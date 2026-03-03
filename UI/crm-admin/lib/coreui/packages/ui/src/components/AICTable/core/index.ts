@@ -1,0 +1,68 @@
+/**
+ * Core AICTable module barrel export.
+ * Re-exports every type, constant, and function from the core sub-modules.
+ */
+
+// Types
+export type {
+  ViewMode,
+  DataStrategy,
+  PagingMode,
+  PaginatorPosition,
+  Density,
+  ColumnType,
+  FilterOperator,
+  DateOperator,
+  SortDirection,
+  TableApiConfig,
+  ExportOption,
+  ExportConfig,
+  EmptyStateAction,
+  EmptyStateConfig,
+  MaskConfig,
+  ImageConfig,
+  CellTemplateItem,
+  ColumnFilterConfig,
+  ValidationConfig,
+  CardViewColumnConfig,
+  TableColumn,
+  ToolbarAction,
+  DensitySetting,
+  SizerConfig,
+  SearchConfig,
+  StyleConfig,
+  CardViewConfig,
+  MapViewConfig,
+  FooterColumn,
+  FooterConfig,
+  RowMenuItem,
+  RowMenuSubItem,
+  RowActionItem,
+  FilterDefinition,
+  FilterGroup,
+  AdvancedFilterConfig,
+  ActiveFilter,
+  TableState,
+  TableConfigSection,
+  TableConfig,
+  AICTableProps,
+} from "./aic-table.types";
+
+// Logic
+export {
+  createDefaultTableState,
+  getVisibleColumns,
+  getChoosableColumns,
+  toggleSortDirection,
+  sortData,
+  filterDataByGlobalTerm,
+  hasActiveFilters,
+  getTotalPages,
+  paginateData,
+  getPageRange,
+  getDensitySetting,
+  getDensityIcon,
+  calculateFooterValue,
+  applyTableMask,
+  DATA_STRATEGY_DESCRIPTIONS,
+} from "./aic-table.logic";

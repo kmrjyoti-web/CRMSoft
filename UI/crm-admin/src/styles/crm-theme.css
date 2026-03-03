@@ -1,0 +1,611 @@
+/* ═══════════════════════════════════════════════════════════
+   CRM THEME — Override CoreUI tokens without editing source
+
+   HOW IT WORKS:
+   CSS cascade: This file loads AFTER CoreUI tokens
+   So these :root values WIN over CoreUI defaults
+
+   TO CHANGE THEME: Edit this file only. Never touch lib/coreui.
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     BRAND COLORS
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  --color-primary: #1e5f74;
+  --color-primary-hover: #174d5f;
+  --color-primary-active: #0f3a4a;
+  --color-primary-light: #d0eaf0;
+  --color-primary-dark: #0d2f3a;
+  --color-primary-50: #eef7fa;
+  --color-primary-100: #cce8f0;
+  --color-primary-500: #2a7a94;
+  --color-primary-600: #1e5f74;
+  --color-primary-700: #174d5f;
+  --color-primary-900: #0d2f3a;
+
+  --color-secondary: #64748b;
+  --color-success: #22c55e;
+  --color-success-light: #dcfce7;
+  --color-danger: #ef4444;
+  --color-danger-light: #fee2e2;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-info: #06b6d4;
+  --color-info-light: #cffafe;
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     TYPOGRAPHY
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     SPACING & RADIUS
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     FORM CONTROLS (--st-* tokens)
+     These override CoreUI's base.css defaults
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+  /* Input */
+  --st-input-height: 40px;
+  --st-input-height-sm: 32px;
+  --st-input-height-lg: 48px;
+  --st-input-border-color: #e2e8f0;
+  --st-input-border-radius: var(--radius-md);
+  --st-input-background: #ffffff;
+  --st-input-focus-border-color: var(--color-primary);
+  --st-input-focus-ring-color: rgba(30, 95, 116, 0.15);
+  --st-input-focus-ring-width: 3px;
+  --st-input-placeholder-color: #94a3b8;
+  --st-input-disabled-background: #f8fafc;
+  --st-input-error-border-color: var(--color-danger);
+  --st-input-error-focus-ring-color: rgba(239, 68, 68, 0.15);
+
+  /* Button */
+  --st-button-height: 40px;
+  --st-button-height-sm: 32px;
+  --st-button-height-lg: 48px;
+  --st-button-border-radius: var(--radius-md);
+  --st-button-font-weight: 500;
+  --st-button-font-size: var(--font-size-base);
+
+  /* Select / Dropdown */
+  --st-select-border-radius: var(--radius-md);
+  --st-select-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --st-select-option-hover-bg: #f1f5f9;
+
+  /* Checkbox & Radio */
+  --st-checkbox-size: 18px;
+  --st-checkbox-border-radius: 4px;
+  --st-checkbox-checked-bg: var(--color-primary);
+  --st-radio-size: 18px;
+
+  /* Switch */
+  --st-switch-checked-bg: var(--color-primary);
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     COMPONENT TOKENS
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+  /* Card */
+  --st-card-border-radius: var(--radius-lg);
+  --st-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --st-card-border-color: #e2e8f0;
+
+  /* Table */
+  --st-table-header-bg: #f8fafc;
+  --st-table-header-font-weight: 600;
+  --st-table-border-color: #e2e8f0;
+  --st-table-row-hover-bg: #f1f5f9;
+  --st-table-row-selected-bg: #eff6ff;
+
+  /* Dialog / Modal */
+  --st-dialog-border-radius: var(--radius-xl);
+  --st-dialog-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  --st-dialog-overlay-bg: rgba(0, 0, 0, 0.5);
+
+  /* Toast */
+  --st-toast-border-radius: var(--radius-md);
+  --st-toast-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  /* Badge */
+  --st-badge-border-radius: var(--radius-full);
+  --st-badge-font-size: var(--font-size-xs);
+  --st-badge-font-weight: 500;
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     CRM LAYOUT (custom tokens for CRM-specific layout)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  --crm-sidebar-width: 260px;
+  --crm-sidebar-collapsed-width: 64px;
+  --crm-sidebar-bg: #0f172a;
+  --crm-sidebar-text: #cbd5e1;
+  --crm-sidebar-active-bg: var(--color-primary);
+  --crm-sidebar-active-text: #ffffff;
+  --crm-sidebar-hover-bg: #1e293b;
+
+  --crm-header-height: 56px;
+  --marg-header-height: 56px;   /* sync logo-area height with header */
+  --crm-header-bg: #ffffff;
+  --crm-header-border: #e2e8f0;
+
+  --crm-page-padding: 24px;
+  --crm-page-bg: #f8fafc;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HEADER OVERRIDES (Marg Books style)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Always-visible icon buttons (zap, grid, user) */
+.marg-header .always-visible-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-right: 4px;
+}
+
+/* Divider between always-visible and toolbar-actions */
+.marg-header .toolbar-actions {
+  border-left: 1px solid var(--marg-border-color);
+}
+
+/* Hide mobile backdrop on desktop — it causes a blur/overlay on page load */
+.mobile-sidebar-backdrop {
+  display: none;
+}
+@media (max-width: 768px) {
+  .mobile-sidebar-backdrop {
+    display: block;
+  }
+}
+
+/* Override footer bg to match header teal */
+.marg-footer {
+  background-color: var(--marg-sidebar-bg);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TRAVELOS HEADER LOOK
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.travelos-header {
+  height: var(--marg-header-height);
+  min-height: var(--marg-header-height);
+  background: var(--marg-header-bg);
+  padding: 0 0 0 12px;
+  overflow: visible;
+  gap: 8px;
+  box-shadow: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.travelos-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.travelos-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.travelos-brand__travel {
+  color: #ff9d2b;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.travelos-brand__os {
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.travelos-menu-toggle {
+  border: none;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.travelos-menu-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.travelos-company-wrap,
+.travelos-profile-wrap {
+  position: relative;
+}
+
+.travelos-profile-wrap {
+  display: flex;
+  align-items: stretch;
+}
+
+.travelos-profile-wrap .travelos-action {
+  height: 100%;
+}
+
+.travelos-company-chip {
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  height: 36px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffffff;
+  min-width: 250px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.travelos-company-chip:hover,
+.travelos-company-chip.is-active {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.travelos-company-chip__avatar,
+.travelos-popover__avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: #e8ecef;
+  color: #35545e;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.travelos-company-chip__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.travelos-company-chip__text strong {
+  font-size: 11px;
+  line-height: 1.1;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.travelos-company-chip__text small {
+  color: #c3d3ff;
+  font-size: 9px;
+  line-height: 1.2;
+}
+
+.travelos-network-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #20f4a5;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.travelos-network-chip__left {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.travelos-network-chip__version {
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.travelos-network-chip__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #ff3c4b;
+}
+
+.travelos-right {
+  margin-left: auto;
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+}
+
+.travelos-action {
+  min-width: 64px;
+  border: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.16);
+  background: transparent;
+  color: #ffffff;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.travelos-action:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.travelos-action__label {
+  font-size: 9px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.travelos-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  width: 320px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f3f5f7;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.28);
+  z-index: 220;
+}
+
+.travelos-company-popover {
+  left: 0;
+}
+
+.travelos-profile-popover {
+  right: 0;
+}
+
+.travelos-popover__head {
+  background: var(--marg-header-bg);
+  color: #ffffff;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.travelos-popover__brand {
+  display: flex;
+  gap: 10px;
+}
+
+.travelos-popover__brand strong {
+  display: block;
+  font-size: 31px;
+  line-height: 1.1;
+}
+
+.travelos-popover__brand small {
+  display: block;
+  color: #b9c4ff;
+  font-size: 12px;
+}
+
+.travelos-popover__close {
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 0;
+}
+
+.travelos-popover__body {
+  padding: 10px 14px;
+  background: #f4f5f7;
+}
+
+.travelos-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #dde2e8;
+  padding: 11px 0;
+  gap: 10px;
+}
+
+.travelos-info-row span {
+  color: #5a6475;
+  font-size: 15px;
+}
+
+.travelos-info-row strong {
+  color: #1f2937;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.travelos-status-active {
+  color: #16a34a !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.travelos-status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #16a34a;
+}
+
+.travelos-popover__foot {
+  padding: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.travelos-btn {
+  border-radius: 6px;
+  height: 40px;
+  border: 1px solid #c8d1dc;
+  background: #ffffff;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.travelos-btn--ghost {
+  flex: 1;
+}
+
+.travelos-btn--primary {
+  flex: 1;
+  background: var(--marg-header-bg);
+  border-color: var(--marg-header-bg);
+  color: #ffffff;
+}
+
+.travelos-btn--logout {
+  width: 100%;
+  color: #dc2626;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+@media (max-width: 1440px) {
+  .travelos-brand__travel,
+  .travelos-brand__os {
+    font-size: 16px;
+  }
+  .travelos-company-chip {
+    min-width: 220px;
+  }
+  .travelos-network-chip {
+    font-size: 10px;
+  }
+  .travelos-network-chip__version {
+    font-size: 10px;
+  }
+  .travelos-action {
+    min-width: 54px;
+    padding: 0 7px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .travelos-company-chip__text,
+  .travelos-action__label {
+    display: none;
+  }
+  .travelos-company-chip {
+    min-width: 40px;
+    width: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+
+/* Remove white logo block on sidebar and sync with header color */
+.marg-sidebar-wrapper .logo-area {
+  background: var(--marg-header-bg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Remove top white strip feeling under header */
+.header-area {
+  background: var(--marg-header-bg);
+}
+
+.content-area {
+  padding-top: 10px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TABLE FULL — Remove inner white wrapper box
+   The AICTableFull renders a bg-white m-4 bordered container
+   inside the bg-gray-100 content area. We flatten it so views
+   (card, list, etc.) sit directly on the gray background.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.bg-gray-100 > .bg-white.m-4 {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TABLE FULL — Sync hardcoded orange Create button with theme primary
+   AICTableFull uses bg-[#f26b3a] / bg-[#e05a29] / border-[#d95322]
+   Override them here so the button matches var(--color-primary).
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.bg-\[\#f26b3a\] {
+  background-color: var(--color-primary) !important;
+}
+.hover\:bg-\[\#f26b3a\]:hover {
+  background-color: var(--color-primary) !important;
+}
+.bg-\[\#e05a29\],
+.hover\:bg-\[\#e05a29\]:hover {
+  background-color: var(--color-primary-hover) !important;
+}
+.border-\[\#d95322\] {
+  border-color: var(--color-primary-hover) !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DARK MODE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+[data-theme="dark"],
+.dark {
+  --color-primary: #2a7a94;
+  --color-primary-light: #0f3a4a;
+
+  --st-input-background: #1e293b;
+  --st-input-border-color: #334155;
+  --st-input-placeholder-color: #64748b;
+  --st-input-focus-ring-color: rgba(30, 95, 116, 0.2);
+
+  --st-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --st-card-border-color: #334155;
+
+  --st-table-header-bg: #1e293b;
+  --st-table-border-color: #334155;
+  --st-table-row-hover-bg: #334155;
+
+  --crm-sidebar-bg: #020617;
+  --crm-header-bg: #0f172a;
+  --crm-header-border: #1e293b;
+  --crm-page-bg: #0f172a;
+}

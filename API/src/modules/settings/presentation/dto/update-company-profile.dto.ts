@@ -1,0 +1,46 @@
+import { IsOptional, IsString, IsInt, Min, Max, IsEmail } from 'class-validator';
+
+export class UpdateCompanyProfileDto {
+  @IsOptional() @IsString() companyName?: string;
+  @IsOptional() @IsString() legalName?: string;
+  @IsOptional() @IsString() tradeName?: string;
+  @IsOptional() @IsString() tagline?: string;
+  @IsOptional() @IsString() industry?: string;
+  @IsOptional() @IsString() companySize?: string;
+  @IsOptional() @IsInt() @Min(1900) @Max(2100) foundedYear?: number;
+  @IsOptional() @IsString() website?: string;
+  @IsOptional() @IsString() phone?: string;
+  @IsOptional() @IsString() alternatePhone?: string;
+  @IsOptional() @IsEmail() email?: string;
+  @IsOptional() @IsEmail() supportEmail?: string;
+  @IsOptional() @IsEmail() billingEmail?: string;
+  @IsOptional() @IsString() addressLine1?: string;
+  @IsOptional() @IsString() addressLine2?: string;
+  @IsOptional() @IsString() city?: string;
+  @IsOptional() @IsString() state?: string;
+  @IsOptional() @IsString() country?: string;
+  @IsOptional() @IsString() pincode?: string;
+  @IsOptional() @IsString() regAddressLine1?: string;
+  @IsOptional() @IsString() regAddressLine2?: string;
+  @IsOptional() @IsString() regCity?: string;
+  @IsOptional() @IsString() regState?: string;
+  @IsOptional() @IsString() regCountry?: string;
+  @IsOptional() @IsString() regPincode?: string;
+  @IsOptional() @IsString() gstNumber?: string;
+  @IsOptional() @IsString() panNumber?: string;
+  @IsOptional() @IsString() tanNumber?: string;
+  @IsOptional() @IsString() cinNumber?: string;
+  @IsOptional() @IsString() msmeNumber?: string;
+  @IsOptional() @IsString() importExportCode?: string;
+  @IsOptional() @IsString() bankName?: string;
+  @IsOptional() @IsString() bankBranch?: string;
+  @IsOptional() @IsString() accountNumber?: string;
+  @IsOptional() @IsString() ifscCode?: string;
+  @IsOptional() @IsString() accountType?: string;
+  @IsOptional() @IsString() upiId?: string;
+  @IsOptional() @IsString() linkedinUrl?: string;
+  @IsOptional() @IsString() facebookUrl?: string;
+  @IsOptional() @IsString() twitterUrl?: string;
+  @IsOptional() @IsString() instagramUrl?: string;
+  @IsOptional() @IsString() youtubeUrl?: string;
+}

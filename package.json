@@ -1,0 +1,19 @@
+{
+  "name": "crm-soft",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --names \"API,WEB\" --prefix-colors \"cyan,magenta\" \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "cd API && npm run start:dev",
+    "dev:web": "cd UI/crm-admin && npm run dev",
+    "build": "concurrently --names \"API,WEB\" \"npm run build:api\" \"npm run build:web\"",
+    "build:api": "cd API && npm run build",
+    "build:web": "cd UI/crm-admin && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "dependencies": {
+    "@notionhq/client": "^5.11.1"
+  }
+}

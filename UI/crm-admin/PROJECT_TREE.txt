@@ -1,0 +1,217 @@
+UI/crm-admin/
+├── .env.local
+├── .eslintrc.json                       # ESLint: golden rule + import order + lucide guard
+├── .gitignore
+├── .gitmodules
+├── .prettierrc                          # Prettier config
+├── .prettierignore
+├── jest.config.ts                       # Jest: path aliases + coverage thresholds
+├── jest.setup.ts
+├── next.config.js
+├── package.json                         # 30+ scripts (validate, check, gen:feature)
+├── pnpm-lock.yaml
+├── postcss.config.mjs
+├── PROJECT_RULES.md                     # Project rules + import chain + placement guide
+├── tailwind.config.ts
+├── tsconfig.json                        # Path aliases for all src/ folders
+│
+├── scripts/
+│   └── generate-feature.sh              # pnpm gen:feature <name>
+│
+├── lib/
+│   └── coreui/                          # Git submodule (crm-custom branch)
+│       └── packages/
+│           ├── ui/                      # Core logic (framework-agnostic)
+│           ├── ui-react/                # React wrappers (AIC* components)
+│           ├── theme/                   # Design tokens
+│           └── layout/                  # Layout system (MargLayout)
+│
+└── src/
+    ├── app/
+    │   ├── layout.tsx                   # Root layout (CSS imports)
+    │   ├── page.tsx                     # Redirect → /dashboard
+    │   ├── globals.css                  # Tailwind + TOD theme CSS
+    │   ├── favicon.ico
+    │   ├── fonts/
+    │   │   ├── GeistVF.woff
+    │   │   └── GeistMonoVF.woff
+    │   ├── __tests__/
+    │   │   └── page.test.tsx
+    │   ├── (auth)/
+    │   │   ├── layout.tsx               # Auth layout (two-column + dark glass)
+    │   │   ├── login/
+    │   │   │   └── page.tsx             # Thin: renders <LoginForm />
+    │   │   └── forgot-password/
+    │   │       └── page.tsx             # Thin: renders <ForgotPasswordForm />
+    │   └── (protected)/
+    │       ├── layout.tsx               # Protected layout (MargLayout sidebar)
+    │       └── dashboard/
+    │           └── page.tsx             # Dashboard page
+    │
+    ├── components/
+    │   ├── ui/                          # ★ UI WRAPPER LAYER (56 components)
+    │   │   ├── index.ts                 # Barrel export — ONLY import point
+    │   │   ├── Icon.tsx                 # Lucide icon system (70+ icons)
+    │   │   │
+    │   │   │── ── Basic Inputs ──
+    │   │   ├── Input.tsx                # AICInput (size=md default)
+    │   │   ├── Select.tsx               # AICSelect
+    │   │   ├── Checkbox.tsx             # AICCheckbox
+    │   │   ├── CheckboxGroup.tsx        # AICCheckboxGroup
+    │   │   ├── CheckboxInput.tsx        # AICCheckboxInput
+    │   │   ├── Radio.tsx                # AICRadio
+    │   │   ├── RadioGroup.tsx           # AICRadioGroup
+    │   │   ├── Switch.tsx               # AICSwitch
+    │   │   ├── SwitchInput.tsx          # AICSwitchInput
+    │   │   │
+    │   │   │── ── Advanced Inputs ──
+    │   │   ├── SelectInput.tsx          # AICSelectInput (searchable)
+    │   │   ├── MultiSelectInput.tsx     # AICMultiSelectInput
+    │   │   ├── DatePicker.tsx           # AICDatePicker
+    │   │   ├── CurrencyInput.tsx        # AICCurrencyInput
+    │   │   ├── NumberInput.tsx          # AICNumber
+    │   │   ├── MobileInput.tsx          # AICMobileInput
+    │   │   ├── InputMask.tsx            # AICInputmask
+    │   │   ├── Autocomplete.tsx         # AICAutocomplete
+    │   │   ├── SmartAutocomplete.tsx    # AICSmartAutocomplete
+    │   │   ├── TagsInput.tsx            # AICTagsInput
+    │   │   ├── OTPInput.tsx             # AICOTPInput
+    │   │   │
+    │   │   │── ── Special Inputs ──
+    │   │   ├── Rating.tsx               # AICRating
+    │   │   ├── Slider.tsx               # AICSlider
+    │   │   ├── ColorPicker.tsx          # AICColorPicker
+    │   │   ├── FileUpload.tsx           # AICFileUpload
+    │   │   ├── Signature.tsx            # AICSignature
+    │   │   ├── RichTextEditor.tsx       # AICRichTextEditor
+    │   │   │
+    │   │   │── ── Selection Controls ──
+    │   │   ├── ListCheckbox.tsx         # AICListCheckbox
+    │   │   ├── SegmentedControl.tsx     # AICSegmentedControl
+    │   │   ├── ToggleButton.tsx         # AICToggleButton
+    │   │   │
+    │   │   │── ── Buttons ──
+    │   │   ├── Button.tsx               # AICButton (size=md default)
+    │   │   ├── SmartButton.tsx          # AICSmartButton
+    │   │   ├── ButtonControl.tsx        # AICButtonControl
+    │   │   ├── DialogButton.tsx         # AICDialogButton
+    │   │   │
+    │   │   │── ── Overlays ──
+    │   │   ├── Modal.tsx                # AICModal
+    │   │   ├── Drawer.tsx               # AICDrawer
+    │   │   ├── SmartDialog.tsx          # AICDialog
+    │   │   ├── SmartDrawer.tsx          # AICSmartDrawer
+    │   │   ├── ConfirmDialog.tsx        # AICConfirmDialog
+    │   │   ├── Popover.tsx              # AICPopover
+    │   │   ├── Tooltip.tsx              # AICTooltip
+    │   │   ├── Portal.tsx               # AICPortal
+    │   │   ├── Toast.tsx                # ToastProvider + ToastContainer + useToast
+    │   │   ├── SmartToast.tsx           # AICSmartToast
+    │   │   │
+    │   │   │── ── Display ──
+    │   │   ├── Badge.tsx                # AICBadge
+    │   │   ├── Avatar.tsx               # AICAvatar + AICAvatarGroup
+    │   │   ├── Typography.tsx           # AICTypography
+    │   │   ├── SyncIndicator.tsx        # AICSyncIndicator
+    │   │   ├── SmartError.tsx           # AICErrorBoundary + AICErrorDashboard
+    │   │   │
+    │   │   │── ── Table ──
+    │   │   ├── Table.tsx                # AICTable
+    │   │   │
+    │   │   │── ── Forms & Schema ──
+    │   │   ├── DynamicField.tsx         # AICDynamicField
+    │   │   ├── DynamicForm.tsx          # AICDynamicForm
+    │   │   ├── SchemaBuilder.tsx        # AICSchemaBuilder + AICFieldEditor
+    │   │   ├── Fieldset.tsx             # AICFieldset
+    │   │   │
+    │   │   │── ── Toolbar ──
+    │   │   ├── Toolbar.tsx              # AICToolbar
+    │   │   ├── ToolbarButton.tsx        # AICToolbarButton
+    │   │   ├── ToolbarButtonGroup.tsx   # AICToolbarButtonGroup
+    │   │   │
+    │   │   └── __tests__/               # 9 test suites
+    │   │       ├── Icon.test.tsx
+    │   │       ├── inputs.test.tsx
+    │   │       ├── special-inputs.test.tsx
+    │   │       ├── buttons.test.tsx
+    │   │       ├── overlays.test.tsx
+    │   │       ├── display.test.tsx
+    │   │       ├── table.test.tsx
+    │   │       ├── forms.test.tsx
+    │   │       └── toolbar.test.tsx
+    │   │
+    │   └── common/                      # Shared non-UI components
+    │       ├── PermissionGate.tsx
+    │       ├── FeatureGate.tsx
+    │       ├── Breadcrumb.tsx
+    │       └── __tests__/
+    │           ├── FeatureGate.test.tsx
+    │           └── PermissionGate.test.tsx
+    │
+    ├── config/                          # App-wide configuration
+    │   ├── constants.ts                 # APP_NAME, API_BASE_URL, defaults
+    │   ├── navigation.ts               # NavItem type + DEFAULT_NAV fallback
+    │   └── permissions.ts              # PERMISSIONS map + PermissionCode type
+    │
+    ├── features/                        # Feature modules
+    │   └── auth/
+    │       ├── components/
+    │       │   ├── LoginForm.tsx         # Login form (extracted from page.tsx)
+    │       │   ├── ForgotPasswordForm.tsx # Forgot password form
+    │       │   ├── AnimatedBackground.tsx # Five-layer background system
+    │       │   ├── BrandingPanel.tsx      # Right-column branding
+    │       │   └── __tests__/
+    │       │       └── LoginForm.test.tsx
+    │       ├── hooks/                    # (future: useAuth)
+    │       ├── services/
+    │       │   ├── auth.service.ts       # Auth API (login, logout, refresh, profile)
+    │       │   └── __tests__/
+    │       │       └── auth.service.test.ts
+    │       ├── types/
+    │       │   └── auth.types.ts         # User, LoginRequest, LoginResponse, JwtPayload
+    │       └── utils/
+    │           ├── auth-cookies.ts       # Cookie helpers
+    │           ├── jwt-decode.ts         # JWT decode utility
+    │           └── time-utils.ts         # Time-of-day + event phase helpers
+    │
+    ├── hooks/                           # Global hooks
+    │   ├── useLookup.ts                 # Lookup data fetching hook
+    │   └── usePermission.ts             # Permission checking hook
+    │
+    ├── middleware.ts                     # Auth middleware
+    │
+    ├── providers/                       # React context providers
+    │   ├── AuthProvider.tsx
+    │   ├── QueryProvider.tsx
+    │   └── ToastProvider.tsx
+    │
+    ├── services/                        # Shared API services
+    │   ├── api-client.ts                # Axios instance + interceptors
+    │   ├── lookup.service.ts            # Lookup API
+    │   ├── menu.service.ts              # Menu API
+    │   ├── permission.service.ts        # Permissions API
+    │   └── __tests__/
+    │       ├── api-client.test.ts
+    │       ├── lookup.service.test.ts
+    │       ├── menu.service.test.ts
+    │       └── permission.service.test.ts
+    │
+    ├── stores/                          # Zustand global stores
+    │   ├── auth.store.ts
+    │   ├── menu.store.ts
+    │   ├── permission.store.ts
+    │   └── __tests__/
+    │       ├── auth.store.test.ts
+    │       ├── menu.store.test.ts
+    │       └── permission.store.test.ts
+    │
+    ├── styles/
+    │   └── crm-theme.css                # CRM theme overrides (loads LAST)
+    │
+    └── types/                           # Global shared types
+        ├── api-response.ts
+        ├── lookup.ts
+        └── menu.ts
+
+
+lsof -ti:3005 | xargs kill -9 2>/dev/null; echo "Port 3005 cleared"
