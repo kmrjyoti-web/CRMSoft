@@ -47,6 +47,12 @@ const SETTINGS_ITEMS: SettingsMenuItem[] = [
     path: "/settings/menus",
   },
   {
+    label: "Data Masking",
+    description: "Configure field-level masking rules per role",
+    icon: "eye-off",
+    path: "/settings/data-masking",
+  },
+  {
     label: "Notion",
     description: "Sync dev sessions to Notion database",
     icon: "book-open",

@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Put, Delete, Param, Body, Query,
-  HttpCode, HttpStatus,
+  HttpCode, HttpStatus, UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -22,6 +22,7 @@ import { RestoreLeadCommand } from '../application/commands/restore-lead/restore
 import { PermanentDeleteLeadCommand } from '../application/commands/permanent-delete-lead/permanent-delete-lead.command';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { ApiResponse } from '../../../common/utils/api-response';
+import { DataMaskingInterceptor, MaskTable } from '../../table-config/data-masking.interceptor';
 
 @ApiTags('Leads')
 @ApiBearerAuth()
@@ -48,6 +49,8 @@ export class LeadsController {
   }
 
   @Get()
+  @UseInterceptors(DataMaskingInterceptor)
+  @MaskTable('leads')
   @ApiOperation({ summary: 'List leads (paginated, filtered by status/priority/owner/contact/org)' })
   async findAll(@Query() query: LeadQueryDto) {
     const result = await this.queryBus.execute(

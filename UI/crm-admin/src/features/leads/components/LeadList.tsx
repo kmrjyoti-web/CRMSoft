@@ -74,6 +74,7 @@ function flattenLeads(leads: LeadListItem[]): Record<string, unknown>[] {
     createdAt: lead.createdAt
       ? new Date(lead.createdAt).toLocaleDateString()
       : "—",
+    _maskingMeta: (lead as any)._maskingMeta,
   }));
 }
 
@@ -244,6 +245,7 @@ export function LeadList() {
         <TableFull
           data={tableData as Record<string, any>[]}
           title="Leads"
+          tableKey="leads"
           columns={LEAD_COLUMNS}
           defaultViewMode="table"
           defaultDensity="compact"

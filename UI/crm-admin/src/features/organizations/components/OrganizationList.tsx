@@ -70,6 +70,7 @@ function flattenOrganizations(
     createdAt: org.createdAt
       ? new Date(org.createdAt).toLocaleDateString()
       : "—",
+    _maskingMeta: (org as any)._maskingMeta,
   }));
 }
 
@@ -242,6 +243,7 @@ export function OrganizationList() {
         <TableFull
           data={tableData as Record<string, any>[]}
           title="Organizations"
+          tableKey="organizations"
           columns={ORGANIZATION_COLUMNS}
           defaultViewMode="table"
           defaultDensity="compact"

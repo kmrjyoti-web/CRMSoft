@@ -77,6 +77,7 @@ function flattenContacts(contacts: RawContactListItem[]): Record<string, unknown
     designation: c.designation ?? "—",
     department: c.department ?? "—",
     createdAt: c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "—",
+    _maskingMeta: (c as any)._maskingMeta,
   }));
 }
 
@@ -333,6 +334,7 @@ export function RawContactList() {
         <TableFull
           data={tableData as Record<string, any>[]}
           title="Raw Contacts"
+          tableKey="raw-contacts"
           columns={RAW_CONTACT_COLUMNS}
           defaultViewMode="table"
           defaultDensity="compact"

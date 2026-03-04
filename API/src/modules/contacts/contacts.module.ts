@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
+import { TableConfigModule } from '../table-config/table-config.module';
 import { ContactsController } from './presentation/contacts.controller';
 import { ContactRepository } from './infrastructure/repositories/contact.repository';
 import { CONTACT_REPOSITORY } from './domain/interfaces/contact-repository.interface';
@@ -30,7 +31,7 @@ const QueryHandlers = [GetContactByIdHandler, GetContactsListHandler];
 const EventHandlers = [OnContactCreatedHandler, OnContactDeactivatedHandler];
 
 @Module({
-  imports: [CqrsModule],
+  imports: [CqrsModule, TableConfigModule],
   controllers: [ContactsController],
   providers: [
     { provide: CONTACT_REPOSITORY, useClass: ContactRepository },

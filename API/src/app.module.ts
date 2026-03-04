@@ -64,6 +64,7 @@ import { RecycleBinModule } from './modules/recycle-bin/recycle-bin.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { ApiGatewayModule } from './modules/api-gateway/api-gateway.module';
+import { TableConfigModule } from './modules/table-config/table-config.module';
 
 @Module({
   imports: [
@@ -124,6 +125,7 @@ import { ApiGatewayModule } from './modules/api-gateway/api-gateway.module';
     SettingsModule,
     PaymentModule,
     ApiGatewayModule,
+    TableConfigModule,
   ],
   controllers: [ErrorAdminController],
   providers: [

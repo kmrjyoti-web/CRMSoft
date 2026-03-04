@@ -49,6 +49,7 @@ function flattenUsers(users: UserListItem[]): Record<string, unknown>[] {
     createdAt: u.createdAt
       ? new Date(u.createdAt).toLocaleDateString()
       : "—",
+    _maskingMeta: (u as any)._maskingMeta,
   }));
 }
 
@@ -198,6 +199,7 @@ export function UserList() {
         <TableFull
           data={tableData as Record<string, any>[]}
           title="Users"
+          tableKey="users"
           columns={USER_COLUMNS}
           defaultViewMode="table"
           defaultDensity="compact"

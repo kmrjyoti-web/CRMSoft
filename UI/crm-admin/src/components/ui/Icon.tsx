@@ -8,7 +8,7 @@ import {
   Phone, Calendar, Clock, Bell, AlertCircle, AlertTriangle,
   Info, CheckCircle, XCircle, ArrowLeft, ArrowRight,
   ArrowUp, ArrowDown, RefreshCw, ExternalLink, Copy,
-  FileText, File, Folder, Image, Paperclip, Send,
+  FileText, FileSpreadsheet, FileJson, File, Folder, Image, Paperclip, Send,
   Star, Heart, Bookmark, Flag, Tag, Hash,
   Home, BarChart2, PieChart, TrendingUp, DollarSign,
   CreditCard, ShoppingCart, Package, Truck, MapPin,
@@ -90,6 +90,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   // Files
   file: File,
   'file-text': FileText,
+  'file-spreadsheet': FileSpreadsheet,
+  'file-json': FileJson,
   folder: Folder,
   image: Image,
   paperclip: Paperclip,

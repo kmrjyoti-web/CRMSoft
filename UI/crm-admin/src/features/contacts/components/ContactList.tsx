@@ -77,6 +77,7 @@ function flattenContacts(contacts: ContactListItem[]): Record<string, unknown>[]
     organization: c.contactOrganizations?.[0]?.organization?.name ?? "—",
     status: c.isActive ? "Active" : "Inactive",
     createdAt: c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "—",
+    _maskingMeta: (c as any)._maskingMeta,
   }));
 }
 
@@ -327,6 +328,7 @@ export function ContactList() {
         <TableFull
           data={tableData as Record<string, any>[]}
           title="Contacts"
+          tableKey="contacts"
           columns={CONTACT_COLUMNS}
           defaultViewMode="table"
           defaultDensity="compact"

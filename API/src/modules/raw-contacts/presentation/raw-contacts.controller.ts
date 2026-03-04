@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Put, Delete, Param, Body, Query,
-  HttpCode, HttpStatus,
+  HttpCode, HttpStatus, UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -24,6 +24,7 @@ import { UpdateRawContactDto } from './dto/update-raw-contact.dto';
 import { RawContactQueryDto } from './dto/raw-contact-query.dto';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { ApiResponse } from '../../../common/utils/api-response';
+import { DataMaskingInterceptor, MaskTable } from '../../table-config/data-masking.interceptor';
 
 @ApiTags('Raw Contacts')
 @ApiBearerAuth()
@@ -49,6 +50,8 @@ export class RawContactsController {
   }
 
   @Get()
+  @UseInterceptors(DataMaskingInterceptor)
+  @MaskTable('raw-contacts')
   @ApiOperation({ summary: 'List raw contacts (paginated, filtered)' })
   async findAll(@Query() query: RawContactQueryDto) {
     const result = await this.queryBus.execute(

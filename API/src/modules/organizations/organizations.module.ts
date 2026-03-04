@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
+import { TableConfigModule } from '../table-config/table-config.module';
 import { OrganizationsController } from './presentation/organizations.controller';
 import { OrganizationRepository } from './infrastructure/repositories/organization.repository';
 import { ORGANIZATION_REPOSITORY } from './domain/interfaces/organization-repository.interface';
@@ -30,7 +31,7 @@ const QueryHandlers = [GetOrganizationByIdHandler, GetOrganizationsListHandler];
 const EventHandlers = [OnOrganizationCreatedHandler, OnOrganizationDeactivatedHandler];
 
 @Module({
-  imports: [CqrsModule],
+  imports: [CqrsModule, TableConfigModule],
   controllers: [OrganizationsController],
   providers: [
     { provide: ORGANIZATION_REPOSITORY, useClass: OrganizationRepository },

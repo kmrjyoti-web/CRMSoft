@@ -82,6 +82,7 @@ function flattenActivities(
     createdAt: a.createdAt
       ? new Date(a.createdAt).toLocaleDateString()
       : "—",
+    _maskingMeta: (a as any)._maskingMeta,
   }));
 }
 
@@ -252,6 +253,7 @@ export function ActivityList() {
         <TableFull
           data={tableData as Record<string, any>[]}
           title="Activities"
+          tableKey="activities"
           columns={ACTIVITY_COLUMNS}
           defaultViewMode="table"
           defaultDensity="compact"

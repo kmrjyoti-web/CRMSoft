@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Put, Delete, Param, Body, Query,
-  HttpCode, HttpStatus,
+  HttpCode, HttpStatus, UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -18,6 +18,7 @@ import { UpdateContactDto } from './dto/update-contact.dto';
 import { ContactQueryDto } from './dto/contact-query.dto';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { ApiResponse } from '../../../common/utils/api-response';
+import { DataMaskingInterceptor, MaskTable } from '../../table-config/data-masking.interceptor';
 
 @ApiTags('Contacts')
 @ApiBearerAuth()
@@ -44,6 +45,8 @@ export class ContactsController {
   }
 
   @Get()
+  @UseInterceptors(DataMaskingInterceptor)
+  @MaskTable('contacts')
   @ApiOperation({ summary: 'List contacts (paginated, search across name/phone/email/org)' })
   async findAll(@Query() query: ContactQueryDto) {
     const result = await this.queryBus.execute(

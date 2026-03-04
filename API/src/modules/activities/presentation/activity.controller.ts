@@ -1,8 +1,9 @@
-import { Controller, Post, Get, Put, Delete, Param, Body, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Put, Delete, Param, Body, Query, HttpCode, HttpStatus, UseInterceptors } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { RequirePermissions } from '../../../core/permissions/decorators/require-permissions.decorator';
 import { ApiResponse } from '../../../common/utils/api-response';
+import { DataMaskingInterceptor, MaskTable } from '../../table-config/data-masking.interceptor';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { CompleteActivityDto } from './dto/complete-activity.dto';
@@ -41,6 +42,8 @@ export class ActivityController {
   }
 
   @Get()
+  @UseInterceptors(DataMaskingInterceptor)
+  @MaskTable('activities')
   @RequirePermissions('activities:read')
   async list(@Query() query: ActivityQueryDto) {
     const result = await this.queryBus.execute(

@@ -428,6 +428,11 @@ model User {
   // WhatsApp Integration relations
   waConversationsAssigned WaConversation[]        @relation("WaConversationAssignedTo")
 
+  // Table Config & Data Masking relations
+  tableConfigs            TableConfig[]            @relation("TableConfigUser")
+  dataMaskingPolicies     DataMaskingPolicy[]      @relation("DataMaskingPolicyUser")
+  unmaskAuditLogs         UnmaskAuditLog[]         @relation("UnmaskAuditLogUser")
+
   @@index([userType, status])
   @@index([tenantId])
   @@index([isDeleted])
@@ -542,6 +547,7 @@ model Role {
   updatedAt       DateTime @updatedAt @map("updated_at")
   users           User[]
   permissions     RolePermission[]
+  dataMaskingPolicies DataMaskingPolicy[] @relation("DataMaskingPolicyRole")
   @@index([tenantId])
   @@unique([tenantId, name])
   @@map("roles")
@@ -6084,4 +6090,59 @@ model RateLimitTier {
   updatedAt           DateTime  @updatedAt @map("updated_at")
 
   @@map("rate_limit_tiers")
+}
+
+// ─── TABLE CONFIGURATION ───
+model TableConfig {
+  id          String   @id @default(uuid())
+  tenantId    String   @default("") @map("tenant_id")
+  tableKey    String   @map("table_key")
+  userId      String?  @map("user_id")
+  config      Json     @map("config")
+  isDefault   Boolean  @default(false) @map("is_default")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user        User?    @relation("TableConfigUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, tableKey, userId])
+  @@index([tenantId, tableKey])
+  @@map("table_configs")
+}
+
+// ─── DATA MASKING POLICY ───
+model DataMaskingPolicy {
+  id          String   @id @default(uuid())
+  tenantId    String   @default("") @map("tenant_id")
+  tableKey    String   @map("table_key")
+  columnId    String   @map("column_id")
+  roleId      String?  @map("role_id")
+  userId      String?  @map("user_id")
+  maskType    String   @default("FULL") @map("mask_type")
+  canUnmask   Boolean  @default(false) @map("can_unmask")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  role        Role?    @relation("DataMaskingPolicyRole", fields: [roleId], references: [id])
+  user        User?    @relation("DataMaskingPolicyUser", fields: [userId], references: [id])
+
+  @@index([tenantId, tableKey])
+  @@map("data_masking_policies")
+}
+
+// ─── UNMASK AUDIT LOG ───
+model UnmaskAuditLog {
+  id          String   @id @default(uuid())
+  tenantId    String   @default("") @map("tenant_id")
+  userId      String   @map("user_id")
+  tableKey    String   @map("table_key")
+  columnId    String   @map("column_id")
+  recordId    String   @map("record_id")
+  unmaskedAt  DateTime @default(now()) @map("unmasked_at")
+
+  user        User     @relation("UnmaskAuditLogUser", fields: [userId], references: [id])
+
+  @@index([tenantId, userId])
+  @@map("unmask_audit_logs")
 }

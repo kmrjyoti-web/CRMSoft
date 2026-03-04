@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
+import { TableConfigModule } from '../table-config/table-config.module';
 import { LeadsController } from './presentation/leads.controller';
 import { LeadRepository } from './infrastructure/repositories/lead.repository';
 import { LEAD_REPOSITORY } from './domain/interfaces/lead-repository.interface';
@@ -34,7 +35,7 @@ const QueryHandlers = [GetLeadByIdHandler, GetLeadsListHandler];
 const EventHandlers = [OnLeadCreatedHandler, OnLeadAllocatedHandler, OnLeadStatusChangedHandler];
 
 @Module({
-  imports: [CqrsModule],
+  imports: [CqrsModule, TableConfigModule],
   controllers: [LeadsController],
   providers: [
     { provide: LEAD_REPOSITORY, useClass: LeadRepository },

@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Put, Delete, Param, Body, Query,
-  HttpCode, HttpStatus,
+  HttpCode, HttpStatus, UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -18,6 +18,7 @@ import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { OrganizationQueryDto } from './dto/organization-query.dto';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { ApiResponse } from '../../../common/utils/api-response';
+import { DataMaskingInterceptor, MaskTable } from '../../table-config/data-masking.interceptor';
 
 @ApiTags('Organizations')
 @ApiBearerAuth()
@@ -45,6 +46,8 @@ export class OrganizationsController {
   }
 
   @Get()
+  @UseInterceptors(DataMaskingInterceptor)
+  @MaskTable('organizations')
   @ApiOperation({ summary: 'List organizations (paginated, filtered)' })
   async findAll(@Query() query: OrganizationQueryDto) {
     const result = await this.queryBus.execute(

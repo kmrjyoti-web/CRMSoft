@@ -245,6 +245,27 @@ src/features/contacts/
 └── utils/
 ```
 
+## 3.4 Table Configuration System
+```
+All list pages MUST pass `tableKey` to `<TableFull>`.
+System default columns live in:
+  src/features/table-config/utils/column-registry.ts
+
+Table config is resolved: user config → tenant default → system defaults.
+Settings icon in TableFull header opens TableConfigDrawer.
+
+Key files:
+  src/features/table-config/hooks/useTableConfig.ts     ← Config hook
+  src/features/table-config/hooks/useDataMasking.ts     ← Masking hook
+  src/features/table-config/components/TableConfigDrawer.tsx
+  src/features/table-config/components/UnmaskButton.tsx
+  src/features/table-config/components/MaskingPolicyManager.tsx
+  src/components/common/ColorBadge.tsx                  ← Status color badges
+
+Data masking policies are managed at:
+  /settings/data-masking                                ← Admin route
+```
+
 ---
 
 # SECTION 4: NAMING CONVENTIONS
