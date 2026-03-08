@@ -48,11 +48,15 @@ export class MenusController {
     return ApiResponse.success(result);
   }
 
-  /** GET /my-menu — Permission-filtered menu for current user. */
+  /** GET /my-menu — Permission-filtered menu for current user (5-check chain). */
   @Get('my-menu')
   async getMyMenu(@CurrentUser() user: any) {
     const result = await this.queryBus.execute(
-      new GetMyMenuQuery(user.id, user.roleId, user.role),
+      new GetMyMenuQuery(
+        user.id, user.roleId, user.role,
+        user.isSuperAdmin, user.tenantId,
+        user.businessTypeCode,
+      ),
     );
     return ApiResponse.success(result);
   }

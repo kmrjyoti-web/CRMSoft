@@ -65,6 +65,18 @@ import { SettingsModule } from './modules/settings/settings.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { ApiGatewayModule } from './modules/api-gateway/api-gateway.module';
 import { TableConfigModule } from './modules/table-config/table-config.module';
+import { TasksModule } from './modules/tasks/tasks.module';
+import { CommentsModule } from './modules/comments/comments.module';
+import { TaskLogicModule } from './modules/task-logic/task-logic.module';
+import { PackagesModule } from './modules/packages/packages.module';
+import { GoogleModule } from './modules/google/google.module';
+import { AiModule } from './modules/ai/ai.module';
+import { WalletModule } from './modules/wallet/wallet.module';
+import { BusinessTypeModule } from './modules/business-type/business-type.module';
+import { ModuleManagerModule } from './modules/module-manager/module-manager.module';
+import { MarketplaceModule } from './modules/marketplace/marketplace.module';
+import { SubscriptionPackageModule } from './modules/subscription-package/subscription-package.module';
+import { HelpModule } from './modules/help/help.module';
 
 @Module({
   imports: [
@@ -126,6 +138,18 @@ import { TableConfigModule } from './modules/table-config/table-config.module';
     PaymentModule,
     ApiGatewayModule,
     TableConfigModule,
+    TasksModule,
+    CommentsModule,
+    TaskLogicModule,
+    PackagesModule,
+    GoogleModule,
+    AiModule,
+    WalletModule,
+    BusinessTypeModule,
+    ModuleManagerModule,
+    MarketplaceModule,
+    SubscriptionPackageModule,
+    HelpModule,
   ],
   controllers: [ErrorAdminController],
   providers: [
