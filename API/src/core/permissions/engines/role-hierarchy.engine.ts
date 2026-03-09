@@ -114,6 +114,12 @@ export class RoleHierarchyEngine {
     this.cacheLoadedAt = Date.now();
   }
 
+  /** Get ALL permission codes in the system (for super admin). */
+  async getAllPermissionCodes(): Promise<string[]> {
+    const all = await this.prisma.permission.findMany();
+    return all.map((p) => `${p.module}:${p.action}`);
+  }
+
   invalidateAll(): void {
     this.roleMap.clear();
     this.cacheLoadedAt = 0;

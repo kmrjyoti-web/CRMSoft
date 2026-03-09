@@ -4,8 +4,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { PrismaModule } from './core/prisma/prisma.module';
-import { ErrorLoggerService } from './common/errors/error-logger.service';
-import { ErrorAdminController } from './common/errors/presentation/error-admin.controller';
+import { ErrorsModule } from './common/errors/errors.module';
 import { RequestContextService } from './common/request/request-context.service';
 import { RequestLoggerMiddleware } from './common/request/request-logger.middleware';
 import { TenantContextInterceptor } from './modules/tenant/infrastructure/tenant-context.interceptor';
@@ -77,6 +76,8 @@ import { ModuleManagerModule } from './modules/module-manager/module-manager.mod
 import { MarketplaceModule } from './modules/marketplace/marketplace.module';
 import { SubscriptionPackageModule } from './modules/subscription-package/subscription-package.module';
 import { HelpModule } from './modules/help/help.module';
+import { PluginsModule } from './modules/plugins/plugins.module';
+import { VerificationModule } from './modules/verification/verification.module';
 
 @Module({
   imports: [
@@ -150,8 +151,11 @@ import { HelpModule } from './modules/help/help.module';
     MarketplaceModule,
     SubscriptionPackageModule,
     HelpModule,
+    PluginsModule,
+    VerificationModule,
+    ErrorsModule,
   ],
-  controllers: [ErrorAdminController],
+  controllers: [],
   providers: [
     {
       provide: APP_INTERCEPTOR,
@@ -162,10 +166,9 @@ import { HelpModule } from './modules/help/help.module';
       useClass: AuditInterceptor,
     },
     // TenantGuard moved to TenantModule to ensure it runs after JwtAuthGuard
-    ErrorLoggerService,
     RequestContextService,
   ],
-  exports: [ErrorLoggerService, RequestContextService],
+  exports: [RequestContextService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

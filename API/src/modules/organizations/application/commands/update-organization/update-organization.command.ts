@@ -13,6 +13,7 @@ export class UpdateOrganizationCommand {
       country?: string;
       pincode?: string;
       industry?: string;
+      annualRevenue?: number;
       notes?: string;
     },
     public readonly filterIds?: string[],

@@ -5,12 +5,14 @@ import {
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { CreateLeadCommand } from '../application/commands/create-lead/create-lead.command';
+import { QuickCreateLeadCommand } from '../application/commands/quick-create-lead/quick-create-lead.command';
 import { AllocateLeadCommand } from '../application/commands/allocate-lead/allocate-lead.command';
 import { ChangeLeadStatusCommand } from '../application/commands/change-lead-status/change-lead-status.command';
 import { UpdateLeadCommand } from '../application/commands/update-lead/update-lead.command';
 import { GetLeadByIdQuery } from '../application/queries/get-lead-by-id/get-lead-by-id.query';
 import { GetLeadsListQuery } from '../application/queries/get-leads-list/get-leads-list.query';
 import { CreateLeadDto } from './dto/create-lead.dto';
+import { QuickCreateLeadDto } from './dto/quick-create-lead.dto';
 import { AllocateLeadDto } from './dto/allocate-lead.dto';
 import { ChangeLeadStatusDto } from './dto/change-lead-status.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
@@ -23,6 +25,7 @@ import { PermanentDeleteLeadCommand } from '../application/commands/permanent-de
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { ApiResponse } from '../../../common/utils/api-response';
 import { DataMaskingInterceptor, MaskTable } from '../../table-config/data-masking.interceptor';
+import { WorkflowEngineService } from '../../../core/workflow/workflow-engine.service';
 
 @ApiTags('Leads')
 @ApiBearerAuth()
@@ -31,7 +34,29 @@ export class LeadsController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly workflowEngine: WorkflowEngineService,
   ) {}
+
+  @Post('quick-create')
+  @ApiOperation({ summary: 'Quick-create lead with inline contact/organization (single atomic request)' })
+  async quickCreate(@Body() dto: QuickCreateLeadDto, @CurrentUser('id') userId: string) {
+    const result = await this.commandBus.execute(
+      new QuickCreateLeadCommand(
+        userId,
+        dto.contactId,
+        dto.inlineContact,
+        dto.organizationId,
+        dto.inlineOrganization,
+        dto.priority,
+        dto.expectedValue,
+        dto.expectedCloseDate ? new Date(dto.expectedCloseDate) : undefined,
+        dto.notes,
+        dto.filterIds,
+      ),
+    );
+    const lead = await this.queryBus.execute(new GetLeadByIdQuery(result.leadId));
+    return ApiResponse.success({ ...lead, rawContactId: result.rawContactId }, 'Lead created');
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create new lead for a verified contact' })
@@ -152,6 +177,70 @@ export class LeadsController {
     await this.commandBus.execute(new RestoreLeadCommand(id));
     const lead = await this.queryBus.execute(new GetLeadByIdQuery(id));
     return ApiResponse.success(lead, 'Lead restored');
+  }
+
+  // ── Workflow Endpoints ──────────────────────────────────
+
+  @Get(':id/workflow-status')
+  @ApiOperation({ summary: 'Get workflow status for a lead (lazy-initializes if missing)' })
+  async getWorkflowStatus(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    let status = await this.workflowEngine.getEntityStatus('LEAD', id);
+
+    // Lazy-init: if no workflow instance exists, create one and fast-forward to current lead status
+    if (!status) {
+      const lead = await this.queryBus.execute(new GetLeadByIdQuery(id));
+      if (!lead) return ApiResponse.success(null);
+
+      try {
+        const instance = await this.workflowEngine.initializeWorkflow('LEAD', id, userId);
+        // Fast-forward to current lead status if not NEW
+        if (lead.status !== 'NEW') {
+          await this.workflowEngine.fastForwardToState(instance.id, lead.status, userId);
+        }
+        status = await this.workflowEngine.getEntityStatus('LEAD', id);
+      } catch {
+        return ApiResponse.success(null);
+      }
+    }
+
+    return ApiResponse.success(status);
+  }
+
+  @Get(':id/workflow-transitions')
+  @ApiOperation({ summary: 'Get available workflow transitions for a lead' })
+  async getWorkflowTransitions(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    const status = await this.workflowEngine.getEntityStatus('LEAD', id);
+    if (!status) return ApiResponse.success([]);
+
+    const transitions = await this.workflowEngine.getAvailableTransitions(status.instanceId, userId);
+    return ApiResponse.success(transitions);
+  }
+
+  @Post(':id/workflow-transition')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Execute a workflow transition on a lead' })
+  async executeWorkflowTransition(
+    @Param('id') id: string,
+    @Body() body: { transitionCode: string; comment?: string },
+    @CurrentUser('id') userId: string,
+  ) {
+    const status = await this.workflowEngine.getEntityStatus('LEAD', id);
+    if (!status) return ApiResponse.success(null, 'No workflow instance found');
+
+    const result = await this.workflowEngine.executeTransition(
+      status.instanceId, body.transitionCode, userId, body.comment,
+    );
+    return ApiResponse.success(result, 'Transition executed');
+  }
+
+  @Get(':id/workflow-history')
+  @ApiOperation({ summary: 'Get workflow transition history for a lead' })
+  async getWorkflowHistory(@Param('id') id: string) {
+    const status = await this.workflowEngine.getEntityStatus('LEAD', id);
+    if (!status) return ApiResponse.success([]);
+
+    const history = await this.workflowEngine.getInstanceHistory(status.instanceId);
+    return ApiResponse.success(history);
   }
 
   @Delete(':id/permanent')

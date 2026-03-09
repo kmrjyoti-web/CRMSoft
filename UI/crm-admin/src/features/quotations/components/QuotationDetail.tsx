@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
-import { Button, Icon, Badge, Modal, SelectInput, Input, Typography } from "@/components/ui";
+import { Button, Icon, Badge, Modal, Input, Typography } from "@/components/ui";
+import { LookupSelect } from "@/components/common/LookupSelect";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
 import { StatusBadge } from "@/components/common/StatusBadge";
@@ -20,18 +21,6 @@ import {
   useReviseQuotation,
 } from "../hooks/useQuotations";
 import type { SendChannel, LineItem, SendLog } from "../types/quotations.types";
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const CHANNEL_OPTIONS = [
-  { label: "Email", value: "EMAIL" },
-  { label: "WhatsApp", value: "WHATSAPP" },
-  { label: "Portal", value: "PORTAL" },
-  { label: "Manual", value: "MANUAL" },
-  { label: "Download", value: "DOWNLOAD" },
-];
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -236,6 +225,14 @@ export function QuotationDetail({ quotationId }: QuotationDetailProps) {
               Revise
             </Button>
           </>
+        )}
+
+        {quotation.status === "ACCEPTED" && (
+          <Link href={`/finance/proforma-invoices/new?quotationId=${quotationId}`}>
+            <Button size="sm" variant="primary">
+              <Icon name="file-check" size={14} /> Create Proforma Invoice
+            </Button>
+          </Link>
         )}
 
         {quotation.status === "ACCEPTED" && quotation.acceptedNote && (
@@ -641,9 +638,9 @@ export function QuotationDetail({ quotationId }: QuotationDetailProps) {
         }
       >
         <div className="space-y-4">
-          <SelectInput
+          <LookupSelect
+            masterCode="COMMUNICATION_CHANNEL"
             label="Channel"
-            options={CHANNEL_OPTIONS}
             value={sendChannel}
             onChange={(v) => setSendChannel(String(v ?? ""))}
           />

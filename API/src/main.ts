@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/errors/global-exception.filter';
 import { ErrorLoggerService } from './common/errors/error-logger.service';
+import { ErrorCatalogService } from './common/errors/error-catalog.service';
 import { ResponseMapperInterceptor } from './common/response/response-mapper.interceptor';
 import { RequestIdMiddleware } from './common/request/request-id.middleware';
 
@@ -46,7 +47,8 @@ async function bootstrap() {
 
   // Global exception filter (standardizes all error responses)
   const errorLogger = app.get(ErrorLoggerService);
-  app.useGlobalFilters(new GlobalExceptionFilter(errorLogger));
+  const errorCatalog = app.get(ErrorCatalogService);
+  app.useGlobalFilters(new GlobalExceptionFilter(errorLogger, errorCatalog));
 
   const config = new DocumentBuilder()
     .setTitle('CRM API')

@@ -398,6 +398,10 @@ export function TableView({
             <tr
               key={row.id}
               className={`group cursor-pointer relative transition-shadow duration-200 outline-none ${isRowSelected ? 'bg-blue-50 hover:bg-blue-100 z-10' : 'hover:bg-gray-50 focus-within:bg-gray-50 hover:z-10 hover:shadow-[inset_1px_0_0_#dadce0,inset_-1px_0_0_#dadce0,0_1px_2px_0_rgba(60,64,67,.3),0_1px_3px_1px_rgba(60,64,67,.15)] focus-within:z-10 focus-within:shadow-[inset_1px_0_0_#dadce0,inset_-1px_0_0_#dadce0,0_1px_2px_0_rgba(60,64,67,.3),0_1px_3px_1px_rgba(60,64,67,.15)] focus:bg-blue-50'}`}
+              onClick={(e) => {
+                if ((e.target as HTMLElement).closest('button, input, a, select, textarea, [role="menu"], [role="menuitem"], .row-action-button')) return;
+                onRowEdit?.(row);
+              }}
               onContextMenu={(e) => handleContextMenu(e, row.id)}
               onKeyDown={(e) => handleKeyDown(e, index, row)}
               tabIndex={0}

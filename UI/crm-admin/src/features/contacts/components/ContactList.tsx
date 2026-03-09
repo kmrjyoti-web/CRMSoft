@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { TableFull, Button, Icon, Switch } from "@/components/ui";
 
 import { useTableFilters } from "@/hooks/useTableFilters";
+import { useDynamicFilterConfig } from "@/hooks/useDynamicFilterConfig";
 import { useBulkSelect } from "@/hooks/useBulkSelect";
 import { useBulkOperations } from "@/hooks/useBulkOperations";
 
@@ -18,8 +19,9 @@ import { BulkActionsBar } from "@/components/common/BulkActionsBar";
 import { BulkEditPanel } from "@/components/common/BulkEditPanel";
 import { useBulkDeleteDialog } from "@/components/common/BulkDeleteDialog";
 import { ActionsMenu } from "@/components/common/ActionsMenu";
+import { HelpButton } from "@/components/common/HelpButton";
 
-import { useSidePanelStore } from "@/stores/side-panel.store";
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 
 import {
   useContactsList,
@@ -29,9 +31,16 @@ import {
   useReactivateContact,
 } from "../hooks/useContacts";
 
-import { ContactForm } from "./ContactForm";
+import { useOpenDashboard } from "@/hooks/useOpenDashboard";
 
-import { CONTACT_FILTER_CONFIG } from "../utils/contact-filters";
+import { OrganizationDashboard } from "@/features/organizations/components/OrganizationDashboard";
+
+import { ContactForm } from "./ContactForm";
+import { ContactDashboard } from "./ContactDashboard";
+import { ContactListUserHelp } from "../help/ContactListUserHelp";
+import { ContactListDevHelp } from "../help/ContactListDevHelp";
+
+import { CONTACT_FILTER_CONFIG, CONTACT_LOOKUP_MAPPINGS } from "../utils/contact-filters";
 
 import type {
   ContactListItem,
@@ -60,11 +69,15 @@ const BULK_EDIT_FIELDS = [
 // ── Helpers ─────────────────────────────────────────────
 
 function getPrimaryComm(contact: ContactListItem, type: "EMAIL" | "PHONE" | "MOBILE") {
-  return (
-    contact.communications?.find((c) => c.type === type && c.isPrimary)?.value ??
-    contact.communications?.find((c) => c.type === type)?.value ??
-    "—"
-  );
+  const primary = contact.communications?.find((c) => c.type === type && c.isPrimary)?.value;
+  const any = contact.communications?.find((c) => c.type === type)?.value;
+  if (type === "MOBILE") {
+    // Fall back to PHONE type if no MOBILE found
+    const phonePrimary = contact.communications?.find((c) => c.type === "PHONE" && c.isPrimary)?.value;
+    const phoneAny = contact.communications?.find((c) => c.type === "PHONE")?.value;
+    return primary ?? any ?? phonePrimary ?? phoneAny ?? "—";
+  }
+  return primary ?? any ?? "—";
 }
 
 function flattenContacts(contacts: ContactListItem[]): Record<string, unknown>[] {
@@ -85,10 +98,27 @@ function flattenContacts(contacts: ContactListItem[]): Record<string, unknown>[]
 
 export function ContactList() {
   const router = useRouter();
-  const openPanel = useSidePanelStore((s) => s.openPanel);
-  const closePanel = useSidePanelStore((s) => s.closePanel);
+
+  const { handleRowEdit, handleCreate, handleRowView } = useEntityPanel({
+    entityKey: "contact",
+    entityLabel: "Contact",
+    FormComponent: ContactForm,
+    DashboardComponent: ContactDashboard,
+    dashboardWidth: 900,
+    idProp: "contactId",
+    editRoute: "/contacts/:id/edit",
+    createRoute: "/contacts/new",
+    displayField: "name",
+    headerButtons: [
+      { id: "btn-phone", label: "Call", icon: "phone", showAs: "icon" as const, onClick: () => {}, variant: "ghost" as const },
+      { id: "btn-mail", label: "Email", icon: "mail", showAs: "icon" as const, onClick: () => {}, variant: "ghost" as const },
+    ],
+  });
+
+  const openDashboard = useOpenDashboard();
 
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const { confirm, ConfirmDialogPortal } = useConfirmDialog();
   const softDeleteMutation = useSoftDeleteContact();
@@ -114,8 +144,10 @@ export function ContactList() {
     [clearSelection, selectAll],
   );
 
+  const dynamicFilterConfig = useDynamicFilterConfig(CONTACT_FILTER_CONFIG, CONTACT_LOOKUP_MAPPINGS);
+
   const { activeFilters, filterParams, handleFilterChange, clearFilters } =
-    useTableFilters(CONTACT_FILTER_CONFIG);
+    useTableFilters(dynamicFilterConfig);
 
   const params = useMemo<ContactListParams>(
     () => ({
@@ -139,6 +171,8 @@ export function ContactList() {
 
   const handleToggleActive = useCallback(
     async (id: string, currentlyActive: boolean) => {
+      if (togglingId) return;
+      setTogglingId(id);
       try {
         if (currentlyActive) {
           await deactivateMut.mutateAsync(id);
@@ -149,26 +183,57 @@ export function ContactList() {
         }
       } catch {
         toast.error("Failed to update status");
+      } finally {
+        setTogglingId(null);
       }
     },
-    [deactivateMut, reactivateMut],
+    [deactivateMut, reactivateMut, togglingId],
   );
 
   const tableData = useMemo(() => {
     const flat = flattenContacts(contacts);
     return flat.map((row, idx) => ({
       ...row,
+      name: (
+        <span
+          className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRowView(row);
+          }}
+        >
+          {`${contacts[idx].firstName} ${contacts[idx].lastName}`}
+        </span>
+      ),
+      organization: contacts[idx].contactOrganizations?.[0]?.organization ? (
+        <span
+          className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium"
+          onClick={(e) => {
+            e.stopPropagation();
+            openDashboard({
+              entityKey: "org",
+              entityLabel: "Organization",
+              entityId: contacts[idx].contactOrganizations[0].organization.id,
+              displayName: contacts[idx].contactOrganizations[0].organization.name,
+              DashboardComponent: OrganizationDashboard,
+            });
+          }}
+        >
+          {contacts[idx].contactOrganizations[0].organization.name}
+        </span>
+      ) : "—",
       status: (
         <div onClick={(e) => e.stopPropagation()}>
           <Switch
             size="sm"
             checked={contacts[idx].isActive}
             onChange={() => handleToggleActive(row.id as string, contacts[idx].isActive)}
+            disabled={togglingId === row.id}
           />
         </div>
       ),
     }));
-  }, [contacts, handleToggleActive]);
+  }, [contacts, handleToggleActive, togglingId, handleRowView, openDashboard]);
 
   // ── Bulk delete hook ────────────────────────────────────
   const selectedArray = Array.from(selectedIds);
@@ -199,92 +264,6 @@ export function ContactList() {
     },
     [confirm, softDeleteMutation],
   );
-
-  // ── Row edit (panel) ─────────────────────────────────────
-
-  const handleRowEdit = useCallback(
-    (row: Record<string, unknown>) => {
-      const panelId = `contact-edit-${row.id}`;
-      const formId = `sp-form-contact-${row.id}`;
-      openPanel({
-        id: panelId,
-        title: `Contact: ${(row.name as string) || "Contact"}`,
-        newTabUrl: `/contacts/${row.id}/edit`,
-        headerButtons: [
-          { id: "btn-phone", label: "Call", icon: "phone", showAs: "icon", onClick: () => {}, variant: "ghost" },
-          { id: "btn-mail", label: "Email", icon: "mail", showAs: "icon", onClick: () => {}, variant: "ghost" },
-        ],
-        footerButtons: [
-          {
-            id: "cancel",
-            label: "Cancel",
-            showAs: "text",
-            variant: "secondary",
-            onClick: () => closePanel(panelId),
-          },
-          {
-            id: "save",
-            label: "Save Changes",
-            icon: "check",
-            showAs: "both",
-            variant: "primary",
-            onClick: () => {
-              const form = document.getElementById(formId) as HTMLFormElement | null;
-              form?.requestSubmit();
-            },
-          },
-        ],
-        content: (
-          <ContactForm
-            contactId={row.id as string}
-            mode="panel"
-            panelId={panelId}
-            onSuccess={() => closePanel(panelId)}
-            onCancel={() => closePanel(panelId)}
-          />
-        ),
-      });
-    },
-    [openPanel, closePanel],
-  );
-
-  const handleCreate = useCallback(() => {
-    const panelId = "contact-new";
-    const formId = "sp-form-contact-new";
-    openPanel({
-      id: panelId,
-      title: "New Contact",
-      newTabUrl: "/contacts/new",
-      footerButtons: [
-        {
-          id: "cancel",
-          label: "Cancel",
-          showAs: "text",
-          variant: "secondary",
-          onClick: () => closePanel(panelId),
-        },
-        {
-          id: "save",
-          label: "Save",
-          icon: "check",
-          showAs: "both",
-          variant: "primary",
-          onClick: () => {
-            const form = document.getElementById(formId) as HTMLFormElement | null;
-            form?.requestSubmit();
-          },
-        },
-      ],
-      content: (
-        <ContactForm
-          mode="panel"
-          panelId={panelId}
-          onSuccess={() => closePanel(panelId)}
-          onCancel={() => closePanel(panelId)}
-        />
-      ),
-    });
-  }, [openPanel, closePanel]);
 
   // ── Bulk edit handlers ─────────────────────────────────────
 
@@ -332,17 +311,27 @@ export function ContactList() {
           columns={CONTACT_COLUMNS}
           defaultViewMode="table"
           defaultDensity="compact"
-          filterConfig={CONTACT_FILTER_CONFIG}
+          filterConfig={dynamicFilterConfig}
           activeFilters={activeFilters}
           onFilterChange={handleFilterChange}
           onFilterClear={clearFilters}
-          onRowEdit={handleRowEdit}
+          onRowEdit={handleRowView}
           onCreate={handleCreate}
           onRowDelete={handleRowArchive}
           onRowArchive={handleRowArchive}
           selectedIds={selectedIds}
           onSelectionChange={handleSelectionChange}
-          headerActions={<ActionsMenu items={actionsMenuItems} />}
+          headerActions={
+            <>
+              <HelpButton
+                panelId="contacts-list-help"
+                title="Contacts — Help"
+                userContent={<ContactListUserHelp />}
+                devContent={<ContactListDevHelp />}
+              />
+              <ActionsMenu items={actionsMenuItems} />
+            </>
+          }
         />
       </div>
 

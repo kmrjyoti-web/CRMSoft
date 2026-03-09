@@ -13,6 +13,8 @@ import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
 
+import { useSidePanelStore } from "@/stores/side-panel.store";
+
 import {
   useTourPlanDetail,
   useCreateTourPlan,
@@ -46,13 +48,18 @@ type TourPlanFormValues = z.infer<typeof tourPlanSchema>;
 
 interface TourPlanFormProps {
   tourPlanId?: string;
+  mode?: "page" | "panel";
+  panelId?: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 // -- Component ------------------------------------------------------------
 
-export function TourPlanForm({ tourPlanId }: TourPlanFormProps) {
+export function TourPlanForm({ tourPlanId, mode = "page", panelId, onSuccess, onCancel }: TourPlanFormProps) {
   const router = useRouter();
   const isEdit = !!tourPlanId;
+  const updatePanelConfig = useSidePanelStore((s) => s.updatePanelConfig);
 
   const { data: tourPlanData, isLoading: isLoadingDetail } = useTourPlanDetail(
     tourPlanId ?? "",
@@ -107,6 +114,37 @@ export function TourPlanForm({ tourPlanId }: TourPlanFormProps) {
     });
   }, [isEdit, tourPlanData, reset]);
 
+  // Sync isSubmitting → panel footer button (loading / disabled / label)
+  useEffect(() => {
+    if (!panelId) return;
+    updatePanelConfig(panelId, {
+      footerButtons: [
+        {
+          id: "cancel",
+          label: "Cancel",
+          showAs: "text",
+          variant: "secondary",
+          disabled: isSubmitting,
+          onClick: () => {},
+        },
+        {
+          id: "save",
+          label: isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Save Changes" : "Save",
+          icon: "check",
+          showAs: "both",
+          variant: "primary",
+          loading: isSubmitting,
+          disabled: isSubmitting,
+          onClick: () => {
+            const formId = `sp-form-tourplan-${tourPlanId ?? "new"}`;
+            const form = document.getElementById(formId) as HTMLFormElement | null;
+            form?.requestSubmit();
+          },
+        },
+      ],
+    });
+  }, [isSubmitting, panelId, isEdit, tourPlanId, updatePanelConfig]);
+
   // -- Submit handler -----------------------------------------------------
 
   const onSubmit = async (values: TourPlanFormValues) => {
@@ -123,7 +161,11 @@ export function TourPlanForm({ tourPlanId }: TourPlanFormProps) {
           },
         });
         toast.success("Tour plan updated");
-        router.push(`/tour-plans/${tourPlanId}`);
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push(`/tour-plans/${tourPlanId}`);
+        }
       } else {
         const visits = values.visits?.map((v) => ({
           leadId: v.leadId || undefined,
@@ -144,7 +186,11 @@ export function TourPlanForm({ tourPlanId }: TourPlanFormProps) {
           visits: visits && visits.length > 0 ? visits : undefined,
         });
         toast.success("Tour plan created");
-        router.push("/tour-plans");
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push("/tour-plans");
+        }
       }
     } catch (err: unknown) {
       const message =
@@ -160,24 +206,29 @@ export function TourPlanForm({ tourPlanId }: TourPlanFormProps) {
 
   // -- Render -------------------------------------------------------------
 
+  const isPanel = mode === "panel";
+
   return (
-    <div className="p-6" style={{ position: "relative" }}>
+    <div className={isPanel ? "p-4" : "p-6"} style={{ position: "relative" }}>
       <FormSubmitOverlay isSubmitting={isSubmitting} isEdit={isEdit} />
-      <PageHeader
-        title={isEdit ? "Edit Tour Plan" : "New Tour Plan"}
-        actions={
-          <Button variant="outline" onClick={() => router.back()}>
-            <Icon name="arrow-left" size={16} /> Back
-          </Button>
-        }
-      />
+      {!isPanel && (
+        <PageHeader
+          title={isEdit ? "Edit Tour Plan" : "New Tour Plan"}
+          actions={
+            <Button variant="outline" onClick={() => router.back()}>
+              <Icon name="arrow-left" size={16} /> Back
+            </Button>
+          }
+        />
+      )}
 
       <FormErrors errors={errors} />
 
       <form
+        id={isPanel ? `sp-form-tourplan-${tourPlanId ?? "new"}` : undefined}
         onSubmit={handleSubmit(onSubmit)}
         noValidate
-        className="mt-4 max-w-3xl space-y-6"
+        className={`${isPanel ? "mt-2" : "mt-4"} max-w-3xl space-y-6`}
       >
         {/* Tour Plan Information */}
         <Fieldset label="Tour Plan Information">
@@ -399,21 +450,23 @@ export function TourPlanForm({ tourPlanId }: TourPlanFormProps) {
           </div>
         </Fieldset>
 
-        {/* Submit */}
-        <div className="flex gap-3 pt-2">
-          <Button
-            type="submit"
-            variant="primary"
-            loading={isSubmitting}
-            disabled={isSubmitting}
-          >
-            <Icon name="check" size={16} />{" "}
-            {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
-          </Button>
-          <Button variant="outline" onClick={() => router.back()}>
-            Cancel
-          </Button>
-        </div>
+        {/* Submit — hidden in panel mode (footer handles it) */}
+        {!isPanel && (
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            >
+              <Icon name="check" size={16} />{" "}
+              {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
+            </Button>
+            <Button variant="outline" onClick={() => router.back()}>
+              Cancel
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   );

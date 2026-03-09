@@ -2,11 +2,20 @@
 
 import { forwardRef } from 'react';
 
-import { AICSelectInput } from '@coreui/ui-react';
+import { Autocomplete } from './Autocomplete';
+import type { AutocompleteProps } from './Autocomplete';
 
-type SelectInputProps = React.ComponentProps<typeof AICSelectInput>;
+/**
+ * SelectInput — drop-in replacement backed by the custom Autocomplete.
+ * All existing usages (LookupSelect, OrganizationSelect, forms, etc.)
+ * automatically get the MUI-style autocomplete behaviour.
+ */
 
-export const SelectInput = forwardRef<HTMLElement, SelectInputProps>((props, ref) => {
-  return <AICSelectInput ref={ref as any} size="sm" variant="outlined" {...props} />;
-});
+type SelectInputProps = AutocompleteProps;
+
+export const SelectInput = forwardRef<HTMLDivElement, SelectInputProps>(
+  (props, ref) => {
+    return <Autocomplete ref={ref} {...props} />;
+  },
+);
 SelectInput.displayName = 'SelectInput';

@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import { Button, DatePicker } from "@/components/ui";
 import { PageHeader } from "@/components/common/PageHeader";
+import { HelpButton } from "@/components/common/HelpButton";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { formatINR } from "@/lib/format-currency";
 import {
@@ -27,6 +28,8 @@ import {
   useLeadSources,
 } from "../hooks/useDashboard";
 import { getDateRange } from "../utils/date-range";
+import { DashboardUserHelp } from "../help/DashboardUserHelp";
+import { DashboardDevHelp } from "../help/DashboardDevHelp";
 import type { DateRangePreset } from "../utils/date-range";
 import { CHART_COLORS } from "../utils/chart-colors";
 import { KpiCard } from "./KpiCard";
@@ -52,9 +55,28 @@ export function DashboardOverview() {
   const { data: sourcesData } = useLeadSources(params);
 
   const kpis = kpiData?.data;
-  const pipeline = pipelineData?.data ?? [];
-  const revenue = revenueData?.data ?? [];
-  const sources = sourcesData?.data ?? [];
+
+  // Backend may return objects with nested arrays — extract safely
+  const rawPipeline = pipelineData?.data;
+  const pipeline: Record<string, unknown>[] = Array.isArray(rawPipeline)
+    ? rawPipeline
+    : Array.isArray((rawPipeline as any)?.stages)
+      ? (rawPipeline as any).stages
+      : [];
+
+  const rawRevenue = revenueData?.data;
+  const revenue: Record<string, unknown>[] = Array.isArray(rawRevenue)
+    ? rawRevenue
+    : [];
+
+  const rawSources = sourcesData?.data;
+  const sources: Record<string, unknown>[] = Array.isArray(rawSources)
+    ? rawSources.map((s: Record<string, unknown>) => ({
+        ...s,
+        count: s.count ?? s.totalLeads ?? 0,
+        percentage: s.percentage ?? s.conversionRate ?? 0,
+      }))
+    : [];
 
   if (kpiLoading) {
     return <LoadingSpinner fullPage />;
@@ -73,6 +95,13 @@ export function DashboardOverview() {
               flexWrap: "wrap",
             }}
           >
+            <HelpButton
+              panelId="dashboard-help"
+              title="Dashboard — Help"
+              userContent={<DashboardUserHelp />}
+              devContent={<DashboardDevHelp />}
+              showLabel={false}
+            />
             {(
               ["7d", "30d", "90d", "thisMonth", "lastMonth"] as DateRangePreset[]
             ).map((p) => (

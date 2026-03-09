@@ -13,9 +13,10 @@ export class LeadRepository implements ILeadRepository {
     return record ? LeadMapper.toDomain(record) : null;
   }
 
-  async save(entity: LeadEntity): Promise<void> {
+  async save(entity: LeadEntity, tx?: any): Promise<void> {
     const data = LeadMapper.toPersistence(entity);
-    await this.prisma.lead.upsert({
+    const client = tx || this.prisma;
+    await client.lead.upsert({
       where: { id: entity.id },
       create: data,
       update: data,
@@ -30,8 +31,9 @@ export class LeadRepository implements ILeadRepository {
    * Generate next lead number: LD-00001, LD-00002, etc.
    * Uses DB count + 1 for simplicity. In production, use a sequence table.
    */
-  async nextLeadNumber(): Promise<string> {
-    const count = await this.prisma.lead.count();
+  async nextLeadNumber(tx?: any): Promise<string> {
+    const client = tx || this.prisma;
+    const count = await client.lead.count();
     const next = count + 1;
     return `LD-${String(next).padStart(5, '0')}`;
   }

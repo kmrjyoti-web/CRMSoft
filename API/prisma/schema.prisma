@@ -15,6 +15,32 @@ enum UserStatus {
   SUSPENDED
 }
 
+enum VerificationStatus {
+  UNVERIFIED
+  PARTIALLY_VERIFIED
+  FULLY_VERIFIED
+}
+
+enum RegistrationType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum OtpPurpose {
+  EMAIL_VERIFICATION
+  MOBILE_VERIFICATION
+  PASSWORD_RESET
+  LOGIN_OTP
+  TRANSACTION
+}
+
+enum OtpStatus {
+  OTP_PENDING
+  OTP_VERIFIED
+  OTP_EXPIRED
+  OTP_FAILED
+}
+
 // RawContact + Contact are SEPARATE tables now
 enum RawContactStatus {
   RAW
@@ -384,6 +410,28 @@ model User {
   updatedAt     DateTime     @updatedAt @map("updated_at")
   createdBy     String?      @map("created_by")
 
+  // ─── VERIFICATION STATUS ───
+  verificationStatus    VerificationStatus  @default(UNVERIFIED) @map("verification_status")
+  emailVerified         Boolean             @default(false) @map("email_verified")
+  emailVerifiedAt       DateTime?           @map("email_verified_at")
+  mobileVerified        Boolean             @default(false) @map("mobile_verified")
+  mobileVerifiedAt      DateTime?           @map("mobile_verified_at")
+
+  // ─── REGISTRATION TYPE ───
+  registrationType      RegistrationType    @default(INDIVIDUAL) @map("registration_type")
+
+  // ─── BUSINESS VERIFICATION (for B2B pricing) ───
+  companyName           String?             @map("company_name")
+  gstNumber             String?             @map("gst_number")
+  gstVerified           Boolean             @default(false) @map("gst_verified")
+  gstVerifiedAt         DateTime?           @map("gst_verified_at")
+  gstVerificationMethod String?             @map("gst_verification_method")
+
+  // ─── BUSINESS DETAILS ───
+  panNumber             String?             @map("pan_number")
+  businessType          String?             @map("business_type")
+  annualTurnover        String?             @map("annual_turnover")
+
   rawContactsCreated   RawContact[]             @relation("RawContactCreatedBy")
   rawContactsVerified  RawContact[]             @relation("RawContactVerifiedBy")
   contactsCreated      Contact[]                @relation("ContactCreatedBy")
@@ -580,6 +628,7 @@ model Role {
   updatedAt           DateTime            @updatedAt @map("updated_at")
   users               User[]
   permissions         RolePermission[]
+  menuPermissions     RoleMenuPermission[]
   dataMaskingPolicies DataMaskingPolicy[] @relation("DataMaskingPolicyRole")
 
   @@unique([tenantId, name])
@@ -610,6 +659,77 @@ model RolePermission {
   @@unique([tenantId, roleId, permissionId])
   @@index([tenantId])
   @@map("role_permissions")
+}
+
+// ─── ROLE MENU PERMISSIONS (per-menu CRUD granularity) ───
+
+model RoleMenuPermission {
+  id         String  @id @default(uuid())
+  tenantId   String  @map("tenant_id")
+  roleId     String  @map("role_id")
+  menuId     String  @map("menu_id")
+
+  // ─── CRUD PERMISSIONS ───
+  canView    Boolean @default(false) @map("can_view")
+  canCreate  Boolean @default(false) @map("can_create")
+  canEdit    Boolean @default(false) @map("can_edit")
+  canDelete  Boolean @default(false) @map("can_delete")
+
+  // ─── DATA OPERATIONS ───
+  canExport     Boolean @default(false) @map("can_export")
+  canImport     Boolean @default(false) @map("can_import")
+  canBulkUpdate Boolean @default(false) @map("can_bulk_update")
+  canBulkDelete Boolean @default(false) @map("can_bulk_delete")
+
+  // ─── WORKFLOW PERMISSIONS ───
+  canApprove  Boolean @default(false) @map("can_approve")
+  canAssign   Boolean @default(false) @map("can_assign")
+  canTransfer Boolean @default(false) @map("can_transfer")
+
+  // ─── SCOPE PERMISSIONS ───
+  canViewAll   Boolean @default(false) @map("can_view_all")
+  canEditAll   Boolean @default(false) @map("can_edit_all")
+  canDeleteAll Boolean @default(false) @map("can_delete_all")
+
+  // ─── FIELD-LEVEL RESTRICTIONS ───
+  restrictedFields Json? @map("restricted_fields")
+
+  // ─── INHERITANCE ───
+  inheritFromParent Boolean @default(true) @map("inherit_from_parent")
+
+  // ─── RELATIONS ───
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  menu Menu @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+  // ─── AUDIT ───
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdById String?  @map("created_by_id")
+  updatedById String?  @map("updated_by_id")
+
+  @@unique([tenantId, roleId, menuId])
+  @@index([tenantId, roleId])
+  @@index([menuId])
+  @@map("role_menu_permissions")
+}
+
+model PermissionTemplate {
+  id          String  @id @default(uuid())
+  name        String
+  code        String  @unique
+  description String?
+  tenantId    String? @map("tenant_id")
+  isSystem    Boolean @default(false) @map("is_system")
+  isDefault   Boolean @default(false) @map("is_default")
+
+  // ─── PER-MENU PERMISSIONS (JSON map: { menuCode: { canView, canCreate, ... } }) ───
+  permissions Json
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([tenantId, name])
+  @@map("permission_templates")
 }
 
 // ─── LOOKUP ───
@@ -1598,6 +1718,7 @@ model Menu {
   terminologyKey            String?  @map("terminology_key")
   createdAt                 DateTime @default(now()) @map("created_at")
   updatedAt                 DateTime @updatedAt @map("updated_at")
+  roleMenuPermissions       RoleMenuPermission[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -5545,27 +5666,75 @@ model CronJobRunLog {
 }
 
 // ═══════════════════════════════════════════════════════
-// ERROR LOGGING
+// ERROR CATALOG & LOGGING
 // ═══════════════════════════════════════════════════════
+
+enum ErrorLayer {
+  BE
+  FE
+  DB
+  MOB
+}
+
+enum ErrorSeverity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+model ErrorCatalog {
+  id           String        @id @default(uuid())
+  code         String        @unique
+  layer        ErrorLayer    @default(BE)
+  module       String        @db.VarChar(100)
+  severity     ErrorSeverity @default(ERROR)
+  httpStatus   Int           @map("http_status")
+  messageEn    String        @map("message_en") @db.Text
+  messageHi    String?       @map("message_hi") @db.Text
+  solutionEn   String?       @map("solution_en") @db.Text
+  solutionHi   String?       @map("solution_hi") @db.Text
+  technicalInfo String?      @map("technical_info") @db.Text
+  helpUrl      String?       @map("help_url")
+  isRetryable  Boolean       @default(false) @map("is_retryable")
+  retryAfterMs Int?          @map("retry_after_ms")
+  isActive     Boolean       @default(true) @map("is_active")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  @@index([layer, module])
+  @@index([severity])
+  @@index([httpStatus])
+  @@map("error_catalog")
+}
+
 model ErrorLog {
-  id         String   @id @default(uuid())
-  requestId  String   @map("request_id")
-  errorCode  String   @map("error_code")
-  message    String   @db.Text
-  statusCode Int      @map("status_code")
+  id         String        @id @default(uuid())
+  requestId  String        @map("request_id")
+  errorCode  String        @map("error_code")
+  message    String        @db.Text
+  statusCode Int           @map("status_code")
+  layer      ErrorLayer    @default(BE)
+  severity   ErrorSeverity @default(ERROR)
   path       String
   method     String
-  userId     String?  @map("user_id")
-  tenantId   String?  @map("tenant_id")
+  userId     String?       @map("user_id")
+  tenantId   String?       @map("tenant_id")
   details    Json?
-  stack      String?  @db.Text
+  stack      String?       @db.Text
   ip         String?
-  userAgent  String?  @map("user_agent") @db.VarChar(500)
-  createdAt  DateTime @default(now()) @map("created_at")
+  userAgent  String?       @map("user_agent") @db.VarChar(500)
+  module     String?       @db.VarChar(100)
+  requestBody Json?        @map("request_body")
+  queryParams Json?        @map("query_params")
+  metadata   Json?
+  createdAt  DateTime      @default(now()) @map("created_at")
 
   @@index([errorCode, createdAt])
   @@index([tenantId, createdAt])
   @@index([requestId])
+  @@index([layer, severity, createdAt])
+  @@index([createdAt])
   @@map("error_logs")
 }
 
@@ -7744,15 +7913,119 @@ enum MarketplaceInstallStatus {
   CANCELLED
 }
 
+// ─── MARKETPLACE FEED ENUMS ───
+
+enum ListingType {
+  PRODUCT
+  SERVICE
+  NEW_LAUNCH
+  LAUNCHING_OFFER
+  REQUIREMENT
+  JOB
+  OTHER
+}
+
+enum ListingStatus {
+  LST_DRAFT
+  LST_SCHEDULED
+  LST_ACTIVE
+  LST_EXPIRED
+  LST_SOLD_OUT
+  LST_DEACTIVATED
+  LST_ARCHIVED
+}
+
+enum VisibilityType {
+  VIS_PUBLIC
+  VIS_GEO_TARGETED
+  VIS_VERIFIED_ONLY
+  VIS_MY_CONTACTS
+  VIS_SELECTED_CONTACTS
+  VIS_CATEGORY_BASED
+  VIS_GRADE_BASED
+}
+
+enum ExpiryAction {
+  EXP_DEACTIVATE
+  EXP_ARCHIVE
+  EXP_DELETE
+  EXP_NOTIFY_OWNER
+}
+
+enum PostType {
+  PT_TEXT
+  PT_IMAGE
+  PT_VIDEO
+  PT_PRODUCT_SHARE
+  PT_JOB_POSTING
+  PT_NEWS
+  PT_ANNOUNCEMENT
+  PT_POLL
+}
+
+enum PostStatus {
+  PS_DRAFT
+  PS_SCHEDULED
+  PS_ACTIVE
+  PS_EXPIRED
+  PS_HIDDEN
+  PS_DELETED
+}
+
+enum EngagementAction {
+  EA_VIEW
+  EA_LIKE
+  EA_UNLIKE
+  EA_COMMENT
+  EA_REPLY
+  EA_SHARE
+  EA_SAVE
+  EA_UNSAVE
+  EA_CLICK
+  EA_ENQUIRY
+}
+
+enum MktOrderStatus {
+  MKT_PENDING
+  MKT_CONFIRMED
+  MKT_PROCESSING
+  MKT_SHIPPED
+  MKT_DELIVERED
+  MKT_CANCELLED
+  MKT_RETURNED
+  MKT_REFUNDED
+}
+
+enum MktPaymentStatus {
+  MPAY_PENDING
+  MPAY_PAID
+  MPAY_FAILED
+  MPAY_REFUNDED
+  MPAY_PARTIALLY_REFUNDED
+}
+
+enum EnquiryStatus {
+  ENQ_NEW
+  ENQ_RESPONDED
+  ENQ_QUOTED
+  ENQ_NEGOTIATING
+  ENQ_CONVERTED
+  ENQ_CLOSED
+  ENQ_SPAM
+}
+
 model MarketplaceVendor {
   id              String       @id @default(uuid())
   companyName     String       @map("company_name")
+  contactName     String?      @map("contact_name")
   contactEmail    String       @unique @map("contact_email")
+  password        String?
   gstNumber       String?      @map("gst_number")
   bankAccountEnc  String?      @map("bank_account_enc") @db.Text
   revenueSharePct Decimal      @default(70) @map("revenue_share_pct") @db.Decimal(5, 2)
   status          VendorStatus @default(PENDING)
   verifiedAt      DateTime?    @map("verified_at")
+  lastLoginAt     DateTime?    @map("last_login_at")
   createdAt       DateTime     @default(now()) @map("created_at")
   updatedAt       DateTime     @updatedAt @map("updated_at")
 
@@ -7918,4 +8191,515 @@ model HelpArticle {
   @@index([moduleCode, screenCode, fieldCode])
   @@index([helpType, isPublished])
   @@map("help_articles")
+}
+
+// ═══════════════════════════════════════════════════════
+// PLUGIN ARCHITECTURE
+// ═══════════════════════════════════════════════════════
+
+enum PluginCategory {
+  COMMUNICATION
+  PAYMENT
+  CALENDAR
+  TELEPHONY
+  STORAGE
+  AI
+  MARKETING
+  ANALYTICS
+}
+
+enum PluginStatus {
+  PLUGIN_ACTIVE
+  PLUGIN_INACTIVE
+  PLUGIN_DEPRECATED
+  PLUGIN_BETA
+}
+
+enum TenantPluginStatus {
+  TP_ACTIVE
+  TP_INACTIVE
+  TP_ERROR
+  TP_PENDING_SETUP
+}
+
+model PluginRegistry {
+  id              String         @id @default(uuid())
+
+  // Identification
+  code            String         @unique
+  name            String
+  description     String?        @db.Text
+  category        PluginCategory
+  version         String         @default("1.0.0")
+  status          PluginStatus   @default(PLUGIN_ACTIVE)
+
+  // Config schema — defines credential/setting fields
+  configSchema    Json           @map("config_schema")
+
+  // Hook points this plugin can respond to
+  hookPoints      String[]       @default([]) @map("hook_points")
+
+  // Menu codes to show when plugin is enabled
+  menuCodes       String[]       @default([]) @map("menu_codes")
+
+  // OAuth config (if applicable)
+  oauthConfig     Json?          @map("oauth_config")
+
+  // Webhook config
+  webhookConfig   Json?          @map("webhook_config")
+
+  // Documentation
+  iconUrl         String?        @map("icon_url")
+  setupGuideUrl   String?        @map("setup_guide_url")
+  apiDocsUrl      String?        @map("api_docs_url")
+
+  // Pricing
+  isPremium       Boolean        @default(false) @map("is_premium")
+  monthlyPrice    Decimal?       @map("monthly_price") @db.Decimal(10, 2)
+
+  // Metadata
+  sortOrder       Int            @default(0) @map("sort_order")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  tenantPlugins   TenantPlugin[]
+
+  @@index([category, status])
+  @@map("plugin_registry")
+}
+
+model TenantPlugin {
+  id                String             @id @default(uuid())
+  tenantId          String             @map("tenant_id")
+  pluginId          String             @map("plugin_id")
+  plugin            PluginRegistry     @relation(fields: [pluginId], references: [id])
+
+  // Status
+  status            TenantPluginStatus @default(TP_PENDING_SETUP)
+  isEnabled         Boolean            @default(false) @map("is_enabled")
+  enabledAt         DateTime?          @map("enabled_at")
+  disabledAt        DateTime?          @map("disabled_at")
+
+  // Credentials (AES-256-GCM encrypted JSON)
+  credentials       String?            @db.Text
+
+  // Non-sensitive settings
+  settings          Json?
+
+  // OAuth tokens (if OAuth-based)
+  accessToken       String?            @map("access_token") @db.Text
+  refreshToken      String?            @map("refresh_token") @db.Text
+  tokenExpiresAt    DateTime?          @map("token_expires_at")
+  tokenScopes       String[]           @default([]) @map("token_scopes")
+
+  // Webhook
+  webhookUrl        String?            @map("webhook_url")
+  webhookSecret     String?            @map("webhook_secret")
+
+  // Usage & Health
+  lastUsedAt        DateTime?          @map("last_used_at")
+  lastSyncAt        DateTime?          @map("last_sync_at")
+  lastErrorAt       DateTime?          @map("last_error_at")
+  lastError         String?            @map("last_error") @db.Text
+  errorCount        Int                @default(0) @map("error_count")
+  consecutiveErrors Int                @default(0) @map("consecutive_errors")
+
+  // Quotas
+  monthlyUsage      Int                @default(0) @map("monthly_usage")
+  monthlyLimit      Int?               @map("monthly_limit")
+  usageResetAt      DateTime?          @map("usage_reset_at")
+
+  // Audit
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+  createdById       String?            @map("created_by_id")
+  updatedById       String?            @map("updated_by_id")
+
+  @@unique([tenantId, pluginId])
+  @@index([tenantId, status])
+  @@index([pluginId])
+  @@map("tenant_plugins")
+}
+
+model PluginHookLog {
+  id              String   @id @default(uuid())
+  tenantId        String   @map("tenant_id")
+  pluginId        String   @map("plugin_id")
+
+  // Event info
+  hookPoint       String   @map("hook_point")
+  entityType      String?  @map("entity_type")
+  entityId        String?  @map("entity_id")
+
+  // Execution
+  status          String   // SUCCESS, FAILED, SKIPPED
+  durationMs      Int?     @map("duration_ms")
+
+  // Request/Response
+  requestPayload  Json?    @map("request_payload")
+  responsePayload Json?    @map("response_payload")
+  errorMessage    String?  @map("error_message") @db.Text
+
+  // Timestamp
+  executedAt      DateTime @default(now()) @map("executed_at")
+
+  @@index([tenantId, hookPoint, executedAt])
+  @@index([tenantId, pluginId, executedAt])
+  @@map("plugin_hook_logs")
+}
+
+// ─── VERIFICATION ───
+
+model VerificationOtp {
+  id              String      @id @default(uuid())
+  tenantId        String?     @map("tenant_id")
+  userId          String?     @map("user_id")
+  target          String
+  targetType      String      @map("target_type")
+  otp             String
+  purpose         OtpPurpose
+  status          OtpStatus   @default(OTP_PENDING)
+  attempts        Int         @default(0)
+  maxAttempts     Int         @default(3) @map("max_attempts")
+  expiresAt       DateTime    @map("expires_at")
+  verifiedAt      DateTime?   @map("verified_at")
+  ipAddress       String?     @map("ip_address")
+  userAgent       String?     @map("user_agent")
+  createdAt       DateTime    @default(now()) @map("created_at")
+
+  @@index([target, purpose, status])
+  @@index([userId, purpose])
+  @@index([expiresAt])
+  @@map("verification_otps")
+}
+
+model GstVerificationLog {
+  id                  String   @id @default(uuid())
+  tenantId            String   @map("tenant_id")
+  userId              String   @map("user_id")
+  gstNumber           String   @map("gst_number")
+  verificationMethod  String   @map("verification_method")
+  apiResponse         Json?    @map("api_response")
+  isValid             Boolean  @map("is_valid")
+  businessName        String?  @map("business_name")
+  businessAddress     String?  @map("business_address")
+  gstStatus           String?  @map("gst_status")
+  approvedBy          String?  @map("approved_by")
+  approvalNotes       String?  @map("approval_notes")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  @@index([tenantId, userId])
+  @@index([gstNumber])
+  @@map("gst_verification_logs")
+}
+
+// ═══════════════════════════════════════════════════════
+// MARKETPLACE FEED — Listings, Posts, Engagement, Orders
+// ═══════════════════════════════════════════════════════
+
+model MarketplaceListing {
+  id                  String          @id @default(uuid())
+  tenantId            String          @map("tenant_id")
+  vendorId            String          @map("vendor_id")
+  listingType         ListingType     @map("listing_type")
+  title               String
+  description         String?         @db.Text
+  shortDescription    String?         @map("short_description")
+  category            String?
+  subcategory         String?
+  tags                String[]        @default([])
+  mediaUrls           Json            @default("[]") @map("media_urls")
+  b2cPrice            Decimal         @map("b2c_price") @db.Decimal(12, 2)
+  compareAtPrice      Decimal?        @map("compare_at_price") @db.Decimal(12, 2)
+  currency            String          @default("INR")
+  b2bEnabled          Boolean         @default(false) @map("b2b_enabled")
+  moq                 Int             @default(1)
+  maxQtyPerOrder      Int?            @map("max_qty_per_order")
+  trackInventory      Boolean         @default(true) @map("track_inventory")
+  stockAvailable      Int             @default(0) @map("stock_available")
+  stockReserved       Int             @default(0) @map("stock_reserved")
+  lowStockThreshold   Int?            @map("low_stock_threshold")
+  visibility          VisibilityType  @default(VIS_PUBLIC)
+  visibilityConfig    Json?           @map("visibility_config")
+  maxResponses        Int?            @map("max_responses")
+  currentResponses    Int             @default(0) @map("current_responses")
+  autoCloseOnLimit    Boolean         @default(false) @map("auto_close_on_limit")
+  status              ListingStatus   @default(LST_DRAFT)
+  publishAt           DateTime?       @map("publish_at")
+  expiresAt           DateTime?       @map("expires_at")
+  expiryAction        ExpiryAction    @default(EXP_DEACTIVATE) @map("expiry_action")
+  requirementConfig   Json?           @map("requirement_config")
+  attributes          Json            @default("{}") @map("attributes")
+  shippingConfig      Json?           @map("shipping_config")
+  slug                String?         @unique
+  metaTitle           String?         @map("meta_title")
+  metaDescription     String?         @map("meta_description")
+  keywords            String[]        @default([])
+  viewCount           Int             @default(0) @map("view_count")
+  enquiryCount        Int             @default(0) @map("enquiry_count")
+  orderCount          Int             @default(0) @map("order_count")
+  isFeatured          Boolean         @default(false) @map("is_featured")
+  featuredUntil       DateTime?       @map("featured_until")
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+  publishedAt         DateTime?       @map("published_at")
+
+  priceTiers          ListingPriceTier[]
+  enquiries           MarketplaceEnquiry[]
+  orderItems          MarketplaceOrderItem[]
+  analytics           ListingAnalytics?
+
+  @@index([tenantId, status])
+  @@index([vendorId])
+  @@index([listingType, status])
+  @@index([category, subcategory])
+  @@index([status, publishAt])
+  @@index([status, expiresAt])
+  @@map("marketplace_listings")
+}
+
+model ListingPriceTier {
+  id              String              @id @default(uuid())
+  listingId       String              @map("listing_id")
+  listing         MarketplaceListing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  minQty          Int                 @map("min_qty")
+  maxQty          Int?                @map("max_qty")
+  pricePerUnit    Decimal             @map("price_per_unit") @db.Decimal(12, 2)
+  customerGrade   String?             @map("customer_grade")
+  createdAt       DateTime            @default(now()) @map("created_at")
+
+  @@unique([listingId, minQty, customerGrade])
+  @@index([listingId])
+  @@map("listing_price_tiers")
+}
+
+model MarketplacePost {
+  id                  String        @id @default(uuid())
+  tenantId            String        @map("tenant_id")
+  authorId            String        @map("author_id")
+  postType            PostType      @default(PT_TEXT) @map("post_type")
+  content             String?       @db.Text
+  mediaUrls           Json          @default("[]") @map("media_urls")
+  linkedListingId     String?       @map("linked_listing_id")
+  visibility          VisibilityType @default(VIS_PUBLIC)
+  visibilityConfig    Json?         @map("visibility_config")
+  status              PostStatus    @default(PS_DRAFT)
+  publishAt           DateTime?     @map("publish_at")
+  expiresAt           DateTime?     @map("expires_at")
+  expiryAction        ExpiryAction  @default(EXP_DEACTIVATE) @map("expiry_action")
+  viewCount           Int           @default(0) @map("view_count")
+  likeCount           Int           @default(0) @map("like_count")
+  commentCount        Int           @default(0) @map("comment_count")
+  shareCount          Int           @default(0) @map("share_count")
+  saveCount           Int           @default(0) @map("save_count")
+  hashtags            String[]      @default([])
+  mentions            String[]      @default([])
+  pollConfig          Json?         @map("poll_config")
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+  publishedAt         DateTime?     @map("published_at")
+
+  engagements         PostEngagement[]
+  comments            PostComment[]
+  analytics           PostAnalytics?
+
+  @@index([tenantId, status, createdAt])
+  @@index([authorId])
+  @@index([status, publishAt])
+  @@index([status, expiresAt])
+  @@map("marketplace_posts")
+}
+
+model PostEngagement {
+  id              String            @id @default(uuid())
+  tenantId        String            @map("tenant_id")
+  postId          String            @map("post_id")
+  post            MarketplacePost   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId          String            @map("user_id")
+  action          EngagementAction
+  sharedTo        String?           @map("shared_to")
+  city            String?
+  state           String?
+  pincode         String?
+  deviceType      String?           @map("device_type")
+  createdAt       DateTime          @default(now()) @map("created_at")
+
+  @@unique([postId, userId, action])
+  @@index([postId, action])
+  @@index([tenantId, createdAt])
+  @@index([userId])
+  @@map("post_engagements")
+}
+
+model PostComment {
+  id              String            @id @default(uuid())
+  tenantId        String            @map("tenant_id")
+  postId          String            @map("post_id")
+  post            MarketplacePost   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId          String            @map("user_id")
+  content         String            @db.Text
+  parentId        String?           @map("parent_id")
+  parent          PostComment?      @relation("CommentReplies", fields: [parentId], references: [id])
+  replies         PostComment[]     @relation("CommentReplies")
+  likeCount       Int               @default(0) @map("like_count")
+  isEdited        Boolean           @default(false) @map("is_edited")
+  isDeleted       Boolean           @default(false) @map("is_deleted")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  @@index([postId, createdAt])
+  @@index([userId])
+  @@index([parentId])
+  @@map("post_comments")
+}
+
+model MarketplaceEnquiry {
+  id                  String              @id @default(uuid())
+  enquiryNumber       String              @unique @map("enquiry_number")
+  tenantId            String              @map("tenant_id")
+  vendorId            String              @map("vendor_id")
+  listingId           String              @map("listing_id")
+  listing             MarketplaceListing  @relation(fields: [listingId], references: [id])
+  listingTitle        String              @map("listing_title")
+  buyerId             String              @map("buyer_id")
+  buyerName           String              @map("buyer_name")
+  buyerEmail          String?             @map("buyer_email")
+  buyerPhone          String?             @map("buyer_phone")
+  buyerCompany        String?             @map("buyer_company")
+  buyerVerified       Boolean             @default(false) @map("buyer_verified")
+  quantity            Int?
+  budget              Decimal?            @db.Decimal(12, 2)
+  timeline            String?
+  message             String?             @db.Text
+  specifications      Json?
+  status              EnquiryStatus       @default(ENQ_NEW)
+  messages            Json                @default("[]")
+  unreadCountBuyer    Int                 @default(0) @map("unread_count_buyer")
+  unreadCountVendor   Int                 @default(0) @map("unread_count_vendor")
+  lastMessageAt       DateTime?           @map("last_message_at")
+  leadId              String?             @map("lead_id")
+  leadCreatedAt       DateTime?           @map("lead_created_at")
+  quotationId         String?             @map("quotation_id")
+  quotedPrice         Decimal?            @map("quoted_price") @db.Decimal(12, 2)
+  quotedAt            DateTime?           @map("quoted_at")
+  convertedToOrderId  String?             @map("converted_to_order_id")
+  convertedAt         DateTime?           @map("converted_at")
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
+
+  @@index([tenantId, status])
+  @@index([vendorId, status])
+  @@index([buyerId])
+  @@index([listingId])
+  @@index([leadId])
+  @@map("marketplace_enquiries")
+}
+
+model MarketplaceOrder {
+  id                  String            @id @default(uuid())
+  orderNumber         String            @unique @map("order_number")
+  tenantId            String            @map("tenant_id")
+  vendorId            String            @map("vendor_id")
+  buyerId             String            @map("buyer_id")
+  subtotal            Decimal           @db.Decimal(12, 2)
+  discountAmount      Decimal           @default(0) @map("discount_amount") @db.Decimal(12, 2)
+  discountCode        String?           @map("discount_code")
+  taxableAmount       Decimal           @map("taxable_amount") @db.Decimal(12, 2)
+  cgstAmount          Decimal?          @map("cgst_amount") @db.Decimal(12, 2)
+  sgstAmount          Decimal?          @map("sgst_amount") @db.Decimal(12, 2)
+  igstAmount          Decimal?          @map("igst_amount") @db.Decimal(12, 2)
+  totalTax            Decimal           @map("total_tax") @db.Decimal(12, 2)
+  shippingAmount      Decimal           @default(0) @map("shipping_amount") @db.Decimal(12, 2)
+  totalAmount         Decimal           @map("total_amount") @db.Decimal(12, 2)
+  status              MktOrderStatus    @default(MKT_PENDING)
+  statusHistory       Json              @default("[]") @map("status_history")
+  shippingAddress     Json              @map("shipping_address")
+  billingAddress      Json?             @map("billing_address")
+  trackingNumber      String?           @map("tracking_number")
+  carrier             String?
+  estimatedDelivery   DateTime?         @map("estimated_delivery")
+  deliveredAt         DateTime?         @map("delivered_at")
+  paymentMethod       String?           @map("payment_method")
+  paymentStatus       MktPaymentStatus  @default(MPAY_PENDING) @map("payment_status")
+  transactionId       String?           @map("transaction_id")
+  paidAt              DateTime?         @map("paid_at")
+  invoiceId           String?           @map("invoice_id")
+  sourceEnquiryId     String?           @map("source_enquiry_id")
+  buyerNotes          String?           @map("buyer_notes") @db.Text
+  vendorNotes         String?           @map("vendor_notes") @db.Text
+  internalNotes       String?           @map("internal_notes") @db.Text
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  items               MarketplaceOrderItem[]
+
+  @@index([tenantId, status])
+  @@index([vendorId, status])
+  @@index([buyerId])
+  @@index([orderNumber])
+  @@index([createdAt])
+  @@map("marketplace_orders")
+}
+
+model MarketplaceOrderItem {
+  id              String              @id @default(uuid())
+  orderId         String              @map("order_id")
+  order           MarketplaceOrder    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  listingId       String              @map("listing_id")
+  listing         MarketplaceListing  @relation(fields: [listingId], references: [id])
+  title           String
+  sku             String?
+  attributes      Json?
+  quantity        Int
+  unitPrice       Decimal             @map("unit_price") @db.Decimal(12, 2)
+  totalPrice      Decimal             @map("total_price") @db.Decimal(12, 2)
+  taxRate         Decimal?            @map("tax_rate") @db.Decimal(5, 2)
+  taxAmount       Decimal?            @map("tax_amount") @db.Decimal(12, 2)
+  appliedTier     String?             @map("applied_tier")
+
+  @@index([orderId])
+  @@index([listingId])
+  @@map("marketplace_order_items")
+}
+
+model ListingAnalytics {
+  id              String              @id @default(uuid())
+  listingId       String              @unique @map("listing_id")
+  listing         MarketplaceListing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  totalViews      Int                 @default(0) @map("total_views")
+  uniqueViews     Int                 @default(0) @map("unique_views")
+  totalEnquiries  Int                 @default(0) @map("total_enquiries")
+  totalOrders     Int                 @default(0) @map("total_orders")
+  totalRevenue    Decimal             @default(0) @map("total_revenue") @db.Decimal(14, 2)
+  viewToEnquiry   Decimal             @default(0) @map("view_to_enquiry") @db.Decimal(5, 2)
+  enquiryToOrder  Decimal             @default(0) @map("enquiry_to_order") @db.Decimal(5, 2)
+  dailyStats      Json                @default("[]") @map("daily_stats")
+  geoStats        Json                @default("{}") @map("geo_stats")
+  mobileViews     Int                 @default(0) @map("mobile_views")
+  desktopViews    Int                 @default(0) @map("desktop_views")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+
+  @@map("listing_analytics")
+}
+
+model PostAnalytics {
+  id              String            @id @default(uuid())
+  postId          String            @unique @map("post_id")
+  post            MarketplacePost   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  totalViews      Int               @default(0) @map("total_views")
+  uniqueViews     Int               @default(0) @map("unique_views")
+  totalLikes      Int               @default(0) @map("total_likes")
+  totalComments   Int               @default(0) @map("total_comments")
+  totalShares     Int               @default(0) @map("total_shares")
+  totalSaves      Int               @default(0) @map("total_saves")
+  engagementRate  Decimal           @default(0) @map("engagement_rate") @db.Decimal(5, 2)
+  dailyStats      Json              @default("[]") @map("daily_stats")
+  geoStats        Json              @default("{}") @map("geo_stats")
+  mobileViews     Int               @default(0) @map("mobile_views")
+  desktopViews    Int               @default(0) @map("desktop_views")
+  topEngagers     Json              @default("[]") @map("top_engagers")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  @@map("post_analytics")
 }

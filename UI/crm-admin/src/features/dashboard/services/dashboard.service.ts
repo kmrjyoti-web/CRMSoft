@@ -22,21 +22,25 @@ import type { ApiResponse } from "@/types/api-response";
 // Dashboard Service
 // ---------------------------------------------------------------------------
 
+const DASHBOARD_URL = "/api/v1/dashboard";
+const ANALYTICS_URL = "/api/v1/analytics";
+const MIS_REPORTS_URL = "/api/v1/mis-reports";
+
 export const dashboardService = {
   getExecutive(params: DashboardQueryParams) {
-    return apiClient.get<ApiResponse<ExecutiveKpis>>("/dashboard/executive", { params });
+    return apiClient.get<ApiResponse<ExecutiveKpis>>(`${DASHBOARD_URL}/executive`, { params });
   },
 
   getPipeline(params: DashboardQueryParams) {
-    return apiClient.get<ApiResponse<PipelineStage[]>>("/dashboard/pipeline", { params });
+    return apiClient.get<ApiResponse<PipelineStage[]>>(`${DASHBOARD_URL}/pipeline`, { params });
   },
 
   getFunnel(params: DashboardQueryParams) {
-    return apiClient.get<ApiResponse<FunnelStep[]>>("/dashboard/funnel", { params });
+    return apiClient.get<ApiResponse<FunnelStep[]>>(`${DASHBOARD_URL}/funnel`, { params });
   },
 
   getMyDashboard() {
-    return apiClient.get<ApiResponse<ExecutiveKpis>>("/dashboard/my");
+    return apiClient.get<ApiResponse<ExecutiveKpis>>(`${DASHBOARD_URL}/my`);
   },
 };
 
@@ -46,27 +50,27 @@ export const dashboardService = {
 
 export const analyticsService = {
   getRevenue(params: DashboardQueryParams) {
-    return apiClient.get<ApiResponse<RevenueDataPoint[]>>("/analytics/revenue", { params });
+    return apiClient.get<ApiResponse<RevenueDataPoint[]>>(`${ANALYTICS_URL}/revenue`, { params });
   },
 
   getLeadSources(params: DashboardQueryParams) {
-    return apiClient.get<ApiResponse<LeadSourceItem[]>>("/analytics/lead-sources", { params });
+    return apiClient.get<ApiResponse<LeadSourceItem[]>>(`${ANALYTICS_URL}/lead-sources`, { params });
   },
 
   getLostReasons(params: DashboardQueryParams) {
-    return apiClient.get<ApiResponse<Record<string, number>[]>>("/analytics/lost-reasons", { params });
+    return apiClient.get<ApiResponse<Record<string, number>[]>>(`${ANALYTICS_URL}/lost-reasons`, { params });
   },
 
   getActivityHeatmap(params: DashboardQueryParams) {
-    return apiClient.get<ApiResponse<unknown>>("/analytics/activity-heatmap", { params });
+    return apiClient.get<ApiResponse<unknown>>(`${ANALYTICS_URL}/activity-heatmap`, { params });
   },
 
   getAging(params: DashboardQueryParams) {
-    return apiClient.get<ApiResponse<unknown>>("/analytics/aging", { params });
+    return apiClient.get<ApiResponse<unknown>>(`${ANALYTICS_URL}/aging`, { params });
   },
 
   getVelocity(params: DashboardQueryParams) {
-    return apiClient.get<ApiResponse<unknown>>("/analytics/velocity", { params });
+    return apiClient.get<ApiResponse<unknown>>(`${ANALYTICS_URL}/velocity`, { params });
   },
 };
 
@@ -76,32 +80,32 @@ export const analyticsService = {
 
 export const reportsService = {
   getDefinitions(category?: string) {
-    return apiClient.get<ApiResponse<ReportDefinition[]>>("/mis-reports/definitions", {
+    return apiClient.get<ApiResponse<ReportDefinition[]>>(`${MIS_REPORTS_URL}/definitions`, {
       params: category ? { category } : undefined,
     });
   },
 
   getDefinition(code: string) {
-    return apiClient.get<ApiResponse<ReportDefinition>>(`/mis-reports/definitions/${code}`);
+    return apiClient.get<ApiResponse<ReportDefinition>>(`${MIS_REPORTS_URL}/definitions/${code}`);
   },
 
   generate(code: string, params: GenerateReportParams) {
-    return apiClient.post<ApiResponse<ReportResult>>(`/mis-reports/generate/${code}`, params);
+    return apiClient.post<ApiResponse<ReportResult>>(`${MIS_REPORTS_URL}/generate/${code}`, params);
   },
 
   export(code: string, params: ExportReportParams) {
-    return apiClient.post<ApiResponse<{ exportId: string }>>(`/mis-reports/export/${code}`, params);
+    return apiClient.post<ApiResponse<{ exportId: string }>>(`${MIS_REPORTS_URL}/export/${code}`, params);
   },
 
   drillDown(code: string, params: DrillDownParams) {
-    return apiClient.post<ApiResponse<ReportResult>>(`/mis-reports/drill-down/${code}`, params);
+    return apiClient.post<ApiResponse<ReportResult>>(`${MIS_REPORTS_URL}/drill-down/${code}`, params);
   },
 
   getExportHistory(params?: ExportHistoryParams) {
-    return apiClient.get<ApiResponse<ExportHistoryItem[]>>("/mis-reports/exports", { params });
+    return apiClient.get<ApiResponse<ExportHistoryItem[]>>(`${MIS_REPORTS_URL}/exports`, { params });
   },
 
   downloadExport(id: string) {
-    return apiClient.get<Blob>(`/mis-reports/exports/${id}/download`, { responseType: "blob" });
+    return apiClient.get<Blob>(`${MIS_REPORTS_URL}/exports/${id}/download`, { responseType: "blob" });
   },
 };

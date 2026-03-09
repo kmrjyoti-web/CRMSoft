@@ -4,7 +4,7 @@ import { NotificationPrefService } from '../services/notification-pref.service';
 import { UpdateNotifPrefDto, BulkUpdateNotifPrefDto } from './dto/update-notif-pref.dto';
 
 @ApiTags('Settings - Notification Preferences')
-@Controller('api/v1/settings/notifications')
+@Controller('settings/notifications')
 export class NotificationPrefController {
   constructor(private readonly service: NotificationPrefService) {}
 

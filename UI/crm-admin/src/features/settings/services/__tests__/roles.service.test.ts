@@ -25,14 +25,14 @@ describe("rolesService", () => {
 
   it("getAll calls GET /roles with params", async () => {
     await rolesService.getAll({ page: 1, limit: 10, search: "admin" });
-    expect(apiClient.get).toHaveBeenCalledWith("/roles", {
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/roles", {
       params: { page: 1, limit: 10, search: "admin" },
     });
   });
 
   it("getById calls GET /roles/:id", async () => {
     await rolesService.getById("role-123");
-    expect(apiClient.get).toHaveBeenCalledWith("/roles/role-123");
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/roles/role-123");
   });
 
   it("create sends POST /roles", async () => {
@@ -42,12 +42,12 @@ describe("rolesService", () => {
       description: "Manager role",
     };
     await rolesService.create(payload);
-    expect(apiClient.post).toHaveBeenCalledWith("/roles", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/roles", payload);
   });
 
   it("update sends PUT /roles/:id (not PATCH)", async () => {
     const payload = { displayName: "Senior Manager" };
     await rolesService.update("role-123", payload);
-    expect(apiClient.put).toHaveBeenCalledWith("/roles/role-123", payload);
+    expect(apiClient.put).toHaveBeenCalledWith("/api/v1/roles/role-123", payload);
   });
 });

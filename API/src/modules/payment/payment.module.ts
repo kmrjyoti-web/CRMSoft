@@ -6,6 +6,7 @@ import { SettingsModule } from '../settings/settings.module';
 import { GstCalculatorService } from './services/gst-calculator.service';
 import { AmountInWordsService } from './services/amount-in-words.service';
 import { InvoiceService } from './services/invoice.service';
+import { ProformaInvoiceService } from './services/proforma-invoice.service';
 import { RazorpayGatewayService } from './services/razorpay-gateway.service';
 import { StripeGatewayService } from './services/stripe-gateway.service';
 import { PaymentGatewayFactoryService } from './services/payment-gateway-factory.service';
@@ -19,6 +20,7 @@ import { PaymentSeederService } from './services/payment-seeder.service';
 
 // ── Controllers ──
 import { InvoiceController } from './presentation/invoice.controller';
+import { ProformaInvoiceController } from './presentation/proforma-invoice.controller';
 import { PaymentController } from './presentation/payment.controller';
 import { ReceiptController } from './presentation/receipt.controller';
 import { RefundController } from './presentation/refund.controller';
@@ -31,6 +33,7 @@ import { PaymentWebhookController } from './presentation/payment-webhook.control
     GstCalculatorService,
     AmountInWordsService,
     InvoiceService,
+    ProformaInvoiceService,
     RazorpayGatewayService,
     StripeGatewayService,
     PaymentGatewayFactoryService,
@@ -44,6 +47,7 @@ import { PaymentWebhookController } from './presentation/payment-webhook.control
   ],
   controllers: [
     InvoiceController,
+    ProformaInvoiceController,
     PaymentController,
     ReceiptController,
     RefundController,
@@ -52,6 +56,7 @@ import { PaymentWebhookController } from './presentation/payment-webhook.control
   ],
   exports: [
     InvoiceService,
+    ProformaInvoiceService,
     PaymentService,
     GstCalculatorService,
     AmountInWordsService,

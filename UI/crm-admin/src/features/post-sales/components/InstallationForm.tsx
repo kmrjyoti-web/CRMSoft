@@ -13,6 +13,8 @@ import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
 
+import { useSidePanelStore } from "@/stores/side-panel.store";
+
 import {
   useInstallationDetail,
   useCreateInstallation,
@@ -49,15 +51,20 @@ type InstallationFormValues = z.infer<typeof installationSchema>;
 
 interface InstallationFormProps {
   installationId?: string;
+  mode?: "page" | "panel";
+  panelId?: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export function InstallationForm({ installationId }: InstallationFormProps) {
+export function InstallationForm({ installationId, mode = "page", panelId, onSuccess, onCancel }: InstallationFormProps) {
   const router = useRouter();
   const isEdit = !!installationId;
+  const updatePanelConfig = useSidePanelStore((s) => s.updatePanelConfig);
 
   // -- Queries & Mutations --------------------------------------------------
   const { data: installationData, isLoading: isLoadingInstallation } =
@@ -121,11 +128,19 @@ export function InstallationForm({ installationId }: InstallationFormProps) {
       if (isEdit && installationId) {
         await updateMutation.mutateAsync({ id: installationId, data: values });
         toast.success("Installation updated");
-        router.push(`/post-sales/installations/${installationId}`);
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push(`/post-sales/installations/${installationId}`);
+        }
       } else {
         await createMutation.mutateAsync(values);
         toast.success("Installation created");
-        router.push("/post-sales/installations");
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push("/post-sales/installations");
+        }
       }
     } catch {
       toast.error(
@@ -136,23 +151,65 @@ export function InstallationForm({ installationId }: InstallationFormProps) {
     }
   };
 
+  // -- Panel footer sync ----------------------------------------------------
+  const isPanel = mode === "panel";
+
+  useEffect(() => {
+    if (!panelId) return;
+    updatePanelConfig(panelId, {
+      footerButtons: [
+        {
+          id: "cancel",
+          label: "Cancel",
+          showAs: "text",
+          variant: "secondary",
+          disabled: isSubmitting,
+          onClick: () => {},
+        },
+        {
+          id: "save",
+          label: isSubmitting
+            ? isEdit
+              ? "Updating..."
+              : "Saving..."
+            : isEdit
+              ? "Save Changes"
+              : "Save",
+          icon: "check",
+          showAs: "both",
+          variant: "primary",
+          loading: isSubmitting,
+          disabled: isSubmitting,
+          onClick: () => {
+            const formId = `sp-form-installation-${installationId ?? "new"}`;
+            const form = document.getElementById(formId) as HTMLFormElement | null;
+            form?.requestSubmit();
+          },
+        },
+      ],
+    });
+  }, [isSubmitting, panelId, isEdit, installationId, updatePanelConfig]);
+
   // -- Loading state --------------------------------------------------------
   if (isEdit && isLoadingInstallation) return <LoadingSpinner fullPage />;
 
   // -- Render ---------------------------------------------------------------
   return (
-    <div className="p-6" style={{ position: "relative" }}>
+    <div className={isPanel ? "p-4" : "p-6"} style={{ position: "relative" }}>
       <FormSubmitOverlay isSubmitting={isSubmitting} isEdit={isEdit} />
-      <PageHeader
-        title={isEdit ? "Edit Installation" : "New Installation"}
-        actions={
-          <Button variant="outline" onClick={() => router.back()}>
-            <Icon name="arrow-left" size={16} /> Back
-          </Button>
-        }
-      />
+      {!isPanel && (
+        <PageHeader
+          title={isEdit ? "Edit Installation" : "New Installation"}
+          actions={
+            <Button variant="outline" onClick={() => router.back()}>
+              <Icon name="arrow-left" size={16} /> Back
+            </Button>
+          }
+        />
+      )}
 
       <form
+        id={isPanel ? `sp-form-installation-${installationId ?? "new"}` : undefined}
         onSubmit={handleSubmit(onSubmit)}
         noValidate
         className="mt-4 max-w-5xl space-y-6"
@@ -456,19 +513,21 @@ export function InstallationForm({ installationId }: InstallationFormProps) {
         {/* ----------------------------------------------------------------
             Actions
         ---------------------------------------------------------------- */}
-        <div className="flex gap-3 pt-2">
-          <Button
-            type="submit"
-            variant="primary"
-            loading={isSubmitting}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
-          </Button>
-          <Button type="button" variant="outline" onClick={() => router.back()}>
-            Cancel
-          </Button>
-        </div>
+        {!isPanel && (
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => router.back()}>
+              Cancel
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   );

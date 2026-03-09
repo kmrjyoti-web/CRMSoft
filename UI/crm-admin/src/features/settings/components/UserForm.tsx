@@ -1,23 +1,23 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-
 import { useRouter } from "next/navigation";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
 
 import { Button, Icon, Input, MobileInput, SelectInput, Switch, Fieldset } from "@/components/ui";
-
 import { FormErrors } from "@/components/common/FormErrors";
 import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
+import { useSidePanelStore } from "@/stores/side-panel.store";
 
 import { useRolesList } from "../hooks/useRoles";
 import { useUserDetail, useCreateUser, useUpdateUser } from "../hooks/useUsers";
+import { useDepartmentsList } from "../hooks/useDepartments";
+import { useDesignationsList } from "../hooks/useDesignations";
 
 // ── Validation Schema ────────────────────────────────────
 
@@ -29,6 +29,8 @@ const userSchema = z.object({
   phone: z.string().optional(),
   userType: z.string().min(1, "User type is required"),
   roleId: z.string().min(1, "Role is required"),
+  departmentId: z.string().optional(),
+  designationId: z.string().optional(),
   isActive: z.boolean().optional(),
 });
 
@@ -43,25 +45,44 @@ const USER_TYPE_OPTIONS = [
 
 interface UserFormProps {
   userId?: string;
+  mode?: "page" | "panel";
+  panelId?: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 // ── Component ────────────────────────────────────────────
 
-export function UserForm({ userId }: UserFormProps) {
+export function UserForm({ userId, mode = "page", panelId, onSuccess, onCancel }: UserFormProps) {
   const router = useRouter();
   const isEdit = !!userId;
+  const updatePanelConfig = useSidePanelStore((s) => s.updatePanelConfig);
 
-  const { data: userData, isLoading: isLoadingUser } = useUserDetail(
-    userId ?? "",
-  );
+  const { data: userData, isLoading: isLoadingUser } = useUserDetail(userId ?? "");
   const { data: rolesData } = useRolesList();
+  const { data: deptsData } = useDepartmentsList({ limit: 10000 });
+  const { data: desigsData } = useDesignationsList({ limit: 10000 });
   const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();
 
+  // Build dropdown options
   const roleOptions = useMemo(() => {
-    const roles = rolesData?.data ?? [];
-    return roles.map((r) => ({ label: r.displayName, value: r.id }));
+    const raw = rolesData?.data;
+    const roles = Array.isArray(raw) ? raw : (raw as any)?.data ?? [];
+    return roles.map((r: any) => ({ label: r.displayName, value: r.id }));
   }, [rolesData]);
+
+  const departmentOptions = useMemo(() => {
+    const list = deptsData?.data ?? [];
+    const items = Array.isArray(list) ? list : (list as any)?.data ?? [];
+    return items.map((d: any) => ({ label: d.displayName || d.name, value: d.id }));
+  }, [deptsData]);
+
+  const designationOptions = useMemo(() => {
+    const list = desigsData?.data ?? [];
+    const items = Array.isArray(list) ? list : (list as any)?.data ?? [];
+    return items.map((d: any) => ({ label: d.name, value: d.id }));
+  }, [desigsData]);
 
   const {
     control,
@@ -69,7 +90,7 @@ export function UserForm({ userId }: UserFormProps) {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<UserFormValues>({
-    resolver: zodResolver(userSchema),
+    resolver: zodResolver(userSchema) as any,
     defaultValues: {
       email: "",
       password: "",
@@ -78,6 +99,8 @@ export function UserForm({ userId }: UserFormProps) {
       phone: "",
       userType: "EMPLOYEE",
       roleId: "",
+      departmentId: "",
+      designationId: "",
       isActive: true,
     },
   });
@@ -85,7 +108,8 @@ export function UserForm({ userId }: UserFormProps) {
   // Pre-populate in edit mode
   useEffect(() => {
     if (!isEdit || !userData?.data) return;
-    const u = userData.data;
+    const raw = userData.data;
+    const u = (raw as any)?.email ? raw : (raw as any)?.data ?? raw;
     reset({
       email: u.email,
       password: undefined,
@@ -94,9 +118,42 @@ export function UserForm({ userId }: UserFormProps) {
       phone: u.phone ?? "",
       userType: u.userType,
       roleId: u.roleId,
+      departmentId: u.departmentId ?? "",
+      designationId: u.designationId ?? "",
       isActive: u.status === "ACTIVE",
     });
   }, [isEdit, userData, reset]);
+
+  // Sync isSubmitting → panel footer button
+  useEffect(() => {
+    if (!panelId) return;
+    updatePanelConfig(panelId, {
+      footerButtons: [
+        {
+          id: "cancel",
+          label: "Cancel",
+          showAs: "text",
+          variant: "secondary",
+          disabled: isSubmitting,
+          onClick: () => {},
+        },
+        {
+          id: "save",
+          label: isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Save Changes" : "Save",
+          icon: "check",
+          showAs: "both",
+          variant: "primary",
+          loading: isSubmitting,
+          disabled: isSubmitting,
+          onClick: () => {
+            const formId = `sp-form-user-${userId ?? "new"}`;
+            const form = document.getElementById(formId) as HTMLFormElement | null;
+            form?.requestSubmit();
+          },
+        },
+      ],
+    });
+  }, [isSubmitting, panelId, isEdit, userId, updatePanelConfig]);
 
   const onSubmit = async (values: UserFormValues) => {
     try {
@@ -108,11 +165,17 @@ export function UserForm({ userId }: UserFormProps) {
             lastName: values.lastName,
             phone: values.phone || undefined,
             roleId: values.roleId,
+            departmentId: values.departmentId || undefined,
+            designationId: values.designationId || undefined,
             status: values.isActive ? "ACTIVE" : "INACTIVE",
           },
         });
         toast.success("User updated");
-        router.push("/settings/users");
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push("/settings/users");
+        }
       } else {
         await createMutation.mutateAsync({
           email: values.email,
@@ -122,9 +185,15 @@ export function UserForm({ userId }: UserFormProps) {
           phone: values.phone || undefined,
           userType: values.userType as "ADMIN" | "EMPLOYEE",
           roleId: values.roleId,
+          departmentId: values.departmentId || undefined,
+          designationId: values.designationId || undefined,
         });
         toast.success("User created");
-        router.push("/settings/users");
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push("/settings/users");
+        }
       }
     } catch (err: unknown) {
       const message =
@@ -136,25 +205,30 @@ export function UserForm({ userId }: UserFormProps) {
 
   if (isEdit && isLoadingUser) return <LoadingSpinner fullPage />;
 
-  return (
-    <div className="p-6" style={{ position: "relative" }}>
-      <FormSubmitOverlay isSubmitting={isSubmitting} isEdit={isEdit} />
-      <PageHeader
-        title={isEdit ? "Edit User" : "New User"}
-        actions={
-          <Button variant="outline" onClick={() => router.back()}>
-            <Icon name="arrow-left" size={16} /> Back
-          </Button>
-        }
-      />
+  const isPanel = mode === "panel";
 
-      <FormErrors errors={errors} />
+  return (
+    <div className={isPanel ? "p-4" : "p-6 max-w-3xl mx-auto"} style={{ position: "relative" }}>
+      <FormSubmitOverlay isSubmitting={isSubmitting} isEdit={isEdit} />
+      {!isPanel && (
+        <PageHeader
+          title={isEdit ? "Edit User" : "New User"}
+          actions={
+            <Button variant="outline" onClick={() => router.back()}>
+              <Icon name="arrow-left" size={16} /> Back
+            </Button>
+          }
+        />
+      )}
 
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        id={isPanel ? `sp-form-user-${userId ?? "new"}` : undefined}
+        onSubmit={(handleSubmit as any)(onSubmit)}
         noValidate
-        className="mt-4 max-w-3xl space-y-6"
+        className={`${isPanel ? "mt-2" : "mt-4"} space-y-6`}
       >
+        <FormErrors errors={errors} />
+
         {/* User Information */}
         <Fieldset label="User Information">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -162,57 +236,50 @@ export function UserForm({ userId }: UserFormProps) {
               name="firstName"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    First Name <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    placeholder="First Name"
-                    value={field.value}
-                    onChange={field.onChange}
-                    error={!!errors.firstName}
-                    errorMessage={errors.firstName?.message}
-                  />
-                </div>
+                <Input
+                  label="First Name"
+                  required
+                  leftIcon={<Icon name="user" size={16} />}
+                  placeholder="First name"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={!!errors.firstName}
+                  errorMessage={errors.firstName?.message}
+                />
               )}
             />
             <Controller
               name="lastName"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Last Name <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    placeholder="Last Name"
-                    value={field.value}
-                    onChange={field.onChange}
-                    error={!!errors.lastName}
-                    errorMessage={errors.lastName?.message}
-                  />
-                </div>
+                <Input
+                  label="Last Name"
+                  required
+                  leftIcon={<Icon name="user" size={16} />}
+                  placeholder="Last name"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={!!errors.lastName}
+                  errorMessage={errors.lastName?.message}
+                />
               )}
             />
             <Controller
               name="email"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Email <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    type="email"
-                    placeholder="Email"
-                    value={field.value}
-                    onChange={field.onChange}
-                    disabled={isEdit}
-                    error={!!errors.email}
-                    errorMessage={errors.email?.message}
-                    leftIcon={<Icon name="mail" size={18} />}
-                  />
-                </div>
+                <Input
+                  label="Email"
+                  required
+                  type="email"
+                  leftIcon={<Icon name="mail" size={16} />}
+                  placeholder="Email address"
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isEdit}
+                  error={!!errors.email}
+                  errorMessage={errors.email?.message}
+                />
               )}
             />
             {!isEdit && (
@@ -220,20 +287,17 @@ export function UserForm({ userId }: UserFormProps) {
                 name="password"
                 control={control}
                 render={({ field }) => (
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">
-                      Password <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                      type="password"
-                      placeholder="Password"
-                      value={field.value ?? ""}
-                      onChange={field.onChange}
-                      error={!!errors.password}
-                      errorMessage={errors.password?.message}
-                      leftIcon={<Icon name="lock" size={18} />}
-                    />
-                  </div>
+                  <Input
+                    label="Password"
+                    required
+                    type="password"
+                    leftIcon={<Icon name="lock" size={16} />}
+                    placeholder="Min 8 characters"
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    error={!!errors.password}
+                    errorMessage={errors.password?.message}
+                  />
                 )}
               />
             )}
@@ -252,20 +316,38 @@ export function UserForm({ userId }: UserFormProps) {
           </div>
         </Fieldset>
 
-        {/* Role & Access */}
-        <Fieldset label="Role & Access">
+        {/* Department, Designation & Role */}
+        <Fieldset label="Department, Designation & Role">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Controller
-              name="userType"
+              name="departmentId"
               control={control}
               render={({ field }) => (
                 <SelectInput
-                  label="User Type"
-                  options={USER_TYPE_OPTIONS}
-                  value={field.value}
-                  onChange={(v) => field.onChange(v ?? "")}
-                  error={!!errors.userType}
-                  errorMessage={errors.userType?.message}
+                  label="Department"
+                  options={departmentOptions}
+                  value={field.value || null}
+                  onChange={(v) => field.onChange(String(v ?? ""))}
+                  placeholder="Select department..."
+                  leftIcon={<Icon name="building-2" size={16} />}
+                  searchable
+                  clearable
+                />
+              )}
+            />
+            <Controller
+              name="designationId"
+              control={control}
+              render={({ field }) => (
+                <SelectInput
+                  label="Designation"
+                  options={designationOptions}
+                  value={field.value || null}
+                  onChange={(v) => field.onChange(String(v ?? ""))}
+                  placeholder="Select designation..."
+                  leftIcon={<Icon name="briefcase" size={16} />}
+                  searchable
+                  clearable
                 />
               )}
             />
@@ -278,8 +360,25 @@ export function UserForm({ userId }: UserFormProps) {
                   options={roleOptions}
                   value={field.value}
                   onChange={(v) => field.onChange(v ?? "")}
+                  leftIcon={<Icon name="shield" size={16} />}
+                  searchable
                   error={!!errors.roleId}
                   errorMessage={errors.roleId?.message}
+                />
+              )}
+            />
+            <Controller
+              name="userType"
+              control={control}
+              render={({ field }) => (
+                <SelectInput
+                  label="User Type"
+                  options={USER_TYPE_OPTIONS}
+                  value={field.value}
+                  onChange={(v) => field.onChange(v ?? "")}
+                  leftIcon={<Icon name="users" size={16} />}
+                  error={!!errors.userType}
+                  errorMessage={errors.userType?.message}
                 />
               )}
             />
@@ -299,21 +398,24 @@ export function UserForm({ userId }: UserFormProps) {
           </div>
         </Fieldset>
 
-        {/* Submit */}
-        <div className="flex gap-3 pt-2">
-          <Button
-            type="submit"
-            variant="primary"
-            loading={isSubmitting}
-            disabled={isSubmitting}
-          >
-            <Icon name="check" size={16} />{" "}
-            {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
-          </Button>
-          <Button variant="outline" onClick={() => router.back()}>
-            Cancel
-          </Button>
-        </div>
+        {/* Submit — hidden in panel mode (footer handles it) */}
+        {!isPanel && (
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            >
+              {isSubmitting
+                ? isEdit ? "Updating..." : "Saving..."
+                : isEdit ? "Update" : "Save"}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => router.back()}>
+              Cancel
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   );

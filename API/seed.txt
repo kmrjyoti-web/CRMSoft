@@ -1,0 +1,633 @@
+================================================================================
+                        CRM-SOFT — COMPLETE SEED DATA REFERENCE
+================================================================================
+
+Run Command:  npx prisma db seed
+              (or: ts-node prisma/seed.ts)
+
+================================================================================
+ 1. PLANS (Global — No Tenant)
+================================================================================
+
+| Plan       | Code       | Price (INR) | Max Users | Max Contacts | Max Leads | Max Products | Max Storage (MB) | Features                                                                     |
+|------------|------------|-------------|-----------|--------------|-----------|--------------|------------------|------------------------------------------------------------------------------|
+| Free       | FREE       |           0 |         3 |          100 |        50 |           20 |              100 | -                                                                            |
+| Starter    | STARTER    |         999 |        10 |        1,000 |       500 |          100 |            1,024 | BULK_IMPORT, BULK_EXPORT                                                     |
+| Business   | BUSINESS   |       2,999 |        50 |       10,000 |     5,000 |          500 |            5,120 | BULK_IMPORT, BULK_EXPORT, DOCUMENTS, WORKFLOWS, CUSTOM_FIELDS, EMAIL_INTEGRATION |
+| Enterprise | ENTERPRISE |       9,999 |       500 |      100,000 |    50,000 |        5,000 |           51,200 | WHATSAPP, EMAIL, BULK_IMPORT, BULK_EXPORT, DOCUMENTS, WORKFLOWS, QUOTATION_AI, ADVANCED_REPORTS, CUSTOM_FIELDS, API_ACCESS |
+
+
+================================================================================
+ 2. TENANTS
+================================================================================
+
+──── DEFAULT TENANT ────
+  Name:          Default Organization
+  Slug:          default
+  Status:        ACTIVE
+  Onboarding:    COMPLETED
+  Plan:          ENTERPRISE
+
+──── DEMO TENANT 1: SHARMA ENTERPRISES ────
+  Name:          Sharma Enterprises Pvt Ltd
+  Slug:          sharma-enterprises
+  Status:        ACTIVE
+  Onboarding:    COMPLETED
+  Plan:          ENTERPRISE
+  Legal Name:    Sharma Enterprises Private Limited
+  Industry:      Industrial Equipment
+  GSTIN:         27AABCS1234A1Z5
+  PAN:           AABCS1234A
+  Contact:       Rajesh Sharma | rajesh@sharmaenterprises.com | +91-20-12345678
+  Address:       123, Industrial Area, Phase 2, Pune, Maharashtra 411001
+
+──── DEMO TENANT 2: MUMBAI DISTRIBUTORS ────
+  Name:          Mumbai Distributors
+  Slug:          mumbai-distributors
+  Status:        ACTIVE
+  Onboarding:    COMPLETED
+  Plan:          BUSINESS
+  Legal Name:    Mumbai Distributors LLP
+  Industry:      FMCG Distribution
+  GSTIN:         27AABCM5678B1Z3
+  PAN:           AABCM5678B
+  Contact:       Arun Desai | arun@mumbaidistributors.com | +91-22-87654321
+  Address:       456, Commerce Center, Mumbai, Maharashtra 400001
+
+──── DEMO TENANT 3: TECHSERVE SOLUTIONS ────
+  Name:          TechServe Solutions
+  Slug:          techserve-solutions
+  Status:        ACTIVE
+  Onboarding:    COMPLETED
+  Plan:          STARTER
+  Legal Name:    TechServe Solutions Pvt Ltd
+  Industry:      IT Services
+  GSTIN:         29AABCT9012C1Z1
+  PAN:           AABCT9012C
+  Contact:       Sanjay Kapoor | sanjay@techserve.in | +91-80-11223344
+  Address:       789, Tech Park, Whitefield, Bangalore, Karnataka 560066
+
+
+================================================================================
+ 3. SUPER ADMIN (Separate Table — No Tenant)
+================================================================================
+
+  Email:         platform@crm.com
+  Password:      SuperAdmin@123
+  Name:          Platform Admin
+
+
+================================================================================
+ 4. ROLES (Per Tenant)
+================================================================================
+
+──── DEFAULT TENANT ROLES (12) ────
+
+| # | Role Name         | Display Name       | Level | System | Can Manage Levels |
+|---|-------------------|--------------------|-------|--------|-------------------|
+| 1 | SUPER_ADMIN       | Super Admin        |     0 | Yes    | [1,2,3,4,5,6]     |
+| 2 | ADMIN             | Admin              |     1 | Yes    | [2,3,4,5,6]       |
+| 3 | MANAGER           | Manager            |     2 | No     | [3,4,5]           |
+| 4 | TEAM_LEAD         | Team Lead          |     3 | No     | [4,5]             |
+| 5 | SALES_EXECUTIVE   | Sales Executive    |     4 | No     | []                |
+| 6 | MARKETING_STAFF   | Marketing Staff    |     4 | No     | []                |
+| 7 | SUPPORT_AGENT     | Support Agent      |     4 | No     | []                |
+| 8 | ACCOUNT_MANAGER   | Account Manager    |     4 | No     | []                |
+| 9 | TELECALLER        | Telecaller         |     5 | No     | []                |
+|10 | CUSTOMER          | Customer           |     5 | No     | []                |
+|11 | REFERRAL_PARTNER  | Referral Partner   |     5 | No     | []                |
+|12 | VIEWER            | Viewer             |     6 | No     | []                |
+
+──── DEMO TENANT ROLES (17 per tenant — adds 5 new) ────
+
+  All 12 above PLUS:
+|13 | SR_SALES_EXECUTIVE | Senior Sales Executive |  4 | No  | []    | Parent: TEAM_LEAD |
+|14 | FIELD_SALES        | Field Sales            |  4 | No  | []    | Parent: MANAGER   |
+|15 | DATA_ENTRY         | Data Entry             |  5 | No  | []    |                   |
+|16 | APPROVER           | Approver               |  3 | No  | []    | Parent: ADMIN     |
+|17 | VENDOR             | Vendor                 |  5 | No  | []    |                   |
+
+
+================================================================================
+ 5. USERS — DEFAULT TENANT (password: Admin@123)
+================================================================================
+
+| # | Email                    | Name              | Role             | UserType         | Status        |
+|---|--------------------------|-------------------|------------------|------------------|---------------|
+| 1 | admin@crm.com            | System Admin      | SUPER_ADMIN      | ADMIN            | ACTIVE        |
+| 2 | manager@crm.com          | Sales Manager     | MANAGER          | EMPLOYEE         | ACTIVE        |
+| 3 | sales1@crm.com           | Raj Patel         | SALES_EXECUTIVE  | EMPLOYEE         | ACTIVE        |
+| 4 | marketing1@crm.com       | Priya Shah        | MARKETING_STAFF  | EMPLOYEE         | ACTIVE        |
+| 5 | customer@example.com     | Vikram Customer   | CUSTOMER         | CUSTOMER         | ACTIVE        |
+| 6 | partner@example.com      | Suresh Partner    | REFERRAL_PARTNER | REFERRAL_PARTNER | ACTIVE        |
+
+
+================================================================================
+ 6. USERS — SHARMA ENTERPRISES (password: Test@123)
+================================================================================
+
+| #  | Email                                  | Name              | Role              | Code   | Reports To       | Verification     | Registration |
+|----|----------------------------------------|-------------------|-------------------|--------|------------------|------------------|--------------|
+|  1 | rajesh@sharmaenterprises.com            | Rajesh Sharma     | ADMIN             | SE-001 | -                | FULLY_VERIFIED   | BUSINESS     |
+|  2 | priya.patel@sharmaenterprises.com       | Priya Patel       | MANAGER           | SE-002 | Rajesh           | FULLY_VERIFIED   | INDIVIDUAL   |
+|  3 | amit.kumar@sharmaenterprises.com        | Amit Kumar        | SR_SALES_EXECUTIVE| SE-003 | Priya            | FULLY_VERIFIED   | INDIVIDUAL   |
+|  4 | neha.singh@sharmaenterprises.com        | Neha Singh        | SALES_EXECUTIVE   | SE-004 | Priya            | FULLY_VERIFIED   | INDIVIDUAL   |
+|  5 | ravi.verma@sharmaenterprises.com        | Ravi Verma        | SALES_EXECUTIVE   | SE-005 | Priya            | FULLY_VERIFIED   | INDIVIDUAL   |
+|  6 | rohit.sharma@sharmaenterprises.com      | Rohit Sharma      | FIELD_SALES       | SE-006 | Priya            | PARTIAL          | INDIVIDUAL   |
+|  7 | pooja.yadav@sharmaenterprises.com       | Pooja Yadav       | FIELD_SALES       | SE-007 | Amit             | FULLY_VERIFIED   | INDIVIDUAL   |
+|  8 | divya.mishra@sharmaenterprises.com      | Divya Mishra      | TELECALLER        | SE-008 | Priya            | FULLY_VERIFIED   | INDIVIDUAL   |
+|  9 | kavita.joshi@sharmaenterprises.com      | Kavita Joshi      | SUPPORT_AGENT     | SE-009 | Rajesh           | FULLY_VERIFIED   | INDIVIDUAL   |
+| 10 | suresh.reddy@sharmaenterprises.com      | Suresh Reddy      | DATA_ENTRY        | SE-010 | Rajesh           | FULLY_VERIFIED   | INDIVIDUAL   |
+| 11 | anita.mehta@sharmaenterprises.com       | Anita Mehta       | APPROVER          | SE-011 | Rajesh           | FULLY_VERIFIED   | INDIVIDUAL   |
+| 12 | mohan.das@sharmaenterprises.com         | Mohan Das         | ACCOUNT_MANAGER   | SE-012 | Rajesh           | FULLY_VERIFIED   | INDIVIDUAL   |
+| 13 | vikram@vikramindustries.com             | Vikram Chauhan    | VENDOR            | -      | -                | FULLY_VERIFIED   | BUSINESS     |
+| 14 | contact@guptatraders.com                | Ramesh Gupta      | VENDOR            | -      | -                | FULLY_VERIFIED   | BUSINESS     |
+| 15 | viewer@sharmaenterprises.com            | Audit User        | VIEWER            | SE-015 | -                | FULLY_VERIFIED   | INDIVIDUAL   |
+
+  Vendors (B2B Verified):
+    Vikram Industries   — GST: 27AABCV1111A1Z1 (Manufacturer)
+    Gupta Traders       — GST: 27AABCG2222B1Z2 (Wholesaler)
+
+  Reporting Hierarchy:
+    Rajesh (Admin)
+    └── Priya (Manager)
+    │   ├── Amit (Sr. Sales Exec)
+    │   │   └── Pooja (Field Sales)
+    │   ├── Neha (Sales Exec)
+    │   ├── Ravi (Sales Exec)
+    │   ├── Rohit (Field Sales)
+    │   └── Divya (Telecaller)
+    ├── Kavita (Support)
+    ├── Suresh (Data Entry)
+    ├── Anita (Approver)
+    └── Mohan (Account Manager)
+
+
+================================================================================
+ 7. USERS — MUMBAI DISTRIBUTORS (password: Test@123)
+================================================================================
+
+| # | Email                                  | Name          | Role            | Code   | Reports To | Verification   |
+|---|----------------------------------------|---------------|-----------------|--------|------------|----------------|
+| 1 | arun@mumbaidistributors.com             | Arun Desai    | ADMIN           | MD-001 | -          | FULLY_VERIFIED |
+| 2 | meera.nair@mumbaidistributors.com        | Meera Nair    | MANAGER         | MD-002 | Arun       | FULLY_VERIFIED |
+| 3 | deepak.jain@mumbaidistributors.com       | Deepak Jain   | SALES_EXECUTIVE | MD-003 | Meera      | FULLY_VERIFIED |
+| 4 | kiran.patil@mumbaidistributors.com       | Kiran Patil   | FIELD_SALES     | MD-004 | Meera      | FULLY_VERIFIED |
+
+
+================================================================================
+ 8. USERS — TECHSERVE SOLUTIONS (password: Test@123)
+================================================================================
+
+| # | Email                     | Name          | Role            | Code   | Reports To | Verification   |
+|---|---------------------------|---------------|-----------------|--------|------------|----------------|
+| 1 | sanjay@techserve.in        | Sanjay Kapoor | ADMIN           | TS-001 | -          | FULLY_VERIFIED |
+| 2 | pooja.sharma@techserve.in  | Pooja Sharma  | SALES_EXECUTIVE | TS-002 | Sanjay     | FULLY_VERIFIED |
+
+
+================================================================================
+ 9. MARKETPLACE CUSTOMERS — DEFAULT TENANT (password: Test@123)
+================================================================================
+
+──── B2B CUSTOMERS (GST Verified) ────
+
+| # | Email                          | Name            | Company              | GST               | Type       | City       |
+|---|--------------------------------|-----------------|----------------------|--------------------|------------|------------|
+| 1 | patel@patelhardware.com         | Nitin Patel     | Patel Hardware Store | 24AABCP3333C1Z3    | Retailer   | Ahmedabad  |
+| 2 | singh@singhelectronics.com      | Harpreet Singh  | Singh Electronics    | 03AABCS4444D1Z4    | Wholesaler | Ludhiana   |
+| 3 | agarwal@agarwalwholesale.com    | Sunil Agarwal   | Agarwal Wholesale    | 09AABCA5555E1Z5    | Wholesaler | Lucknow    |
+
+──── B2C CUSTOMERS (Individual) ────
+
+| # | Email                   | Name          | Verification   |
+|---|-------------------------|---------------|----------------|
+| 4 | ramesh.kumar@gmail.com   | Ramesh Kumar  | FULLY_VERIFIED |
+| 5 | sunita.devi@gmail.com    | Sunita Devi   | FULLY_VERIFIED |
+
+──── PARTIALLY VERIFIED ────
+
+| # | Email                  | Name            | Email Verified | Mobile Verified |
+|---|------------------------|-----------------|----------------|-----------------|
+| 6 | partialuser1@gmail.com  | Partial UserOne | Yes            | No              |
+| 7 | partialuser2@gmail.com  | Partial UserTwo | No             | Yes             |
+
+──── UNVERIFIED ────
+
+| # | Email                 | Name          | Email Verified | Mobile Verified |
+|---|-----------------------|---------------|----------------|-----------------|
+| 8 | newuser1@gmail.com     | New UserOne   | No             | No              |
+| 9 | newuser2@gmail.com     | New UserTwo   | No             | No              |
+
+──── BUSINESS PENDING GST ────
+
+| #  | Email                      | Name             | Company             | GST              | GST Verified |
+|----|----------------------------|------------------|----------------------|------------------|--------------|
+| 10 | business.pending@gmail.com  | Business Pending | Pending Business Co  | 27AABCP9999F1Z9  | No           |
+
+
+================================================================================
+ 10. DEPARTMENTS (Default Tenant)
+================================================================================
+
+  COMPANY (HQ)                    Level 0
+  ├── SALES                       Level 1
+  │   ├── SALES_NORTH             Level 2
+  │   └── SALES_SOUTH             Level 2
+  ├── MARKETING                   Level 1
+  └── SUPPORT                     Level 1
+
+
+================================================================================
+ 11. PERMISSIONS (Global — Module x Action)
+================================================================================
+
+  41 modules x 5 actions = 205 permissions
+
+  Modules:
+    contacts, raw_contacts, organizations, leads, activities, demos,
+    tour-plans, quotations, invoices, payments, installations, trainings,
+    licenses, ledgers, support-tickets, communications, users, roles,
+    lookups, ownership, reports, departments, designations, brands,
+    manufacturers, packages, locations, menus, custom_fields, products,
+    product_pricing, workflows, follow-ups, reminders, recurrence,
+    calendar, dashboard, analytics, performance, audit, settings, wallet
+
+  Actions: create, read, update, delete, export
+
+  Assignment: All 205 permissions -> SUPER_ADMIN role
+
+
+================================================================================
+ 12. PERMISSION TEMPLATES (6 Templates)
+================================================================================
+
+──── 1. FULL_ADMIN (System, Not Default) ────
+  All 14 flags true on all menus:
+    DASHBOARD, CONTACTS, LEADS, QUOTATIONS, MARKETPLACE_GROUP,
+    REPORTS_GROUP, SETTINGS_GROUP, USERS, ROLES, INVOICES,
+    PAYMENTS, ACTIVITIES, TICKETS
+
+──── 2. SALES_MANAGER (System, Not Default) ────
+  Menus: DASHBOARD, CONTACTS, LEADS, QUOTATIONS, MARKETPLACE_GROUP,
+         REPORTS_GROUP, SETTINGS_GROUP, ACTIVITIES, INVOICES
+  Highlights: canAssign, canTransfer on LEADS; canApprove on QUOTATIONS
+
+──── 3. SALES_EXECUTIVE (System, DEFAULT) ────
+  Menus: DASHBOARD, CONTACTS, LEADS, QUOTATIONS, MARKETPLACE_GROUP,
+         REPORTS_GROUP, ACTIVITIES
+  Highlights: canView + canCreate + canEdit only (no delete/export)
+
+──── 4. READ_ONLY (System, Not Default) ────
+  Menus: DASHBOARD, CONTACTS, LEADS, QUOTATIONS, MARKETPLACE_GROUP,
+         REPORTS_GROUP, INVOICES, PAYMENTS, ACTIVITIES
+  Highlights: canView only on all menus
+
+──── 5. DATA_ENTRY (System, Not Default) ────
+  Menus: CONTACTS, LEADS, QUOTATIONS, ACTIVITIES
+  Highlights: canView + canCreate + canEdit + canImport (no delete)
+
+──── 6. APPROVER (System, Not Default) ────
+  Menus: DASHBOARD, QUOTATIONS, LEADS, INVOICES
+  Highlights: canView + canApprove + canViewAll
+
+
+================================================================================
+ 13. PRODUCTS (Default Tenant)
+================================================================================
+
+| Code      | Name                    | Type       | MRP      | Sale Price | GST  | HSN  |
+|-----------|-------------------------|------------|----------|------------|------|------|
+| PRD-00001 | CRM Suite               | Master     | 49,999   | 44,999     | 18%  | 8523 |
+| PRD-00002 | CRM Basic               | Variant    | 14,999   | 12,999     | 18%  | 8523 |
+| PRD-00003 | CRM Professional        | Variant    | 29,999   | 26,999     | 18%  | 8523 |
+| PRD-00004 | CRM Enterprise          | Variant    | 49,999   | 44,999     | 18%  | 8523 |
+| PRD-00005 | ERP Suite               | Master     | 99,999   | 89,999     | 18%  | 8523 |
+| PRD-00006 | ERP Standard            | Variant    | 59,999   | 54,999     | 18%  | 8523 |
+| PRD-00007 | ERP Premium             | Variant    | 99,999   | 89,999     | 18%  | 8523 |
+| PRD-00008 | Annual Support Plan     | Standalone | 19,999   | 17,999     | 18%  | 9983 |
+| PRD-00009 | Implementation Service  | Standalone | 75,000   | 65,000     | 18%  | 9983 |
+
+
+================================================================================
+ 14. CUSTOMER PRICE GROUPS (Default Tenant)
+================================================================================
+
+| Code    | Name    | Discount | Priority | Description               |
+|---------|---------|----------|----------|---------------------------|
+| RATE_A  | Rate A  |       5% |        4 | Premium enterprise pricing |
+| RATE_B  | Rate B  |      10% |        3 | Standard business pricing  |
+| RATE_C  | Rate C  |      15% |        2 | Volume discount pricing    |
+| RATE_D  | Rate D  |      20% |        1 | Wholesale pricing          |
+| RETAIL  | Retail  |       0% |        0 | Default retail pricing     |
+
+
+================================================================================
+ 15. APPROVAL RULES (Default Tenant)
+================================================================================
+
+| Entity    | Action                     | Checker Role | Skip For Roles       | Amount Threshold |
+|-----------|----------------------------|--------------|----------------------|------------------|
+| lead      | leads:status_change_WON    | MANAGER      | ADMIN, SUPER_ADMIN   | -                |
+| lead      | leads:status_change_LOST   | TEAM_LEAD    | MANAGER, ADMIN, SUPER_ADMIN | -         |
+| quotation | quotations:approve         | MANAGER      | ADMIN                | 50,000           |
+| contact   | contacts:bulk_delete       | ADMIN        | SUPER_ADMIN          | -                |
+| employee  | users:role_change          | ADMIN        | SUPER_ADMIN          | -                |
+
+
+================================================================================
+ 16. LOOKUP CATEGORIES (Default Tenant — 38 Categories)
+================================================================================
+
+INDUSTRY:              IT/Software, Finance/Banking, Healthcare, Manufacturing, Retail, Education, Real Estate, Other
+LEAD_SOURCE:           Website, Referral, Trade Show, Cold Call, Social Media, Email Campaign
+LEAD_TYPE:             Hot (Red), Warm (Orange), Cold (Blue)
+LEAD_CATEGORY:         Direct, Channel, Partner, Online
+LEAD_GROUP:            SMB, Enterprise, Government, Startup
+CITY:                  Mumbai, Delhi, Bangalore, Hyderabad, Chennai, Pune, Kolkata, Ahmedabad
+CONTACT_SOURCE:        Referral, Website, Trade Show, Cold Call, Social Media, Email Campaign
+CONTACT_CATEGORY:      Customer, Prospect, Partner, Vendor, Employee, Other
+RAW_CONTACT_SOURCE:    Manual, Bulk Import, Web Form, Referral, API
+DEPARTMENT:            Sales, Marketing, Engineering, HR, Finance, Operations, Support, Management
+DESIGNATION:           CEO, CTO, CFO, VP, Director, Manager, Executive, Associate, Intern
+ACTIVITY_TYPE:         Call, Email, Meeting, Note, WhatsApp, SMS, Visit
+PRODUCT_TYPE:          Software, Hardware, Service, Subscription, License
+PRODUCT_CATEGORY:      CRM, ERP, HRM, Accounting, Infrastructure
+PRODUCT_SEGMENT:       Enterprise, SMB, Startup, Individual
+PRODUCT_DELIVERY:      Cloud/SaaS, On-Premise, Hybrid
+PRODUCT_LIFECYCLE:     GA, Beta, EOL, Preview
+UNIT_OF_MEASURE:       Piece, Box, Pack, KG, Gram, Litre, Meter, Set, Dozen, Roll, Pair, Other
+GST_RATE:              0%, 5%, 12%, 18%, 28%
+DISCOUNT_TYPE:         Percentage, Flat
+QUOTATION_PRICE_TYPE:  Fixed, Range, Negotiable
+PAYMENT_METHOD:        Cash, Cheque, Bank Transfer, UPI, Credit Card, Debit Card, Net Banking, Wallet, Razorpay, Stripe, Other
+COMMUNICATION_CHANNEL: Email, WhatsApp, Portal, Manual, Download, SMS
+TEMPLATE_CATEGORY:     Sales, Marketing, Support, Notification, Other
+WORKFLOW_TRIGGER_TYPE: Manual, Auto, Scheduled
+CUSTOMER_BUDGET:       Below 1L, 1-5L, 5-10L, 10-50L, Above 50L
+PREVIOUS_SOFTWARE:     Tally, SAP, Zoho, Salesforce, None, Other
+IT_INFRA:              Cloud, On-Premise, Hybrid, None
+ORGANIZATION_TYPE:     Private Ltd, LLP, Partnership, Sole Proprietor, Public Ltd, NGO
+ORGANIZATION_CATEGORY: Client, Prospect, Vendor, Partner, Distributor
+ORGANIZATION_GROUP:    Corporate, SME, MSME, Government, Startup
+ORGANIZATION_STATUS:   Active Client, Churned, Prospect, On Hold
+BUSINESS_TYPE:         B2B, B2C, B2B2C, D2C
+
+
+================================================================================
+ 17. MENUS (Hierarchical — 35+ Items)
+================================================================================
+
+  Dashboard                        /dashboard
+  Contacts                         (GROUP)
+    ├── Raw Contacts               /raw-contacts
+    ├── Verified Contacts          /contacts
+    └── Organizations              /organizations
+  Leads                            /leads
+  Communications                   /communications
+  Calendar                         /calendar
+  Tasks                            /tasks
+  Activities                       (GROUP)
+    ├── All Activities             /activities
+    ├── Demos                      /demos
+    └── Tour Plans                 /tour-plans
+  Products                         (GROUP)
+    ├── Products                   /products/products
+    ├── Packages                   /products/packages
+    └── Units                      /products/units
+  Quotations                       /quotations
+  Finance                          (GROUP)
+    ├── Proforma Invoices          /finance/proforma-invoices
+    ├── Invoices                   /finance/invoices
+    └── Payments                   /finance/payments
+  Post-Sales                       (GROUP)
+    ├── Installations              /post-sales/installations
+    ├── Trainings                  /post-sales/trainings
+    └── Tickets                    /post-sales/tickets
+  Documents                        /documents
+  Communication                    (GROUP)
+    ├── Templates                  /communication/templates
+    └── Signatures                 /communication/signatures
+  Workflows                        /workflows
+  WhatsApp                         (GROUP)
+    ├── Dashboard                  /whatsapp/dashboard
+    ├── Conversations              /whatsapp/conversations
+    ├── Templates                  /whatsapp/templates
+    ├── Broadcasts                 /whatsapp/broadcasts
+    ├── Chatbot                    /whatsapp/chatbot
+    ├── Quick Replies              /whatsapp/quick-replies
+    └── Opt-outs                   /whatsapp/opt-outs
+  Reports                          (GROUP — 13 children)
+    ├── All Reports, Sales, Lead, Contact & Org, Activity, Demo,
+    │   Quotation, Tour Plan, Team, Communication, Executive,
+    │   Custom, Report Designer
+  Settings                         (GROUP — 15 children)
+    ├── Users, Roles & Permissions, Departments, Designations,
+    │   Lookups, Menu Management, Data Masking, Recycle Bin,
+    │   Audit Logs, Google, AI Models, Integrations, Subscription,
+    │   Wallet, Coupons
+  Developer                        (GROUP)
+    ├── Developer Tools            /developer/tools
+    ├── API Keys                   /developer/api-keys
+    ├── Webhooks                   /developer/webhooks
+    └── Logs                       /developer/logs
+  Software Vendor                  (GROUP — Platform Admin Only)
+    ├── Vendor Dashboard           /admin/vendor-dashboard
+    ├── Plans                      /admin/plans
+    ├── Tenants                    /admin/tenants
+    ├── Licenses                   /admin/licenses
+    ├── Offers                     /admin/offers
+    ├── Modules                    /admin/modules
+    ├── Recharge Plans             /admin/recharge-plans
+    ├── Coupons                    /admin/coupons
+    ├── Service Rates              /admin/service-rates
+    └── Wallet Analytics           /admin/wallet-analytics
+
+
+================================================================================
+ 18. WORKFLOWS (Default Tenant — 4 Workflows)
+================================================================================
+
+  1. Lead Pipeline Workflow
+  2. Demo Workflow
+  3. Tour Plan Workflow
+  4. Quotation Workflow
+
+
+================================================================================
+ 19. PLUGINS (12 Integrations)
+================================================================================
+
+| # | Code            | Name                | Category      | Auth Type  |
+|---|-----------------|---------------------|---------------|------------|
+| 1 | whatsapp_cloud  | WhatsApp Cloud API  | COMMUNICATION | API Key    |
+| 2 | gmail           | Gmail Integration   | COMMUNICATION | OAuth      |
+| 3 | smtp            | SMTP Email          | COMMUNICATION | Credentials|
+| 4 | sms_twilio      | Twilio SMS          | COMMUNICATION | API Key    |
+| 5 | razorpay        | Razorpay            | PAYMENT       | API Key    |
+| 6 | stripe          | Stripe              | PAYMENT       | API Key    |
+| 7 | google_calendar | Google Calendar     | CALENDAR      | OAuth      |
+| 8 | exotel          | Exotel              | TELEPHONY     | API Key    |
+| 9 | aws_s3          | AWS S3              | STORAGE       | API Key    |
+|10 | google_drive    | Google Drive        | STORAGE       | OAuth      |
+|11 | openai          | OpenAI / ChatGPT    | AI            | API Key    |
+|12 | sendgrid        | SendGrid            | MARKETING     | API Key    |
+
+
+================================================================================
+ 20. ERROR CATALOG (70+ Error Codes — Bilingual EN/HI)
+================================================================================
+
+Category: GENERIC
+  INTERNAL_ERROR, VALIDATION_ERROR, NOT_FOUND, DUPLICATE_ENTRY,
+  INVALID_INPUT, OPERATION_FAILED, RATE_LIMIT_EXCEEDED, SERVICE_UNAVAILABLE
+
+Category: AUTH
+  AUTH_TOKEN_MISSING, AUTH_TOKEN_EXPIRED, AUTH_TOKEN_INVALID,
+  AUTH_INVALID_CREDENTIALS, AUTH_ACCOUNT_LOCKED, FORBIDDEN, PERMISSION_DENIED
+
+Category: TENANT
+  TENANT_NOT_FOUND, PLAN_LIMIT_REACHED, FEATURE_DISABLED, SUBSCRIPTION_EXPIRED
+
+Category: DOMAIN
+  CONTACT_NOT_FOUND, CONTACT_DUPLICATE, LEAD_NOT_FOUND, LEAD_STAGE_INVALID,
+  ORGANIZATION_NOT_FOUND, QUOTATION_NOT_FOUND, PRODUCT_NOT_FOUND
+
+Category: DATABASE
+  DB_UNIQUE_CONSTRAINT, DB_RECORD_NOT_FOUND, DB_FK_VIOLATION, DB_CONNECTION_FAILED
+
+Category: INTEGRATIONS
+  EMAIL_SEND_FAILED, EMAIL_TEMPLATE_NOT_FOUND,
+  WHATSAPP_SEND_FAILED, WHATSAPP_NOT_CONFIGURED
+
+Category: WORKFLOW
+  WORKFLOW_EXECUTION_FAILED, WORKFLOW_NOT_FOUND
+
+Category: IMPORT/EXPORT
+  IMPORT_FILE_INVALID, EXPORT_FAILED
+
+Category: SECURITY
+  ENCRYPTION_FAILED, CREDENTIAL_VERIFICATION_FAILED
+
+Category: FRONTEND
+  FE_NETWORK_ERROR, FE_RENDER_ERROR, FE_SESSION_EXPIRED, FE_FORM_VALIDATION
+
+Category: MOBILE
+  MOB_SYNC_FAILED, MOB_GPS_UNAVAILABLE
+
+Category: DOCUMENTS
+  DOCUMENT_UPLOAD_FAILED, DOCUMENT_NOT_FOUND
+
+Category: VERIFICATION
+  VERIFICATION_REQUIRED, OTP_EXPIRED, OTP_INVALID, OTP_MAX_ATTEMPTS,
+  GST_INVALID_FORMAT, GST_ALREADY_REGISTERED,
+  EMAIL_ALREADY_VERIFIED, MOBILE_ALREADY_VERIFIED
+
+Category: MARKETPLACE
+  LISTING_NOT_FOUND, LISTING_EXPIRED, LISTING_INACTIVE,
+  B2B_VERIFICATION_REQUIRED, ENQUIRY_NOT_FOUND,
+  ORDER_NOT_FOUND, ORDER_EMPTY_ITEMS, POST_NOT_FOUND
+
+Category: PLUGINS
+  PLUGIN_NOT_CONFIGURED, PLUGIN_CREDENTIALS_INVALID, PLUGIN_API_FAILED
+
+Category: FINANCE
+  INVOICE_NOT_FOUND, INVOICE_ALREADY_PAID, PAYMENT_FAILED, PAYMENT_NOT_FOUND
+
+Category: ACTIVITIES
+  ACTIVITY_NOT_FOUND, TOUR_PLAN_CONFLICT
+
+Category: TICKETS
+  TICKET_NOT_FOUND, TICKET_CLOSED
+
+Category: SETTINGS
+  ROLE_IN_USE, LOOKUP_NOT_FOUND
+
+
+================================================================================
+ 21. RAW CONTACTS (1000 Dummy Records — Default Tenant)
+================================================================================
+
+  Auto-generated 1000 raw contact records for testing bulk operations.
+
+
+================================================================================
+ QUICK LOGIN REFERENCE
+================================================================================
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │  VENDOR PORTAL (http://localhost:3006)                              │
+  │                                                                     │
+  │  Demo Vendor:     vendor@demo.com        / Vendor@123               │
+  ├──────────────────────────────────────────────────────────────────────┤
+  │  DEFAULT TENANT (password: Admin@123)                               │
+  │                                                                     │
+  │  Platform Admin:  platform@crm.com       / SuperAdmin@123           │
+  │  System Admin:    admin@crm.com          / Admin@123                │
+  │  Manager:         manager@crm.com        / Admin@123                │
+  │  Sales Exec:      sales1@crm.com         / Admin@123                │
+  │  Marketing:       marketing1@crm.com     / Admin@123                │
+  │  Customer:        customer@example.com   / Admin@123                │
+  │  Partner:         partner@example.com    / Admin@123                │
+  ├──────────────────────────────────────────────────────────────────────┤
+  │  SHARMA ENTERPRISES (password: Test@123)                            │
+  │                                                                     │
+  │  Admin:           rajesh@sharmaenterprises.com                      │
+  │  Sales Manager:   priya.patel@sharmaenterprises.com                 │
+  │  Sr. Sales Exec:  amit.kumar@sharmaenterprises.com                  │
+  │  Sales Exec:      neha.singh@sharmaenterprises.com                  │
+  │  Field Sales:     rohit.sharma@sharmaenterprises.com  (partial)     │
+  │  Vendor (B2B):    vikram@vikramindustries.com                       │
+  │  Viewer:          viewer@sharmaenterprises.com                      │
+  ├──────────────────────────────────────────────────────────────────────┤
+  │  MUMBAI DISTRIBUTORS (password: Test@123)                           │
+  │                                                                     │
+  │  Admin:           arun@mumbaidistributors.com                       │
+  │  Sales Manager:   meera.nair@mumbaidistributors.com                 │
+  │  Sales Exec:      deepak.jain@mumbaidistributors.com                │
+  │  Field Sales:     kiran.patil@mumbaidistributors.com                │
+  ├──────────────────────────────────────────────────────────────────────┤
+  │  TECHSERVE SOLUTIONS (password: Test@123)                           │
+  │                                                                     │
+  │  Admin:           sanjay@techserve.in                               │
+  │  Sales Exec:      pooja.sharma@techserve.in                         │
+  ├──────────────────────────────────────────────────────────────────────┤
+  │  MARKETPLACE CUSTOMERS (password: Test@123)                         │
+  │                                                                     │
+  │  B2B Customer:    patel@patelhardware.com                           │
+  │  B2B Customer:    singh@singhelectronics.com                        │
+  │  B2C Customer:    ramesh.kumar@gmail.com                            │
+  │  Unverified:      newuser1@gmail.com                                │
+  │  GST Pending:     business.pending@gmail.com                        │
+  └──────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+ TOTAL COUNTS
+================================================================================
+
+  Plans:                    4
+  Tenants:                  4  (1 default + 3 demo)
+  Super Admins:             1
+  Roles (default tenant):  12  (+5 new in demo tenants = 17)
+  Users (default):          6
+  Users (Sharma):          15
+  Users (Mumbai):           4
+  Users (TechServe):        2
+  Users (Marketplace):     10
+  ─────────────────────────────
+  Total Users:             37
+  ─────────────────────────────
+  Permissions:            205  (41 modules x 5 actions)
+  Permission Templates:     6
+  Departments:              6
+  Approval Rules:           5
+  Products:                 9
+  Price Groups:             5
+  Workflows:                4
+  Lookup Categories:       38
+  Menu Items:             ~60
+  Plugins:                 12
+  Error Codes:            70+
+  Raw Contacts:         1,000
+
+================================================================================

@@ -1,6 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
 import { CHECK_LIMIT_KEY } from '../plan-limit.guard';
-import { LimitResource } from '../../services/limit-checker.service';
 
-export const CheckLimit = (resource: LimitResource) =>
+export const CheckLimit = (resource: string) =>
   SetMetadata(CHECK_LIMIT_KEY, resource);

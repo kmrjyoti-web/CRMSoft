@@ -17,6 +17,11 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { LookupSelect } from "@/components/common/LookupSelect";
 import { PageHeader } from "@/components/common/PageHeader";
 
+import { useSidePanelStore } from "@/stores/side-panel.store";
+
+import { useFormConfig } from "@/features/form-config/hooks/useFormConfig";
+import { FormConfigButton } from "@/features/form-config/components/FormConfigButton";
+
 import {
   useOrganizationDetail,
   useCreateOrganization,
@@ -30,6 +35,11 @@ const organizationSchema = z.object({
   gstNumber: z.string().optional(),
   annualRevenue: z.number().nullable().optional(),
   industryId: z.string().optional(),
+  orgTypeId: z.string().optional(),
+  orgCategoryId: z.string().optional(),
+  orgGroupId: z.string().optional(),
+  orgStatusId: z.string().optional(),
+  businessTypeId: z.string().optional(),
   website: z.string().optional(),
   email: z
     .string()
@@ -51,17 +61,24 @@ type OrganizationFormValues = z.infer<typeof organizationSchema>;
 
 interface OrganizationFormProps {
   organizationId?: string;
+  mode?: "page" | "panel";
+  panelId?: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 // ── Component ────────────────────────────────────────────
 
-export function OrganizationForm({ organizationId }: OrganizationFormProps) {
+export function OrganizationForm({ organizationId, mode = "page", panelId, onSuccess, onCancel }: OrganizationFormProps) {
   const router = useRouter();
   const isEdit = !!organizationId;
+
+  const { isFieldVisible, getFieldLabel } = useFormConfig("form-organizations");
 
   const { data: orgData, isLoading: isLoadingOrg } = useOrganizationDetail(
     organizationId ?? "",
   );
+  const updatePanelConfig = useSidePanelStore((s) => s.updatePanelConfig);
   const createMutation = useCreateOrganization();
   const updateMutation = useUpdateOrganization();
 
@@ -77,6 +94,11 @@ export function OrganizationForm({ organizationId }: OrganizationFormProps) {
       gstNumber: "",
       annualRevenue: null,
       industryId: "",
+      orgTypeId: "",
+      orgCategoryId: "",
+      orgGroupId: "",
+      orgStatusId: "",
+      businessTypeId: "",
       website: "",
       email: "",
       phone: "",
@@ -93,15 +115,19 @@ export function OrganizationForm({ organizationId }: OrganizationFormProps) {
   useEffect(() => {
     if (!isEdit || !orgData?.data) return;
     const o = orgData.data;
-    const industryFilter = o.filters?.find(
-      (f) => f.lookupValue?.value?.startsWith("INDUSTRY_TYPE"),
-    );
+    const findFilter = (cat: string) =>
+      o.filters?.find((f: any) => f.lookupValue?.lookup?.category === cat)?.lookupValueId ?? "";
 
     reset({
       name: o.name,
       gstNumber: o.gstNumber ?? "",
       annualRevenue: o.annualRevenue ?? null,
-      industryId: industryFilter?.lookupValueId ?? "",
+      industryId: findFilter("INDUSTRY_TYPE"),
+      orgTypeId: findFilter("ORGANIZATION_TYPE"),
+      orgCategoryId: findFilter("ORGANIZATION_CATEGORY"),
+      orgGroupId: findFilter("ORGANIZATION_GROUP"),
+      orgStatusId: findFilter("ORGANIZATION_STATUS"),
+      businessTypeId: findFilter("BUSINESS_TYPE"),
       website: o.website ?? "",
       email: o.email ?? "",
       phone: o.phone ?? "",
@@ -114,9 +140,42 @@ export function OrganizationForm({ organizationId }: OrganizationFormProps) {
     });
   }, [isEdit, orgData, reset]);
 
+  // Sync isSubmitting → panel footer button
+  useEffect(() => {
+    if (!panelId) return;
+    updatePanelConfig(panelId, {
+      footerButtons: [
+        {
+          id: "cancel",
+          label: "Cancel",
+          showAs: "text" as const,
+          variant: "secondary" as const,
+          disabled: isSubmitting,
+          onClick: () => {},
+        },
+        {
+          id: "save",
+          label: isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Save Changes" : "Save",
+          icon: "check",
+          showAs: "both" as const,
+          variant: "primary" as const,
+          loading: isSubmitting,
+          disabled: isSubmitting,
+          onClick: () => {
+            const formId = `sp-form-org-${organizationId ?? "new"}`;
+            const form = document.getElementById(formId) as HTMLFormElement | null;
+            form?.requestSubmit();
+          },
+        },
+      ],
+    });
+  }, [isSubmitting, panelId, isEdit, updatePanelConfig]);
+
   const onSubmit = async (values: OrganizationFormValues) => {
-    const filterIds: string[] = [];
-    if (values.industryId) filterIds.push(values.industryId);
+    const filterIds = [
+      values.industryId, values.orgTypeId, values.orgCategoryId,
+      values.orgGroupId, values.orgStatusId, values.businessTypeId,
+    ].filter(Boolean) as string[];
 
     const payload = {
       name: values.name,
@@ -138,11 +197,13 @@ export function OrganizationForm({ organizationId }: OrganizationFormProps) {
       if (isEdit && organizationId) {
         await updateMutation.mutateAsync({ id: organizationId, data: payload });
         toast.success("Organization updated");
-        router.push(`/organizations/${organizationId}`);
+        if (mode === "panel" && onSuccess) onSuccess();
+        else router.push(`/organizations/${organizationId}`);
       } else {
         await createMutation.mutateAsync(payload);
         toast.success("Organization created");
-        router.push("/organizations");
+        if (mode === "panel" && onSuccess) onSuccess();
+        else router.push("/organizations");
       }
     } catch (err: unknown) {
       const message =
@@ -154,265 +215,377 @@ export function OrganizationForm({ organizationId }: OrganizationFormProps) {
 
   if (isEdit && isLoadingOrg) return <LoadingSpinner fullPage />;
 
+  const isPanel = mode === "panel";
+
+  // Section visibility helpers
+  const showCompanyInfo = isFieldVisible("name") || isFieldVisible("industryId") || isFieldVisible("gstNumber") || isFieldVisible("annualRevenue");
+  const showClassification = isFieldVisible("orgTypeId") || isFieldVisible("orgCategoryId") || isFieldVisible("orgGroupId") || isFieldVisible("orgStatusId") || isFieldVisible("businessTypeId");
+  const showContact = isFieldVisible("website") || isFieldVisible("email") || isFieldVisible("phone");
+  const showAddress = isFieldVisible("address") || isFieldVisible("city") || isFieldVisible("state") || isFieldVisible("country") || isFieldVisible("pincode");
+  const showNotes = isFieldVisible("notes");
+
   return (
-    <div className="p-6" style={{ position: "relative" }}>
+    <div className={isPanel ? "p-4" : "p-6"} style={{ position: "relative" }}>
       <FormSubmitOverlay isSubmitting={isSubmitting} isEdit={isEdit} />
-      <PageHeader
-        title={isEdit ? "Edit Organization" : "New Organization"}
-        actions={
-          <Button variant="outline" onClick={() => router.back()}>
-            <Icon name="arrow-left" size={16} /> Back
-          </Button>
-        }
-      />
+      {!isPanel && (
+        <PageHeader
+          title={isEdit ? "Edit Organization" : "New Organization"}
+          actions={
+            <div className="flex items-center gap-2">
+              <FormConfigButton formKey="form-organizations" />
+              <Button variant="outline" onClick={() => router.back()}>
+                <Icon name="arrow-left" size={16} /> Back
+              </Button>
+            </div>
+          }
+        />
+      )}
+
+      {isPanel && (
+        <div className="flex justify-end mb-2">
+          <FormConfigButton formKey="form-organizations" />
+        </div>
+      )}
 
       <FormErrors errors={errors} />
 
       <form
+        id={isPanel ? `sp-form-org-${organizationId ?? "new"}` : undefined}
         onSubmit={handleSubmit(onSubmit)}
         noValidate
-        className="mt-4 max-w-3xl space-y-6"
+        className={`${isPanel ? "mt-2" : "mt-4"} max-w-3xl space-y-6`}
       >
         {/* Company Information */}
-        <Fieldset label="Company Information">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Controller
-              name="name"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Company Name <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    placeholder="Company Name"
-                    value={field.value}
-                    onChange={field.onChange}
-                    error={!!errors.name}
-                    errorMessage={errors.name?.message}
-                  />
-                </div>
-              )}
-            />
-            <Controller
-              name="industryId"
-              control={control}
-              render={({ field }) => (
-                <LookupSelect
-                  masterCode="INDUSTRY_TYPE"
-                  label="Industry"
-                  value={field.value ?? null}
-                  onChange={(v) => field.onChange(v ?? "")}
+        {showCompanyInfo && (
+          <Fieldset label="Company Information">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {isFieldVisible("name") && (
+                <Controller
+                  name="name"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      label={getFieldLabel("name")}
+                      required
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={!!errors.name}
+                      errorMessage={errors.name?.message}
+                      leftIcon={<Icon name="building" size={16} />}
+                    />
+                  )}
                 />
               )}
-            />
-            <Controller
-              name="gstNumber"
-              control={control}
-              render={({ field }) => (
-                <InputMask
-                  label="GST Number"
-                  maskType="custom"
-                  customMask="99AAAAA9999A9A9"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
+              {isFieldVisible("industryId") && (
+                <Controller
+                  name="industryId"
+                  control={control}
+                  render={({ field }) => (
+                    <LookupSelect
+                      masterCode="INDUSTRY_TYPE"
+                      label={getFieldLabel("industryId")}
+                      valueKey="id"
+                      value={field.value ?? null}
+                      onChange={(v) => field.onChange(v ?? "")}
+                      leftIcon={<Icon name="briefcase" size={16} />}
+                    />
+                  )}
                 />
               )}
-            />
-            <Controller
-              name="annualRevenue"
-              control={control}
-              render={({ field }) => (
-                <CurrencyInput
-                  label="Annual Revenue"
-                  currency="INR"
-                  value={field.value ?? null}
-                  onChange={(v) => field.onChange(v)}
+              {isFieldVisible("gstNumber") && (
+                <Controller
+                  name="gstNumber"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      label={getFieldLabel("gstNumber")}
+                      value={field.value ?? ""}
+                      onChange={(v) => field.onChange(v.toUpperCase().slice(0, 15))}
+                      leftIcon={<Icon name="hash" size={16} />}
+                    />
+                  )}
                 />
               )}
-            />
-          </div>
-        </Fieldset>
+              {isFieldVisible("annualRevenue") && (
+                <Controller
+                  name="annualRevenue"
+                  control={control}
+                  render={({ field }) => (
+                    <CurrencyInput
+                      label={getFieldLabel("annualRevenue")}
+                      currency="INR"
+                      value={field.value ?? null}
+                      onChange={(v) => field.onChange(v)}
+                    />
+                  )}
+                />
+              )}
+            </div>
+          </Fieldset>
+        )}
+
+        {/* Classification */}
+        {showClassification && (
+          <Fieldset label="Classification">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {isFieldVisible("orgTypeId") && (
+                <Controller
+                  name="orgTypeId"
+                  control={control}
+                  render={({ field }) => (
+                    <LookupSelect
+                      masterCode="ORGANIZATION_TYPE"
+                      label={getFieldLabel("orgTypeId")}
+                      valueKey="id"
+                      value={field.value ?? null}
+                      onChange={(v) => field.onChange(v ?? "")}
+                      leftIcon={<Icon name="building" size={16} />}
+                    />
+                  )}
+                />
+              )}
+              {isFieldVisible("orgCategoryId") && (
+                <Controller
+                  name="orgCategoryId"
+                  control={control}
+                  render={({ field }) => (
+                    <LookupSelect
+                      masterCode="ORGANIZATION_CATEGORY"
+                      label={getFieldLabel("orgCategoryId")}
+                      valueKey="id"
+                      value={field.value ?? null}
+                      onChange={(v) => field.onChange(v ?? "")}
+                      leftIcon={<Icon name="tag" size={16} />}
+                    />
+                  )}
+                />
+              )}
+              {isFieldVisible("orgGroupId") && (
+                <Controller
+                  name="orgGroupId"
+                  control={control}
+                  render={({ field }) => (
+                    <LookupSelect
+                      masterCode="ORGANIZATION_GROUP"
+                      label={getFieldLabel("orgGroupId")}
+                      valueKey="id"
+                      value={field.value ?? null}
+                      onChange={(v) => field.onChange(v ?? "")}
+                      leftIcon={<Icon name="users" size={16} />}
+                    />
+                  )}
+                />
+              )}
+              {isFieldVisible("orgStatusId") && (
+                <Controller
+                  name="orgStatusId"
+                  control={control}
+                  render={({ field }) => (
+                    <LookupSelect
+                      masterCode="ORGANIZATION_STATUS"
+                      label={getFieldLabel("orgStatusId")}
+                      valueKey="id"
+                      value={field.value ?? null}
+                      onChange={(v) => field.onChange(v ?? "")}
+                      leftIcon={<Icon name="activity" size={16} />}
+                    />
+                  )}
+                />
+              )}
+              {isFieldVisible("businessTypeId") && (
+                <Controller
+                  name="businessTypeId"
+                  control={control}
+                  render={({ field }) => (
+                    <LookupSelect
+                      masterCode="BUSINESS_TYPE"
+                      label={getFieldLabel("businessTypeId")}
+                      valueKey="id"
+                      value={field.value ?? null}
+                      onChange={(v) => field.onChange(v ?? "")}
+                      leftIcon={<Icon name="briefcase" size={16} />}
+                    />
+                  )}
+                />
+              )}
+            </div>
+          </Fieldset>
+        )}
 
         {/* Contact */}
-        <Fieldset label="Contact">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Controller
-              name="website"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Website
-                  </label>
-                  <Input
-                    placeholder="https://example.com"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    leftIcon={<Icon name="globe" size={18} />}
-                  />
-                </div>
-              )}
-            />
-            <Controller
-              name="email"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Email
-                  </label>
-                  <Input
-                    type="email"
-                    placeholder="Email"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    error={!!errors.email}
-                    errorMessage={errors.email?.message}
-                    leftIcon={<Icon name="mail" size={18} />}
-                  />
-                </div>
-              )}
-            />
-            <Controller
-              name="phone"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Phone
-                  </label>
-                  <Input
-                    type="tel"
-                    placeholder="Phone"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    leftIcon={<Icon name="phone" size={18} />}
-                  />
-                </div>
-              )}
-            />
-          </div>
-        </Fieldset>
-
-        {/* Address */}
-        <Fieldset label="Address">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Controller
-              name="address"
-              control={control}
-              render={({ field }) => (
-                <div className="sm:col-span-2">
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Street Address
-                  </label>
-                  <Input
-                    placeholder="Street address"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
-              )}
-            />
-            <Controller
-              name="city"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    City
-                  </label>
-                  <Input
-                    placeholder="City"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
-              )}
-            />
-            <Controller
-              name="state"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    State
-                  </label>
-                  <Input
-                    placeholder="State"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
-              )}
-            />
-            <Controller
-              name="country"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Country
-                  </label>
-                  <Input
-                    placeholder="Country"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
-              )}
-            />
-            <Controller
-              name="pincode"
-              control={control}
-              render={({ field }) => (
-                <InputMask
-                  label="PIN Code"
-                  maskType="custom"
-                  customMask="999999"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
+        {showContact && (
+          <Fieldset label="Contact">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {isFieldVisible("website") && (
+                <Controller
+                  name="website"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      label={getFieldLabel("website")}
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      leftIcon={<Icon name="globe" size={16} />}
+                    />
+                  )}
                 />
               )}
-            />
-          </div>
-        </Fieldset>
+              {isFieldVisible("email") && (
+                <Controller
+                  name="email"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      label={getFieldLabel("email")}
+                      type="email"
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      error={!!errors.email}
+                      errorMessage={errors.email?.message}
+                      leftIcon={<Icon name="mail" size={16} />}
+                    />
+                  )}
+                />
+              )}
+              {isFieldVisible("phone") && (
+                <Controller
+                  name="phone"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      label={getFieldLabel("phone")}
+                      type="tel"
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      leftIcon={<Icon name="phone" size={16} />}
+                    />
+                  )}
+                />
+              )}
+            </div>
+          </Fieldset>
+        )}
+
+        {/* Address */}
+        {showAddress && (
+          <Fieldset label="Address">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {isFieldVisible("address") && (
+                <div className="sm:col-span-2">
+                  <Controller
+                    name="address"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        label={getFieldLabel("address")}
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        leftIcon={<Icon name="map-pin" size={16} />}
+                      />
+                    )}
+                  />
+                </div>
+              )}
+              {isFieldVisible("city") && (
+                <Controller
+                  name="city"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      label={getFieldLabel("city")}
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      leftIcon={<Icon name="map-pin" size={16} />}
+                    />
+                  )}
+                />
+              )}
+              {isFieldVisible("state") && (
+                <Controller
+                  name="state"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      label={getFieldLabel("state")}
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      leftIcon={<Icon name="map-pin" size={16} />}
+                    />
+                  )}
+                />
+              )}
+              {isFieldVisible("country") && (
+                <Controller
+                  name="country"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      label={getFieldLabel("country")}
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      leftIcon={<Icon name="globe" size={16} />}
+                    />
+                  )}
+                />
+              )}
+              {isFieldVisible("pincode") && (
+                <Controller
+                  name="pincode"
+                  control={control}
+                  render={({ field }) => (
+                    <InputMask
+                      label={getFieldLabel("pincode")}
+                      maskType="custom"
+                      customMask="999999"
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
+              )}
+            </div>
+          </Fieldset>
+        )}
 
         {/* Notes */}
-        <Controller
-          name="notes"
-          control={control}
-          render={({ field }) => (
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
-                Notes
-              </label>
-              <textarea
-                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                rows={3}
-                placeholder="Notes"
-                value={field.value ?? ""}
-                onChange={(e) => field.onChange(e.target.value)}
-              />
-            </div>
-          )}
-        />
+        {showNotes && (
+          <Controller
+            name="notes"
+            control={control}
+            render={({ field }) => (
+              <div>
+                <label className="mb-1 flex items-center gap-1 text-sm font-medium text-gray-700">
+                  <Icon name="file-text" size={14} className="text-gray-400" /> {getFieldLabel("notes")}
+                </label>
+                <textarea
+                  className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
+                  rows={3}
+                  placeholder={getFieldLabel("notes")}
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
+              </div>
+            )}
+          />
+        )}
 
-        {/* Submit */}
-        <div className="flex gap-3 pt-2">
-          <Button
-            type="submit"
-            variant="primary"
-            loading={isSubmitting}
-            disabled={isSubmitting}
-          >
-            <Icon name="check" size={16} />{" "}
-            {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
-          </Button>
-          <Button variant="outline" onClick={() => router.back()}>
-            Cancel
-          </Button>
-        </div>
+        {/* Submit — hidden in panel mode */}
+        {!isPanel && (
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            >
+              <Icon name="check" size={16} />{" "}
+              {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
+            </Button>
+            <Button variant="outline" onClick={() => router.back()}>
+              Cancel
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   );

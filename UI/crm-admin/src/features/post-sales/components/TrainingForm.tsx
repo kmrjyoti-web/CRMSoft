@@ -21,6 +21,8 @@ import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
 
+import { useSidePanelStore } from "@/stores/side-panel.store";
+
 import {
   useTrainingDetail,
   useCreateTraining,
@@ -56,13 +58,19 @@ type TrainingFormValues = z.infer<typeof trainingSchema>;
 
 interface TrainingFormProps {
   trainingId?: string;
+  mode?: "page" | "panel";
+  panelId?: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 // -- Component ---------------------------------------------------------------
 
-export function TrainingForm({ trainingId }: TrainingFormProps) {
+export function TrainingForm({ trainingId, mode = "page", panelId, onSuccess, onCancel }: TrainingFormProps) {
   const router = useRouter();
   const isEdit = !!trainingId;
+  const updatePanelConfig = useSidePanelStore((s) => s.updatePanelConfig);
+  const isPanel = mode === "panel";
 
   const { data: trainingData, isLoading: isLoadingTraining } =
     useTrainingDetail(trainingId ?? "");
@@ -127,6 +135,43 @@ export function TrainingForm({ trainingId }: TrainingFormProps) {
     });
   }, [isEdit, trainingData, reset]);
 
+  // Sync panel footer buttons
+  useEffect(() => {
+    if (!panelId) return;
+    updatePanelConfig(panelId, {
+      footerButtons: [
+        {
+          id: "cancel",
+          label: "Cancel",
+          showAs: "text",
+          variant: "secondary",
+          disabled: isSubmitting,
+          onClick: () => {},
+        },
+        {
+          id: "save",
+          label: isSubmitting
+            ? isEdit
+              ? "Updating..."
+              : "Saving..."
+            : isEdit
+              ? "Save Changes"
+              : "Save",
+          icon: "check",
+          showAs: "both",
+          variant: "primary",
+          loading: isSubmitting,
+          disabled: isSubmitting,
+          onClick: () => {
+            const formId = `sp-form-training-${trainingId ?? "new"}`;
+            const form = document.getElementById(formId) as HTMLFormElement | null;
+            form?.requestSubmit();
+          },
+        },
+      ],
+    });
+  }, [isSubmitting, panelId, isEdit, trainingId, updatePanelConfig]);
+
   const onSubmit = async (values: TrainingFormValues) => {
     try {
       if (isEdit && trainingId) {
@@ -151,7 +196,11 @@ export function TrainingForm({ trainingId }: TrainingFormProps) {
           },
         });
         toast.success("Training updated");
-        router.push(`/post-sales/trainings/${trainingId}`);
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push(`/post-sales/trainings/${trainingId}`);
+        }
       } else {
         await createMutation.mutateAsync({
           title: values.title,
@@ -174,7 +223,11 @@ export function TrainingForm({ trainingId }: TrainingFormProps) {
           internalNotes: values.internalNotes || undefined,
         });
         toast.success("Training created");
-        router.push("/post-sales/trainings");
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push("/post-sales/trainings");
+        }
       }
     } catch (err: unknown) {
       const message =
@@ -187,20 +240,23 @@ export function TrainingForm({ trainingId }: TrainingFormProps) {
   if (isEdit && isLoadingTraining) return <LoadingSpinner fullPage />;
 
   return (
-    <div className="p-6" style={{ position: "relative" }}>
+    <div className={isPanel ? "p-4" : "p-6"} style={{ position: "relative" }}>
       <FormSubmitOverlay isSubmitting={isSubmitting} isEdit={isEdit} />
-      <PageHeader
-        title={isEdit ? "Edit Training" : "New Training"}
-        actions={
-          <Button variant="outline" onClick={() => router.back()}>
-            Back
-          </Button>
-        }
-      />
+      {!isPanel && (
+        <PageHeader
+          title={isEdit ? "Edit Training" : "New Training"}
+          actions={
+            <Button variant="outline" onClick={() => router.back()}>
+              Back
+            </Button>
+          }
+        />
+      )}
 
       <FormErrors errors={errors} />
 
       <form
+        id={isPanel ? `sp-form-training-${trainingId ?? "new"}` : undefined}
         onSubmit={handleSubmit(onSubmit)}
         noValidate
         className="mt-4 max-w-3xl space-y-6"
@@ -519,19 +575,21 @@ export function TrainingForm({ trainingId }: TrainingFormProps) {
         </Fieldset>
 
         {/* Submit */}
-        <div className="flex gap-3 pt-2">
-          <Button
-            type="submit"
-            variant="primary"
-            loading={isSubmitting}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
-          </Button>
-          <Button variant="outline" onClick={() => router.back()}>
-            Cancel
-          </Button>
-        </div>
+        {!isPanel && (
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
+            </Button>
+            <Button variant="outline" onClick={() => router.back()}>
+              Cancel
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   );

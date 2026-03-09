@@ -10,5 +10,13 @@ export class UpdateContactCommand {
       notes?: string;
     },
     public readonly filterIds?: string[],
+    public readonly communications?: Array<{
+      type: string;
+      value: string;
+      priorityType?: string;
+      label?: string;
+      isPrimary?: boolean;
+    }>,
+    public readonly organizationId?: string,
   ) {}
 }

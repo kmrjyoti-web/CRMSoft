@@ -48,3 +48,11 @@ export function useReorderMenus() {
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
   });
 }
+
+export function useResetMenuDefaults() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => menusAdminService.resetDefaults(),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
+  });
+}

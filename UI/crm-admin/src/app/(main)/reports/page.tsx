@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { ReportCatalog } from "@/features/dashboard/components/ReportCatalog";
+import { ReportHome } from '@/features/reports/components/ReportHome';
 
 export default function ReportsPage() {
-  return <ReportCatalog />;
+  return <ReportHome />;
 }

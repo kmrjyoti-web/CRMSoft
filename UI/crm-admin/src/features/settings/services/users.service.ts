@@ -9,7 +9,7 @@ import type {
   UserUpdateData,
 } from "../types/settings.types";
 
-const BASE_URL = "/users";
+const BASE_URL = "/api/v1/users";
 
 export const usersService = {
   getAll: (params?: UserListParams) =>

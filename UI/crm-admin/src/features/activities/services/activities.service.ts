@@ -10,7 +10,7 @@ import type {
   ActivityCompleteData,
 } from "../types/activities.types";
 
-const BASE_URL = "/activities";
+const BASE_URL = "/api/v1/activities";
 
 export const activitiesService = {
   getAll: (params?: ActivityListParams) =>

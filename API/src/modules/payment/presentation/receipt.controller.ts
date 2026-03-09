@@ -5,7 +5,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { ReceiptService } from '../services/receipt.service';
 
 @ApiTags('Receipts')
-@Controller('api/v1/receipts')
+@Controller('receipts')
 export class ReceiptController {
   constructor(private readonly receiptService: ReceiptService) {}
 

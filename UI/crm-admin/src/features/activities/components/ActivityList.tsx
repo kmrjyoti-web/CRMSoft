@@ -2,6 +2,8 @@
 
 import { useMemo, useCallback, useState } from "react";
 
+import { useEntityPanel } from "@/hooks/useEntityPanel";
+
 import { useRouter } from "next/navigation";
 
 import toast from "react-hot-toast";
@@ -18,10 +20,14 @@ import { BulkEditPanel } from "@/components/common/BulkEditPanel";
 import { useBulkDeleteDialog } from "@/components/common/BulkDeleteDialog";
 import { useConfirmDialog } from "@/components/common/useConfirmDialog";
 import { ActionsMenu } from "@/components/common/ActionsMenu";
+import { HelpButton } from "@/components/common/HelpButton";
 import { formatDate } from "@/lib/format-date";
 
 import { useActivitiesList, useSoftDeleteActivity, useUpdateActivity, useDeactivateActivity, useReactivateActivity } from "../hooks/useActivities";
 
+import { ActivityForm } from "./ActivityForm";
+import { ActivityListUserHelp } from "../help/ActivityListUserHelp";
+import { ActivityListDevHelp } from "../help/ActivityListDevHelp";
 import { ACTIVITY_FILTER_CONFIG } from "../utils/activity-filters";
 
 import type {
@@ -90,6 +96,16 @@ function flattenActivities(
 
 export function ActivityList() {
   const router = useRouter();
+
+  const { handleRowEdit, handleCreate } = useEntityPanel({
+    entityKey: "activity",
+    entityLabel: "Activity",
+    FormComponent: ActivityForm,
+    idProp: "activityId",
+    editRoute: "/activities/:id/edit",
+    createRoute: "/activities/new",
+    displayField: "subject",
+  });
 
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
 
@@ -182,17 +198,6 @@ export function ActivityList() {
     onComplete: () => clearSelection(),
   });
 
-  const handleRowEdit = useCallback(
-    (row: Record<string, unknown>) => {
-      router.push(`/activities/${row.id}`);
-    },
-    [router],
-  );
-
-  const handleCreate = useCallback(() => {
-    router.push("/activities/new");
-  }, [router]);
-
   // ── Single row delete ─────────────────────────────────────
 
   const handleRowDelete = useCallback(
@@ -266,7 +271,17 @@ export function ActivityList() {
           onCreate={handleCreate}
           selectedIds={selectedIds}
           onSelectionChange={handleSelectionChange}
-          headerActions={<ActionsMenu items={actionsMenuItems} />}
+          headerActions={
+            <>
+              <HelpButton
+                panelId="activities-list-help"
+                title="Activities — Help"
+                userContent={<ActivityListUserHelp />}
+                devContent={<ActivityListDevHelp />}
+              />
+              <ActionsMenu items={actionsMenuItems} />
+            </>
+          }
         />
       </div>
 

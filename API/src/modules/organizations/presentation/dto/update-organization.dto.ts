@@ -1,5 +1,5 @@
 import {
-  IsString, IsOptional, IsEmail, IsArray, MinLength,
+  IsString, IsOptional, IsEmail, IsArray, MinLength, IsNumber,
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -15,6 +15,7 @@ export class UpdateOrganizationDto {
   @ApiPropertyOptional() @IsOptional() @IsString() country?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() pincode?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() industry?: string;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() annualRevenue?: number;
   @ApiPropertyOptional() @IsOptional() @IsString() notes?: string;
 
   @ApiPropertyOptional({ type: [String], description: 'Replace all filters' })

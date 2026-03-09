@@ -27,8 +27,9 @@ export function SidePanel({ panel }: SidePanelProps) {
   const isFullscreen = state === "fullscreen";
   const isMaximized = state === "maximized";
 
-  // Bring to front on click
-  const handlePanelClick = useCallback(() => {
+  // Bring to front on mousedown (fires before click, so child panels opened via
+  // button click handlers always get a higher z-index than the parent)
+  const handlePanelMouseDown = useCallback(() => {
     bringToFront(config.id);
   }, [bringToFront, config.id]);
 
@@ -58,21 +59,25 @@ export function SidePanel({ panel }: SidePanelProps) {
   // Don't render if minimized
   if (state === "minimized") return null;
 
+  const hasCustomWidth = !isFullscreen && !isMaximized && config.width;
   const widthClass = isFullscreen
     ? "sp-panel--fullscreen"
     : isMaximized
       ? "sp-panel--maximized"
-      : "sp-panel--normal";
+      : hasCustomWidth
+        ? "sp-panel--normal"
+        : "sp-panel--normal";
 
   const positionClass = isFullscreen ? "sp-panel--inset" : "";
   const animClass = isFirstRender.current ? " sp-panel--entering" : "";
+  const bodyClass = config.noPadding ? "sp-body sp-body--no-pad" : "sp-body";
 
   const panelEl = (
     <div
       ref={panelRef}
       className={`sp-panel ${widthClass} ${positionClass}${animClass}`}
-      style={{ zIndex }}
-      onClick={handlePanelClick}
+      style={{ zIndex, ...(hasCustomWidth ? { width: config.width } : {}) }}
+      onMouseDown={handlePanelMouseDown}
     >
       <SidePanelHeader
         config={config}
@@ -84,7 +89,7 @@ export function SidePanel({ panel }: SidePanelProps) {
         onClose={() => closePanel(config.id)}
       />
 
-      <div className="sp-body">{config.content}</div>
+      <div className={bodyClass}>{config.content}</div>
 
       <SidePanelFooter
         buttons={config.footerButtons}

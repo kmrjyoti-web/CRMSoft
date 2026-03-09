@@ -11,6 +11,7 @@ import { AddValueCommand } from '../application/commands/add-value/add-value.com
 import { UpdateValueCommand } from '../application/commands/update-value/update-value.command';
 import { ReorderValuesCommand } from '../application/commands/reorder-values/reorder-values.command';
 import { DeactivateValueCommand } from '../application/commands/deactivate-value/deactivate-value.command';
+import { ResetLookupDefaultsCommand } from '../application/commands/reset-lookup-defaults/reset-lookup-defaults.command';
 import { GetAllLookupsQuery } from '../application/queries/get-all-lookups/get-all-lookups.query';
 import { GetLookupByIdQuery } from '../application/queries/get-lookup-by-id/get-lookup-by-id.query';
 import { GetValuesByCategoryQuery } from '../application/queries/get-values-by-category/get-values-by-category.query';
@@ -118,5 +119,13 @@ export class LookupsController {
   async deactivateValue(@Param('valueId') valueId: string) {
     await this.commandBus.execute(new DeactivateValueCommand(valueId));
     return ApiResponse.success(null, 'Value deactivated');
+  }
+
+  @Post('reset-defaults')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reset all system lookups to seed defaults' })
+  async resetToDefaults() {
+    const result = await this.commandBus.execute(new ResetLookupDefaultsCommand());
+    return ApiResponse.success(result, 'Lookup defaults restored');
   }
 }

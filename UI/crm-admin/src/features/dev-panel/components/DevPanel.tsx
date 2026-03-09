@@ -15,6 +15,7 @@ import { NetworkLogTab } from "./tabs/NetworkLogTab";
 import { SystemInfoTab } from "./tabs/SystemInfoTab";
 import { FeatureFlagsTab } from "./tabs/FeatureFlagsTab";
 import { QueryInspectorTab } from "./tabs/QueryInspectorTab";
+import { DocsTab } from "./tabs/DocsTab";
 
 import type { DevTab, DevTabId } from "../types/dev-panel.types";
 
@@ -28,6 +29,7 @@ const DEV_TABS: DevTab[] = [
   { id: "system-info", label: "System", icon: "monitor", description: "Build, browser, auth, config info" },
   { id: "feature-flags", label: "Flags", icon: "flag", description: "Feature flags & plan gates" },
   { id: "query-inspector", label: "Query Cache", icon: "layers", description: "TanStack Query cache inspector" },
+  { id: "docs", label: "Feature Docs", icon: "book-open", description: "Developer documentation for all features" },
 ];
 
 const TAB_COMPONENTS: Record<DevTabId, React.ComponentType> = {
@@ -40,6 +42,7 @@ const TAB_COMPONENTS: Record<DevTabId, React.ComponentType> = {
   "system-info": SystemInfoTab,
   "feature-flags": FeatureFlagsTab,
   "query-inspector": QueryInspectorTab,
+  docs: DocsTab,
 };
 
 export function DevPanel() {

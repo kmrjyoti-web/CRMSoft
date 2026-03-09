@@ -15,7 +15,7 @@ describe('GetMyMenuHandler', () => {
 
   // Full CRM sidebar menus for testing
   const allMenus = [
-    makeMenu({ id: 'dash', name: 'Dashboard', code: 'DASHBOARD', route: '/dashboard', permissionModule: 'dashboard', permissionAction: 'view', sortOrder: 0 }),
+    makeMenu({ id: 'dash', name: 'Dashboard', code: 'DASHBOARD', route: '/dashboard', permissionModule: 'dashboard', permissionAction: 'read', sortOrder: 0 }),
     makeMenu({ id: 'div1', name: 'Div 1', code: 'DIV_1', menuType: 'DIVIDER', sortOrder: 1 }),
     makeMenu({ id: 'contacts-group', name: 'Contacts', code: 'CONTACTS_GROUP', menuType: 'GROUP', sortOrder: 2 }),
     makeMenu({ id: 'raw', name: 'Raw Contacts', code: 'RAW_CONTACTS', route: '/raw-contacts', parentId: 'contacts-group', permissionModule: 'contacts', permissionAction: 'read', sortOrder: 0 }),
@@ -33,8 +33,10 @@ describe('GetMyMenuHandler', () => {
     prisma = {
       menu: { findMany: jest.fn().mockResolvedValue(allMenus.filter(m => m.isActive)) },
       rolePermission: { findMany: jest.fn().mockResolvedValue([]) },
+      tenant: { findFirst: jest.fn().mockResolvedValue({ id: 'default-tenant-id', slug: 'default' }) },
     };
-    handler = new GetMyMenuHandler(prisma);
+    const configService = { get: jest.fn().mockReturnValue(undefined) } as any;
+    handler = new GetMyMenuHandler(prisma, configService);
   });
 
   it('SUPER_ADMIN sees all active menus', async () => {
@@ -50,7 +52,7 @@ describe('GetMyMenuHandler', () => {
 
   it('SALES_EXEC sees only permitted menus (no Admin section)', async () => {
     prisma.rolePermission.findMany.mockResolvedValue([
-      { permission: { module: 'dashboard', action: 'view' } },
+      { permission: { module: 'dashboard', action: 'read' } },
       { permission: { module: 'leads', action: 'read' } },
       { permission: { module: 'contacts', action: 'read' } },
     ]);
@@ -65,7 +67,7 @@ describe('GetMyMenuHandler', () => {
 
   it('Groups with no visible children are hidden', async () => {
     prisma.rolePermission.findMany.mockResolvedValue([
-      { permission: { module: 'dashboard', action: 'view' } },
+      { permission: { module: 'dashboard', action: 'read' } },
     ]);
     const result = await handler.execute(new GetMyMenuQuery('u3', 'r3', 'VIEWER'));
     const codes = flatCodes(result);
@@ -81,7 +83,7 @@ describe('GetMyMenuHandler', () => {
 
   it('Dividers between hidden sections are removed', async () => {
     prisma.rolePermission.findMany.mockResolvedValue([
-      { permission: { module: 'dashboard', action: 'view' } },
+      { permission: { module: 'dashboard', action: 'read' } },
     ]);
     const result = await handler.execute(new GetMyMenuQuery('u5', 'r5', 'VIEWER'));
     // Only Dashboard + Help visible, dividers should be cleaned up

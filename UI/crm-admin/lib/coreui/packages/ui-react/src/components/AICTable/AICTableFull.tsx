@@ -58,6 +58,8 @@ export const AICTableFull = forwardRef<HTMLDivElement, AICTableFullProps>(functi
     selectedIds,
     onSelectionChange,
     headerActions,
+    kanbanCategoryOptions,
+    defaultCalendarSettings,
   },
   ref,
 ) {
@@ -70,7 +72,7 @@ export const AICTableFull = forwardRef<HTMLDivElement, AICTableFullProps>(functi
   const [isKanbanModalOpen, setIsKanbanModalOpen] = useState(false);
   const [treeSettings, setTreeSettings] = useState<TreeSettings | null>(null);
   const [isTreeModalOpen, setIsTreeModalOpen] = useState(false);
-  const [calendarSettings, setCalendarSettings] = useState<CalendarSettings | null>(null);
+  const [calendarSettings, setCalendarSettings] = useState<CalendarSettings | null>(defaultCalendarSettings ?? null);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
   const [chartSettings, setChartSettings] = useState<ChartSettings | null>(null);
   const [isChartModalOpen, setIsChartModalOpen] = useState(false);
@@ -148,7 +150,7 @@ export const AICTableFull = forwardRef<HTMLDivElement, AICTableFullProps>(functi
       case 'card':
         return <CardView data={filteredData} />;
       case 'calendar':
-        return <CalendarView data={filteredData} settings={calendarSettings} columns={columns} />;
+        return <CalendarView data={filteredData} settings={calendarSettings} columns={columns} onRowEdit={onRowEdit} />;
       case 'map':
         return <MapView data={filteredData} />;
       case 'bi':
@@ -160,7 +162,7 @@ export const AICTableFull = forwardRef<HTMLDivElement, AICTableFullProps>(functi
       case 'tree':
         return <TreeView data={filteredData} settings={treeSettings} columns={columns} />;
       case 'kanban':
-        return <KanbanView data={filteredData} settings={kanbanSettings} onCreate={onCreate} />;
+        return <KanbanView data={filteredData} settings={kanbanSettings} onCreate={onCreate} categoryOptions={kanbanCategoryOptions} title={title} />;
       default:
         return <TableView data={filteredData} density={density} validationRules={validationRules} showOnlyErrors={showOnlyErrors} columns={columns} />;
     }
@@ -342,7 +344,7 @@ export const AICTableFull = forwardRef<HTMLDivElement, AICTableFullProps>(functi
         />
 
         <div className="flex-1 overflow-hidden bg-white m-4 border border-gray-200 rounded-md shadow-sm flex flex-col">
-          <div className="flex-1 overflow-auto flex flex-col">
+          <div className="flex-1 min-h-0 overflow-auto">
             <AnimatePresence mode="wait">
               <motion.div
                 key={viewMode}
@@ -350,25 +352,25 @@ export const AICTableFull = forwardRef<HTMLDivElement, AICTableFullProps>(functi
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="flex flex-col min-h-full"
+                className="h-full flex flex-col"
               >
-                <div className="flex-1">{renderView()}</div>
-
-                {viewMode !== 'table' && (
-                  <div className="flex-none flex items-center justify-between px-4 py-2 border-t border-gray-200 bg-gray-50 text-sm text-gray-600 mt-auto">
-                    <div>Total Records <span className="font-semibold text-gray-900">{filteredData.length}</span></div>
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-1">
-                        <button className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50" disabled><ChevronLeft size={16} /></button>
-                        <span className="font-medium text-gray-900">1 to {filteredData.length}</span>
-                        <button className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50" disabled><ChevronRight size={16} /></button>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <div className="flex-1 min-h-0 overflow-auto">{renderView()}</div>
               </motion.div>
             </AnimatePresence>
           </div>
+
+          {viewMode !== 'table' && (
+            <div className="flex-shrink-0 flex items-center justify-between px-4 py-2 border-t border-gray-200 bg-gray-50 text-sm text-gray-600">
+              <div>Total Records <span className="font-semibold text-gray-900">{filteredData.length}</span></div>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-1">
+                  <button className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50" disabled><ChevronLeft size={16} /></button>
+                  <span className="font-medium text-gray-900">1 to {filteredData.length}</span>
+                  <button className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50" disabled><ChevronRight size={16} /></button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -378,6 +380,7 @@ export const AICTableFull = forwardRef<HTMLDivElement, AICTableFullProps>(functi
         onClose={() => { setIsKanbanModalOpen(false); if (!kanbanSettings) setViewMode(defaultViewMode); }}
         onSave={(settings) => { setKanbanSettings(settings); setIsKanbanModalOpen(false); setViewMode('kanban'); }}
         data={data}
+        categoryOptions={kanbanCategoryOptions}
       />
       <TreeSettingsModal
         isOpen={isTreeModalOpen}

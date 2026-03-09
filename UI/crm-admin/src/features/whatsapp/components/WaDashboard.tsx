@@ -1,0 +1,145 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import {
+  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+} from 'recharts';
+import { Button, DatePicker } from '@/components/ui';
+import { PageHeader } from '@/components/common/PageHeader';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { getDateRange } from '@/features/dashboard/utils/date-range';
+import { CHART_COLORS } from '@/features/dashboard/utils/chart-colors';
+import type { DateRangePreset } from '@/features/dashboard/utils/date-range';
+import { useWaAnalytics, useWaAgentPerformance } from '../hooks/useWaAnalytics';
+import { WaKpiCards } from './WaKpiCards';
+import { AgentPerformanceTable } from './AgentPerformanceTable';
+
+export function WaDashboard() {
+  const [preset, setPreset] = useState<DateRangePreset>('30d');
+  const initialRange = useMemo(() => getDateRange('30d'), []);
+  const [dateFrom, setDateFrom] = useState(initialRange.dateFrom);
+  const [dateTo, setDateTo] = useState(initialRange.dateTo);
+
+  const handlePreset = (p: DateRangePreset) => {
+    setPreset(p);
+    const range = getDateRange(p);
+    setDateFrom(range.dateFrom);
+    setDateTo(range.dateTo);
+  };
+
+  const params = useMemo(() => ({ dateFrom, dateTo }), [dateFrom, dateTo]);
+  const { data: statsData, isLoading } = useWaAnalytics(params);
+  const { data: agentsData, isLoading: agentsLoading } = useWaAgentPerformance(params);
+
+  const stats = statsData?.data;
+  const agents = Array.isArray(agentsData?.data) ? agentsData.data : [];
+
+  // Build chart data from stats
+  const messageChart = useMemo(() => {
+    if (!stats) return [];
+    return [
+      { name: 'Sent', value: stats.messagesSent ?? 0 },
+      { name: 'Delivered', value: stats.messagesDelivered ?? 0 },
+      { name: 'Read', value: stats.messagesRead ?? 0 },
+      { name: 'Failed', value: stats.messagesFailed ?? 0 },
+    ];
+  }, [stats]);
+
+  const conversationChart = useMemo(() => {
+    if (!stats) return [];
+    return [
+      { name: 'Open', value: stats.openConversations ?? 0 },
+      { name: 'Pending', value: stats.pendingConversations ?? 0 },
+      { name: 'Resolved', value: stats.resolvedConversations ?? 0 },
+    ];
+  }, [stats]);
+
+  if (isLoading) return <LoadingSpinner fullPage />;
+
+  return (
+    <div>
+      <PageHeader
+        title="WhatsApp Dashboard"
+        actions={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            {(['7d', '30d', '90d', 'thisMonth', 'lastMonth'] as DateRangePreset[]).map((p) => (
+              <Button
+                key={p}
+                size="sm"
+                variant={preset === p ? 'primary' : 'outline'}
+                onClick={() => handlePreset(p)}
+              >
+                {p === '7d' ? '7D' : p === '30d' ? '30D' : p === '90d' ? '90D'
+                  : p === 'thisMonth' ? 'This Month' : 'Last Month'}
+              </Button>
+            ))}
+            <DatePicker
+              label="From"
+              value={dateFrom}
+              onChange={(v) => { setDateFrom(v); setPreset('custom'); }}
+            />
+            <DatePicker
+              label="To"
+              value={dateTo}
+              onChange={(v) => { setDateTo(v); setPreset('custom'); }}
+            />
+          </div>
+        }
+      />
+
+      <WaKpiCards data={stats} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Message Delivery */}
+        <div className="rounded-lg border border-gray-200 bg-white p-5">
+          <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: '#1e293b' }}>
+            Message Delivery
+          </h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={messageChart}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
+              <Tooltip />
+              <Bar dataKey="value" name="Messages">
+                {messageChart.map((_entry, index) => (
+                  <Cell key={`msg-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Conversation Status */}
+        <div className="rounded-lg border border-gray-200 bg-white p-5">
+          <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: '#1e293b' }}>
+            Conversation Status
+          </h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={conversationChart}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                label={((props: Record<string, unknown>) =>
+                  `${props.name} (${props.value})`) as any}
+              >
+                {conversationChart.map((_entry, index) => (
+                  <Cell key={`conv-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <AgentPerformanceTable data={agents} isLoading={agentsLoading} />
+    </div>
+  );
+}

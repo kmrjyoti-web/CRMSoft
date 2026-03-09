@@ -8,7 +8,7 @@ import { useLookup } from "@/hooks/useLookup";
 interface LookupSelectProps {
   masterCode: string;
   parentId?: string;
-  value?: string | null;
+  value?: string | number | null;
   onChange?: (value: string | number | boolean | null) => void;
   placeholder?: string;
   label?: string;
@@ -16,6 +16,16 @@ interface LookupSelectProps {
   errorMessage?: string;
   disabled?: boolean;
   required?: boolean;
+  /** When true, option values are converted to numbers (for GST_RATE etc.) */
+  numericValue?: boolean;
+  /** Which LookupValue field to use as the option value.
+   *  "value" (default) → the code string (e.g. "CEO")
+   *  "id" → the lookupValueId UUID (use for filterIds) */
+  valueKey?: "id" | "value";
+  /** Left icon element (floating label + icon pattern) */
+  leftIcon?: React.ReactNode;
+  /** Footer content below the select (action links, hints) */
+  footer?: React.ReactNode;
 }
 
 export function LookupSelect({
@@ -28,6 +38,10 @@ export function LookupSelect({
   errorMessage,
   disabled,
   required,
+  numericValue,
+  valueKey = "value",
+  leftIcon,
+  footer,
 }: LookupSelectProps) {
   const { data, isLoading } = useLookup(masterCode);
 
@@ -35,9 +49,9 @@ export function LookupSelect({
     () =>
       data?.map((v) => ({
         label: v.label,
-        value: v.value,
+        value: numericValue ? Number(v.value) : v[valueKey],
       })) ?? [],
-    [data],
+    [data, numericValue, valueKey],
   );
 
   return (
@@ -52,6 +66,8 @@ export function LookupSelect({
       errorMessage={errorMessage}
       disabled={disabled}
       required={required}
+      leftIcon={leftIcon}
+      footer={footer}
       searchable
       clearable
     />

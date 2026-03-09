@@ -1,5 +1,7 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { PrismaModule } from '../../core/prisma/prisma.module';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { CalendarModule } from '../calendar/calendar.module';
 
 // ─── SERVICES ───
 import { JobRegistryService } from './services/job-registry.service';
@@ -78,6 +80,23 @@ import {
   WorkflowDelayedActionsHandler,
 } from './handlers/placeholder-handlers';
 
+// ─── HANDLERS: TASK ENGINE ───
+import {
+  CheckOverdueTasksHandler,
+  CheckTaskEscalationsHandler,
+  ProcessTaskRecurrenceHandler,
+  CheckMissedRemindersHandler,
+} from './handlers/task-handlers';
+
+// ─── HANDLERS: CALENDAR ENGINE ───
+import {
+  ProcessEventRemindersHandler,
+  SyncExternalCalendarsHandler,
+  RenewCalendarWebhooksHandler,
+  AutoCompletePastEventsHandler,
+  GenerateRecurringEventsHandler,
+} from './handlers/calendar-handlers';
+
 const ALL_HANDLERS = [
   // Sync
   ExpireFlushCommandsHandler, SyncChangelogCleanupHandler,
@@ -106,10 +125,17 @@ const ALL_HANDLERS = [
   RecalcTenantUsageHandler, SendTrialExpiryEmailsHandler,
   SuspendOverdueAccountsHandler, ScheduledReportsHandler,
   DailyDigestHandler, WorkflowDelayedActionsHandler,
+  // Task Engine
+  CheckOverdueTasksHandler, CheckTaskEscalationsHandler,
+  ProcessTaskRecurrenceHandler, CheckMissedRemindersHandler,
+  // Calendar Engine
+  ProcessEventRemindersHandler, SyncExternalCalendarsHandler,
+  RenewCalendarWebhooksHandler, AutoCompletePastEventsHandler,
+  GenerateRecurringEventsHandler,
 ];
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, NotificationsModule, CalendarModule],
   controllers: [CronAdminController],
   providers: [
     JobRegistryService,
@@ -171,6 +197,15 @@ export class CronEngineModule implements OnModuleInit {
     private readonly schedReports: ScheduledReportsHandler,
     private readonly dailyDigest: DailyDigestHandler,
     private readonly workflowActions: WorkflowDelayedActionsHandler,
+    private readonly overdueTasks: CheckOverdueTasksHandler,
+    private readonly taskEscalations: CheckTaskEscalationsHandler,
+    private readonly taskRecurrence: ProcessTaskRecurrenceHandler,
+    private readonly missedReminders: CheckMissedRemindersHandler,
+    private readonly eventReminders: ProcessEventRemindersHandler,
+    private readonly syncCalendars: SyncExternalCalendarsHandler,
+    private readonly renewWebhooks: RenewCalendarWebhooksHandler,
+    private readonly autoComplete: AutoCompletePastEventsHandler,
+    private readonly genRecurring: GenerateRecurringEventsHandler,
   ) {}
 
   onModuleInit(): void {
@@ -188,6 +223,9 @@ export class CronEngineModule implements OnModuleInit {
       this.expireTrials, this.expireSubs, this.autoRenew,
       this.recalcUsage, this.trialExpiry, this.suspendOverdue,
       this.schedReports, this.dailyDigest, this.workflowActions,
+      this.overdueTasks, this.taskEscalations, this.taskRecurrence, this.missedReminders,
+      this.eventReminders, this.syncCalendars, this.renewWebhooks,
+      this.autoComplete, this.genRecurring,
     ];
     for (const h of handlers) {
       this.registry.register(h);

@@ -31,6 +31,7 @@ import {
   useUpdateMenu,
   useDeactivateMenu,
   useReorderMenus,
+  useResetMenuDefaults,
 } from "../hooks/useMenus";
 
 import type { MenuAdminItem, MenuType } from "../types/settings.types";
@@ -195,12 +196,14 @@ export function MenuEditor() {
   const updateMutation = useUpdateMenu();
   const deactivateMutation = useDeactivateMenu();
   const reorderMutation = useReorderMenus();
+  const resetMutation = useResetMenuDefaults();
 
   // ── State ──
 
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuAdminItem | null>(null);
+  const [confirmResetOpen, setConfirmResetOpen] = useState(false);
 
   // Form fields
   const [formName, setFormName] = useState("");
@@ -282,6 +285,18 @@ export function MenuEditor() {
     setEditingItem(null);
     resetForm();
   }, [resetForm]);
+
+  // ── Reset to defaults ──
+
+  const handleResetDefaults = useCallback(async () => {
+    try {
+      const result = await resetMutation.mutateAsync();
+      setConfirmResetOpen(false);
+      toast.success(`Menus reset to defaults (${result?.data?.seeded ?? 0} items)`);
+    } catch {
+      toast.error("Failed to reset menus");
+    }
+  }, [resetMutation]);
 
   // ── Deactivate ──
 
@@ -458,9 +473,18 @@ export function MenuEditor() {
       <PageHeader
         title="Menu Editor"
         actions={
-          <Button variant="primary" onClick={handleAdd}>
-            <Icon name="plus" size={16} /> Add Menu Item
-          </Button>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmResetOpen(true)}
+              loading={resetMutation.isPending}
+            >
+              <Icon name="rotate-ccw" size={16} /> Reset to Defaults
+            </Button>
+            <Button variant="primary" onClick={handleAdd}>
+              <Icon name="plus" size={16} /> Add Menu Item
+            </Button>
+          </div>
         }
       />
 
@@ -612,6 +636,34 @@ export function MenuEditor() {
             onChange={(value: boolean) => setFormOpenInNewTab(value)}
           />
         </div>
+      </Modal>
+
+      {/* Confirmation modal for Reset to Defaults */}
+      <Modal
+        open={confirmResetOpen}
+        onClose={() => setConfirmResetOpen(false)}
+        title="Reset Menus to Defaults"
+        size="sm"
+        footer={
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            <Button variant="outline" onClick={() => setConfirmResetOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleResetDefaults}
+              loading={resetMutation.isPending}
+              disabled={resetMutation.isPending}
+            >
+              Reset
+            </Button>
+          </div>
+        }
+      >
+        <p style={{ margin: 0, color: "#374151" }}>
+          This will <strong>delete all current menu items</strong> and restore the
+          system defaults. Any custom menus you added will be lost. Are you sure?
+        </p>
       </Modal>
     </div>
   );

@@ -6,6 +6,7 @@ import type {
   LeadListParams,
   LeadCreateData,
   LeadUpdateData,
+  QuickCreateLeadData,
 } from "../types/leads.types";
 
 const KEY = "leads";
@@ -30,6 +31,18 @@ export function useCreateLead() {
   return useMutation({
     mutationFn: (data: LeadCreateData) => leadsService.create(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
+  });
+}
+
+export function useQuickCreateLead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: QuickCreateLeadData) => leadsService.quickCreate(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [KEY] });
+      qc.invalidateQueries({ queryKey: ["contacts"] });
+      qc.invalidateQueries({ queryKey: ["organizations"] });
+    },
   });
 }
 

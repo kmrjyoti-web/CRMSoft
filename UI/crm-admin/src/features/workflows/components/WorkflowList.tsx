@@ -12,8 +12,11 @@ import { Button, Icon, Badge } from "@/components/ui";
 import { EmptyState } from "@/components/common/EmptyState";
 import { TableSkeleton } from "@/components/common/TableSkeleton";
 import { PageHeader } from "@/components/common/PageHeader";
+import { HelpButton } from "@/components/common/HelpButton";
 
 import { useWorkflowsList, useCloneWorkflow } from "../hooks/useWorkflows";
+import { WorkflowHelpContent } from "./WorkflowHelp";
+import { WorkflowDevHelp } from "../help/WorkflowDevHelp";
 
 import type {
   WorkflowListParams,
@@ -85,11 +88,19 @@ export function WorkflowList() {
         title="Workflows"
         subtitle={`${totalCount} workflow${totalCount !== 1 ? "s" : ""}`}
         actions={
-          <Link href="/workflows/new">
-            <Button variant="primary">
-              <Icon name="plus" size={16} /> Add Workflow
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <HelpButton
+              panelId="workflow-list-help"
+              title="Workflows — Help"
+              userContent={<WorkflowHelpContent />}
+              devContent={<WorkflowDevHelp />}
+            />
+            <Link href="/workflows/new">
+              <Button variant="primary">
+                <Icon name="plus" size={16} /> Add Workflow
+              </Button>
+            </Link>
+          </div>
         }
       />
 
@@ -126,7 +137,7 @@ export function WorkflowList() {
       {/* Table */}
       {workflows.length === 0 ? (
         <EmptyState
-          icon="git-branch"
+          icon="activity"
           title="No workflows found"
           description="Get started by adding your first workflow."
           action={{
@@ -241,6 +252,7 @@ export function WorkflowList() {
           )}
         </>
       )}
+
     </div>
   );
 }

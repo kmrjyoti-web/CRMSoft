@@ -26,14 +26,14 @@ describe("usersService", () => {
 
   it("getAll calls GET /users with params", async () => {
     await usersService.getAll({ page: 1, limit: 10, search: "test" });
-    expect(apiClient.get).toHaveBeenCalledWith("/users", {
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/users", {
       params: { page: 1, limit: 10, search: "test" },
     });
   });
 
   it("getById calls GET /users/:id", async () => {
     await usersService.getById("user-123");
-    expect(apiClient.get).toHaveBeenCalledWith("/users/user-123");
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/users/user-123");
   });
 
   it("create sends POST /users", async () => {
@@ -46,17 +46,17 @@ describe("usersService", () => {
       roleId: "role-1",
     };
     await usersService.create(payload);
-    expect(apiClient.post).toHaveBeenCalledWith("/users", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/users", payload);
   });
 
   it("update sends PUT /users/:id (not PATCH)", async () => {
     const payload = { firstName: "Jane" };
     await usersService.update("user-123", payload);
-    expect(apiClient.put).toHaveBeenCalledWith("/users/user-123", payload);
+    expect(apiClient.put).toHaveBeenCalledWith("/api/v1/users/user-123", payload);
   });
 
   it("deactivate sends POST /users/:id/deactivate", async () => {
     await usersService.deactivate("user-123");
-    expect(apiClient.post).toHaveBeenCalledWith("/users/user-123/deactivate");
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/users/user-123/deactivate");
   });
 });

@@ -8,15 +8,15 @@ import type { IconName, MenuItem } from "@/components/ui";
 
 // ── Icon with fallback ──────────────────────────────────
 
-function MenuIcon({ name }: { name: string }) {
+function MenuIcon({ name, size = 18 }: { name: string; size?: number }) {
   if (name && name in ICON_MAP) {
-    return <Icon name={name as IconName} size={18} />;
+    return <Icon name={name as IconName} size={size} />;
   }
   return (
     <span
       style={{
-        width: 18,
-        height: 18,
+        width: size,
+        height: size,
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
@@ -65,6 +65,7 @@ export function CRMSidebar({
     const flatten = (items: MenuItem[]): MenuItem[] => {
       const out: MenuItem[] = [];
       for (const item of items) {
+        if (item.label === "__DIVIDER__" || item.label.startsWith("__TITLE__")) continue;
         out.push(item);
         if (item.expanded && item.subItems?.length) {
           out.push(...flatten(item.subItems));
@@ -203,7 +204,34 @@ export function CRMSidebar({
 
         {/* Menu List */}
         <ul className="menu-list">
-          {filteredItems.map((item, i) => (
+          {filteredItems.map((item, i) =>
+            item.label === "__DIVIDER__" ? (
+              <li key={`divider-${i}`} className="menu-divider">
+                <hr
+                  style={{
+                    border: "none",
+                    borderTop: "1px solid rgba(255,255,255,0.08)",
+                    margin: "6px 16px",
+                  }}
+                />
+              </li>
+            ) : item.label.startsWith("__TITLE__") ? (
+              <li key={`title-${i}`} style={{ padding: "12px 16px 4px" }}>
+                {showFull && (
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      letterSpacing: 1.2,
+                      color: "rgba(255,255,255,0.4)",
+                    }}
+                  >
+                    {item.label.replace("__TITLE__", "")}
+                  </span>
+                )}
+              </li>
+            ) : (
             <li
               key={item.label + i}
               className={[
@@ -242,14 +270,23 @@ export function CRMSidebar({
                     {item.subItems.map((sub, j) => (
                       <li
                         key={sub.label + j}
-                        className={`sub-menu-item${
-                          focusedItem === sub ? " focused" : ""
-                        }`}
+                        className={[
+                          "sub-menu-item",
+                          sub.active ? "active" : "",
+                          focusedItem === sub ? "focused" : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
                       >
                         <div
                           className="sub-menu-row"
                           onClick={(e) => handleSubItemClick(sub, e)}
                         >
+                          {sub.icon && (
+                            <span className="sub-menu-icon">
+                              <MenuIcon name={sub.icon} size={14} />
+                            </span>
+                          )}
                           <span className="sub-menu-text">{sub.label}</span>
                           {sub.hasSub && (
                             <span
@@ -268,14 +305,23 @@ export function CRMSidebar({
                             {sub.subItems.map((child, k) => (
                               <li
                                 key={child.label + k}
-                                className={`sub-menu-item nested${
-                                  focusedItem === child ? " focused" : ""
-                                }`}
+                                className={[
+                                  "sub-menu-item nested",
+                                  child.active ? "active" : "",
+                                  focusedItem === child ? "focused" : "",
+                                ]
+                                  .filter(Boolean)
+                                  .join(" ")}
                                 onClick={(e) =>
                                   handleSubItemClick(child, e)
                                 }
                               >
                                 <div className="sub-menu-row nested-row">
+                                  {child.icon && (
+                                    <span className="sub-menu-icon">
+                                      <MenuIcon name={child.icon} size={14} />
+                                    </span>
+                                  )}
                                   <span className="sub-menu-text">
                                     {child.label}
                                   </span>
@@ -289,7 +335,8 @@ export function CRMSidebar({
                   </ul>
                 )}
             </li>
-          ))}
+            )
+          )}
         </ul>
       </div>
 

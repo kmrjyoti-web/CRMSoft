@@ -12,11 +12,12 @@ import { z } from "zod";
 import {
   Button,
   Input,
-  SelectInput,
   DatePicker,
   NumberInput,
   Fieldset,
 } from "@/components/ui";
+import { LookupSelect } from "@/components/common/LookupSelect";
+import { useSidePanelStore } from "@/stores/side-panel.store";
 
 import { FormErrors } from "@/components/common/FormErrors";
 import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
@@ -45,29 +46,22 @@ const activitySchema = z.object({
 
 type ActivityFormValues = z.infer<typeof activitySchema>;
 
-// -- Constants ---------------------------------------------------------------
-
-const ACTIVITY_TYPE_OPTIONS = [
-  { label: "Call", value: "CALL" },
-  { label: "Email", value: "EMAIL" },
-  { label: "Meeting", value: "MEETING" },
-  { label: "Note", value: "NOTE" },
-  { label: "WhatsApp", value: "WHATSAPP" },
-  { label: "SMS", value: "SMS" },
-  { label: "Visit", value: "VISIT" },
-];
-
 // -- Props -------------------------------------------------------------------
 
 interface ActivityFormProps {
   activityId?: string;
+  mode?: "page" | "panel";
+  panelId?: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 // -- Component ---------------------------------------------------------------
 
-export function ActivityForm({ activityId }: ActivityFormProps) {
+export function ActivityForm({ activityId, mode = "page", panelId, onSuccess, onCancel }: ActivityFormProps) {
   const router = useRouter();
   const isEdit = !!activityId;
+  const updatePanelConfig = useSidePanelStore((s) => s.updatePanelConfig);
 
   const { data: activityData, isLoading: isLoadingActivity } =
     useActivityDetail(activityId ?? "");
@@ -111,6 +105,45 @@ export function ActivityForm({ activityId }: ActivityFormProps) {
     });
   }, [isEdit, activityData, reset]);
 
+  const isPanel = mode === "panel";
+
+  // Sync panel footer buttons with form submitting state
+  useEffect(() => {
+    if (!panelId) return;
+    updatePanelConfig(panelId, {
+      footerButtons: [
+        {
+          id: "cancel",
+          label: "Cancel",
+          showAs: "text",
+          variant: "secondary",
+          disabled: isSubmitting,
+          onClick: () => {},
+        },
+        {
+          id: "save",
+          label: isSubmitting
+            ? isEdit
+              ? "Updating..."
+              : "Saving..."
+            : isEdit
+              ? "Save Changes"
+              : "Save",
+          icon: "check",
+          showAs: "both",
+          variant: "primary",
+          loading: isSubmitting,
+          disabled: isSubmitting,
+          onClick: () => {
+            const formId = `sp-form-activity-${activityId ?? "new"}`;
+            const form = document.getElementById(formId) as HTMLFormElement | null;
+            form?.requestSubmit();
+          },
+        },
+      ],
+    });
+  }, [isSubmitting, panelId, isEdit, activityId, updatePanelConfig]);
+
   const onSubmit = async (values: ActivityFormValues) => {
     try {
       if (isEdit && activityId) {
@@ -134,7 +167,11 @@ export function ActivityForm({ activityId }: ActivityFormProps) {
           },
         });
         toast.success("Activity updated");
-        router.push(`/activities/${activityId}`);
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push(`/activities/${activityId}`);
+        }
       } else {
         await createMutation.mutateAsync({
           type: values.type as
@@ -155,7 +192,11 @@ export function ActivityForm({ activityId }: ActivityFormProps) {
           contactId: values.contactId || undefined,
         });
         toast.success("Activity created");
-        router.push("/activities");
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push("/activities");
+        }
       }
     } catch (err: unknown) {
       const message =
@@ -168,20 +209,23 @@ export function ActivityForm({ activityId }: ActivityFormProps) {
   if (isEdit && isLoadingActivity) return <LoadingSpinner fullPage />;
 
   return (
-    <div className="p-6" style={{ position: "relative" }}>
+    <div className={isPanel ? "p-4" : "p-6"} style={{ position: "relative" }}>
       <FormSubmitOverlay isSubmitting={isSubmitting} isEdit={isEdit} />
-      <PageHeader
-        title={isEdit ? "Edit Activity" : "New Activity"}
-        actions={
-          <Button variant="outline" onClick={() => router.back()}>
-            Back
-          </Button>
-        }
-      />
+      {!isPanel && (
+        <PageHeader
+          title={isEdit ? "Edit Activity" : "New Activity"}
+          actions={
+            <Button variant="outline" onClick={() => router.back()}>
+              Back
+            </Button>
+          }
+        />
+      )}
 
       <FormErrors errors={errors} />
 
       <form
+        id={isPanel ? `sp-form-activity-${activityId ?? "new"}` : undefined}
         onSubmit={handleSubmit(onSubmit)}
         noValidate
         className="mt-4 max-w-3xl space-y-6"
@@ -193,9 +237,9 @@ export function ActivityForm({ activityId }: ActivityFormProps) {
               name="type"
               control={control}
               render={({ field }) => (
-                <SelectInput
+                <LookupSelect
+                  masterCode="ACTIVITY_TYPE"
                   label="Type"
-                  options={ACTIVITY_TYPE_OPTIONS}
                   value={field.value}
                   onChange={field.onChange}
                   error={!!errors.type}
@@ -341,19 +385,21 @@ export function ActivityForm({ activityId }: ActivityFormProps) {
         </Fieldset>
 
         {/* Submit */}
-        <div className="flex gap-3 pt-2">
-          <Button
-            type="submit"
-            variant="primary"
-            loading={isSubmitting}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
-          </Button>
-          <Button variant="outline" onClick={() => router.back()}>
-            Cancel
-          </Button>
-        </div>
+        {!isPanel && (
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
+            </Button>
+            <Button variant="outline" onClick={() => router.back()}>
+              Cancel
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   );

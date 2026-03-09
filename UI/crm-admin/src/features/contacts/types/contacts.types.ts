@@ -71,6 +71,7 @@ export interface ContactFilter {
     id: string;
     value: string;
     label: string;
+    lookup?: { category: string };
   };
 }
 
@@ -123,6 +124,8 @@ export interface ContactUpdateData {
   designation?: string;
   department?: string;
   notes?: string;
+  communications?: CommunicationInput[];
+  organizationId?: string;
   filterIds?: string[];
 }
 

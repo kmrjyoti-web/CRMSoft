@@ -14,7 +14,7 @@ export interface CredentialSchema {
   provider: CredentialProvider;
   displayName: string;
   icon: string;
-  category: 'EMAIL' | 'PAYMENT' | 'STORAGE' | 'TELEPHONY' | 'MAPS' | 'MESSAGING' | 'OTHER';
+  category: 'EMAIL' | 'PAYMENT' | 'STORAGE' | 'TELEPHONY' | 'MAPS' | 'MESSAGING' | 'AI' | 'OTHER';
   fields: FieldDefinition[];
   setupGuide?: string;
   verifiable: boolean;
@@ -326,6 +326,60 @@ export class CredentialSchemaService {
       fields: [
         { key: 'serviceAccountJson', label: 'Service Account JSON', type: 'textarea', required: true, helpText: 'Paste the full JSON key file content' },
         { key: 'projectId', label: 'Project ID', type: 'text', required: false },
+      ],
+    });
+
+    // ─── AI PROVIDERS ───
+    this.schemas.set('ANTHROPIC_CLAUDE', {
+      provider: 'ANTHROPIC_CLAUDE',
+      displayName: 'Anthropic Claude',
+      icon: 'cpu',
+      category: 'AI',
+      verifiable: true,
+      supportsOAuth: false,
+      setupGuide: 'Get API key from console.anthropic.com → API Keys',
+      fields: [
+        { key: 'apiKey', label: 'API Key', type: 'password', required: true, helpText: 'sk-ant-...' },
+      ],
+    });
+
+    this.schemas.set('OPENAI_GPT', {
+      provider: 'OPENAI_GPT',
+      displayName: 'OpenAI GPT',
+      icon: 'cpu',
+      category: 'AI',
+      verifiable: true,
+      supportsOAuth: false,
+      setupGuide: 'Get API key from platform.openai.com → API keys',
+      fields: [
+        { key: 'apiKey', label: 'API Key', type: 'password', required: true },
+        { key: 'organizationId', label: 'Organization ID', type: 'text', required: false },
+      ],
+    });
+
+    this.schemas.set('GOOGLE_GEMINI', {
+      provider: 'GOOGLE_GEMINI',
+      displayName: 'Google Gemini',
+      icon: 'cpu',
+      category: 'AI',
+      verifiable: true,
+      supportsOAuth: false,
+      setupGuide: 'Get API key from aistudio.google.com → Get API key',
+      fields: [
+        { key: 'apiKey', label: 'API Key', type: 'password', required: true },
+      ],
+    });
+
+    this.schemas.set('GROQ', {
+      provider: 'GROQ',
+      displayName: 'Groq',
+      icon: 'zap',
+      category: 'AI',
+      verifiable: true,
+      supportsOAuth: false,
+      setupGuide: 'Get API key from console.groq.com → API Keys',
+      fields: [
+        { key: 'apiKey', label: 'API Key', type: 'password', required: true },
       ],
     });
 

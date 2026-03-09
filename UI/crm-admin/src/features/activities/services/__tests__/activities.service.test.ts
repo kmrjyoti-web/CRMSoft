@@ -27,36 +27,36 @@ describe("activitiesService", () => {
 
   it("getAll calls GET /activities with params", async () => {
     await activitiesService.getAll({ page: 1, limit: 10 });
-    expect(apiClient.get).toHaveBeenCalledWith("/activities", {
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/activities", {
       params: { page: 1, limit: 10 },
     });
   });
 
   it("getById calls GET /activities/:id", async () => {
     await activitiesService.getById("act-1");
-    expect(apiClient.get).toHaveBeenCalledWith("/activities/act-1");
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/activities/act-1");
   });
 
   it("create sends POST /activities", async () => {
     const payload = { type: "CALL", subject: "Test" };
     await activitiesService.create(payload as any);
-    expect(apiClient.post).toHaveBeenCalledWith("/activities", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/activities", payload);
   });
 
   it("update sends PUT /activities/:id", async () => {
     const payload = { subject: "Updated" };
     await activitiesService.update("act-1", payload);
-    expect(apiClient.put).toHaveBeenCalledWith("/activities/act-1", payload);
+    expect(apiClient.put).toHaveBeenCalledWith("/api/v1/activities/act-1", payload);
   });
 
   it("complete sends POST /activities/:id/complete", async () => {
     const payload = { outcome: "Success" };
     await activitiesService.complete("act-1", payload);
-    expect(apiClient.post).toHaveBeenCalledWith("/activities/act-1/complete", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/activities/act-1/complete", payload);
   });
 
   it("delete sends DELETE /activities/:id", async () => {
     await activitiesService.delete("act-1");
-    expect(apiClient.delete).toHaveBeenCalledWith("/activities/act-1");
+    expect(apiClient.delete).toHaveBeenCalledWith("/api/v1/activities/act-1");
   });
 });

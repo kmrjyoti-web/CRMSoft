@@ -8,7 +8,7 @@ import {
 } from './dto/update-business-hours.dto';
 
 @ApiTags('Settings - Business Hours')
-@Controller('api/v1/settings/business-hours')
+@Controller('settings/business-hours')
 export class BusinessHoursController {
   constructor(private readonly service: BusinessHoursService) {}
 

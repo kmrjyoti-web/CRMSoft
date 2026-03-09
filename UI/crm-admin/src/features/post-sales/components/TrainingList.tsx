@@ -1,18 +1,24 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
-
-import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 
 import { TableFull } from "@/components/ui";
 
 import { useTableFilters } from "@/hooks/useTableFilters";
 
+import { useEntityPanel } from "@/hooks/useEntityPanel";
+
 import { TableSkeleton } from "@/components/common/TableSkeleton";
+
+import { HelpButton } from "@/components/common/HelpButton";
 
 import { useTrainingsList } from "../hooks/usePostSales";
 
 import { TRAINING_FILTER_CONFIG } from "../utils/training-filters";
+
+import { TrainingForm } from "./TrainingForm";
+import { TrainingListUserHelp } from "../help/TrainingListUserHelp";
+import { PostSalesDevHelp } from "../help/PostSalesDevHelp";
 
 import type {
   TrainingListItem,
@@ -55,7 +61,15 @@ function flattenTrainings(
 // ── Component ───────────────────────────────────────────
 
 export function TrainingList() {
-  const router = useRouter();
+  const { handleRowEdit, handleCreate } = useEntityPanel({
+    entityKey: "training",
+    entityLabel: "Training",
+    FormComponent: TrainingForm,
+    idProp: "trainingId",
+    editRoute: "/post-sales/trainings/:id/edit",
+    createRoute: "/post-sales/trainings/new",
+    displayField: "trainingNo",
+  });
 
   const { activeFilters, filterParams, handleFilterChange, clearFilters } =
     useTableFilters(TRAINING_FILTER_CONFIG);
@@ -82,17 +96,6 @@ export function TrainingList() {
 
   const tableData = useMemo(() => flattenTrainings(items), [items]);
 
-  const handleRowEdit = useCallback(
-    (row: Record<string, unknown>) => {
-      router.push(`/post-sales/trainings/${row.id}`);
-    },
-    [router],
-  );
-
-  const handleCreate = useCallback(() => {
-    router.push("/post-sales/trainings/new");
-  }, [router]);
-
   if (isLoading) return <TableSkeleton title="Trainings" />;
 
   return (
@@ -109,6 +112,14 @@ export function TrainingList() {
         onFilterClear={clearFilters}
         onRowEdit={handleRowEdit}
         onCreate={handleCreate}
+        headerActions={
+          <HelpButton
+            panelId="trainings-list-help"
+            title="Trainings — Help"
+            userContent={<TrainingListUserHelp />}
+            devContent={<PostSalesDevHelp />}
+          />
+        }
       />
     </div>
   );

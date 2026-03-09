@@ -12,5 +12,8 @@ export class CreateActivityCommand {
     public readonly locationName?: string,
     public readonly latitude?: number,
     public readonly longitude?: number,
+    public readonly reminderMinutesBefore?: number,
+    public readonly taggedUserIds?: string[],
+    public readonly tenantId?: string,
   ) {}
 }

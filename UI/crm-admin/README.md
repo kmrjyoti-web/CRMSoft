@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CRMSoft Admin Panel
 
-## Getting Started
+Multi-tenant CRM administration panel built for Indian SMB businesses. Covers the full CRM lifecycle — leads, quotations, contacts, organizations, activities, finance, post-sales, reporting, and more.
 
-First, run the development server:
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript (strict) |
+| UI Library | CoreUI (AIC-prefixed, custom fork) |
+| State (client) | Zustand |
+| State (server) | TanStack React Query |
+| Forms | react-hook-form + zod |
+| HTTP | Axios |
+| Testing | Jest + React Testing Library + Playwright |
+
+## Quick Start
+
+**Prerequisites:** Node 18+, pnpm
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Install dependencies
+pnpm install
+
+# Set up environment
+cp .env.example .env.local
+# Edit .env.local — set NEXT_PUBLIC_API_URL
+
+# Start dev server (port 3005)
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Project Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+  app/                    # Next.js App Router pages
+    (auth)/               # Login, forgot-password (public)
+    (main)/               # Protected pages — render feature components
+  components/
+    ui/                   # 56 CoreUI wrapper components (ONLY place @coreui/* is imported)
+    common/               # Shared components (DataTable, FilterPanel, ColorBadge, etc.)
+  features/               # 65 feature modules (DDD pattern)
+    contacts/
+    organizations/
+    leads/
+    quotations/
+    ...
+  stores/                 # Zustand stores
+  services/               # API service layer (Axios)
+  hooks/                  # Shared custom hooks
+lib/
+  coreui/                 # CoreUI Git submodule (never edit directly)
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Key Features
 
-## Learn More
+| Domain | Features |
+|---|---|
+| Sales | Lead Management (Kanban + list), Quotation Builder (GST), Pipeline |
+| Contacts | Contacts CRUD, Organizations CRUD, Merge & Dedupe |
+| Activities | Activities, Follow-ups, Tour Plans, Calendar |
+| Finance | Invoices, Payments, Receipts, Credit Notes |
+| Post-Sales | Installations, Trainings, Support Tickets |
+| Dashboard | KPI cards, Recharts charts, filterable reports |
+| Communication | Email Templates, Signatures, Bulk Campaigns, Email Tracking |
+| Workflows | Visual Workflow Builder, Trigger/Action editor |
+| Settings | Users, Roles, Permissions, Lookups, Data Masking |
+| Marketplace | Plugin Store, API Gateway Admin, Integrations |
+| Platform | Offline Sync Admin, Verification Service, Help System |
+| Developer | Menu Editor, User Overrides, Table Config |
 
-To learn more about Next.js, take a look at the following resources:
+50+ additional modules included.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Testing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm test               # Unit + integration tests (Jest)
+pnpm test:coverage      # With coverage report
+pnpm e2e                # End-to-end tests (Playwright)
+```
 
-## Deploy on Vercel
+Current: 341 tests, 64 suites, all passing.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Building
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm build      # Production build
+pnpm start      # Start production server
+```
+
+## Docker
+
+```bash
+# Build image
+docker build -t crmsoft-admin .
+
+# Run container
+docker run -p 3005:3005 \
+  -e NEXT_PUBLIC_API_URL=http://your-api:3001/api/v1 \
+  crmsoft-admin
+```
+
+See [docs/deployment.md](docs/deployment.md) for Docker Compose (full stack with API + PostgreSQL + Redis).
+
+## Environment Variables
+
+| Variable | Description | Default |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | NestJS API base URL | `http://localhost:3001/api/v1` |
+| `NEXT_PUBLIC_APP_NAME` | App display name | `CRMSoft` |
+| `NEXT_PUBLIC_ENABLE_SSE` | Enable Server-Sent Events | `true` |
+
+## 8 Golden Rules
+
+1. **Never import `@coreui/*` outside `src/components/ui/`** — ESLint enforces this.
+2. **Never import `lucide-react` outside `src/components/ui/Icon.tsx`** — use `<Icon name="..." />` everywhere.
+3. **Never edit `lib/coreui/` for styling** — add overrides to `crm-theme.css` only.
+4. **Never use inline SVGs** — always use `<Icon name="..." />`.
+5. **Features are self-contained** — all logic for a feature lives in `src/features/{name}/`.
+6. **Route pages are thin** — pages only render the feature root component; no logic in pages.
+7. **After CoreUI update** — run `pnpm coreui:update` to validate all 56 wrappers.
+8. **All sidebars use shared hooks** — `useEntityPanel` (CRUD panels) or `useContentPanel` (info/help). Never use raw `openPanel()` in features.
+
+## Docs
+
+- [Architecture](docs/architecture.md)
+- [Getting Started](docs/getting-started.md)
+- [Deployment](docs/deployment.md)
+- [Changelog](CHANGELOG.md)

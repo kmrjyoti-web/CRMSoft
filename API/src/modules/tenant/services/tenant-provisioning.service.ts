@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { TenantContextService } from '../infrastructure/tenant-context.service';
+import { MENU_SEED_DATA } from '../../menus/presentation/menu-seed-data';
 
 @Injectable()
 export class TenantProvisioningService {
@@ -101,9 +102,56 @@ export class TenantProvisioningService {
         },
       });
 
+      // 8. Create default menu items for tenant
+      await this.seedMenus(tx, tenantId);
+
       this.logger.log(`Tenant provisioned: ${tenant.id} (${data.name})`);
 
       return { tenant, adminUser, subscription };
-    });
+    }, { timeout: 30000 });
+  }
+
+  /** Seed default menu items for a new tenant. */
+  private async seedMenus(tx: any, tenantId: string) {
+    let sortOrder = 0;
+    for (const item of MENU_SEED_DATA) {
+      const parent = await tx.menu.create({
+        data: {
+          tenantId,
+          name: item.name,
+          code: item.code,
+          icon: item.icon ?? null,
+          route: item.route ?? null,
+          menuType: item.menuType ?? 'ITEM',
+          permissionModule: item.permissionModule ?? null,
+          permissionAction: item.permissionAction ?? null,
+          badgeText: item.badgeText ?? null,
+          badgeColor: item.badgeColor ?? null,
+          sortOrder: sortOrder++,
+        },
+      });
+
+      if (item.children) {
+        let childOrder = 0;
+        for (const child of item.children) {
+          await tx.menu.create({
+            data: {
+              tenantId,
+              parentId: parent.id,
+              name: child.name,
+              code: child.code,
+              icon: child.icon ?? null,
+              route: child.route ?? null,
+              menuType: child.menuType ?? 'ITEM',
+              permissionModule: child.permissionModule ?? null,
+              permissionAction: child.permissionAction ?? null,
+              badgeText: child.badgeText ?? null,
+              badgeColor: child.badgeColor ?? null,
+              sortOrder: childOrder++,
+            },
+          });
+        }
+      }
+    }
   }
 }

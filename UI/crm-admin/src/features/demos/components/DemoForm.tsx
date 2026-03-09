@@ -13,6 +13,8 @@ import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
 
+import { useSidePanelStore } from "@/stores/side-panel.store";
+
 import { useDemoDetail, useCreateDemo, useUpdateDemo } from "../hooks/useDemos";
 
 // ── Validation Schema ────────────────────────────────────
@@ -33,13 +35,18 @@ type DemoFormValues = z.infer<typeof demoSchema>;
 
 interface DemoFormProps {
   demoId?: string;
+  mode?: "page" | "panel";
+  panelId?: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 // ── Component ────────────────────────────────────────────
 
-export function DemoForm({ demoId }: DemoFormProps) {
+export function DemoForm({ demoId, mode = "page", panelId, onSuccess, onCancel }: DemoFormProps) {
   const router = useRouter();
   const isEdit = !!demoId;
+  const updatePanelConfig = useSidePanelStore((s) => s.updatePanelConfig);
 
   const { data: demoData, isLoading: isLoadingDemo } = useDemoDetail(
     demoId ?? "",
@@ -83,6 +90,42 @@ export function DemoForm({ demoId }: DemoFormProps) {
     });
   }, [isEdit, demoData, reset]);
 
+  // Sync isSubmitting → panel footer button (loading / disabled / label)
+  useEffect(() => {
+    if (!panelId) return;
+    updatePanelConfig(panelId, {
+      footerButtons: [
+        {
+          id: "cancel",
+          label: "Cancel",
+          showAs: "text",
+          variant: "secondary",
+          onClick: () => onCancel?.(),
+        },
+        {
+          id: "save",
+          label: isSubmitting
+            ? isEdit
+              ? "Updating..."
+              : "Saving..."
+            : isEdit
+              ? "Save Changes"
+              : "Save",
+          icon: "check",
+          showAs: "both",
+          variant: "primary",
+          loading: isSubmitting,
+          disabled: isSubmitting,
+          onClick: () => {
+            const formId = `sp-form-demo-${demoId ?? "new"}`;
+            const form = document.getElementById(formId) as HTMLFormElement | null;
+            form?.requestSubmit();
+          },
+        },
+      ],
+    });
+  }, [isSubmitting, panelId, isEdit, demoId, updatePanelConfig, onCancel]);
+
   const onSubmit = async (values: DemoFormValues) => {
     const payload = {
       mode: values.mode as "ONLINE" | "OFFLINE",
@@ -99,11 +142,19 @@ export function DemoForm({ demoId }: DemoFormProps) {
         const { leadId: _, conductedById: __, ...updatePayload } = payload;
         await updateMutation.mutateAsync({ id: demoId, data: updatePayload });
         toast.success("Demo updated");
-        router.push(`/demos/${demoId}`);
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push(`/demos/${demoId}`);
+        }
       } else {
         await createMutation.mutateAsync(payload);
         toast.success("Demo created");
-        router.push("/demos");
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push("/demos");
+        }
       }
     } catch (err: unknown) {
       const message =
@@ -115,24 +166,29 @@ export function DemoForm({ demoId }: DemoFormProps) {
 
   if (isEdit && isLoadingDemo) return <LoadingSpinner fullPage />;
 
+  const isPanel = mode === "panel";
+
   return (
-    <div className="p-6" style={{ position: "relative" }}>
+    <div className={isPanel ? "p-4" : "p-6"} style={{ position: "relative" }}>
       <FormSubmitOverlay isSubmitting={isSubmitting} isEdit={isEdit} />
-      <PageHeader
-        title={isEdit ? "Edit Demo" : "New Demo"}
-        actions={
-          <Button variant="outline" onClick={() => router.back()}>
-            <Icon name="arrow-left" size={16} /> Back
-          </Button>
-        }
-      />
+      {!isPanel && (
+        <PageHeader
+          title={isEdit ? "Edit Demo" : "New Demo"}
+          actions={
+            <Button variant="outline" onClick={() => router.back()}>
+              <Icon name="arrow-left" size={16} /> Back
+            </Button>
+          }
+        />
+      )}
 
       <FormErrors errors={errors} />
 
       <form
+        id={isPanel ? `sp-form-demo-${demoId ?? "new"}` : undefined}
         onSubmit={handleSubmit(onSubmit)}
         noValidate
-        className="mt-4 max-w-3xl space-y-6"
+        className={`${isPanel ? "mt-2" : "mt-4"} max-w-3xl space-y-6`}
       >
         {/* Demo Information */}
         <Fieldset label="Demo Information">
@@ -260,21 +316,23 @@ export function DemoForm({ demoId }: DemoFormProps) {
           </div>
         </Fieldset>
 
-        {/* Submit */}
-        <div className="flex gap-3 pt-2">
-          <Button
-            type="submit"
-            variant="primary"
-            loading={isSubmitting}
-            disabled={isSubmitting}
-          >
-            <Icon name="check" size={16} />{" "}
-            {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
-          </Button>
-          <Button variant="outline" onClick={() => router.back()}>
-            Cancel
-          </Button>
-        </div>
+        {/* Submit — hidden in panel mode (footer handles it) */}
+        {!isPanel && (
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            >
+              <Icon name="check" size={16} />{" "}
+              {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
+            </Button>
+            <Button variant="outline" onClick={() => router.back()}>
+              Cancel
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   );

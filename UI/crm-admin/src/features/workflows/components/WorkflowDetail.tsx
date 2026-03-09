@@ -8,6 +8,21 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
+
+import {
   Button,
   Icon,
   Badge,
@@ -25,7 +40,6 @@ import { formatDate } from "@/lib/format-date";
 
 import {
   useWorkflowDetail,
-  useWorkflowVisual,
   usePublishWorkflow,
   useValidateWorkflow,
   useCloneWorkflow,
@@ -37,13 +51,16 @@ import {
   useDeleteTransition,
 } from "../hooks/useWorkflows";
 
+import { useContentPanel } from "@/hooks/useEntityPanel";
+
+import { WorkflowHelpContent } from "./WorkflowHelp";
+import { WorkflowAutoHelpContent } from "./WorkflowAutoHelp";
+
 import type {
   WorkflowState,
   WorkflowTransition,
   WorkflowStateCreateData,
   WorkflowTransitionCreateData,
-  VisualNode,
-  VisualEdge,
 } from "../types/workflows.types";
 
 // ── Constants ────────────────────────────────────────────
@@ -86,15 +103,390 @@ const TRIGGER_BADGE_VARIANT: Record<string, "default" | "primary" | "warning" | 
   APPROVAL: "danger",
 };
 
+// ── SortableStateCard ────────────────────────────────────
+
+function SortableStateCard({
+  state,
+  onEdit,
+  onDelete,
+  onAddTransitionFrom,
+}: {
+  state: WorkflowState;
+  onEdit: (s: WorkflowState) => void;
+  onDelete: (s: WorkflowState) => void;
+  onAddTransitionFrom: (s: WorkflowState) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: state.id });
+
+  const style: React.CSSProperties = {
+    transform: transform
+      ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+      : undefined,
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 10 : undefined,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="group flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-3 py-3 transition-shadow hover:shadow-md"
+    >
+      {/* Drag handle */}
+      <button
+        type="button"
+        className="cursor-grab touch-none rounded p-1 text-gray-300 hover:bg-gray-50 hover:text-gray-500 active:cursor-grabbing"
+        {...attributes}
+        {...listeners}
+      >
+        <Icon name="grip-vertical" size={16} />
+      </button>
+
+      {/* Color + Name */}
+      <div
+        className="h-8 w-8 flex-shrink-0 rounded-lg"
+        style={{ backgroundColor: state.color ?? "#e2e8f0" }}
+      />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-gray-900">{state.name}</p>
+        <p className="truncate font-mono text-xs text-gray-400">{state.code}</p>
+      </div>
+
+      {/* Badges */}
+      <div className="hidden items-center gap-1.5 sm:flex">
+        <Badge variant={STATE_TYPE_BADGE_VARIANT[state.stateType] ?? "default"}>
+          {state.stateType}
+        </Badge>
+        {state.category && (
+          <Badge variant={CATEGORY_BADGE_VARIANT[state.category] ?? "default"}>
+            {state.category}
+          </Badge>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+        <button
+          type="button"
+          title="Add transition from this state"
+          className="rounded p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600"
+          onClick={() => onAddTransitionFrom(state)}
+        >
+          <Icon name="arrow-right" size={14} />
+        </button>
+        <button
+          type="button"
+          title="Edit state"
+          className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          onClick={() => onEdit(state)}
+        >
+          <Icon name="edit" size={14} />
+        </button>
+        <button
+          type="button"
+          title="Delete state"
+          className="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
+          onClick={() => onDelete(state)}
+        >
+          <Icon name="trash" size={14} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── GettingStarted ───────────────────────────────────────
+
+function GettingStarted({
+  onAddState,
+  onShowHelp,
+}: {
+  onAddState: () => void;
+  onShowHelp: () => void;
+}) {
+  return (
+    <div className="mt-6 rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 p-8">
+      <div className="mx-auto max-w-lg text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
+          <Icon name="activity" size={32} className="text-blue-500" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900">
+          Build Your Workflow Pipeline
+        </h3>
+        <p className="mt-2 text-sm text-gray-500">
+          Follow these steps to configure your workflow. Each step builds on the
+          previous one.
+        </p>
+      </div>
+
+      <div className="mx-auto mt-8 max-w-md space-y-4">
+        {/* Step 1 */}
+        <div className="flex items-start gap-4 rounded-lg bg-white p-4 shadow-sm">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600">
+            1
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-gray-900">Add States</p>
+            <p className="mt-0.5 text-xs text-gray-500">
+              Define the stages your entity will pass through. Start with an Initial state,
+              add Intermediate stages, and finish with Terminal states (Won/Lost).
+            </p>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={onAddState}
+              className="mt-2"
+            >
+              <Icon name="plus" size={14} /> Add First State
+            </Button>
+          </div>
+        </div>
+
+        {/* Step 2 */}
+        <div className="flex items-start gap-4 rounded-lg bg-white p-4 opacity-60 shadow-sm">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-bold text-gray-400">
+            2
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-900">Add Transitions</p>
+            <p className="mt-0.5 text-xs text-gray-500">
+              Connect your states with transitions to define allowed movements.
+              For example: New &rarr; Verified, Verified &rarr; Allocated.
+            </p>
+          </div>
+        </div>
+
+        {/* Step 3 */}
+        <div className="flex items-start gap-4 rounded-lg bg-white p-4 opacity-60 shadow-sm">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-bold text-gray-400">
+            3
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-900">Validate &amp; Publish</p>
+            <p className="mt-0.5 text-xs text-gray-500">
+              Validate your workflow to check for errors, then publish to activate
+              it for use.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 text-center">
+        <button
+          type="button"
+          onClick={onShowHelp}
+          className="text-sm text-blue-600 hover:text-blue-700 hover:underline"
+        >
+          <Icon name="help-circle" size={14} className="mr-1 inline" />
+          Read the full Workflow Builder Guide
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Workflow Diagram (client-side layout) ───────────────
+
+const NODE_W = 140;
+const NODE_H = 56;
+const COL_GAP = 60;
+const ROW_GAP = 40;
+const PADDING = 30;
+const COLS_PER_ROW = 5;
+
+interface DiagramNode {
+  id: string;
+  label: string;
+  stateType: string;
+  color: string;
+  x: number;
+  y: number;
+}
+
+function WorkflowDiagram({
+  states,
+  transitions,
+}: {
+  states: WorkflowState[];
+  transitions: WorkflowTransition[];
+}) {
+  const layout = useMemo(() => {
+    const nodes: DiagramNode[] = states.map((s, idx) => {
+      const col = idx % COLS_PER_ROW;
+      const row = Math.floor(idx / COLS_PER_ROW);
+      return {
+        id: s.id,
+        label: s.name,
+        stateType: s.stateType,
+        color: s.color ?? "#94a3b8",
+        x: PADDING + col * (NODE_W + COL_GAP),
+        y: PADDING + row * (NODE_H + ROW_GAP),
+      };
+    });
+
+    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+
+    const edgeLines = transitions
+      .map((t) => {
+        const src = nodeMap.get(t.fromStateId);
+        const tgt = nodeMap.get(t.toStateId);
+        if (!src || !tgt) return null;
+        return { id: t.id, src, tgt, label: t.name, triggerType: t.triggerType };
+      })
+      .filter(Boolean) as Array<{
+        id: string;
+        src: DiagramNode;
+        tgt: DiagramNode;
+        label: string;
+        triggerType: string;
+      }>;
+
+    const totalRows = Math.ceil(states.length / COLS_PER_ROW);
+    const totalCols = Math.min(states.length, COLS_PER_ROW);
+    const svgW = PADDING * 2 + totalCols * NODE_W + (totalCols - 1) * COL_GAP;
+    const svgH = PADDING * 2 + totalRows * NODE_H + (totalRows - 1) * ROW_GAP;
+
+    return { nodes, edgeLines, svgW, svgH };
+  }, [states, transitions]);
+
+  if (layout.nodes.length === 0) return null;
+
+  return (
+    <div className="overflow-auto rounded-lg border border-gray-100 bg-slate-50">
+      <svg
+        width={Math.max(layout.svgW, 600)}
+        height={Math.max(layout.svgH, 200)}
+        viewBox={`0 0 ${Math.max(layout.svgW, 600)} ${Math.max(layout.svgH, 200)}`}
+        className="select-none"
+      >
+        <defs>
+          <marker
+            id="arrowhead"
+            markerWidth="8"
+            markerHeight="6"
+            refX="8"
+            refY="3"
+            orient="auto"
+          >
+            <polygon points="0 0, 8 3, 0 6" fill="#94a3b8" />
+          </marker>
+        </defs>
+
+        {/* Edges */}
+        {layout.edgeLines.map((e) => {
+          const srcCx = e.src.x + NODE_W / 2;
+          const srcCy = e.src.y + NODE_H / 2;
+          const tgtCx = e.tgt.x + NODE_W / 2;
+          const tgtCy = e.tgt.y + NODE_H / 2;
+
+          // Calculate start/end at node borders
+          const dx = tgtCx - srcCx;
+          const dy = tgtCy - srcCy;
+
+          // Determine which side to connect
+          let x1: number, y1: number, x2: number, y2: number;
+          if (Math.abs(dx) > Math.abs(dy)) {
+            // Horizontal connection
+            if (dx > 0) {
+              x1 = e.src.x + NODE_W;
+              y1 = srcCy;
+              x2 = e.tgt.x;
+              y2 = tgtCy;
+            } else {
+              x1 = e.src.x;
+              y1 = srcCy;
+              x2 = e.tgt.x + NODE_W;
+              y2 = tgtCy;
+            }
+          } else {
+            // Vertical connection
+            if (dy > 0) {
+              x1 = srcCx;
+              y1 = e.src.y + NODE_H;
+              x2 = tgtCx;
+              y2 = e.tgt.y;
+            } else {
+              x1 = srcCx;
+              y1 = e.src.y;
+              x2 = tgtCx;
+              y2 = e.tgt.y + NODE_H;
+            }
+          }
+
+          // Curved path
+          const midX = (x1 + x2) / 2;
+          const midY = (y1 + y2) / 2;
+          const path =
+            Math.abs(dy) < 10
+              ? `M ${x1} ${y1} L ${x2} ${y2}`
+              : `M ${x1} ${y1} Q ${midX} ${y1} ${midX} ${midY} Q ${midX} ${y2} ${x2} ${y2}`;
+
+          return (
+            <g key={e.id}>
+              <path
+                d={path}
+                fill="none"
+                stroke="#cbd5e1"
+                strokeWidth={1.5}
+                markerEnd="url(#arrowhead)"
+              />
+            </g>
+          );
+        })}
+
+        {/* Nodes */}
+        {layout.nodes.map((n) => (
+          <g key={n.id}>
+            <rect
+              x={n.x}
+              y={n.y}
+              width={NODE_W}
+              height={NODE_H}
+              rx={10}
+              fill={n.color}
+              stroke={darkenColor(n.color)}
+              strokeWidth={2}
+            />
+            <text
+              x={n.x + NODE_W / 2}
+              y={n.y + NODE_H / 2 - 6}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="#fff"
+              fontSize={12}
+              fontWeight={600}
+            >
+              {n.label}
+            </text>
+            <text
+              x={n.x + NODE_W / 2}
+              y={n.y + NODE_H / 2 + 12}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="rgba(255,255,255,0.7)"
+              fontSize={9}
+              fontWeight={500}
+            >
+              {n.stateType}
+            </text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
 // ── Component ────────────────────────────────────────────
 
 export function WorkflowDetail({ workflowId }: { workflowId: string }) {
   const router = useRouter();
   const { confirm, ConfirmDialogPortal } = useConfirmDialog();
+  const { openContent } = useContentPanel();
 
   // ── Queries ──
   const { data, isLoading } = useWorkflowDetail(workflowId);
-  const { data: visualData } = useWorkflowVisual(workflowId);
 
   // ── Mutations ──
   const publishMutation = usePublishWorkflow();
@@ -140,23 +532,57 @@ export function WorkflowDetail({ workflowId }: { workflowId: string }) {
     [workflow?.states],
   );
 
-  // ── Visual data ──
-  const nodes: VisualNode[] = useMemo(() => visualData?.data?.nodes ?? [], [visualData]);
-  const edges: VisualEdge[] = useMemo(() => visualData?.data?.edges ?? [], [visualData]);
-
-  // ── Node map for edge rendering ──
-  const nodeMap = useMemo(() => {
-    const map = new Map<string, VisualNode>();
-    nodes.forEach((n) => map.set(n.id, n));
-    return map;
-  }, [nodes]);
-
   // ── State name lookup for transitions table ──
   const stateNameMap = useMemo(() => {
     const map = new Map<string, string>();
     (workflow?.states ?? []).forEach((s) => map.set(s.id, s.name));
     return map;
   }, [workflow?.states]);
+
+  // ── Sorted states ──
+  const sortedStates = useMemo(
+    () => [...(workflow?.states ?? [])].sort((a, b) => a.sortOrder - b.sortOrder),
+    [workflow?.states],
+  );
+
+  // ── DnD for states ──
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  );
+
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id || !workflow) return;
+
+      const oldIndex = sortedStates.findIndex((s) => s.id === active.id);
+      const newIndex = sortedStates.findIndex((s) => s.id === over.id);
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      const reordered = arrayMove(sortedStates, oldIndex, newIndex);
+
+      // Update each moved state's sort order via API
+      const promises = reordered.map((s, idx) => {
+        if (s.sortOrder !== idx * 10) {
+          return updateStateMutation.mutateAsync({
+            stateId: s.id,
+            data: { sortOrder: idx * 10 },
+          });
+        }
+        return null;
+      }).filter(Boolean);
+
+      if (promises.length > 0) {
+        try {
+          await Promise.all(promises);
+          toast.success("State order updated");
+        } catch {
+          toast.error("Failed to update state order");
+        }
+      }
+    },
+    [workflow, sortedStates, updateStateMutation],
+  );
 
   // ── State Modal helpers ──
   const resetStateForm = useCallback(() => {
@@ -275,6 +701,17 @@ export function WorkflowDetail({ workflowId }: { workflowId: string }) {
     resetTransitionForm();
     setTransitionModalOpen(true);
   }, [resetTransitionForm]);
+
+  const openAddTransitionFrom = useCallback(
+    (s: WorkflowState) => {
+      resetTransitionForm();
+      setFromStateId(s.id);
+      setTransName(`${s.name} to `);
+      setTransCode(`${s.code}_TO_`);
+      setTransitionModalOpen(true);
+    },
+    [resetTransitionForm],
+  );
 
   const openEditTransition = useCallback((t: WorkflowTransition) => {
     setEditingTransition(t);
@@ -406,7 +843,7 @@ export function WorkflowDetail({ workflowId }: { workflowId: string }) {
     return (
       <div className="p-6">
         <EmptyState
-          icon="git-branch"
+          icon="activity"
           title="Workflow not found"
           description="The workflow you're looking for doesn't exist."
           action={{
@@ -418,13 +855,23 @@ export function WorkflowDetail({ workflowId }: { workflowId: string }) {
     );
   }
 
+  const statesCount = workflow.states.length;
+  const transitionsCount = workflow.transitions.length;
+
   return (
     <div className="p-6">
       {/* ── Page Header ── */}
       <PageHeader
         title={workflow.name}
+        subtitle={workflow.description || `${workflow.entityType} workflow`}
         actions={
           <div className="flex gap-2">
+            <Button variant="outline" onClick={() => openContent({ id: "workflow-auto-help", title: workflow.name, content: <WorkflowAutoHelpContent workflow={workflow} /> })}>
+              <Icon name="file-text" size={16} /> Docs
+            </Button>
+            <Button variant="outline" onClick={() => openContent({ id: "workflow-help", title: "Workflow Builder Guide", content: <WorkflowHelpContent /> })}>
+              <Icon name="help-circle" size={16} /> Guide
+            </Button>
             <Button variant="outline" onClick={() => router.back()}>
               <Icon name="arrow-left" size={16} /> Back
             </Button>
@@ -459,304 +906,205 @@ export function WorkflowDetail({ workflowId }: { workflowId: string }) {
         }
       />
 
-      {/* ── Info Card ── */}
-      <div className="mt-6 rounded-lg border border-gray-200 bg-white p-5">
-        <h3 className="mb-4 text-sm font-semibold uppercase text-gray-500">
-          Workflow Details
-        </h3>
-        <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <dt className="text-xs text-gray-400">Name</dt>
-            <dd className="text-sm font-medium">{workflow.name}</dd>
+      {/* ── Compact Info Bar ── */}
+      <div className="mt-4 rounded-lg border border-gray-200 bg-white px-5 py-3">
+        <div className="flex flex-wrap items-center gap-y-2 divide-x divide-gray-200">
+          <div className="flex items-center gap-1.5 pr-5">
+            <span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Code</span>
+            <span className="font-mono text-sm font-semibold text-gray-800">{workflow.code}</span>
           </div>
-          <div>
-            <dt className="text-xs text-gray-400">Code</dt>
-            <dd className="text-sm">{workflow.code}</dd>
+          <div className="flex items-center gap-1.5 px-5">
+            <span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Entity</span>
+            <Badge variant="secondary">{workflow.entityType}</Badge>
           </div>
-          <div>
-            <dt className="text-xs text-gray-400">Entity Type</dt>
-            <dd>
-              <Badge variant="secondary">{workflow.entityType}</Badge>
-            </dd>
+          <div className="flex items-center gap-1.5 px-5">
+            <span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Status</span>
+            <Badge variant={workflow.isPublished ? "success" : "warning"}>
+              {workflow.isPublished ? "Published" : "Draft"}
+            </Badge>
           </div>
-          <div>
-            <dt className="text-xs text-gray-400">Version</dt>
-            <dd className="text-sm">{workflow.version}</dd>
+          <div className="flex items-center gap-1.5 px-5">
+            <span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Active</span>
+            <Badge variant={workflow.isActive ? "success" : "default"}>
+              {workflow.isActive ? "Yes" : "No"}
+            </Badge>
           </div>
-          <div>
-            <dt className="text-xs text-gray-400">Active</dt>
-            <dd>
-              <Badge variant={workflow.isActive ? "success" : "default"}>
-                {workflow.isActive ? "Active" : "Inactive"}
-              </Badge>
-            </dd>
+          {workflow.isDefault && (
+            <div className="px-5">
+              <Badge variant="primary">Default</Badge>
+            </div>
+          )}
+          <div className="px-5">
+            <span className="text-xs font-medium text-gray-500">v{workflow.version}</span>
           </div>
-          <div>
-            <dt className="text-xs text-gray-400">Published</dt>
-            <dd>
-              <Badge variant={workflow.isPublished ? "success" : "warning"}>
-                {workflow.isPublished ? "Published" : "Draft"}
-              </Badge>
-            </dd>
+          <div className="ml-auto flex items-center gap-3 pl-5 text-xs text-gray-500">
+            <span className="flex items-center gap-1">
+              <Icon name="layers" size={12} className="text-gray-400" />
+              {statesCount} states
+            </span>
+            <span className="flex items-center gap-1">
+              <Icon name="arrow-right" size={12} className="text-gray-400" />
+              {transitionsCount} transitions
+            </span>
+            <span>{formatDate(workflow.createdAt)}</span>
           </div>
-          <div>
-            <dt className="text-xs text-gray-400">Default</dt>
-            <dd>
-              <Badge variant={workflow.isDefault ? "primary" : "outline"}>
-                {workflow.isDefault ? "Yes" : "No"}
-              </Badge>
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs text-gray-400">Created</dt>
-            <dd className="text-sm">{formatDate(workflow.createdAt)}</dd>
-          </div>
-        </dl>
+        </div>
       </div>
 
-      {/* ── States Panel ── */}
-      <div className="mt-6 rounded-lg border border-gray-200 bg-white p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold uppercase text-gray-500">
-            States
-          </h3>
-          <Button variant="primary" size="sm" onClick={openAddState}>
-            <Icon name="plus" size={14} /> Add State
-          </Button>
-        </div>
-
-        {workflow.states.length === 0 ? (
-          <EmptyState
-            icon="layers"
-            title="No states"
-            description="Add states to define the workflow stages."
-          />
-        ) : (
-          <div className="space-y-3">
-            {workflow.states.map((s) => (
-              <div
-                key={s.id}
-                className="flex items-center justify-between rounded-lg border border-gray-100 px-4 py-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="h-4 w-4 rounded-full"
-                    style={{ backgroundColor: s.color ?? "#e2e8f0" }}
-                  />
-                  <div>
-                    <span className="text-sm font-medium">{s.name}</span>
-                    <span className="ml-2 text-xs text-gray-400">{s.code}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge variant={STATE_TYPE_BADGE_VARIANT[s.stateType] ?? "default"}>
-                    {s.stateType}
-                  </Badge>
-                  {s.category && (
-                    <Badge variant={CATEGORY_BADGE_VARIANT[s.category] ?? "default"}>
-                      {s.category}
-                    </Badge>
-                  )}
-                  <div className="flex gap-1">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => openEditState(s)}
+      {/* ── Getting Started (empty workflow) ── */}
+      {statesCount === 0 && transitionsCount === 0 ? (
+        <GettingStarted onAddState={openAddState} onShowHelp={() => openContent({ id: "workflow-help", title: "Workflow Builder Guide", content: <WorkflowHelpContent /> })} />
+      ) : (
+        <>
+          {/* ── Visual Pipeline Preview ── */}
+          {sortedStates.length > 0 && (
+            <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4">
+              <div className="flex items-center gap-1 overflow-x-auto pb-1">
+                {sortedStates.map((s, idx) => (
+                  <div key={s.id} className="flex items-center">
+                    <div
+                      className="flex h-8 items-center rounded-full px-3 text-xs font-medium text-white shadow-sm whitespace-nowrap"
+                      style={{ backgroundColor: s.color ?? "#94a3b8" }}
                     >
-                      <Icon name="edit" size={14} />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="danger"
-                      onClick={() => handleDeleteState(s)}
-                    >
-                      <Icon name="trash-2" size={14} />
-                    </Button>
+                      {s.name}
+                    </div>
+                    {idx < sortedStates.length - 1 && (
+                      <Icon name="chevron-right" size={14} className="mx-0.5 flex-shrink-0 text-gray-300" />
+                    )}
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </div>
+          )}
 
-      {/* ── Transitions Panel ── */}
-      <div className="mt-6 rounded-lg border border-gray-200 bg-white p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold uppercase text-gray-500">
-            Transitions
-          </h3>
-          <Button variant="primary" size="sm" onClick={openAddTransition}>
-            <Icon name="plus" size={14} /> Add Transition
-          </Button>
-        </div>
+          {/* ── States & Transitions Side-by-Side ── */}
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {/* States Panel */}
+            <div className="rounded-lg border border-gray-200 bg-white p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="flex items-center gap-2 text-sm font-semibold uppercase text-gray-500">
+                  <Icon name="layers" size={14} /> States
+                  <Badge variant="outline">{statesCount}</Badge>
+                </h3>
+                <Button variant="primary" size="sm" onClick={openAddState}>
+                  <Icon name="plus" size={14} /> Add State
+                </Button>
+              </div>
 
-        {workflow.transitions.length === 0 ? (
-          <EmptyState
-            icon="arrow-right"
-            title="No transitions"
-            description="Add transitions to connect workflow states."
-          />
-        ) : (
-          <div className="overflow-x-auto rounded-lg border border-gray-200">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-left text-xs font-medium uppercase text-gray-500">
-                <tr>
-                  <th className="px-4 py-3">From State</th>
-                  <th className="px-4 py-3">To State</th>
-                  <th className="px-4 py-3">Name</th>
-                  <th className="px-4 py-3">Trigger Type</th>
-                  <th className="px-4 py-3">Required Permission</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {workflow.transitions.map((t) => (
-                  <tr key={t.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium">
-                      {stateNameMap.get(t.fromStateId) ?? t.fromStateId}
-                    </td>
-                    <td className="px-4 py-3 font-medium">
-                      {stateNameMap.get(t.toStateId) ?? t.toStateId}
-                    </td>
-                    <td className="px-4 py-3">{t.name}</td>
-                    <td className="px-4 py-3">
+              {statesCount === 0 ? (
+                <div className="py-8 text-center text-sm text-gray-400">
+                  <Icon name="layers" size={24} className="mx-auto mb-2 text-gray-300" />
+                  <p>No states yet</p>
+                </div>
+              ) : (
+                <>
+                  <p className="mb-2 text-[11px] text-gray-400">
+                    <Icon name="grip-vertical" size={10} className="mr-0.5 inline text-gray-300" />
+                    Drag to reorder
+                  </p>
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <SortableContext
+                      items={sortedStates.map((s) => s.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-1.5">
+                        {sortedStates.map((s) => (
+                          <SortableStateCard
+                            key={s.id}
+                            state={s}
+                            onEdit={openEditState}
+                            onDelete={handleDeleteState}
+                            onAddTransitionFrom={openAddTransitionFrom}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                </>
+              )}
+            </div>
+
+            {/* Transitions Panel */}
+            <div className="rounded-lg border border-gray-200 bg-white p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="flex items-center gap-2 text-sm font-semibold uppercase text-gray-500">
+                  <Icon name="arrow-right" size={14} /> Transitions
+                  <Badge variant="outline">{transitionsCount}</Badge>
+                </h3>
+                <Button variant="primary" size="sm" onClick={openAddTransition}>
+                  <Icon name="plus" size={14} /> Add
+                </Button>
+              </div>
+
+              {transitionsCount === 0 ? (
+                <div className="py-8 text-center text-sm text-gray-400">
+                  <Icon name="arrow-right" size={24} className="mx-auto mb-2 text-gray-300" />
+                  <p>No transitions yet</p>
+                  {statesCount >= 2 && (
+                    <p className="mt-1 text-xs">Add transitions to connect your states</p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  {workflow.transitions.map((t) => (
+                    <div
+                      key={t.id}
+                      className="group flex items-center gap-2 rounded-lg border border-gray-100 px-3 py-2.5 hover:shadow-sm"
+                    >
+                      <div className="flex min-w-0 flex-1 items-center gap-1.5">
+                        <span
+                          className="inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full"
+                          style={{ backgroundColor: workflow.states.find((s) => s.id === t.fromStateId)?.color ?? "#94a3b8" }}
+                        />
+                        <span className="truncate text-xs font-medium">{stateNameMap.get(t.fromStateId) ?? "?"}</span>
+                        <Icon name="arrow-right" size={12} className="flex-shrink-0 text-gray-300" />
+                        <span
+                          className="inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full"
+                          style={{ backgroundColor: workflow.states.find((s) => s.id === t.toStateId)?.color ?? "#94a3b8" }}
+                        />
+                        <span className="truncate text-xs font-medium">{stateNameMap.get(t.toStateId) ?? "?"}</span>
+                      </div>
                       <Badge variant={TRIGGER_BADGE_VARIANT[t.triggerType] ?? "default"}>
                         {t.triggerType}
                       </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-gray-500">
-                      {t.requiredPermission || "\u2014"}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
+                      <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                        <button
+                          type="button"
+                          className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                           onClick={() => openEditTransition(t)}
                         >
-                          <Icon name="edit" size={14} />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="danger"
+                          <Icon name="edit" size={12} />
+                        </button>
+                        <button
+                          type="button"
+                          className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600"
                           onClick={() => handleDeleteTransition(t)}
                         >
-                          <Icon name="trash-2" size={14} />
-                        </Button>
+                          <Icon name="trash" size={12} />
+                        </button>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* ── Visual Diagram Section ── */}
-      <div className="mt-6 rounded-lg border border-gray-200 bg-white p-5">
-        <h3 className="mb-4 text-sm font-semibold uppercase text-gray-500">
-          Workflow Diagram
-        </h3>
-        <div
-          className="relative overflow-auto rounded-lg border border-gray-200 bg-slate-50"
-          style={{ minHeight: 400 }}
-        >
-          {nodes.length === 0 ? (
-            <div className="flex h-full min-h-[400px] items-center justify-center text-sm text-gray-400">
-              Publish workflow to generate diagram
-            </div>
-          ) : (
-            <>
-              {/* SVG edges overlay */}
-              <svg
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  pointerEvents: "none",
-                }}
-              >
-                <defs>
-                  <marker
-                    id="arrowhead"
-                    markerWidth="10"
-                    markerHeight="7"
-                    refX="10"
-                    refY="3.5"
-                    orient="auto"
-                  >
-                    <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
-                  </marker>
-                </defs>
-                {edges.map((edge) => {
-                  const sourceNode = nodeMap.get(edge.source);
-                  const targetNode = nodeMap.get(edge.target);
-                  if (!sourceNode || !targetNode) return null;
-                  const x1 = sourceNode.x + 60;
-                  const y1 = sourceNode.y + 25;
-                  const x2 = targetNode.x + 60;
-                  const y2 = targetNode.y + 25;
-                  const midX = (x1 + x2) / 2;
-                  const midY = (y1 + y2) / 2;
-                  return (
-                    <g key={edge.id}>
-                      <line
-                        x1={x1}
-                        y1={y1}
-                        x2={x2}
-                        y2={y2}
-                        stroke="#64748b"
-                        strokeWidth={1.5}
-                        markerEnd="url(#arrowhead)"
-                      />
-                      <text
-                        x={midX}
-                        y={midY - 6}
-                        textAnchor="middle"
-                        fontSize={11}
-                        fill="#475569"
-                      >
-                        {edge.label}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
-
-              {/* Nodes */}
-              {nodes.map((node) => (
-                <div
-                  key={node.id}
-                  style={{
-                    position: "absolute",
-                    left: node.x,
-                    top: node.y,
-                    backgroundColor: node.color ?? "#e2e8f0",
-                    borderRadius: 8,
-                    padding: "8px 16px",
-                    border: `2px solid ${darkenColor(node.color ?? "#e2e8f0")}`,
-                    minWidth: 120,
-                    textAlign: "center",
-                  }}
-                >
-                  <div style={{ fontWeight: 600, fontSize: 13 }}>{node.label}</div>
-                  <div className="mt-1">
-                    <Badge
-                      variant={STATE_TYPE_BADGE_VARIANT[node.stateType] ?? "default"}
-                    >
-                      {node.stateType}
-                    </Badge>
-                  </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </>
-          )}
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── Visual Diagram Section (client-side layout) ── */}
+      {statesCount > 0 && (
+        <div className="mt-4 rounded-lg border border-gray-200 bg-white p-5">
+          <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase text-gray-500">
+            <Icon name="monitor" size={14} /> Workflow Diagram
+          </h3>
+          <WorkflowDiagram states={sortedStates} transitions={workflow.transitions} />
         </div>
-      </div>
+      )}
 
       {/* ── State Modal ── */}
       <Modal

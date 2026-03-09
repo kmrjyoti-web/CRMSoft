@@ -6,7 +6,7 @@ import { ApiRateLimitGuard } from '../guards/api-rate-limit.guard';
 import { ApiScopes } from '../decorators/api-scopes.decorator';
 import { PaginationQueryDto } from './dto/public-api.dto';
 
-@Controller('api/v1/leads')
+@Controller('leads')
 @UseGuards(ApiKeyGuard, ApiScopeGuard, ApiRateLimitGuard)
 export class PublicLeadsController {
   constructor(private readonly prisma: PrismaService) {}

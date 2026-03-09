@@ -3,7 +3,7 @@ import type { ApiResponse } from "@/types/api-response";
 
 import type { PermissionItem } from "../types/settings.types";
 
-const BASE_URL = "/permissions";
+const BASE_URL = "/api/v1/permissions";
 
 export const permissionsService = {
   getAll: () =>
@@ -18,7 +18,7 @@ export const permissionsService = {
 
   updateRolePermissions: (roleId: string, permissionIds: string[]) =>
     apiClient
-      .put<ApiResponse<void>>(`/roles/${roleId}/permissions`, {
+      .put<ApiResponse<void>>(`/api/v1/roles/${roleId}/permissions`, {
         permissionIds,
       })
       .then((r) => r.data),

@@ -6,9 +6,15 @@ import { useRouter } from "next/navigation";
 
 import toast from "react-hot-toast";
 
+import { useEntityPanel } from "@/hooks/useEntityPanel";
+
+import { OrganizationForm } from "./OrganizationForm";
+import { OrganizationDashboard } from "./OrganizationDashboard";
+
 import { TableFull, Button, Icon, Switch } from "@/components/ui";
 
 import { useTableFilters } from "@/hooks/useTableFilters";
+import { useDynamicFilterConfig } from "@/hooks/useDynamicFilterConfig";
 import { useBulkSelect } from "@/hooks/useBulkSelect";
 import { useBulkOperations } from "@/hooks/useBulkOperations";
 
@@ -18,6 +24,7 @@ import { BulkActionsBar } from "@/components/common/BulkActionsBar";
 import { BulkEditPanel } from "@/components/common/BulkEditPanel";
 import { useBulkDeleteDialog } from "@/components/common/BulkDeleteDialog";
 import { ActionsMenu } from "@/components/common/ActionsMenu";
+import { HelpButton } from "@/components/common/HelpButton";
 
 import {
   useOrganizationsList,
@@ -27,7 +34,9 @@ import {
   useReactivateOrganization,
 } from "../hooks/useOrganizations";
 
-import { ORGANIZATION_FILTER_CONFIG } from "../utils/organization-filters";
+import { ORGANIZATION_FILTER_CONFIG, ORGANIZATION_LOOKUP_MAPPINGS } from "../utils/organization-filters";
+import { OrganizationListUserHelp } from "../help/OrganizationListUserHelp";
+import { OrganizationListDevHelp } from "../help/OrganizationListDevHelp";
 
 import type {
   OrganizationListItem,
@@ -79,7 +88,20 @@ function flattenOrganizations(
 export function OrganizationList() {
   const router = useRouter();
 
+  const { handleRowEdit, handleCreate, handleRowView } = useEntityPanel({
+    entityKey: "org",
+    entityLabel: "Organization",
+    FormComponent: OrganizationForm,
+    DashboardComponent: OrganizationDashboard,
+    dashboardWidth: 900,
+    idProp: "organizationId",
+    editRoute: "/organizations/:id/edit",
+    createRoute: "/organizations/new",
+    displayField: "name",
+  });
+
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const { confirm, ConfirmDialogPortal } = useConfirmDialog();
   const softDeleteMutation = useSoftDeleteOrganization();
@@ -105,8 +127,10 @@ export function OrganizationList() {
     [clearSelection, selectAll],
   );
 
+  const dynamicFilterConfig = useDynamicFilterConfig(ORGANIZATION_FILTER_CONFIG, ORGANIZATION_LOOKUP_MAPPINGS);
+
   const { activeFilters, filterParams, handleFilterChange, clearFilters } =
-    useTableFilters(ORGANIZATION_FILTER_CONFIG);
+    useTableFilters(dynamicFilterConfig);
 
   const params = useMemo<OrganizationListParams>(
     () => ({
@@ -132,6 +156,8 @@ export function OrganizationList() {
 
   const handleToggleActive = useCallback(
     async (id: string, currentlyActive: boolean) => {
+      if (togglingId) return;
+      setTogglingId(id);
       try {
         if (currentlyActive) {
           await deactivateMut.mutateAsync(id);
@@ -142,26 +168,40 @@ export function OrganizationList() {
         }
       } catch {
         toast.error("Failed to update status");
+      } finally {
+        setTogglingId(null);
       }
     },
-    [deactivateMut, reactivateMut],
+    [deactivateMut, reactivateMut, togglingId],
   );
 
   const tableData = useMemo(() => {
     const flat = flattenOrganizations(organizations);
     return flat.map((row, idx) => ({
       ...row,
+      name: (
+        <span
+          className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRowView(row);
+          }}
+        >
+          {organizations[idx].name}
+        </span>
+      ),
       status: (
         <div onClick={(e) => e.stopPropagation()}>
           <Switch
             size="sm"
             checked={organizations[idx].isActive}
             onChange={() => handleToggleActive(row.id as string, organizations[idx].isActive)}
+            disabled={togglingId === row.id}
           />
         </div>
       ),
     }));
-  }, [organizations, handleToggleActive]);
+  }, [organizations, handleToggleActive, togglingId, handleRowView]);
 
   // ── Bulk delete hook ────────────────────────────────────
   const selectedArray = Array.from(selectedIds);
@@ -192,17 +232,6 @@ export function OrganizationList() {
     },
     [confirm, softDeleteMutation],
   );
-
-  const handleRowEdit = useCallback(
-    (row: Record<string, unknown>) => {
-      router.push(`/organizations/${row.id}/edit`);
-    },
-    [router],
-  );
-
-  const handleCreate = useCallback(() => {
-    router.push("/organizations/new");
-  }, [router]);
 
   // ── Bulk edit handlers ─────────────────────────────────────
 
@@ -247,17 +276,27 @@ export function OrganizationList() {
           columns={ORGANIZATION_COLUMNS}
           defaultViewMode="table"
           defaultDensity="compact"
-          filterConfig={ORGANIZATION_FILTER_CONFIG}
+          filterConfig={dynamicFilterConfig}
           activeFilters={activeFilters}
           onFilterChange={handleFilterChange}
           onFilterClear={clearFilters}
-          onRowEdit={handleRowEdit}
+          onRowEdit={handleRowView}
           onCreate={handleCreate}
           onRowDelete={handleRowArchive}
           onRowArchive={handleRowArchive}
           selectedIds={selectedIds}
           onSelectionChange={handleSelectionChange}
-          headerActions={<ActionsMenu items={actionsMenuItems} />}
+          headerActions={
+            <>
+              <HelpButton
+                panelId="organizations-list-help"
+                title="Organizations — Help"
+                userContent={<OrganizationListUserHelp />}
+                devContent={<OrganizationListDevHelp />}
+              />
+              <ActionsMenu items={actionsMenuItems} />
+            </>
+          }
         />
       </div>
 

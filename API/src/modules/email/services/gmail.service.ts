@@ -1,10 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
+import { CredentialService } from '../../tenant-config/services/credential.service';
 import { IEmailProviderService, SendEmailParams, SendResult, FetchOptions, FetchResult } from './email-provider.interface';
 
 @Injectable()
 export class GmailService implements IEmailProviderService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly credentialService: CredentialService,
+  ) {}
 
   async sendEmail(accountId: string, params: SendEmailParams): Promise<SendResult> {
     // In production: use googleapis library
@@ -26,15 +30,52 @@ export class GmailService implements IEmailProviderService {
     return { emails: [], newSyncToken: `history-${Date.now()}` };
   }
 
-  getAuthUrl(userId: string, redirectUrl: string): string {
-    const clientId = process.env.GOOGLE_CLIENT_ID || '';
+  async getAuthUrl(tenantId: string, userId: string, redirectUrl: string): Promise<string> {
+    const creds = await this.credentialService.get(tenantId, 'GMAIL' as any);
+    const clientId = creds?.clientId || process.env.GOOGLE_CLIENT_ID || '';
+
+    if (!clientId) {
+      throw new BadRequestException(
+        'Gmail OAuth is not configured. Please add Google credentials in Settings > Integrations.',
+      );
+    }
+
     const scopes = 'https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.modify';
-    return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&scope=${encodeURIComponent(scopes)}&access_type=offline&state=${userId}`;
+    return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&scope=${encodeURIComponent(scopes)}&access_type=offline&prompt=consent&state=${userId}`;
   }
 
-  async handleOAuthCallback(code: string, userId: string, redirectUrl: string) {
-    // In production: POST https://oauth2.googleapis.com/token
-    // Exchange code for access_token + refresh_token
-    return { accessToken: 'mock-access', refreshToken: 'mock-refresh', expiresIn: 3600 };
+  async handleOAuthCallback(tenantId: string, code: string, userId: string, redirectUrl: string) {
+    const creds = await this.credentialService.get(tenantId, 'GMAIL' as any);
+    const clientId = creds?.clientId || process.env.GOOGLE_CLIENT_ID || '';
+    const clientSecret = creds?.clientSecret || process.env.GOOGLE_CLIENT_SECRET || '';
+
+    if (!clientId || !clientSecret) {
+      throw new BadRequestException('Gmail OAuth credentials not configured for this tenant');
+    }
+
+    // Exchange code for tokens
+    const res = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUrl,
+        grant_type: 'authorization_code',
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      throw new BadRequestException(`Google OAuth error: ${data.error_description || data.error}`);
+    }
+
+    return {
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token,
+      expiresIn: data.expires_in || 3600,
+    };
   }
 }

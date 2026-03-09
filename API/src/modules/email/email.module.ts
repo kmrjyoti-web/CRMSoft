@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
+import { TenantConfigModule } from '../tenant-config/tenant-config.module';
 
 // Services
 import { GmailService } from './services/gmail.service';
@@ -118,7 +119,7 @@ const QueryHandlers = [
 ];
 
 @Module({
-  imports: [CqrsModule],
+  imports: [CqrsModule, TenantConfigModule],
   controllers: [
     EmailController,
     EmailAccountController,

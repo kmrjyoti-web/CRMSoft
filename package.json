@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently --kill-others-on-fail --names \"API,WEB\" --prefix-colors \"cyan,magenta\" \"npm run dev:api\" \"npm run dev:web\"",
+    "dev": "concurrently --kill-others-on-fail --names \"API,ADMIN,VENDOR\" --prefix-colors \"cyan,magenta,yellow\" \"npm run dev:api\" \"npm run dev:web\" \"npm run dev:vendor\"",
     "dev:api": "cd API && npm run start:dev",
     "dev:web": "cd UI/crm-admin && npm run dev",
-    "build": "concurrently --names \"API,WEB\" \"npm run build:api\" \"npm run build:web\"",
+    "dev:vendor": "cd UI/vendor-panel && npm run dev",
+    "build": "concurrently --names \"API,ADMIN,VENDOR\" \"npm run build:api\" \"npm run build:web\" \"npm run build:vendor\"",
     "build:api": "cd API && npm run build",
-    "build:web": "cd UI/crm-admin && npm run build"
+    "build:web": "cd UI/crm-admin && npm run build",
+    "build:vendor": "cd UI/vendor-panel && npm run build"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

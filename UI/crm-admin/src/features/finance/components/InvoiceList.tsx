@@ -1,14 +1,19 @@
 'use client';
 
-import { useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 
 import { TableFull } from "@/components/ui";
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 import { useTableFilters } from "@/hooks/useTableFilters";
 import { TableSkeleton } from "@/components/common/TableSkeleton";
 
+import { HelpButton } from "@/components/common/HelpButton";
+
 import { useInvoicesList } from "../hooks/useFinance";
 import { INVOICE_FILTER_CONFIG } from "../utils/invoice-filters";
+import { InvoiceForm } from "./InvoiceForm";
+import { InvoiceListUserHelp } from "../help/InvoiceListUserHelp";
+import { InvoiceListDevHelp } from "../help/InvoiceListDevHelp";
 import type {
   InvoiceListItem,
   InvoiceListParams,
@@ -61,7 +66,16 @@ function flattenInvoices(items: InvoiceListItem[]): Record<string, unknown>[] {
 // ---------------------------------------------------------------------------
 
 export function InvoiceList() {
-  const router = useRouter();
+  const { handleRowEdit, handleCreate } = useEntityPanel({
+    entityKey: "invoice",
+    entityLabel: "Invoice",
+    FormComponent: InvoiceForm,
+    idProp: "invoiceId",
+    editRoute: "/finance/invoices/:id",
+    createRoute: "/finance/invoices/new",
+    displayField: "invoiceNo",
+    panelWidth: 860,
+  });
 
   const { activeFilters, filterParams, handleFilterChange, clearFilters } =
     useTableFilters(INVOICE_FILTER_CONFIG);
@@ -82,17 +96,6 @@ export function InvoiceList() {
 
   const tableData = useMemo(() => flattenInvoices(items), [items]);
 
-  const handleRowEdit = useCallback(
-    (row: Record<string, unknown>) => {
-      router.push(`/finance/invoices/${row.id}`);
-    },
-    [router],
-  );
-
-  const handleCreate = useCallback(() => {
-    router.push("/finance/invoices/new");
-  }, [router]);
-
   if (isLoading) return <TableSkeleton title="Invoices" />;
 
   return (
@@ -109,6 +112,14 @@ export function InvoiceList() {
         onFilterClear={clearFilters}
         onRowEdit={handleRowEdit}
         onCreate={handleCreate}
+        headerActions={
+          <HelpButton
+            panelId="invoices-list-help"
+            title="Invoices — Help"
+            userContent={<InvoiceListUserHelp />}
+            devContent={<InvoiceListDevHelp />}
+          />
+        }
       />
     </div>
   );

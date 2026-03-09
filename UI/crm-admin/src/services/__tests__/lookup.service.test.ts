@@ -28,14 +28,14 @@ const wrappedResponse = {
 // ── Tests ────────────────────────────────────────────────
 
 describe("lookupService.getValues", () => {
-  it("calls GET /api/v1/lookups/values with masterCode query param", async () => {
+  it("calls GET /api/v1/lookups/values/:masterCode as route param", async () => {
     (api.get as jest.Mock).mockResolvedValueOnce(wrappedResponse);
 
     const result = await lookupService.getValues("INDUSTRY_TYPE");
 
-    expect(api.get).toHaveBeenCalledWith("/api/v1/lookups/values", {
-      params: { masterCode: "INDUSTRY_TYPE" },
-    });
+    expect(api.get).toHaveBeenCalledWith(
+      "/api/v1/lookups/values/INDUSTRY_TYPE",
+    );
     expect(result).toEqual(fakeLookups);
   });
 });

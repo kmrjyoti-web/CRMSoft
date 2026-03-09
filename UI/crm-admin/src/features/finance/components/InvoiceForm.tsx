@@ -11,17 +11,25 @@ import {
   Button,
   Icon,
   Input,
-  SelectInput,
   DatePicker,
   NumberInput,
   CurrencyInput,
   Fieldset,
   Typography,
+  Modal,
 } from "@/components/ui";
+import { LookupSelect } from "@/components/common/LookupSelect";
+import { ProductSelect } from "@/components/common/ProductSelect";
+import type { ProductSelectOption } from "@/components/common/ProductSelect";
+import { LeadSelect } from "@/components/common/LeadSelect";
+import type { LeadSelectOption } from "@/components/common/LeadSelect";
+import { ContactSelect } from "@/components/common/ContactSelect";
+import { OrganizationSelect } from "@/components/common/OrganizationSelect";
 import { FormErrors } from "@/components/common/FormErrors";
 import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
+import { useSidePanelStore } from "@/stores/side-panel.store";
 
 import {
   useInvoiceDetail,
@@ -36,6 +44,7 @@ import type { InvoiceLineItem } from "../types/finance.types";
 // ---------------------------------------------------------------------------
 
 const lineItemSchema = z.object({
+  productId: z.string().optional(),
   productName: z.string().min(1, "Product name is required"),
   description: z.string().optional(),
   hsnCode: z.string().optional(),
@@ -83,31 +92,9 @@ type InvoiceFormValues = z.infer<typeof invoiceSchema>;
 // Constants
 // ---------------------------------------------------------------------------
 
-const UNIT_OPTIONS = [
-  { label: "Piece", value: "PIECE" },
-  { label: "Box", value: "BOX" },
-  { label: "Kg", value: "KG" },
-  { label: "Metre", value: "METRE" },
-  { label: "Litre", value: "LITRE" },
-  { label: "Set", value: "SET" },
-  { label: "Pair", value: "PAIR" },
-  { label: "Other", value: "OTHER" },
-];
-
-const GST_RATE_OPTIONS = [
-  { label: "0%", value: 0 },
-  { label: "5%", value: 5 },
-  { label: "12%", value: 12 },
-  { label: "18%", value: 18 },
-  { label: "28%", value: 28 },
-];
-
-const DISCOUNT_TYPE_OPTIONS = [
-  { label: "%", value: "PERCENTAGE" },
-  { label: "Flat", value: "FLAT" },
-];
 
 const DEFAULT_LINE_ITEM = {
+  productId: "",
   productName: "",
   description: "",
   hsnCode: "",
@@ -127,17 +114,26 @@ const DEFAULT_LINE_ITEM = {
 
 interface InvoiceFormProps {
   invoiceId?: string;
+  leadId?: string;
+  mode?: "page" | "panel";
+  panelId?: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
+export function InvoiceForm({ invoiceId, leadId: defaultLeadId, mode = "page", panelId, onSuccess, onCancel }: InvoiceFormProps) {
   const router = useRouter();
   const isEdit = !!invoiceId;
+  const updatePanelConfig = useSidePanelStore((s) => s.updatePanelConfig);
 
   const [isInterState, setIsInterState] = useState(false);
+  const [showNotesModal, setShowNotesModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showInternalNotesModal, setShowInternalNotesModal] = useState(false);
 
   // -- Queries & Mutations --------------------------------------------------
   const { data: invoiceData, isLoading: isLoadingInvoice } =
@@ -151,6 +147,7 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceSchema),
@@ -176,7 +173,7 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
       discountType: "",
       discountValue: null,
       isInterState: false,
-      lineItems: [],
+      lineItems: [DEFAULT_LINE_ITEM],
       notes: "",
       termsAndConditions: "",
       internalNotes: "",
@@ -218,6 +215,7 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
       discountValue: inv.discountValue ?? null,
       isInterState: inv.isInterState ?? false,
       lineItems: (inv.lineItems ?? []).map((li: InvoiceLineItem) => ({
+        productId: (li as any).productId ?? "",
         productName: li.productName,
         description: li.description ?? "",
         hsnCode: li.hsnCode ?? "",
@@ -235,6 +233,43 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
       internalNotes: inv.internalNotes ?? "",
     });
   }, [isEdit, invoiceData, reset]);
+
+  // -- Pre-fill leadId when opened from Lead Dashboard -------------------------
+  useEffect(() => {
+    if (isEdit || !defaultLeadId) return;
+    setValue("leadId", defaultLeadId);
+  }, [isEdit, defaultLeadId, setValue]);
+
+  // -- Sync isSubmitting → panel footer button (loading / disabled / label) --
+  useEffect(() => {
+    if (!panelId) return;
+    updatePanelConfig(panelId, {
+      footerButtons: [
+        {
+          id: "cancel",
+          label: "Cancel",
+          showAs: "text",
+          variant: "secondary",
+          disabled: isSubmitting,
+          onClick: () => {},
+        },
+        {
+          id: "save",
+          label: isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Save Changes" : "Save",
+          icon: "check",
+          showAs: "both",
+          variant: "primary",
+          loading: isSubmitting,
+          disabled: isSubmitting,
+          onClick: () => {
+            const formId = `sp-form-invoice-${invoiceId ?? "new"}`;
+            const form = document.getElementById(formId) as HTMLFormElement | null;
+            form?.requestSubmit();
+          },
+        },
+      ],
+    });
+  }, [isSubmitting, panelId, isEdit, invoiceId, updatePanelConfig]);
 
   // -- Live summary calculation ---------------------------------------------
   const watchedLineItems = watch("lineItems");
@@ -281,11 +316,19 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
         const { lineItems, quotationId, leadId, contactId, organizationId, ...rest } = payload;
         await updateInvoice.mutateAsync({ id: invoiceId, data: rest });
         toast.success("Invoice updated");
-        router.push(`/invoices/${invoiceId}`);
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push(`/invoices/${invoiceId}`);
+        }
       } else {
         await createInvoice.mutateAsync(payload as any);
         toast.success("Invoice created");
-        router.push("/invoices");
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push("/invoices");
+        }
       }
     } catch {
       toast.error(isEdit ? "Failed to update invoice" : "Failed to create invoice");
@@ -295,23 +338,28 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
   // -- Loading state --------------------------------------------------------
   if (isEdit && isLoadingInvoice) return <LoadingSpinner fullPage />;
 
+  const isPanel = mode === "panel";
+
   // -- Render ---------------------------------------------------------------
   return (
-    <div className="p-6" style={{ position: "relative" }}>
+    <div className={isPanel ? "p-4" : "p-6 max-w-5xl mx-auto"} style={{ position: "relative" }}>
       <FormSubmitOverlay isSubmitting={isSubmitting} isEdit={isEdit} />
-      <PageHeader
-        title={isEdit ? "Edit Invoice" : "New Invoice"}
-        actions={
-          <Button variant="outline" onClick={() => router.back()}>
-            <Icon name="arrow-left" size={16} /> Back
-          </Button>
-        }
-      />
+      {!isPanel && (
+        <PageHeader
+          title={isEdit ? "Edit Invoice" : "New Invoice"}
+          actions={
+            <Button variant="outline" onClick={() => router.back()}>
+              <Icon name="arrow-left" size={16} /> Back
+            </Button>
+          }
+        />
+      )}
 
       <form
+        id={isPanel ? `sp-form-invoice-${invoiceId ?? "new"}` : undefined}
         onSubmit={handleSubmit(onSubmit)}
         noValidate
-        className="mt-4 max-w-5xl space-y-6"
+        className={`${isPanel ? "mt-2" : "mt-4 max-w-5xl"} space-y-6`}
       >
         <FormErrors errors={errors} />
 
@@ -319,24 +367,22 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
             Invoice Information
         ---------------------------------------------------------------- */}
         <Fieldset label="Invoice Information">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {/* Billing Name */}
             <Controller
               name="billingName"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Billing Name <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    placeholder="Billing name"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    error={!!errors.billingName}
-                    errorMessage={errors.billingName?.message}
-                  />
-                </div>
+                <Input
+                  label="Billing Name"
+                  required
+                  leftIcon={<Icon name="user" size={16} />}
+                  placeholder="Billing name"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  error={!!errors.billingName}
+                  errorMessage={errors.billingName?.message}
+                />
               )}
             />
 
@@ -384,70 +430,61 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
               name="quotationId"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Quotation ID
-                  </label>
-                  <Input
-                    placeholder="Quotation ID"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <Input
+                  label="Quotation ID"
+                  leftIcon={<Icon name="file-text" size={16} />}
+                  placeholder="Quotation ID"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
               )}
             />
 
-            {/* Lead ID */}
+            {/* Lead */}
             <Controller
               name="leadId"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Lead ID
-                  </label>
-                  <Input
-                    placeholder="Lead ID"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <LeadSelect
+                  label="Lead"
+                  value={field.value || null}
+                  onChange={(val) => field.onChange(String(val ?? ""))}
+                  onLeadSelect={(lead: LeadSelectOption | null) => {
+                    if (lead) {
+                      setValue("contactId", lead.contactId);
+                      setValue("organizationId", lead.organizationId ?? "");
+                      setValue("billingName", `${lead.contactFirstName} ${lead.contactLastName}`.trim());
+                    }
+                  }}
+                  error={!!errors.leadId}
+                  errorMessage={errors.leadId?.message}
+                />
               )}
             />
 
-            {/* Contact ID */}
+            {/* Contact */}
             <Controller
               name="contactId"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Contact ID
-                  </label>
-                  <Input
-                    placeholder="Contact ID"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <ContactSelect
+                  label="Contact"
+                  value={field.value || null}
+                  onChange={(val) => field.onChange(String(val ?? ""))}
+                />
               )}
             />
 
-            {/* Organization ID */}
+            {/* Organization */}
             <Controller
               name="organizationId"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Organization ID
-                  </label>
-                  <Input
-                    placeholder="Organization ID"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <OrganizationSelect
+                  label="Organization"
+                  value={field.value || null}
+                  onChange={(val) => field.onChange(String(val ?? ""))}
+                />
               )}
             />
           </div>
@@ -457,21 +494,18 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
             Billing Address
         ---------------------------------------------------------------- */}
         <Fieldset label="Billing Address">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Controller
               name="billingAddress"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Address
-                  </label>
-                  <Input
-                    placeholder="Street address"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <Input
+                  label="Address"
+                  leftIcon={<Icon name="map-pin" size={16} />}
+                  placeholder="Street address"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
               )}
             />
 
@@ -479,16 +513,13 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
               name="billingCity"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    City
-                  </label>
-                  <Input
-                    placeholder="City"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <Input
+                  label="City"
+                  leftIcon={<Icon name="building-2" size={16} />}
+                  placeholder="City"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
               )}
             />
 
@@ -496,16 +527,13 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
               name="billingState"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    State
-                  </label>
-                  <Input
-                    placeholder="State"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <Input
+                  label="State"
+                  leftIcon={<Icon name="map" size={16} />}
+                  placeholder="State"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
               )}
             />
 
@@ -513,16 +541,13 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
               name="billingPincode"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Pincode
-                  </label>
-                  <Input
-                    placeholder="Pincode"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <Input
+                  label="Pincode"
+                  leftIcon={<Icon name="hash" size={16} />}
+                  placeholder="Pincode"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
               )}
             />
 
@@ -530,16 +555,13 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
               name="billingGstNumber"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    GST Number
-                  </label>
-                  <Input
-                    placeholder="GST number"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <Input
+                  label="GST Number"
+                  leftIcon={<Icon name="receipt" size={16} />}
+                  placeholder="GST number"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
               )}
             />
           </div>
@@ -549,21 +571,18 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
             Shipping Address
         ---------------------------------------------------------------- */}
         <Fieldset label="Shipping Address" toggleable defaultCollapsed>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Controller
               name="shippingName"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Shipping Name
-                  </label>
-                  <Input
-                    placeholder="Shipping name"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <Input
+                  label="Shipping Name"
+                  leftIcon={<Icon name="user" size={16} />}
+                  placeholder="Shipping name"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
               )}
             />
 
@@ -571,16 +590,13 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
               name="shippingAddress"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Address
-                  </label>
-                  <Input
-                    placeholder="Shipping address"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <Input
+                  label="Address"
+                  leftIcon={<Icon name="map-pin" size={16} />}
+                  placeholder="Shipping address"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
               )}
             />
 
@@ -588,16 +604,13 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
               name="shippingCity"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    City
-                  </label>
-                  <Input
-                    placeholder="City"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <Input
+                  label="City"
+                  leftIcon={<Icon name="building-2" size={16} />}
+                  placeholder="City"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
               )}
             />
 
@@ -605,16 +618,13 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
               name="shippingState"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    State
-                  </label>
-                  <Input
-                    placeholder="State"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <Input
+                  label="State"
+                  leftIcon={<Icon name="map" size={16} />}
+                  placeholder="State"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
               )}
             />
 
@@ -622,16 +632,13 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
               name="shippingPincode"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Pincode
-                  </label>
-                  <Input
-                    placeholder="Pincode"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <Input
+                  label="Pincode"
+                  leftIcon={<Icon name="hash" size={16} />}
+                  placeholder="Pincode"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
               )}
             />
           </div>
@@ -674,7 +681,7 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
                   <th className="pb-2 pr-2 w-40">Discount</th>
                   <th className="pb-2 pr-2 w-24">GST %</th>
                   <th className="pb-2 pr-2 w-28 text-right">Line Total</th>
-                  <th className="pb-2 w-10"></th>
+                  <th className="pb-2 w-20"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -694,13 +701,24 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
                       {/* Product Name */}
                       <td className="py-2 pr-2">
                         <Controller
-                          name={`lineItems.${index}.productName`}
+                          name={`lineItems.${index}.productId`}
                           control={control}
                           render={({ field: f }) => (
-                            <Input
-                              placeholder="Product name"
-                              value={f.value}
-                              onChange={f.onChange}
+                            <ProductSelect
+                              label=""
+                              value={f.value ?? null}
+                              onChange={(val) => f.onChange(val ?? "")}
+                              onProductSelect={(product: ProductSelectOption | null) => {
+                                if (product) {
+                                  setValue(`lineItems.${index}.productName`, product.name);
+                                  if (product.salePrice) setValue(`lineItems.${index}.unitPrice`, product.salePrice);
+                                  if (product.hsnCode) setValue(`lineItems.${index}.hsnCode`, product.hsnCode);
+                                  if (product.primaryUnit) setValue(`lineItems.${index}.unit`, product.primaryUnit);
+                                  if (product.gstRate != null) setValue(`lineItems.${index}.gstRate`, product.gstRate);
+                                  if (product.cessRate != null) setValue(`lineItems.${index}.cessRate`, product.cessRate);
+                                  if (product.shortDescription) setValue(`lineItems.${index}.description`, product.shortDescription);
+                                }
+                              }}
                               error={!!errors.lineItems?.[index]?.productName}
                             />
                           )}
@@ -731,9 +749,9 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
                           name={`lineItems.${index}.unit`}
                           control={control}
                           render={({ field: f }) => (
-                            <SelectInput
+                            <LookupSelect
+                              masterCode="UNIT_OF_MEASURE"
                               label=""
-                              options={UNIT_OPTIONS}
                               value={f.value ?? ""}
                               onChange={(v) => f.onChange(String(v ?? ""))}
                             />
@@ -751,7 +769,7 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
                               label=""
                               value={f.value}
                               onChange={(v) => f.onChange(v)}
-                              currency={"\u20B9"}
+                              currency="₹"
                             />
                           )}
                         />
@@ -765,9 +783,9 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
                             control={control}
                             render={({ field: f }) => (
                               <div className="w-20">
-                                <SelectInput
+                                <LookupSelect
+                                  masterCode="DISCOUNT_TYPE"
                                   label=""
-                                  options={DISCOUNT_TYPE_OPTIONS}
                                   value={f.value ?? ""}
                                   onChange={(v) => f.onChange(String(v ?? ""))}
                                 />
@@ -797,9 +815,10 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
                           name={`lineItems.${index}.gstRate`}
                           control={control}
                           render={({ field: f }) => (
-                            <SelectInput
+                            <LookupSelect
+                              masterCode="GST_RATE"
+                              numericValue
                               label=""
-                              options={GST_RATE_OPTIONS}
                               value={f.value ?? ""}
                               onChange={(v) =>
                                 f.onChange(v === "" || v === null ? null : Number(v))
@@ -816,14 +835,25 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
 
                       {/* Remove */}
                       <td className="py-2">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => remove(index)}
-                        >
-                          Remove
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => append(DEFAULT_LINE_ITEM)}
+                          >
+                            <Icon name="plus" size={14} />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => remove(index)}
+                            disabled={fields.length <= 1}
+                          >
+                            <Icon name="trash" size={14} />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -832,20 +862,6 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
             </table>
           </div>
 
-          {fields.length === 0 && (
-            <p className="py-4 text-center text-sm text-gray-400">
-              No line items yet. Add one below.
-            </p>
-          )}
-
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-3"
-            onClick={() => append(DEFAULT_LINE_ITEM)}
-          >
-            + Add Item
-          </Button>
         </Fieldset>
 
         {/* ----------------------------------------------------------------
@@ -861,9 +877,9 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
                   name="discountType"
                   control={control}
                   render={({ field }) => (
-                    <SelectInput
+                    <LookupSelect
+                      masterCode="DISCOUNT_TYPE"
                       label=""
-                      options={DISCOUNT_TYPE_OPTIONS}
                       value={field.value ?? ""}
                       onChange={(v) => field.onChange(String(v ?? ""))}
                     />
@@ -937,83 +953,149 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
         {/* ----------------------------------------------------------------
             Notes & Terms
         ---------------------------------------------------------------- */}
-        <Fieldset label="Notes & Terms" toggleable defaultCollapsed>
-          <div className="space-y-4">
-            <Controller
-              name="notes"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Notes
-                  </label>
-                  <textarea
-                    className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    rows={3}
-                    placeholder="Notes visible on invoice..."
-                  />
-                </div>
-              )}
-            />
+        {/* ────────────────────────────────────────────────────
+            Additional Details — Notes, Terms, Internal Notes buttons
+        ──────────────────────────────────────────────────── */}
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => setShowNotesModal(true)}
+            className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors"
+          >
+            <Icon name="file-text" size={16} />
+            <span className="font-medium">Notes</span>
+            {watch("notes") && <span className="ml-auto text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded">Added</span>}
+            {!watch("notes") && <span className="ml-auto text-xs text-gray-400">+ Add</span>}
+          </button>
 
-            <Controller
-              name="termsAndConditions"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Terms & Conditions
-                  </label>
-                  <textarea
-                    className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    rows={3}
-                    placeholder="Payment terms, late fees, etc..."
-                  />
-                </div>
-              )}
-            />
+          <button
+            type="button"
+            onClick={() => setShowTermsModal(true)}
+            className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors"
+          >
+            <Icon name="shield" size={16} />
+            <span className="font-medium">Terms & Conditions</span>
+            {watch("termsAndConditions") && <span className="ml-2 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded">Added</span>}
+            {!watch("termsAndConditions") && <span className="ml-2 text-xs text-gray-400">+ Add</span>}
+          </button>
 
-            <Controller
-              name="internalNotes"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Internal Notes
-                  </label>
-                  <textarea
-                    className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    rows={3}
-                    placeholder="Internal notes (not visible to customer)..."
-                  />
-                </div>
-              )}
-            />
-          </div>
-        </Fieldset>
+          <button
+            type="button"
+            onClick={() => setShowInternalNotesModal(true)}
+            className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors"
+          >
+            <Icon name="message-square" size={16} />
+            <span className="font-medium">Internal Notes</span>
+            {watch("internalNotes") && <span className="ml-2 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded">Added</span>}
+            {!watch("internalNotes") && <span className="ml-2 text-xs text-gray-400">+ Add</span>}
+          </button>
+        </div>
+
+        {/* ── Notes Modal ── */}
+        <Modal
+          open={showNotesModal}
+          onClose={() => setShowNotesModal(false)}
+          title="Notes"
+          size="md"
+          footer={
+            <div className="flex justify-end">
+              <Button type="button" variant="primary" onClick={() => setShowNotesModal(false)}>
+                Done
+              </Button>
+            </div>
+          }
+        >
+          <Controller
+            name="notes"
+            control={control}
+            render={({ field }) => (
+              <textarea
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                rows={5}
+                placeholder="Notes visible on invoice..."
+              />
+            )}
+          />
+        </Modal>
+
+        {/* ── Terms & Conditions Modal ── */}
+        <Modal
+          open={showTermsModal}
+          onClose={() => setShowTermsModal(false)}
+          title="Terms & Conditions"
+          size="md"
+          footer={
+            <div className="flex justify-end">
+              <Button type="button" variant="primary" onClick={() => setShowTermsModal(false)}>
+                Done
+              </Button>
+            </div>
+          }
+        >
+          <Controller
+            name="termsAndConditions"
+            control={control}
+            render={({ field }) => (
+              <textarea
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                rows={5}
+                placeholder="Payment terms, late fees, etc..."
+              />
+            )}
+          />
+        </Modal>
+
+        {/* ── Internal Notes Modal ── */}
+        <Modal
+          open={showInternalNotesModal}
+          onClose={() => setShowInternalNotesModal(false)}
+          title="Internal Notes"
+          size="md"
+          footer={
+            <div className="flex justify-end">
+              <Button type="button" variant="primary" onClick={() => setShowInternalNotesModal(false)}>
+                Done
+              </Button>
+            </div>
+          }
+        >
+          <Controller
+            name="internalNotes"
+            control={control}
+            render={({ field }) => (
+              <textarea
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                rows={5}
+                placeholder="Internal notes (not visible to customer)..."
+              />
+            )}
+          />
+        </Modal>
 
         {/* ----------------------------------------------------------------
-            Actions
+            Actions — hidden in panel mode (footer handles it)
         ---------------------------------------------------------------- */}
-        <div className="flex gap-3 pt-2">
-          <Button
-            type="submit"
-            variant="primary"
-            loading={isSubmitting}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
-          </Button>
-          <Button type="button" variant="outline" onClick={() => router.back()}>
-            Cancel
-          </Button>
-        </div>
+        {!isPanel && (
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => router.back()}>
+              Cancel
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   );

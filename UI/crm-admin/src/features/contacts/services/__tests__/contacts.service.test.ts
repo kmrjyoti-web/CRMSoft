@@ -26,30 +26,30 @@ describe("contactsService", () => {
 
   it("getAll calls GET /contacts with params", async () => {
     await contactsService.getAll({ page: 1, limit: 10, search: "test" });
-    expect(apiClient.get).toHaveBeenCalledWith("/contacts", {
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/contacts", {
       params: { page: 1, limit: 10, search: "test" },
     });
   });
 
   it("getById calls GET /contacts/:id", async () => {
     await contactsService.getById("abc-123");
-    expect(apiClient.get).toHaveBeenCalledWith("/contacts/abc-123");
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/contacts/abc-123");
   });
 
   it("create sends POST /contacts", async () => {
     const payload = { firstName: "John", lastName: "Doe" };
     await contactsService.create(payload);
-    expect(apiClient.post).toHaveBeenCalledWith("/contacts", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/contacts", payload);
   });
 
   it("update sends PUT /contacts/:id (not PATCH)", async () => {
     const payload = { firstName: "Jane" };
     await contactsService.update("abc-123", payload);
-    expect(apiClient.put).toHaveBeenCalledWith("/contacts/abc-123", payload);
+    expect(apiClient.put).toHaveBeenCalledWith("/api/v1/contacts/abc-123", payload);
   });
 
   it("deactivate sends POST /contacts/:id/deactivate", async () => {
     await contactsService.deactivate("abc-123");
-    expect(apiClient.post).toHaveBeenCalledWith("/contacts/abc-123/deactivate");
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/contacts/abc-123/deactivate");
   });
 });

@@ -18,6 +18,7 @@ import { ReportBookmarksController } from './presentation/report-bookmarks.contr
 import { ReportSchedulesController } from './presentation/report-schedules.controller';
 import { CustomReportController } from './presentation/custom-report.controller';
 import { DailyDigestController } from './presentation/daily-digest.controller';
+import { ReportTemplatesController } from './presentation/report-templates.controller';
 
 // Sales Reports
 import { SalesSummaryReport } from './reports/sales/sales-summary.report';
@@ -134,6 +135,7 @@ const REPORT_CLASSES = [
     MisReportsController,
     ReportBookmarksController,
     ReportSchedulesController,
+    ReportTemplatesController,
     CustomReportController,
     DailyDigestController,
   ],

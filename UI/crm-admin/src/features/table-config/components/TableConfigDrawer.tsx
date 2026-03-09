@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 
 import { Drawer, Button, Icon, Switch } from "@/components/ui";
 
 import { useTableConfig } from "../hooks/useTableConfig";
 
 import { ColumnConfigList } from "./ColumnConfigList";
+import { FilterConfigList } from "./FilterConfigList";
 
 import type { TableFilterConfig } from "@/components/ui/table-filter.types";
 
-import type { ColumnConfig, TableConfigData } from "../types/table-config.types";
+import type { ColumnConfig, TableConfigData, FilterLayoutSection } from "../types/table-config.types";
 
 type Tab = "columns" | "filters" | "settings";
 
@@ -42,6 +43,7 @@ export function TableConfigDrawer({
     defaultViewMode: savedViewMode,
     showRowActions: savedShowRowActions,
     filterVisibility: savedFilterVisibility,
+    filterLayout: savedFilterLayout,
     saveConfig,
     resetToDefault,
     isSaving,
@@ -53,7 +55,29 @@ export function TableConfigDrawer({
   const [viewMode, setViewMode] = useState<string>("table");
   const [showRowActions, setShowRowActions] = useState(true);
   const [filterVisibility, setFilterVisibility] = useState<Record<string, boolean>>({});
+  const [filterLayout, setFilterLayout] = useState<FilterLayoutSection[]>([]);
   const [applyToAll, setApplyToAll] = useState(false);
+
+  // Build default layout from filterConfig sections
+  const defaultLayout = useMemo((): FilterLayoutSection[] => {
+    if (!filterConfig) return [];
+    return filterConfig.sections.map((s) => ({
+      title: s.title,
+      filterIds: s.filters.map((f) => f.columnId),
+    }));
+  }, [filterConfig]);
+
+  // Flat list of all filters for FilterConfigList
+  const allFilters = useMemo(() => {
+    if (!filterConfig) return [];
+    return filterConfig.sections.flatMap((s) =>
+      s.filters.map((f) => ({
+        columnId: f.columnId,
+        label: f.label,
+        filterType: f.filterType,
+      })),
+    );
+  }, [filterConfig]);
 
   // Sync local state when drawer opens or saved config changes
   useEffect(() => {
@@ -64,22 +88,25 @@ export function TableConfigDrawer({
       setViewMode(savedViewMode ?? "table");
       setShowRowActions(savedShowRowActions ?? true);
       setFilterVisibility(savedFilterVisibility ?? {});
+      setFilterLayout(savedFilterLayout ?? defaultLayout);
       setApplyToAll(false);
     }
-  }, [isOpen, savedColumns, savedDensity, savedViewMode, savedShowRowActions, savedFilterVisibility]);
+  }, [isOpen, savedColumns, savedDensity, savedViewMode, savedShowRowActions, savedFilterVisibility, savedFilterLayout, defaultLayout]);
 
   const handleSave = useCallback(async () => {
     const hasFilterChanges = Object.keys(filterVisibility).length > 0;
+    const hasLayoutChanges = JSON.stringify(filterLayout) !== JSON.stringify(defaultLayout);
     const config: TableConfigData = {
       columns: localColumns,
       density: density as TableConfigData["density"],
       defaultViewMode: viewMode,
       showRowActions,
       ...(hasFilterChanges ? { filterVisibility } : {}),
+      ...(hasLayoutChanges ? { filterLayout } : {}),
     };
     await saveConfig(config, applyToAll);
     onClose();
-  }, [localColumns, density, viewMode, showRowActions, filterVisibility, applyToAll, saveConfig, onClose]);
+  }, [localColumns, density, viewMode, showRowActions, filterVisibility, filterLayout, defaultLayout, applyToAll, saveConfig, onClose]);
 
   const handleReset = useCallback(async () => {
     await resetToDefault();
@@ -133,47 +160,17 @@ export function TableConfigDrawer({
           {activeTab === "filters" && (
             <div className="space-y-4">
               <p className="text-xs text-gray-500">
-                Toggle which filters appear in the sidebar.
+                Drag to reorder, toggle visibility, change group, or create new groups.
               </p>
-              {filterConfig && filterConfig.sections.length > 0 ? (
-                <div className="space-y-4">
-                  {filterConfig.sections.map((section) => (
-                    <div key={section.title}>
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                        {section.title}
-                      </p>
-                      <div className="space-y-1.5 pl-1">
-                        {section.filters.map((filter) => {
-                          const isDefault = !defaultFilterIds || defaultFilterIds.has(filter.columnId);
-                          const checked = isDefault
-                            ? filterVisibility[filter.columnId] !== false
-                            : filterVisibility[filter.columnId] === true;
-                          return (
-                            <div key={filter.columnId} className="flex items-center gap-2 py-0.5">
-                              <label className="flex items-center gap-2 text-sm cursor-pointer flex-1 min-w-0">
-                                <input
-                                  type="checkbox"
-                                  checked={checked}
-                                  onChange={() =>
-                                    setFilterVisibility((prev) => ({
-                                      ...prev,
-                                      [filter.columnId]: !checked,
-                                    }))
-                                  }
-                                  className="rounded border-gray-300 text-blue-600 shrink-0"
-                                />
-                                <span className="text-gray-700 truncate">{filter.label}</span>
-                              </label>
-                              <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-400 rounded shrink-0">
-                                {filter.filterType}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              {allFilters.length > 0 ? (
+                <FilterConfigList
+                  allFilters={allFilters}
+                  layout={filterLayout}
+                  visibility={filterVisibility}
+                  defaultFilterIds={defaultFilterIds ?? new Set()}
+                  onLayoutChange={setFilterLayout}
+                  onVisibilityChange={setFilterVisibility}
+                />
               ) : (
                 <p className="text-sm text-gray-400 py-8 text-center">
                   No filters available for this table.

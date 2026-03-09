@@ -10,9 +10,12 @@ import { PermissionChainService } from './services/permission-chain.service';
 import { PermissionCacheService } from './services/permission-cache.service';
 import { PermissionPolicyGuard } from './guards/permission-policy.guard';
 import { OwnershipGuard } from './guards/ownership.guard';
+import { MenuPermissionGuard } from './guards/menu-permission.guard';
+import { MenusModule } from '../../modules/menus/menus.module';
 
 @Global()
 @Module({
+  imports: [MenusModule],
   providers: [
     RbacEngine,
     UbacEngine,
@@ -24,6 +27,7 @@ import { OwnershipGuard } from './guards/ownership.guard';
     PermissionCacheService,
     PermissionPolicyGuard,
     OwnershipGuard,
+    MenuPermissionGuard,
     { provide: APP_GUARD, useClass: PermissionPolicyGuard },
   ],
   exports: [
@@ -37,6 +41,7 @@ import { OwnershipGuard } from './guards/ownership.guard';
     PermissionCacheService,
     PermissionPolicyGuard,
     OwnershipGuard,
+    MenuPermissionGuard,
   ],
 })
 export class PermissionsCoreModule {}

@@ -5,10 +5,12 @@ const createJestConfig = nextJest({ dir: './' });
 
 const config: Config = {
   displayName: 'crm-admin',
-  testEnvironment: 'jest-environment-jsdom',
+  testEnvironment: '<rootDir>/jest.environment.js',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 
   moduleNameMapper: {
+    // MSW v2 ships as ESM (.mjs) for the node export — force CJS for jest
+    '^msw/node$': '<rootDir>/node_modules/msw/lib/node/index.js',
     '^@/components/ui$': '<rootDir>/src/components/ui/index.ts',
     '^@/components/ui/(.*)$': '<rootDir>/src/components/ui/$1',
     '^@/components/common/(.*)$': '<rootDir>/src/components/common/$1',
@@ -56,10 +58,10 @@ const config: Config = {
     '<rootDir>/node_modules/',
     '<rootDir>/.next/',
     '<rootDir>/lib/coreui/',
+    '<rootDir>/e2e/',
   ],
-  transformIgnorePatterns: [
-    'node_modules/(?!(@coreui)/)',
-  ],
+  // transformIgnorePatterns is managed by nextJest via next.config.js transpilePackages.
+  // MSW deps (msw, @mswjs/interceptors, until-async, rettime) are listed there.
 };
 
 export default createJestConfig(config);

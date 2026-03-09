@@ -4,7 +4,7 @@ import { EmailFooterService } from '../services/email-footer.service';
 import { CreateEmailFooterDto, UpdateEmailFooterDto } from './dto/email-footer.dto';
 
 @ApiTags('Settings - Email Footer')
-@Controller('api/v1/settings/email-footers')
+@Controller('settings/email-footers')
 export class EmailFooterController {
   constructor(private readonly service: EmailFooterService) {}
 

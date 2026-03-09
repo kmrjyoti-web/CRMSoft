@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsUUID, IsEnum, IsNumber } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional, IsUUID, IsEnum, IsNumber, Matches } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 // ─── SHARED ───
@@ -31,6 +31,8 @@ export class RegisterDto {
   @ApiPropertyOptional({ enum: ['ADMIN', 'EMPLOYEE'] })
   @IsOptional() @IsEnum(['ADMIN', 'EMPLOYEE'])
   userType?: string;
+  @ApiPropertyOptional() @IsOptional() @IsUUID() departmentId?: string;
+  @ApiPropertyOptional() @IsOptional() @IsUUID() designationId?: string;
 }
 
 // ─── CUSTOMER SELF-REGISTER (public) ───
@@ -61,4 +63,33 @@ export class PartnerRegisterDto {
   @ApiPropertyOptional() @IsOptional() @IsString() bankName?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() bankAccount?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() ifscCode?: string;
+}
+
+// ─── TENANT SELF-REGISTER (public) ───
+
+export class TenantRegisterDto {
+  @ApiProperty({ example: 'Acme Corp' })
+  @IsString() companyName: string;
+
+  @ApiProperty({ example: 'acme-corp', description: 'URL-safe tenant slug' })
+  @IsString() @Matches(/^[a-z0-9][a-z0-9-]*[a-z0-9]$/, { message: 'Slug must be lowercase alphanumeric with hyphens' })
+  slug: string;
+
+  @ApiProperty({ example: 'admin@acme.com' })
+  @IsEmail() email: string;
+
+  @ApiProperty({ example: 'Admin@123' })
+  @IsString() @MinLength(6) password: string;
+
+  @ApiProperty({ example: 'John' })
+  @IsString() firstName: string;
+
+  @ApiProperty({ example: 'Doe' })
+  @IsString() lastName: string;
+
+  @ApiPropertyOptional({ example: '+91-9876543210' })
+  @IsOptional() @IsString() phone?: string;
+
+  @ApiPropertyOptional({ description: 'Plan ID to subscribe to (defaults to first active plan)' })
+  @IsOptional() @IsUUID() planId?: string;
 }

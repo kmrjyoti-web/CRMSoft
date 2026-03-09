@@ -6,7 +6,7 @@ import { RefundService } from '../services/refund.service';
 import { CreateRefundDto, RefundQueryDto } from './dto/refund.dto';
 
 @ApiTags('Refunds')
-@Controller('api/v1/refunds')
+@Controller('refunds')
 export class RefundController {
   constructor(private readonly refundService: RefundService) {}
 

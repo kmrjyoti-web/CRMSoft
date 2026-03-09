@@ -1,5 +1,5 @@
 import {
-  IsString, IsOptional, IsEmail, IsArray, MinLength,
+  IsString, IsOptional, IsEmail, IsArray, MinLength, IsNumber,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -47,6 +47,9 @@ export class CreateOrganizationDto {
   @ApiPropertyOptional({ example: 'IT / Software' })
   @IsOptional() @IsString()
   industry?: string;
+
+  @ApiPropertyOptional() @IsOptional() @IsNumber()
+  annualRevenue?: number;
 
   @ApiPropertyOptional() @IsOptional() @IsString()
   notes?: string;

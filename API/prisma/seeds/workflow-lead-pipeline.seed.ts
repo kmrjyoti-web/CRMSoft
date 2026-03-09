@@ -80,6 +80,7 @@ export async function seedLeadWorkflow(prisma: PrismaClient, adminId: string, te
         name: t.name,
         code: t.code,
         triggerType: 'MANUAL',
+        actions: [{ type: 'FIELD_UPDATE', config: { entity: 'lead', field: 'status', value: t.to } }],
       },
     });
   }

@@ -30,6 +30,8 @@ import { DataRetentionController } from './presentation/data-retention.controlle
 import { EmailFooterController } from './presentation/email-footer.controller';
 import { NotionController } from './presentation/notion.controller';
 import { UsersController } from './presentation/users.controller';
+import { RolesController } from './presentation/roles.controller';
+import { PermissionsController } from './presentation/permissions.controller';
 
 // User Command Handlers
 import { SoftDeleteUserHandler } from './application/commands/soft-delete-user/soft-delete-user.handler';
@@ -69,6 +71,8 @@ const CONTROLLERS = [
   EmailFooterController,
   NotionController,
   UsersController,
+  RolesController,
+  PermissionsController,
 ];
 
 @Module({

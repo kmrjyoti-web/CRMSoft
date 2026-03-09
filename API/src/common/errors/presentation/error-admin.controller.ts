@@ -1,24 +1,125 @@
 import {
   Controller,
   Get,
+  Post,
+  Put,
   Delete,
   Query,
   Param,
+  Body,
   UseGuards,
+  HttpCode,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { PrismaService } from '../../../core/prisma/prisma.service';
-import { generateErrorReference } from '../error-docs-generator';
+import { ErrorCatalogService } from '../error-catalog.service';
+import { ErrorLoggerService } from '../error-logger.service';
 import { ERROR_CODES, TOTAL_ERROR_CODES } from '../error-codes';
+import { generateErrorReference } from '../error-docs-generator';
+import { PrismaService } from '../../../core/prisma/prisma.service';
 
 @Controller('admin/errors')
 @UseGuards(JwtAuthGuard)
 export class ErrorAdminController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly catalogService: ErrorCatalogService,
+    private readonly loggerService: ErrorLoggerService,
+    private readonly prisma: PrismaService,
+  ) {}
+
+  // ═══════════════════════════════════════════════════
+  // CATALOG (DB-backed with i18n)
+  // ═══════════════════════════════════════════════════
+
+  /**
+   * GET /admin/errors/catalog
+   * Returns all error catalog entries from DB (cached).
+   */
+  @Get('catalog')
+  async listCatalog(@Query('module') module?: string, @Query('layer') layer?: string) {
+    if (module) return this.catalogService.getByModule(module);
+    if (layer) return this.catalogService.getByLayer(layer);
+    return this.catalogService.getAll();
+  }
+
+  /**
+   * GET /admin/errors/catalog/:code
+   * Returns a single catalog entry by error code.
+   */
+  @Get('catalog/:code')
+  async getCatalogEntry(@Param('code') code: string) {
+    const entry = await this.catalogService.getByCode(code);
+    if (!entry) return { found: false, code };
+    return { found: true, ...entry };
+  }
+
+  /**
+   * POST /admin/errors/catalog/refresh
+   * Force-refresh the in-memory error catalog cache.
+   */
+  @Post('catalog/refresh')
+  async refreshCatalog() {
+    const count = await this.catalogService.refreshCache();
+    return { refreshed: true, entries: count };
+  }
+
+  /**
+   * PUT /admin/errors/catalog/:code
+   * Update a catalog entry (messages, solutions, etc.)
+   */
+  @Put('catalog/:code')
+  async updateCatalogEntry(
+    @Param('code') code: string,
+    @Body() body: {
+      messageEn?: string;
+      messageHi?: string;
+      solutionEn?: string;
+      solutionHi?: string;
+      helpUrl?: string;
+      isRetryable?: boolean;
+    },
+  ) {
+    const updated = await this.prisma.errorCatalog.update({
+      where: { code },
+      data: body,
+    });
+    await this.catalogService.refreshCache();
+    return updated;
+  }
+
+  /**
+   * GET /admin/errors/modules
+   * List distinct modules in the error catalog.
+   */
+  @Get('modules')
+  async getModules() {
+    const result = await this.prisma.errorCatalog.findMany({
+      select: { module: true },
+      distinct: ['module'],
+    });
+    return result.map((r) => r.module);
+  }
+
+  /**
+   * GET /admin/errors/logs/severity/:severity
+   * Get errors by severity for a tenant.
+   */
+  @Get('logs/severity/:severity')
+  async getLogsBySeverity(
+    @Param('severity') severity: string,
+    @Query('tenantId') tenantId?: string,
+    @Query('limit') limit = '50',
+  ) {
+    if (!tenantId) return [];
+    return this.loggerService.getBySeverity(tenantId, severity, parseInt(limit));
+  }
+
+  // ═══════════════════════════════════════════════════
+  // LEGACY CODES (TypeScript-based)
+  // ═══════════════════════════════════════════════════
 
   /**
    * GET /admin/errors/codes
-   * Returns all error codes with their metadata.
+   * Returns all error codes from the TypeScript registry.
    */
   @Get('codes')
   listErrorCodes() {
@@ -33,14 +134,12 @@ export class ErrorAdminController {
 
   /**
    * GET /admin/errors/codes/:code
-   * Returns a single error code definition.
+   * Returns a single error code definition from TypeScript registry.
    */
   @Get('codes/:code')
   getErrorCode(@Param('code') code: string) {
     const def = ERROR_CODES[code];
-    if (!def) {
-      return { found: false, code };
-    }
+    if (!def) return { found: false, code };
     return { found: true, ...def };
   }
 
@@ -53,45 +152,31 @@ export class ErrorAdminController {
     return { markdown: generateErrorReference() };
   }
 
+  // ═══════════════════════════════════════════════════
+  // LOGS
+  // ═══════════════════════════════════════════════════
+
   /**
    * GET /admin/errors/logs
    * Lists error logs with pagination and filtering.
    */
   @Get('logs')
   async listErrorLogs(
-    @Query('page') page = 1,
-    @Query('limit') limit = 20,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
     @Query('errorCode') errorCode?: string,
     @Query('tenantId') tenantId?: string,
-    @Query('statusCode') statusCode?: string,
+    @Query('layer') layer?: string,
+    @Query('severity') severity?: string,
   ) {
-    const where: any = {};
-    if (errorCode) where.errorCode = errorCode;
-    if (tenantId) where.tenantId = tenantId;
-    if (statusCode) where.statusCode = Number(statusCode);
-
-    const [data, total] = await Promise.all([
-      this.prisma.errorLog.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip: (Number(page) - 1) * Number(limit),
-        take: Number(limit),
-      }),
-      this.prisma.errorLog.count({ where }),
-    ]);
-
-    const totalPages = Math.ceil(total / Number(limit));
-    return {
-      data,
-      meta: {
-        page: Number(page),
-        limit: Number(limit),
-        total,
-        totalPages,
-        hasNext: Number(page) < totalPages,
-        hasPrevious: Number(page) > 1,
-      },
-    };
+    return this.loggerService.getRecent({
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+      errorCode,
+      tenantId,
+      layer,
+      severity,
+    });
   }
 
   /**
@@ -103,35 +188,53 @@ export class ErrorAdminController {
     @Query('tenantId') tenantId?: string,
     @Query('since') since?: string,
   ) {
-    const where: any = {};
-    if (tenantId) where.tenantId = tenantId;
-    if (since) where.createdAt = { gte: new Date(since) };
-
-    const stats = await this.prisma.errorLog.groupBy({
-      by: ['errorCode'],
-      where,
-      _count: { id: true },
-      orderBy: { _count: { id: 'desc' } },
-    });
-
-    const total = await this.prisma.errorLog.count({ where });
-
-    return {
-      total,
-      byCode: stats.map((s) => ({
-        errorCode: s.errorCode,
-        count: s._count.id,
-      })),
-    };
+    return this.loggerService.getStats({ tenantId, since });
   }
 
   /**
-   * DELETE /admin/errors/logs/:id
-   * Delete a single error log entry.
+   * GET /admin/errors/trace/:traceId
+   * Look up error logs by trace ID.
    */
-  @Delete('logs/:id')
-  async deleteErrorLog(@Param('id') id: string) {
-    await this.prisma.errorLog.delete({ where: { id } });
-    return { deleted: true };
+  @Get('trace/:traceId')
+  async getByTraceId(@Param('traceId') traceId: string) {
+    const logs = await this.loggerService.getByTraceId(traceId);
+    return { traceId, count: logs.length, logs };
+  }
+
+  // ═══════════════════════════════════════════════════
+  // FRONTEND ERROR LOGGING
+  // ═══════════════════════════════════════════════════
+
+  /**
+   * POST /admin/errors/frontend
+   * Accepts error reports from the frontend.
+   */
+  @Post('frontend')
+  logFrontendError(
+    @Body() body: {
+      errorCode: string;
+      message: string;
+      path: string;
+      userId?: string;
+      tenantId?: string;
+      details?: any;
+      userAgent?: string;
+    },
+  ) {
+    this.loggerService.log({
+      requestId: `fe_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      errorCode: body.errorCode || 'FE_UNKNOWN',
+      message: body.message,
+      statusCode: 0,
+      path: body.path || '/',
+      method: 'FRONTEND',
+      layer: 'FE',
+      severity: 'ERROR',
+      userId: body.userId,
+      tenantId: body.tenantId,
+      details: body.details ? ErrorLoggerService.sanitizeBody(body.details) : undefined,
+      userAgent: body.userAgent,
+    });
+    return { logged: true };
   }
 }

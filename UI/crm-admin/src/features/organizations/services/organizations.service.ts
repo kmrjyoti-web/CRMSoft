@@ -9,7 +9,7 @@ import type {
   OrganizationUpdateData,
 } from "../types/organizations.types";
 
-const BASE_URL = "/organizations";
+const BASE_URL = "/api/v1/organizations";
 
 export const organizationsService = {
   getAll: (params?: OrganizationListParams) =>

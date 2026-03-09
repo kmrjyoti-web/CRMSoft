@@ -123,6 +123,11 @@ export class PermissionChainService {
     return this.roleHierarchyEngine.getEffectivePermissions(userId);
   }
 
+  /** Get ALL permission codes in the system (for super admin). */
+  async getAllPermissionCodes(): Promise<string[]> {
+    return this.roleHierarchyEngine.getAllPermissionCodes();
+  }
+
   /** Invalidate all engine caches. */
   invalidateAll(): void {
     this.rbacEngine.invalidateAll();

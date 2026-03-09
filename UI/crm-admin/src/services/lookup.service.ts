@@ -6,13 +6,14 @@ import api from "./api-client";
 // ── Lookup Service ─────────────────────────────────────
 
 export const lookupService = {
-  /** GET /api/v1/lookups/values?masterCode=CATEGORY */
+  /** GET /api/v1/lookups/values/:category */
   async getValues(masterCode: string): Promise<LookupValue[]> {
     const { data } = await api.get<ApiResponse<LookupValue[]>>(
-      "/api/v1/lookups/values",
-      { params: { masterCode } },
+      `/api/v1/lookups/values/${masterCode}`,
     );
-    return data.data;
+    const result = data.data;
+    // Backend returns { lookupId, category, displayName, values }
+    return Array.isArray(result) ? result : (result as any)?.values ?? [];
   },
 };
 

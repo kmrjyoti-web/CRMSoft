@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
@@ -7,6 +7,8 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { PlatformBootstrapService } from './platform-bootstrap.service';
+import { TenantModule } from '../../modules/tenant/tenant.module';
 
 @Module({
   imports: [
@@ -18,9 +20,10 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
         signOptions: { expiresIn: config.get('JWT_EXPIRES_IN') || '24h' },
       }),
     }),
+    forwardRef(() => TenantModule),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, { provide: APP_GUARD, useClass: JwtAuthGuard }],
+  providers: [AuthService, JwtStrategy, PlatformBootstrapService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
   exports: [AuthService],
 })
 export class AuthModule {}

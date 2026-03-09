@@ -12,7 +12,7 @@ import type {
   DemoCancelData,
 } from "../types/demos.types";
 
-const BASE_URL = "/demos";
+const BASE_URL = "/api/v1/demos";
 
 export const demosService = {
   getAll: (params?: DemoListParams) =>

@@ -9,6 +9,15 @@ export class CalendarQueryDto {
 
   @IsOptional() @IsArray() @IsString({ each: true })
   eventTypes?: string[];
+
+  @IsOptional() @IsArray() @IsString({ each: true })
+  sources?: string[];
+
+  @IsOptional() @IsString()
+  userId?: string;
+
+  @IsOptional() @IsString()
+  view?: string;
 }
 
 export class TeamCalendarQueryDto {
@@ -20,4 +29,24 @@ export class TeamCalendarQueryDto {
 
   @IsArray() @IsString({ each: true })
   userIds: string[];
+}
+
+export class UnifiedCalendarQueryDto {
+  @IsDateString()
+  startDate: string;
+
+  @IsDateString()
+  endDate: string;
+
+  @IsOptional() @IsArray() @IsString({ each: true })
+  sources?: string[];
+
+  @IsOptional() @IsString()
+  userId?: string;
+
+  @IsOptional() @IsString()
+  view?: string;
+
+  @IsOptional() @IsString()
+  search?: string;
 }

@@ -5,6 +5,8 @@ import { lookupsService } from "../services/lookups.service";
 import type {
   LookupCreateData,
   LookupUpdateData,
+  LookupValueCreateData,
+  LookupValueUpdateData,
 } from "../types/lookup.types";
 
 const KEY = "lookups-admin";
@@ -46,5 +48,44 @@ export function useDeactivateLookup() {
   return useMutation({
     mutationFn: (id: string) => lookupsService.deactivate(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
+  });
+}
+
+// ── Value mutations ──────────────────────────────────────
+
+export function useAddLookupValue() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ lookupId, data }: { lookupId: string; data: LookupValueCreateData }) =>
+      lookupsService.addValue(lookupId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
+  });
+}
+
+export function useUpdateLookupValue() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ valueId, data }: { valueId: string; data: LookupValueUpdateData }) =>
+      lookupsService.updateValue(valueId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
+  });
+}
+
+export function useDeactivateLookupValue() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (valueId: string) => lookupsService.deactivateValue(valueId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
+  });
+}
+
+export function useResetLookupDefaults() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => lookupsService.resetDefaults(),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [KEY] });
+      qc.invalidateQueries({ queryKey: ["lookup"] });
+    },
   });
 }

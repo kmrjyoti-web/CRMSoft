@@ -18,7 +18,7 @@ export class NotificationTemplateService {
       throw new NotFoundException(`Template "${templateName}" not found`);
     }
 
-    const subject = this.interpolate(template.subject, variables);
+    const subject = this.interpolate(template.subject || '', variables);
     const body = this.interpolate(template.body, variables);
 
     return {

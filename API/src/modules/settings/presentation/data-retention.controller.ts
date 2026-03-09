@@ -4,7 +4,7 @@ import { DataRetentionService } from '../services/data-retention.service';
 import { UpdateDataRetentionDto } from './dto/update-data-retention.dto';
 
 @ApiTags('Settings - Data Retention')
-@Controller('api/v1/settings/retention')
+@Controller('settings/retention')
 export class DataRetentionController {
   constructor(private readonly service: DataRetentionService) {}
 

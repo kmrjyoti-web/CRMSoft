@@ -28,43 +28,43 @@ describe("demosService", () => {
 
   it("getAll calls GET /demos with params", async () => {
     await demosService.getAll({ page: 1, limit: 10 });
-    expect(apiClient.get).toHaveBeenCalledWith("/demos", {
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/demos", {
       params: { page: 1, limit: 10 },
     });
   });
 
   it("getById calls GET /demos/:id", async () => {
     await demosService.getById("demo-1");
-    expect(apiClient.get).toHaveBeenCalledWith("/demos/demo-1");
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/demos/demo-1");
   });
 
   it("create sends POST /demos", async () => {
     const payload = { mode: "ONLINE", scheduledAt: "2024-01-15", leadId: "lead-1" };
     await demosService.create(payload as any);
-    expect(apiClient.post).toHaveBeenCalledWith("/demos", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/demos", payload);
   });
 
   it("update sends PUT /demos/:id", async () => {
     const payload = { notes: "Updated" };
     await demosService.update("demo-1", payload);
-    expect(apiClient.put).toHaveBeenCalledWith("/demos/demo-1", payload);
+    expect(apiClient.put).toHaveBeenCalledWith("/api/v1/demos/demo-1", payload);
   });
 
   it("reschedule sends POST /demos/:id/reschedule", async () => {
     const payload = { scheduledAt: "2024-02-01", reason: "Conflict" };
     await demosService.reschedule("demo-1", payload);
-    expect(apiClient.post).toHaveBeenCalledWith("/demos/demo-1/reschedule", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/demos/demo-1/reschedule", payload);
   });
 
   it("complete sends POST /demos/:id/complete", async () => {
     const payload = { result: "INTERESTED", outcome: "Good" };
     await demosService.complete("demo-1", payload as any);
-    expect(apiClient.post).toHaveBeenCalledWith("/demos/demo-1/complete", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/demos/demo-1/complete", payload);
   });
 
   it("cancel sends POST /demos/:id/cancel", async () => {
     const payload = { cancelReason: "No show" };
     await demosService.cancel("demo-1", payload);
-    expect(apiClient.post).toHaveBeenCalledWith("/demos/demo-1/cancel", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/demos/demo-1/cancel", payload);
   });
 });

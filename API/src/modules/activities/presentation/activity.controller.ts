@@ -28,7 +28,11 @@ export class ActivityController {
 
   @Post()
   @RequirePermissions('activities:create')
-  async create(@Body() dto: CreateActivityDto, @CurrentUser('id') userId: string) {
+  async create(
+    @Body() dto: CreateActivityDto,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('tenantId') tenantId: string,
+  ) {
     const result = await this.commandBus.execute(
       new CreateActivityCommand(
         dto.type, dto.subject, userId, dto.description,
@@ -36,6 +40,9 @@ export class ActivityController {
         dto.endTime ? new Date(dto.endTime) : undefined,
         dto.duration, dto.leadId, dto.contactId,
         dto.locationName, dto.latitude, dto.longitude,
+        (dto as any).reminderMinutesBefore,
+        (dto as any).taggedUserIds,
+        tenantId,
       ),
     );
     return ApiResponse.success(result, 'Activity created');

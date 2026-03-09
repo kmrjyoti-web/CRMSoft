@@ -10,8 +10,20 @@ import { Button, Icon, Badge, TableFull } from "@/components/ui";
 
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
+import { useConfirmDialog } from "@/components/common/useConfirmDialog";
 
-import { useLookupDetail, useDeactivateLookup } from "../hooks/useLookups";
+import { useSidePanelStore } from "@/stores/side-panel.store";
+
+import {
+  useLookupDetail,
+  useDeactivateLookup,
+  useAddLookupValue,
+  useUpdateLookupValue,
+  useDeactivateLookupValue,
+} from "../hooks/useLookups";
+
+import { LookupForm } from "./LookupForm";
+import { LookupValueForm } from "./LookupValueForm";
 
 import type { LookupValueItem } from "../types/lookup.types";
 
@@ -36,9 +48,18 @@ function flattenValues(values: LookupValueItem[]): Record<string, unknown>[] {
     value: v.value,
     label: v.label,
     icon: v.icon ?? "—",
-    color: v.color ?? "—",
+    color: v.color ? (
+      <span className="inline-flex items-center gap-1.5">
+        <span
+          className="inline-block w-3 h-3 rounded-full border border-gray-200"
+          style={{ backgroundColor: v.color }}
+        />
+        {v.color}
+      </span>
+    ) : "—",
     isDefault: v.isDefault ? "Yes" : "No",
     status: v.isActive ? "Active" : "Inactive",
+    _raw: v,
   }));
 }
 
@@ -52,8 +73,15 @@ interface LookupDetailProps {
 
 export function LookupDetail({ lookupId }: LookupDetailProps) {
   const router = useRouter();
+  const openPanel = useSidePanelStore((s) => s.openPanel);
+  const closePanel = useSidePanelStore((s) => s.closePanel);
+  const { confirm, ConfirmDialogPortal } = useConfirmDialog();
+
   const { data, isLoading, error } = useLookupDetail(lookupId);
   const deactivateMutation = useDeactivateLookup();
+  const addValueMutation = useAddLookupValue();
+  const updateValueMutation = useUpdateLookupValue();
+  const deactivateValueMutation = useDeactivateLookupValue();
   const [deactivating, setDeactivating] = useState(false);
 
   const lookup = useMemo(() => {
@@ -87,6 +115,160 @@ export function LookupDetail({ lookupId }: LookupDetailProps) {
     }
   }, [lookup, lookupId, deactivateMutation, router]);
 
+  // ── Edit Lookup metadata (side panel) ──────────────────
+  const handleEditLookup = useCallback(() => {
+    if (!lookup) return;
+    const panelId = `lookup-edit-${lookupId}`;
+    const formId = `sp-form-lookup-${lookupId}`;
+    openPanel({
+      id: panelId,
+      title: `Edit: ${lookup.displayName}`,
+      footerButtons: [
+        {
+          id: "cancel",
+          label: "Cancel",
+          showAs: "text",
+          variant: "secondary",
+          onClick: () => closePanel(panelId),
+        },
+        {
+          id: "save",
+          label: "Save Changes",
+          icon: "check",
+          showAs: "both",
+          variant: "primary",
+          onClick: () => {
+            const form = document.getElementById(formId) as HTMLFormElement | null;
+            form?.requestSubmit();
+          },
+        },
+      ],
+      content: (
+        <LookupForm
+          lookupId={lookupId}
+          mode="panel"
+          panelId={panelId}
+          onSuccess={() => closePanel(panelId)}
+          onCancel={() => closePanel(panelId)}
+        />
+      ),
+    });
+  }, [lookup, lookupId, openPanel, closePanel]);
+
+  // ── Add Value (side panel) ─────────────────────────────
+  const handleCreateValue = useCallback(() => {
+    if (!lookup) return;
+    const panelId = "lookup-value-new";
+    const formId = `sp-form-${panelId}`;
+    openPanel({
+      id: panelId,
+      title: `Add Value to ${lookup.displayName}`,
+      footerButtons: [
+        {
+          id: "cancel",
+          label: "Cancel",
+          showAs: "text",
+          variant: "secondary",
+          onClick: () => closePanel(panelId),
+        },
+        {
+          id: "save",
+          label: "Save",
+          icon: "check",
+          showAs: "both",
+          variant: "primary",
+          onClick: () => {
+            const form = document.getElementById(formId) as HTMLFormElement | null;
+            form?.requestSubmit();
+          },
+        },
+      ],
+      content: (
+        <LookupValueForm
+          category={lookup.category}
+          panelId={panelId}
+          onSubmit={async (values) => {
+            await addValueMutation.mutateAsync({ lookupId, data: values });
+            toast.success("Value added");
+            closePanel(panelId);
+          }}
+          onCancel={() => closePanel(panelId)}
+        />
+      ),
+    });
+  }, [lookup, lookupId, openPanel, closePanel, addValueMutation]);
+
+  // ── Edit Value (side panel) ────────────────────────────
+  const handleRowEdit = useCallback(
+    (row: Record<string, unknown>) => {
+      if (!lookup) return;
+      const rawValue = row._raw as LookupValueItem;
+      const panelId = `lookup-value-edit-${rawValue.id}`;
+      const formId = `sp-form-${panelId}`;
+      openPanel({
+        id: panelId,
+        title: `Edit Value: ${rawValue.label}`,
+        footerButtons: [
+          {
+            id: "cancel",
+            label: "Cancel",
+            showAs: "text",
+            variant: "secondary",
+            onClick: () => closePanel(panelId),
+          },
+          {
+            id: "save",
+            label: "Save Changes",
+            icon: "check",
+            showAs: "both",
+            variant: "primary",
+            onClick: () => {
+              const form = document.getElementById(formId) as HTMLFormElement | null;
+              form?.requestSubmit();
+            },
+          },
+        ],
+        content: (
+          <LookupValueForm
+            category={lookup.category}
+            panelId={panelId}
+            initialData={rawValue}
+            onSubmit={async (values) => {
+              await updateValueMutation.mutateAsync({
+                valueId: rawValue.id,
+                data: values,
+              });
+              toast.success("Value updated");
+              closePanel(panelId);
+            }}
+            onCancel={() => closePanel(panelId)}
+          />
+        ),
+      });
+    },
+    [lookup, openPanel, closePanel, updateValueMutation],
+  );
+
+  // ── Delete Value (confirm dialog) ──────────────────────
+  const handleRowDelete = useCallback(
+    async (row: Record<string, unknown>) => {
+      const ok = await confirm({
+        title: "Deactivate Value",
+        message: `Deactivate "${row.label}"? It will no longer appear in dropdowns.`,
+        type: "danger",
+        confirmText: "Deactivate",
+      });
+      if (!ok) return;
+      try {
+        await deactivateValueMutation.mutateAsync(row.id as string);
+        toast.success("Value deactivated");
+      } catch {
+        toast.error("Failed to deactivate value");
+      }
+    },
+    [confirm, deactivateValueMutation],
+  );
+
   if (isLoading) return <LoadingSpinner fullPage />;
 
   if (error || !lookup) {
@@ -103,72 +285,61 @@ export function LookupDetail({ lookupId }: LookupDetailProps) {
   }
 
   return (
-    <div className="p-6">
-      <PageHeader
-        title={lookup.displayName}
-        actions={
+    <div className="h-full flex flex-col">
+      {/* Compact Header */}
+      <div className="shrink-0 px-4 py-3 border-b bg-white">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg font-semibold text-gray-900">{lookup.displayName}</h1>
+            <span className="text-xs text-gray-400 font-mono">{lookup.category}</span>
+            <Badge variant={lookup.isSystem ? "warning" : "secondary"}>
+              {lookup.isSystem ? "System" : "Custom"}
+            </Badge>
+            <Badge variant={lookup.isActive ? "success" : "danger"}>
+              {lookup.isActive ? "Active" : "Inactive"}
+            </Badge>
+            {lookup.description && (
+              <span className="text-sm text-gray-500 hidden sm:inline">— {lookup.description}</span>
+            )}
+          </div>
           <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleEditLookup}>
+              <Icon name="edit" size={14} /> Edit
+            </Button>
             {!lookup.isSystem && lookup.isActive && (
               <Button
                 variant="danger"
+                size="sm"
                 onClick={handleDeactivate}
                 loading={deactivating}
                 disabled={deactivating}
               >
-                <Icon name="trash-2" size={16} /> Deactivate
+                <Icon name="trash-2" size={14} /> Deactivate
               </Button>
             )}
-            <Button variant="outline" onClick={() => router.push("/settings/lookups")}>
-              <Icon name="arrow-left" size={16} /> Back
+            <Button variant="outline" size="sm" onClick={() => router.push("/settings/lookups")}>
+              <Icon name="arrow-left" size={14} /> Back
             </Button>
           </div>
-        }
-      />
-
-      {/* Lookup Info */}
-      <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-        <div>
-          <span className="text-gray-500">Category Code</span>
-          <p className="font-medium">{lookup.category}</p>
         </div>
-        <div>
-          <span className="text-gray-500">Display Name</span>
-          <p className="font-medium">{lookup.displayName}</p>
-        </div>
-        <div>
-          <span className="text-gray-500">System</span>
-          <p>
-            <Badge variant={lookup.isSystem ? "warning" : "secondary"}>
-              {lookup.isSystem ? "System" : "Custom"}
-            </Badge>
-          </p>
-        </div>
-        <div>
-          <span className="text-gray-500">Status</span>
-          <p>
-            <Badge variant={lookup.isActive ? "success" : "danger"}>
-              {lookup.isActive ? "Active" : "Inactive"}
-            </Badge>
-          </p>
-        </div>
-        {lookup.description && (
-          <div className="col-span-2 sm:col-span-4">
-            <span className="text-gray-500">Description</span>
-            <p className="font-medium">{lookup.description}</p>
-          </div>
-        )}
       </div>
 
-      {/* Values Table */}
-      <div className="mt-6 h-[500px] flex flex-col">
+      {/* Values Table — fills remaining height */}
+      <div className="flex-1 min-h-0">
         <TableFull
           data={tableData as Record<string, any>[]}
           title={`Values (${lookup.values?.length ?? 0})`}
+          tableKey={`lookup-values-${lookupId}`}
           columns={VALUE_COLUMNS}
           defaultViewMode="table"
           defaultDensity="compact"
+          onRowEdit={handleRowEdit}
+          onRowDelete={handleRowDelete}
+          onCreate={handleCreateValue}
         />
       </div>
+
+      <ConfirmDialogPortal />
     </div>
   );
 }

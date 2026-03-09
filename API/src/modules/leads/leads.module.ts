@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TableConfigModule } from '../table-config/table-config.module';
+import { WorkflowCoreModule } from '../../core/workflow/workflow-core.module';
 import { LeadsController } from './presentation/leads.controller';
 import { LeadRepository } from './infrastructure/repositories/lead.repository';
 import { LEAD_REPOSITORY } from './domain/interfaces/lead-repository.interface';
 
 // Commands
 import { CreateLeadHandler } from './application/commands/create-lead/create-lead.handler';
+import { QuickCreateLeadHandler } from './application/commands/quick-create-lead/quick-create-lead.handler';
 import { AllocateLeadHandler } from './application/commands/allocate-lead/allocate-lead.handler';
 import { ChangeLeadStatusHandler } from './application/commands/change-lead-status/change-lead-status.handler';
 import { UpdateLeadHandler } from './application/commands/update-lead/update-lead.handler';
@@ -26,7 +28,7 @@ import { OnLeadAllocatedHandler } from './application/event-handlers/on-lead-all
 import { OnLeadStatusChangedHandler } from './application/event-handlers/on-lead-status-changed.handler';
 
 const CommandHandlers = [
-  CreateLeadHandler, AllocateLeadHandler,
+  CreateLeadHandler, QuickCreateLeadHandler, AllocateLeadHandler,
   ChangeLeadStatusHandler, UpdateLeadHandler,
   DeactivateLeadHandler, ReactivateLeadHandler,
   SoftDeleteLeadHandler, RestoreLeadHandler, PermanentDeleteLeadHandler,
@@ -35,7 +37,7 @@ const QueryHandlers = [GetLeadByIdHandler, GetLeadsListHandler];
 const EventHandlers = [OnLeadCreatedHandler, OnLeadAllocatedHandler, OnLeadStatusChangedHandler];
 
 @Module({
-  imports: [CqrsModule, TableConfigModule],
+  imports: [CqrsModule, TableConfigModule, WorkflowCoreModule],
   controllers: [LeadsController],
   providers: [
     { provide: LEAD_REPOSITORY, useClass: LeadRepository },

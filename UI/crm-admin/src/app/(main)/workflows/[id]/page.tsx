@@ -1,13 +1,11 @@
 "use client";
 
-import { use } from "react";
 import { WorkflowDetail } from "@/features/workflows/components/WorkflowDetail";
 
 export default function WorkflowDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = use(params);
-  return <WorkflowDetail workflowId={id} />;
+  return <WorkflowDetail workflowId={params.id} />;
 }

@@ -9,7 +9,9 @@ import { useForm, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
 
-import { Button, Icon, Input, MobileInput, SelectInput, Fieldset } from "@/components/ui";
+import { Button, Icon, Input, MobileInput, Fieldset } from "@/components/ui";
+
+import { LookupSelect } from "@/components/common/LookupSelect";
 
 import { FormErrors } from "@/components/common/FormErrors";
 import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
@@ -55,14 +57,6 @@ interface RawContactFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
 }
-
-const SOURCE_OPTIONS = [
-  { value: "MANUAL", label: "Manual" },
-  { value: "BULK_IMPORT", label: "Bulk Import" },
-  { value: "WEB_FORM", label: "Web Form" },
-  { value: "REFERRAL", label: "Referral" },
-  { value: "API", label: "API" },
-];
 
 // ── Component ────────────────────────────────────────────
 
@@ -149,7 +143,7 @@ export function RawContactForm({ rawContactId, mode = "page", panelId, onSuccess
           loading: isSubmitting,
           disabled: isSubmitting,
           onClick: () => {
-            const formId = `sp-form-${rawContactId ?? "new"}`;
+            const formId = `sp-form-raw-contact-${rawContactId ?? "new"}`;
             const form = document.getElementById(formId) as HTMLFormElement | null;
             form?.requestSubmit();
           },
@@ -244,7 +238,7 @@ export function RawContactForm({ rawContactId, mode = "page", panelId, onSuccess
       <FormErrors errors={errors} />
 
       <form
-        id={isPanel ? `sp-form-${rawContactId ?? "new"}` : undefined}
+        id={isPanel ? `sp-form-raw-contact-${rawContactId ?? "new"}` : undefined}
         onSubmit={handleSubmit(onSubmit as any)}
         noValidate
         className={`${isPanel ? "mt-2" : "mt-4"} max-w-3xl space-y-6`}
@@ -331,10 +325,11 @@ export function RawContactForm({ rawContactId, mode = "page", panelId, onSuccess
               name="designation"
               control={control}
               render={({ field }) => (
-                <Input
+                <LookupSelect
+                  masterCode="DESIGNATION"
                   label="Designation"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
+                  value={field.value ?? null}
+                  onChange={(v) => field.onChange(String(v ?? ""))}
                   leftIcon={<Icon name="briefcase" size={16} />}
                 />
               )}
@@ -343,10 +338,11 @@ export function RawContactForm({ rawContactId, mode = "page", panelId, onSuccess
               name="department"
               control={control}
               render={({ field }) => (
-                <Input
+                <LookupSelect
+                  masterCode="DEPARTMENT"
                   label="Department"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
+                  value={field.value ?? null}
+                  onChange={(v) => field.onChange(String(v ?? ""))}
                   leftIcon={<Icon name="users" size={16} />}
                 />
               )}
@@ -356,11 +352,12 @@ export function RawContactForm({ rawContactId, mode = "page", panelId, onSuccess
                 name="source"
                 control={control}
                 render={({ field }) => (
-                  <SelectInput
+                  <LookupSelect
+                    masterCode="RAW_CONTACT_SOURCE"
                     label="Source"
-                    options={SOURCE_OPTIONS}
                     value={field.value ?? "MANUAL"}
                     onChange={(v) => field.onChange(String(v ?? "MANUAL"))}
+                    leftIcon={<Icon name="target" size={16} />}
                   />
                 )}
               />

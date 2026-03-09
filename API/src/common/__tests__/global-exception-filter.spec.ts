@@ -1,9 +1,25 @@
 import { GlobalExceptionFilter } from '../errors/global-exception.filter';
 import { AppError } from '../errors/app-error';
-import { BadRequestException, NotFoundException, HttpException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 const mockErrorLogger = {
-  log: jest.fn().mockResolvedValue(undefined),
+  log: jest.fn(),
+} as any;
+
+const mockCatalog = {
+  cache: new Map([
+    ['LEAD_NOT_FOUND', {
+      code: 'LEAD_NOT_FOUND',
+      layer: 'BE',
+      module: 'LEADS',
+      severity: 'WARNING',
+      httpStatus: 404,
+      messageEn: 'Lead does not exist',
+      messageHi: 'लीड मौजूद नहीं है',
+      solutionEn: 'Verify the lead ID.',
+      solutionHi: 'लीड ID सत्यापित करें।',
+    }],
+  ]),
 } as any;
 
 function createMockHost(url = '/api/v1/test') {
@@ -31,7 +47,7 @@ describe('GlobalExceptionFilter', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    filter = new GlobalExceptionFilter(mockErrorLogger);
+    filter = new GlobalExceptionFilter(mockErrorLogger, mockCatalog);
   });
 
   it('should handle AppError with correct code and status', () => {
@@ -106,7 +122,7 @@ describe('GlobalExceptionFilter', () => {
     );
   });
 
-  it('should handle unknown errors as INTERNAL_ERROR', () => {
+  it('should handle unknown errors as INTERNAL_ERROR with CRITICAL severity', () => {
     const host = createMockHost();
     const error = new TypeError('Cannot read property of undefined');
 
@@ -118,9 +134,14 @@ describe('GlobalExceptionFilter', () => {
         error: expect.objectContaining({ code: 'INTERNAL_ERROR' }),
       }),
     );
+    expect(mockErrorLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        severity: 'CRITICAL',
+      }),
+    );
   });
 
-  it('should include requestId, path, and timestamp in response', () => {
+  it('should include requestId/traceId, path, and timestamp in response', () => {
     const host = createMockHost('/api/v1/leads/xyz');
     const error = AppError.from('NOT_FOUND');
 
@@ -135,7 +156,7 @@ describe('GlobalExceptionFilter', () => {
     );
   });
 
-  it('should log error via ErrorLoggerService', () => {
+  it('should log error via ErrorLoggerService with layer and severity', () => {
     const host = createMockHost();
     const error = AppError.from('LEAD_NOT_FOUND');
 
@@ -149,6 +170,73 @@ describe('GlobalExceptionFilter', () => {
         method: 'GET',
         userId: 'user-1',
         tenantId: 'tenant-1',
+        layer: 'BE',
+        severity: 'WARNING',
+      }),
+    );
+  });
+
+  it('should generate UUID traceId when requestId is missing', () => {
+    const json = jest.fn();
+    const status = jest.fn().mockReturnValue({ json });
+    const host = {
+      switchToHttp: () => ({
+        getRequest: () => ({
+          url: '/test',
+          method: 'GET',
+          headers: {},
+        }),
+        getResponse: () => ({ status }),
+      }),
+      json,
+      status,
+    } as any;
+
+    filter.catch(new Error('test'), host);
+
+    const response = json.mock.calls[0][0];
+    expect(response.requestId).toBeDefined();
+    expect(response.requestId).not.toBe('unknown');
+  });
+
+  it('should enrich response from ErrorCatalog when entry exists', () => {
+    const host = createMockHost();
+    // Add NOT_FOUND to mock catalog
+    mockCatalog.cache.set('NOT_FOUND', {
+      code: 'NOT_FOUND',
+      layer: 'BE',
+      module: 'SYSTEM',
+      severity: 'WARNING',
+      httpStatus: 404,
+      messageEn: 'The requested resource was not found',
+      messageHi: 'अनुरोधित संसाधन नहीं मिला',
+      solutionEn: 'Verify the resource ID exists.',
+      solutionHi: 'सत्यापित करें कि संसाधन ID मौजूद है।',
+    });
+
+    const error = new NotFoundException('Resource missing');
+    filter.catch(error, host);
+
+    expect(host.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: expect.objectContaining({
+          suggestion: 'Verify the resource ID exists.',
+        }),
+      }),
+    );
+  });
+
+  it('should work without ErrorCatalog (optional dependency)', () => {
+    const filterNoCatalog = new GlobalExceptionFilter(mockErrorLogger);
+    const host = createMockHost();
+    const error = AppError.from('LEAD_NOT_FOUND');
+
+    filterNoCatalog.catch(error, host);
+
+    expect(host.status).toHaveBeenCalledWith(404);
+    expect(host.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: expect.objectContaining({ code: 'LEAD_NOT_FOUND' }),
       }),
     );
   });

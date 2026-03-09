@@ -19,7 +19,7 @@ import { BulkEditPanel } from "@/components/common/BulkEditPanel";
 import { useBulkDeleteDialog } from "@/components/common/BulkDeleteDialog";
 import { ActionsMenu } from "@/components/common/ActionsMenu";
 
-import { useSidePanelStore } from "@/stores/side-panel.store";
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 
 import { useRawContactsList, useUpdateRawContact, useSoftDeleteRawContact, useDeactivateRawContact, useReactivateRawContact } from "../hooks/useRawContacts";
 
@@ -85,10 +85,23 @@ function flattenContacts(contacts: RawContactListItem[]): Record<string, unknown
 
 export function RawContactList() {
   const router = useRouter();
-  const openPanel = useSidePanelStore((s) => s.openPanel);
-  const closePanel = useSidePanelStore((s) => s.closePanel);
+
+  const { handleRowEdit, handleCreate } = useEntityPanel({
+    entityKey: "raw-contact",
+    entityLabel: "Contact",
+    FormComponent: RawContactForm,
+    idProp: "rawContactId",
+    editRoute: "/raw-contacts/:id/edit",
+    createRoute: "/raw-contacts/new",
+    displayField: "name",
+    headerButtons: [
+      { id: "btn-phone", label: "Call", icon: "phone", showAs: "icon" as const, onClick: () => {}, variant: "ghost" as const },
+      { id: "btn-mail", label: "Email", icon: "mail", showAs: "icon" as const, onClick: () => {}, variant: "ghost" as const },
+    ],
+  });
 
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const { confirm, ConfirmDialogPortal } = useConfirmDialog();
   const softDeleteMutation = useSoftDeleteRawContact();
@@ -139,6 +152,8 @@ export function RawContactList() {
 
   const handleToggleActive = useCallback(
     async (id: string, currentlyActive: boolean) => {
+      if (togglingId) return;
+      setTogglingId(id);
       try {
         if (currentlyActive) {
           await deactivateMut.mutateAsync(id);
@@ -149,9 +164,11 @@ export function RawContactList() {
         }
       } catch {
         toast.error("Failed to update status");
+      } finally {
+        setTogglingId(null);
       }
     },
-    [deactivateMut, reactivateMut],
+    [deactivateMut, reactivateMut, togglingId],
   );
 
   const tableData = useMemo(() => {
@@ -164,11 +181,12 @@ export function RawContactList() {
             size="sm"
             checked={contacts[idx].isActive ?? true}
             onChange={() => handleToggleActive(row.id as string, contacts[idx].isActive ?? true)}
+            disabled={togglingId === row.id}
           />
         </div>
       ),
     }));
-  }, [contacts, handleToggleActive]);
+  }, [contacts, handleToggleActive, togglingId]);
 
   const selectedArray = Array.from(selectedIds);
 
@@ -199,90 +217,6 @@ export function RawContactList() {
     },
     [confirm, softDeleteMutation],
   );
-
-  const handleRowEdit = useCallback(
-    (row: Record<string, unknown>) => {
-      const panelId = `raw-contact-edit-${row.id}`;
-      const formId = `sp-form-${row.id}`;
-      openPanel({
-        id: panelId,
-        title: `Contact: ${(row.name as string) || "Raw Contact"}`,
-        newTabUrl: `/raw-contacts/${row.id}/edit`,
-        headerButtons: [
-          { id: "btn-phone", label: "Call", icon: "phone", showAs: "icon", onClick: () => {}, variant: "ghost" },
-          { id: "btn-mail", label: "Email", icon: "mail", showAs: "icon", onClick: () => {}, variant: "ghost" },
-        ],
-        footerButtons: [
-          {
-            id: "cancel",
-            label: "Cancel",
-            showAs: "text",
-            variant: "secondary",
-            onClick: () => closePanel(panelId),
-          },
-          {
-            id: "save",
-            label: "Save Changes",
-            icon: "check",
-            showAs: "both",
-            variant: "primary",
-            onClick: () => {
-              const form = document.getElementById(formId) as HTMLFormElement | null;
-              form?.requestSubmit();
-            },
-          },
-        ],
-        content: (
-          <RawContactForm
-            rawContactId={row.id as string}
-            mode="panel"
-            panelId={panelId}
-            onSuccess={() => closePanel(panelId)}
-            onCancel={() => closePanel(panelId)}
-          />
-        ),
-      });
-    },
-    [openPanel, closePanel],
-  );
-
-  const handleCreate = useCallback(() => {
-    const panelId = "raw-contact-new";
-    const formId = "sp-form-new";
-    openPanel({
-      id: panelId,
-      title: "New Raw Contact",
-      newTabUrl: "/raw-contacts/new",
-      footerButtons: [
-        {
-          id: "cancel",
-          label: "Cancel",
-          showAs: "text",
-          variant: "secondary",
-          onClick: () => closePanel(panelId),
-        },
-        {
-          id: "save",
-          label: "Save",
-          icon: "check",
-          showAs: "both",
-          variant: "primary",
-          onClick: () => {
-            const form = document.getElementById(formId) as HTMLFormElement | null;
-            form?.requestSubmit();
-          },
-        },
-      ],
-      content: (
-        <RawContactForm
-          mode="panel"
-          panelId={panelId}
-          onSuccess={() => closePanel(panelId)}
-          onCancel={() => closePanel(panelId)}
-        />
-      ),
-    });
-  }, [openPanel, closePanel]);
 
   // ── Bulk edit handlers ─────────────────────────────────────
 

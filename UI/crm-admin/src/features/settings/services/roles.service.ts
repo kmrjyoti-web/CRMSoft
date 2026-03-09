@@ -9,7 +9,7 @@ import type {
   RoleUpdateData,
 } from "../types/settings.types";
 
-const BASE_URL = "/roles";
+const BASE_URL = "/api/v1/roles";
 
 export const rolesService = {
   getAll: (params?: RoleListParams) =>

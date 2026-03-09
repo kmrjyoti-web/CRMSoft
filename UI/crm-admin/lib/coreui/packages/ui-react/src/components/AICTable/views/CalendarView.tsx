@@ -12,10 +12,12 @@ export function CalendarView({
   data,
   settings,
   columns,
+  onRowEdit,
 }: {
   data: any[];
   settings?: CalendarSettings | null;
   columns?: ColumnDef[];
+  onRowEdit?: (row: any) => void;
 }) {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
@@ -190,15 +192,25 @@ export function CalendarView({
                 )}
               </div>
               <div className="space-y-0.5">
-                {dayItems.slice(0, 3).map((item: any) => (
-                  <div
-                    key={item.id || Math.random()}
-                    className="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded truncate cursor-pointer hover:bg-blue-200 transition-colors"
-                    title={String(item[labelField] || item.contactName || item.name || '—')}
-                  >
-                    {item[labelField] || item.contactName || item.name || '—'}
-                  </div>
-                ))}
+                {dayItems.slice(0, 3).map((item: any) => {
+                  const itemColor = item.color as string | undefined;
+                  const bgStyle = itemColor
+                    ? { backgroundColor: `${itemColor}18`, color: itemColor, borderLeft: `3px solid ${itemColor}` }
+                    : undefined;
+                  return (
+                    <div
+                      key={item.id || Math.random()}
+                      className={`text-xs px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors ${
+                        itemColor ? 'hover:opacity-80' : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                      }`}
+                      style={bgStyle}
+                      title={String(item[labelField] || item.contactName || item.name || '—')}
+                      onClick={() => onRowEdit?.(item)}
+                    >
+                      {item[labelField] || item.contactName || item.name || '—'}
+                    </div>
+                  );
+                })}
                 {dayItems.length > 3 && (
                   <div className="text-xs text-gray-400 pl-1">+{dayItems.length - 3} more</div>
                 )}

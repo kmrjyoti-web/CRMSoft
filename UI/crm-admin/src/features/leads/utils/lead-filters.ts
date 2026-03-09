@@ -39,6 +39,14 @@ export const LEAD_FILTER_CONFIG: TableFilterConfig = {
       ],
     },
     {
+      title: 'Text Fields',
+      defaultOpen: true,
+      filters: [
+        { columnId: 'contactName', label: 'Contact', filterType: 'text', queryParam: 'contactName' },
+        { columnId: 'organization', label: 'Organization', filterType: 'text', queryParam: 'organization' },
+      ],
+    },
+    {
       title: 'Date Fields',
       defaultOpen: false,
       filters: [

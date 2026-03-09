@@ -6,6 +6,8 @@ describe('CalendarService', () => {
   let syncService: CalendarSyncService;
   let prisma: any;
 
+  const tenantId = 'tenant-1';
+
   const mockEvents = [
     { id: 'ce-1', eventType: 'ACTIVITY', title: 'Call', startTime: new Date(), userId: 'user-1', isActive: true },
     { id: 'ce-2', eventType: 'DEMO', title: 'Demo', startTime: new Date(), userId: 'user-1', isActive: true },
@@ -22,40 +24,40 @@ describe('CalendarService', () => {
       },
     };
     service = new CalendarService(prisma);
-    syncService = new CalendarSyncService(prisma);
+    syncService = new CalendarSyncService(prisma, {} as any, {} as any);
   });
 
   it('should get calendar events for a user within date range', async () => {
-    const result = await service.getCalendarEvents('user-1', new Date('2025-01-01'), new Date('2025-01-31'));
+    const result = await service.getCalendarEvents(tenantId, 'user-1', new Date('2025-01-01'), new Date('2025-01-31'));
     expect(prisma.calendarEvent.findMany).toHaveBeenCalled();
     expect(result).toHaveLength(2);
   });
 
   it('should filter by event types', async () => {
     prisma.calendarEvent.findMany.mockResolvedValue([mockEvents[0]]);
-    const result = await service.getCalendarEvents('user-1', new Date('2025-01-01'), new Date('2025-01-31'), ['ACTIVITY']);
+    const result = await service.getCalendarEvents(tenantId, 'user-1', new Date('2025-01-01'), new Date('2025-01-31'), ['ACTIVITY']);
     expect(result).toHaveLength(1);
   });
 
   it('should get team calendar for multiple users', async () => {
     prisma.calendarEvent.findMany.mockResolvedValue(mockEvents.map((e) => ({ ...e, user: { id: 'user-1', firstName: 'Raj', lastName: 'Patel' } })));
-    const result = await service.getTeamCalendar(['user-1', 'user-2'], new Date('2025-01-01'), new Date('2025-01-31'));
+    const result = await service.getTeamCalendar(tenantId, ['user-1', 'user-2'], new Date('2025-01-01'), new Date('2025-01-31'));
     expect(result).toHaveLength(2);
   });
 
   it('should get availability with busy slots', async () => {
-    const result = await service.getAvailability('user-1', new Date('2025-01-15'));
+    const result = await service.getAvailability(tenantId, 'user-1', new Date('2025-01-15'));
     expect(result.busySlots).toHaveLength(2);
     expect(result.totalEvents).toBe(2);
   });
 
   it('should get day view', async () => {
-    const result = await service.getDayView('user-1', new Date('2025-01-15'));
+    const result = await service.getDayView(tenantId, 'user-1', new Date('2025-01-15'));
     expect(prisma.calendarEvent.findMany).toHaveBeenCalled();
   });
 
   it('should get month view', async () => {
-    const result = await service.getMonthView('user-1', 2025, 1);
+    const result = await service.getMonthView(tenantId, 'user-1', 2025, 1);
     expect(prisma.calendarEvent.findMany).toHaveBeenCalled();
   });
 

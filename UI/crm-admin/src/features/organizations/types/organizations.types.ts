@@ -14,6 +14,7 @@ export interface OrganizationItem {
   pincode?: string;
   industry?: string;
   annualRevenue?: number | null;
+  numberOfEmployees?: number | null;
   notes?: string;
   isActive: boolean;
   createdAt: string;
@@ -49,6 +50,7 @@ export interface OrganizationLead {
   status: string;
   priority: string;
   expectedValue?: number;
+  createdAt?: string;
 }
 
 export interface OrganizationFilter {
@@ -58,6 +60,7 @@ export interface OrganizationFilter {
     id: string;
     value: string;
     label: string;
+    lookup?: { category: string };
   };
 }
 

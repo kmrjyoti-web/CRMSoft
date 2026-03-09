@@ -35,7 +35,12 @@ export class GetLeadByIdHandler implements IQueryHandler<GetLeadByIdQuery> {
         },
         filters: {
           include: {
-            lookupValue: { select: { id: true, value: true, label: true } },
+            lookupValue: {
+              select: {
+                id: true, value: true, label: true,
+                lookup: { select: { category: true } },
+              },
+            },
           },
         },
         activities: {

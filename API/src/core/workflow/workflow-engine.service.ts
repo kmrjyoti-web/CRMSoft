@@ -150,6 +150,53 @@ export class WorkflowEngineService {
     };
   }
 
+  async fastForwardToState(instanceId: string, targetStateCode: string, userId: string) {
+    const instance = await this.prisma.workflowInstance.findUnique({
+      where: { id: instanceId },
+      include: { workflow: { include: { states: true } } },
+    });
+    if (!instance) throw new NotFoundException(`Workflow instance "${instanceId}" not found`);
+
+    const targetState = instance.workflow.states.find((s) => s.code === targetStateCode);
+    if (!targetState) throw new BadRequestException(`State "${targetStateCode}" not found in workflow`);
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId }, select: { firstName: true, lastName: true },
+    });
+
+    await this.prisma.workflowInstance.update({
+      where: { id: instanceId },
+      data: {
+        currentStateId: targetState.id,
+        previousStateId: instance.currentStateId,
+        ...(targetState.stateType === 'TERMINAL' ? { completedAt: new Date(), isActive: false } : {}),
+      },
+    });
+
+    await this.prisma.workflowHistory.create({
+      data: {
+        instanceId, fromStateId: instance.currentStateId, toStateId: targetState.id,
+        action: 'FAST_FORWARD', performedById: userId,
+        performedByName: user ? `${user.firstName} ${user.lastName}` : userId,
+        comment: `Fast-forwarded to "${targetState.name}" during lazy initialization`,
+      },
+    });
+
+    this.logger.log(`Fast-forwarded instance ${instanceId} to state "${targetStateCode}"`);
+  }
+
+  async getInstanceHistory(instanceId: string) {
+    return this.prisma.workflowHistory.findMany({
+      where: { instanceId },
+      include: {
+        fromState: { select: { id: true, name: true, code: true, color: true } },
+        toState: { select: { id: true, name: true, code: true, color: true } },
+        transition: { select: { id: true, name: true, code: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   private async performTransition(instance: any, transition: any, userId: string, comment?: string, entityData?: any) {
     const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { firstName: true, lastName: true, email: true } });
     const performerName = user ? `${user.firstName} ${user.lastName}` : userId;

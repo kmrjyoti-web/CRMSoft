@@ -6,7 +6,7 @@ import { HolidayService } from '../services/holiday.service';
 import { CreateHolidayDto, UpdateHolidayDto, HolidayQueryDto } from './dto/holiday.dto';
 
 @ApiTags('Settings - Holidays')
-@Controller('api/v1/settings/holidays')
+@Controller('settings/holidays')
 export class HolidayController {
   constructor(private readonly service: HolidayService) {}
 

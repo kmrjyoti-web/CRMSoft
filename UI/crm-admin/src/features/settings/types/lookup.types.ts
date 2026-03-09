@@ -44,6 +44,25 @@ export interface LookupUpdateData {
   description?: string;
 }
 
+// ── Lookup Value CRUD ────────────────────────────────────
+
+export interface LookupValueCreateData {
+  value: string;
+  label: string;
+  icon?: string;
+  color?: string;
+  isDefault?: boolean;
+  parentId?: string;
+  configJson?: unknown;
+}
+
+export interface LookupValueUpdateData {
+  label?: string;
+  icon?: string;
+  color?: string;
+  isDefault?: boolean;
+}
+
 export interface LookupListParams {
   activeOnly?: boolean;
   [key: string]: unknown;

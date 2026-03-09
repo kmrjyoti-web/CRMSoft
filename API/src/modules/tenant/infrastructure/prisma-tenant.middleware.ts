@@ -58,7 +58,18 @@ export function createTenantMiddleware(
         };
         break;
 
+      case 'findUniqueOrThrow':
+        // Convert to findFirstOrThrow + add tenantId
+        params.action = 'findFirstOrThrow' as any;
+        params.args = {
+          where: { ...params.args.where, tenantId },
+          ...(params.args.select && { select: params.args.select }),
+          ...(params.args.include && { include: params.args.include }),
+        };
+        break;
+
       case 'findFirst':
+      case 'findFirstOrThrow':
       case 'findMany':
       case 'count':
       case 'aggregate':

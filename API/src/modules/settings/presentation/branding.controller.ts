@@ -9,7 +9,7 @@ import { DomainVerifierService } from '../services/domain-verifier.service';
 import { UpdateBrandingDto, InitiateDomainDto } from './dto/update-branding.dto';
 
 @ApiTags('Settings - Branding')
-@Controller('api/v1/settings/branding')
+@Controller('settings/branding')
 export class BrandingController {
   constructor(
     private readonly brandingService: BrandingService,

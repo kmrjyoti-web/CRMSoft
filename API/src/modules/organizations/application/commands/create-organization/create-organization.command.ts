@@ -12,6 +12,7 @@ export class CreateOrganizationCommand {
     public readonly country?: string,
     public readonly pincode?: string,
     public readonly industry?: string,
+    public readonly annualRevenue?: number,
     public readonly notes?: string,
     public readonly filterIds?: string[],
   ) {}

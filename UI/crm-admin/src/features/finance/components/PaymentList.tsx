@@ -1,14 +1,18 @@
 'use client';
 
-import { useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 
 import { TableFull } from "@/components/ui";
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 import { useTableFilters } from "@/hooks/useTableFilters";
 import { TableSkeleton } from "@/components/common/TableSkeleton";
 
+import { HelpButton } from "@/components/common/HelpButton";
+
 import { usePaymentsList } from "../hooks/useFinance";
 import { PAYMENT_FILTER_CONFIG } from "../utils/payment-filters";
+import { PaymentListUserHelp } from "../help/PaymentListUserHelp";
+import { PaymentListDevHelp } from "../help/PaymentListDevHelp";
 import type {
   PaymentListItem,
   PaymentListParams,
@@ -59,7 +63,28 @@ function flattenPayments(items: PaymentListItem[]): Record<string, unknown>[] {
 // ---------------------------------------------------------------------------
 
 export function PaymentList() {
-  const router = useRouter();
+  const { handleRowEdit } = useEntityPanel({
+    entityKey: "payment",
+    entityLabel: "Payment",
+    FormComponent: () => null,
+    idProp: "",
+    editRoute: "/finance/payments/:id",
+    createRoute: "/finance/payments/new",
+    displayField: "paymentNo",
+    viewOnly: true,
+    viewContent: (row: Record<string, unknown>) => (
+      <div className="p-4 space-y-4">
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div><span className="text-gray-500">Payment No</span><p className="font-medium">{(row.paymentNo as string) || "\u2014"}</p></div>
+          <div><span className="text-gray-500">Invoice</span><p className="font-medium">{(row.invoiceNo as string) || "\u2014"}</p></div>
+          <div><span className="text-gray-500">Amount</span><p className="font-medium">{(row.amount as string) || "\u2014"}</p></div>
+          <div><span className="text-gray-500">Method</span><p className="font-medium">{(row.method as string) || "\u2014"}</p></div>
+          <div><span className="text-gray-500">Status</span><p className="font-medium">{(row.status as string) || "\u2014"}</p></div>
+          <div><span className="text-gray-500">Paid At</span><p className="font-medium">{(row.paidAt as string) || "\u2014"}</p></div>
+        </div>
+      </div>
+    ),
+  });
 
   const { activeFilters, filterParams, handleFilterChange, clearFilters } =
     useTableFilters(PAYMENT_FILTER_CONFIG);
@@ -80,13 +105,6 @@ export function PaymentList() {
 
   const tableData = useMemo(() => flattenPayments(items), [items]);
 
-  const handleRowEdit = useCallback(
-    (row: Record<string, unknown>) => {
-      router.push(`/finance/payments/${row.id}`);
-    },
-    [router],
-  );
-
   if (isLoading) return <TableSkeleton title="Payments" />;
 
   return (
@@ -102,6 +120,14 @@ export function PaymentList() {
         onFilterChange={handleFilterChange}
         onFilterClear={clearFilters}
         onRowEdit={handleRowEdit}
+        headerActions={
+          <HelpButton
+            panelId="payments-list-help"
+            title="Payments — Help"
+            userContent={<PaymentListUserHelp />}
+            devContent={<PaymentListDevHelp />}
+          />
+        }
       />
     </div>
   );

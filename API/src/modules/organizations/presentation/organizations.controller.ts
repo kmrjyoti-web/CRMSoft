@@ -37,8 +37,8 @@ export class OrganizationsController {
       new CreateOrganizationCommand(
         dto.name, userId, dto.website, dto.email, dto.phone,
         dto.gstNumber, dto.address, dto.city, dto.state,
-        dto.country, dto.pincode, dto.industry, dto.notes,
-        dto.filterIds,
+        dto.country, dto.pincode, dto.industry, dto.annualRevenue,
+        dto.notes, dto.filterIds,
       ),
     );
     const org = await this.queryBus.execute(new GetOrganizationByIdQuery(id));

@@ -7,6 +7,7 @@ import {
   ILeadRepository, LEAD_REPOSITORY,
 } from '../../../domain/interfaces/lead-repository.interface';
 import { PrismaService } from '../../../../../core/prisma/prisma.service';
+import { WorkflowEngineService } from '../../../../../core/workflow/workflow-engine.service';
 
 /**
  * Create a new Lead for a verified Contact.
@@ -27,6 +28,7 @@ export class CreateLeadHandler implements ICommandHandler<CreateLeadCommand> {
     @Inject(LEAD_REPOSITORY) private readonly repo: ILeadRepository,
     private readonly publisher: EventPublisher,
     private readonly prisma: PrismaService,
+    private readonly workflowEngine: WorkflowEngineService,
   ) {}
 
   async execute(command: CreateLeadCommand): Promise<string> {
@@ -90,6 +92,13 @@ export class CreateLeadHandler implements ICommandHandler<CreateLeadCommand> {
     // 4. Publish events only AFTER the transaction succeeds
     const withEvents = this.publisher.mergeObjectContext(lead);
     withEvents.commit();
+
+    // 5. Auto-initialize workflow instance (best-effort)
+    try {
+      await this.workflowEngine.initializeWorkflow('LEAD', lead.id, command.createdById);
+    } catch (e) {
+      this.logger.warn(`Workflow init skipped for lead ${lead.id}: ${(e as Error).message}`);
+    }
 
     this.logger.log(`Lead created: ${lead.leadNumber} for contact ${command.contactId}`);
     return lead.id;

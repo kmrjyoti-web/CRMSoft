@@ -65,6 +65,7 @@ export interface LeadFilter {
     id: string;
     value: string;
     label: string;
+    lookup?: { category: string };
   };
 }
 
@@ -118,6 +119,30 @@ export interface LeadDetail extends LeadItem {
 export interface LeadCreateData {
   contactId: string;
   organizationId?: string;
+  priority?: LeadPriority;
+  expectedValue?: number;
+  expectedCloseDate?: string;
+  notes?: string;
+  filterIds?: string[];
+}
+
+// ── Quick Create (inline contact/org) ────────────────────
+
+export interface InlineContactData {
+  firstName: string;
+  lastName: string;
+  mobile: string;
+}
+
+export interface InlineOrganizationData {
+  name: string;
+}
+
+export interface QuickCreateLeadData {
+  contactId?: string;
+  inlineContact?: InlineContactData;
+  organizationId?: string;
+  inlineOrganization?: InlineOrganizationData;
   priority?: LeadPriority;
   expectedValue?: number;
   expectedCloseDate?: string;

@@ -25,18 +25,18 @@ describe("dashboardService", () => {
   it("getExecutive calls GET /dashboard/executive with params", async () => {
     const params = { dateFrom: "2026-01-01", dateTo: "2026-01-31" };
     await dashboardService.getExecutive(params);
-    expect(apiClient.get).toHaveBeenCalledWith("/dashboard/executive", { params });
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/dashboard/executive", { params });
   });
 
   it("getPipeline calls GET /dashboard/pipeline", async () => {
     const params = { dateFrom: "2026-01-01", dateTo: "2026-01-31" };
     await dashboardService.getPipeline(params);
-    expect(apiClient.get).toHaveBeenCalledWith("/dashboard/pipeline", { params });
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/dashboard/pipeline", { params });
   });
 
   it("getMyDashboard calls GET /dashboard/my", async () => {
     await dashboardService.getMyDashboard();
-    expect(apiClient.get).toHaveBeenCalledWith("/dashboard/my");
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/dashboard/my");
   });
 });
 
@@ -53,13 +53,13 @@ describe("analyticsService", () => {
   it("getRevenue calls GET /analytics/revenue with params", async () => {
     const params = { dateFrom: "2026-01-01", dateTo: "2026-01-31" };
     await analyticsService.getRevenue(params);
-    expect(apiClient.get).toHaveBeenCalledWith("/analytics/revenue", { params });
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/analytics/revenue", { params });
   });
 
   it("getLeadSources calls GET /analytics/lead-sources", async () => {
     const params = { dateFrom: "2026-01-01", dateTo: "2026-01-31" };
     await analyticsService.getLeadSources(params);
-    expect(apiClient.get).toHaveBeenCalledWith("/analytics/lead-sources", { params });
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/analytics/lead-sources", { params });
   });
 });
 
@@ -76,7 +76,7 @@ describe("reportsService", () => {
 
   it("getDefinitions calls GET /mis-reports/definitions", async () => {
     await reportsService.getDefinitions("Sales");
-    expect(apiClient.get).toHaveBeenCalledWith("/mis-reports/definitions", {
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/mis-reports/definitions", {
       params: { category: "Sales" },
     });
   });
@@ -84,12 +84,12 @@ describe("reportsService", () => {
   it("generate sends POST /mis-reports/generate/:code", async () => {
     const params = { dateFrom: "2026-01-01", dateTo: "2026-01-31" };
     await reportsService.generate("SALES_SUMMARY", params);
-    expect(apiClient.post).toHaveBeenCalledWith("/mis-reports/generate/SALES_SUMMARY", params);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/mis-reports/generate/SALES_SUMMARY", params);
   });
 
   it("export sends POST /mis-reports/export/:code", async () => {
     const params = { dateFrom: "2026-01-01", dateTo: "2026-01-31", format: "PDF" as const };
     await reportsService.export("SALES_SUMMARY", params);
-    expect(apiClient.post).toHaveBeenCalledWith("/mis-reports/export/SALES_SUMMARY", params);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/mis-reports/export/SALES_SUMMARY", params);
   });
 });

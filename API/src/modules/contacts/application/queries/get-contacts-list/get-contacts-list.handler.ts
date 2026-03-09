@@ -60,9 +60,9 @@ export class GetContactsListHandler implements IQueryHandler<GetContactsListQuer
         orderBy: { [query.sortBy]: query.sortOrder },
         include: {
           communications: {
-            where: { isPrimary: true },
-            select: { id: true, type: true, value: true, priorityType: true },
-            take: 3,
+            select: { id: true, type: true, value: true, isPrimary: true, priorityType: true },
+            orderBy: { isPrimary: 'desc' },
+            take: 5,
           },
           contactOrganizations: {
             where: { isActive: true },

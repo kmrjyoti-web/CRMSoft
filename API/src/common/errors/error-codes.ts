@@ -1047,6 +1047,219 @@ export const ERROR_CODES: Record<string, ErrorCodeDefinition> = {
     message: 'API version is not supported',
     suggestion: 'Use a supported API version (v1).',
   },
+
+  // ═══════════════════════════════════════════════════
+  // CALENDAR & SCHEDULING
+  // ═══════════════════════════════════════════════════
+
+  CALENDAR_EVENT_NOT_FOUND: {
+    code: 'CALENDAR_EVENT_NOT_FOUND',
+    httpStatus: 404,
+    message: 'Calendar event does not exist',
+    suggestion: 'Verify the event ID. Use GET /calendar/events to list events.',
+  },
+  CALENDAR_EVENT_CONFLICT: {
+    code: 'CALENDAR_EVENT_CONFLICT',
+    httpStatus: 409,
+    message: 'The scheduled time conflicts with an existing event',
+    suggestion: 'Use POST /calendar/availability/free-slots to find available times.',
+  },
+  CALENDAR_EVENT_PAST: {
+    code: 'CALENDAR_EVENT_PAST',
+    httpStatus: 422,
+    message: 'Cannot create or modify events in the past',
+    suggestion: 'Choose a future date/time for the event.',
+  },
+  CALENDAR_EVENT_CANCELLED: {
+    code: 'CALENDAR_EVENT_CANCELLED',
+    httpStatus: 422,
+    message: 'This event has been cancelled and cannot be modified',
+    suggestion: 'Create a new event instead.',
+  },
+  CALENDAR_INVALID_TIME_RANGE: {
+    code: 'CALENDAR_INVALID_TIME_RANGE',
+    httpStatus: 400,
+    message: 'End time must be after start time',
+    suggestion: 'Ensure endTime is later than startTime.',
+  },
+  CALENDAR_PARTICIPANT_EXISTS: {
+    code: 'CALENDAR_PARTICIPANT_EXISTS',
+    httpStatus: 409,
+    message: 'This participant is already added to the event',
+    suggestion: 'Check existing participants before adding.',
+  },
+  CALENDAR_SYNC_NOT_CONFIGURED: {
+    code: 'CALENDAR_SYNC_NOT_CONFIGURED',
+    httpStatus: 404,
+    message: 'Calendar sync is not configured for this provider',
+    suggestion: 'Connect your calendar via POST /calendar/sync/connect.',
+  },
+  CALENDAR_SYNC_ALREADY_CONNECTED: {
+    code: 'CALENDAR_SYNC_ALREADY_CONNECTED',
+    httpStatus: 409,
+    message: 'Calendar is already connected for this provider',
+    suggestion: 'Disconnect first, then reconnect.',
+  },
+  CALENDAR_SYNC_AUTH_FAILED: {
+    code: 'CALENDAR_SYNC_AUTH_FAILED',
+    httpStatus: 401,
+    message: 'Calendar sync authentication failed',
+    suggestion: 'Reconnect your calendar to refresh credentials.',
+  },
+  CALENDAR_AVAILABILITY_NOT_SET: {
+    code: 'CALENDAR_AVAILABILITY_NOT_SET',
+    httpStatus: 404,
+    message: 'Working hours are not configured for this user',
+    suggestion: 'Set working hours via PUT /calendar/availability/working-hours.',
+  },
+
+  // ═══════════════════════════════════════════════════
+  // VERIFICATION
+  // ═══════════════════════════════════════════════════
+  VERIFICATION_REQUIRED: {
+    code: 'VERIFICATION_REQUIRED',
+    httpStatus: 403,
+    message: 'Please verify your email and mobile to continue',
+    suggestion: 'Go to Settings → Verification to verify your account.',
+  },
+  OTP_EXPIRED: {
+    code: 'OTP_EXPIRED',
+    httpStatus: 400,
+    message: 'OTP has expired. Please request a new one.',
+    suggestion: 'Click "Resend OTP" to get a new code.',
+  },
+  OTP_INVALID: {
+    code: 'OTP_INVALID',
+    httpStatus: 400,
+    message: 'Invalid OTP. Please check and try again.',
+    suggestion: 'Enter the 6-digit code sent to your email/phone.',
+  },
+  OTP_MAX_ATTEMPTS: {
+    code: 'OTP_MAX_ATTEMPTS',
+    httpStatus: 429,
+    message: 'Too many OTP attempts. Please request a new OTP.',
+    suggestion: 'Wait 60 seconds then request a new OTP.',
+  },
+  GST_INVALID_FORMAT: {
+    code: 'GST_INVALID_FORMAT',
+    httpStatus: 400,
+    message: 'Invalid GST number format',
+    suggestion: 'GST number should be 15 characters (e.g., 27AABCU9603R1ZM).',
+  },
+  GST_ALREADY_REGISTERED: {
+    code: 'GST_ALREADY_REGISTERED',
+    httpStatus: 409,
+    message: 'This GST number is already registered with another account',
+    suggestion: 'Contact support if you believe this is an error.',
+  },
+  EMAIL_ALREADY_VERIFIED: {
+    code: 'EMAIL_ALREADY_VERIFIED',
+    httpStatus: 400,
+    message: 'Email is already verified',
+    suggestion: 'No action needed — your email is already verified.',
+  },
+  MOBILE_ALREADY_VERIFIED: {
+    code: 'MOBILE_ALREADY_VERIFIED',
+    httpStatus: 400,
+    message: 'Mobile is already verified',
+    suggestion: 'No action needed — your mobile is already verified.',
+  },
+
+  // ═══════════════════════════════════════════════════
+  // MARKETPLACE
+  // ═══════════════════════════════════════════════════
+  LISTING_NOT_FOUND: {
+    code: 'LISTING_NOT_FOUND',
+    httpStatus: 404,
+    message: 'Listing not found',
+    suggestion: 'The listing may have been removed or expired.',
+  },
+  LISTING_EXPIRED: {
+    code: 'LISTING_EXPIRED',
+    httpStatus: 410,
+    message: 'This listing has expired',
+    suggestion: 'Contact the vendor for availability.',
+  },
+  LISTING_INACTIVE: {
+    code: 'LISTING_INACTIVE',
+    httpStatus: 400,
+    message: 'This listing is not currently active',
+    suggestion: 'The vendor may have paused this listing.',
+  },
+  B2B_VERIFICATION_REQUIRED: {
+    code: 'B2B_VERIFICATION_REQUIRED',
+    httpStatus: 403,
+    message: 'B2B pricing requires GST verification',
+    suggestion: 'Verify your GST number to access wholesale pricing.',
+  },
+  ENQUIRY_NOT_FOUND: {
+    code: 'ENQUIRY_NOT_FOUND',
+    httpStatus: 404,
+    message: 'Enquiry not found',
+    suggestion: 'Verify the enquiry ID.',
+  },
+  ORDER_NOT_FOUND: {
+    code: 'ORDER_NOT_FOUND',
+    httpStatus: 404,
+    message: 'Order not found',
+    suggestion: 'Verify the order ID or order number.',
+  },
+  ORDER_EMPTY_ITEMS: {
+    code: 'ORDER_EMPTY_ITEMS',
+    httpStatus: 400,
+    message: 'Order must contain at least one item',
+    suggestion: 'Add items to your order before submitting.',
+  },
+  POST_NOT_FOUND: {
+    code: 'POST_NOT_FOUND',
+    httpStatus: 404,
+    message: 'Post not found',
+    suggestion: 'The post may have been deleted.',
+  },
+
+  // ═══════════════════════════════════════════════════
+  // PLUGIN
+  // ═══════════════════════════════════════════════════
+  PLUGIN_NOT_CONFIGURED: {
+    code: 'PLUGIN_NOT_CONFIGURED',
+    httpStatus: 400,
+    message: 'Plugin is not configured',
+    suggestion: 'Go to Settings → Integrations to configure the plugin.',
+  },
+  PLUGIN_CREDENTIALS_INVALID: {
+    code: 'PLUGIN_CREDENTIALS_INVALID',
+    httpStatus: 401,
+    message: 'Plugin credentials are invalid',
+    suggestion: 'Update the API credentials in Settings → Integrations.',
+  },
+  PLUGIN_API_FAILED: {
+    code: 'PLUGIN_API_FAILED',
+    httpStatus: 502,
+    message: 'External plugin API request failed',
+    suggestion: 'Try again. If the issue persists, check the plugin status.',
+  },
+
+  // ═══════════════════════════════════════════════════
+  // TICKET & POST-SALES
+  // ═══════════════════════════════════════════════════
+  TICKET_NOT_FOUND: {
+    code: 'TICKET_NOT_FOUND',
+    httpStatus: 404,
+    message: 'Support ticket does not exist',
+    suggestion: 'Verify the ticket ID or ticket number.',
+  },
+  TICKET_CLOSED: {
+    code: 'TICKET_CLOSED',
+    httpStatus: 400,
+    message: 'This ticket has been closed',
+    suggestion: 'Reopen the ticket or create a new one.',
+  },
+  TOUR_PLAN_CONFLICT: {
+    code: 'TOUR_PLAN_CONFLICT',
+    httpStatus: 409,
+    message: 'A tour plan already exists for this date',
+    suggestion: 'Edit the existing tour plan or choose a different date.',
+  },
 };
 
 /** Total error codes count. */

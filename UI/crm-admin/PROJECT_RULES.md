@@ -46,7 +46,7 @@ CRM/
 
 ---
 
-# SECTION 2: THE 10 UNBREAKABLE RULES
+# SECTION 2: THE 11 UNBREAKABLE RULES
 
 These rules are NON-NEGOTIABLE. If you are an AI model and you violate
 any of these, the project WILL break and the developer WILL have to
@@ -187,6 +187,40 @@ pnpm validate:quick          # Before every commit
 pnpm validate                # Before every PR
 pnpm coreui:check:imports    # After CoreUI changes
 pnpm check:all               # Full health check
+```
+
+## RULE 11: ALL SIDEBARS MUST USE SHARED PANEL HOOKS
+```
+FORBIDDEN — Opening Drawer directly:
+   <Drawer open={showHelp} onClose={...}>...</Drawer>
+   <Drawer open={open} onClose={onClose}>...</Drawer>
+
+FORBIDDEN — Calling openPanel directly in feature files:
+   const openPanel = useSidePanelStore((s) => s.openPanel);
+   openPanel({ id: "...", content: <Form ... /> });
+
+CORRECT — Use useEntityPanel for CRUD panels:
+   import { useEntityPanel } from '@/hooks/useEntityPanel';
+   const { handleRowEdit, handleCreate } = useEntityPanel({
+     entityKey: 'contact', entityLabel: 'Contact',
+     FormComponent: ContactForm, idProp: 'contactId',
+     editRoute: '/contacts/:id/edit', createRoute: '/contacts/new',
+   });
+
+CORRECT — Use useContentPanel for read-only info/help panels:
+   import { useContentPanel } from '@/hooks/useEntityPanel';
+   const { openContent } = useContentPanel();
+   openContent({ id: 'workflow-help', title: 'Help', content: <HelpContent /> });
+```
+**WHY:** Single sidebar system. `useEntityPanel` for CRUD, `useContentPanel` for info.
+Never use `<Drawer>` or raw `openPanel()` in feature files.
+
+**EXCEPTION — These files are allowed to call `useSidePanelStore` directly:**
+```
+   src/hooks/useEntityPanel.tsx          ← Shared hook (only file that calls openPanel)
+   src/stores/side-panel.store.ts        ← Store definition
+   src/components/common/SidePanel/*     ← Panel renderer infrastructure
+   src/features/*/components/*Form.tsx   ← Forms use updatePanelConfig to sync isSubmitting
 ```
 
 ---

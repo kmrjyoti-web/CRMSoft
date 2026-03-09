@@ -32,7 +32,7 @@ describe('CreateOrganizationHandler', () => {
       new CreateOrganizationCommand(
         'TechCorp', 'user-1', undefined, undefined, undefined,
         undefined, undefined, undefined, undefined, undefined,
-        undefined, undefined, undefined, ['f-1', 'f-2'],
+        undefined, undefined, undefined, undefined, ['f-1', 'f-2'],
       ),
     );
     expect(prisma.organizationFilter.createMany).toHaveBeenCalledTimes(1);

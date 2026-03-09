@@ -79,6 +79,7 @@ export function useTableConfig(tableKey: string | undefined) {
     pageSize: merged?.pageSize,
     showRowActions: merged?.showRowActions ?? true,
     filterVisibility: merged?.filterVisibility,
+    filterLayout: merged?.filterLayout,
     isLoading: enabled ? isLoading : false,
     isSaving: saveMutation.isPending,
     saveConfig,

@@ -13,12 +13,12 @@ import {
   Button,
   Icon,
   Input,
-  SelectInput,
   Switch,
   Fieldset,
   RichTextEditor,
   TagsInput,
 } from "@/components/ui";
+import { LookupSelect } from "@/components/common/LookupSelect";
 
 import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
@@ -46,14 +46,6 @@ const templateSchema = z.object({
 type TemplateFormValues = z.infer<typeof templateSchema>;
 
 // ── Helpers ──────────────────────────────────────────────
-
-const CATEGORY_OPTIONS = [
-  { label: "Sales", value: "SALES" },
-  { label: "Marketing", value: "MARKETING" },
-  { label: "Support", value: "SUPPORT" },
-  { label: "Notification", value: "NOTIFICATION" },
-  { label: "Other", value: "OTHER" },
-];
 
 const labelStyle: React.CSSProperties = {
   fontSize: 13,
@@ -187,9 +179,9 @@ export function TemplateForm({ templateId }: { templateId?: string }) {
               name="category"
               control={control}
               render={({ field }) => (
-                <SelectInput
+                <LookupSelect
+                  masterCode="TEMPLATE_CATEGORY"
                   label="Category"
-                  options={CATEGORY_OPTIONS}
                   value={field.value}
                   onChange={(v) => field.onChange(String(v ?? ""))}
                   error={!!errors.category}

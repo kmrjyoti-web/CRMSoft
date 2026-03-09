@@ -5,6 +5,52 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Icon, useLayout } from "@/components/ui";
+import { useWalletBalance } from "@/features/wallet/hooks/useWallet";
+import { formatTokens } from "@/features/wallet/utils/wallet-helpers";
+import { NotificationBell } from "@/features/notifications/components/NotificationBell";
+
+// ── Wallet Chip ──────────────────────────────────────────
+
+function WalletChip({ onClick }: { onClick: () => void }) {
+  const { data, isLoading } = useWalletBalance();
+  const balance = data?.data;
+
+  if (isLoading || !balance) return null;
+
+  const total = balance.totalAvailable;
+  const isLow = total < 500;
+
+  return (
+    <button
+      type="button"
+      className="travelos-action travelos-wallet-chip"
+      title="Wallet Balance — click to recharge"
+      onClick={onClick}
+      style={{ display: "flex", alignItems: "center", gap: 4 }}
+    >
+      <span className="travelos-action__icon">
+        <Icon name="wallet" size={17} />
+      </span>
+      <span className="travelos-action__label" style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        Wallet
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            padding: "1px 7px",
+            borderRadius: 20,
+            lineHeight: 1.6,
+            background: isLow ? "#fee2e2" : "#dcfce7",
+            color: isLow ? "#dc2626" : "#16a34a",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {formatTokens(total)}
+        </span>
+      </span>
+    </button>
+  );
+}
 
 // ── Props ────────────────────────────────────────────────
 
@@ -15,6 +61,7 @@ interface CRMHeaderProps {
   userEmail?: string;
   userRole?: string;
   version?: string;
+  isSuperAdmin?: boolean;
   onLogout?: () => void;
   onOpenShortcuts?: () => void;
 }
@@ -28,6 +75,7 @@ export function CRMHeader({
   userEmail,
   userRole,
   version = "V 1.0",
+  isSuperAdmin = false,
   onLogout,
   onOpenShortcuts,
 }: CRMHeaderProps) {
@@ -93,11 +141,10 @@ export function CRMHeader({
     title: string;
     onClick?: () => void;
   }> = [
-    { key: "import", icon: "download", label: "Pur. Import", title: "Import data", onClick: () => router.push("/settings") },
+    { key: "import", icon: "upload", label: "Import", title: "Bulk Import", onClick: () => router.push("/import") },
     { key: "ticket", icon: "mail", label: "Ticket", title: "Support tickets", onClick: () => router.push("/support-tickets") },
     { key: "help", icon: "help-circle", label: "Help", title: "Help & documentation" },
     { key: "settings", icon: "settings", label: "Settings", title: "Settings", onClick: () => router.push("/settings") },
-    { key: "notification", icon: "bell", label: "Notification", title: "Notifications" },
     { key: "shortcut", icon: "command", label: "Shortcut", title: "Keyboard shortcuts", onClick: onOpenShortcuts },
     { key: "history", icon: "history", label: "History", title: "History", onClick: () => router.push("/activities") },
   ];
@@ -138,7 +185,7 @@ export function CRMHeader({
                   <span className="travelos-popover__avatar">{companyInitial}</span>
                   <div>
                     <strong>{storeTitle}</strong>
-                    <small>CRM Soft Pvt Ltd</small>
+                    <small>{storeName}</small>
                   </div>
                 </div>
                 <button
@@ -162,7 +209,7 @@ export function CRMHeader({
                 </div>
                 <div className="travelos-info-row">
                   <span>GSTIN</span>
-                  <strong>27AADCB2230M1Z2</strong>
+                  <strong>—</strong>
                 </div>
                 <div className="travelos-info-row">
                   <span>Branch</span>
@@ -189,6 +236,10 @@ export function CRMHeader({
       </div>
 
       <div className="travelos-right">
+        {!isSuperAdmin && (
+          <WalletChip onClick={() => router.push("/settings/wallet")} />
+        )}
+
         {topActions.map((action) => (
           <button
             key={action.key}
@@ -203,6 +254,8 @@ export function CRMHeader({
             <span className="travelos-action__label">{action.label}</span>
           </button>
         ))}
+
+        <NotificationBell />
 
         <div className="travelos-profile-wrap">
           <button

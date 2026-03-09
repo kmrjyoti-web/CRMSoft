@@ -6,7 +6,7 @@ import { AutoNumberService } from '../services/auto-number.service';
 import { UpdateAutoNumberDto, ResetSequenceDto } from './dto/update-auto-number.dto';
 
 @ApiTags('Settings - Auto Numbering')
-@Controller('api/v1/settings/auto-numbering')
+@Controller('settings/auto-numbering')
 export class AutoNumberController {
   constructor(private readonly service: AutoNumberService) {}
 

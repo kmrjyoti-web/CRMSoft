@@ -27,29 +27,29 @@ describe("emailTemplatesService", () => {
   it("getAll calls GET /email-templates with params", async () => {
     const params = { search: "welcome", page: 1 };
     await emailTemplatesService.getAll(params);
-    expect(apiClient.get).toHaveBeenCalledWith("/email-templates", { params });
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/email-templates", { params });
   });
 
   it("getById calls GET /email-templates/:id", async () => {
     await emailTemplatesService.getById("tpl-1");
-    expect(apiClient.get).toHaveBeenCalledWith("/email-templates/tpl-1");
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/email-templates/tpl-1");
   });
 
   it("create calls POST /email-templates", async () => {
     const payload = { name: "Welcome", subject: "Hi", body: "<p>Hello</p>" };
     await emailTemplatesService.create(payload as any);
-    expect(apiClient.post).toHaveBeenCalledWith("/email-templates", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/email-templates", payload);
   });
 
   it("delete calls DELETE /email-templates/:id", async () => {
     await emailTemplatesService.delete("tpl-1");
-    expect(apiClient.delete).toHaveBeenCalledWith("/email-templates/tpl-1");
+    expect(apiClient.delete).toHaveBeenCalledWith("/api/v1/email-templates/tpl-1");
   });
 
   it("preview calls POST /email-templates/:id/preview", async () => {
     const payload = { variables: { name: "John" } };
     await emailTemplatesService.preview("tpl-1", payload as any);
-    expect(apiClient.post).toHaveBeenCalledWith("/email-templates/tpl-1/preview", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/email-templates/tpl-1/preview", payload);
   });
 });
 
@@ -63,12 +63,12 @@ describe("emailSignaturesService", () => {
 
   it("getAll calls GET /email-signatures", async () => {
     await emailSignaturesService.getAll();
-    expect(apiClient.get).toHaveBeenCalledWith("/email-signatures");
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/email-signatures");
   });
 
   it("create calls POST /email-signatures", async () => {
     const payload = { name: "Default", body: "<p>Regards</p>" };
     await emailSignaturesService.create(payload as any);
-    expect(apiClient.post).toHaveBeenCalledWith("/email-signatures", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/email-signatures", payload);
   });
 });

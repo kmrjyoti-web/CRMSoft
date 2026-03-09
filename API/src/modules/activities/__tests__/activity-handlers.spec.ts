@@ -35,7 +35,8 @@ describe('Activity Handlers', () => {
   });
 
   it('should create an activity with reminder and calendar event', async () => {
-    const handler = new CreateActivityHandler(prisma);
+    const mockChannelRouter = { send: jest.fn().mockResolvedValue({ channels: [] }) };
+    const handler = new CreateActivityHandler(prisma, mockChannelRouter as any);
     const result = await handler.execute({
       type: 'CALL', subject: 'Follow up', userId: 'user-1',
       scheduledAt: new Date(Date.now() + 86400000),

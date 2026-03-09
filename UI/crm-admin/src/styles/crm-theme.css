@@ -587,6 +587,149 @@
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    DARK MODE
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FILTER SIDEBAR — Wider + themed accent color
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Override framer-motion inline 280px → 320px */
+.flex-shrink-0.border-r.flex-col {
+  min-width: 320px !important;
+}
+
+/* Sync filter Apply button from orange to primary */
+.bg-\[\#d95322\] {
+  background-color: var(--color-primary) !important;
+}
+.hover\:bg-\[\#c24a1e\]:hover {
+  background-color: var(--color-primary-hover) !important;
+}
+
+/* Sync filter checkbox/radio accent from orange to primary */
+.accent-\[\#d95322\] {
+  accent-color: var(--color-primary) !important;
+}
+.text-\[\#d95322\] {
+  color: var(--color-primary) !important;
+}
+.focus\:ring-\[\#d95322\]:focus {
+  --tw-ring-color: var(--color-primary) !important;
+}
+.focus\:border-\[\#d95322\]:focus {
+  border-color: var(--color-primary) !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CARD VIEW — Prevent cards from stretching when few records
+   The grid container has h-full which stretches cards to fill.
+   align-content: start keeps cards at natural height.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.crm-table-full .grid.gap-4.bg-gray-50 {
+  align-content: start;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MOBILE RESPONSIVE (≤768px)
+   - Hide non-essential toolbar items
+   - Keep: title, filter, create, settings
+   - Filter sidebar overlays content
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 768px) {
+  /* Toolbar: stack on mobile, allow wrap */
+  .crm-mobile header.flex {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  /* Search bar: collapse to full-width row below title */
+  .crm-mobile header .relative.w-64 {
+    width: 100% !important;
+    order: 10;
+  }
+
+  /* Hide the title divider (between title & search) */
+  .crm-mobile header > div:first-child > .w-px {
+    display: none;
+  }
+
+  /* Hide Sort button */
+  .crm-mobile header button[title="Sort"] {
+    display: none;
+  }
+
+  /* Hide Validate Data button */
+  .crm-mobile header button[title="Validate Data"] {
+    display: none;
+  }
+
+  /* Hide Errors Only label */
+  .crm-mobile header label.flex.items-center.space-x-1\.5 {
+    display: none;
+  }
+
+  /* Hide toolbar dividers (h-5 w-px) inside right actions section */
+  .crm-mobile header > div:last-child > .w-px {
+    display: none;
+  }
+
+  /* Hide View mode toggle group */
+  .crm-mobile header .bg-gray-100.rounded-md.border-gray-200 {
+    display: none;
+  }
+
+  /* Hide Column visibility, Calendar/Chart/BI/Kanban/Tree settings buttons */
+  .crm-mobile header button[title="Show/Hide Columns"],
+  .crm-mobile header button[title="Calendar Settings"],
+  .crm-mobile header button[title="Chart Settings"],
+  .crm-mobile header button[title="BI Settings"],
+  .crm-mobile header button[title="Kanban Settings"],
+  .crm-mobile header button[title="Tree Settings"] {
+    display: none;
+  }
+
+  /* Hide Refresh button (standalone p-1.5 without title in right section) */
+  .crm-mobile header > div:last-child > button:not([title]):not(.flex) {
+    display: none;
+  }
+
+  /* Hide Density menu (relative div after refresh) */
+  .crm-mobile header > div:last-child > .relative:not(.ml-1):not(.w-64) {
+    display: none;
+  }
+
+  /* Create button: icon-only on mobile */
+  .crm-mobile header .shadow-sm > button:first-child {
+    padding: 6px 10px;
+    font-size: 0;
+  }
+  .crm-mobile header .shadow-sm > button:first-child svg {
+    font-size: initial;
+  }
+  /* Hide create dropdown arrow on mobile */
+  .crm-mobile header .shadow-sm > button:last-child {
+    display: none;
+  }
+
+  /* Filter sidebar: overlay on mobile (not push) */
+  .crm-mobile .flex-shrink-0.border-r.flex-col {
+    position: absolute !important;
+    z-index: 50;
+    height: 100%;
+    min-width: 280px !important;
+    max-width: 85vw;
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Card view: single column on mobile with tighter padding */
+  .crm-mobile .grid.gap-4.bg-gray-50 {
+    padding: 12px;
+    gap: 12px;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DARK MODE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 [data-theme="dark"],
 .dark {
   --color-primary: #2a7a94;

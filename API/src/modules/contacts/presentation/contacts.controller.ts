@@ -74,7 +74,7 @@ export class ContactsController {
     @CurrentUser('id') userId: string,
   ) {
     await this.commandBus.execute(
-      new UpdateContactCommand(id, userId, dto, dto.filterIds),
+      new UpdateContactCommand(id, userId, dto, dto.filterIds, dto.communications, dto.organizationId),
     );
     const contact = await this.queryBus.execute(new GetContactByIdQuery(id));
     return ApiResponse.success(contact, 'Contact updated');

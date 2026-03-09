@@ -9,6 +9,7 @@ import { AddValueHandler } from './application/commands/add-value/add-value.hand
 import { UpdateValueHandler } from './application/commands/update-value/update-value.handler';
 import { ReorderValuesHandler } from './application/commands/reorder-values/reorder-values.handler';
 import { DeactivateValueHandler } from './application/commands/deactivate-value/deactivate-value.handler';
+import { ResetLookupDefaultsHandler } from './application/commands/reset-lookup-defaults/reset-lookup-defaults.handler';
 
 import { GetAllLookupsHandler } from './application/queries/get-all-lookups/get-all-lookups.handler';
 import { GetLookupByIdHandler } from './application/queries/get-lookup-by-id/get-lookup-by-id.handler';
@@ -17,6 +18,7 @@ import { GetValuesByCategoryHandler } from './application/queries/get-values-by-
 const CommandHandlers = [
   CreateLookupHandler, UpdateLookupHandler, DeactivateLookupHandler,
   AddValueHandler, UpdateValueHandler, ReorderValuesHandler, DeactivateValueHandler,
+  ResetLookupDefaultsHandler,
 ];
 const QueryHandlers = [
   GetAllLookupsHandler, GetLookupByIdHandler, GetValuesByCategoryHandler,

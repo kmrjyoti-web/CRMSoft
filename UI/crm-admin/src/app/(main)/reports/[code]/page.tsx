@@ -1,13 +1,11 @@
-"use client";
+'use client';
 
-import { use } from "react";
-import { ReportViewer } from "@/features/dashboard/components/ReportViewer";
+import { ReportViewerEnhanced } from '@/features/reports/components/ReportViewerEnhanced';
 
 export default function ReportViewerPage({
   params,
 }: {
-  params: Promise<{ code: string }>;
+  params: { code: string };
 }) {
-  const { code } = use(params);
-  return <ReportViewer reportCode={code} />;
+  return <ReportViewerEnhanced reportCode={params.code} />;
 }

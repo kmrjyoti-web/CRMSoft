@@ -7,9 +7,10 @@ import type {
   LeadListParams,
   LeadCreateData,
   LeadUpdateData,
+  QuickCreateLeadData,
 } from "../types/leads.types";
 
-const BASE_URL = "/leads";
+const BASE_URL = "/api/v1/leads";
 
 export const leadsService = {
   getAll: (params?: LeadListParams) =>
@@ -25,6 +26,11 @@ export const leadsService = {
   create: (payload: LeadCreateData) =>
     apiClient
       .post<ApiResponse<LeadDetail>>(BASE_URL, payload)
+      .then((r) => r.data),
+
+  quickCreate: (payload: QuickCreateLeadData) =>
+    apiClient
+      .post<ApiResponse<LeadDetail>>(`${BASE_URL}/quick-create`, payload)
       .then((r) => r.data),
 
   update: (id: string, payload: LeadUpdateData) =>

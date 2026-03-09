@@ -13,10 +13,13 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { TableSkeleton } from "@/components/common/TableSkeleton";
 import { PageHeader } from "@/components/common/PageHeader";
 import { useConfirmDialog } from "@/components/common/useConfirmDialog";
+import { HelpButton } from "@/components/common/HelpButton";
 
 import { formatDate } from "@/lib/format-date";
 
 import { useTemplatesList, useDeleteTemplate } from "../hooks/useCommunication";
+import { TemplateListUserHelp } from "../help/TemplateListUserHelp";
+import { CommunicationDevHelp } from "../help/CommunicationDevHelp";
 
 import type {
   EmailTemplateListParams,
@@ -114,11 +117,19 @@ export function TemplateList() {
         title="Email Templates"
         subtitle={`${totalCount} template${totalCount !== 1 ? "s" : ""}`}
         actions={
-          <Link href="/communication/templates/new">
-            <Button variant="primary">
-              <Icon name="plus" size={16} /> Add Template
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <HelpButton
+              panelId="templates-list-help"
+              title="Email Templates — Help"
+              userContent={<TemplateListUserHelp />}
+              devContent={<CommunicationDevHelp />}
+            />
+            <Link href="/communication/templates/new">
+              <Button variant="primary">
+                <Icon name="plus" size={16} /> Add Template
+              </Button>
+            </Link>
+          </div>
         }
       />
 

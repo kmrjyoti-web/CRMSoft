@@ -6,7 +6,7 @@ import { CreditNoteService } from '../services/credit-note.service';
 import { CreateCreditNoteDto, ApplyCreditNoteDto, CreditNoteQueryDto } from './dto/credit-note.dto';
 
 @ApiTags('Credit Notes')
-@Controller('api/v1/credit-notes')
+@Controller('credit-notes')
 export class CreditNoteController {
   constructor(private readonly creditNoteService: CreditNoteService) {}
 

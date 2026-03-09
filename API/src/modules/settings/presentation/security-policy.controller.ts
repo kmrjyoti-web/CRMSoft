@@ -6,7 +6,7 @@ import { SecurityPolicyService } from '../services/security-policy.service';
 import { UpdateSecurityPolicyDto, CreateIpRuleDto } from './dto/update-security-policy.dto';
 
 @ApiTags('Settings - Security Policy')
-@Controller('api/v1/settings/security')
+@Controller('settings/security')
 export class SecurityPolicyController {
   constructor(private readonly service: SecurityPolicyService) {}
 

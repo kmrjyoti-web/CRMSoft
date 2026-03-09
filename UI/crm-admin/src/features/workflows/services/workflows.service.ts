@@ -17,7 +17,7 @@ import type {
   WorkflowValidationResult,
 } from "../types/workflows.types";
 
-const BASE_URL = "/workflows";
+const BASE_URL = "/api/v1/workflows";
 
 export const workflowsService = {
   getAll: (params?: WorkflowListParams) =>

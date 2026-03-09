@@ -39,13 +39,17 @@ export class CreateRawContactHandler implements ICommandHandler<CreateRawContact
 
     // 4. Create communication records (phone, email, etc.)
     if (command.communications?.length) {
+      const seenTypes = new Set<string>();
       for (const comm of command.communications) {
+        const isFirstOfType = !seenTypes.has(comm.type);
+        seenTypes.add(comm.type);
         await this.prisma.communication.create({
           data: {
             type: comm.type as any,
             value: comm.value,
             priorityType: (comm.priorityType as any) || 'PRIMARY',
             label: comm.label,
+            isPrimary: comm.isPrimary ?? isFirstOfType,
             rawContactId: rawContact.id,
           },
         });

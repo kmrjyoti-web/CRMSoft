@@ -9,6 +9,18 @@ import { RealtimeService } from './services/realtime.service';
 import { DigestService } from './services/digest.service';
 import { CleanupService } from './services/cleanup.service';
 import { PreferenceService } from './services/preference.service';
+import { NotificationConfigService } from './services/notification-config.service';
+import { EscalationService } from './services/escalation.service';
+import { QuietHourService } from './services/quiet-hour.service';
+import { NotificationDispatchService } from './services/notification-dispatch.service';
+import { NotificationAnalyticsService } from './services/notification-analytics.service';
+
+// Channel Adapters
+import { EmailAdapter } from './services/adapters/email.adapter';
+import { SmsAdapter } from './services/adapters/sms.adapter';
+import { WhatsAppAdapter } from './services/adapters/whatsapp.adapter';
+import { PushAdapter } from './services/adapters/push.adapter';
+import { CallAdapter } from './services/adapters/call.adapter';
 
 // Gateway
 import { NotificationGateway } from './gateway/notification.gateway';
@@ -17,6 +29,7 @@ import { SseController } from './gateway/sse.controller';
 // Controllers
 import { NotificationController } from './presentation/notification.controller';
 import { NotificationSettingsController } from './presentation/notification-settings.controller';
+import { NotificationAdminController } from './presentation/notification-admin.controller';
 
 // Command Handlers
 import { SendNotificationHandler } from './application/commands/send-notification/send-notification.handler';
@@ -64,7 +77,7 @@ const QueryHandlers = [
 
 @Module({
   imports: [CqrsModule],
-  controllers: [NotificationController, NotificationSettingsController, SseController],
+  controllers: [NotificationController, NotificationSettingsController, NotificationAdminController, SseController],
   providers: [
     NotificationCoreService,
     NotificationTemplateService,
@@ -73,10 +86,20 @@ const QueryHandlers = [
     DigestService,
     CleanupService,
     PreferenceService,
+    NotificationConfigService,
+    EscalationService,
+    QuietHourService,
+    NotificationDispatchService,
+    NotificationAnalyticsService,
+    EmailAdapter,
+    SmsAdapter,
+    WhatsAppAdapter,
+    PushAdapter,
+    CallAdapter,
     NotificationGateway,
     ...CommandHandlers,
     ...QueryHandlers,
   ],
-  exports: [NotificationCoreService, ChannelRouterService, RealtimeService, NotificationTemplateService],
+  exports: [NotificationCoreService, ChannelRouterService, RealtimeService, NotificationTemplateService, NotificationConfigService, EscalationService, QuietHourService, NotificationDispatchService, NotificationAnalyticsService],
 })
 export class NotificationsModule {}

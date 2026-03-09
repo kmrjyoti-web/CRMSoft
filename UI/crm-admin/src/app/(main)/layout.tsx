@@ -40,6 +40,14 @@ function transformMenu(
       return permissionCodes.includes(item.permissionCode);
     })
     .map((item) => {
+      // Dividers → special label marker (rendered as <hr> in sidebar)
+      if (item.menuType === "DIVIDER") {
+        return { label: "__DIVIDER__", icon: "" };
+      }
+      // Section titles → special marker (rendered as section header in sidebar)
+      if (item.menuType === "TITLE") {
+        return { label: `__TITLE__${item.name}`, icon: "" };
+      }
       const children = item.children?.length
         ? transformMenu(item.children, permissionCodes)
         : undefined;
@@ -51,6 +59,20 @@ function transformMenu(
         subItems: children,
       };
     });
+}
+
+/** For SuperAdmin: split menu into Admin + Platform sections. */
+function buildPlatformMenu(tree: MenuTreeItem[]): MenuTreeItem[] {
+  const vendorGroup = tree.find((item) => item.code === "SOFTWARE_VENDOR_GROUP");
+  const crmMenus = tree.filter((item) => item.code !== "SOFTWARE_VENDOR_GROUP");
+
+  const result: MenuTreeItem[] = [
+    { id: "__section_admin", name: "Admin", code: "SECTION_ADMIN", icon: null, route: null, menuType: "TITLE", openInNewTab: false, children: [] },
+    ...crmMenus,
+    { id: "__section_platform", name: "Platform", code: "SECTION_PLATFORM", icon: null, route: null, menuType: "TITLE", openInNewTab: false, children: [] },
+    ...(vendorGroup?.children ?? []),
+  ];
+  return result;
 }
 
 // ── Convert fallback NavItem[] → MenuItem[] ─────────────
@@ -79,6 +101,8 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
 
   const user = useAuthStore((s) => s.user);
   const tenantCode = useAuthStore((s) => s.tenantCode);
+  const tenantName = useAuthStore((s) => s.tenantName);
+  const isSuperAdmin = useAuthStore((s) => s.isSuperAdmin);
   const setMenuItems = useMargLayout((s) => s.setMenuItems);
   const setActiveItem = useMargLayout((s) => s.setActiveItem);
   const margInit = useMargLayout((s) => s.init);
@@ -115,7 +139,8 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
       .getMyMenu()
       .then((tree) => {
         useMenuStore.getState().setMenu(tree);
-        setMenuItems(transformMenu(tree));
+        const menuTree = isSuperAdmin ? buildPlatformMenu(tree) : tree;
+        setMenuItems(transformMenu(menuTree));
       })
       .catch(() => {
         // API menu unavailable — use fallback navigation
@@ -181,11 +206,12 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
       <div className="main-content-wrapper">
         <div className="header-area">
           <CRMHeader
-            storeName="CRM Admin"
+            storeName={isSuperAdmin ? "CRM Platform" : (tenantName || "CRM Admin")}
             companyCode={tenantCode}
             userName={userName}
             userEmail={user?.email}
             userRole={userRole}
+            isSuperAdmin={isSuperAdmin}
             onLogout={handleLogout}
             onOpenShortcuts={() => setShowShortcuts(true)}
           />

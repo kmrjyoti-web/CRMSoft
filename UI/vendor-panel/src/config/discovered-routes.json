@@ -1,0 +1,63 @@
+{
+  "generatedAt": "2026-03-09T02:40:32.463Z",
+  "totalRoutes": 8,
+  "routes": [
+    {
+      "key": "dashboard",
+      "label": "Dashboard",
+      "path": "/",
+      "icon": "LayoutDashboard",
+      "displayOrder": 1
+    },
+    {
+      "key": "analytics",
+      "label": "Analytics",
+      "path": "/analytics",
+      "icon": "BarChart3",
+      "moduleKey": "analytics",
+      "displayOrder": 2
+    },
+    {
+      "key": "enquiries",
+      "label": "Enquiries",
+      "path": "/enquiries",
+      "icon": "MessageSquare",
+      "displayOrder": 3
+    },
+    {
+      "key": "listings",
+      "label": "Listings",
+      "path": "/listings",
+      "icon": "Package",
+      "displayOrder": 4
+    },
+    {
+      "key": "orders",
+      "label": "Orders",
+      "path": "/orders",
+      "icon": "ShoppingCart",
+      "displayOrder": 5
+    },
+    {
+      "key": "posts",
+      "label": "Posts",
+      "path": "/posts",
+      "icon": "FileText",
+      "displayOrder": 6
+    },
+    {
+      "key": "profile",
+      "label": "Profile",
+      "path": "/profile",
+      "icon": "User",
+      "displayOrder": 7
+    },
+    {
+      "key": "settings",
+      "label": "Settings",
+      "path": "/settings",
+      "icon": "Settings",
+      "displayOrder": 8
+    }
+  ]
+}

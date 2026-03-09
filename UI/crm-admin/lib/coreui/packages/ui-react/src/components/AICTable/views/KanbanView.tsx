@@ -3,16 +3,28 @@ import { ArrowRightToLine } from 'lucide-react';
 import type { KanbanSettings } from '../types';
 import { KANBAN_COLOR_PALETTE } from '../constants';
 
-export function KanbanView({ data, settings, onCreate }: { data: any[]; settings: KanbanSettings | null; onCreate?: () => void }) {
+export function KanbanView({ data, settings, onCreate, categoryOptions, title }: { data: any[]; settings: KanbanSettings | null; onCreate?: () => void; categoryOptions?: Record<string, string[]>; title?: string }) {
   const categorizeBy = settings?.categorizeBy || 'leadSource';
   const aggregateBy = settings?.aggregateBy || '';
   const selectedFields = settings?.selectedFields || ['contactName', 'accountName'];
 
-  const uniqueCategories = Array.from(new Set(data.map(item => item[categorizeBy]).filter(Boolean)));
+  // Use predefined categories if available for the selected field, otherwise derive from data
+  const predefined = categoryOptions?.[categorizeBy];
+  const selectedCats = settings?.selectedCategories;
+  let allCategories: string[];
 
-  const columns = uniqueCategories.map((cat, index) => {
+  if (predefined) {
+    // Use predefined list, filtered by user selection if present
+    allCategories = selectedCats && selectedCats.length > 0
+      ? predefined.filter(c => selectedCats.includes(c))
+      : predefined;
+  } else {
+    allCategories = Array.from(new Set(data.map(item => item[categorizeBy]).filter(Boolean))).map(String);
+  }
+
+  const columns = allCategories.map((cat, index) => {
     const palette = KANBAN_COLOR_PALETTE[index % KANBAN_COLOR_PALETTE.length];
-    return { id: String(cat), title: String(cat), ...palette };
+    return { id: String(cat), title: String(cat).replace(/_/g, ' '), ...palette };
   });
 
   const uncategorizedData = data.filter(d => !d[categorizeBy]);
@@ -72,8 +84,8 @@ export function KanbanView({ data, settings, onCreate }: { data: any[]; settings
               {aggregateDisplay && <div className="text-xs font-medium">{aggregateDisplay}</div>}
             </div>
 
-            <div className={`flex-1 border-l border-r border-b rounded-b-md bg-gray-100 p-2 flex flex-col ${settings?.headerStyle === 'Multi Color' ? col.border : 'border-gray-200'}`}>
-              <div className="flex-1 overflow-y-auto">
+            <div className={`flex-1 min-h-0 border-l border-r border-b rounded-b-md bg-gray-100 p-2 flex flex-col ${settings?.headerStyle === 'Multi Color' ? col.border : 'border-gray-200'}`}>
+              <div className="flex-1 min-h-0 overflow-y-auto">
                 {colData.length === 0 ? (
                   <div className="h-full flex items-center justify-center text-sm text-gray-500">
                     No items found.
@@ -99,10 +111,12 @@ export function KanbanView({ data, settings, onCreate }: { data: any[]; settings
                 )}
               </div>
 
-              <div className="mt-2 pt-2 border-t border-gray-200 flex items-center justify-between">
-                <button onClick={onCreate} className="text-xs text-[#d95322] hover:underline font-medium">Create Contact</button>
-                <button className="text-gray-400 hover:text-gray-600"><ArrowRightToLine size={14} /></button>
-              </div>
+              {onCreate && (
+                <div className="flex-shrink-0 mt-2 pt-2 border-t border-gray-200 flex items-center justify-between">
+                  <button onClick={onCreate} className="text-xs text-[#d95322] hover:underline font-medium">+ Create {title || 'Record'}</button>
+                  <button className="text-gray-400 hover:text-gray-600"><ArrowRightToLine size={14} /></button>
+                </div>
+              )}
             </div>
           </div>
         );

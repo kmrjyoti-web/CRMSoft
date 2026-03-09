@@ -9,7 +9,8 @@ export type DevTabId =
   | "network-log"
   | "system-info"
   | "feature-flags"
-  | "query-inspector";
+  | "query-inspector"
+  | "docs";
 
 export interface DevTab {
   id: DevTabId;

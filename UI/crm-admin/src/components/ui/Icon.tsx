@@ -10,15 +10,23 @@ import {
   ArrowUp, ArrowDown, RefreshCw, ExternalLink, Copy,
   FileText, FileSpreadsheet, FileJson, File, Folder, Image, Paperclip, Send,
   Star, Heart, Bookmark, Flag, Tag, Hash,
-  Home, BarChart2, PieChart, TrendingUp, DollarSign,
+  Home, BarChart2, PieChart, TrendingUp, DollarSign, IndianRupee,
   CreditCard, ShoppingCart, Package, Truck, MapPin,
   Globe, Wifi, WifiOff, Loader2, LogOut, Menu,
   Maximize2, Minimize2, Maximize, Minimize, Minus, Shrink, Expand,
   UserPlus, Grip, GripVertical, Briefcase,
-  Zap, Command, Keyboard, CircleHelp, LayoutGrid, History,
-  Activity, Palette, Database, Shield, Monitor, Layers, Code,
+  Target, Zap, Command, Keyboard, CircleHelp, LayoutGrid, History,
+  Activity, Palette, Database, Shield, ShieldCheck, Monitor, Layers, Code,
   Bold, Italic, Underline,
   List, Type, Sliders, CheckSquare, MousePointer, Grid3X3, Wrench,
+  GitBranch, BookOpen, Headphones,
+  LayoutDashboard, StickyNote, Circle, Columns, MessageSquare, Edit3, Link2,
+  Archive, Box, Map, MessageCircle, UserCheck,
+  Save, AtSign, Server, Timer, Repeat, Key, Percent,
+  FileClock, RotateCcw,
+  Bot, Radio, UserX, Video, Cpu, Crown, Wallet, Receipt, ArrowUpCircle,
+  UploadCloud, FolderPlus, Edit2, GitCommit, Share2, Cloud, FileX2, Move, Music, Table2, AlignLeft,
+  Layout, Pause, Play, Square, TrendingDown, Terminal, ScrollText, Gift,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -103,6 +111,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
   // Commerce
   'dollar-sign': DollarSign,
+  'indian-rupee': IndianRupee,
   'credit-card': CreditCard,
   cart: ShoppingCart,
   package: Package,
@@ -114,6 +123,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   bookmark: Bookmark,
   flag: Flag,
   tag: Tag,
+  target: Target,
   hash: Hash,
 
   // Location
@@ -164,6 +174,80 @@ const ICON_MAP: Record<string, LucideIcon> = {
   'mouse-pointer': MousePointer,
   grid: Grid3X3,
   tool: Wrench,
+
+  // Sidebar / Navigation
+  'git-branch': GitBranch,
+  'book-open': BookOpen,
+  headphones: Headphones,
+  'trash-2': Trash2,
+
+  // Dashboard & Layout
+  'layout-dashboard': LayoutDashboard,
+  'sticky-note': StickyNote,
+  circle: Circle,
+  columns: Columns,
+  'message-square': MessageSquare,
+  'shield-check': ShieldCheck,
+  'edit-3': Edit3,
+  'building-2': Building2,
+  link: Link2,
+
+  // Products & Menu icons
+  archive: Archive,
+  box: Box,
+  map: Map,
+  'message-circle': MessageCircle,
+  'user-check': UserCheck,
+  'bar-chart-2': BarChart2,
+
+  // Config & Integration icons
+  save: Save,
+  'at-sign': AtSign,
+  server: Server,
+  timer: Timer,
+  repeat: Repeat,
+  key: Key,
+  'refresh-cw': RefreshCw,
+  percent: Percent,
+  'file-clock': FileClock,
+  'rotate-ccw': RotateCcw,
+
+  // WhatsApp module icons
+  bot: Bot,
+  radio: Radio,
+  'user-x': UserX,
+
+  // Google integration
+  video: Video,
+
+  // AI integration
+  cpu: Cpu,
+  crown: Crown,
+  wallet: Wallet,
+  receipt: Receipt,
+  'arrow-up-circle': ArrowUpCircle,
+
+  // Document management
+  'upload-cloud': UploadCloud,
+  'folder-plus': FolderPlus,
+  'edit-2': Edit2,
+  'git-commit': GitCommit,
+  'share-2': Share2,
+  cloud: Cloud,
+  'file-x': FileX2,
+  move: Move,
+  music: Music,
+  'table-icon': Table2,
+  'table2': Table2,
+  'align-left': AlignLeft,
+  'layout': Layout,
+  'pause': Pause,
+  'play': Play,
+  'square': Square,
+  'trending-down': TrendingDown,
+  terminal: Terminal,
+  'scroll-text': ScrollText,
+  gift: Gift,
 };
 
 export type IconName = keyof typeof ICON_MAP;

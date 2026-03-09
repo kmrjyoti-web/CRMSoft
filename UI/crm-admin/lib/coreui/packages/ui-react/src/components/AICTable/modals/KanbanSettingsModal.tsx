@@ -33,6 +33,10 @@ function toLabel(field: string): string {
     .trim();
 }
 
+function toCategoryLabel(value: string): string {
+  return value.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 /* ── component ───────────────────────────────────────────── */
 
 export function KanbanSettingsModal({
@@ -40,11 +44,13 @@ export function KanbanSettingsModal({
   onClose,
   onSave,
   data,
+  categoryOptions,
 }: {
   isOpen: boolean;
   onClose: () => void;
   onSave: (settings: KanbanSettings) => void;
   data: any[];
+  categoryOptions?: Record<string, string[]>;
 }) {
   // ── compute fields BEFORE useState so detected values become defaults ──
   const allFields = Array.from(
@@ -63,7 +69,35 @@ export function KanbanSettingsModal({
     () => numericFields[0] ?? ''
   );
   const [headerStyle, setHeaderStyle] = useState<'Mono Color' | 'Multi Color'>('Multi Color');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    () => categoryOptions?.[categoricalFields[0] ?? ''] ?? []
+  );
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Available predefined categories for the current categorizeBy field
+  const currentCategoryOptions = categoryOptions?.[categorizeBy];
+
+  const handleCategorizeByChange = (field: string) => {
+    setCategorizeBy(field);
+    // Reset categories to all when field changes
+    const opts = categoryOptions?.[field];
+    setSelectedCategories(opts ?? []);
+  };
+
+  const toggleCategory = (cat: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    );
+  };
+
+  const toggleAllCategories = () => {
+    if (!currentCategoryOptions) return;
+    if (selectedCategories.length === currentCategoryOptions.length) {
+      setSelectedCategories([]);
+    } else {
+      setSelectedCategories([...currentCategoryOptions]);
+    }
+  };
 
   // For the field picker — first field is "primary" (locked), rest selectable
   const primaryField = allFields[0] ?? '';
@@ -129,7 +163,7 @@ export function KanbanSettingsModal({
             </label>
             <select
               value={categorizeBy}
-              onChange={e => setCategorizeBy(e.target.value)}
+              onChange={e => handleCategorizeByChange(e.target.value)}
               className="flex-1 border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#d95322] focus:border-[#d95322]"
             >
               {categoricalFields.length === 0 && (
@@ -140,6 +174,40 @@ export function KanbanSettingsModal({
               ))}
             </select>
           </div>
+
+          {/* Category Columns Selection — only when predefined options exist */}
+          {currentCategoryOptions && currentCategoryOptions.length > 0 && (
+            <div className="flex gap-3">
+              <label className="w-36 shrink-0 text-sm text-gray-600 text-right pt-1 flex items-start justify-end gap-1">
+                Columns <HelpCircle size={13} className="text-gray-400 mt-0.5" />
+              </label>
+              <div className="flex-1">
+                <div className="border border-gray-200 rounded-md max-h-48 overflow-y-auto p-2 space-y-1">
+                  <label className="flex items-center gap-2 px-2 py-1 text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-50 rounded border-b border-gray-100 pb-2 mb-1">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.length === currentCategoryOptions.length}
+                      onChange={toggleAllCategories}
+                      className="rounded text-[#d95322] focus:ring-[#d95322]"
+                    />
+                    Select All
+                  </label>
+                  {currentCategoryOptions.map(cat => (
+                    <label key={cat} className="flex items-center gap-2 px-2 py-1 text-sm text-gray-700 cursor-pointer hover:bg-orange-50 rounded">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.includes(cat)}
+                        onChange={() => toggleCategory(cat)}
+                        className="rounded text-[#d95322] focus:ring-[#d95322]"
+                      />
+                      {toCategoryLabel(cat)}
+                    </label>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-400 mt-1">{selectedCategories.length} of {currentCategoryOptions.length} columns selected</p>
+              </div>
+            </div>
+          )}
 
           {/* Aggregate By */}
           <div className="flex items-center gap-3">
@@ -249,7 +317,7 @@ export function KanbanSettingsModal({
             Cancel
           </button>
           <button
-            onClick={() => onSave({ name, categorizeBy, aggregateBy, headerStyle, selectedFields })}
+            onClick={() => onSave({ name, categorizeBy, aggregateBy, headerStyle, selectedFields, selectedCategories: currentCategoryOptions ? selectedCategories : undefined })}
             disabled={!categorizeBy}
             className="px-4 py-2 text-sm font-medium text-white bg-[#d95322] rounded-md hover:bg-[#c24a1e] disabled:opacity-50 disabled:cursor-not-allowed"
           >

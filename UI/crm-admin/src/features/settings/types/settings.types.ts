@@ -16,6 +16,8 @@ export interface UserItem {
   status: UserStatus;
   userType: UserType;
   roleId: string;
+  departmentId?: string | null;
+  designationId?: string | null;
   employeeCode?: string | null;
   lastLoginAt?: string | null;
   isActive: boolean;
@@ -31,10 +33,14 @@ export interface UserRole {
 
 export interface UserListItem extends UserItem {
   role: UserRole;
+  department?: { id: string; name: string; displayName: string } | null;
+  designation?: { id: string; name: string; code: string } | null;
 }
 
 export interface UserDetail extends UserItem {
   role: UserRole;
+  department?: { id: string; name: string; displayName: string } | null;
+  designation?: { id: string; name: string; code: string } | null;
   createdBy?: {
     id: string;
     firstName: string;
@@ -50,6 +56,8 @@ export interface UserCreateData {
   phone?: string;
   userType: UserType;
   roleId: string;
+  departmentId?: string;
+  designationId?: string;
 }
 
 export interface UserUpdateData {
@@ -57,6 +65,8 @@ export interface UserUpdateData {
   lastName?: string;
   phone?: string;
   roleId?: string;
+  departmentId?: string;
+  designationId?: string;
   status?: UserStatus;
 }
 

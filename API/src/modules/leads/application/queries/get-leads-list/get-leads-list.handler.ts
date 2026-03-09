@@ -67,7 +67,12 @@ export class GetLeadsListHandler implements IQueryHandler<GetLeadsListQuery> {
           },
           filters: {
             include: {
-              lookupValue: { select: { id: true, value: true, label: true } },
+              lookupValue: {
+                select: {
+                  id: true, value: true, label: true,
+                  lookup: { select: { category: true } },
+                },
+              },
             },
           },
           _count: { select: { activities: true, demos: true, quotations: true } },

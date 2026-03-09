@@ -1,21 +1,22 @@
 "use client";
 
-import { useCallback } from "react";
-
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-import toast from "react-hot-toast";
 
 import { Button, Icon, Badge, Avatar } from "@/components/ui";
 
 import { EmptyState } from "@/components/common/EmptyState";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
-import { StatusBadge } from "@/components/common/StatusBadge";
 import { formatDate } from "@/lib/format-date";
+import { HelpButton } from "@/components/common/HelpButton";
 
-import { useLeadDetail, useChangeLeadStatus } from "../hooks/useLeads";
+import { useLeadDetail } from "../hooks/useLeads";
+import { useLeadWorkflowHistory } from "@/features/workflows/hooks/useWorkflowExecution";
+
+import { LeadPipeline } from "./LeadPipeline";
+import { LeadWorkflowHelpContent } from "./LeadWorkflowHelp";
+import { LeadListDevHelp } from "../help/LeadListDevHelp";
 
 import type { LeadPriority } from "../types/leads.types";
 
@@ -38,27 +39,11 @@ interface LeadDetailProps {
 
 export function LeadDetail({ leadId }: LeadDetailProps) {
   const router = useRouter();
-
   const { data, isLoading } = useLeadDetail(leadId);
-  const changeStatusMutation = useChangeLeadStatus();
+  const { data: historyData } = useLeadWorkflowHistory(leadId);
 
   const lead = data?.data;
-
-  const handleStatusChange = useCallback(
-    async (newStatus: string) => {
-      if (!lead) return;
-      try {
-        await changeStatusMutation.mutateAsync({
-          id: leadId,
-          status: newStatus,
-        });
-        toast.success(`Lead moved to ${newStatus.replace(/_/g, " ")}`);
-      } catch {
-        toast.error("Failed to change lead status");
-      }
-    },
-    [lead, changeStatusMutation, leadId],
-  );
+  const history = historyData?.data ?? [];
 
   if (isLoading) return <LoadingSpinner fullPage />;
 
@@ -84,6 +69,12 @@ export function LeadDetail({ leadId }: LeadDetailProps) {
         title={`${lead.leadNumber} — ${lead.contact.firstName} ${lead.contact.lastName}`}
         actions={
           <div className="flex gap-2">
+            <HelpButton
+              panelId="lead-detail-help"
+              title="Lead Pipeline — Help"
+              userContent={<LeadWorkflowHelpContent />}
+              devContent={<LeadListDevHelp />}
+            />
             <Button variant="outline" onClick={() => router.back()}>
               <Icon name="arrow-left" size={16} /> Back
             </Button>
@@ -96,27 +87,9 @@ export function LeadDetail({ leadId }: LeadDetailProps) {
         }
       />
 
-      {/* Status bar */}
-      <div className="mt-4 flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4">
-        <span className="text-sm text-gray-500">Status:</span>
-        <StatusBadge status={lead.status.toLowerCase()} />
-        {!lead.isTerminal &&
-          lead.validNextStatuses &&
-          lead.validNextStatuses.length > 0 && (
-            <div className="ml-4 flex gap-2">
-              <span className="text-sm text-gray-400">Move to:</span>
-              {lead.validNextStatuses.map((s) => (
-                <Button
-                  key={s}
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleStatusChange(s)}
-                >
-                  {s.replace(/_/g, " ")}
-                </Button>
-              ))}
-            </div>
-          )}
+      {/* Pipeline stepper */}
+      <div className="mt-4">
+        <LeadPipeline leadId={leadId} />
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -253,6 +226,56 @@ export function LeadDetail({ leadId }: LeadDetailProps) {
               <p className="text-sm text-gray-400">No activities yet.</p>
             )}
           </div>
+
+          {/* Workflow History */}
+          <div className="rounded-lg border border-gray-200 bg-white p-5">
+            <h3 className="mb-4 text-sm font-semibold uppercase text-gray-500">
+              <Icon name="history" size={14} /> Pipeline History
+            </h3>
+            {history.length > 0 ? (
+              <div className="space-y-3">
+                {history.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="flex items-start gap-3 border-l-2 border-gray-200 pl-3"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        {entry.fromState && entry.toState ? (
+                          <span className="text-sm">
+                            <span className="font-medium">{entry.fromState.name}</span>
+                            {" → "}
+                            <span className="font-medium">{entry.toState.name}</span>
+                          </span>
+                        ) : entry.toState ? (
+                          <span className="text-sm">
+                            Started at{" "}
+                            <span className="font-medium">{entry.toState.name}</span>
+                          </span>
+                        ) : null}
+                        {entry.action === "FAST_FORWARD" && (
+                          <Badge variant="outline">Auto</Badge>
+                        )}
+                        {entry.action === "APPROVAL_REQUESTED" && (
+                          <Badge variant="warning">Pending Approval</Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-400">
+                        {entry.performedByName} — {formatDate(entry.createdAt)}
+                      </p>
+                      {entry.comment && (
+                        <p className="mt-1 text-xs text-gray-500 italic">
+                          &ldquo;{entry.comment}&rdquo;
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400">No history yet.</p>
+            )}
+          </div>
         </div>
 
         {/* Sidebar */}
@@ -322,6 +345,7 @@ export function LeadDetail({ leadId }: LeadDetailProps) {
           </div>
         </div>
       </div>
+
     </div>
   );
 }

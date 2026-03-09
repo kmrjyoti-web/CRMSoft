@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Param, Body, UseGuards,
+  Controller, Get, Post, Param, Body, UseGuards, Query,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
@@ -12,7 +12,10 @@ import { DisconnectAccountCommand } from '../application/commands/disconnect-acc
 import { SyncInboxCommand } from '../application/commands/sync-inbox/sync-inbox.command';
 import { GetAccountsQuery } from '../application/queries/get-accounts/query';
 import { GetAccountDetailQuery } from '../application/queries/get-account-detail/query';
-import { ConnectAccountDto } from './dto/email-account.dto';
+import { ConnectAccountDto, TestConnectionDto, OAuthInitiateDto, OAuthCallbackDto } from './dto/email-account.dto';
+import { ImapSmtpService } from '../services/imap-smtp.service';
+import { GmailService } from '../services/gmail.service';
+import { OutlookService } from '../services/outlook.service';
 
 @ApiTags('Email Accounts')
 @ApiBearerAuth()
@@ -22,7 +25,68 @@ export class EmailAccountController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly imapSmtpService: ImapSmtpService,
+    private readonly gmailService: GmailService,
+    private readonly outlookService: OutlookService,
   ) {}
+
+  @Post('test-connection')
+  @RequirePermissions('emails:create')
+  async testConnection(@Body() dto: TestConnectionDto) {
+    const result = await this.imapSmtpService.testConnection(dto);
+    return ApiResponse.success(result, 'Connection test completed');
+  }
+
+  @Post('oauth/initiate')
+  @RequirePermissions('emails:create')
+  async oauthInitiate(
+    @Body() dto: OAuthInitiateDto,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('tenantId') tenantId: string,
+  ) {
+    const frontendOrigin = process.env.CORS_ORIGINS?.split(',')[0] || 'http://localhost:3005';
+    const redirectUrl = `${frontendOrigin}/settings/email/oauth-callback`;
+
+    let authUrl: string;
+    if (dto.provider === 'GMAIL') {
+      authUrl = await this.gmailService.getAuthUrl(tenantId, userId, redirectUrl);
+    } else {
+      authUrl = await this.outlookService.getAuthUrl(tenantId, userId, redirectUrl);
+    }
+
+    return ApiResponse.success({ authUrl, redirectUrl }, 'OAuth URL generated');
+  }
+
+  @Post('oauth/callback')
+  @RequirePermissions('emails:create')
+  async oauthCallback(
+    @Body() dto: OAuthCallbackDto,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('tenantId') tenantId: string,
+  ) {
+    const frontendOrigin = process.env.CORS_ORIGINS?.split(',')[0] || 'http://localhost:3005';
+    const redirectUrl = `${frontendOrigin}/settings/email/oauth-callback`;
+
+    let tokens: { accessToken: string; refreshToken: string; expiresIn: number };
+
+    if (dto.provider === 'GMAIL') {
+      tokens = await this.gmailService.handleOAuthCallback(tenantId, dto.code, userId, redirectUrl);
+    } else {
+      tokens = await this.outlookService.handleOAuthCallback(tenantId, dto.code, userId, redirectUrl);
+    }
+
+    const tokenExpiresAt = new Date(Date.now() + tokens.expiresIn * 1000);
+
+    const result = await this.commandBus.execute(
+      new ConnectAccountCommand(
+        dto.provider, userId, dto.emailAddress || `${dto.provider.toLowerCase()}@oauth.pending`,
+        dto.displayName, dto.label,
+        tokens.accessToken, tokens.refreshToken, tokenExpiresAt,
+      ),
+    );
+
+    return ApiResponse.success(result, 'OAuth account connected');
+  }
 
   @Post('connect')
   @RequirePermissions('emails:create')

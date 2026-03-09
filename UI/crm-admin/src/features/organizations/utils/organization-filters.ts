@@ -10,11 +10,20 @@ export const ORGANIZATION_FILTER_CONFIG: TableFilterConfig = {
       ],
     },
     {
+      title: 'Lookup Fields',
+      defaultOpen: true,
+      filters: [
+        { columnId: 'industry', label: 'Industry', filterType: 'master', queryParam: 'industry', options: [] },
+      ],
+    },
+    {
       title: 'Text Fields',
       defaultOpen: true,
       filters: [
+        { columnId: 'name', label: 'Name', filterType: 'text', queryParam: 'search' },
         { columnId: 'city', label: 'City', filterType: 'text', queryParam: 'city' },
-        { columnId: 'industry', label: 'Industry', filterType: 'text', queryParam: 'industry' },
+        { columnId: 'phone', label: 'Phone', filterType: 'text', queryParam: 'phone' },
+        { columnId: 'website', label: 'Website', filterType: 'text', queryParam: 'website' },
       ],
     },
     {
@@ -25,4 +34,9 @@ export const ORGANIZATION_FILTER_CONFIG: TableFilterConfig = {
       ],
     },
   ],
+};
+
+/** Lookup mappings for useDynamicFilterConfig */
+export const ORGANIZATION_LOOKUP_MAPPINGS: Record<string, string> = {
+  industry: 'INDUSTRY_TYPE',
 };

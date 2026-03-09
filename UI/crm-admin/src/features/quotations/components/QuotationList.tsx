@@ -1,17 +1,21 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
-
-import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 
 import { TableFull } from "@/components/ui";
 
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 import { useTableFilters } from "@/hooks/useTableFilters";
 
 import { TableSkeleton } from "@/components/common/TableSkeleton";
 import { formatDate } from "@/lib/format-date";
 
+import { HelpButton } from "@/components/common/HelpButton";
+
 import { useQuotationsList } from "../hooks/useQuotations";
+import { QuotationForm } from "./QuotationForm";
+import { QuotationListUserHelp } from "../help/QuotationListUserHelp";
+import { QuotationListDevHelp } from "../help/QuotationListDevHelp";
 
 import { QUOTATION_FILTER_CONFIG } from "../utils/quotation-filters";
 
@@ -67,7 +71,16 @@ function flattenQuotations(
 // -- Component ---------------------------------------------------------------
 
 export function QuotationList() {
-  const router = useRouter();
+  const { handleRowEdit, handleCreate } = useEntityPanel({
+    entityKey: "quotation",
+    entityLabel: "Quotation",
+    FormComponent: QuotationForm,
+    idProp: "quotationId",
+    editRoute: "/quotations/:id",
+    createRoute: "/quotations/new",
+    displayField: "quotationNo",
+    panelWidth: 860,
+  });
 
   const { activeFilters, filterParams, handleFilterChange, clearFilters } =
     useTableFilters(QUOTATION_FILTER_CONFIG);
@@ -94,17 +107,6 @@ export function QuotationList() {
 
   const tableData = useMemo(() => flattenQuotations(items), [items]);
 
-  const handleRowEdit = useCallback(
-    (row: Record<string, unknown>) => {
-      router.push(`/quotations/${row.id}`);
-    },
-    [router],
-  );
-
-  const handleCreate = useCallback(() => {
-    router.push("/quotations/new");
-  }, [router]);
-
   if (isLoading) return <TableSkeleton title="Quotations" />;
 
   return (
@@ -121,6 +123,14 @@ export function QuotationList() {
         onFilterClear={clearFilters}
         onRowEdit={handleRowEdit}
         onCreate={handleCreate}
+        headerActions={
+          <HelpButton
+            panelId="quotations-list-help"
+            title="Quotations — Help"
+            userContent={<QuotationListUserHelp />}
+            devContent={<QuotationListDevHelp />}
+          />
+        }
       />
     </div>
   );

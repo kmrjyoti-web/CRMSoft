@@ -36,6 +36,7 @@ export function LoginForm() {
   const redirectTo = searchParams.get("redirect") || "/dashboard";
 
   const [serverError, setServerError] = useState<string | null>(null);
+  const [isPlatformLogin, setIsPlatformLogin] = useState(false);
 
   const {
     control,
@@ -56,7 +57,7 @@ export function LoginForm() {
     try {
       await authService.login(
         { email: values.email, password: values.password },
-        "admin",
+        isPlatformLogin ? "super-admin" : "admin",
       );
       toast.success("Welcome back!");
       router.push(redirectTo);
@@ -71,10 +72,12 @@ export function LoginForm() {
   return (
     <>
       <Typography variant="heading" level={3} className="mb-1">
-        Sign in
+        {isPlatformLogin ? "Platform Admin" : "Sign in"}
       </Typography>
       <Typography variant="text" color="muted" className="mb-6">
-        Enter your credentials to access your account
+        {isPlatformLogin
+          ? "Enter platform admin credentials"
+          : "Enter your credentials to access your account"}
       </Typography>
 
       {/* Server error */}
@@ -133,22 +136,24 @@ export function LoginForm() {
           />
         </div>
 
-        {/* Tenant Code */}
-        <div className="mb-5">
-          <Controller
-            name="tenantCode"
-            control={control}
-            render={({ field }) => (
-              <Input
-                type="text"
-                placeholder="e.g. acme-corp (optional)"
-                value={field.value ?? ""}
-                onChange={field.onChange}
-                leftIcon={<Icon name="building" size={20} />}
-              />
-            )}
-          />
-        </div>
+        {/* Tenant Code — hidden for platform admin */}
+        {!isPlatformLogin && (
+          <div className="mb-5">
+            <Controller
+              name="tenantCode"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  placeholder="e.g. acme-corp (optional)"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  leftIcon={<Icon name="building" size={20} />}
+                />
+              )}
+            />
+          </div>
+        )}
 
         {/* Remember me + Forgot password */}
         <div className="flex items-center justify-between mb-6">
@@ -179,9 +184,38 @@ export function LoginForm() {
           loading={isSubmitting}
           disabled={isSubmitting}
         >
-          Sign in
+          {isPlatformLogin ? "Sign in as Platform Admin" : "Sign in"}
         </Button>
       </form>
+
+      {/* Platform Admin toggle */}
+      <p className="text-center text-sm mt-4" style={{ color: "rgba(255,255,255,0.7)" }}>
+        <button
+          type="button"
+          onClick={() => {
+            setIsPlatformLogin((v) => !v);
+            setServerError(null);
+          }}
+          className="font-medium hover:underline"
+          style={{ color: "var(--color-primary)", background: "none", border: "none", cursor: "pointer" }}
+        >
+          {isPlatformLogin ? "Login as Tenant Admin" : "Login as Platform Admin"}
+        </button>
+      </p>
+
+      {/* Register link — only for tenant login */}
+      {!isPlatformLogin && (
+        <p className="text-center text-sm mt-3" style={{ color: "rgba(255,255,255,0.7)" }}>
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/register"
+            className="font-medium hover:underline"
+            style={{ color: "var(--color-primary)" }}
+          >
+            Register
+          </Link>
+        </p>
+      )}
     </>
   );
 }

@@ -2,7 +2,7 @@ import {
   Injectable, CanActivate, ExecutionContext, ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { LimitCheckerService, LimitResource } from '../services/limit-checker.service';
+import { LimitCheckerService } from '../services/limit-checker.service';
 
 export const CHECK_LIMIT_KEY = 'checkLimit';
 
@@ -14,7 +14,7 @@ export class PlanLimitGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const resource = this.reflector.get<LimitResource>(
+    const resource = this.reflector.get<string>(
       CHECK_LIMIT_KEY,
       context.getHandler(),
     );
@@ -25,10 +25,18 @@ export class PlanLimitGuard implements CanActivate {
     const tenantId = request.user?.tenantId;
     if (!tenantId) return true;
 
-    const result = await this.limiter.canCreate(tenantId, resource);
-    if (!result.allowed) {
+    const result = await this.limiter.checkResource(tenantId, resource);
+
+    if (result.limitType === 'DISABLED') {
       throw new ForbiddenException(
-        `Plan limit reached for ${resource}: ${result.current}/${result.limit}`,
+        `Feature not available in your plan: ${resource}`,
+      );
+    }
+
+    if (!result.allowed) {
+      const limitLabel = result.limitType === 'MONTHLY' ? 'monthly limit' : 'limit';
+      throw new ForbiddenException(
+        `Plan ${limitLabel} reached for ${resource}: ${result.current}/${result.limit}`,
       );
     }
 

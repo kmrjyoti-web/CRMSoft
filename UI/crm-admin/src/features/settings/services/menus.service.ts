@@ -8,7 +8,7 @@ import type {
   MenuReorderData,
 } from "../types/settings.types";
 
-const BASE_URL = "/menus";
+const BASE_URL = "/api/v1/menus";
 
 export const menusAdminService = {
   getTree: () =>
@@ -39,5 +39,10 @@ export const menusAdminService = {
   reorder: (payload: MenuReorderData) =>
     apiClient
       .post<ApiResponse<void>>(`${BASE_URL}/reorder`, payload)
+      .then((r) => r.data),
+
+  resetDefaults: () =>
+    apiClient
+      .post<ApiResponse<{ seeded: number }>>(`${BASE_URL}/seed`)
       .then((r) => r.data),
 };

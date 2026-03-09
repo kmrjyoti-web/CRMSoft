@@ -69,6 +69,7 @@ export { ToastProvider, ToastContainer, useToast } from './Toast';
 export { SmartToast } from './SmartToast';
 
 // ── Display ──
+export { Card } from './Card';
 export { Badge } from './Badge';
 export { Avatar, AvatarGroup } from './Avatar';
 export { Typography } from './Typography';

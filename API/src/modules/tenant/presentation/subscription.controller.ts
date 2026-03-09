@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Param, Body,
+  Controller, Get, Post, Put, Param, Body,
   HttpCode, HttpStatus,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
@@ -14,9 +14,13 @@ import { ListPlansQuery } from '../application/queries/list-plans/query';
 import { SubscribeDto } from './dto/subscribe.dto';
 import { ChangePlanDto } from './dto/change-plan.dto';
 import { OnboardingStepDto } from './dto/onboarding-step.dto';
+import { UpsertTenantProfileDto } from './dto/upsert-tenant-profile.dto';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { Public } from '../../../common/decorators/roles.decorator';
 import { ApiResponse } from '../../../common/utils/api-response';
+import { LimitCheckerService } from '../services/limit-checker.service';
+import { UsageTrackerService } from '../services/usage-tracker.service';
+import { TenantProfileService } from '../services/tenant-profile.service';
 
 @ApiTags('Subscription')
 @ApiBearerAuth()
@@ -25,6 +29,9 @@ export class SubscriptionController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly limitChecker: LimitCheckerService,
+    private readonly usageTracker: UsageTrackerService,
+    private readonly tenantProfileService: TenantProfileService,
   ) {}
 
   @Get()
@@ -89,6 +96,31 @@ export class SubscriptionController {
       new CompleteOnboardingStepCommand(tenantId, step as any),
     );
     return ApiResponse.success(result, 'Onboarding step completed');
+  }
+
+  @Get('limits')
+  @ApiOperation({ summary: 'Get current plan limits with usage' })
+  async getLimitsWithUsage(@CurrentUser('tenantId') tenantId: string) {
+    const result = await this.limitChecker.getAllLimitsWithUsage(tenantId);
+    return ApiResponse.success(result);
+  }
+
+  @Get('usage-detail')
+  @ApiOperation({ summary: 'Get detailed usage breakdown per resource' })
+  async getUsageDetail(@CurrentUser('tenantId') tenantId: string) {
+    const details = await this.usageTracker.getUsageDetails(tenantId);
+    return ApiResponse.success(details);
+  }
+
+  @Put('profile')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update own tenant profile (for onboarding)' })
+  async updateProfile(
+    @CurrentUser('tenantId') tenantId: string,
+    @Body() body: UpsertTenantProfileDto,
+  ) {
+    const profile = await this.tenantProfileService.upsert(tenantId, body);
+    return ApiResponse.success(profile, 'Profile updated');
   }
 
   @Get('plans')

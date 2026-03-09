@@ -55,6 +55,17 @@ export const COLUMN_REGISTRY: Record<string, ColumnConfig[]> = {
     { id: "department", label: "Department", visible: false, order: 8 },
     { id: "createdAt", label: "Created", visible: true, order: 9 },
   ],
+  documents: [
+    { id: "originalName", label: "File Name", visible: true, order: 0 },
+    { id: "category", label: "Category", visible: true, order: 1 },
+    { id: "fileSize", label: "Size", visible: true, order: 2 },
+    { id: "storageType", label: "Storage", visible: true, order: 3 },
+    { id: "version", label: "Version", visible: true, order: 4 },
+    { id: "folder", label: "Folder", visible: true, order: 5 },
+    { id: "uploadedBy", label: "Uploaded By", visible: true, order: 6 },
+    { id: "status", label: "Status", visible: true, order: 7 },
+    { id: "createdAt", label: "Created", visible: true, order: 8 },
+  ],
   users: [
     { id: "name", label: "Name", visible: true, order: 0 },
     { id: "email", label: "Email", visible: true, order: 1 },

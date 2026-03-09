@@ -1,13 +1,22 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 
-// AICTableFull uses motion/react which requires ResizeObserver
+// AICTableFull uses motion/react which requires ResizeObserver + matchMedia
 beforeAll(() => {
   global.ResizeObserver = class {
     observe() {}
     unobserve() {}
     disconnect() {}
   } as any;
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation((query: string) => ({
+      matches: false, media: query, onchange: null,
+      addListener: jest.fn(), removeListener: jest.fn(),
+      addEventListener: jest.fn(), removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
 });
 
 import { RawContactList } from "../RawContactList";
@@ -46,6 +55,25 @@ jest.mock("../../hooks/useRawContacts", () => ({
   useRawContactsList: (...args: unknown[]) => mockUseRawContactsList(...args),
   useUpdateRawContact: () => ({ mutateAsync: jest.fn() }),
   useSoftDeleteRawContact: () => ({ mutateAsync: jest.fn() }),
+  useDeactivateRawContact: () => ({ mutateAsync: jest.fn() }),
+  useReactivateRawContact: () => ({ mutateAsync: jest.fn() }),
+}));
+
+jest.mock("@/hooks/useEntityPanel", () => ({
+  useEntityPanel: () => ({ handleRowEdit: jest.fn(), handleCreate: jest.fn(), handleRowView: jest.fn() }),
+  useContentPanel: () => ({ openContent: jest.fn() }),
+}));
+
+jest.mock("@/hooks/useBulkSelect", () => ({
+  useBulkSelect: () => ({ selectedIds: new Set(), toggle: jest.fn(), selectAll: jest.fn(), clearSelection: jest.fn(), count: 0 }),
+}));
+
+jest.mock("@/hooks/useTableFilters", () => ({
+  useTableFilters: () => ({ activeFilters: {}, filterParams: {}, handleFilterChange: jest.fn(), clearFilters: jest.fn() }),
+}));
+
+jest.mock("@/stores/auth.store", () => ({
+  useAuthStore: (selector: any) => selector({ roles: ["ADMIN"] }),
 }));
 
 jest.mock("@/hooks/useBulkOperations", () => ({

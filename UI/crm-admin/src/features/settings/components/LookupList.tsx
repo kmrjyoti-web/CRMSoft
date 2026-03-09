@@ -4,11 +4,21 @@ import { useMemo, useCallback } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { TableFull } from "@/components/ui";
+import toast from "react-hot-toast";
+
+import { Button, Icon, TableFull } from "@/components/ui";
+
+import { useTableFilters } from "@/hooks/useTableFilters";
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 
 import { TableSkeleton } from "@/components/common/TableSkeleton";
+import { useConfirmDialog } from "@/components/common/useConfirmDialog";
 
-import { useLookupsList } from "../hooks/useLookups";
+import { useLookupsList, useDeactivateLookup, useResetLookupDefaults } from "../hooks/useLookups";
+
+import { LookupForm } from "./LookupForm";
+
+import { LOOKUP_FILTER_CONFIG } from "../utils/lookup-filters";
 
 import type { LookupListItem } from "../types/lookup.types";
 
@@ -45,6 +55,22 @@ function flattenLookups(lookups: LookupListItem[]): Record<string, unknown>[] {
 
 export function LookupList() {
   const router = useRouter();
+  const { confirm, ConfirmDialogPortal } = useConfirmDialog();
+  const deactivateMutation = useDeactivateLookup();
+  const resetMutation = useResetLookupDefaults();
+
+  const { handleCreate } = useEntityPanel({
+    entityKey: "lookup",
+    entityLabel: "Lookup",
+    FormComponent: LookupForm,
+    idProp: "lookupId",
+    editRoute: "/settings/lookups/:id",
+    createRoute: "/settings/lookups/new",
+    displayField: "displayName",
+  });
+
+  const { activeFilters, filterParams, handleFilterChange, clearFilters } =
+    useTableFilters(LOOKUP_FILTER_CONFIG);
 
   const { data, isLoading, error } = useLookupsList(false);
 
@@ -57,6 +83,7 @@ export function LookupList() {
 
   const tableData = useMemo(() => flattenLookups(lookups), [lookups]);
 
+  // Navigate to detail page on row click/edit
   const handleRowEdit = useCallback(
     (row: Record<string, unknown>) => {
       router.push(`/settings/lookups/${row.id}`);
@@ -64,9 +91,41 @@ export function LookupList() {
     [router],
   );
 
-  const handleCreate = useCallback(() => {
-    router.push("/settings/lookups/new");
-  }, [router]);
+  const handleRowDelete = useCallback(
+    async (row: Record<string, unknown>) => {
+      const ok = await confirm({
+        title: "Deactivate Lookup",
+        message: `Deactivate "${row.displayName}"? This will hide it from dropdowns.`,
+        type: "danger",
+        confirmText: "Deactivate",
+      });
+      if (!ok) return;
+      try {
+        await deactivateMutation.mutateAsync(row.id as string);
+        toast.success("Lookup deactivated");
+      } catch {
+        toast.error("Failed to deactivate lookup");
+      }
+    },
+    [confirm, deactivateMutation],
+  );
+
+  const handleResetDefaults = useCallback(async () => {
+    const ok = await confirm({
+      title: "Reset Lookup Defaults",
+      message:
+        "This will restore all system lookup categories and values to their defaults. Custom values will be preserved. Continue?",
+      type: "danger",
+      confirmText: "Reset Defaults",
+    });
+    if (!ok) return;
+    try {
+      await resetMutation.mutateAsync();
+      toast.success("Lookup defaults restored");
+    } catch {
+      toast.error("Failed to reset lookup defaults");
+    }
+  }, [confirm, resetMutation]);
 
   if (isLoading) return <TableSkeleton title="Lookup Master" />;
 
@@ -83,15 +142,37 @@ export function LookupList() {
 
   return (
     <div className="h-full flex flex-col">
-      <TableFull
-        data={tableData as Record<string, any>[]}
-        title="Lookup Master"
-        columns={LOOKUP_COLUMNS}
-        defaultViewMode="table"
-        defaultDensity="compact"
-        onRowEdit={handleRowEdit}
-        onCreate={handleCreate}
-      />
+      {/* Reset Defaults */}
+      <div className="shrink-0 px-4 pt-2 flex justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleResetDefaults}
+          loading={resetMutation.isPending}
+          disabled={resetMutation.isPending}
+        >
+          <Icon name="refresh" size={14} /> Reset Defaults
+        </Button>
+      </div>
+
+      <div className="flex-1 min-h-0">
+        <TableFull
+          data={tableData as Record<string, any>[]}
+          title="Lookup Master"
+          tableKey="lookups"
+          columns={LOOKUP_COLUMNS}
+          defaultViewMode="table"
+          defaultDensity="compact"
+          filterConfig={LOOKUP_FILTER_CONFIG}
+          activeFilters={activeFilters}
+          onFilterChange={handleFilterChange}
+          onFilterClear={clearFilters}
+          onRowEdit={handleRowEdit}
+          onRowDelete={handleRowDelete}
+          onCreate={handleCreate}
+        />
+      </div>
+      <ConfirmDialogPortal />
     </div>
   );
 }

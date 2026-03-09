@@ -12,7 +12,7 @@ import type {
   VisitCheckOutData,
 } from "../types/tour-plans.types";
 
-const BASE_URL = "/tour-plans";
+const BASE_URL = "/api/v1/tour-plans";
 
 export const tourPlansService = {
   getAll: (params?: TourPlanListParams) =>

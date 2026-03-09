@@ -40,6 +40,8 @@ export const RAW_CONTACT_FILTER_CONFIG: TableFilterConfig = {
         { columnId: 'firstName', label: 'First Name', filterType: 'text', queryParam: 'firstName' },
         { columnId: 'lastName', label: 'Last Name', filterType: 'text', queryParam: 'lastName' },
         { columnId: 'companyName', label: 'Company', filterType: 'text', queryParam: 'companyName' },
+        { columnId: 'email', label: 'Email', filterType: 'text', queryParam: 'email' },
+        { columnId: 'phone', label: 'Phone', filterType: 'text', queryParam: 'phone' },
       ],
     },
     {

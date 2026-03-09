@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useMemo } from "react";
 
-import { useRouter } from "next/navigation";
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 
 import { TableFull } from "@/components/ui";
 
@@ -12,6 +12,7 @@ import { TableSkeleton } from "@/components/common/TableSkeleton";
 import { formatDate } from "@/lib/format-date";
 
 import { useDemosList } from "../hooks/useDemos";
+import { DemoForm } from "./DemoForm";
 
 import { DEMO_FILTER_CONFIG } from "../utils/demo-filters";
 
@@ -52,7 +53,15 @@ function flattenDemos(items: DemoListItem[]): Record<string, unknown>[] {
 // -- Component ---------------------------------------------------------------
 
 export function DemoList() {
-  const router = useRouter();
+  const { handleRowEdit, handleCreate } = useEntityPanel({
+    entityKey: "demo",
+    entityLabel: "Demo",
+    FormComponent: DemoForm,
+    idProp: "demoId",
+    editRoute: "/demos/:id/edit",
+    createRoute: "/demos/new",
+    displayField: "subject",
+  });
 
   const { activeFilters, filterParams, handleFilterChange, clearFilters } =
     useTableFilters(DEMO_FILTER_CONFIG);
@@ -78,17 +87,6 @@ export function DemoList() {
   }, [responseData]);
 
   const tableData = useMemo(() => flattenDemos(items), [items]);
-
-  const handleRowEdit = useCallback(
-    (row: Record<string, unknown>) => {
-      router.push(`/demos/${row.id}`);
-    },
-    [router],
-  );
-
-  const handleCreate = useCallback(() => {
-    router.push("/demos/new");
-  }, [router]);
 
   if (isLoading) return <TableSkeleton title="Demos" />;
 

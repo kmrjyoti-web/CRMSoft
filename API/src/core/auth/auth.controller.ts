@@ -1,11 +1,11 @@
 import {
-  Controller, Post, Get, Body, UseGuards, HttpCode, HttpStatus,
+  Controller, Post, Get, Param, Body, UseGuards, HttpCode, HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
   LoginDto, RegisterDto, RefreshTokenDto, ChangePasswordDto,
-  CustomerRegisterDto, PartnerRegisterDto,
+  CustomerRegisterDto, PartnerRegisterDto, TenantRegisterDto,
 } from './dto/auth.dto';
 import { Public, Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -68,6 +68,19 @@ export class AuthController {
     );
   }
 
+  // ─── VENDOR LOGIN ───
+
+  @Public()
+  @Post('vendor/login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Vendor Portal Login — VENDORS ONLY' })
+  async vendorLogin(@Body() dto: LoginDto) {
+    return ApiResponse.success(
+      await this.auth.vendorLogin(dto.email, dto.password),
+      'Vendor login successful',
+    );
+  }
+
   // ─── SUPER ADMIN LOGIN ───
 
   @Public()
@@ -100,6 +113,24 @@ export class AuthController {
     return ApiResponse.success(
       await this.auth.registerPartner(dto),
       'Partner registered',
+    );
+  }
+
+  @Public()
+  @Get('tenant/check-slug/:slug')
+  @ApiOperation({ summary: 'Check if company slug is available (public)' })
+  async checkSlug(@Param('slug') slug: string) {
+    const available = await this.auth.isSlugAvailable(slug);
+    return ApiResponse.success({ available });
+  }
+
+  @Public()
+  @Post('tenant/register')
+  @ApiOperation({ summary: 'Tenant Self-Registration (public)' })
+  async tenantRegister(@Body() dto: TenantRegisterDto) {
+    return ApiResponse.success(
+      await this.auth.registerTenant(dto),
+      'Registration successful',
     );
   }
 
@@ -147,8 +178,13 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user effective permissions' })
-  async permissions(@CurrentUser('id') userId: string) {
-    const codes = await this.permissionChain.getEffectivePermissions(userId);
+  async permissions(@CurrentUser() user: any) {
+    // Super admin gets ALL permissions
+    if (user.isSuperAdmin) {
+      const all = await this.permissionChain.getAllPermissionCodes();
+      return ApiResponse.success(all);
+    }
+    const codes = await this.permissionChain.getEffectivePermissions(user.id);
     return ApiResponse.success(codes);
   }
 
@@ -156,7 +192,11 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user profile (all user types)' })
-  async me(@CurrentUser('id') userId: string) {
-    return ApiResponse.success(await this.auth.getProfile(userId));
+  async me(@CurrentUser() user: any) {
+    if (user.isSuperAdmin) {
+      const admin = await this.auth.getSuperAdminProfile(user.id);
+      return ApiResponse.success(admin);
+    }
+    return ApiResponse.success(await this.auth.getProfile(user.id));
   }
 }

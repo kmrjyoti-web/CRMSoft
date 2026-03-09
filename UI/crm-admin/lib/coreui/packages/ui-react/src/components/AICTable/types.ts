@@ -30,6 +30,7 @@ export interface KanbanSettings {
   aggregateBy: string;
   headerStyle: 'Mono Color' | 'Multi Color';
   selectedFields: string[];
+  selectedCategories?: string[];
 }
 
 export interface TreeSettings {
@@ -144,4 +145,10 @@ export interface AICTableFullProps {
   onSelectionChange?: (ids: Set<string>) => void;
   /** Custom content rendered next to the Create button (replaces dummy ... button) */
   headerActions?: React.ReactNode;
+  /** Predefined category values for Kanban view. Maps field name → all possible values.
+   *  When the user picks a categorizeBy field that exists in this map, ALL values
+   *  are shown as Kanban columns (even empty ones) and a category selection UI appears. */
+  kanbanCategoryOptions?: Record<string, string[]>;
+  /** Pre-configured calendar settings so calendar view opens without modal */
+  defaultCalendarSettings?: CalendarSettings;
 }

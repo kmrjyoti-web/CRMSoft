@@ -58,6 +58,8 @@ export class ListProductsHandler implements IQueryHandler<ListProductsQuery> {
         orderBy: { [sortBy]: sortDir },
         include: {
           parent: { select: { id: true, name: true } },
+          brand: { select: { id: true, name: true, code: true } },
+          manufacturer: { select: { id: true, name: true, code: true } },
           _count: { select: { children: true } },
         },
       }),

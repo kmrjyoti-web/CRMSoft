@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TableConfigModule } from '../table-config/table-config.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { ActivityController } from './presentation/activity.controller';
 import { CreateActivityHandler } from './application/commands/create-activity/create-activity.handler';
 import { UpdateActivityHandler } from './application/commands/update-activity/update-activity.handler';
@@ -24,7 +25,7 @@ const CommandHandlers = [
 const QueryHandlers = [GetActivityListHandler, GetActivityByIdHandler, GetActivitiesByEntityHandler, GetActivityStatsHandler];
 
 @Module({
-  imports: [CqrsModule, TableConfigModule],
+  imports: [CqrsModule, TableConfigModule, NotificationsModule],
   controllers: [ActivityController],
   providers: [...CommandHandlers, ...QueryHandlers],
 })

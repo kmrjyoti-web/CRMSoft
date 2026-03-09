@@ -2,11 +2,13 @@
 
 import { useMemo, useCallback, useState } from "react";
 
+import { useEntityPanel } from "@/hooks/useEntityPanel";
+
 import { useRouter } from "next/navigation";
 
 import toast from "react-hot-toast";
 
-import { TableFull, Button, Icon, Switch } from "@/components/ui";
+import { TableFull, Switch } from "@/components/ui";
 
 import { useTableFilters } from "@/hooks/useTableFilters";
 import { useBulkSelect } from "@/hooks/useBulkSelect";
@@ -18,14 +20,26 @@ import { BulkActionsBar } from "@/components/common/BulkActionsBar";
 import { BulkEditPanel } from "@/components/common/BulkEditPanel";
 import { useBulkDeleteDialog } from "@/components/common/BulkDeleteDialog";
 import { ActionsMenu } from "@/components/common/ActionsMenu";
+import { HelpButton } from "@/components/common/HelpButton";
+
+import { useOpenDashboard } from "@/hooks/useOpenDashboard";
+
+import { ContactDashboard } from "@/features/contacts/components/ContactDashboard";
+import { OrganizationDashboard } from "@/features/organizations/components/OrganizationDashboard";
+
+import { LeadForm } from "./LeadForm";
+import { LeadDashboard } from "./LeadDashboard";
 
 import { useLeadsList, useUpdateLead, useSoftDeleteLead, useDeactivateLead, useReactivateLead } from "../hooks/useLeads";
 
 import { LEAD_FILTER_CONFIG } from "../utils/lead-filters";
+import { LeadListUserHelp } from "../help/LeadListUserHelp";
+import { LeadListDevHelp } from "../help/LeadListDevHelp";
 
 import type {
   LeadListItem,
   LeadListParams,
+  LeadStatus,
 } from "../types/leads.types";
 
 // ── Column definitions ──────────────────────────────────
@@ -83,7 +97,22 @@ function flattenLeads(leads: LeadListItem[]): Record<string, unknown>[] {
 export function LeadList() {
   const router = useRouter();
 
+  const { handleRowEdit, handleCreate, handleRowView } = useEntityPanel({
+    entityKey: "lead",
+    entityLabel: "Lead",
+    FormComponent: LeadForm,
+    DashboardComponent: LeadDashboard,
+    dashboardWidth: 900,
+    idProp: "leadId",
+    editRoute: "/leads/:id/edit",
+    createRoute: "/leads/new",
+    displayField: "leadNumber",
+  });
+
+  const openDashboard = useOpenDashboard();
+
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const { confirm, ConfirmDialogPortal } = useConfirmDialog();
   const softDeleteMutation = useSoftDeleteLead();
@@ -134,6 +163,8 @@ export function LeadList() {
 
   const handleToggleActive = useCallback(
     async (id: string, currentlyActive: boolean) => {
+      if (togglingId) return;
+      setTogglingId(id);
       try {
         if (currentlyActive) {
           await deactivateMut.mutateAsync(id);
@@ -144,26 +175,74 @@ export function LeadList() {
         }
       } catch {
         toast.error("Failed to update status");
+      } finally {
+        setTogglingId(null);
       }
     },
-    [deactivateMut, reactivateMut],
+    [deactivateMut, reactivateMut, togglingId],
   );
 
   const tableData = useMemo(() => {
     const flat = flattenLeads(leads);
     return flat.map((row, idx) => ({
       ...row,
+      leadNumber: (
+        <span
+          className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRowView(row);
+          }}
+        >
+          {leads[idx].leadNumber}
+        </span>
+      ),
+      contactName: (
+        <span
+          className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium"
+          onClick={(e) => {
+            e.stopPropagation();
+            openDashboard({
+              entityKey: "contact",
+              entityLabel: "Contact",
+              entityId: leads[idx].contact.id,
+              displayName: `${leads[idx].contact.firstName} ${leads[idx].contact.lastName}`,
+              DashboardComponent: ContactDashboard,
+            });
+          }}
+        >
+          {`${leads[idx].contact.firstName} ${leads[idx].contact.lastName}`}
+        </span>
+      ),
+      organization: leads[idx].organization ? (
+        <span
+          className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium"
+          onClick={(e) => {
+            e.stopPropagation();
+            openDashboard({
+              entityKey: "org",
+              entityLabel: "Organization",
+              entityId: leads[idx].organization!.id,
+              displayName: leads[idx].organization!.name,
+              DashboardComponent: OrganizationDashboard,
+            });
+          }}
+        >
+          {leads[idx].organization!.name}
+        </span>
+      ) : "—",
       active: (
         <div onClick={(e) => e.stopPropagation()}>
           <Switch
             size="sm"
             checked={leads[idx].isActive ?? true}
             onChange={() => handleToggleActive(row.id as string, leads[idx].isActive ?? true)}
+            disabled={togglingId === row.id}
           />
         </div>
       ),
     }));
-  }, [leads, handleToggleActive]);
+  }, [leads, handleToggleActive, togglingId, handleRowView, openDashboard]);
 
   const selectedArray = Array.from(selectedIds);
 
@@ -194,17 +273,6 @@ export function LeadList() {
     },
     [confirm, softDeleteMutation],
   );
-
-  const handleRowEdit = useCallback(
-    (row: Record<string, unknown>) => {
-      router.push(`/leads/${row.id}/edit`);
-    },
-    [router],
-  );
-
-  const handleCreate = useCallback(() => {
-    router.push("/leads/new");
-  }, [router]);
 
   // ── Bulk edit handlers ─────────────────────────────────────
 
@@ -237,6 +305,19 @@ export function LeadList() {
     [router],
   );
 
+  // ── All lead statuses for Kanban columns ───────────────────
+
+  const ALL_LEAD_STATUSES: LeadStatus[] = [
+    "NEW", "VERIFIED", "ALLOCATED", "IN_PROGRESS",
+    "DEMO_SCHEDULED", "QUOTATION_SENT", "NEGOTIATION",
+    "WON", "LOST", "ON_HOLD",
+  ];
+
+  const kanbanCategoryOptions = useMemo(
+    () => ({ status: ALL_LEAD_STATUSES as string[] }),
+    [],
+  );
+
   if (isLoading) return <TableSkeleton title="Leads" />;
 
   return (
@@ -253,16 +334,26 @@ export function LeadList() {
           activeFilters={activeFilters}
           onFilterChange={handleFilterChange}
           onFilterClear={clearFilters}
-          onRowEdit={handleRowEdit}
+          onRowEdit={handleRowView}
           onRowDelete={handleRowDelete}
           onCreate={handleCreate}
           selectedIds={selectedIds}
           onSelectionChange={handleSelectionChange}
-          headerActions={<ActionsMenu items={actionsMenuItems} />}
+          kanbanCategoryOptions={kanbanCategoryOptions}
+          headerActions={
+            <>
+              <HelpButton
+                panelId="leads-list-help"
+                title="Leads — Help"
+                userContent={<LeadListUserHelp />}
+                devContent={<LeadListDevHelp />}
+              />
+              <ActionsMenu items={actionsMenuItems} />
+            </>
+          }
         />
       </div>
 
-      {/* Floating bulk actions bar */}
       <BulkActionsBar
         count={selectionCount}
         onEdit={() => setBulkEditOpen(true)}

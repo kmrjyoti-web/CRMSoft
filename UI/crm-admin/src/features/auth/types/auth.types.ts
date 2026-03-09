@@ -19,6 +19,7 @@ export interface JwtPayload {
   userType: string;
   tenantId?: string;
   tenantCode?: string;
+  isSuperAdmin?: boolean;
   exp: number;
   iat: number;
 }

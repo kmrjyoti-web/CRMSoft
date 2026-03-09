@@ -23,6 +23,7 @@ export interface PanelConfig {
   content: ReactNode;
   icon?: string;
   width?: number;
+  noPadding?: boolean;
   newTabUrl?: string;
   headerButtons?: ActionButton[];
   footerButtons?: ActionButton[];

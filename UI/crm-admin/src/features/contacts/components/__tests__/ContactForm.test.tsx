@@ -22,6 +22,22 @@ jest.mock("@/hooks/useLookup", () => ({
   useLookup: () => ({ data: [], isLoading: false }),
 }));
 
+jest.mock("@/stores/side-panel.store", () => ({
+  useSidePanelStore: (selector: any) => selector({ updatePanelConfig: jest.fn(), openPanel: jest.fn(), closePanel: jest.fn() }),
+}));
+
+jest.mock("@/features/form-config/hooks/useFormConfig", () => ({
+  useFormConfig: () => ({ fields: [], isFieldVisible: () => true, getFieldLabel: (id: string) => id, isLoading: false, saveConfig: jest.fn(), resetToDefault: jest.fn(), isSaving: false }),
+}));
+
+jest.mock("@/features/form-config/components/FormConfigButton", () => ({
+  FormConfigButton: () => null,
+}));
+
+jest.mock("@/stores/auth.store", () => ({
+  useAuthStore: (selector: any) => selector({ roles: ["ADMIN"] }),
+}));
+
 function renderWithProvider(ui: React.ReactElement) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
@@ -34,13 +50,13 @@ describe("ContactForm", () => {
     renderWithProvider(<ContactForm />);
     expect(screen.getByText("Personal Information")).toBeInTheDocument();
     expect(screen.getByText("Company")).toBeInTheDocument();
-    expect(screen.getByText("Address")).toBeInTheDocument();
   });
 
   it("renders required fields", () => {
     renderWithProvider(<ContactForm />);
-    expect(screen.getByText(/First Name/)).toBeInTheDocument();
-    expect(screen.getByText(/Last Name/)).toBeInTheDocument();
+    // getFieldLabel mock returns field id as-is
+    expect(screen.getByText(/firstName/)).toBeInTheDocument();
+    expect(screen.getByText(/lastName/)).toBeInTheDocument();
   });
 
   it("shows validation errors on empty submit", async () => {

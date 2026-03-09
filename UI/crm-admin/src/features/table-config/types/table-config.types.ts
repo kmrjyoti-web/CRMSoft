@@ -7,6 +7,11 @@ export interface ColumnConfig {
   pinned?: "left" | "right" | null;
 }
 
+export interface FilterLayoutSection {
+  title: string;
+  filterIds: string[];
+}
+
 export interface TableConfigData {
   columns: ColumnConfig[];
   density?: "compact" | "cozy" | "comfortable";
@@ -14,6 +19,8 @@ export interface TableConfigData {
   pageSize?: number;
   showRowActions?: boolean;
   filterVisibility?: Record<string, boolean>;
+  /** Custom filter grouping + ordering (overrides static filterConfig sections) */
+  filterLayout?: FilterLayoutSection[];
 }
 
 export interface TableConfigRecord {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -10,14 +10,20 @@ import { TableFull, Button, Icon, Switch } from "@/components/ui";
 
 import { useTableFilters } from "@/hooks/useTableFilters";
 import { useBulkSelect } from "@/hooks/useBulkSelect";
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 
 import { TableSkeleton } from "@/components/common/TableSkeleton";
 import { useConfirmDialog } from "@/components/common/useConfirmDialog";
 import { BulkActionsBar } from "@/components/common/BulkActionsBar";
 import { useBulkDeleteDialog } from "@/components/common/BulkDeleteDialog";
 import { ActionsMenu } from "@/components/common/ActionsMenu";
+import { HelpButton } from "@/components/common/HelpButton";
 
 import { useUsersList, useSoftDeleteUser, useDeactivateUser, useActivateUser } from "../hooks/useUsers";
+
+import { UserForm } from "./UserForm";
+import { UserListUserHelp } from "../help/UserListUserHelp";
+import { SettingsDevHelp } from "../help/SettingsDevHelp";
 
 import { USER_FILTER_CONFIG } from "../utils/user-filters";
 
@@ -57,6 +63,18 @@ function flattenUsers(users: UserListItem[]): Record<string, unknown>[] {
 
 export function UserList() {
   const router = useRouter();
+
+  const { handleRowEdit, handleCreate } = useEntityPanel({
+    entityKey: "user",
+    entityLabel: "User",
+    FormComponent: UserForm,
+    idProp: "userId",
+    editRoute: "/settings/users/:id/edit",
+    createRoute: "/settings/users/new",
+    displayField: "name",
+  });
+
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const { confirm, ConfirmDialogPortal } = useConfirmDialog();
   const softDeleteMutation = useSoftDeleteUser();
@@ -105,6 +123,8 @@ export function UserList() {
 
   const handleToggleActive = useCallback(
     async (id: string, currentlyActive: boolean) => {
+      if (togglingId) return;
+      setTogglingId(id);
       try {
         if (currentlyActive) {
           await deactivateMut.mutateAsync(id);
@@ -115,9 +135,11 @@ export function UserList() {
         }
       } catch {
         toast.error("Failed to update status");
+      } finally {
+        setTogglingId(null);
       }
     },
-    [deactivateMut, activateMut],
+    [deactivateMut, activateMut, togglingId],
   );
 
   const tableData = useMemo(() => {
@@ -130,11 +152,12 @@ export function UserList() {
             size="sm"
             checked={users[idx].status === "ACTIVE"}
             onChange={() => handleToggleActive(row.id as string, users[idx].status === "ACTIVE")}
+            disabled={togglingId === row.id}
           />
         </div>
       ),
     }));
-  }, [users, handleToggleActive]);
+  }, [users, handleToggleActive, togglingId]);
 
   // ── Bulk deactivate hook ──────────────────────────────────
   const selectedArray = Array.from(selectedIds);
@@ -165,17 +188,6 @@ export function UserList() {
     },
     [confirm, softDeleteMutation],
   );
-
-  const handleRowEdit = useCallback(
-    (row: Record<string, unknown>) => {
-      router.push(`/settings/users/${row.id}/edit`);
-    },
-    [router],
-  );
-
-  const handleCreate = useCallback(() => {
-    router.push("/settings/users/new");
-  }, [router]);
 
   // ── Actions menu items ─────────────────────────────────────
 
@@ -213,7 +225,17 @@ export function UserList() {
           onRowArchive={handleRowArchive}
           selectedIds={selectedIds}
           onSelectionChange={handleSelectionChange}
-          headerActions={<ActionsMenu items={actionsMenuItems} />}
+          headerActions={
+            <>
+              <HelpButton
+                panelId="users-list-help"
+                title="Users — Help"
+                userContent={<UserListUserHelp />}
+                devContent={<SettingsDevHelp />}
+              />
+              <ActionsMenu items={actionsMenuItems} />
+            </>
+          }
         />
       </div>
 

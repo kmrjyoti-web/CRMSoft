@@ -1,16 +1,22 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
-
-import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 
 import { TableFull } from "@/components/ui";
 
 import { useTableFilters } from "@/hooks/useTableFilters";
 
+import { useEntityPanel } from "@/hooks/useEntityPanel";
+
 import { TableSkeleton } from "@/components/common/TableSkeleton";
 
+import { HelpButton } from "@/components/common/HelpButton";
+
 import { useTicketsList } from "../hooks/usePostSales";
+
+import { TicketForm } from "./TicketForm";
+import { TicketListUserHelp } from "../help/TicketListUserHelp";
+import { PostSalesDevHelp } from "../help/PostSalesDevHelp";
 
 import { TICKET_FILTER_CONFIG } from "../utils/ticket-filters";
 
@@ -55,7 +61,15 @@ function flattenTickets(
 // ── Component ───────────────────────────────────────────
 
 export function TicketList() {
-  const router = useRouter();
+  const { handleRowEdit, handleCreate } = useEntityPanel({
+    entityKey: "ticket",
+    entityLabel: "Ticket",
+    FormComponent: TicketForm,
+    idProp: "ticketId",
+    editRoute: "/post-sales/tickets/:id/edit",
+    createRoute: "/post-sales/tickets/new",
+    displayField: "ticketNo",
+  });
 
   const { activeFilters, filterParams, handleFilterChange, clearFilters } =
     useTableFilters(TICKET_FILTER_CONFIG);
@@ -82,17 +96,6 @@ export function TicketList() {
 
   const tableData = useMemo(() => flattenTickets(items), [items]);
 
-  const handleRowEdit = useCallback(
-    (row: Record<string, unknown>) => {
-      router.push(`/post-sales/tickets/${row.id}`);
-    },
-    [router],
-  );
-
-  const handleCreate = useCallback(() => {
-    router.push("/post-sales/tickets/new");
-  }, [router]);
-
   if (isLoading) return <TableSkeleton title="Tickets" />;
 
   return (
@@ -109,6 +112,14 @@ export function TicketList() {
         onFilterClear={clearFilters}
         onRowEdit={handleRowEdit}
         onCreate={handleCreate}
+        headerActions={
+          <HelpButton
+            panelId="tickets-list-help"
+            title="Tickets — Help"
+            userContent={<TicketListUserHelp />}
+            devContent={<PostSalesDevHelp />}
+          />
+        }
       />
     </div>
   );

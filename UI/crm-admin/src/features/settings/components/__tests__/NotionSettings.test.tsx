@@ -1,13 +1,22 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 
-// AICTableFull uses motion/react which requires ResizeObserver
+// AICTableFull uses motion/react which requires ResizeObserver + matchMedia
 beforeAll(() => {
   global.ResizeObserver = class {
     observe() {}
     unobserve() {}
     disconnect() {}
   } as any;
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation((query: string) => ({
+      matches: false, media: query, onchange: null,
+      addListener: jest.fn(), removeListener: jest.fn(),
+      addEventListener: jest.fn(), removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
 });
 
 import { NotionSettings } from "../NotionSettings";

@@ -12,6 +12,8 @@ export class GetProductByIdHandler implements IQueryHandler<GetProductByIdQuery>
       where: { id: query.id },
       include: {
         parent: { select: { id: true, name: true, code: true } },
+        brand: { select: { id: true, name: true, code: true } },
+        manufacturer: { select: { id: true, name: true, code: true } },
         children: {
           select: {
             id: true, name: true, code: true,

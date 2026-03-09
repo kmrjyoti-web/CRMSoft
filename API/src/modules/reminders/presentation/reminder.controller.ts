@@ -7,9 +7,13 @@ import { CreateReminderDto } from './dto/create-reminder.dto';
 import { ReminderQueryDto } from './dto/reminder-query.dto';
 import { CreateReminderCommand } from '../application/commands/create-reminder/create-reminder.command';
 import { DismissReminderCommand } from '../application/commands/dismiss-reminder/dismiss-reminder.command';
+import { SnoozeReminderCommand } from '../application/commands/snooze-reminder/snooze-reminder.command';
+import { CancelReminderCommand } from '../application/commands/cancel-reminder/cancel-reminder.command';
+import { AcknowledgeReminderCommand } from '../application/commands/acknowledge-reminder/acknowledge-reminder.command';
 import { GetReminderListQuery } from '../application/queries/get-reminder-list/get-reminder-list.query';
 import { GetPendingRemindersQuery } from '../application/queries/get-pending-reminders/get-pending-reminders.query';
 import { GetReminderStatsQuery } from '../application/queries/get-reminder-stats/get-reminder-stats.query';
+import { GetManagerReminderStatsQuery } from '../application/queries/get-manager-reminder-stats/get-manager-reminder-stats.query';
 
 @Controller('reminders')
 export class ReminderController {
@@ -47,10 +51,40 @@ export class ReminderController {
     return ApiResponse.success(result);
   }
 
+  @Get('manager-stats')
+  @RequirePermissions('reminders:read')
+  async managerStats(@CurrentUser() user: any) {
+    const result = await this.queryBus.execute(new GetManagerReminderStatsQuery(user.id, user.roleLevel ?? 5));
+    return ApiResponse.success(result);
+  }
+
   @Post(':id/dismiss')
   @RequirePermissions('reminders:update')
   async dismiss(@Param('id') id: string, @CurrentUser('id') userId: string) {
     const result = await this.commandBus.execute(new DismissReminderCommand(id, userId));
     return ApiResponse.success(result, 'Reminder dismissed');
+  }
+
+  @Post(':id/snooze')
+  @RequirePermissions('reminders:update')
+  async snooze(@Param('id') id: string, @CurrentUser('id') userId: string, @Body('snoozedUntil') snoozedUntil?: string) {
+    const result = await this.commandBus.execute(
+      new SnoozeReminderCommand(id, userId, snoozedUntil ? new Date(snoozedUntil) : undefined),
+    );
+    return ApiResponse.success(result, 'Reminder snoozed');
+  }
+
+  @Post(':id/cancel')
+  @RequirePermissions('reminders:update')
+  async cancel(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    const result = await this.commandBus.execute(new CancelReminderCommand(id, userId));
+    return ApiResponse.success(result, 'Reminder cancelled');
+  }
+
+  @Post(':id/acknowledge')
+  @RequirePermissions('reminders:update')
+  async acknowledge(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    const result = await this.commandBus.execute(new AcknowledgeReminderCommand(id, userId));
+    return ApiResponse.success(result, 'Reminder acknowledged');
   }
 }

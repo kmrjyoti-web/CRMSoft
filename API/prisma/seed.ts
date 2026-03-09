@@ -8,8 +8,48 @@ import { seedReportDefinitions } from './seeds/report-definitions.seed';
 import { seedSyncPolicies } from './seeds/sync-policies.seed';
 import { seedTenantConfigs } from './seeds/tenant-configs.seed';
 import { seedRawContacts } from './seeds/raw-contacts.seed';
+import { seedTaskEngine } from './seeds/task-engine.seed';
+import { seedPermissionTemplates } from './seeds/permission-templates.seed';
+import { seedDemoData } from './seeds/demo-data.seed';
+import { LOOKUP_SEED_DATA } from '../src/modules/lookups/data/lookup-seed-data';
+import { MENU_SEED_DATA } from '../src/modules/menus/presentation/menu-seed-data';
+import type { MenuSeedItem } from '../src/modules/menus/application/commands/bulk-seed-menus/bulk-seed-menus.command';
 
 const prisma = new PrismaClient();
+
+/** Upsert a single menu item by code. */
+async function upsertMenu(item: MenuSeedItem, parentId: string | null, sortOrder: number) {
+  const existing = await prisma.menu.findFirst({ where: { code: item.code } });
+  const data = {
+    name: item.name, icon: item.icon, route: item.route, parentId, sortOrder,
+    menuType: item.menuType ?? 'ITEM',
+    permissionModule: item.permissionModule,
+    permissionAction: item.permissionAction ?? (item.permissionModule ? 'view' : undefined),
+    badgeColor: item.badgeColor, badgeText: item.badgeText,
+    openInNewTab: item.openInNewTab ?? false,
+  };
+  if (existing) {
+    return prisma.menu.update({ where: { id: existing.id }, data });
+  }
+  return prisma.menu.create({ data: { ...data, code: item.code } });
+}
+
+/** Seed all menus from MENU_SEED_DATA (2 levels). */
+async function seedMenus() {
+  let count = 0;
+  for (let i = 0; i < MENU_SEED_DATA.length; i++) {
+    const item = MENU_SEED_DATA[i];
+    const parent = await upsertMenu(item, null, i);
+    count++;
+    if (item.children) {
+      for (let j = 0; j < item.children.length; j++) {
+        await upsertMenu(item.children[j], parent.id, j);
+        count++;
+      }
+    }
+  }
+  return count;
+}
 
 async function main() {
   console.log('🌱 Seeding...\n');
@@ -91,7 +131,7 @@ async function main() {
   console.log(`✅ ${roles.length} roles`);
 
   // ─── PERMISSIONS (global, no tenantId) ───
-  const modules = ['contacts','organizations','leads','activities','demos','tour-plans','quotations','invoices','payments','installations','trainings','licenses','ledgers','support-tickets','communications','users','roles','lookups','ownership','reports','departments','designations','brands','manufacturers','locations','menus','custom_fields','products','product_pricing','workflows','follow-ups','reminders','recurrence','calendar'];
+  const modules = ['contacts','raw_contacts','organizations','leads','activities','demos','tour-plans','quotations','invoices','payments','installations','trainings','licenses','ledgers','support-tickets','communications','users','roles','lookups','ownership','reports','departments','designations','brands','manufacturers','packages','locations','menus','custom_fields','products','product_pricing','workflows','follow-ups','reminders','recurrence','calendar','dashboard','analytics','performance','audit','settings','wallet'];
   const actions = ['create','read','update','delete','export'];
   let pc = 0;
   for (const m of modules) {
@@ -185,58 +225,9 @@ async function main() {
 
   console.log('✅ 6 users (Admin, Employee, Customer, Partner)');
 
-  // ─── LOOKUP SEED DATA ───
+  // ─── LOOKUP SEED DATA (from shared file) ───
 
-  const lookups: { category: string; displayName: string; isSystem: boolean; values: { value: string; label: string; icon?: string; color?: string }[] }[] = [
-    {
-      category: 'INDUSTRY', displayName: 'Industry', isSystem: true,
-      values: [
-        { value: 'IT_SOFTWARE', label: 'IT / Software', icon: '💻', color: '#3B82F6' },
-        { value: 'FINANCE', label: 'Finance & Banking', icon: '🏦', color: '#10B981' },
-        { value: 'HEALTHCARE', label: 'Healthcare', icon: '🏥', color: '#EF4444' },
-        { value: 'MANUFACTURING', label: 'Manufacturing', icon: '🏭', color: '#F59E0B' },
-        { value: 'RETAIL', label: 'Retail', icon: '🛒', color: '#8B5CF6' },
-        { value: 'EDUCATION', label: 'Education', icon: '📚', color: '#06B6D4' },
-        { value: 'REAL_ESTATE', label: 'Real Estate', icon: '🏢', color: '#EC4899' },
-        { value: 'OTHER', label: 'Other', icon: '📋', color: '#6B7280' },
-      ],
-    },
-    {
-      category: 'LEAD_SOURCE', displayName: 'Lead Source', isSystem: true,
-      values: [
-        { value: 'WEBSITE', label: 'Website', icon: '🌐' },
-        { value: 'REFERRAL', label: 'Referral', icon: '🤝' },
-        { value: 'TRADE_SHOW', label: 'Trade Show', icon: '🎪' },
-        { value: 'COLD_CALL', label: 'Cold Call', icon: '📞' },
-        { value: 'SOCIAL_MEDIA', label: 'Social Media', icon: '📱' },
-        { value: 'EMAIL_CAMPAIGN', label: 'Email Campaign', icon: '📧' },
-      ],
-    },
-    {
-      category: 'PRODUCT_INTEREST', displayName: 'Product Interest', isSystem: false,
-      values: [
-        { value: 'CRM', label: 'CRM Software' },
-        { value: 'ERP', label: 'ERP Suite' },
-        { value: 'HRM', label: 'HR Management' },
-        { value: 'ACCOUNTING', label: 'Accounting Software' },
-      ],
-    },
-    {
-      category: 'CITY', displayName: 'City', isSystem: true,
-      values: [
-        { value: 'MUMBAI', label: 'Mumbai' },
-        { value: 'DELHI', label: 'Delhi' },
-        { value: 'BANGALORE', label: 'Bangalore' },
-        { value: 'HYDERABAD', label: 'Hyderabad' },
-        { value: 'CHENNAI', label: 'Chennai' },
-        { value: 'PUNE', label: 'Pune' },
-        { value: 'KOLKATA', label: 'Kolkata' },
-        { value: 'AHMEDABAD', label: 'Ahmedabad' },
-      ],
-    },
-  ];
-
-  for (const lk of lookups) {
+  for (const lk of LOOKUP_SEED_DATA) {
     const lookup = await prisma.masterLookup.upsert({
       where: { tenantId_category: { tenantId, category: lk.category } },
       create: { tenantId, category: lk.category, displayName: lk.displayName, isSystem: lk.isSystem ?? false },
@@ -255,7 +246,7 @@ async function main() {
       });
     }
   }
-  console.log('✅ Lookups seeded');
+  console.log(`✅ ${LOOKUP_SEED_DATA.length} lookup categories seeded`);
 
   // Assign all permissions to SUPER_ADMIN
   const allPerms = await prisma.permission.findMany();
@@ -267,6 +258,10 @@ async function main() {
     });
   }
   console.log(`✅ ${allPerms.length} permissions → SUPER_ADMIN`);
+
+  // ─── MENUS ───
+  const menuCount = await seedMenus();
+  console.log(`✅ ${menuCount} menu items seeded`);
 
   // ─── NEW ROLES (TEAM_LEAD, TELECALLER, VIEWER) ───
   await prisma.role.upsert({ where: { tenantId_name: { tenantId, name: 'TEAM_LEAD' } }, update: {}, create: { tenantId, name: 'TEAM_LEAD', displayName: 'Team Lead', description: 'Team lead / supervisor' } });
@@ -358,71 +353,7 @@ async function main() {
   }
   console.log('✅ Approval rules seeded');
 
-  // ─── PRODUCT FILTER LOOKUPS ───
-  const productLookups = [
-    {
-      category: 'PRODUCT_TYPE', displayName: 'Product Type', isSystem: true,
-      values: [
-        { value: 'SOFTWARE', label: 'Software' },
-        { value: 'HARDWARE', label: 'Hardware' },
-        { value: 'SERVICE', label: 'Service' },
-        { value: 'SUBSCRIPTION', label: 'Subscription' },
-        { value: 'LICENSE', label: 'License' },
-      ],
-    },
-    {
-      category: 'PRODUCT_CATEGORY', displayName: 'Product Category', isSystem: true,
-      values: [
-        { value: 'CRM', label: 'CRM' },
-        { value: 'ERP', label: 'ERP' },
-        { value: 'HRM', label: 'HRM' },
-        { value: 'ACCOUNTING', label: 'Accounting' },
-        { value: 'INFRASTRUCTURE', label: 'Infrastructure' },
-      ],
-    },
-    {
-      category: 'PRODUCT_SEGMENT', displayName: 'Product Segment', isSystem: true,
-      values: [
-        { value: 'ENTERPRISE', label: 'Enterprise' },
-        { value: 'SMB', label: 'SMB' },
-        { value: 'STARTUP', label: 'Startup' },
-        { value: 'INDIVIDUAL', label: 'Individual' },
-      ],
-    },
-    {
-      category: 'PRODUCT_DELIVERY', displayName: 'Product Delivery', isSystem: true,
-      values: [
-        { value: 'CLOUD', label: 'Cloud / SaaS' },
-        { value: 'ON_PREMISE', label: 'On-Premise' },
-        { value: 'HYBRID', label: 'Hybrid' },
-      ],
-    },
-    {
-      category: 'PRODUCT_LIFECYCLE', displayName: 'Product Lifecycle', isSystem: true,
-      values: [
-        { value: 'GA', label: 'Generally Available' },
-        { value: 'BETA', label: 'Beta' },
-        { value: 'EOL', label: 'End of Life' },
-        { value: 'PREVIEW', label: 'Preview' },
-      ],
-    },
-  ];
-  for (const lk of productLookups) {
-    const lookup = await prisma.masterLookup.upsert({
-      where: { tenantId_category: { tenantId, category: lk.category } },
-      create: { tenantId, category: lk.category, displayName: lk.displayName, isSystem: lk.isSystem },
-      update: { displayName: lk.displayName },
-    });
-    for (let i = 0; i < lk.values.length; i++) {
-      const v = lk.values[i];
-      await prisma.lookupValue.upsert({
-        where: { tenantId_lookupId_value: { tenantId, lookupId: lookup.id, value: v.value } },
-        create: { tenantId, lookupId: lookup.id, value: v.value, label: v.label, rowIndex: i },
-        update: { label: v.label, rowIndex: i },
-      });
-    }
-  }
-  console.log('✅ Product filter lookups seeded');
+  // Product filter lookups are now included in LOOKUP_SEED_DATA above
 
   // ─── CUSTOMER PRICE GROUPS ───
   const priceGroups = [
@@ -556,8 +487,21 @@ async function main() {
   console.log('\n⚙️ Seeding tenant configs...');
   await seedTenantConfigs(prisma, tenantId);
 
+  // ─── TASK ENGINE (configs, templates, cron jobs) ───
+  console.log('\n⚙️ Seeding task engine...');
+  await seedTaskEngine(prisma);
+
+  // ─── PERMISSION TEMPLATES ───
+  console.log('\n🔐 Seeding permission templates...');
+  const templateCount = await seedPermissionTemplates(prisma);
+  console.log(`✅ ${templateCount} permission templates seeded`);
+
   // ─── RAW CONTACTS (1000 dummy records) ───
   await seedRawContacts(prisma, admin.id, tenantId, 1000);
+
+  // ─── DEMO DATA (3 tenants + 35 users) ───
+  console.log('\n🏢 Seeding demo data...');
+  await seedDemoData(prisma);
 
   console.log('\n🔑 Platform: platform@crm.com / SuperAdmin@123');
   console.log('🔑 Admin:    admin@crm.com / Admin@123');
@@ -565,7 +509,11 @@ async function main() {
   console.log('🔑 Employee: sales1@crm.com / Admin@123');
   console.log('🔑 Employee: marketing1@crm.com / Admin@123');
   console.log('🔑 Customer: customer@example.com / Admin@123');
-  console.log('🔑 Partner:  partner@example.com / Admin@123\n');
+  console.log('🔑 Partner:  partner@example.com / Admin@123');
+  console.log('\n🏢 Demo Tenant Accounts (password: Test@123):');
+  console.log('🔑 Sharma:   rajesh@sharmaenterprises.com');
+  console.log('🔑 Mumbai:   arun@mumbaidistributors.com');
+  console.log('🔑 TechServe: sanjay@techserve.in\n');
 }
 
 main().catch(e => { console.error(e); process.exit(1); }).finally(() => prisma.$disconnect());

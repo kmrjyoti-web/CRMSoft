@@ -1,17 +1,19 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useMemo } from "react";
 
 import { useRouter } from "next/navigation";
 
 import { TableFull } from "@/components/ui";
 
 import { useTableFilters } from "@/hooks/useTableFilters";
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 
 import { TableSkeleton } from "@/components/common/TableSkeleton";
 import { formatDate } from "@/lib/format-date";
 
 import { useTourPlansList } from "../hooks/useTourPlans";
+import { TourPlanForm } from "./TourPlanForm";
 
 import { TOUR_PLAN_FILTER_CONFIG } from "../utils/tour-plan-filters";
 
@@ -54,6 +56,16 @@ function flattenTourPlans(
 export function TourPlanList() {
   const router = useRouter();
 
+  const { handleRowEdit, handleCreate } = useEntityPanel({
+    entityKey: "tourplan",
+    entityLabel: "Tour Plan",
+    FormComponent: TourPlanForm,
+    idProp: "tourPlanId",
+    editRoute: "/tour-plans/:id/edit",
+    createRoute: "/tour-plans/new",
+    displayField: "title",
+  });
+
   const { activeFilters, filterParams, handleFilterChange, clearFilters } =
     useTableFilters(TOUR_PLAN_FILTER_CONFIG);
 
@@ -78,17 +90,6 @@ export function TourPlanList() {
   }, [responseData]);
 
   const tableData = useMemo(() => flattenTourPlans(items), [items]);
-
-  const handleRowEdit = useCallback(
-    (row: Record<string, unknown>) => {
-      router.push(`/tour-plans/${row.id}`);
-    },
-    [router],
-  );
-
-  const handleCreate = useCallback(() => {
-    router.push("/tour-plans/new");
-  }, [router]);
 
   if (isLoading) return <TableSkeleton title="Tour Plans" />;
 

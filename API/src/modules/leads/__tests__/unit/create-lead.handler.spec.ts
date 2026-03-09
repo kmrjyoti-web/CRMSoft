@@ -8,6 +8,7 @@ describe('CreateLeadHandler', () => {
   let publisher: any;
   let prisma: any;
   let txMock: any;
+  let workflowEngine: any;
 
   beforeEach(() => {
     repo = {
@@ -25,7 +26,10 @@ describe('CreateLeadHandler', () => {
       organization: { findUnique: jest.fn().mockResolvedValue({ id: 'org-1' }) },
       $transaction: jest.fn(async (cb: any) => cb(txMock)),
     };
-    handler = new CreateLeadHandler(repo, publisher, prisma);
+    workflowEngine = {
+      initializeWorkflow: jest.fn().mockResolvedValue({}),
+    };
+    handler = new CreateLeadHandler(repo, publisher, prisma, workflowEngine);
   });
 
   it('should create lead and return UUID', async () => {

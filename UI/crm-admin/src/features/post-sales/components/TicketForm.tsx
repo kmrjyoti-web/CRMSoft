@@ -13,6 +13,8 @@ import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
 
+import { useSidePanelStore } from "@/stores/side-panel.store";
+
 import {
   useTicketDetail,
   useCreateTicket,
@@ -45,15 +47,20 @@ type TicketFormValues = z.infer<typeof ticketSchema>;
 
 interface TicketFormProps {
   ticketId?: string;
+  mode?: "page" | "panel";
+  panelId?: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export function TicketForm({ ticketId }: TicketFormProps) {
+export function TicketForm({ ticketId, mode = "page", panelId, onSuccess, onCancel }: TicketFormProps) {
   const router = useRouter();
   const isEdit = !!ticketId;
+  const updatePanelConfig = useSidePanelStore((s) => s.updatePanelConfig);
 
   // -- Queries & Mutations --------------------------------------------------
   const { data: ticketData, isLoading: isLoadingTicket } = useTicketDetail(
@@ -104,17 +111,56 @@ export function TicketForm({ ticketId }: TicketFormProps) {
     });
   }, [isEdit, ticketData, reset]);
 
+  // -- Sync isSubmitting → panel footer button ----------------------------
+  useEffect(() => {
+    if (!panelId) return;
+    updatePanelConfig(panelId, {
+      footerButtons: [
+        {
+          id: "cancel",
+          label: "Cancel",
+          showAs: "text",
+          variant: "secondary",
+          disabled: isSubmitting,
+          onClick: () => {},
+        },
+        {
+          id: "save",
+          label: isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Save Changes" : "Save",
+          icon: "check",
+          showAs: "both",
+          variant: "primary",
+          loading: isSubmitting,
+          disabled: isSubmitting,
+          onClick: () => {
+            const formId = `sp-form-ticket-${ticketId ?? "new"}`;
+            const form = document.getElementById(formId) as HTMLFormElement | null;
+            form?.requestSubmit();
+          },
+        },
+      ],
+    });
+  }, [isSubmitting, panelId, isEdit, ticketId, updatePanelConfig]);
+
   // -- Submit handler -------------------------------------------------------
   const onSubmit = async (values: TicketFormValues) => {
     try {
       if (isEdit && ticketId) {
         await updateMutation.mutateAsync({ id: ticketId, data: values as any });
         toast.success("Ticket updated");
-        router.push(`/post-sales/tickets/${ticketId}`);
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push(`/post-sales/tickets/${ticketId}`);
+        }
       } else {
         await createMutation.mutateAsync(values as any);
         toast.success("Ticket created");
-        router.push("/post-sales/tickets");
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push("/post-sales/tickets");
+        }
       }
     } catch {
       toast.error(
@@ -127,22 +173,27 @@ export function TicketForm({ ticketId }: TicketFormProps) {
   if (isEdit && isLoadingTicket) return <LoadingSpinner fullPage />;
 
   // -- Render ---------------------------------------------------------------
+  const isPanel = mode === "panel";
+
   return (
-    <div className="p-6" style={{ position: "relative" }}>
+    <div className={isPanel ? "p-4" : "p-6"} style={{ position: "relative" }}>
       <FormSubmitOverlay isSubmitting={isSubmitting} isEdit={isEdit} />
-      <PageHeader
-        title={isEdit ? "Edit Ticket" : "New Ticket"}
-        actions={
-          <Button variant="outline" onClick={() => router.back()}>
-            Back
-          </Button>
-        }
-      />
+      {!isPanel && (
+        <PageHeader
+          title={isEdit ? "Edit Ticket" : "New Ticket"}
+          actions={
+            <Button variant="outline" onClick={() => router.back()}>
+              Back
+            </Button>
+          }
+        />
+      )}
 
       <form
+        id={isPanel ? `sp-form-ticket-${ticketId ?? "new"}` : undefined}
         onSubmit={handleSubmit(onSubmit)}
         noValidate
-        className="mt-4 max-w-5xl space-y-6"
+        className={`${isPanel ? "mt-2" : "mt-4"} max-w-5xl space-y-6`}
       >
         <FormErrors errors={errors} />
 
@@ -377,21 +428,23 @@ export function TicketForm({ ticketId }: TicketFormProps) {
         </Fieldset>
 
         {/* ----------------------------------------------------------------
-            Actions
+            Actions — hidden in panel mode (footer handles it)
         ---------------------------------------------------------------- */}
-        <div className="flex gap-3 pt-2">
-          <Button
-            type="submit"
-            variant="primary"
-            loading={isSubmitting}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
-          </Button>
-          <Button type="button" variant="outline" onClick={() => router.back()}>
-            Cancel
-          </Button>
-        </div>
+        {!isPanel && (
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => router.back()}>
+              Cancel
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   );

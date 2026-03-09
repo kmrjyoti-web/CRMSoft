@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { TenantProvisioningService } from '../../modules/tenant/services/tenant-provisioning.service';
 import { randomBytes } from 'crypto';
 
 @Injectable()
@@ -14,6 +15,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
+    private tenantProvisioning: TenantProvisioningService,
   ) {}
 
   // ═══════════════════════════════════════
@@ -96,13 +98,113 @@ export class AuthService {
   }
 
   // ═══════════════════════════════════════
+  // VENDOR LOGIN (marketplace vendor)
+  // ═══════════════════════════════════════
+
+  async vendorLogin(email: string, password: string) {
+    // Reject SuperAdmin trying to use vendor portal
+    const superAdmin = await this.prisma.superAdmin.findUnique({ where: { email } });
+    if (superAdmin) {
+      throw new ForbiddenException(
+        'This portal is for vendors only. Please use the CRM Admin portal.',
+      );
+    }
+
+    // Reject regular User (admin/employee/customer/partner)
+    const regularUser = await this.prisma.user.findFirst({ where: { email } });
+    if (regularUser) {
+      throw new ForbiddenException(
+        'This portal is for vendors only. Please use the CRM Admin portal.',
+      );
+    }
+
+    // Find vendor by email
+    const vendor = await this.prisma.marketplaceVendor.findUnique({
+      where: { contactEmail: email },
+    });
+
+    if (!vendor) throw new UnauthorizedException('Invalid email or password');
+    if (!vendor.password) {
+      throw new UnauthorizedException(
+        'Password not set. Please contact your administrator.',
+      );
+    }
+
+    const valid = await bcrypt.compare(password, vendor.password);
+    if (!valid) throw new UnauthorizedException('Invalid email or password');
+
+    // Status checks
+    if (vendor.status === 'PENDING') {
+      throw new ForbiddenException(
+        'Your vendor registration is pending approval. Please wait for admin verification.',
+      );
+    }
+    if (vendor.status === 'SUSPENDED') {
+      throw new ForbiddenException(
+        'Your vendor account has been suspended. Please contact support.',
+      );
+    }
+
+    // Update last login
+    await this.prisma.marketplaceVendor.update({
+      where: { id: vendor.id },
+      data: { lastLoginAt: new Date() },
+    });
+
+    const payload = {
+      sub: vendor.id,
+      email: vendor.contactEmail,
+      role: 'VENDOR',
+      userType: 'VENDOR',
+      vendorId: vendor.id,
+    };
+
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwt.signAsync(payload, {
+        secret: this.config.get('JWT_SECRET'),
+        expiresIn: '1d',
+      }),
+      this.jwt.signAsync(payload, {
+        secret: this.config.get('JWT_REFRESH_SECRET'),
+        expiresIn: '7d',
+      }),
+    ]);
+
+    const firstName = vendor.contactName?.split(' ')[0] ?? vendor.companyName;
+    const lastName = vendor.contactName?.split(' ').slice(1).join(' ') ?? '';
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: vendor.id,
+        email: vendor.contactEmail,
+        firstName,
+        lastName,
+        userType: 'VENDOR',
+        role: 'VENDOR',
+      },
+      vendor: {
+        id: vendor.id,
+        companyName: vendor.companyName,
+        contactEmail: vendor.contactEmail,
+        gstNumber: vendor.gstNumber,
+        status: vendor.status,
+        revenueSharePct: Number(vendor.revenueSharePct),
+      },
+      tenantId: '',
+    };
+  }
+
+  // ═══════════════════════════════════════
   // REGISTER — Admin creates staff
   // ═══════════════════════════════════════
 
   async registerStaff(data: {
     email: string; password: string; firstName: string;
     lastName: string; phone?: string; roleId: string;
-    userType?: string; createdBy: string;
+    userType?: string; departmentId?: string; designationId?: string;
+    createdBy: string;
   }) {
     const existing = await this.prisma.user.findFirst({ where: { email: data.email } });
     if (existing) {
@@ -123,6 +225,8 @@ export class AuthService {
         firstName: data.firstName, lastName: data.lastName,
         phone: data.phone, roleId: data.roleId,
         userType: userType as any, createdBy: data.createdBy,
+        departmentId: data.departmentId || undefined,
+        designationId: data.designationId || undefined,
       },
       include: { role: true },
     });
@@ -219,6 +323,85 @@ export class AuthService {
     };
   }
 
+  /** Check if a company slug is available. */
+  async isSlugAvailable(slug: string): Promise<boolean> {
+    const existing = await this.prisma.tenant.findFirst({ where: { slug } });
+    return !existing;
+  }
+
+  // ═══════════════════════════════════════
+  // TENANT SELF-REGISTER (public)
+  // ═══════════════════════════════════════
+
+  async registerTenant(data: {
+    companyName: string; slug: string; email: string;
+    password: string; firstName: string; lastName: string;
+    phone?: string; planId?: string;
+  }) {
+    // Check email uniqueness
+    const existingUser = await this.prisma.user.findFirst({ where: { email: data.email } });
+    if (existingUser) {
+      throw new ConflictException('Email already registered');
+    }
+
+    // Check slug uniqueness
+    const existingTenant = await this.prisma.tenant.findFirst({ where: { slug: data.slug } });
+    if (existingTenant) {
+      throw new ConflictException('Company slug already taken');
+    }
+
+    // Find plan (use provided or first active plan)
+    let planId = data.planId;
+    if (!planId) {
+      const defaultPlan = await this.prisma.plan.findFirst({
+        where: { isActive: true },
+        orderBy: { price: 'asc' },
+      });
+      if (!defaultPlan) {
+        throw new NotFoundException('No active plans available');
+      }
+      planId = defaultPlan.id;
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(data.password, this.getSaltRounds());
+
+    // Provision tenant (creates Tenant + roles + admin User + permissions + lookups + Subscription + TenantUsage)
+    const { tenant, adminUser, subscription } = await this.tenantProvisioning.provision({
+      name: data.companyName,
+      slug: data.slug,
+      adminEmail: data.email,
+      adminPassword: hashedPassword,
+      adminFirstName: data.firstName,
+      adminLastName: data.lastName,
+      planId,
+    });
+
+    // Generate JWT tokens (auto-login)
+    const tokens = await this.generateTokens(
+      adminUser.id, adminUser.email, 'ADMIN', 'ADMIN', tenant.id,
+    );
+
+    return {
+      user: {
+        id: adminUser.id,
+        email: adminUser.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        userType: 'ADMIN',
+        role: 'ADMIN',
+      },
+      tenant: {
+        id: tenant.id,
+        name: tenant.name,
+        slug: tenant.slug,
+        status: tenant.status,
+        onboardingStep: tenant.onboardingStep,
+      },
+      ...tokens,
+    };
+  }
+
   // ═══════════════════════════════════════
   // SHARED METHODS
   // ═══════════════════════════════════════
@@ -294,6 +477,19 @@ export class AuthService {
     return user;
   }
 
+  async getSuperAdminProfile(adminId: string) {
+    const admin = await this.prisma.superAdmin.findUnique({ where: { id: adminId } });
+    if (!admin) throw new NotFoundException('Super admin not found');
+    return {
+      id: admin.id,
+      email: admin.email,
+      firstName: admin.firstName,
+      lastName: admin.lastName,
+      userType: 'SUPER_ADMIN',
+      role: { id: null, name: 'PLATFORM_ADMIN', displayName: 'Platform Admin' },
+    };
+  }
+
   // ═══════════════════════════════════════
   // PRIVATE HELPERS
   // ═══════════════════════════════════════
@@ -338,6 +534,12 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
+    // Fetch tenant info for response
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: user.tenantId },
+      select: { id: true, name: true, slug: true, status: true, onboardingStep: true },
+    });
+
     const tokens = await this.generateTokens(
       user.id, user.email, user.role.name, user.userType, user.tenantId,
     );
@@ -352,6 +554,7 @@ export class AuthService {
           totalReferrals: user.referralPartner.totalReferrals,
         }),
       },
+      tenant: tenant ?? undefined,
       ...tokens,
     };
   }

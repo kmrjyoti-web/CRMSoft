@@ -12,7 +12,7 @@ type InputProps = React.ComponentProps<typeof AICInput> & {
 export const Input = forwardRef<HTMLElement, InputProps>((props, ref) => {
   const { label, value, onFocus, onBlur, leftIcon, error, ...rest } = props;
   const [focused, setFocused] = useState(false);
-  const isActive = focused || !!value;
+  const isActive = focused || !!value || !!props.placeholder;
 
   if (!label) {
     return (
@@ -30,7 +30,7 @@ export const Input = forwardRef<HTMLElement, InputProps>((props, ref) => {
   }
 
   const labelCls = [
-    'absolute z-10 bg-white px-1 pointer-events-none transition-all duration-200 truncate max-w-[80%]',
+    'absolute z-[1] bg-white px-1 pointer-events-none transition-all duration-200 truncate max-w-[80%]',
     isActive
       ? `top-0 -translate-y-1/2 text-[11px] left-2 ${error ? 'text-red-500' : 'text-[var(--color-primary)]'}`
       : `top-4 -translate-y-1/2 text-sm text-gray-500 ${leftIcon ? 'left-9' : 'left-2.5'}`,

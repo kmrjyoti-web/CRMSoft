@@ -7,11 +7,19 @@ import { useForm, Controller, useFieldArray } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
 
-import { Button, Icon, Input, SelectInput, DatePicker, NumberInput, CurrencyInput, Fieldset, Typography } from "@/components/ui";
+import { Button, Icon, Input, DatePicker, NumberInput, CurrencyInput, Fieldset, Typography, Modal } from "@/components/ui";
+import { LookupSelect } from "@/components/common/LookupSelect";
+import { ProductSelect } from "@/components/common/ProductSelect";
+import type { ProductSelectOption } from "@/components/common/ProductSelect";
+import { LeadSelect } from "@/components/common/LeadSelect";
+import type { LeadSelectOption } from "@/components/common/LeadSelect";
+import { ContactSelect } from "@/components/common/ContactSelect";
+import { OrganizationSelect } from "@/components/common/OrganizationSelect";
 import { FormErrors } from "@/components/common/FormErrors";
 import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
+import { useSidePanelStore } from "@/stores/side-panel.store";
 
 import { useQuotationDetail, useCreateQuotation, useUpdateQuotation } from "../hooks/useQuotations";
 import { calculateLineItem, calculateSummary } from "../utils/gst";
@@ -22,6 +30,7 @@ import type { LineItem } from "../types/quotations.types";
 // ---------------------------------------------------------------------------
 
 const lineItemSchema = z.object({
+  productId: z.string().optional(),
   productName: z.string().min(1, "Product name is required"),
   description: z.string().optional(),
   hsnCode: z.string().optional(),
@@ -58,58 +67,31 @@ const quotationSchema = z.object({
 type QuotationFormValues = z.infer<typeof quotationSchema>;
 
 // ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const PRICE_TYPE_OPTIONS = [
-  { label: "Fixed", value: "FIXED" },
-  { label: "Range", value: "RANGE" },
-  { label: "Negotiable", value: "NEGOTIABLE" },
-];
-
-const UNIT_OPTIONS = [
-  { label: "Piece", value: "PIECE" },
-  { label: "Box", value: "BOX" },
-  { label: "Pack", value: "PACK" },
-  { label: "Kg", value: "KG" },
-  { label: "Gram", value: "GRAM" },
-  { label: "Litre", value: "LITRE" },
-  { label: "Meter", value: "METER" },
-  { label: "Set", value: "SET" },
-  { label: "Dozen", value: "DOZEN" },
-  { label: "Roll", value: "ROLL" },
-];
-
-const GST_RATE_OPTIONS = [
-  { label: "0%", value: 0 },
-  { label: "5%", value: 5 },
-  { label: "12%", value: 12 },
-  { label: "18%", value: 18 },
-  { label: "28%", value: 28 },
-];
-
-const DISCOUNT_TYPE_OPTIONS = [
-  { label: "%", value: "PERCENTAGE" },
-  { label: "Flat", value: "FLAT" },
-];
-
-// ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
 
 interface QuotationFormProps {
   quotationId?: string;
+  leadId?: string;
+  mode?: "page" | "panel";
+  panelId?: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export function QuotationForm({ quotationId }: QuotationFormProps) {
+export function QuotationForm({ quotationId, leadId: defaultLeadId, mode = "page", panelId, onSuccess, onCancel }: QuotationFormProps) {
   const router = useRouter();
   const isEdit = !!quotationId;
+  const updatePanelConfig = useSidePanelStore((s) => s.updatePanelConfig);
 
   const [isInterState, setIsInterState] = useState(false);
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showNotesModal, setShowNotesModal] = useState(false);
 
   // ── Queries & Mutations ───────────────────────────────────
   const { data: quotationData, isLoading: isLoadingQuotation } =
@@ -123,6 +105,7 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<QuotationFormValues>({
     resolver: zodResolver(quotationSchema),
@@ -142,7 +125,19 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
       discountType: "",
       discountValue: null,
       internalNotes: "",
-      items: [],
+      items: [{
+        productId: "",
+        productName: "",
+        quantity: 1,
+        unit: "PIECE",
+        unitPrice: 0,
+        discountType: "",
+        discountValue: null,
+        gstRate: 18,
+        cessRate: null,
+        isOptional: false,
+        notes: "",
+      }],
     },
   });
 
@@ -169,6 +164,7 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
       discountValue: q.discountValue ?? null,
       internalNotes: q.internalNotes ?? "",
       items: (q.lineItems ?? []).map((li: LineItem) => ({
+        productId: (li as any).productId ?? "",
         productName: li.productName,
         description: li.description ?? "",
         hsnCode: li.hsnCode ?? "",
@@ -184,6 +180,43 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
       })),
     });
   }, [isEdit, quotationData, reset]);
+
+  // ── Pre-fill leadId when opened from Lead Dashboard ──────
+  useEffect(() => {
+    if (isEdit || !defaultLeadId) return;
+    setValue("leadId", defaultLeadId);
+  }, [isEdit, defaultLeadId, setValue]);
+
+  // Sync isSubmitting → panel footer button (loading / disabled / label)
+  useEffect(() => {
+    if (!panelId) return;
+    updatePanelConfig(panelId, {
+      footerButtons: [
+        {
+          id: "cancel",
+          label: "Cancel",
+          showAs: "text",
+          variant: "secondary",
+          disabled: isSubmitting,
+          onClick: () => {},
+        },
+        {
+          id: "save",
+          label: isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Save Changes" : "Save",
+          icon: "check",
+          showAs: "both",
+          variant: "primary",
+          loading: isSubmitting,
+          disabled: isSubmitting,
+          onClick: () => {
+            const formId = `sp-form-quotation-${quotationId ?? "new"}`;
+            const form = document.getElementById(formId) as HTMLFormElement | null;
+            form?.requestSubmit();
+          },
+        },
+      ],
+    });
+  }, [isSubmitting, panelId, isEdit, quotationId, updatePanelConfig]);
 
   // ── Live summary calculation ──────────────────────────────
   const watchedItems = watch("items") ?? [];
@@ -215,11 +248,19 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
         const updateData = { ...rest, discountValue: discountValue ?? undefined };
         await updateMutation.mutateAsync({ id: quotationId, data: updateData });
         toast.success("Quotation updated");
-        router.push(`/quotations/${quotationId}`);
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push(`/quotations/${quotationId}`);
+        }
       } else {
         await createMutation.mutateAsync(values as any);
         toast.success("Quotation created");
-        router.push("/quotations");
+        if (mode === "panel" && onSuccess) {
+          onSuccess();
+        } else {
+          router.push("/quotations");
+        }
       }
     } catch {
       toast.error(isEdit ? "Failed to update quotation" : "Failed to create quotation");
@@ -229,41 +270,41 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
   // ── Loading state ─────────────────────────────────────────
   if (isEdit && isLoadingQuotation) return <LoadingSpinner fullPage />;
 
+  const isPanel = mode === "panel";
+
   // ── Render ────────────────────────────────────────────────
   return (
-    <div className="p-6" style={{ position: "relative" }}>
+    <div className={isPanel ? "p-4" : "p-6 max-w-5xl mx-auto"} style={{ position: "relative" }}>
       <FormSubmitOverlay isSubmitting={isSubmitting} isEdit={isEdit} />
-      <PageHeader
-        title={isEdit ? "Edit Quotation" : "New Quotation"}
-        actions={
-          <Button variant="outline" onClick={() => router.back()}>
-            <Icon name="arrow-left" size={16} /> Back
-          </Button>
-        }
-      />
+      {!isPanel && (
+        <PageHeader
+          title={isEdit ? "Edit Quotation" : "New Quotation"}
+          actions={
+            <Button variant="outline" onClick={() => router.back()}>
+              <Icon name="arrow-left" size={16} /> Back
+            </Button>
+          }
+        />
+      )}
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-4 max-w-5xl space-y-6">
+      <form id={isPanel ? `sp-form-quotation-${quotationId ?? "new"}` : undefined} onSubmit={handleSubmit(onSubmit)} noValidate className={`mt-4 space-y-6${isPanel ? "" : " max-w-5xl"}`}>
         <FormErrors errors={errors} />
 
         {/* ────────────────────────────────────────────────────
             Quotation Information
         ──────────────────────────────────────────────────── */}
         <Fieldset label="Quotation Information">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-3 gap-4">
             <Controller
               name="title"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Title
-                  </label>
-                  <Input
-                    placeholder="Quotation title"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <Input
+                  label="Title"
+                  placeholder="Quotation title"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
               )}
             />
 
@@ -271,9 +312,9 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
               name="priceType"
               control={control}
               render={({ field }) => (
-                <SelectInput
+                <LookupSelect
+                  masterCode="QUOTATION_PRICE_TYPE"
                   label="Price Type"
-                  options={PRICE_TYPE_OPTIONS}
                   value={field.value ?? ""}
                   onChange={(v) => field.onChange(String(v ?? ""))}
                 />
@@ -284,18 +325,20 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
               name="leadId"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Lead ID <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    placeholder="Lead ID"
-                    value={field.value}
-                    onChange={field.onChange}
-                    error={!!errors.leadId}
-                    errorMessage={errors.leadId?.message}
-                  />
-                </div>
+                <LeadSelect
+                  label="Lead"
+                  required
+                  value={field.value || null}
+                  onChange={(val) => field.onChange(String(val ?? ""))}
+                  onLeadSelect={(lead: LeadSelectOption | null) => {
+                    if (lead) {
+                      setValue("contactPersonId", lead.contactId);
+                      setValue("organizationId", lead.organizationId ?? "");
+                    }
+                  }}
+                  error={!!errors.leadId}
+                  errorMessage={errors.leadId?.message}
+                />
               )}
             />
 
@@ -303,16 +346,11 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
               name="contactPersonId"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Contact Person ID
-                  </label>
-                  <Input
-                    placeholder="Contact person ID"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <ContactSelect
+                  label="Contact Person"
+                  value={field.value || null}
+                  onChange={(val) => field.onChange(String(val ?? ""))}
+                />
               )}
             />
 
@@ -320,38 +358,14 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
               name="organizationId"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Organization ID
-                  </label>
-                  <Input
-                    placeholder="Organization ID"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                </div>
+                <OrganizationSelect
+                  label="Organization"
+                  value={field.value || null}
+                  onChange={(val) => field.onChange(String(val ?? ""))}
+                />
               )}
             />
           </div>
-
-          <Controller
-            name="summary"
-            control={control}
-            render={({ field }) => (
-              <div className="mt-4">
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Summary
-                </label>
-                <textarea
-                  className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                  rows={3}
-                  placeholder="Brief summary..."
-                />
-              </div>
-            )}
-          />
         </Fieldset>
 
         {/* ────────────────────────────────────────────────────
@@ -380,7 +394,7 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
           </div>
 
           {/* Line items table */}
-          <div className="overflow-x-auto">
+          <div className="overflow-visible">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 text-left text-xs font-medium uppercase text-gray-500">
@@ -391,7 +405,7 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
                   <th className="pb-2 pr-2 w-40">Discount</th>
                   <th className="pb-2 pr-2 w-24">GST %</th>
                   <th className="pb-2 pr-2 w-28 text-right">Line Total</th>
-                  <th className="pb-2 w-10"></th>
+                  <th className="pb-2 w-20"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -409,13 +423,24 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
                     <tr key={fieldItem.id} className="align-top">
                       <td className="py-2 pr-2">
                         <Controller
-                          name={`items.${index}.productName`}
+                          name={`items.${index}.productId`}
                           control={control}
                           render={({ field: f }) => (
-                            <Input
-                              placeholder="Product name"
-                              value={f.value}
-                              onChange={f.onChange}
+                            <ProductSelect
+                              label=""
+                              value={f.value ?? null}
+                              onChange={(val) => f.onChange(val ?? "")}
+                              onProductSelect={(product: ProductSelectOption | null) => {
+                                if (product) {
+                                  setValue(`items.${index}.productName`, product.name);
+                                  if (product.salePrice) setValue(`items.${index}.unitPrice`, product.salePrice);
+                                  if (product.hsnCode) setValue(`items.${index}.hsnCode`, product.hsnCode);
+                                  if (product.primaryUnit) setValue(`items.${index}.unit`, product.primaryUnit);
+                                  if (product.gstRate != null) setValue(`items.${index}.gstRate`, product.gstRate);
+                                  if (product.cessRate != null) setValue(`items.${index}.cessRate`, product.cessRate);
+                                  if (product.shortDescription) setValue(`items.${index}.description`, product.shortDescription);
+                                }
+                              }}
                               error={!!errors.items?.[index]?.productName}
                             />
                           )}
@@ -427,6 +452,7 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
                           control={control}
                           render={({ field: f }) => (
                             <NumberInput
+                              label=""
                               value={f.value}
                               onChange={f.onChange}
                               min={0.01}
@@ -441,8 +467,8 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
                           name={`items.${index}.unit`}
                           control={control}
                           render={({ field: f }) => (
-                            <SelectInput
-                              options={UNIT_OPTIONS}
+                            <LookupSelect
+                              masterCode="UNIT_OF_MEASURE"
                               value={f.value ?? ""}
                               onChange={(v) => f.onChange(String(v ?? ""))}
                             />
@@ -455,9 +481,10 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
                           control={control}
                           render={({ field: f }) => (
                             <CurrencyInput
+                              label=""
                               value={f.value}
                               onChange={f.onChange}
-                              currency="\u20B9"
+                              currency="₹"
                               decimals={2}
                             />
                           )}
@@ -470,8 +497,8 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
                             control={control}
                             render={({ field: f }) => (
                               <div className="w-20">
-                                <SelectInput
-                                  options={DISCOUNT_TYPE_OPTIONS}
+                                <LookupSelect
+                                  masterCode="DISCOUNT_TYPE"
                                   value={f.value ?? ""}
                                   onChange={(v) => f.onChange(String(v ?? ""))}
                                 />
@@ -484,6 +511,7 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
                             render={({ field: f }) => (
                               <div className="w-20">
                                 <NumberInput
+                                  label=""
                                   value={f.value ?? null}
                                   onChange={f.onChange}
                                   min={0}
@@ -499,8 +527,9 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
                           name={`items.${index}.gstRate`}
                           control={control}
                           render={({ field: f }) => (
-                            <SelectInput
-                              options={GST_RATE_OPTIONS}
+                            <LookupSelect
+                              masterCode="GST_RATE"
+                              numericValue
                               value={f.value ?? ""}
                               onChange={(v) =>
                                 f.onChange(v === "" || v === null ? null : Number(v))
@@ -513,14 +542,39 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
                         {fmt(calc.lineTotal)}
                       </td>
                       <td className="py-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => remove(index)}
-                        >
-                          <Icon name="trash-2" size={14} />
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              append({
+                                productId: "",
+                                productName: "",
+                                quantity: 1,
+                                unit: "PIECE",
+                                unitPrice: 0,
+                                discountType: "",
+                                discountValue: null,
+                                gstRate: 18,
+                                cessRate: null,
+                                isOptional: false,
+                                notes: "",
+                              })
+                            }
+                          >
+                            <Icon name="plus" size={14} />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => remove(index)}
+                            disabled={fields.length <= 1}
+                          >
+                            <Icon name="trash-2" size={14} />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -529,33 +583,6 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
             </table>
           </div>
 
-          {fields.length === 0 && (
-            <p className="py-4 text-center text-sm text-gray-400">
-              No line items yet. Add one below.
-            </p>
-          )}
-
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-3"
-            onClick={() =>
-              append({
-                productName: "",
-                quantity: 1,
-                unit: "PIECE",
-                unitPrice: 0,
-                discountType: "",
-                discountValue: null,
-                gstRate: 18,
-                cessRate: null,
-                isOptional: false,
-                notes: "",
-              })
-            }
-          >
-            <Icon name="plus" size={16} className="mr-1" /> Add Item
-          </Button>
         </Fieldset>
 
         {/* ────────────────────────────────────────────────────
@@ -571,8 +598,8 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
                   name="discountType"
                   control={control}
                   render={({ field }) => (
-                    <SelectInput
-                      options={DISCOUNT_TYPE_OPTIONS}
+                    <LookupSelect
+                      masterCode="DISCOUNT_TYPE"
                       value={field.value ?? ""}
                       onChange={(v) => field.onChange(String(v ?? ""))}
                     />
@@ -585,6 +612,7 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
                   control={control}
                   render={({ field }) => (
                     <NumberInput
+                      label=""
                       value={field.value ?? null}
                       onChange={field.onChange}
                       min={0}
@@ -640,43 +668,120 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
         </Fieldset>
 
         {/* ────────────────────────────────────────────────────
-            Validity & Terms
+            Additional Details — Summary, Terms, Notes buttons
         ──────────────────────────────────────────────────── */}
-        <Fieldset label="Validity & Terms" toggleable defaultCollapsed>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Controller
-              name="validFrom"
-              control={control}
-              render={({ field }) => (
-                <DatePicker
-                  label="Valid From"
-                  value={field.value ?? ""}
-                  onChange={(v) => field.onChange(v)}
-                />
-              )}
-            />
-            <Controller
-              name="validUntil"
-              control={control}
-              render={({ field }) => (
-                <DatePicker
-                  label="Valid Until"
-                  value={field.value ?? ""}
-                  onChange={(v) => field.onChange(v)}
-                />
-              )}
-            />
+        <div className="flex flex-wrap gap-3">
+          <div className="w-1/2 min-w-[280px]">
+            <button
+              type="button"
+              onClick={() => setShowSummaryModal(true)}
+              className="flex items-center gap-2 w-full rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors"
+            >
+              <Icon name="file-text" size={16} />
+              <span className="font-medium">Summary</span>
+              {watch("summary") && <span className="ml-auto text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded">Added</span>}
+              {!watch("summary") && <span className="ml-auto text-xs text-gray-400">+ Add</span>}
+            </button>
           </div>
 
-          <div className="mt-4 space-y-4">
+          <button
+            type="button"
+            onClick={() => setShowTermsModal(true)}
+            className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors"
+          >
+            <Icon name="shield" size={16} />
+            <span className="font-medium">Validity & Terms</span>
+            {(watch("validFrom") || watch("paymentTerms") || watch("termsConditions")) && <span className="ml-2 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded">Added</span>}
+            {!(watch("validFrom") || watch("paymentTerms") || watch("termsConditions")) && <span className="ml-2 text-xs text-gray-400">+ Add</span>}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowNotesModal(true)}
+            className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors"
+          >
+            <Icon name="message-square" size={16} />
+            <span className="font-medium">Internal Notes</span>
+            {watch("internalNotes") && <span className="ml-2 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded">Added</span>}
+            {!watch("internalNotes") && <span className="ml-2 text-xs text-gray-400">+ Add</span>}
+          </button>
+        </div>
+
+        {/* ── Summary Modal ── */}
+        <Modal
+          open={showSummaryModal}
+          onClose={() => setShowSummaryModal(false)}
+          title="Summary"
+          size="md"
+          footer={
+            <div className="flex justify-end">
+              <Button type="button" variant="primary" onClick={() => setShowSummaryModal(false)}>
+                Done
+              </Button>
+            </div>
+          }
+        >
+          <Controller
+            name="summary"
+            control={control}
+            render={({ field }) => (
+              <textarea
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                rows={5}
+                placeholder="Brief summary of the quotation..."
+              />
+            )}
+          />
+        </Modal>
+
+        {/* ── Validity & Terms Modal ── */}
+        <Modal
+          open={showTermsModal}
+          onClose={() => setShowTermsModal(false)}
+          title="Validity & Terms"
+          size="lg"
+          footer={
+            <div className="flex justify-end">
+              <Button type="button" variant="primary" onClick={() => setShowTermsModal(false)}>
+                Done
+              </Button>
+            </div>
+          }
+        >
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Controller
+                name="validFrom"
+                control={control}
+                render={({ field }) => (
+                  <DatePicker
+                    label="Valid From"
+                    value={field.value ?? ""}
+                    onChange={(v) => field.onChange(v)}
+                  />
+                )}
+              />
+              <Controller
+                name="validUntil"
+                control={control}
+                render={({ field }) => (
+                  <DatePicker
+                    label="Valid Until"
+                    value={field.value ?? ""}
+                    onChange={(v) => field.onChange(v)}
+                  />
+                )}
+              />
+            </div>
+
             <Controller
               name="paymentTerms"
               control={control}
               render={({ field }) => (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Payment Terms
-                  </label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Payment Terms</label>
                   <textarea
                     className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
                     value={field.value ?? ""}
@@ -692,9 +797,7 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
               control={control}
               render={({ field }) => (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Delivery Terms
-                  </label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Delivery Terms</label>
                   <textarea
                     className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
                     value={field.value ?? ""}
@@ -710,9 +813,7 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
               control={control}
               render={({ field }) => (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Warranty Terms
-                  </label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Warranty Terms</label>
                   <textarea
                     className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
                     value={field.value ?? ""}
@@ -728,9 +829,7 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
               control={control}
               render={({ field }) => (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Terms & Conditions
-                  </label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Terms & Conditions</label>
                   <textarea
                     className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
                     value={field.value ?? ""}
@@ -741,48 +840,55 @@ export function QuotationForm({ quotationId }: QuotationFormProps) {
               )}
             />
           </div>
-        </Fieldset>
+        </Modal>
 
-        {/* ────────────────────────────────────────────────────
-            Internal Notes
-        ──────────────────────────────────────────────────── */}
-        <Fieldset label="Internal Notes" toggleable defaultCollapsed>
+        {/* ── Internal Notes Modal ── */}
+        <Modal
+          open={showNotesModal}
+          onClose={() => setShowNotesModal(false)}
+          title="Internal Notes"
+          size="md"
+          footer={
+            <div className="flex justify-end">
+              <Button type="button" variant="primary" onClick={() => setShowNotesModal(false)}>
+                Done
+              </Button>
+            </div>
+          }
+        >
           <Controller
             name="internalNotes"
             control={control}
             render={({ field }) => (
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Notes
-                </label>
-                <textarea
-                  className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                  rows={3}
-                  placeholder="Internal notes (not visible to customer)..."
-                />
-              </div>
+              <textarea
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                rows={5}
+                placeholder="Internal notes (not visible to customer)..."
+              />
             )}
           />
-        </Fieldset>
+        </Modal>
 
         {/* ────────────────────────────────────────────────────
-            Actions
+            Actions — hidden in panel mode (footer handles it)
         ──────────────────────────────────────────────────── */}
-        <div className="flex gap-3 pt-2">
-          <Button
-            type="submit"
-            variant="primary"
-            loading={isSubmitting}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
-          </Button>
-          <Button type="button" variant="outline" onClick={() => router.back()}>
-            Cancel
-          </Button>
-        </div>
+        {!isPanel && (
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => router.back()}>
+              Cancel
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   );

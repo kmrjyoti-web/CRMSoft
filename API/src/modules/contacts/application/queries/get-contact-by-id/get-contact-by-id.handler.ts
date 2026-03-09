@@ -38,7 +38,12 @@ export class GetContactByIdHandler implements IQueryHandler<GetContactByIdQuery>
         },
         filters: {
           include: {
-            lookupValue: { select: { id: true, value: true, label: true } },
+            lookupValue: {
+              select: {
+                id: true, value: true, label: true,
+                lookup: { select: { category: true } },
+              },
+            },
           },
         },
         rawContacts: {

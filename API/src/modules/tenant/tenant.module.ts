@@ -8,6 +8,14 @@ import { UsageTrackerService } from './services/usage-tracker.service';
 import { LimitCheckerService } from './services/limit-checker.service';
 import { PaymentGatewayService } from './services/payment-gateway.service';
 import { InvoiceGeneratorService } from './services/invoice-generator.service';
+import { PlanLimitService } from './services/plan-limit.service';
+import { TenantProfileService } from './services/tenant-profile.service';
+import { LicenseService } from './services/license.service';
+import { SoftwareOfferService } from './services/software-offer.service';
+import { ModuleDefinitionService } from './services/module-definition.service';
+import { ModuleAccessService } from './services/module-access.service';
+import { TenantActivityService } from './services/tenant-activity.service';
+import { VendorDashboardService } from './services/vendor-dashboard.service';
 
 // Infrastructure
 import { TenantContextService } from './infrastructure/tenant-context.service';
@@ -16,6 +24,7 @@ import { TenantGuard } from './infrastructure/tenant.guard';
 import { SuperAdminGuard } from './infrastructure/super-admin.guard';
 import { PlanLimitGuard } from './infrastructure/plan-limit.guard';
 import { FeatureFlagGuard } from './infrastructure/feature-flag.guard';
+import { ModuleAccessGuard } from './infrastructure/module-access.guard';
 
 // Command Handlers
 import { CreateTenantHandler } from './application/commands/create-tenant/create-tenant.handler';
@@ -51,6 +60,12 @@ import { TenantAdminController } from './presentation/tenant-admin.controller';
 import { PlanAdminController } from './presentation/plan-admin.controller';
 import { SubscriptionController } from './presentation/subscription.controller';
 import { BillingController } from './presentation/billing.controller';
+import { PlanLimitController } from './presentation/plan-limit.controller';
+import { VendorDashboardController } from './presentation/vendor-dashboard.controller';
+import { TenantProfileController } from './presentation/tenant-profile.controller';
+import { LicenseController } from './presentation/license.controller';
+import { SoftwareOfferController } from './presentation/software-offer.controller';
+import { ModuleAccessController } from './presentation/module-access.controller';
 
 const CommandHandlers = [
   CreateTenantHandler,
@@ -88,8 +103,14 @@ const QueryHandlers = [
   controllers: [
     TenantAdminController,
     PlanAdminController,
+    PlanLimitController,
     SubscriptionController,
     BillingController,
+    VendorDashboardController,
+    TenantProfileController,
+    LicenseController,
+    SoftwareOfferController,
+    ModuleAccessController,
   ],
   providers: [
     // Services
@@ -98,6 +119,14 @@ const QueryHandlers = [
     LimitCheckerService,
     PaymentGatewayService,
     InvoiceGeneratorService,
+    PlanLimitService,
+    TenantProfileService,
+    LicenseService,
+    SoftwareOfferService,
+    ModuleDefinitionService,
+    ModuleAccessService,
+    TenantActivityService,
+    VendorDashboardService,
     // Infrastructure
     TenantContextService,
     TenantContextInterceptor,
@@ -106,6 +135,7 @@ const QueryHandlers = [
     SuperAdminGuard,
     PlanLimitGuard,
     FeatureFlagGuard,
+    ModuleAccessGuard,
     // CQRS
     ...CommandHandlers,
     ...QueryHandlers,
@@ -115,6 +145,10 @@ const QueryHandlers = [
     UsageTrackerService,
     LimitCheckerService,
     TenantContextService,
+    PlanLimitService,
+    ModuleAccessService,
+    LicenseService,
+    TenantActivityService,
   ],
 })
 export class TenantModule {}

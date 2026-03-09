@@ -9,7 +9,7 @@ import type {
   ContactUpdateData,
 } from "../types/contacts.types";
 
-const BASE_URL = "/contacts";
+const BASE_URL = "/api/v1/contacts";
 
 export const contactsService = {
   getAll: (params?: ContactListParams) =>

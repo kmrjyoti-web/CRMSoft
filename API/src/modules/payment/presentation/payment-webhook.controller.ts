@@ -8,7 +8,7 @@ import { StripeGatewayService } from '../services/stripe-gateway.service';
 import { PaymentGatewayFactoryService } from '../services/payment-gateway-factory.service';
 
 @ApiTags('Payment Webhooks')
-@Controller('api/v1/webhooks/payment')
+@Controller('webhooks/payment')
 export class PaymentWebhookController {
   private readonly logger = new Logger(PaymentWebhookController.name);
 

@@ -30,7 +30,12 @@ export class GetOrganizationByIdHandler implements IQueryHandler<GetOrganization
         },
         filters: {
           include: {
-            lookupValue: { select: { id: true, value: true, label: true } },
+            lookupValue: {
+              select: {
+                id: true, value: true, label: true,
+                lookup: { select: { category: true } },
+              },
+            },
           },
         },
         createdByUser: { select: { id: true, firstName: true, lastName: true } },

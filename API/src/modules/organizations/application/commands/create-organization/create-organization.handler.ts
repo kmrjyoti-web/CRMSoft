@@ -38,6 +38,7 @@ export class CreateOrganizationHandler implements ICommandHandler<CreateOrganiza
       country: command.country,
       pincode: command.pincode,
       industry: command.industry,
+      annualRevenue: command.annualRevenue,
       notes: command.notes,
       createdById: command.createdById,
     });

@@ -11,10 +11,10 @@ import {
   Modal,
   Badge,
   Typography,
-  SelectInput,
   CurrencyInput,
   DatePicker,
 } from "@/components/ui";
+import { LookupSelect } from "@/components/common/LookupSelect";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
 import { StatusBadge } from "@/components/common/StatusBadge";
@@ -61,20 +61,6 @@ const paymentStatusVariantMap: Record<string, string> = {
   REFUNDED: "outline",
   PARTIALLY_REFUNDED: "warning",
 };
-
-const METHOD_OPTIONS = [
-  { label: "Cash", value: "CASH" },
-  { label: "Cheque", value: "CHEQUE" },
-  { label: "Bank Transfer", value: "BANK_TRANSFER" },
-  { label: "UPI", value: "UPI" },
-  { label: "Credit Card", value: "CREDIT_CARD" },
-  { label: "Debit Card", value: "DEBIT_CARD" },
-  { label: "Net Banking", value: "NET_BANKING" },
-  { label: "Wallet", value: "WALLET" },
-  { label: "Razorpay", value: "RAZORPAY" },
-  { label: "Stripe", value: "STRIPE" },
-  { label: "Other", value: "OTHER" },
-];
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -863,9 +849,9 @@ export function InvoiceDetail({ invoiceId }: InvoiceDetailProps) {
             value={paymentAmount}
             onChange={(value: number | null) => setPaymentAmount(value)}
           />
-          <SelectInput
+          <LookupSelect
+            masterCode="PAYMENT_METHOD"
             label="Payment Method"
-            options={METHOD_OPTIONS}
             value={paymentMethod}
             onChange={(v) =>
               setPaymentMethod(String(v ?? "CASH") as PaymentMethod)

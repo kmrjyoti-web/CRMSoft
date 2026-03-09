@@ -13,6 +13,7 @@ export class CreateRawContactCommand {
       value: string;
       priorityType?: string;
       label?: string;
+      isPrimary?: boolean;
     }>,
     public readonly filterIds?: string[],
   ) {}

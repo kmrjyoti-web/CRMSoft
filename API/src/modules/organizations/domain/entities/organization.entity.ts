@@ -15,6 +15,7 @@ export interface CreateOrganizationProps {
   country?: string;
   pincode?: string;
   industry?: string;
+  annualRevenue?: number;
   notes?: string;
   createdById: string;
 }
@@ -31,6 +32,7 @@ export interface UpdateOrganizationProps {
   country?: string;
   pincode?: string;
   industry?: string;
+  annualRevenue?: number;
   notes?: string;
 }
 
@@ -46,6 +48,7 @@ export class OrganizationEntity extends AggregateRoot {
   private _country?: string;
   private _pincode?: string;
   private _industry?: string;
+  private _annualRevenue?: number;
   private _notes?: string;
   private _isActive: boolean;
   private _createdById: string;
@@ -78,6 +81,7 @@ export class OrganizationEntity extends AggregateRoot {
     org._country = props.country?.trim();
     org._pincode = props.pincode?.trim();
     org._industry = props.industry?.trim();
+    org._annualRevenue = props.annualRevenue ?? undefined;
     org._notes = props.notes?.trim();
     org._isActive = true;
     org._createdById = props.createdById;
@@ -110,6 +114,7 @@ export class OrganizationEntity extends AggregateRoot {
     org._country = data.country ?? undefined;
     org._pincode = data.pincode ?? undefined;
     org._industry = data.industry ?? undefined;
+    org._annualRevenue = data.annualRevenue ?? undefined;
     org._notes = data.notes ?? undefined;
     org._isActive = data.isActive ?? true;
     org._createdById = data.createdById;
@@ -149,6 +154,7 @@ export class OrganizationEntity extends AggregateRoot {
     if (data.country !== undefined) this._country = data.country?.trim();
     if (data.pincode !== undefined) this._pincode = data.pincode?.trim();
     if (data.industry !== undefined) this._industry = data.industry?.trim();
+    if (data.annualRevenue !== undefined) this._annualRevenue = data.annualRevenue ?? undefined;
     if (data.notes !== undefined) this._notes = data.notes?.trim();
     this._updatedAt = new Date();
 
@@ -218,6 +224,7 @@ export class OrganizationEntity extends AggregateRoot {
   get country(): string | undefined { return this._country; }
   get pincode(): string | undefined { return this._pincode; }
   get industry(): string | undefined { return this._industry; }
+  get annualRevenue(): number | undefined { return this._annualRevenue; }
   get notes(): string | undefined { return this._notes; }
   get isActive(): boolean { return this._isActive; }
   get createdById(): string { return this._createdById; }

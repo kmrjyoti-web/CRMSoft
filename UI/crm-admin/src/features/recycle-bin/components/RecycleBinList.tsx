@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useCallback, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import toast from "react-hot-toast";
 
@@ -80,6 +81,7 @@ function flattenItems(items: RecycleBinItem[]): Record<string, unknown>[] {
 // ── Component ───────────────────────────────────────────
 
 export function RecycleBinList() {
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("");
 
   const { confirm, ConfirmDialogPortal } = useConfirmDialog();
@@ -131,7 +133,10 @@ export function RecycleBinList() {
       const svc = SERVICE_MAP[entityType as RecycleBinEntityType];
       if (svc) await svc.permanentDelete(rawId);
     },
-    onComplete: () => clearSelection(),
+    onComplete: () => {
+      clearSelection();
+      queryClient.invalidateQueries({ queryKey: ["recycle-bin"] });
+    },
   });
 
   // ── Single row restore ─────────────────────────────────
@@ -149,12 +154,13 @@ export function RecycleBinList() {
         const entityType = row._entityType as RecycleBinEntityType;
         const svc = SERVICE_MAP[entityType];
         if (svc) await svc.restore(row.rawId as string);
+        queryClient.invalidateQueries({ queryKey: ["recycle-bin"] });
         toast.success("Record restored successfully");
       } catch {
         toast.error("Failed to restore record");
       }
     },
-    [confirm],
+    [confirm, queryClient],
   );
 
   // ── Single row permanent delete ────────────────────────
@@ -172,12 +178,13 @@ export function RecycleBinList() {
         const entityType = row._entityType as RecycleBinEntityType;
         const svc = SERVICE_MAP[entityType];
         if (svc) await svc.permanentDelete(row.rawId as string);
+        queryClient.invalidateQueries({ queryKey: ["recycle-bin"] });
         toast.success("Record permanently deleted");
       } catch {
         toast.error("Failed to delete record");
       }
     },
-    [confirm],
+    [confirm, queryClient],
   );
 
   // ── Bulk restore handler ───────────────────────────────
@@ -196,8 +203,9 @@ export function RecycleBinList() {
       if (svc) await svc.restore(rawId);
     });
     clearSelection();
+    queryClient.invalidateQueries({ queryKey: ["recycle-bin"] });
     toast.success("Records restored");
-  }, [confirm, selectionCount, selectedArray, bulkExecute, clearSelection]);
+  }, [confirm, selectionCount, selectedArray, bulkExecute, clearSelection, queryClient]);
 
   if (isLoading) return <TableSkeleton title="Recycle Bin" />;
 

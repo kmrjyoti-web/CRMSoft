@@ -39,18 +39,30 @@ export const useMargLayout = create<MargLayoutStore>((set, get) => ({
 
   setActiveItem: (link) =>
     set((state) => ({
-      menuItems: state.menuItems.map((m) => ({
-        ...m,
-        active: m.link === link,
-        subItems: m.subItems?.map((s) => ({
-          ...s,
-          active: s.link === link,
-          subItems: s.subItems?.map((c) => ({
+      menuItems: state.menuItems.map((m) => {
+        const subItems = m.subItems?.map((s) => {
+          const childItems = s.subItems?.map((c) => ({
             ...c,
             active: c.link === link,
-          })),
-        })),
-      })),
+          }));
+          const hasActiveChild = childItems?.some((c) => c.active) ?? false;
+          return {
+            ...s,
+            active: s.link === link,
+            expanded: (s.link === link || hasActiveChild) ? true : s.expanded,
+            subItems: childItems,
+          };
+        });
+        const hasActiveSub = subItems?.some(
+          (s) => s.active || s.subItems?.some((c) => c.active),
+        ) ?? false;
+        return {
+          ...m,
+          active: m.link === link || hasActiveSub,
+          expanded: hasActiveSub ? true : m.expanded,
+          subItems,
+        };
+      }),
     })),
 
   filterMenuItems: (term: string): MenuItem[] => {

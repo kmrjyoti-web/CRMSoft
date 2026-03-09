@@ -4,7 +4,7 @@ import { CompanyProfileService } from '../services/company-profile.service';
 import { UpdateCompanyProfileDto } from './dto/update-company-profile.dto';
 
 @ApiTags('Settings - Company Profile')
-@Controller('api/v1/settings/company')
+@Controller('settings/company')
 export class CompanyProfileController {
   constructor(private readonly service: CompanyProfileService) {}
 

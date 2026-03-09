@@ -30,3 +30,15 @@ npm-debug.log*
 
 # Coverage
 coverage/
+
+# Temp files
+API/tmp/
+*.csv
+*.xlsx
+
+# Embedded repos
+CRMSoft/
+
+# Test artifacts
+playwright-report/
+e2e/

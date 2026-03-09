@@ -11,8 +11,18 @@ export class ReminderProcessorService {
   async processDueReminders() {
     const now = new Date();
 
+    // 1. Re-activate snoozed reminders whose snooze time has passed
+    const unsnoozed = await this.prisma.reminder.updateMany({
+      where: { isActive: true, status: 'SNOOZED', snoozedUntil: { lte: now } },
+      data: { status: 'PENDING', snoozedUntil: null },
+    });
+    if (unsnoozed.count > 0) {
+      this.logger.log(`Re-activated ${unsnoozed.count} snoozed reminders`);
+    }
+
+    // 2. Fetch PENDING reminders that are due
     const dueReminders = await this.prisma.reminder.findMany({
-      where: { isActive: true, isSent: false, scheduledAt: { lte: now } },
+      where: { isActive: true, status: 'PENDING', scheduledAt: { lte: now } },
       include: { recipient: { select: { id: true, email: true, firstName: true } } },
       take: 100,
     });
@@ -41,7 +51,7 @@ export class ReminderProcessorService {
 
         await this.prisma.reminder.update({
           where: { id: reminder.id },
-          data: { isSent: true, sentAt: now },
+          data: { isSent: true, sentAt: now, status: 'TRIGGERED', triggeredAt: now },
         });
       } catch (error) {
         this.logger.error(`Failed to process reminder ${reminder.id}: ${error.message}`);
@@ -49,5 +59,25 @@ export class ReminderProcessorService {
     }
 
     this.logger.log(`Processed ${dueReminders.length} reminders`);
+  }
+
+  /** Detect missed reminders: PENDING > 1 hour past scheduledAt. */
+  async detectMissedReminders() {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+
+    const missed = await this.prisma.reminder.updateMany({
+      where: {
+        isActive: true,
+        status: 'PENDING',
+        scheduledAt: { lt: oneHourAgo },
+      },
+      data: { status: 'MISSED', missedAt: new Date() },
+    });
+
+    if (missed.count > 0) {
+      this.logger.log(`Marked ${missed.count} reminders as MISSED`);
+    }
+
+    return missed.count;
   }
 }

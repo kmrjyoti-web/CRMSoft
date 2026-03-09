@@ -482,6 +482,41 @@
   background-color: rgba(255, 255, 255, 0.05);
 }
 
+.marg-sidebar-wrapper .sub-menu-item.active {
+  color: white;
+  background-color: rgba(38, 166, 154, 0.15);
+}
+
+.marg-sidebar-wrapper .sub-menu-item.active .sub-menu-row {
+  color: var(--marg-accent, #26a69a);
+  font-weight: 500;
+}
+
+.marg-sidebar-wrapper .sub-menu-item.active::before {
+  background-color: var(--marg-accent, #26a69a);
+  height: 2px;
+}
+
+.marg-sidebar-wrapper .sub-menu-item.active .sub-menu-icon {
+  color: var(--marg-accent, #26a69a);
+}
+
+.marg-sidebar-wrapper .sub-menu-item .sub-menu-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  flex-shrink: 0;
+  color: #78909c;
+  transition: color 0.2s;
+}
+
+.marg-sidebar-wrapper .sub-menu-item:hover .sub-menu-icon {
+  color: white;
+}
+
 .marg-sidebar-wrapper .sub-menu-item .sub-menu-text {
   flex: 1;
 }

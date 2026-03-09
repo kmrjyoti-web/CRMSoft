@@ -25,9 +25,14 @@ export interface PaginationMeta {
 export interface ApiErrorDetail {
   code: string;
   message: string;
+  messageHi?: string;
   details?: any;
   suggestion?: string;
+  suggestionHi?: string;
   documentationUrl?: string;
+  helpUrl?: string;
+  isRetryable?: boolean;
+  retryAfterMs?: number;
 }
 
 export interface PaginatedResult<T> {

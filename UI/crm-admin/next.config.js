@@ -2,6 +2,7 @@ const path = require('path');
 
 /** @type {import('next').NextConfig} */
 module.exports = {
+  output: 'standalone',
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -13,6 +14,11 @@ module.exports = {
     '@coreui/ui-react',
     '@coreui/theme',
     '@coreui/layout',
+    // MSW v2 and its ESM-only dependencies need transformation in jest
+    'msw',
+    '@mswjs/interceptors',
+    'until-async',
+    'rettime',
   ],
   webpack: (config) => {
     config.resolve.alias = {

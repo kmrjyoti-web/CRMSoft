@@ -26,32 +26,32 @@ describe("organizationsService", () => {
 
   it("getAll calls GET /organizations with params", async () => {
     await organizationsService.getAll({ page: 1, limit: 10, search: "test" });
-    expect(apiClient.get).toHaveBeenCalledWith("/organizations", {
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/organizations", {
       params: { page: 1, limit: 10, search: "test" },
     });
   });
 
   it("getById calls GET /organizations/:id", async () => {
     await organizationsService.getById("org-123");
-    expect(apiClient.get).toHaveBeenCalledWith("/organizations/org-123");
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/organizations/org-123");
   });
 
   it("create sends POST /organizations", async () => {
     const payload = { name: "Acme Corp" };
     await organizationsService.create(payload);
-    expect(apiClient.post).toHaveBeenCalledWith("/organizations", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/organizations", payload);
   });
 
   it("update sends PUT /organizations/:id (not PATCH)", async () => {
     const payload = { name: "Acme Inc" };
     await organizationsService.update("org-123", payload);
-    expect(apiClient.put).toHaveBeenCalledWith("/organizations/org-123", payload);
+    expect(apiClient.put).toHaveBeenCalledWith("/api/v1/organizations/org-123", payload);
   });
 
   it("deactivate sends POST /organizations/:id/deactivate", async () => {
     await organizationsService.deactivate("org-123");
     expect(apiClient.post).toHaveBeenCalledWith(
-      "/organizations/org-123/deactivate",
+      "/api/v1/organizations/org-123/deactivate",
     );
   });
 });

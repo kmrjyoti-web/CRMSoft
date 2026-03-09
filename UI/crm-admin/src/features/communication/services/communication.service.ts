@@ -14,8 +14,8 @@ import type {
   EmailSignatureUpdateData,
 } from "../types/communication.types";
 
-const TEMPLATES_URL = "/email-templates";
-const SIGNATURES_URL = "/email-signatures";
+const TEMPLATES_URL = "/api/v1/email-templates";
+const SIGNATURES_URL = "/api/v1/email-signatures";
 
 export const emailTemplatesService = {
   getAll: (params?: EmailTemplateListParams) =>

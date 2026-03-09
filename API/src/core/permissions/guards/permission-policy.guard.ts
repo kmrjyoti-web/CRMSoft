@@ -42,6 +42,9 @@ export class PermissionPolicyGuard implements CanActivate {
     const user = request.user;
     if (!user) throw new PermissionError('AUTH_REQUIRED', permissions[0]);
 
+    // Super admin bypasses all permission checks
+    if (user.isSuperAdmin) return true;
+
     // Get ownership metadata
     const ownershipMeta = this.reflector.get<{ resourceType: string; paramName: string }>(
       OWNERSHIP_KEY, context.getHandler(),

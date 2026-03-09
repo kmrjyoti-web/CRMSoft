@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, useId, createElement } from 'react';
+import { useState, useMemo, useCallback, useId, createElement, useEffect } from 'react';
 
 import { AICTableFull } from '@coreui/ui-react';
 
@@ -34,15 +34,27 @@ function inferFilterType(colId: string): 'text' | 'date' | 'number' | 'boolean' 
 interface TableFullProps extends AICTableFullProps {
   /** Enable table config system. When set, columns come from saved config + settings icon appears. */
   tableKey?: string;
+  /** Predefined category values for Kanban view. Maps field name → all possible values. */
+  kanbanCategoryOptions?: Record<string, string[]>;
 }
 
-export function TableFull({ tableKey, columns: staticColumns, data, headerActions, onRowEdit, onRowDelete, onRowCopy, onRowArchive, filterConfig, ...rest }: TableFullProps) {
+export function TableFull({ tableKey, columns: staticColumns, data, headerActions, onRowEdit, onRowDelete, onRowCopy, onRowArchive, filterConfig, kanbanCategoryOptions, defaultCalendarSettings, ...rest }: TableFullProps) {
   const enabled = !!tableKey;
   const config = useTableConfig(tableKey);
   const { rules, unmask } = useDataMasking(tableKey);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [unmaskedValues, setUnmaskedValues] = useState<Record<string, string>>({});
   const scopeId = useId().replace(/:/g, '');
+
+  // Detect mobile for responsive defaults
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   // Use config columns only when loaded + non-empty; always fall back to static
   const configColumns = enabled && !config.isLoading ? config.visibleColumns : undefined;
@@ -82,25 +94,70 @@ export function TableFull({ tableKey, columns: staticColumns, data, headerAction
     };
   }, [filterConfig, staticColumns]);
 
-  // Filter visible sidebar filters based on saved visibility
+  // Filter visible sidebar filters based on saved visibility + apply saved layout
   // Static filters: visible by default (hidden only if explicitly false)
   // Auto-generated: hidden by default (visible only if explicitly true)
   const filteredFilterConfig = useMemo(() => {
     if (!enabled || !allFilterConfig) return filterConfig;
     const vis = config.filterVisibility;
-    if (!vis) return filterConfig; // no saved prefs → show original static filters only
+    const layout = config.filterLayout;
+
+    // Build a flat map of all available filters (columnId → filter def)
+    const filterMap = new Map<string, any>();
+    for (const s of allFilterConfig.sections) {
+      for (const f of s.filters) filterMap.set(f.columnId, f);
+    }
+
+    // Determine visibility for each filter
+    const isVisible = (columnId: string) => {
+      if (!vis) return staticFilterIds.has(columnId); // no prefs → static only
+      if (staticFilterIds.has(columnId)) return vis[columnId] !== false;
+      return vis[columnId] === true;
+    };
+
+    // If saved layout exists, use it to build sections in custom order
+    if (layout && layout.length > 0) {
+      const usedIds = new Set<string>();
+      const sections = layout
+        .map((ls) => {
+          const filters = ls.filterIds
+            .filter((id) => {
+              const f = filterMap.get(id);
+              return f && isVisible(id);
+            })
+            .map((id) => {
+              usedIds.add(id);
+              return filterMap.get(id)!;
+            });
+          // Preserve defaultOpen from original section if title matches
+          const origSection = allFilterConfig.sections.find((s) => s.title === ls.title);
+          return { title: ls.title, defaultOpen: origSection?.defaultOpen ?? false, filters };
+        })
+        .filter((s) => s.filters.length > 0);
+
+      // Append any visible filters not covered by layout (e.g. newly added filters)
+      const orphanFilters: any[] = [];
+      for (const [id, f] of filterMap) {
+        if (!usedIds.has(id) && isVisible(id)) orphanFilters.push(f);
+      }
+      if (orphanFilters.length > 0) {
+        sections.push({ title: 'More Filters', defaultOpen: false, filters: orphanFilters });
+      }
+
+      return { sections };
+    }
+
+    // No layout saved — fall back to visibility-only filtering
+    if (!vis) return filterConfig;
     return {
       sections: allFilterConfig.sections
         .map((section) => ({
           ...section,
-          filters: section.filters.filter((f) => {
-            if (staticFilterIds.has(f.columnId)) return vis[f.columnId] !== false;
-            return vis[f.columnId] === true;
-          }),
+          filters: section.filters.filter((f) => isVisible(f.columnId)),
         }))
         .filter((s) => s.filters.length > 0),
     };
-  }, [enabled, allFilterConfig, filterConfig, staticFilterIds, config.filterVisibility]);
+  }, [enabled, allFilterConfig, filterConfig, staticFilterIds, config.filterVisibility, config.filterLayout]);
 
   // Unmask handler: calls API, caches result locally
   const handleUnmask = useCallback(
@@ -261,15 +318,15 @@ export function TableFull({ tableKey, columns: staticColumns, data, headerAction
   // (AICTableFull reads density/viewMode/columns on mount only — uncontrolled)
   const configKey = useMemo(
     () => enabled
-      ? `${tableKey}-${config.density ?? 'c'}-${config.defaultViewMode ?? 't'}-${showActions}-${colFingerprint}`
-      : 'static',
-    [enabled, tableKey, config.density, config.defaultViewMode, showActions, colFingerprint],
+      ? `${tableKey}-${config.density ?? 'c'}-${isMobile ? 'card' : config.defaultViewMode ?? 't'}-${showActions}-${colFingerprint}`
+      : `static-${isMobile ? 'card' : 'desk'}`,
+    [enabled, tableKey, config.density, config.defaultViewMode, showActions, colFingerprint, isMobile],
   );
 
   const wrapperClass = `table-full-${scopeId}`;
 
   return (
-    <div className={`${wrapperClass} h-full`}>
+    <div className={`${wrapperClass} crm-table-full h-full ${isMobile ? 'crm-mobile' : ''}`}>
       {/* Scoped CSS to hide actions column when disabled */}
       {!showActions && (
         <style>{`.${wrapperClass} th:last-child, .${wrapperClass} td:last-child { display: none !important; }`}</style>
@@ -281,12 +338,14 @@ export function TableFull({ tableKey, columns: staticColumns, data, headerAction
         data={maskedData}
         columns={effectiveColumns}
         defaultDensity={(enabled ? config.density : rest.defaultDensity) as AICTableFullProps['defaultDensity']}
-        defaultViewMode={(enabled ? config.defaultViewMode : rest.defaultViewMode) as AICTableFullProps['defaultViewMode']}
+        defaultViewMode={(isMobile ? 'card' : (enabled ? config.defaultViewMode : undefined) ?? rest.defaultViewMode) as AICTableFullProps['defaultViewMode']}
         headerActions={combinedHeaderActions}
         onRowEdit={showActions ? onRowEdit : undefined}
         onRowDelete={showActions ? onRowDelete : undefined}
         onRowCopy={showActions ? onRowCopy : undefined}
         onRowArchive={showActions ? onRowArchive : undefined}
+        kanbanCategoryOptions={kanbanCategoryOptions}
+        defaultCalendarSettings={defaultCalendarSettings}
       />
       {enabled && (
         <TableConfigDrawer

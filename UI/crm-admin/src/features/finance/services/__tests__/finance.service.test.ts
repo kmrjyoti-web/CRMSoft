@@ -27,37 +27,37 @@ describe("invoiceService", () => {
 
   it("getAll calls GET /invoices with params", async () => {
     await invoiceService.getAll({ page: 1, limit: 10, status: "DRAFT" });
-    expect(apiClient.get).toHaveBeenCalledWith("/invoices", {
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/invoices", {
       params: { page: 1, limit: 10, status: "DRAFT" },
     });
   });
 
   it("getById calls GET /invoices/:id", async () => {
     await invoiceService.getById("inv-1");
-    expect(apiClient.get).toHaveBeenCalledWith("/invoices/inv-1");
+    expect(apiClient.get).toHaveBeenCalledWith("/api/v1/invoices/inv-1");
   });
 
   it("create sends POST /invoices", async () => {
     const payload = { billingName: "Test", dueDate: "2024-02-01", lineItems: [] };
     await invoiceService.create(payload as any);
-    expect(apiClient.post).toHaveBeenCalledWith("/invoices", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/invoices", payload);
   });
 
   it("generate sends POST /invoices/generate", async () => {
     const payload = { quotationId: "q-1", dueDate: "2024-02-01" };
     await invoiceService.generate(payload);
-    expect(apiClient.post).toHaveBeenCalledWith("/invoices/generate", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/invoices/generate", payload);
   });
 
   it("send sends POST /invoices/:id/send", async () => {
     await invoiceService.send("inv-1");
-    expect(apiClient.post).toHaveBeenCalledWith("/invoices/inv-1/send");
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/invoices/inv-1/send");
   });
 
   it("cancel sends POST /invoices/:id/cancel", async () => {
     const payload = { reason: "Duplicate" };
     await invoiceService.cancel("inv-1", payload);
-    expect(apiClient.post).toHaveBeenCalledWith("/invoices/inv-1/cancel", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/invoices/inv-1/cancel", payload);
   });
 });
 
@@ -71,7 +71,7 @@ describe("paymentService", () => {
   it("record sends POST /payments/record", async () => {
     const payload = { invoiceId: "inv-1", amount: 5000, method: "CASH" as const };
     await paymentService.record(payload as any);
-    expect(apiClient.post).toHaveBeenCalledWith("/payments/record", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/payments/record", payload);
   });
 });
 
@@ -88,7 +88,7 @@ describe("creditNoteService", () => {
   it("create sends POST /credit-notes", async () => {
     const payload = { invoiceId: "inv-1", amount: 1000, reason: "Damaged goods" };
     await creditNoteService.create(payload);
-    expect(apiClient.post).toHaveBeenCalledWith("/credit-notes", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/credit-notes", payload);
   });
 });
 
@@ -96,6 +96,6 @@ describe("refundService", () => {
   it("create sends POST /refunds", async () => {
     const payload = { paymentId: "pay-1", amount: 500, reason: "Overcharged" };
     await refundService.create(payload);
-    expect(apiClient.post).toHaveBeenCalledWith("/refunds", payload);
+    expect(apiClient.post).toHaveBeenCalledWith("/api/v1/refunds", payload);
   });
 });

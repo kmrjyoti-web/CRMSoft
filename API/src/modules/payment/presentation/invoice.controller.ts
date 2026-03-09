@@ -9,7 +9,7 @@ import {
 } from './dto/invoice.dto';
 
 @ApiTags('Invoices')
-@Controller('api/v1/invoices')
+@Controller('invoices')
 export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
 

@@ -56,7 +56,8 @@ describe('AuthService — Multi-Login', () => {
       verify: jest.fn(),
     };
     config = { get: jest.fn().mockReturnValue('secret') };
-    service = new AuthService(prisma as any, jwt as any, config as any);
+    const tenantProvisioning = { provision: jest.fn() };
+    service = new AuthService(prisma as any, jwt as any, config as any, tenantProvisioning as any);
   });
 
   // ─── ADMIN LOGIN ───

@@ -16,7 +16,7 @@ import type {
 
 import type { ApiResponse } from "@/types/api-response";
 
-const BASE_URL = "/quotations";
+const BASE_URL = "/api/v1/quotations";
 
 export const quotationsService = {
   getAll(params?: QuotationListParams) {
