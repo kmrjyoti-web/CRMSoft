@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { Typography, Button, Icon, Badge } from "@/components/ui";
+import { Icon } from "@/components/ui";
 
 import { registrationService } from "../services/registration.service";
 import type { PlanOption } from "../types/registration.types";
@@ -22,7 +22,6 @@ export function PlanSelector({ selectedPlanId, onSelect }: PlanSelectorProps) {
       .then((data) => {
         const list = Array.isArray(data) ? data : [];
         setPlans(list);
-        // Auto-select first plan if none selected
         if (!selectedPlanId && list.length > 0) {
           onSelect(list[0].id);
         }
@@ -41,10 +40,8 @@ export function PlanSelector({ selectedPlanId, onSelect }: PlanSelectorProps) {
 
   if (plans.length === 0) {
     return (
-      <div className="text-center py-8">
-        <Typography variant="text" color="muted">
-          No plans available at the moment.
-        </Typography>
+      <div className="text-center py-8" style={{ color: "rgba(148,163,184,0.85)" }}>
+        No plans available at the moment.
       </div>
     );
   }
@@ -59,85 +56,166 @@ export function PlanSelector({ selectedPlanId, onSelect }: PlanSelectorProps) {
   };
 
   return (
+    /* Scrollable container — max 2 rows visible, then scroll */
     <div
       style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(${Math.min(plans.length, 3)}, 1fr)`,
-        gap: "16px",
+        maxHeight: 360,
+        overflowY: plans.length > 4 ? "auto" : "visible",
+        paddingRight: plans.length > 4 ? 4 : 0,
+        scrollbarWidth: "thin",
+        scrollbarColor: "rgba(255,255,255,0.2) transparent",
       }}
     >
-      {plans.map((plan, index) => {
-        const isSelected = selectedPlanId === plan.id;
-        const isMiddle = plans.length === 3 && index === 1;
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 14,
+        }}
+      >
+        {plans.map((plan, index) => {
+          const isSelected = selectedPlanId === plan.id;
+          const isPopular = plans.length >= 2 && index === 1;
 
-        return (
-          <div
-            key={plan.id}
-            onClick={() => onSelect(plan.id)}
-            style={{
-              border: isSelected
-                ? "2px solid var(--color-primary)"
-                : "1px solid var(--border-color, #e2e8f0)",
-              borderRadius: "var(--radius-lg, 12px)",
-              padding: "24px 20px",
-              cursor: "pointer",
-              background: isSelected
-                ? "var(--color-primary-light, rgba(59,130,246,0.05))"
-                : "var(--surface-bg, #fff)",
-              transition: "all 0.2s ease",
-              position: "relative",
-            }}
-          >
-            {isMiddle && (
-              <div style={{ position: "absolute", top: "-12px", left: "50%", transform: "translateX(-50%)" }}>
-                <Badge variant="primary">Popular</Badge>
-              </div>
-            )}
-
-            <div className="text-center mb-4">
-              <Typography variant="heading" level={5} className="mb-1">
-                {plan.name}
-              </Typography>
-              {plan.description && (
-                <Typography variant="text" color="muted" size="13px">
-                  {plan.description}
-                </Typography>
+          return (
+            <div
+              key={plan.id}
+              onClick={() => onSelect(plan.id)}
+              style={{
+                position: "relative",
+                borderRadius: 12,
+                padding: "18px 16px",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                background: isSelected
+                  ? "rgba(30, 95, 116, 0.45)"
+                  : "rgba(255, 255, 255, 0.06)",
+                border: isSelected
+                  ? "2px solid rgba(94, 234, 212, 0.75)"
+                  : "1px solid rgba(255, 255, 255, 0.15)",
+                boxShadow: isSelected
+                  ? "0 0 0 3px rgba(94, 234, 212, 0.12), 0 4px 20px rgba(30,95,116,0.3)"
+                  : "none",
+                backdropFilter: "blur(8px)",
+              }}
+            >
+              {/* Popular badge */}
+              {isPopular && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: -11,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    background: "linear-gradient(135deg, #1e5f74, #5eead4)",
+                    color: "#fff",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    letterSpacing: "0.05em",
+                    padding: "3px 10px",
+                    borderRadius: 99,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  POPULAR
+                </div>
               )}
-            </div>
 
-            <div className="text-center mb-4">
-              <span className="text-2xl font-bold">{formatPrice(plan.price)}</span>
-              {plan.price > 0 && (
-                <Typography variant="text" color="muted" size="13px">
-                  /{plan.billingCycle || "month"}
-                </Typography>
+              {/* Selected check */}
+              {isSelected && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 10,
+                    right: 10,
+                    color: "#5eead4",
+                  }}
+                >
+                  <Icon name="check-circle" size={16} />
+                </div>
               )}
-            </div>
 
-            {plan.maxUsers && (
-              <div className="flex items-center gap-2 mb-2 text-sm">
-                <Icon name="users" size={14} />
-                <span>Up to {plan.maxUsers} users</span>
+              {/* Plan name */}
+              <div style={{ marginBottom: 6 }}>
+                <div style={{
+                  fontSize: 15,
+                  fontWeight: 700,
+                  color: isSelected ? "#f1f5f9" : "rgba(226,232,240,0.9)",
+                  lineHeight: 1.2,
+                }}>
+                  {plan.name}
+                </div>
+                {plan.description && (
+                  <div style={{
+                    fontSize: 11,
+                    color: "rgba(148,163,184,0.8)",
+                    marginTop: 3,
+                    lineHeight: 1.4,
+                  }}>
+                    {plan.description}
+                  </div>
+                )}
               </div>
-            )}
 
-            <div className="mt-4">
-              <Button
-                variant={isSelected ? "primary" : "outline"}
-                fullWidth
-                size="sm"
+              {/* Price */}
+              <div style={{ marginBottom: 10 }}>
+                <span style={{
+                  fontSize: 22,
+                  fontWeight: 800,
+                  color: isSelected ? "#5eead4" : "#f1f5f9",
+                  letterSpacing: "-0.02em",
+                }}>
+                  {formatPrice(plan.price)}
+                </span>
+                {plan.price > 0 && (
+                  <span style={{ fontSize: 11, color: "rgba(148,163,184,0.7)", marginLeft: 4 }}>
+                    /{plan.billingCycle || "month"}
+                  </span>
+                )}
+              </div>
+
+              {/* Users limit */}
+              {plan.maxUsers && (
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  fontSize: 12,
+                  color: "rgba(148,163,184,0.85)",
+                }}>
+                  <Icon name="users" size={12} />
+                  <span>Up to {plan.maxUsers} users</span>
+                </div>
+              )}
+
+              {/* Select button */}
+              <button
                 type="button"
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  onSelect(plan.id);
+                onClick={(e) => { e.stopPropagation(); onSelect(plan.id); }}
+                style={{
+                  marginTop: 12,
+                  width: "100%",
+                  padding: "7px 0",
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  background: isSelected
+                    ? "linear-gradient(135deg, #1e5f74, #2a7a94)"
+                    : "rgba(255,255,255,0.08)",
+                  border: isSelected
+                    ? "1px solid rgba(94,234,212,0.4)"
+                    : "1px solid rgba(255,255,255,0.18)",
+                  color: isSelected ? "#fff" : "rgba(226,232,240,0.85)",
                 }}
               >
-                {isSelected ? "Selected" : "Select Plan"}
-              </Button>
+                {isSelected ? "✓ Selected" : "Select Plan"}
+              </button>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

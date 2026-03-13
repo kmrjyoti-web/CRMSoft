@@ -118,15 +118,15 @@ body {
    ═══════════════════════════════════════════════════════ */
 
 .tod-dark-glass-card {
-  background: rgba(15, 23, 42, 0.42);
-  backdrop-filter: blur(22px) saturate(150%);
-  -webkit-backdrop-filter: blur(22px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: var(--radius-lg, 12px);
+  background: rgba(15, 23, 42, 0.52);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
   box-shadow:
-    0 25px 70px rgba(2, 6, 23, 0.35),
+    0 30px 80px rgba(2, 6, 23, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  padding: 2rem;
+  padding: 2.25rem 2rem 1.75rem;
   /* Force light text for headings / labels / muted text */
   --color-text: #f1f5f9;
   --color-text-secondary: #cbd5e1;
@@ -135,17 +135,80 @@ body {
   --color-danger: #f87171;
 }
 
-/* Reset CSS vars for input containers so inputs stay white-bg / dark-text.
-   Targets the AICInput BASE_CLASSES: "flex w-full rounded-[var(--radius-md)] ..." */
+/* ── Auth inputs: shared glassmorphism style ──────────────────
+   Targets the AICInput wrapper: "flex w-full rounded-[var(--radius-md)] ..."
+   All 3 inputs (email / password / tenant) share one cohesive look.
+   ─────────────────────────────────────────────────────────── */
 .tod-dark-glass-card .flex.rounded-\[var\(--radius-md\)\] {
-  --color-text: #0f172a;
-  --color-text-secondary: #475569;
+  --color-text: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
   --color-text-tertiary: #94a3b8;
-  --color-bg: #ffffff;
-  --color-bg-secondary: #f8fafc;
-  --color-border: #e2e8f0;
-  --color-border-hover: #cbd5e1;
-  --color-border-focus: #3b82f6;
+  --color-bg: rgba(255, 255, 255, 0.08);
+  --color-bg-secondary: rgba(255, 255, 255, 0.04);
+  --color-border: rgba(255, 255, 255, 0.20);
+  --color-border-hover: rgba(255, 255, 255, 0.35);
+  --color-border-focus: rgba(94, 234, 212, 0.70);
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.20) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Hover state */
+.tod-dark-glass-card .flex.rounded-\[var\(--radius-md\)\]:hover {
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Focus-within: teal glow ring matching the dark theme */
+.tod-dark-glass-card .flex.rounded-\[var\(--radius-md\)\]:focus-within {
+  border-color: rgba(94, 234, 212, 0.80) !important;
+  background: rgba(255, 255, 255, 0.13) !important;
+  box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.18) !important;
+}
+
+/* Input text + placeholder inside glass inputs */
+.tod-dark-glass-card .flex.rounded-\[var\(--radius-md\)\] input {
+  color: #f1f5f9 !important;
+  caret-color: #5eead4;
+}
+.tod-dark-glass-card .flex.rounded-\[var\(--radius-md\)\] input::placeholder {
+  color: rgba(148, 163, 184, 0.70) !important;
+}
+
+/* Left icon color in auth inputs */
+.tod-dark-glass-card .flex.rounded-\[var\(--radius-md\)\] svg {
+  color: rgba(148, 163, 184, 0.85) !important;
+  stroke: rgba(148, 163, 184, 0.85) !important;
+}
+.tod-dark-glass-card .flex.rounded-\[var\(--radius-md\)\]:focus-within svg {
+  color: #5eead4 !important;
+  stroke: #5eead4 !important;
+}
+
+/* Password show/hide eye button */
+.tod-dark-glass-card .flex.rounded-\[var\(--radius-md\)\] button[type="button"] {
+  color: rgba(148, 163, 184, 0.80) !important;
+}
+.tod-dark-glass-card .flex.rounded-\[var\(--radius-md\)\] button[type="button"]:hover {
+  color: #f1f5f9 !important;
+}
+
+/* Floating label inside glass inputs — replace white bg chip with dark glass bg */
+.tod-dark-glass-card .relative label {
+  background: rgba(15, 23, 42, 0.75) !important;
+  color: rgba(148, 163, 184, 0.90) !important;
+  border-radius: 3px;
+}
+.tod-dark-glass-card .relative:focus-within label {
+  color: #5eead4 !important;
+  background: rgba(15, 23, 42, 0.85) !important;
+}
+
+/* Checkbox label color inside dark card */
+.tod-dark-glass-card label {
+  color: #cbd5e1 !important;
 }
 
 /* Error alert adapted for dark card */
@@ -316,9 +379,28 @@ body {
   padding: 1.5rem;
 }
 
+/* Wide variant for register page — full width, no branding panel */
+.tod-auth-left--wide {
+  width: 100% !important;
+  padding: 2rem 1.5rem;
+  align-items: flex-start;
+  padding-top: max(2rem, 5vh);
+}
+
 .tod-auth-left-inner {
   width: 100%;
   max-width: 28rem;
+}
+
+/* Wide inner — register card wider */
+.tod-auth-left-inner--wide {
+  max-width: 640px;
+}
+
+@media (min-width: 768px) {
+  .tod-auth-left-inner--wide {
+    max-width: 700px;
+  }
 }
 
 .tod-auth-right {
@@ -338,6 +420,7 @@ body {
 
 @media (min-width: 1024px) {
   .tod-auth-left { width: 50%; }
+  .tod-auth-left--wide { width: 100% !important; }
 }
 
 /* ═══════════════════════════════════════════════════════

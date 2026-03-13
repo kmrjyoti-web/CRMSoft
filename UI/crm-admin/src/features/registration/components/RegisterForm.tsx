@@ -16,6 +16,7 @@ import { useAuthStore } from "@/stores/auth.store";
 
 import { registrationService } from "../services/registration.service";
 import type { RegisterFormData } from "../types/registration.types";
+import { IndustrySelector } from "./IndustrySelector";
 import { PlanSelector } from "./PlanSelector";
 
 // ── Validation Schema ────────────────────────────────────
@@ -34,6 +35,7 @@ const registerSchema = z
       .regex(/^[a-z0-9][a-z0-9-]*[a-z0-9]$/, "Slug must be lowercase, alphanumeric with hyphens"),
     phone: z.string().optional(),
     planId: z.string().optional(),
+    businessTypeCode: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -44,6 +46,7 @@ const registerSchema = z
 
 const STEPS = [
   { label: "Account", icon: "user" as const },
+  { label: "Industry", icon: "factory" as const },
   { label: "Company", icon: "building" as const },
   { label: "Plan", icon: "credit-card" as const },
   { label: "Review", icon: "check-circle" as const },
@@ -119,6 +122,7 @@ export function RegisterForm() {
       slug: "",
       phone: "",
       planId: "",
+      businessTypeCode: "",
     },
   });
 
@@ -137,7 +141,9 @@ export function RegisterForm() {
     switch (step) {
       case 0:
         return trigger(["firstName", "lastName", "email", "password", "confirmPassword"]);
-      case 1: {
+      case 1:
+        return true; // Industry selection is optional
+      case 2: {
         const fieldValid = await trigger(["companyName", "slug"]);
         if (!fieldValid) return false;
         // Check slug availability on the server
@@ -157,9 +163,9 @@ export function RegisterForm() {
           return true; // Allow to proceed if check fails (server will catch it)
         }
       }
-      case 2:
-        return true; // Plan selection is optional
       case 3:
+        return true; // Plan selection is optional
+      case 4:
         return true;
       default:
         return true;
@@ -185,6 +191,7 @@ export function RegisterForm() {
         lastName: formValues.lastName,
         phone: formValues.phone || undefined,
         planId: formValues.planId || undefined,
+        businessTypeCode: formValues.businessTypeCode || undefined,
       });
 
       // Auto-login: set token + store
@@ -207,12 +214,21 @@ export function RegisterForm() {
 
   return (
     <>
-      <Typography variant="heading" level={3} className="mb-1">
-        Create Account
-      </Typography>
-      <Typography variant="text" color="muted" className="mb-4">
-        Set up your CRM workspace in minutes
-      </Typography>
+      <div className="mb-5 text-center">
+        <h2 style={{
+          fontSize: 24,
+          fontWeight: 700,
+          color: "#f1f5f9",
+          letterSpacing: "-0.02em",
+          lineHeight: 1.2,
+          marginBottom: 6,
+        }}>
+          Create Account
+        </h2>
+        <p style={{ fontSize: 13, color: "rgba(148,163,184,0.9)", lineHeight: 1.5 }}>
+          Set up your CRM workspace in minutes
+        </p>
+      </div>
 
       <StepIndicator currentStep={step} />
 
@@ -234,18 +250,20 @@ export function RegisterForm() {
         {/* ── Step 0: Account Details ── */}
         {step === 0 && (
           <div className="space-y-4">
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "14px" }}>
               <Controller
                 name="firstName"
                 control={control}
                 render={({ field }) => (
                   <Input
+                    size="lg"
+                    label="First Name"
                     placeholder="First Name"
                     value={field.value}
                     onChange={field.onChange}
                     error={!!errors.firstName}
                     errorMessage={errors.firstName?.message}
-                    leftIcon={<Icon name="user" size={18} />}
+                    leftIcon={<Icon name="user" size={20} />}
                     required
                   />
                 )}
@@ -255,12 +273,14 @@ export function RegisterForm() {
                 control={control}
                 render={({ field }) => (
                   <Input
+                    size="lg"
+                    label="Last Name"
                     placeholder="Last Name"
                     value={field.value}
                     onChange={field.onChange}
                     error={!!errors.lastName}
                     errorMessage={errors.lastName?.message}
-                    leftIcon={<Icon name="user" size={18} />}
+                    leftIcon={<Icon name="user" size={20} />}
                     required
                   />
                 )}
@@ -272,67 +292,83 @@ export function RegisterForm() {
               control={control}
               render={({ field }) => (
                 <Input
+                  size="lg"
                   type="email"
-                  placeholder="Work Email"
+                  label="Work Email"
+                  placeholder="you@company.com"
                   value={field.value}
                   onChange={field.onChange}
                   error={!!errors.email}
                   errorMessage={errors.email?.message}
-                  leftIcon={<Icon name="mail" size={18} />}
+                  leftIcon={<Icon name="mail" size={20} />}
                   required
                 />
               )}
             />
 
-            <Controller
-              name="password"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  type="password"
-                  placeholder="Password (min 6 chars)"
-                  value={field.value}
-                  onChange={field.onChange}
-                  error={!!errors.password}
-                  errorMessage={errors.password?.message}
-                  leftIcon={<Icon name="lock" size={18} />}
-                  required
-                />
-              )}
-            />
-
-            <Controller
-              name="confirmPassword"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  type="password"
-                  placeholder="Confirm Password"
-                  value={field.value}
-                  onChange={field.onChange}
-                  error={!!errors.confirmPassword}
-                  errorMessage={errors.confirmPassword?.message}
-                  leftIcon={<Icon name="lock" size={18} />}
-                  required
-                />
-              )}
-            />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "14px" }}>
+              <Controller
+                name="password"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    size="lg"
+                    type="password"
+                    label="Password"
+                    placeholder="Min 6 characters"
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={!!errors.password}
+                    errorMessage={errors.password?.message}
+                    leftIcon={<Icon name="lock" size={20} />}
+                    required
+                  />
+                )}
+              />
+              <Controller
+                name="confirmPassword"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    size="lg"
+                    type="password"
+                    label="Confirm Password"
+                    placeholder="Repeat password"
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={!!errors.confirmPassword}
+                    errorMessage={errors.confirmPassword?.message}
+                    leftIcon={<Icon name="lock" size={20} />}
+                    required
+                  />
+                )}
+              />
+            </div>
           </div>
         )}
 
-        {/* ── Step 1: Company Info ── */}
+        {/* ── Step 1: Industry Selection ── */}
         {step === 1 && (
+          <IndustrySelector
+            selectedCode={values.businessTypeCode}
+            onSelect={(code) => setValue("businessTypeCode", code)}
+          />
+        )}
+
+        {/* ── Step 2: Company Info ── */}
+        {step === 2 && (
           <div className="space-y-4">
             <Controller
               name="companyName"
               control={control}
               render={({ field }) => (
                 <Input
-                  placeholder="Company Name"
+                  size="lg"
+                  label="Company Name"
+                  placeholder="Your company name"
                   value={field.value}
                   onChange={(val: string) => {
                     field.onChange(val);
-                    // Auto-generate slug from company name
                     const generated = autoSlug(val);
                     if (generated) {
                       setValue("slug", generated);
@@ -341,7 +377,7 @@ export function RegisterForm() {
                   }}
                   error={!!errors.companyName}
                   errorMessage={errors.companyName?.message}
-                  leftIcon={<Icon name="building" size={18} />}
+                  leftIcon={<Icon name="building" size={20} />}
                   required
                 />
               )}
@@ -353,22 +389,24 @@ export function RegisterForm() {
               render={({ field }) => (
                 <div>
                   <Input
+                    size="lg"
+                    label="Company Code"
                     placeholder="company-slug (URL-safe)"
                     value={field.value}
                     onChange={(val: string) => {
                       field.onChange(val);
-                      setSlugStatus("idle"); // Reset status when user types
+                      setSlugStatus("idle");
                     }}
                     error={!!errors.slug || slugStatus === "taken"}
                     errorMessage={
                       errors.slug?.message ||
                       (slugStatus === "taken" ? "This company code is already taken" : undefined)
                     }
-                    leftIcon={<Icon name="link" size={18} />}
+                    leftIcon={<Icon name="link" size={20} />}
                     required
                   />
                   {slugStatus === "available" && (
-                    <div className="flex items-center gap-1 mt-1" style={{ color: "#22c55e", fontSize: "12px" }}>
+                    <div className="flex items-center gap-1 mt-1" style={{ color: "#5eead4", fontSize: "12px" }}>
                       <Icon name="check-circle" size={14} />
                       <span>Company code is available</span>
                     </div>
@@ -382,75 +420,78 @@ export function RegisterForm() {
               control={control}
               render={({ field }) => (
                 <Input
+                  size="lg"
+                  label="Phone"
                   placeholder="Phone (optional)"
                   value={field.value ?? ""}
                   onChange={field.onChange}
-                  leftIcon={<Icon name="phone" size={18} />}
+                  leftIcon={<Icon name="phone" size={20} />}
                 />
               )}
             />
           </div>
         )}
 
-        {/* ── Step 2: Plan Selection ── */}
-        {step === 2 && (
+        {/* ── Step 3: Plan Selection ── */}
+        {step === 3 && (
           <PlanSelector
             selectedPlanId={values.planId}
             onSelect={(planId) => setValue("planId", planId)}
           />
         )}
 
-        {/* ── Step 3: Review ── */}
-        {step === 3 && (
-          <div className="space-y-3">
-            <div
-              style={{
-                border: "1px solid var(--border-color, #e2e8f0)",
-                borderRadius: "var(--radius-md, 8px)",
-                padding: "16px",
-              }}
-            >
-              <Typography variant="text" color="muted" size="12px" className="mb-1">
-                Account
-              </Typography>
-              <div className="text-sm">
-                <strong>{values.firstName} {values.lastName}</strong>
+        {/* ── Step 4: Review ── */}
+        {step === 4 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {[
+              {
+                label: "Account",
+                primary: `${values.firstName} ${values.lastName}`,
+                secondary: values.email,
+              },
+              values.businessTypeCode
+                ? { label: "Industry", primary: values.businessTypeCode.replace(/_/g, " "), secondary: "" }
+                : null,
+              {
+                label: "Company",
+                primary: values.companyName,
+                secondary: `Code: ${values.slug}${values.phone ? ` · ${values.phone}` : ""}`,
+              },
+            ].filter(Boolean).map((row: any) => (
+              <div
+                key={row.label}
+                style={{
+                  border: "1px solid rgba(255,255,255,0.14)",
+                  borderRadius: 10,
+                  padding: "12px 14px",
+                  background: "rgba(255,255,255,0.05)",
+                }}
+              >
+                <div style={{ fontSize: 11, color: "rgba(148,163,184,0.7)", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  {row.label}
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#f1f5f9" }}>{row.primary}</div>
+                {row.secondary && (
+                  <div style={{ fontSize: 12, color: "rgba(148,163,184,0.8)", marginTop: 2 }}>{row.secondary}</div>
+                )}
               </div>
-              <div className="text-sm text-slate-400">{values.email}</div>
-            </div>
-
-            <div
-              style={{
-                border: "1px solid var(--border-color, #e2e8f0)",
-                borderRadius: "var(--radius-md, 8px)",
-                padding: "16px",
-              }}
-            >
-              <Typography variant="text" color="muted" size="12px" className="mb-1">
-                Company
-              </Typography>
-              <div className="text-sm">
-                <strong>{values.companyName}</strong>
-              </div>
-              <div className="text-sm text-slate-400">
-                Slug: {values.slug}
-                {values.phone && <span> | Phone: {values.phone}</span>}
-              </div>
-            </div>
-
-            <Typography variant="text" color="muted" size="12px" className="mt-2">
+            ))}
+            <p style={{ fontSize: 11, color: "rgba(148,163,184,0.65)", marginTop: 4, lineHeight: 1.5 }}>
               By creating an account, you agree to our Terms of Service and Privacy Policy.
-            </Typography>
+            </p>
           </div>
         )}
 
         {/* ── Navigation Buttons ── */}
-        <div
-          className="mt-6"
-          style={{ display: "flex", gap: "12px", justifyContent: "space-between" }}
-        >
+        <div className="mt-6" style={{ display: "flex", gap: 12, justifyContent: "space-between" }}>
           {step > 0 ? (
-            <Button type="button" variant="outline" onClick={prevStep}>
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              onClick={prevStep}
+              style={{ border: "1px solid rgba(255,255,255,0.2)", color: "#cbd5e1", background: "rgba(255,255,255,0.06)" }}
+            >
               <Icon name="arrow-left" size={16} />
               Back
             </Button>
@@ -462,9 +503,16 @@ export function RegisterForm() {
             <Button
               type="button"
               variant="primary"
+              size="lg"
               onClick={nextStep}
               loading={slugStatus === "checking"}
               disabled={slugStatus === "checking"}
+              style={{
+                background: "linear-gradient(135deg, #1e5f74 0%, #2a7a94 100%)",
+                border: "1px solid rgba(94,234,212,0.3)",
+                boxShadow: "0 4px 20px rgba(30,95,116,0.4)",
+                fontWeight: 600,
+              }}
             >
               {slugStatus === "checking" ? "Checking..." : "Continue"}
               {slugStatus !== "checking" && <Icon name="arrow-right" size={16} />}
@@ -473,8 +521,15 @@ export function RegisterForm() {
             <Button
               type="submit"
               variant="primary"
+              size="lg"
               loading={isSubmitting}
               disabled={isSubmitting}
+              style={{
+                background: "linear-gradient(135deg, #1e5f74 0%, #2a7a94 100%)",
+                border: "1px solid rgba(94,234,212,0.3)",
+                boxShadow: "0 4px 20px rgba(30,95,116,0.4)",
+                fontWeight: 600,
+              }}
             >
               Create Account
             </Button>
@@ -482,13 +537,17 @@ export function RegisterForm() {
         </div>
       </form>
 
+      {/* Divider */}
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.10)", margin: "20px 0 14px" }} />
+
       {/* Login link */}
-      <p className="text-center text-sm mt-4" style={{ color: "rgba(255,255,255,0.7)" }}>
+      <p className="text-center" style={{ fontSize: 13, color: "rgba(148,163,184,0.85)" }}>
         Already have an account?{" "}
         <Link
           href="/login"
-          className="font-medium hover:underline"
-          style={{ color: "var(--color-primary)" }}
+          style={{ fontSize: 13, fontWeight: 600, color: "#f1f5f9", textDecoration: "none" }}
+          onMouseOver={(e) => (e.currentTarget.style.color = "#5eead4")}
+          onMouseOut={(e) => (e.currentTarget.style.color = "#f1f5f9")}
         >
           Sign in
         </Link>

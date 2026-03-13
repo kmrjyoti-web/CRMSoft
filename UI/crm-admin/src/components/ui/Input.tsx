@@ -13,12 +13,14 @@ export const Input = forwardRef<HTMLElement, InputProps>((props, ref) => {
   const { label, value, onFocus, onBlur, leftIcon, error, ...rest } = props;
   const [focused, setFocused] = useState(false);
   const isActive = focused || !!value || !!props.placeholder;
+  const isLg = rest.size === 'lg';
+  const defaultSize = isLg ? 'lg' : 'sm';
 
   if (!label) {
     return (
       <AICInput
         ref={ref as any}
-        size="sm"
+        size={defaultSize}
         value={value}
         leftIcon={leftIcon}
         error={error}
@@ -29,18 +31,21 @@ export const Input = forwardRef<HTMLElement, InputProps>((props, ref) => {
     );
   }
 
+  // Inactive: vertically center in the input height (sm=32px→top-4, lg=48px→top-6)
+  const inactiveTop = isLg ? 'top-6' : 'top-4';
+
   const labelCls = [
     'absolute z-[1] bg-white px-1 pointer-events-none transition-all duration-200 truncate max-w-[80%]',
     isActive
       ? `top-0 -translate-y-1/2 text-[11px] left-2 ${error ? 'text-red-500' : 'text-[var(--color-primary)]'}`
-      : `top-4 -translate-y-1/2 text-sm text-gray-500 ${leftIcon ? 'left-9' : 'left-2.5'}`,
+      : `${inactiveTop} -translate-y-1/2 ${isLg ? 'text-base' : 'text-sm'} text-gray-500 ${leftIcon ? 'left-9' : 'left-2.5'}`,
   ].join(' ');
 
   return (
     <div className="relative">
       <AICInput
         ref={ref as any}
-        size="sm"
+        size={defaultSize}
         value={value}
         leftIcon={leftIcon}
         error={error}

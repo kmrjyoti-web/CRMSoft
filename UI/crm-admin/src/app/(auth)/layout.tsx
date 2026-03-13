@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import AnimatedBackground from "@/features/auth/components/AnimatedBackground";
 import BrandingPanel from "@/features/auth/components/BrandingPanel";
@@ -12,6 +13,8 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   const [period, setPeriod] = useState<TimePeriod>("working");
+  const pathname = usePathname();
+  const isRegister = pathname === "/register";
 
   useEffect(() => {
     if (process.env.NODE_ENV === "development") {
@@ -33,8 +36,8 @@ export default function AuthLayout({
       <AnimatedBackground period={period} />
 
       {/* Left column — form */}
-      <div className="tod-auth-left">
-        <div className="tod-auth-left-inner">
+      <div className={isRegister ? "tod-auth-left tod-auth-left--wide" : "tod-auth-left"}>
+        <div className={isRegister ? "tod-auth-left-inner tod-auth-left-inner--wide" : "tod-auth-left-inner"}>
           {/* Logo */}
           <div className="flex justify-center mb-8">
             <div className="flex items-center gap-2">
@@ -76,8 +79,8 @@ export default function AuthLayout({
         </div>
       </div>
 
-      {/* Right column — branding (hidden on mobile) */}
-      <BrandingPanel period={period} />
+      {/* Right column — branding (hidden on mobile, hidden on register) */}
+      {!isRegister && <BrandingPanel period={period} />}
     </div>
   );
 }

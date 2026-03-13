@@ -36,7 +36,6 @@ export function LoginForm() {
   const redirectTo = searchParams.get("redirect") || "/dashboard";
 
   const [serverError, setServerError] = useState<string | null>(null);
-  const [isPlatformLogin, setIsPlatformLogin] = useState(false);
 
   const {
     control,
@@ -57,7 +56,7 @@ export function LoginForm() {
     try {
       await authService.login(
         { email: values.email, password: values.password },
-        isPlatformLogin ? "super-admin" : "admin",
+        "admin",
       );
       toast.success("Welcome back!");
       router.push(redirectTo);
@@ -71,14 +70,25 @@ export function LoginForm() {
 
   return (
     <>
-      <Typography variant="heading" level={3} className="mb-1">
-        {isPlatformLogin ? "Platform Admin" : "Sign in"}
-      </Typography>
-      <Typography variant="text" color="muted" className="mb-6">
-        {isPlatformLogin
-          ? "Enter platform admin credentials"
-          : "Enter your credentials to access your account"}
-      </Typography>
+      <div className="mb-6 text-center">
+        <h2 style={{
+          fontSize: 26,
+          fontWeight: 700,
+          color: "#f1f5f9",
+          letterSpacing: "-0.02em",
+          lineHeight: 1.2,
+          marginBottom: 8,
+        }}>
+          Welcome back
+        </h2>
+        <p style={{
+          fontSize: 14,
+          color: "rgba(148, 163, 184, 0.9)",
+          lineHeight: 1.5,
+        }}>
+          Sign in to your account to continue
+        </p>
+      </div>
 
       {/* Server error */}
       {serverError && (
@@ -103,7 +113,9 @@ export function LoginForm() {
             control={control}
             render={({ field }) => (
               <Input
+                size="lg"
                 type="email"
+                label="Email"
                 placeholder="you@company.com"
                 value={field.value}
                 onChange={field.onChange}
@@ -123,7 +135,9 @@ export function LoginForm() {
             control={control}
             render={({ field }) => (
               <Input
+                size="lg"
                 type="password"
+                label="Password"
                 placeholder="Enter your password"
                 value={field.value}
                 onChange={field.onChange}
@@ -136,27 +150,27 @@ export function LoginForm() {
           />
         </div>
 
-        {/* Tenant Code — hidden for platform admin */}
-        {!isPlatformLogin && (
-          <div className="mb-5">
-            <Controller
-              name="tenantCode"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  type="text"
-                  placeholder="e.g. acme-corp (optional)"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                  leftIcon={<Icon name="building" size={20} />}
-                />
-              )}
-            />
-          </div>
-        )}
+        {/* Tenant Code */}
+        <div className="mb-5">
+          <Controller
+            name="tenantCode"
+            control={control}
+            render={({ field }) => (
+              <Input
+                size="lg"
+                type="text"
+                label="Company Code"
+                placeholder="e.g. acme-corp (optional)"
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                leftIcon={<Icon name="building-2" size={20} />}
+              />
+            )}
+          />
+        </div>
 
         {/* Remember me + Forgot password */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6" style={{ marginTop: 2 }}>
           <Controller
             name="rememberMe"
             control={control}
@@ -170,7 +184,9 @@ export function LoginForm() {
           />
           <Link
             href="/forgot-password"
-            className="text-sm text-[var(--color-primary)] hover:underline"
+            style={{ fontSize: 13, color: "#5eead4", textDecoration: "none", fontWeight: 500 }}
+            onMouseOver={(e) => (e.currentTarget.style.textDecoration = "underline")}
+            onMouseOut={(e) => (e.currentTarget.style.textDecoration = "none")}
           >
             Forgot Password?
           </Link>
@@ -180,42 +196,37 @@ export function LoginForm() {
         <Button
           type="submit"
           variant="primary"
+          size="lg"
           fullWidth
           loading={isSubmitting}
           disabled={isSubmitting}
+          style={{
+            background: "linear-gradient(135deg, #1e5f74 0%, #2a7a94 100%)",
+            border: "1px solid rgba(94, 234, 212, 0.3)",
+            boxShadow: "0 4px 20px rgba(30, 95, 116, 0.4)",
+            fontWeight: 600,
+            letterSpacing: "0.02em",
+          }}
         >
-          {isPlatformLogin ? "Sign in as Platform Admin" : "Sign in"}
+          Sign in
         </Button>
       </form>
 
-      {/* Platform Admin toggle */}
-      <p className="text-center text-sm mt-4" style={{ color: "rgba(255,255,255,0.7)" }}>
-        <button
-          type="button"
-          onClick={() => {
-            setIsPlatformLogin((v) => !v);
-            setServerError(null);
-          }}
-          className="font-medium hover:underline"
-          style={{ color: "var(--color-primary)", background: "none", border: "none", cursor: "pointer" }}
-        >
-          {isPlatformLogin ? "Login as Tenant Admin" : "Login as Platform Admin"}
-        </button>
-      </p>
+      {/* Divider */}
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.10)", margin: "20px 0 16px" }} />
 
-      {/* Register link — only for tenant login */}
-      {!isPlatformLogin && (
-        <p className="text-center text-sm mt-3" style={{ color: "rgba(255,255,255,0.7)" }}>
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/register"
-            className="font-medium hover:underline"
-            style={{ color: "var(--color-primary)" }}
-          >
-            Register
-          </Link>
-        </p>
-      )}
+      {/* Register link */}
+      <p className="text-center" style={{ fontSize: 13, color: "rgba(148, 163, 184, 0.85)" }}>
+        Don&apos;t have an account?{" "}
+        <Link
+          href="/register"
+          style={{ fontSize: 13, fontWeight: 600, color: "#f1f5f9", textDecoration: "none" }}
+          onMouseOver={(e) => (e.currentTarget.style.color = "#5eead4")}
+          onMouseOut={(e) => (e.currentTarget.style.color = "#f1f5f9")}
+        >
+          Register
+        </Link>
+      </p>
     </>
   );
 }

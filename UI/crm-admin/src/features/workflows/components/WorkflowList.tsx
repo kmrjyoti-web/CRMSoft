@@ -1,258 +1,217 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-
-import Link from "next/link";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { TableFull, Badge, Button, Icon } from "@/components/ui";
+import { useWorkflowsList } from "../hooks/useWorkflows";
+import type { WorkflowListItem } from "../types/workflows.types";
 
-import toast from "react-hot-toast";
-
-import { Button, Icon, Badge } from "@/components/ui";
-
-import { EmptyState } from "@/components/common/EmptyState";
-import { TableSkeleton } from "@/components/common/TableSkeleton";
-import { PageHeader } from "@/components/common/PageHeader";
-import { HelpButton } from "@/components/common/HelpButton";
-
-import { useWorkflowsList, useCloneWorkflow } from "../hooks/useWorkflows";
-import { WorkflowHelpContent } from "./WorkflowHelp";
-import { WorkflowDevHelp } from "../help/WorkflowDevHelp";
-
-import type {
-  WorkflowListParams,
-  WorkflowEntityType,
-  WorkflowListItem,
-} from "../types/workflows.types";
-
-// ── Constants ────────────────────────────────────────────
-
-const ENTITY_TYPES: Array<{ label: string; value: WorkflowEntityType | "ALL" }> = [
-  { label: "All", value: "ALL" },
-  { label: "Lead", value: "LEAD" },
-  { label: "Quotation", value: "QUOTATION" },
-  { label: "Invoice", value: "INVOICE" },
-  { label: "Installation", value: "INSTALLATION" },
-  { label: "Ticket", value: "TICKET" },
+const WORKFLOW_COLUMNS = [
+  { id: "name", label: "Name", visible: true },
+  { id: "code", label: "Code", visible: true },
+  { id: "entityType", label: "Entity Type", visible: true },
+  { id: "states", label: "States", visible: true },
+  { id: "transitions", label: "Transitions", visible: true },
+  { id: "status", label: "Status", visible: true },
+  { id: "isDefault", label: "Default", visible: true },
 ];
 
-// ── Component ────────────────────────────────────────────
+function flattenWorkflows(workflows: WorkflowListItem[]): Record<string, any>[] {
+  return workflows.map((w) => ({
+    id: w.id,
+    name: <span style={{ fontWeight: 600 }}>{w.name}</span>,
+    code: <Badge variant="outline">{w.code}</Badge>,
+    entityType: <Badge variant="secondary">{w.entityType}</Badge>,
+    states: <Badge variant="outline">{w._count?.states ?? 0}</Badge>,
+    transitions: <Badge variant="outline">{w._count?.transitions ?? 0}</Badge>,
+    status: w.isActive ? <Badge variant="success">Active</Badge> : <Badge variant="default">Draft</Badge>,
+    isDefault: w.isDefault ? <Badge variant="primary">Default</Badge> : "—",
+    _rawName: w.name,
+  }));
+}
+
+interface ViewModeDialogProps {
+  workflowName: string;
+  isCreate?: boolean;
+  onClose: () => void;
+  onSelect: (mode: "visual" | "form") => void;
+}
+
+function ViewModeDialog({ workflowName, isCreate, onClose, onSelect }: ViewModeDialogProps) {
+  return (
+    <div
+      style={{
+        position: "fixed", inset: 0, zIndex: 9999,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)",
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: "#fff", borderRadius: 16, padding: "28px 28px 24px",
+          width: 420, boxShadow: "0 20px 60px rgba(0,0,0,0.18)",
+          display: "flex", flexDirection: "column", gap: 20,
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+          <div>
+            <div style={{ fontSize: 17, fontWeight: 700, color: "#0f172a", marginBottom: 4 }}>
+              {isCreate ? "Create Workflow" : "Open Workflow"}
+            </div>
+            <div style={{ fontSize: 13, color: "#64748b" }}>
+              {isCreate
+                ? "Choose how you want to build the workflow"
+                : <><strong style={{ color: "#1e293b" }}>{workflowName}</strong> — choose how to open it</>}
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{ border: "none", background: "none", cursor: "pointer", color: "#94a3b8", padding: 4, borderRadius: 6, lineHeight: 1 }}
+          >
+            <Icon name="x" size={18} />
+          </button>
+        </div>
+
+        {/* Options */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          {/* Visual Editor */}
+          <button
+            onClick={() => onSelect("visual")}
+            style={{
+              border: "2px solid #e2e8f0", borderRadius: 12, padding: "18px 14px",
+              background: "#f8fafc", cursor: "pointer", textAlign: "left",
+              transition: "all 0.15s ease", display: "flex", flexDirection: "column", gap: 10,
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--color-primary)";
+              (e.currentTarget as HTMLButtonElement).style.background = "#f0f9ff";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = "#e2e8f0";
+              (e.currentTarget as HTMLButtonElement).style.background = "#f8fafc";
+            }}
+          >
+            <div style={{
+              width: 40, height: 40, borderRadius: 10, background: "linear-gradient(135deg, #667eea, #764ba2)",
+              display: "flex", alignItems: "center", justifyContent: "center", color: "#fff",
+            }}>
+              <Icon name="git-branch" size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#0f172a", marginBottom: 3 }}>Visual Editor</div>
+              <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.4 }}>
+                Drag &amp; drop flow canvas with states and transitions
+              </div>
+            </div>
+          </button>
+
+          {/* Form View */}
+          <button
+            onClick={() => onSelect("form")}
+            style={{
+              border: "2px solid #e2e8f0", borderRadius: 12, padding: "18px 14px",
+              background: "#f8fafc", cursor: "pointer", textAlign: "left",
+              transition: "all 0.15s ease", display: "flex", flexDirection: "column", gap: 10,
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--color-primary)";
+              (e.currentTarget as HTMLButtonElement).style.background = "#f0fdf4";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = "#e2e8f0";
+              (e.currentTarget as HTMLButtonElement).style.background = "#f8fafc";
+            }}
+          >
+            <div style={{
+              width: 40, height: 40, borderRadius: 10, background: "linear-gradient(135deg, #06b6d4, #0891b2)",
+              display: "flex", alignItems: "center", justifyContent: "center", color: "#fff",
+            }}>
+              <Icon name="list" size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#0f172a", marginBottom: 3 }}>Form View</div>
+              <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.4 }}>
+                Edit states, transitions and settings in a structured form
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function WorkflowList() {
   const router = useRouter();
-  const cloneMutation = useCloneWorkflow();
+  const { data, isLoading } = useWorkflowsList({ page: 1, limit: 50 });
+  const [selectedWorkflow, setSelectedWorkflow] = useState<{ id: string; name: string } | null>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  const [params, setParams] = useState<WorkflowListParams>({
-    page: 1,
-    limit: 20,
-  });
+  const workflows: WorkflowListItem[] = useMemo(() => {
+    const raw = data?.data ?? [];
+    return Array.isArray(raw) ? raw : [];
+  }, [data]);
 
-  const [selectedEntity, setSelectedEntity] = useState<string>("ALL");
-
-  const { data, isLoading } = useWorkflowsList(params);
-
-  const workflows = useMemo(() => data?.data ?? [], [data]);
-  const meta = data?.meta;
-  const totalCount = meta?.total ?? 0;
-
-  const handleSearch = useCallback((value: string) => {
-    setParams((prev) => ({ ...prev, search: value || undefined, page: 1 }));
-  }, []);
-
-  const handleEntityFilter = useCallback((value: string) => {
-    setSelectedEntity(value);
-    setParams((prev) => ({
-      ...prev,
-      entityType: value === "ALL" ? undefined : (value as WorkflowEntityType),
-      page: 1,
-    }));
-  }, []);
-
-  const handleClone = useCallback(
-    async (e: React.MouseEvent, id: string) => {
-      e.stopPropagation();
-      try {
-        await cloneMutation.mutateAsync(id);
-        toast.success("Workflow cloned");
-      } catch {
-        toast.error("Failed to clone workflow");
-      }
-    },
-    [cloneMutation],
+  const rows = useMemo(
+    () => (isLoading ? [] : flattenWorkflows(workflows)),
+    [workflows, isLoading],
   );
 
-  if (isLoading) return <TableSkeleton title="Workflows" />;
+  const handleRowClick = (row: Record<string, any>) => {
+    setSelectedWorkflow({ id: row.id, name: row._rawName ?? "Workflow" });
+  };
+
+  const handleSelect = (mode: "visual" | "form") => {
+    if (!selectedWorkflow) return;
+    if (mode === "visual") {
+      router.push(`/workflows/${selectedWorkflow.id}/visual`);
+    } else {
+      router.push(`/workflows/${selectedWorkflow.id}`);
+    }
+    setSelectedWorkflow(null);
+  };
+
+  const handleCreateSelect = (mode: "visual" | "form") => {
+    setShowCreateDialog(false);
+    if (mode === "visual") {
+      router.push("/workflows/visual/new");
+    } else {
+      router.push("/workflows/new");
+    }
+  };
 
   return (
-    <div className="p-6">
-      <PageHeader
+    <>
+      <TableFull
+        data={rows}
         title="Workflows"
-        subtitle={`${totalCount} workflow${totalCount !== 1 ? "s" : ""}`}
-        actions={
-          <div className="flex gap-2">
-            <HelpButton
-              panelId="workflow-list-help"
-              title="Workflows — Help"
-              userContent={<WorkflowHelpContent />}
-              devContent={<WorkflowDevHelp />}
-            />
-            <Link href="/workflows/new">
-              <Button variant="primary">
-                <Icon name="plus" size={16} /> Add Workflow
-              </Button>
-            </Link>
-          </div>
-        }
+        tableKey="workflows-list"
+        columns={WORKFLOW_COLUMNS}
+        defaultViewMode="table"
+        defaultDensity="compact"
+        onRowEdit={handleRowClick}
+        onCreate={() => setShowCreateDialog(true)}
       />
 
-      {/* Entity type filter + search bar */}
-      <div className="mb-4 flex items-center gap-3">
-        <div className="relative flex-1 max-w-md">
-          <input
-            type="text"
-            placeholder="Search workflows..."
-            className="w-full rounded-lg border border-gray-200 px-4 py-2 pl-10 text-sm focus:border-blue-400 focus:outline-none"
-            onChange={(e) => handleSearch(e.target.value)}
-          />
-          <Icon
-            name="search"
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-          />
-        </div>
-
-        <div className="flex gap-2">
-          {ENTITY_TYPES.map((et) => (
-            <Button
-              key={et.value}
-              size="sm"
-              variant={selectedEntity === et.value ? "primary" : "outline"}
-              onClick={() => handleEntityFilter(et.value)}
-            >
-              {et.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      {/* Table */}
-      {workflows.length === 0 ? (
-        <EmptyState
-          icon="activity"
-          title="No workflows found"
-          description="Get started by adding your first workflow."
-          action={{
-            label: "Add Workflow",
-            onClick: () => router.push("/workflows/new"),
-          }}
+      {selectedWorkflow && (
+        <ViewModeDialog
+          workflowName={selectedWorkflow.name}
+          onClose={() => setSelectedWorkflow(null)}
+          onSelect={handleSelect}
         />
-      ) : (
-        <>
-          <div className="overflow-x-auto rounded-lg border border-gray-200">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-left text-xs font-medium uppercase text-gray-500">
-                <tr>
-                  <th className="px-4 py-3">Name</th>
-                  <th className="px-4 py-3">Code</th>
-                  <th className="px-4 py-3">Entity Type</th>
-                  <th className="px-4 py-3">States</th>
-                  <th className="px-4 py-3">Transitions</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Default</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {workflows.map((item: WorkflowListItem) => (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-gray-50 cursor-pointer"
-                    onClick={() => router.push(`/workflows/${item.id}`)}
-                  >
-                    <td className="px-4 py-3 font-medium">{item.name}</td>
-                    <td className="px-4 py-3 text-gray-600">{item.code}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant="secondary">{item.entityType}</Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge variant="outline">
-                        {item._count?.states ?? 0}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge variant="outline">
-                        {item._count?.transitions ?? 0}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      {item.isActive ? (
-                        <Badge variant="success">Active</Badge>
-                      ) : (
-                        <Badge variant="default">Draft</Badge>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {item.isDefault && (
-                        <Badge variant="primary">Default</Badge>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div
-                        className="flex items-center justify-end gap-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Link href={`/workflows/${item.id}`}>
-                          <Button size="sm" variant="outline">
-                            <Icon name="eye" size={14} /> View
-                          </Button>
-                        </Link>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={(e) => handleClone(e, item.id)}
-                        >
-                          <Icon name="copy" size={14} /> Clone
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {meta && meta.totalPages > 1 && (
-            <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
-              <span>
-                Page {meta.page} of {meta.totalPages} ({meta.total} total)
-              </span>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={!meta.hasPrevious}
-                  onClick={() =>
-                    setParams((p) => ({ ...p, page: (p.page ?? 1) - 1 }))
-                  }
-                >
-                  <Icon name="chevron-left" size={14} /> Previous
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={!meta.hasNext}
-                  onClick={() =>
-                    setParams((p) => ({ ...p, page: (p.page ?? 1) + 1 }))
-                  }
-                >
-                  Next <Icon name="chevron-right" size={14} />
-                </Button>
-              </div>
-            </div>
-          )}
-        </>
       )}
 
-    </div>
+      {showCreateDialog && (
+        <ViewModeDialog
+          workflowName="New Workflow"
+          isCreate
+          onClose={() => setShowCreateDialog(false)}
+          onSelect={handleCreateSelect}
+        />
+      )}
+    </>
   );
 }
