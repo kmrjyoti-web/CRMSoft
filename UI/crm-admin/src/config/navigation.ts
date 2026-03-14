@@ -55,10 +55,12 @@ export const DEFAULT_NAV: NavItem[] = [
   {
     label: 'CRM', path: '/contacts', icon: 'users',
     children: [
-      { label: 'Dashboard', path: '/contacts/dashboard', icon: 'layout-dashboard', permission: 'contacts:view' },
       {
         label: 'Contact Master', path: '/contacts', icon: 'user-check',
         children: [
+          { label: 'Dashboard', path: '/contacts/dashboard', icon: 'layout-dashboard', permission: 'contacts:view' },
+          { label: 'All Records', path: '/contacts/all-records', icon: 'list', permission: 'contacts:view' },
+          { label: 'Statistics', path: '/contacts/statistics', icon: 'bar-chart-2', permission: 'contacts:view' },
           { label: 'Raw Contacts', path: '/raw-contacts', icon: 'user-plus', permission: 'raw-contacts:view' },
           { label: 'Contacts', path: '/contacts', icon: 'users', permission: 'contacts:view' },
           { label: 'Organizations', path: '/organizations', icon: 'building', permission: 'organizations:view' },

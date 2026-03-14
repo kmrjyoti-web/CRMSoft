@@ -51,11 +51,13 @@ export const MENU_SEED_DATA: MenuSeedItem[] = [
     name: 'CRM', code: 'CRM', icon: 'users', menuType: 'GROUP',
     route: '/contacts', permissionModule: 'contacts', permissionAction: 'read',
     children: [
-      { name: 'Dashboard', code: 'CRM_DASH', icon: 'layout-dashboard', menuType: 'ITEM', route: '/contacts/dashboard', permissionModule: 'contacts', permissionAction: 'read' },
       {
         name: 'Contact Master', code: 'CRM_CONTACT_ROW', icon: 'user-check', menuType: 'GROUP',
         permissionModule: 'contacts', permissionAction: 'read',
         children: [
+          { name: 'Dashboard', code: 'CRM_DASH', icon: 'layout-dashboard', menuType: 'ITEM', route: '/contacts/dashboard', permissionModule: 'contacts', permissionAction: 'read' },
+          { name: 'All Records', code: 'CRM_ALL_RECORDS', icon: 'list', menuType: 'ITEM', route: '/contacts/all-records', permissionModule: 'contacts', permissionAction: 'read' },
+          { name: 'Statistics', code: 'CRM_STATISTICS', icon: 'bar-chart-2', menuType: 'ITEM', route: '/contacts/statistics', permissionModule: 'contacts', permissionAction: 'read' },
           { name: 'Raw Contacts', code: 'CRM_RAW', icon: 'user-plus', menuType: 'ITEM', route: '/raw-contacts', permissionModule: 'raw-contacts', permissionAction: 'read' },
           { name: 'Contacts', code: 'CRM_CONTACTS', icon: 'users', menuType: 'ITEM', route: '/contacts', permissionModule: 'contacts', permissionAction: 'read' },
           { name: 'Organizations', code: 'CRM_ORGS', icon: 'building', menuType: 'ITEM', route: '/organizations', permissionModule: 'organizations', permissionAction: 'read' },

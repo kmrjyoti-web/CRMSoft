@@ -84,23 +84,17 @@ async function main() {
     return created;
   }
 
-  for (let i = 0; i < (MENU_SEED_DATA as MenuSeedItem[]).length; i++) {
-    const item = (MENU_SEED_DATA as MenuSeedItem[])[i];
-    const parent = await createMenu(item, null, i);
-
-    if (item.children) {
-      for (let j = 0; j < item.children.length; j++) {
-        const child = item.children[j];
-        const childMenu = await createMenu(child, parent.id, j);
-
-        if (child.children) {
-          for (let k = 0; k < child.children.length; k++) {
-            await createMenu(child.children[k], childMenu.id, k);
-          }
-        }
+  async function seedRecursive(items: MenuSeedItem[], parentId: string | null): Promise<void> {
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const created = await createMenu(item, parentId, i);
+      if (item.children && item.children.length > 0) {
+        await seedRecursive(item.children, created.id);
       }
     }
   }
+
+  await seedRecursive(MENU_SEED_DATA as MenuSeedItem[], null);
 
   console.log(`✅ Seeded ${count} menus`);
 

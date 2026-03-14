@@ -4,6 +4,10 @@ import type {
   VerifyOtpDto,
   InitiateResult,
   VerificationRecord,
+  VerificationReportSummary,
+  VerificationReportListResponse,
+  VerificationTrendResponse,
+  VerificationReportFilters,
 } from "../types/entity-verification.types";
 
 const BASE = "/api/v1/entity-verification";
@@ -34,6 +38,46 @@ export const entityVerificationService = {
 
   getPending: () =>
     api.get<unknown>(`${BASE}/pending`).then((r) => unwrap<VerificationRecord[]>(r)),
+
+  // ── Report endpoints ────────────────────────────────────
+
+  getReportSummary: (dateFrom?: string, dateTo?: string) => {
+    const params = new URLSearchParams();
+    if (dateFrom) params.set("dateFrom", dateFrom);
+    if (dateTo) params.set("dateTo", dateTo);
+    const qs = params.toString();
+    return api.get<unknown>(`${BASE}/report/summary${qs ? `?${qs}` : ""}`).then((r) => unwrap<VerificationReportSummary>(r));
+  },
+
+  getReportList: (filters: VerificationReportFilters) => {
+    const params = new URLSearchParams();
+    if (filters.status) params.set("status", filters.status);
+    if (filters.channel) params.set("channel", filters.channel);
+    if (filters.mode) params.set("mode", filters.mode);
+    if (filters.entityType) params.set("entityType", filters.entityType);
+    if (filters.dateFrom) params.set("dateFrom", filters.dateFrom);
+    if (filters.dateTo) params.set("dateTo", filters.dateTo);
+    if (filters.search) params.set("search", filters.search);
+    if (filters.page) params.set("page", String(filters.page));
+    if (filters.limit) params.set("limit", String(filters.limit));
+    const qs = params.toString();
+    return api.get<unknown>(`${BASE}/report/list${qs ? `?${qs}` : ""}`).then((r) => unwrap<VerificationReportListResponse>(r));
+  },
+
+  getExpiredLinks: () =>
+    api.get<unknown>(`${BASE}/report/expired-links`).then((r) => unwrap<VerificationRecord[]>(r)),
+
+  getVerificationTrend: (days = 30) =>
+    api.get<unknown>(`${BASE}/report/trend?days=${days}`).then((r) => unwrap<VerificationTrendResponse>(r)),
+
+  getExportUrl: (filters?: { status?: string; dateFrom?: string; dateTo?: string }) => {
+    const params = new URLSearchParams();
+    if (filters?.status) params.set("status", filters.status);
+    if (filters?.dateFrom) params.set("dateFrom", filters.dateFrom);
+    if (filters?.dateTo) params.set("dateTo", filters.dateTo);
+    const qs = params.toString();
+    return `${BASE}/report/export${qs ? `?${qs}` : ""}`;
+  },
 };
 
 // Public endpoints (no auth)

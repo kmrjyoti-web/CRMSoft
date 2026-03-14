@@ -62,3 +62,51 @@ export interface VerificationPageData {
   };
   expiresAt?: string;
 }
+
+// ── Report types ─────────────────────────────────────────
+
+export interface VerificationReportSummary {
+  total: number;
+  verified: number;
+  pending: number;
+  expired: number;
+  failed: number;
+  rejected: number;
+  verificationRate: number;
+  byChannel: Record<string, number>;
+  byMode: Record<string, number>;
+  byEntityType: Record<string, number>;
+}
+
+export interface VerificationReportListResponse {
+  data: VerificationRecord[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface VerificationTrendItem {
+  date: string;
+  total: number;
+  verified: number;
+  expired: number;
+  failed: number;
+}
+
+export interface VerificationTrendResponse {
+  trend: VerificationTrendItem[];
+  channelBreakdown: Record<string, number>;
+}
+
+export interface VerificationReportFilters {
+  status?: string;
+  channel?: string;
+  mode?: string;
+  entityType?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
