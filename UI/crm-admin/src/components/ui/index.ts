@@ -15,6 +15,7 @@ export type { IconName, IconProps } from './Icon';
 
 // ── Basic Inputs ──
 export { Input } from './Input';
+export { TextareaInput } from './TextareaInput';
 export { Select } from './Select';
 export { Checkbox } from './Checkbox';
 export { CheckboxGroup } from './CheckboxGroup';
