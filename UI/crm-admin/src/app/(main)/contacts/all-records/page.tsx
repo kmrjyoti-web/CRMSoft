@@ -1,9 +1,9 @@
 "use client";
 import dynamic from "next/dynamic";
-const CRMDashboard = dynamic(
-  () => import("@/features/contacts/components/CRMDashboard").then((m) => m.CRMDashboard),
+const CRMAllRecordsPage = dynamic(
+  () => import("@/features/contacts/components/CRMDashboard").then((m) => m.CRMAllRecordsPage),
   { ssr: false },
 );
 export default function ContactAllRecordsPage() {
-  return <CRMDashboard initialTab="records" />;
+  return <CRMAllRecordsPage />;
 }

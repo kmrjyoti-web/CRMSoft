@@ -6,7 +6,6 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
 import { useQuery } from "@tanstack/react-query";
-import { PageHeader } from "@/components/common/PageHeader";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { KpiCard } from "@/features/dashboard/components/KpiCard";
 import { CHART_COLORS } from "@/features/dashboard/utils/chart-colors";
@@ -21,43 +20,73 @@ import type {
   VerificationTrend, DepartmentWiseData, ContactListItem,
 } from "../types/contacts.types";
 
-// ── Tab type ──────────────────────────────────────────────
+// ── Page toolbar (matches Executive Dashboard style) ──────
 
-type Tab = "dashboard" | "records" | "statistics";
-
-function TabBtn({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+function CRMToolbar({
+  title,
+  actions,
+}: {
+  title: string;
+  actions?: React.ReactNode;
+}) {
   return (
-    <button
-      onClick={onClick}
-      className={`px-5 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-        active
-          ? "border-blue-600 text-blue-600"
-          : "border-transparent text-gray-500 hover:text-gray-700"
-      }`}
-    >
-      {label}
-    </button>
+    <div className="flex items-center justify-between px-0 pb-5">
+      <div className="flex items-center gap-3">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-1.5 text-sm text-gray-400">
+          <span>CRM</span>
+          <Icon name="chevron-right" size={13} />
+          <span>Contact Master</span>
+          <Icon name="chevron-right" size={13} />
+        </div>
+        <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+      </div>
+      {actions && <div className="flex items-center gap-2">{actions}</div>}
+    </div>
   );
 }
 
-// ══════════════════════════════════════════════════════════
-//  MAIN COMPONENT
-// ══════════════════════════════════════════════════════════
+// ── Shared date range hook ────────────────────────────────
 
-interface CRMDashboardProps {
-  initialTab?: Tab;
-}
-
-export function CRMDashboard({ initialTab = "dashboard" }: CRMDashboardProps) {
-  const [tab, setTab] = useState<Tab>(initialTab);
+function useDateRange() {
   const [dateRange, setDateRange] = useState<DateRange>(() => ({
     start: subDays(new Date(), 30),
     end: new Date(),
   }));
-
   const handleRangeChange = useCallback((range: DateRange | null) => {
     if (range) setDateRange(range);
   }, []);
+  return { dateRange, handleRangeChange };
+}
+
+// ── Date picker action ────────────────────────────────────
+
+function DatePickerAction({
+  dateRange,
+  onRangeChange,
+}: {
+  dateRange: DateRange;
+  onRangeChange: (r: DateRange | null) => void;
+}) {
+  return (
+    <AICDatePicker
+      mode="range"
+      dateRange={dateRange}
+      onRangeChange={onRangeChange}
+      showPresets
+      showHighlights
+      placeholder="Select date range"
+      size="sm"
+    />
+  );
+}
+
+// ══════════════════════════════════════════════════════════
+//  PAGE 1 — DASHBOARD  (/contacts/dashboard)
+// ══════════════════════════════════════════════════════════
+
+export function CRMDashboardPage() {
+  const { dateRange, handleRangeChange } = useDateRange();
 
   const params = useMemo(() => ({
     dateFrom: format(dateRange.start, "yyyy-MM-dd"),
@@ -66,14 +95,12 @@ export function CRMDashboard({ initialTab = "dashboard" }: CRMDashboardProps) {
 
   const { data: dashData, isLoading } = useCRMDashboard(params);
 
-  // Safely extract dashboard data
   const raw = dashData?.data as any;
   const stats: CRMDashboardStats = raw?.stats ?? {
     totalContacts: 0, activeContacts: 0, inactiveContacts: 0,
     verifiedContacts: 0, notVerifiedContacts: 0,
     totalOrganizations: 0, verifiedOrganizations: 0, totalCustomers: 0,
   };
-
   const industryWise: IndustryWiseData[] = Array.isArray(raw?.industryWise) ? raw.industryWise : [];
   const sourceWise: SourceWiseData[] = Array.isArray(raw?.sourceWise) ? raw.sourceWise : [];
   const verificationTrend: VerificationTrend[] = Array.isArray(raw?.verificationTrend) ? raw.verificationTrend : [];
@@ -92,78 +119,12 @@ export function CRMDashboard({ initialTab = "dashboard" }: CRMDashboardProps) {
   if (isLoading) return <LoadingSpinner fullPage />;
 
   return (
-    <div className="p-6 space-y-4">
-      <PageHeader
-        title="CRM Contact Master"
-        description="Contact, verification, and customer insights at a glance."
-        actions={
-          <AICDatePicker
-            mode="range"
-            dateRange={dateRange}
-            onRangeChange={handleRangeChange}
-            showPresets
-            showHighlights
-            placeholder="Select date range"
-            size="sm"
-          />
-        }
+    <div className="p-6 space-y-6">
+      <CRMToolbar
+        title="Dashboard"
+        actions={<DatePickerAction dateRange={dateRange} onRangeChange={handleRangeChange} />}
       />
 
-      {/* Tab bar */}
-      <div className="flex border-b border-gray-200 bg-white rounded-t-lg px-4">
-        <TabBtn label="Dashboard" active={tab === "dashboard"} onClick={() => setTab("dashboard")} />
-        <TabBtn label="All Records" active={tab === "records"} onClick={() => setTab("records")} />
-        <TabBtn label="Statistics" active={tab === "statistics"} onClick={() => setTab("statistics")} />
-      </div>
-
-      {tab === "dashboard" && (
-        <DashboardTab
-          stats={stats}
-          industryWise={industryWise}
-          sourceWise={sourceWise}
-          verificationTrend={verificationTrend}
-          departmentWise={departmentWise}
-          recentContacts={recentContacts}
-          verificationPie={verificationPie}
-          orgPie={orgPie}
-        />
-      )}
-
-      {tab === "records" && <AllRecordsTab />}
-
-      {tab === "statistics" && (
-        <StatisticsTab
-          stats={stats}
-          industryWise={industryWise}
-          sourceWise={sourceWise}
-          verificationTrend={verificationTrend}
-          departmentWise={departmentWise}
-          verificationPie={verificationPie}
-          orgPie={orgPie}
-        />
-      )}
-    </div>
-  );
-}
-
-// ══════════════════════════════════════════════════════════
-//  TAB 1 — DASHBOARD
-// ══════════════════════════════════════════════════════════
-
-interface DashboardTabProps {
-  stats: CRMDashboardStats;
-  industryWise: IndustryWiseData[];
-  sourceWise: SourceWiseData[];
-  verificationTrend: VerificationTrend[];
-  departmentWise: DepartmentWiseData[];
-  recentContacts: ContactListItem[];
-  verificationPie: { name: string; value: number; fill: string }[];
-  orgPie: { name: string; value: number; fill: string }[];
-}
-
-function DashboardTab({ stats, industryWise, sourceWise, verificationTrend, departmentWise, recentContacts, verificationPie, orgPie }: DashboardTabProps) {
-  return (
-    <div className="space-y-6">
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <KpiCard title="Total Contacts" value={stats.totalContacts} icon="users" color="#3b82f6" variant="clean" />
@@ -181,7 +142,8 @@ function DashboardTab({ stats, industryWise, sourceWise, verificationTrend, depa
         <ChartCard title="Contact Verification Status">
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
-              <Pie data={verificationPie} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={95} innerRadius={48} label={((p: any) => `${p.name}: ${p.value}`) as any}>
+              <Pie data={verificationPie} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={95} innerRadius={48}
+                label={((p: any) => `${p.name}: ${p.value}`) as any}>
                 {verificationPie.map((e, i) => <Cell key={i} fill={e.fill} />)}
               </Pie>
               <Tooltip /><Legend />
@@ -202,7 +164,7 @@ function DashboardTab({ stats, industryWise, sourceWise, verificationTrend, depa
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          ) : <EmptyChart message="No industry data available" />}
+          ) : <EmptyChart />}
         </ChartCard>
       </div>
 
@@ -212,13 +174,14 @@ function DashboardTab({ stats, industryWise, sourceWise, verificationTrend, depa
           {sourceWise.length > 0 ? (
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
-                <Pie data={sourceWise} dataKey="count" nameKey="source" cx="50%" cy="50%" outerRadius={95} label={((p: any) => `${p.source} (${p.percentage}%)`) as any}>
+                <Pie data={sourceWise} dataKey="count" nameKey="source" cx="50%" cy="50%" outerRadius={95}
+                  label={((p: any) => `${p.source} (${p.percentage}%)`) as any}>
                   {sourceWise.map((_e, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                 </Pie>
                 <Tooltip /><Legend />
               </PieChart>
             </ResponsiveContainer>
-          ) : <EmptyChart message="No source data available" />}
+          ) : <EmptyChart />}
         </ChartCard>
 
         <ChartCard title="Verification Trend">
@@ -233,7 +196,7 @@ function DashboardTab({ stats, industryWise, sourceWise, verificationTrend, depa
                 <Area type="monotone" dataKey="unverified" stackId="1" stroke="#ef4444" fill="#ef444440" name="Unverified" />
               </AreaChart>
             </ResponsiveContainer>
-          ) : <EmptyChart message="No verification trend data" />}
+          ) : <EmptyChart />}
         </ChartCard>
       </div>
 
@@ -242,7 +205,8 @@ function DashboardTab({ stats, industryWise, sourceWise, verificationTrend, depa
         <ChartCard title="Organization Verification">
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
-              <Pie data={orgPie} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={95} innerRadius={48} label={((p: any) => `${p.name}: ${p.value}`) as any}>
+              <Pie data={orgPie} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={95} innerRadius={48}
+                label={((p: any) => `${p.name}: ${p.value}`) as any}>
                 {orgPie.map((e, i) => <Cell key={i} fill={e.fill} />)}
               </Pie>
               <Tooltip /><Legend />
@@ -263,7 +227,7 @@ function DashboardTab({ stats, industryWise, sourceWise, verificationTrend, depa
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          ) : <EmptyChart message="No department data available" />}
+          ) : <EmptyChart />}
         </ChartCard>
       </div>
 
@@ -312,17 +276,17 @@ function DashboardTab({ stats, industryWise, sourceWise, verificationTrend, depa
               </tbody>
             </table>
           </div>
-        ) : <EmptyChart message="No recent contacts" />}
+        ) : <EmptyChart />}
       </div>
     </div>
   );
 }
 
 // ══════════════════════════════════════════════════════════
-//  TAB 2 — ALL RECORDS
+//  PAGE 2 — ALL RECORDS  (/contacts/all-records)
 // ══════════════════════════════════════════════════════════
 
-function AllRecordsTab() {
+export function CRMAllRecordsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [verifFilter, setVerifFilter] = useState("");
@@ -356,11 +320,22 @@ function AllRecordsTab() {
     setPage(1);
   }, []);
 
+  const hasFilers = search || statusFilter || verifFilter;
+
   return (
-    <div className="space-y-4">
+    <div className="p-6 space-y-4">
+      <CRMToolbar
+        title="All Records"
+        actions={
+          <span className="text-sm text-gray-500">
+            {meta.total > 0 ? `${meta.total} contacts` : ""}
+          </span>
+        }
+      />
+
       {/* Filters */}
       <div className="bg-white rounded-lg border border-gray-200 p-4 flex flex-wrap gap-3 items-end">
-        <div className="flex-1 min-w-[200px]">
+        <div className="flex-1 min-w-[220px]">
           <Input
             label="Search contacts"
             value={search}
@@ -392,7 +367,7 @@ function AllRecordsTab() {
             ]}
           />
         </div>
-        {(search || statusFilter || verifFilter) && (
+        {hasFilers && (
           <Button variant="outline" onClick={() => { setSearch(""); setStatusFilter(""); setVerifFilter(""); setPage(1); }}>
             Clear
           </Button>
@@ -421,8 +396,9 @@ function AllRecordsTab() {
                 <tbody>
                   {contacts.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-12 text-center text-gray-400 text-sm">
-                        No contacts found
+                      <td colSpan={7} className="py-14 text-center text-gray-400 text-sm">
+                        <Icon name="inbox" size={32} />
+                        <p className="mt-2">No contacts found</p>
                       </td>
                     </tr>
                   ) : contacts.map((c) => {
@@ -457,28 +433,17 @@ function AllRecordsTab() {
               </table>
             </div>
 
-            {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50">
                 <p className="text-xs text-gray-500">
                   Showing {((page - 1) * limit) + 1}–{Math.min(page * limit, meta.total)} of {meta.total} contacts
                 </p>
-                <div className="flex gap-1">
-                  <button
-                    disabled={page <= 1}
-                    onClick={() => setPage((p) => p - 1)}
-                    className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-40"
-                  >
+                <div className="flex gap-1 items-center">
+                  <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-40">
                     <Icon name="chevron-left" size={16} />
                   </button>
-                  <span className="px-3 py-1 text-xs text-gray-700">
-                    Page {page} of {totalPages}
-                  </span>
-                  <button
-                    disabled={page >= totalPages}
-                    onClick={() => setPage((p) => p + 1)}
-                    className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-40"
-                  >
+                  <span className="px-3 py-1 text-xs text-gray-700">Page {page} of {totalPages}</span>
+                  <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)} className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-40">
                     <Icon name="chevron-right" size={16} />
                   </button>
                 </div>
@@ -492,32 +457,52 @@ function AllRecordsTab() {
 }
 
 // ══════════════════════════════════════════════════════════
-//  TAB 3 — STATISTICS
+//  PAGE 3 — STATISTICS  (/contacts/statistics)
 // ══════════════════════════════════════════════════════════
 
-interface StatisticsTabProps {
-  stats: CRMDashboardStats;
-  industryWise: IndustryWiseData[];
-  sourceWise: SourceWiseData[];
-  verificationTrend: VerificationTrend[];
-  departmentWise: DepartmentWiseData[];
-  verificationPie: { name: string; value: number; fill: string }[];
-  orgPie: { name: string; value: number; fill: string }[];
-}
+export function CRMStatisticsPage() {
+  const { dateRange, handleRangeChange } = useDateRange();
 
-function StatisticsTab({ stats, industryWise, sourceWise, verificationTrend, departmentWise, verificationPie, orgPie }: StatisticsTabProps) {
-  const verificationRate = stats.totalContacts > 0
-    ? ((stats.verifiedContacts / stats.totalContacts) * 100).toFixed(1)
-    : "0.0";
-  const activeRate = stats.totalContacts > 0
-    ? ((stats.activeContacts / stats.totalContacts) * 100).toFixed(1)
-    : "0.0";
-  const orgVerifRate = stats.totalOrganizations > 0
-    ? ((stats.verifiedOrganizations / stats.totalOrganizations) * 100).toFixed(1)
-    : "0.0";
+  const params = useMemo(() => ({
+    dateFrom: format(dateRange.start, "yyyy-MM-dd"),
+    dateTo: format(dateRange.end, "yyyy-MM-dd"),
+  }), [dateRange]);
+
+  const { data: dashData, isLoading } = useCRMDashboard(params);
+
+  const raw = dashData?.data as any;
+  const stats: CRMDashboardStats = raw?.stats ?? {
+    totalContacts: 0, activeContacts: 0, inactiveContacts: 0,
+    verifiedContacts: 0, notVerifiedContacts: 0,
+    totalOrganizations: 0, verifiedOrganizations: 0, totalCustomers: 0,
+  };
+  const industryWise: IndustryWiseData[] = Array.isArray(raw?.industryWise) ? raw.industryWise : [];
+  const sourceWise: SourceWiseData[] = Array.isArray(raw?.sourceWise) ? raw.sourceWise : [];
+  const verificationTrend: VerificationTrend[] = Array.isArray(raw?.verificationTrend) ? raw.verificationTrend : [];
+  const departmentWise: DepartmentWiseData[] = Array.isArray(raw?.departmentWise) ? raw.departmentWise : [];
+
+  const verificationPie = [
+    { name: "Verified", value: stats.verifiedContacts, fill: "#10b981" },
+    { name: "Not Verified", value: stats.notVerifiedContacts, fill: "#ef4444" },
+  ];
+  const orgPie = [
+    { name: "Verified", value: stats.verifiedOrganizations, fill: "#3b82f6" },
+    { name: "Unverified", value: Math.max(0, stats.totalOrganizations - stats.verifiedOrganizations), fill: "#f59e0b" },
+  ];
+
+  const verificationRate = stats.totalContacts > 0 ? ((stats.verifiedContacts / stats.totalContacts) * 100).toFixed(1) : "0.0";
+  const activeRate = stats.totalContacts > 0 ? ((stats.activeContacts / stats.totalContacts) * 100).toFixed(1) : "0.0";
+  const orgVerifRate = stats.totalOrganizations > 0 ? ((stats.verifiedOrganizations / stats.totalOrganizations) * 100).toFixed(1) : "0.0";
+
+  if (isLoading) return <LoadingSpinner fullPage />;
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
+      <CRMToolbar
+        title="Statistics"
+        actions={<DatePickerAction dateRange={dateRange} onRangeChange={handleRangeChange} />}
+      />
+
       {/* Summary stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Verification Rate" value={`${verificationRate}%`} color="#10b981" icon="shield-check" />
@@ -526,7 +511,7 @@ function StatisticsTab({ stats, industryWise, sourceWise, verificationTrend, dep
         <StatCard label="Total Customers" value={stats.totalCustomers.toString()} color="#f59e0b" icon="crown" />
       </div>
 
-      {/* Contact vs Org verification split */}
+      {/* Verification splits */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ChartCard title="Contact Verification Split">
           <ResponsiveContainer width="100%" height={260}>
@@ -553,7 +538,7 @@ function StatisticsTab({ stats, industryWise, sourceWise, verificationTrend, dep
         </ChartCard>
       </div>
 
-      {/* Verification trend full width */}
+      {/* Trend */}
       <ChartCard title="Verification Trend Over Time">
         {verificationTrend.length > 0 ? (
           <ResponsiveContainer width="100%" height={280}>
@@ -566,7 +551,7 @@ function StatisticsTab({ stats, industryWise, sourceWise, verificationTrend, dep
               <Area type="monotone" dataKey="unverified" stackId="1" stroke="#ef4444" fill="#ef444440" name="Unverified" />
             </AreaChart>
           </ResponsiveContainer>
-        ) : <EmptyChart message="No trend data available" />}
+        ) : <EmptyChart />}
       </ChartCard>
 
       {/* Industry + Department */}
@@ -584,7 +569,7 @@ function StatisticsTab({ stats, industryWise, sourceWise, verificationTrend, dep
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          ) : <EmptyChart message="No industry data" />}
+          ) : <EmptyChart />}
         </ChartCard>
 
         <ChartCard title="Contacts by Department">
@@ -600,11 +585,11 @@ function StatisticsTab({ stats, industryWise, sourceWise, verificationTrend, dep
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          ) : <EmptyChart message="No department data" />}
+          ) : <EmptyChart />}
         </ChartCard>
       </div>
 
-      {/* Source breakdown full width */}
+      {/* Source */}
       <ChartCard title="Contacts by Source / Campaign">
         {sourceWise.length > 0 ? (
           <ResponsiveContainer width="100%" height={280}>
@@ -618,10 +603,16 @@ function StatisticsTab({ stats, industryWise, sourceWise, verificationTrend, dep
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        ) : <EmptyChart message="No source data available" />}
+        ) : <EmptyChart />}
       </ChartCard>
     </div>
   );
+}
+
+// ── Legacy export for backward compat ─────────────────────
+// (kept so any existing import of CRMDashboard doesn't break)
+export function CRMDashboard() {
+  return <CRMDashboardPage />;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -651,10 +642,10 @@ function StatCard({ label, value, color, icon }: { label: string; value: string;
   );
 }
 
-function EmptyChart({ message }: { message: string }) {
+function EmptyChart() {
   return (
     <div className="flex items-center justify-center h-[260px] text-gray-400 text-sm">
-      {message}
+      No data available
     </div>
   );
 }
