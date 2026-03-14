@@ -8,6 +8,7 @@ export interface RegisterFormData {
   lastName: string;
   phone?: string;
   planId?: string;
+  businessTypeCode?: string;
 }
 
 export interface RegisterRequest {
@@ -19,6 +20,7 @@ export interface RegisterRequest {
   lastName: string;
   phone?: string;
   planId?: string;
+  businessTypeCode?: string;
 }
 
 export interface RegisterResponse {

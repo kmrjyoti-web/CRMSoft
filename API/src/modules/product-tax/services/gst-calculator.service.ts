@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { GSTBreakup, TaxComponent } from '../presentation/dto/product-tax.dto';
 
 @Injectable()
-export class GstCalculatorService {
+export class ProductTaxGstCalculatorService {
   calculateGST(params: {
     amount: number;
     gstRate: number;

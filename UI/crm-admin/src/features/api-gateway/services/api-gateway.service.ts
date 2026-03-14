@@ -18,7 +18,7 @@ import type {
   UsageFilters,
 } from "../types/api-gateway.types";
 
-const BASE = "/api-gateway/admin";
+const BASE = "/api/v1/api-gateway/admin";
 
 // ── API Keys ─────────────────────────────────────────
 export function createApiKey(dto: CreateApiKeyDto) {

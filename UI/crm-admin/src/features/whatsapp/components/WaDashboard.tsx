@@ -1,34 +1,36 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
-  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
+  BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
-import { Button, DatePicker } from '@/components/ui';
-import { PageHeader } from '@/components/common/PageHeader';
+import { AICDatePicker } from '@/components/shared/AICDatePicker';
+import type { DateRange } from '@/components/shared/AICDatePicker';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { getDateRange } from '@/features/dashboard/utils/date-range';
 import { CHART_COLORS } from '@/features/dashboard/utils/chart-colors';
-import type { DateRangePreset } from '@/features/dashboard/utils/date-range';
+import { format, subDays } from 'date-fns';
 import { useWaAnalytics, useWaAgentPerformance } from '../hooks/useWaAnalytics';
 import { WaKpiCards } from './WaKpiCards';
 import { AgentPerformanceTable } from './AgentPerformanceTable';
 
 export function WaDashboard() {
-  const [preset, setPreset] = useState<DateRangePreset>('30d');
-  const initialRange = useMemo(() => getDateRange('30d'), []);
-  const [dateFrom, setDateFrom] = useState(initialRange.dateFrom);
-  const [dateTo, setDateTo] = useState(initialRange.dateTo);
+  const [dateRange, setDateRange] = useState<DateRange>(() => ({
+    start: subDays(new Date(), 30),
+    end: new Date(),
+  }));
 
-  const handlePreset = (p: DateRangePreset) => {
-    setPreset(p);
-    const range = getDateRange(p);
-    setDateFrom(range.dateFrom);
-    setDateTo(range.dateTo);
-  };
+  const handleRangeChange = useCallback((range: DateRange | null) => {
+    if (range) setDateRange(range);
+  }, []);
 
-  const params = useMemo(() => ({ dateFrom, dateTo }), [dateFrom, dateTo]);
+  const params = useMemo(
+    () => ({
+      dateFrom: format(dateRange.start, 'yyyy-MM-dd'),
+      dateTo: format(dateRange.end, 'yyyy-MM-dd'),
+    }),
+    [dateRange],
+  );
   const { data: statsData, isLoading } = useWaAnalytics(params);
   const { data: agentsData, isLoading: agentsLoading } = useWaAgentPerformance(params);
 
@@ -59,34 +61,20 @@ export function WaDashboard() {
 
   return (
     <div>
-      <PageHeader
-        title="WhatsApp Dashboard"
-        actions={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            {(['7d', '30d', '90d', 'thisMonth', 'lastMonth'] as DateRangePreset[]).map((p) => (
-              <Button
-                key={p}
-                size="sm"
-                variant={preset === p ? 'primary' : 'outline'}
-                onClick={() => handlePreset(p)}
-              >
-                {p === '7d' ? '7D' : p === '30d' ? '30D' : p === '90d' ? '90D'
-                  : p === 'thisMonth' ? 'This Month' : 'Last Month'}
-              </Button>
-            ))}
-            <DatePicker
-              label="From"
-              value={dateFrom}
-              onChange={(v) => { setDateFrom(v); setPreset('custom'); }}
-            />
-            <DatePicker
-              label="To"
-              value={dateTo}
-              onChange={(v) => { setDateTo(v); setPreset('custom'); }}
-            />
-          </div>
-        }
-      />
+      {/* ── Toolbar Header ── */}
+      <div className="flex items-center justify-between gap-4 flex-wrap mb-5 py-2 border-b border-gray-200">
+        <h1 className="text-lg font-semibold text-gray-800 m-0">WhatsApp Dashboard</h1>
+        <AICDatePicker
+          mode="range"
+          dateRange={dateRange}
+          onRangeChange={handleRangeChange}
+          showPresets
+          showHighlights
+          placeholder="Select date range"
+          size="sm"
+          dropdownAlign="right"
+        />
+      </div>
 
       <WaKpiCards data={stats} />
 

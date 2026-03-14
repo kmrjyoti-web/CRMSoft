@@ -2,7 +2,10 @@
 
 import { useMemo } from "react";
 
-import { SelectInput, Icon } from "@/components/ui";
+import { Icon } from "@/components/ui/Icon";
+
+import { SmartSearch } from "./SmartSearch";
+import type { SmartSearchField, SmartSearchColumn } from "./SmartSearch";
 
 import { useProductsList } from "@/features/products/hooks/useProducts";
 import type { ProductListItem } from "@/features/products/types/products.types";
@@ -14,6 +17,8 @@ export interface ProductSelectOption {
   name: string;
   code: string;
   salePrice?: number;
+  purchasePrice?: number;
+  costPrice?: number;
   mrp?: number;
   hsnCode?: string;
   gstRate?: number;
@@ -22,16 +27,45 @@ export interface ProductSelectOption {
   shortDescription?: string;
 }
 
+export type ProductDisplayMode = "compact" | "detailed";
+
 interface ProductSelectProps {
   value?: string | null;
   onChange?: (value: string | number | boolean | null) => void;
   /** Called when a product is selected — receives full product data for auto-fill */
   onProductSelect?: (product: ProductSelectOption | null) => void;
+  /** Pre-filter products before showing (e.g., only certain categories) */
+  filterFn?: (product: ProductSelectOption) => boolean;
+  /** "compact" = single line, "detailed" = two-line with price/HSN/unit (default: "compact") */
+  displayMode?: ProductDisplayMode;
   label?: string;
   error?: boolean;
   errorMessage?: string;
   disabled?: boolean;
 }
+
+// ── Currency formatter ───────────────────────────────────
+
+const fmtPrice = (n?: number) =>
+  n != null ? `₹${n.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "";
+
+// ── Field definitions for SmartSearch ────────────────────
+
+const PRODUCT_FIELDS: SmartSearchField[] = [
+  { key: "NM", label: "Product Name", accessor: "name", isDefault: true },
+  { key: "PC", label: "Product Code", accessor: "code", isDefault: true },
+  { key: "HS", label: "HSN Code", accessor: "hsnCode" },
+  { key: "DS", label: "Description", accessor: "shortDescription" },
+  { key: "UN", label: "Unit", accessor: "primaryUnit" },
+];
+
+const PRODUCT_TABLE_COLUMNS: SmartSearchColumn<ProductSelectOption>[] = [
+  { key: "name", header: "Name", accessor: "name" },
+  { key: "code", header: "Code", accessor: "code", width: "80px" },
+  { key: "salePrice", header: "Price", accessor: (p) => fmtPrice(p.salePrice), width: "90px" },
+  { key: "hsnCode", header: "HSN", accessor: "hsnCode", width: "80px" },
+  { key: "unit", header: "Unit", accessor: "primaryUnit", width: "60px" },
+];
 
 // ── Component ────────────────────────────────────────────
 
@@ -39,6 +73,8 @@ export function ProductSelect({
   value,
   onChange,
   onProductSelect,
+  filterFn,
+  displayMode = "compact",
   label = "Product",
   error,
   errorMessage,
@@ -49,53 +85,94 @@ export function ProductSelect({
   const products = useMemo<ProductSelectOption[]>(() => {
     const raw = data?.data;
     const list: ProductListItem[] = Array.isArray(raw) ? raw : (raw as any)?.data ?? [];
-    return list.map((p) => ({
+    const mapped = list.map((p) => ({
       id: p.id,
       name: p.name,
       code: p.code,
       salePrice: p.salePrice,
+      purchasePrice: (p as any).purchasePrice,
+      costPrice: (p as any).costPrice,
       mrp: p.mrp,
       hsnCode: p.hsnCode,
       primaryUnit: p.primaryUnit,
       shortDescription: p.shortDescription,
     }));
-  }, [data]);
+    return filterFn ? mapped.filter(filterFn) : mapped;
+  }, [data, filterFn]);
 
-  const options = useMemo(
-    () =>
-      products.map((p) => ({
-        label: `${p.name} (${p.code})`,
-        value: p.id,
-      })),
-    [products],
-  );
+  // ── Render helpers ────────────────────────────────────
 
-  const handleChange = (val: string | number | boolean | null) => {
-    onChange?.(val);
-    if (onProductSelect) {
-      if (val) {
-        const product = products.find((p) => p.id === val) ?? null;
-        onProductSelect(product);
-      } else {
-        onProductSelect(null);
-      }
+  const renderListItem = (p: ProductSelectOption, isSelected: boolean, _isHighlighted: boolean) => {
+    if (displayMode === "detailed") {
+      return (
+        <div className="flex flex-col gap-0.5 w-full min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-sm truncate">{p.name}</span>
+            <span className="text-[11px] text-gray-400 font-mono flex-shrink-0">{p.code}</span>
+            {isSelected && <Icon name="check" size={14} className="ml-auto text-[var(--color-primary)] flex-shrink-0" />}
+          </div>
+          <div className="flex items-center gap-3 text-[11px] text-gray-500">
+            {p.salePrice != null && <span>{fmtPrice(p.salePrice)}</span>}
+            {p.hsnCode && <span>HSN: {p.hsnCode}</span>}
+            {p.primaryUnit && <span>{p.primaryUnit}</span>}
+            {p.gstRate != null && <span>GST {p.gstRate}%</span>}
+          </div>
+        </div>
+      );
     }
+
+    // compact
+    return (
+      <div className="flex items-center gap-2 w-full min-w-0">
+        <span className="text-sm truncate">
+          {p.name} <span className="text-gray-400">({p.code})</span>
+        </span>
+        {p.salePrice != null && (
+          <span className="ml-auto text-[11px] text-gray-400 flex-shrink-0 tabular-nums">{fmtPrice(p.salePrice)}</span>
+        )}
+        {isSelected && <Icon name="check" size={14} className="text-[var(--color-primary)] flex-shrink-0" />}
+      </div>
+    );
   };
 
+  const renderCardItem = (p: ProductSelectOption, isSelected: boolean) => (
+    <div className="flex flex-col gap-1 p-2 w-full min-w-0">
+      <div className="flex items-center gap-2">
+        <span className="font-medium text-sm truncate">{p.name}</span>
+        {isSelected && <Icon name="check" size={14} className="ml-auto text-[var(--color-primary)]" />}
+      </div>
+      <div className="text-[11px] text-gray-400 font-mono">{p.code}</div>
+      <div className="flex items-center gap-2 text-[11px] text-gray-500">
+        {p.salePrice != null && <span>{fmtPrice(p.salePrice)}</span>}
+        {p.primaryUnit && <span>{p.primaryUnit}</span>}
+      </div>
+    </div>
+  );
+
   return (
-    <SelectInput
-      options={options}
+    <SmartSearch<ProductSelectOption>
+      items={products}
+      fields={PRODUCT_FIELDS}
+      idAccessor="id"
       value={value}
-      onChange={handleChange}
-      placeholder="Select product..."
+      onChange={(id) => {
+        onChange?.(id);
+        if (!id) onProductSelect?.(null);
+      }}
+      onSelect={(item) => onProductSelect?.(item)}
+      displayMode="list"
+      allowModeSwitch
+      renderListItem={renderListItem}
+      renderCardItem={renderCardItem}
+      tableColumns={PRODUCT_TABLE_COLUMNS}
+      formatSelected={(p) => `${p.name} (${p.code})`}
       label={label}
-      loading={isLoading}
+      placeholder="Search by name, code, HSN..."
       error={error}
       errorMessage={errorMessage}
       disabled={disabled}
-      leftIcon={<Icon name="package" size={16} />}
-      searchable
-      clearable
+      loading={isLoading}
+      minDropdownWidth={320}
     />
   );
 }

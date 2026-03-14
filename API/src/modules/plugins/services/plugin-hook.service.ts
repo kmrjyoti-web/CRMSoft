@@ -1,18 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { PluginService } from './plugin.service';
+import { PluginHandlerRegistry, HookPayload } from '../handlers/handler-registry';
+import { EncryptionService } from '../../tenant-config/services/encryption.service';
 
-interface HookPayload {
-  tenantId: string;
-  entityType: string;
-  entityId: string;
-  action: string;
-  data: any;
-  userId?: string;
-}
+export { HookPayload };
 
 /**
  * Fires hook events to all enabled plugins that listen to them.
+ * Delegates to registered plugin handlers for actual execution.
  * Execution is async (fire-and-forget) — errors are logged, not propagated.
  */
 @Injectable()
@@ -22,6 +18,8 @@ export class PluginHookService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly pluginService: PluginService,
+    private readonly handlerRegistry: PluginHandlerRegistry,
+    private readonly encryption: EncryptionService,
   ) {}
 
   /**
@@ -54,9 +52,31 @@ export class PluginHookService {
       const startTime = Date.now();
 
       try {
-        // Log the hook execution as SUCCESS
-        // In a real implementation, this would delegate to a specific plugin handler
-        // e.g., WhatsAppPluginHandler.onLeadCreated(lead, credentials)
+        // Delegate to registered handler if available
+        let responsePayload: any = null;
+        const handler = this.handlerRegistry.get(tenantPlugin.plugin.code);
+
+        if (handler) {
+          // Decrypt credentials for the handler
+          let credentials: Record<string, any> = {};
+          if (tenantPlugin.credentials) {
+            try {
+              credentials = this.encryption.decrypt(tenantPlugin.credentials);
+            } catch {
+              this.logger.error(`Failed to decrypt credentials for ${tenantPlugin.plugin.code}`);
+            }
+          }
+
+          responsePayload = await handler.handle(
+            hookPoint,
+            payload,
+            credentials,
+            (tenantPlugin.settings as Record<string, any>) || {},
+          );
+        } else {
+          this.logger.debug(`No handler for plugin ${tenantPlugin.plugin.code}, logging only`);
+        }
+
         await this.logHookExecution(
           tenantId,
           tenantPlugin.pluginId,
@@ -67,6 +87,7 @@ export class PluginHookService {
           Date.now() - startTime,
           data,
           null,
+          responsePayload,
         );
 
         // Clear consecutive errors on success
@@ -151,6 +172,7 @@ export class PluginHookService {
     durationMs: number,
     requestPayload: any,
     errorMessage: string | null,
+    responsePayload?: any,
   ) {
     try {
       await this.prisma.pluginHookLog.create({
@@ -164,6 +186,9 @@ export class PluginHookService {
           durationMs,
           requestPayload: requestPayload
             ? JSON.parse(JSON.stringify(requestPayload))
+            : undefined,
+          responsePayload: responsePayload
+            ? JSON.parse(JSON.stringify(responsePayload))
             : undefined,
           errorMessage,
         },

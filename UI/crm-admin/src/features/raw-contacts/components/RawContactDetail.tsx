@@ -15,6 +15,8 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { useConfirmDialog } from "@/components/common/useConfirmDialog";
 import { formatDate } from "@/lib/format-date";
 
+import { VerifyButton } from "@/features/entity-verification";
+
 import {
   useRawContactDetail,
   useVerifyRawContact,
@@ -151,7 +153,15 @@ export function RawContactDetail({ rawContactId }: RawContactDetailProps) {
         title={`${contact.firstName} ${contact.lastName}`}
         subtitle={contact.designation ?? undefined}
         actions={
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 items-center">
+            <VerifyButton
+              entityType="RAW_CONTACT"
+              entityId={rawContactId}
+              entityName={`${contact.firstName} ${contact.lastName}`}
+              entityEmail={contact.communications?.find((c: RawContactCommunication) => c.type === "EMAIL")?.value}
+              entityPhone={contact.communications?.find((c: RawContactCommunication) => c.type === "PHONE" || c.type === "MOBILE")?.value}
+              initialStatus={contact.entityVerificationStatus ?? "UNVERIFIED"}
+            />
             <Button variant="outline" onClick={() => router.push("/raw-contacts")}>
               <Icon name="arrow-left" size={16} /> Back
             </Button>

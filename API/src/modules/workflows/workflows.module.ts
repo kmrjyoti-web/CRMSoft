@@ -4,6 +4,8 @@ import { WorkflowAdminController } from './presentation/workflow-admin.controlle
 import { WorkflowConfigController } from './presentation/workflow-config.controller';
 import { WorkflowExecutionController } from './presentation/workflow-execution.controller';
 import { WorkflowApprovalController } from './presentation/workflow-approval.controller';
+import { WorkflowAiController } from './presentation/workflow-ai.controller';
+import { WorkflowAiService } from './services/workflow-ai.service';
 
 // Command Handlers
 import { CreateWorkflowHandler } from './application/commands/create-workflow/create-workflow.handler';
@@ -59,7 +61,8 @@ const QueryHandlers = [
     WorkflowConfigController,
     WorkflowExecutionController,
     WorkflowApprovalController,
+    WorkflowAiController,
   ],
-  providers: [...CommandHandlers, ...QueryHandlers],
+  providers: [...CommandHandlers, ...QueryHandlers, WorkflowAiService],
 })
 export class WorkflowsModule {}

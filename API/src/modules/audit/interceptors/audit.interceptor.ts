@@ -1,22 +1,28 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { AuditCoreService } from '../services/audit-core.service';
 import { AuditSnapshotService } from '../services/audit-snapshot.service';
 import { AuditEntityResolverService } from '../services/audit-entity-resolver.service';
+import { TenantContextService } from '../../../modules/tenant/infrastructure/tenant-context.service';
 import { AUDIT_SKIP_KEY } from '../decorators/audit-skip.decorator';
 import { AUDIT_META_KEY } from '../decorators/auditable.decorator';
 import { AUDIT_ENTITY_KEY } from '../decorators/audit-entity.decorator';
 
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
+  private readonly logger = new Logger('AuditInterceptor');
+
   constructor(
     private readonly auditCoreService: AuditCoreService,
     private readonly snapshotService: AuditSnapshotService,
     private readonly entityResolver: AuditEntityResolverService,
+    private readonly tenantContext: TenantContextService,
     private readonly reflector: Reflector,
-  ) {}
+  ) {
+    this.logger.log('AuditInterceptor initialized');
+  }
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
@@ -39,6 +45,7 @@ export class AuditInterceptor implements NestInterceptor {
 
     // Resolve entity from URL
     const resolved = this.entityResolver.resolve(request.url, request.params || {}, method);
+    this.logger.debug(`[AUDIT] ${method} ${request.url} → resolved=${JSON.stringify(resolved)}`);
 
     // Check @AuditEntity() on controller
     const controllerEntityType = this.reflector.get<string>(AUDIT_ENTITY_KEY, controller);
@@ -55,6 +62,7 @@ export class AuditInterceptor implements NestInterceptor {
     }
 
     if (!resolved) {
+      this.logger.debug(`[AUDIT] No route match for ${method} ${request.url} — skipping`);
       return next.handle();
     }
 
@@ -67,6 +75,9 @@ export class AuditInterceptor implements NestInterceptor {
         // Don't block the request
       }
     }
+
+    // Capture tenantId synchronously (ALS context lost after setImmediate)
+    const tenantId = this.tenantContext.getTenantId() || request.user?.tenantId || '';
 
     // Capture request context
     const requestContext = {
@@ -103,9 +114,14 @@ export class AuditInterceptor implements NestInterceptor {
               afterSnapshot = await this.snapshotService.captureSnapshot(resolved.entityType, resolved.entityId);
             }
 
-            if (!resolved.entityId) return;
+            if (!resolved.entityId) {
+              this.logger.warn(`[AUDIT] No entityId for ${resolved.entityType} ${resolved.action} — skipping log`);
+              return;
+            }
 
+            this.logger.log(`[AUDIT] Logging: ${resolved.action} ${resolved.entityType} ${resolved.entityId} tenant=${tenantId}`);
             await this.auditCoreService.log({
+              tenantId,
               entityType: resolved.entityType,
               entityId: resolved.entityId,
               action: resolved.action,
@@ -126,7 +142,7 @@ export class AuditInterceptor implements NestInterceptor {
             });
           } catch (error) {
             // NEVER let audit logging break the application
-            console.error('Audit log error:', error.message);
+            this.logger.error(`[AUDIT] Audit log error: ${error.message}`, error.stack);
           }
         });
       }),

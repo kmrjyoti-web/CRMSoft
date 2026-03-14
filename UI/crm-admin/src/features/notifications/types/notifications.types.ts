@@ -123,3 +123,24 @@ export interface SSENotificationEvent {
   type: string;
   data: Notification;
 }
+
+// ── Admin Config ────────────────────────────────────────
+
+export interface NotificationConfig {
+  id: string;
+  eventType: string;
+  channels: NotificationChannel[];
+  templateId?: string;
+  isEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EscalationRule {
+  id: string;
+  entityType: string;
+  triggerAfterHours: number;
+  action: string;
+  targetRoleLevel?: number;
+  isActive: boolean;
+}

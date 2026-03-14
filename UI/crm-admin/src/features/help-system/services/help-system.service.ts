@@ -7,7 +7,7 @@ import type {
   HelpArticleFilters,
 } from "../types/help-system.types";
 
-const BASE = "/help";
+const BASE = "/api/v1/help";
 
 export function listArticles(filters?: HelpArticleFilters) {
   return apiClient.get<ApiResponse<HelpArticle[]>>(`${BASE}/articles`, { params: filters }).then((r) => r.data);

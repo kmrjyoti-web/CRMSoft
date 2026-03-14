@@ -3,8 +3,77 @@
 import { useState, useMemo, useCallback } from "react";
 
 import { Icon, ICON_MAP, useLayout, useMargLayout } from "@/components/ui";
+import { useMenuStore } from "@/stores/menu.store";
+import { useTabStore, ROUTE_TO_DOC_TYPE, DOCUMENT_CONFIG } from "@/stores/tab.store";
 
 import type { IconName, MenuItem } from "@/components/ui";
+
+// ── Skeleton Loader ─────────────────────────────────────
+
+function SidebarSkeleton() {
+  // Simulate a realistic menu structure: 8 items, some with sub-items
+  const rows = [1, 1, 0.7, 1, 0.85, 1, 0.6, 1, 0.75, 1, 0.9, 1];
+  return (
+    <ul className="menu-list" style={{ padding: "8px 0" }}>
+      {rows.map((widthFactor, i) => (
+        <li key={i} style={{ padding: "0 12px", marginBottom: 4 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "8px 8px",
+              borderRadius: 6,
+            }}
+          >
+            {/* Icon placeholder */}
+            <div
+              className="skeleton-pulse"
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: 4,
+                flexShrink: 0,
+              }}
+            />
+            {/* Text placeholder */}
+            <div
+              className="skeleton-pulse"
+              style={{
+                height: 12,
+                borderRadius: 4,
+                width: `${widthFactor * 100}%`,
+                maxWidth: 140,
+              }}
+            />
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// ── Empty state ─────────────────────────────────────────
+
+function SidebarEmptyState() {
+  return (
+    <div style={{ padding: "32px 16px", textAlign: "center" }}>
+      <Icon name="alert-circle" size={28} />
+      <p
+        style={{
+          color: "rgba(255,255,255,0.4)",
+          fontSize: 12,
+          marginTop: 8,
+          lineHeight: 1.4,
+        }}
+      >
+        No menu items available.
+        <br />
+        Contact your administrator.
+      </p>
+    </div>
+  );
+}
 
 // ── Icon with fallback ──────────────────────────────────
 
@@ -50,10 +119,29 @@ export function CRMSidebar({
   const filterMenuItems = useMargLayout((s) => s.filterMenuItems);
   const toggleItem = useMargLayout((s) => s.toggleItem);
   const setActiveItem = useMargLayout((s) => s.setActiveItem);
+  const menuLoading = useMenuStore((s) => s.loading);
+  const menuLoaded = useMenuStore((s) => s.loaded);
 
   const [isHovered, setHovered] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [hoveredLink, setHoveredLink] = useState<string | null>(null);
+
+  const addTab = useTabStore((s) => s.addTab);
+
+  // Local state for Level 2 expand/collapse — CoreUI's toggleItem doesn't
+  // reliably find nested sub-items in the top-level menuItems array, so we
+  // track Level 2 expanded state independently.
+  const [expandedL2, setExpandedL2] = useState<Set<string>>(new Set());
+
+  const toggleL2 = useCallback((label: string) => {
+    setExpandedL2((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) next.delete(label);
+      else next.add(label);
+      return next;
+    });
+  }, []);
 
   const filteredItems = useMemo(
     () => filterMenuItems(searchText),
@@ -62,19 +150,21 @@ export function CRMSidebar({
 
   // Flatten visible items for keyboard navigation
   const flatVisibleItems = useMemo(() => {
-    const flatten = (items: MenuItem[]): MenuItem[] => {
+    const flatten = (items: MenuItem[], level = 1): MenuItem[] => {
       const out: MenuItem[] = [];
       for (const item of items) {
         if (item.label === "__DIVIDER__" || item.label.startsWith("__TITLE__")) continue;
         out.push(item);
-        if (item.expanded && item.subItems?.length) {
-          out.push(...flatten(item.subItems));
+        const isExpanded =
+          level === 1 ? item.expanded : expandedL2.has(item.label);
+        if (isExpanded && item.subItems?.length) {
+          out.push(...flatten(item.subItems, level + 1));
         }
       }
       return out;
     };
     return flatten(filteredItems);
-  }, [filteredItems]);
+  }, [filteredItems, expandedL2]);
 
   const focusedItem =
     focusedIndex >= 0 && focusedIndex < flatVisibleItems.length
@@ -97,7 +187,8 @@ export function CRMSidebar({
     (item: MenuItem, e: React.MouseEvent) => {
       e.stopPropagation();
       if (item.hasSub) {
-        toggleItem(item);
+        // Use local state — CoreUI's toggleItem can't find nested sub-items
+        toggleL2(item.label);
         return;
       }
       if (item.link) {
@@ -105,7 +196,7 @@ export function CRMSidebar({
         onNavigate?.(item.link);
       }
     },
-    [toggleItem, setActiveItem, onNavigate],
+    [toggleL2, setActiveItem, onNavigate],
   );
 
   const handleSearchKeydown = useCallback(
@@ -203,7 +294,12 @@ export function CRMSidebar({
         </div>
 
         {/* Menu List */}
-        <ul className="menu-list">
+        {menuLoading && !menuLoaded && showFull ? (
+          <SidebarSkeleton />
+        ) : menuLoaded && filteredItems.length === 0 && !searchText && showFull ? (
+          <SidebarEmptyState />
+        ) : null}
+        <ul className="menu-list" style={menuLoading && !menuLoaded ? { display: "none" } : undefined}>
           {filteredItems.map((item, i) =>
             item.label === "__DIVIDER__" ? (
               <li key={`divider-${i}`} className="menu-divider">
@@ -267,16 +363,44 @@ export function CRMSidebar({
                 showFull &&
                 item.subItems && (
                   <ul className="sub-menu-list">
-                    {item.subItems.map((sub, j) => (
+                    {item.subItems.map((sub, j) =>
+                      sub.label === "__DIVIDER__" ? (
+                        <li key={`sub-divider-${j}`} className="menu-divider">
+                          <hr
+                            style={{
+                              border: "none",
+                              borderTop: "1px solid rgba(255,255,255,0.08)",
+                              margin: "4px 16px",
+                            }}
+                          />
+                        </li>
+                      ) : sub.label.startsWith("__TITLE__") ? (
+                        <li key={`sub-title-${j}`} style={{ padding: "10px 16px 2px" }}>
+                          <span
+                            style={{
+                              fontSize: 9,
+                              fontWeight: 700,
+                              textTransform: "uppercase",
+                              letterSpacing: 1.2,
+                              color: "rgba(255,255,255,0.35)",
+                            }}
+                          >
+                            {sub.label.replace("__TITLE__", "")}
+                          </span>
+                        </li>
+                      ) : (
                       <li
                         key={sub.label + j}
                         className={[
                           "sub-menu-item",
                           sub.active ? "active" : "",
+                          expandedL2.has(sub.label) ? "expanded" : "",
                           focusedItem === sub ? "focused" : "",
                         ]
                           .filter(Boolean)
                           .join(" ")}
+                        onMouseEnter={() => sub.link ? setHoveredLink(sub.link) : undefined}
+                        onMouseLeave={() => setHoveredLink(null)}
                       >
                         <div
                           className="sub-menu-row"
@@ -288,10 +412,35 @@ export function CRMSidebar({
                             </span>
                           )}
                           <span className="sub-menu-text">{sub.label}</span>
+                          {/* POS quick-open button — only for supported routes */}
+                          {sub.link && ROUTE_TO_DOC_TYPE[sub.link] && hoveredLink === sub.link && (
+                            <button
+                              title={`New ${DOCUMENT_CONFIG[ROUTE_TO_DOC_TYPE[sub.link]].shortName} tab`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addTab(ROUTE_TO_DOC_TYPE[sub.link!]!);
+                              }}
+                              style={{
+                                background: "rgba(255,255,255,0.15)",
+                                border: "none",
+                                borderRadius: 4,
+                                cursor: "pointer",
+                                color: "white",
+                                display: "flex",
+                                alignItems: "center",
+                                padding: "1px 4px",
+                                marginLeft: "auto",
+                                fontSize: 10,
+                                fontWeight: 700,
+                              }}
+                            >
+                              <Icon name="plus" size={11} />
+                            </button>
+                          )}
                           {sub.hasSub && (
                             <span
                               className={`plus-icon${
-                                sub.expanded ? " rotated" : ""
+                                expandedL2.has(sub.label) ? " rotated" : ""
                               }`}
                             >
                               <Icon name="chevron-right" size={14} />
@@ -300,7 +449,7 @@ export function CRMSidebar({
                         </div>
 
                         {/* Third-level */}
-                        {sub.hasSub && sub.expanded && sub.subItems && (
+                        {sub.hasSub && expandedL2.has(sub.label) && sub.subItems && (
                           <ul className="sub-menu-list-nested">
                             {sub.subItems.map((child, k) => (
                               <li
@@ -331,7 +480,8 @@ export function CRMSidebar({
                           </ul>
                         )}
                       </li>
-                    ))}
+                      )
+                    )}
                   </ul>
                 )}
             </li>

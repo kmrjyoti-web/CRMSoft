@@ -91,6 +91,15 @@ export const LOOKUP_SEED_DATA: LookupSeedCategory[] = [
 
   // ── Product lookups ───────────────────────────────────
   {
+    category: 'INVENTORY_TYPE',
+    displayName: 'Inventory Type',
+    isSystem: true,
+    values: [
+      { value: 'PRODUCT', label: 'Product' },
+      { value: 'SERVICE', label: 'Service' },
+    ],
+  },
+  {
     category: 'PRODUCT_TYPE',
     displayName: 'Product Type',
     isSystem: true,

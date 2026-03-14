@@ -48,7 +48,7 @@ describe('SubscriptionPackageService', () => {
     const result = await service.listAll();
     expect(result).toEqual(packages);
     expect(mockPrisma.subscriptionPackage.findMany).toHaveBeenCalledWith({
-      where: {},
+      where: { industryCode: null },
       orderBy: { planLevel: 'asc' },
       include: { coupons: { where: { isActive: true }, select: { id: true, code: true } } },
     });
@@ -58,7 +58,7 @@ describe('SubscriptionPackageService', () => {
     mockPrisma.subscriptionPackage.findMany.mockResolvedValue([]);
     await service.listAll(true);
     expect(mockPrisma.subscriptionPackage.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { isActive: true } }),
+      expect.objectContaining({ where: { industryCode: null, isActive: true } }),
     );
   });
 
@@ -129,7 +129,7 @@ describe('SubscriptionPackageService', () => {
     const result = await service.getFeatured();
     expect(result).toEqual(featured);
     expect(mockPrisma.subscriptionPackage.findMany).toHaveBeenCalledWith({
-      where: { isActive: true, isFeatured: true },
+      where: { isActive: true, isFeatured: true, industryCode: null },
       orderBy: { sortOrder: 'asc' },
     });
   });

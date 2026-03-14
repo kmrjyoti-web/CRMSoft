@@ -9,9 +9,14 @@ export interface MenuSeedItem {
   badgeColor?: string;
   badgeText?: string;
   openInNewTab?: boolean;
+  isAdminOnly?: boolean;
   children?: MenuSeedItem[];
 }
 
 export class BulkSeedMenusCommand {
-  constructor(public readonly menus: MenuSeedItem[]) {}
+  constructor(
+    public readonly menus: MenuSeedItem[],
+    public readonly tenantId?: string,
+    public readonly isSuperAdmin?: boolean,
+  ) {}
 }

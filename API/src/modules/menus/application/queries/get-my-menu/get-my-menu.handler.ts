@@ -2,6 +2,7 @@ import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { ConfigService } from '@nestjs/config';
 import { GetMyMenuQuery } from './get-my-menu.query';
 import { PrismaService } from '../../../../../core/prisma/prisma.service';
+import { industryFilter } from '../../../../../common/utils/industry-filter.util';
 
 interface MenuRow {
   id: string;
@@ -22,6 +23,7 @@ interface MenuRow {
   businessTypeApplicability: any;
   autoEnableWithModule: string | null;
   terminologyKey: string | null;
+  isAdminOnly: boolean;
 }
 
 export interface MenuTreeItem {
@@ -34,6 +36,7 @@ export interface MenuTreeItem {
   badgeColor?: string | null;
   badgeText?: string | null;
   openInNewTab: boolean;
+  isAdminOnly?: boolean;
   children: MenuTreeItem[];
 }
 
@@ -74,9 +77,13 @@ export class GetMyMenuHandler implements IQueryHandler<GetMyMenuQuery> {
       return this.buildTree(menus);
     }
 
-    // 1. Load all active menus (isActive check)
+    // 1. Load all active menus (isActive check + industry filter)
     const allMenus = await this.prisma.menu.findMany({
-      where: { isActive: true, tenantId: query.tenantId },
+      where: {
+        isActive: true,
+        tenantId: query.tenantId,
+        ...industryFilter(query.businessTypeCode),
+      } as any,
       orderBy: { sortOrder: 'asc' },
     });
 
@@ -221,7 +228,15 @@ export class GetMyMenuHandler implements IQueryHandler<GetMyMenuQuery> {
         continue;
       }
 
+      if (item.menuType === 'TITLE') {
+        visible.push(this.toTreeItem(item, ctx?.terminology));
+        continue;
+      }
+
       if (item.menuType === 'GROUP') {
+        // Check 0: admin-only menus hidden from non-admin users
+        if (item.isAdminOnly) continue;
+
         // Check 3: business type applicability on groups too
         if (!this.checkBusinessType(item, ctx?.businessTypeCode)) continue;
 
@@ -234,7 +249,8 @@ export class GetMyMenuHandler implements IQueryHandler<GetMyMenuQuery> {
         continue;
       }
 
-      // ITEM — apply 5-check chain
+      // ITEM — apply 5-check chain (admin-only items hidden from regular users)
+      if (item.isAdminOnly) continue;
       if (this.isVisible5Check(item, perms, ctx)) {
         const node = this.toTreeItem(item, ctx?.terminology);
         if (entry.childRows.length > 0) {

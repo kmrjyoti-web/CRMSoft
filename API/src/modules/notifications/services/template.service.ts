@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
+import { industryFilter } from '../../../common/utils/industry-filter.util';
 
 @Injectable()
 export class NotificationTemplateService {
@@ -74,8 +75,8 @@ export class NotificationTemplateService {
     });
   }
 
-  async getAll(params?: { category?: string; isActive?: boolean }) {
-    const where: any = {};
+  async getAll(params?: { category?: string; isActive?: boolean; industryCode?: string }) {
+    const where: any = { ...industryFilter(params?.industryCode) };
     if (params?.category) where.category = params.category;
     if (params?.isActive !== undefined) where.isActive = params.isActive;
 

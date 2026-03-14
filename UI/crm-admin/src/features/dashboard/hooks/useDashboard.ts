@@ -72,6 +72,38 @@ export function useLeadSources(params: DashboardQueryParams) {
   });
 }
 
+export function useLostReasons(params: DashboardQueryParams) {
+  return useQuery({
+    queryKey: [ANALYTICS_KEY, "lost-reasons", params],
+    queryFn: () => analyticsService.getLostReasons(params).then((r) => r.data),
+    enabled: !!params.dateFrom && !!params.dateTo,
+  });
+}
+
+export function useActivityHeatmap(params: DashboardQueryParams) {
+  return useQuery({
+    queryKey: [ANALYTICS_KEY, "activity-heatmap", params],
+    queryFn: () => analyticsService.getActivityHeatmap(params).then((r) => r.data),
+    enabled: !!params.dateFrom && !!params.dateTo,
+  });
+}
+
+export function useAging(params: DashboardQueryParams) {
+  return useQuery({
+    queryKey: [ANALYTICS_KEY, "aging", params],
+    queryFn: () => analyticsService.getAging(params).then((r) => r.data),
+    enabled: !!params.dateFrom && !!params.dateTo,
+  });
+}
+
+export function useVelocity(params: DashboardQueryParams) {
+  return useQuery({
+    queryKey: [ANALYTICS_KEY, "velocity", params],
+    queryFn: () => analyticsService.getVelocity(params).then((r) => r.data),
+    enabled: !!params.dateFrom && !!params.dateTo,
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Report hooks
 // ---------------------------------------------------------------------------

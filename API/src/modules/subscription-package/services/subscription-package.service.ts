@@ -1,13 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
+import { industryFilter } from '../../../common/utils/industry-filter.util';
 
 @Injectable()
 export class SubscriptionPackageService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** List all packages ordered by planLevel */
-  async listAll(activeOnly?: boolean) {
-    const where: any = {};
+  async listAll(activeOnly?: boolean, industryCode?: string) {
+    const where: any = { ...industryFilter(industryCode) };
     if (activeOnly) where.isActive = true;
 
     return this.prisma.subscriptionPackage.findMany({
@@ -107,9 +108,9 @@ export class SubscriptionPackageService {
   }
 
   /** List featured active packages */
-  async getFeatured() {
+  async getFeatured(industryCode?: string) {
     return this.prisma.subscriptionPackage.findMany({
-      where: { isActive: true, isFeatured: true },
+      where: { isActive: true, isFeatured: true, ...industryFilter(industryCode) } as any,
       orderBy: { sortOrder: 'asc' },
     });
   }

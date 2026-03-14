@@ -11,7 +11,9 @@ interface PlanComparisonTableProps {
 }
 
 export function PlanComparisonTable({ onClose, currentPlanId }: PlanComparisonTableProps) {
-  const { data: plans, isLoading } = useAvailablePlans();
+  const { data: plansRes, isLoading } = useAvailablePlans();
+  const rawPlans = (plansRes as any)?.data ?? plansRes;
+  const plans: any[] = Array.isArray(rawPlans) ? rawPlans : [];
   const changePlanMut = useChangePlan();
 
   const handleChangePlan = async (planId: string) => {

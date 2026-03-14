@@ -4,6 +4,10 @@ export class ApiResponse<T> {
   data?: T;
   meta?: any;
 
+  constructor() {
+    Object.defineProperty(this, '__isApiResponse', { value: true, enumerable: false });
+  }
+
   static success<T>(data: T, message = 'Success', meta?: any): ApiResponse<T> {
     const r = new ApiResponse<T>();
     r.success = true;

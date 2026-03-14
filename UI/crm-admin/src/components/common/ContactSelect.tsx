@@ -2,12 +2,26 @@
 
 import { useMemo, useCallback } from "react";
 
-import { SelectInput, Icon } from "@/components/ui";
+import { SmartSearch } from "./SmartSearch";
+import type { SmartSearchField } from "./SmartSearch";
 
 import { useContactsList } from "@/features/contacts/hooks/useContacts";
 import { useSidePanelStore } from "@/stores/side-panel.store";
 
 import { ContactForm } from "@/features/contacts/components/ContactForm";
+
+// ── Types ────────────────────────────────────────────────
+
+interface ContactRow {
+  id: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  designation?: string;
+  department?: string;
+  organizationId?: string | null;
+  organizationName?: string;
+}
 
 interface ContactSelectProps {
   value?: string | null;
@@ -24,6 +38,19 @@ interface ContactSelectProps {
   leftIcon?: React.ReactNode;
 }
 
+// ── Field definitions for SmartSearch ────────────────────
+
+const CONTACT_FIELDS: SmartSearchField[] = [
+  { key: "NM", label: "Full Name", accessor: "fullName", isDefault: true },
+  { key: "FN", label: "First Name", accessor: "firstName" },
+  { key: "LN", label: "Last Name", accessor: "lastName" },
+  { key: "DG", label: "Designation", accessor: "designation" },
+  { key: "DP", label: "Department", accessor: "department" },
+  { key: "CM", label: "Company", accessor: "organizationName" },
+];
+
+// ── Component ────────────────────────────────────────────
+
 export function ContactSelect({
   value,
   onChange,
@@ -34,31 +61,39 @@ export function ContactSelect({
   errorMessage,
   disabled,
   required,
-  leftIcon,
 }: ContactSelectProps) {
   const { data, isLoading } = useContactsList();
   const openPanel = useSidePanelStore((s) => s.openPanel);
   const closePanel = useSidePanelStore((s) => s.closePanel);
 
-  const contactList = useMemo(() => {
+  const contactList = useMemo<ContactRow[]>(() => {
     const raw = data?.data;
     const list = Array.isArray(raw) ? raw : (raw as any)?.data ?? [];
-    return list as { id: string; firstName: string; lastName: string; organizationId?: string | null }[];
+    return (list as any[]).map((c) => ({
+      id: c.id,
+      firstName: c.firstName,
+      lastName: c.lastName,
+      fullName: `${c.firstName} ${c.lastName}`,
+      designation: c.designation,
+      department: c.department,
+      organizationId: c.organizationId,
+      organizationName: c.contactOrganizations?.[0]?.organization?.name ?? "",
+    }));
   }, [data]);
 
-  const options = useMemo(() => {
-    return contactList.map((c) => ({
-      label: `${c.firstName} ${c.lastName}`,
-      value: c.id,
-    }));
-  }, [contactList]);
-
   const handleChange = useCallback(
-    (val: string | number | boolean | null) => {
-      onChange?.(val);
-      if (onContactSelected && val) {
-        const contact = contactList.find((c) => c.id === val);
-        if (contact) onContactSelected(contact);
+    (id: string | null) => {
+      onChange?.(id);
+      if (onContactSelected && id) {
+        const contact = contactList.find((c) => c.id === id);
+        if (contact) {
+          onContactSelected({
+            id: contact.id,
+            firstName: contact.firstName,
+            lastName: contact.lastName,
+            organizationId: contact.organizationId,
+          });
+        }
       }
     },
     [onChange, onContactSelected, contactList],
@@ -128,21 +163,22 @@ export function ContactSelect({
   );
 
   return (
-    <SelectInput
-      options={options}
+    <SmartSearch<ContactRow>
+      items={contactList}
+      fields={CONTACT_FIELDS}
+      idAccessor="id"
       value={value}
       onChange={handleChange}
-      placeholder="Select contact..."
+      formatSelected={(c) => c.fullName}
       label={label}
-      loading={isLoading}
+      placeholder="Search by name, company, designation..."
       error={error}
       errorMessage={errorMessage}
       disabled={disabled}
       required={required}
-      leftIcon={leftIcon}
+      loading={isLoading}
       footer={actionFooter}
-      searchable
-      clearable
+      minDropdownWidth={300}
     />
   );
 }

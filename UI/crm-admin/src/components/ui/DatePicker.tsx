@@ -1,12 +1,11 @@
 'use client';
 
-import { forwardRef } from 'react';
+import { AICDatePicker } from '@/components/shared/AICDatePicker';
+import type { AICDatePickerProps } from '@/components/shared/AICDatePicker';
 
-import { AICDatePicker } from '@coreui/ui-react';
+export type DatePickerProps = AICDatePickerProps;
 
-type DatePickerProps = React.ComponentProps<typeof AICDatePicker>;
-
-export const DatePicker = forwardRef<HTMLElement, DatePickerProps>((props, ref) => {
-  return <AICDatePicker ref={ref as any} {...props} />;
-});
+export function DatePicker(props: DatePickerProps) {
+  return <AICDatePicker {...props} />;
+}
 DatePicker.displayName = 'DatePicker';

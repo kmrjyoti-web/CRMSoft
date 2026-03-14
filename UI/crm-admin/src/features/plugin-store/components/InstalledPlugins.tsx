@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 import { Button, Badge, Icon, Switch } from "@/components/ui";
@@ -12,30 +13,16 @@ import {
   useDisablePlugin,
 } from "../hooks/usePluginStore";
 import type { InstalledPlugin } from "../types/plugin-store.types";
+import { CATEGORY_CONFIG, STATUS_BADGE } from "../types/plugin-store.types";
 
-// ── Status helpers ────────────────────────────────────────────────────────────
-
-type BadgeVariant = "success" | "secondary" | "danger";
-
-function pluginStatusVariant(status: InstalledPlugin["status"]): BadgeVariant {
-  switch (status) {
-    case "ACTIVE":
-      return "success";
-    case "DISABLED":
-      return "secondary";
-    case "ERROR":
-      return "danger";
-    default:
-      return "secondary";
-  }
-}
+// ── Helpers ──────────────────────────────────────────────────────────
 
 function formatDate(dateStr: string | undefined): string {
   if (!dateStr) return "—";
   return new Date(dateStr).toLocaleDateString();
 }
 
-// ── Table styles ──────────────────────────────────────────────────────────────
+// ── Table styles ─────────────────────────────────────────────────────
 
 const thStyle: React.CSSProperties = {
   padding: "10px 14px",
@@ -58,13 +45,14 @@ const tdStyle: React.CSSProperties = {
   verticalAlign: "middle",
 };
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Component ────────────────────────────────────────────────────────
 
 interface InstalledPluginsProps {
   onViewLogs?: (pluginCode: string) => void;
 }
 
 export function InstalledPlugins({ onViewLogs }: InstalledPluginsProps) {
+  const router = useRouter();
   const { data, isLoading } = useInstalledPlugins();
   const enableMutation = useEnablePlugin();
   const disableMutation = useDisablePlugin();
@@ -79,7 +67,7 @@ export function InstalledPlugins({ onViewLogs }: InstalledPluginsProps) {
     if (togglingCode) return;
     setTogglingCode(plugin.code);
     try {
-      if (plugin.status === "ACTIVE") {
+      if (plugin.isEnabled) {
         await disableMutation.mutateAsync(plugin.code);
         toast.success(`"${plugin.name}" disabled`);
       } else {
@@ -135,6 +123,17 @@ export function InstalledPlugins({ onViewLogs }: InstalledPluginsProps) {
             <Icon name="zap" size={40} color="#9ca3af" />
           </div>
           <p style={{ margin: 0 }}>No plugins installed yet</p>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => router.push("/plugins/catalog")}
+            style={{ marginTop: 12 }}
+          >
+            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <Icon name="plus" size={14} />
+              Browse Catalog
+            </span>
+          </Button>
         </div>
       ) : (
         <div style={{ overflowX: "auto" }}>
@@ -142,128 +141,131 @@ export function InstalledPlugins({ onViewLogs }: InstalledPluginsProps) {
             <thead>
               <tr>
                 <th style={thStyle}>Name</th>
-                <th style={thStyle}>Code</th>
                 <th style={thStyle}>Category</th>
                 <th style={thStyle}>Status</th>
                 <th style={thStyle}>Enabled</th>
+                <th style={thStyle}>Errors</th>
                 <th style={thStyle}>Last Used</th>
                 <th style={{ ...thStyle, textAlign: "right" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {plugins.map((plugin) => (
-                <tr key={plugin.id}>
-                  <td style={tdStyle}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div
-                        style={{
-                          width: 34,
-                          height: 34,
-                          borderRadius: 8,
-                          background: "#f0fdf4",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <Icon name="zap" size={16} color="#16a34a" />
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: 600, fontSize: 14 }}>
-                          {plugin.name}
+              {plugins.map((plugin) => {
+                const catCfg = CATEGORY_CONFIG[plugin.category] ?? {
+                  label: plugin.category,
+                  icon: "zap",
+                  color: "#6b7280",
+                };
+                const sBadge = STATUS_BADGE[plugin.status] ?? {
+                  label: plugin.status,
+                  variant: "secondary",
+                  icon: "circle",
+                };
+
+                return (
+                  <tr
+                    key={plugin.id}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => router.push(`/plugins/${plugin.code}`)}
+                  >
+                    <td style={tdStyle}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div
+                          style={{
+                            width: 34,
+                            height: 34,
+                            borderRadius: 8,
+                            background: `${catCfg.color}15`,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Icon name={catCfg.icon} size={16} color={catCfg.color} />
                         </div>
-                        <div style={{ fontSize: 12, color: "#9ca3af" }}>
-                          v{plugin.version}
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: 14 }}>
+                            {plugin.name}
+                          </div>
+                          <div style={{ fontSize: 12, color: "#9ca3af" }}>
+                            {plugin.code}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td style={tdStyle}>
-                    <code
+                    </td>
+                    <td style={tdStyle}>
+                      <Badge variant="outline" style={{ color: catCfg.color }}>
+                        {catCfg.label}
+                      </Badge>
+                    </td>
+                    <td style={tdStyle}>
+                      <Badge variant={sBadge.variant as any}>
+                        <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                          <Icon name={sBadge.icon} size={12} />
+                          {sBadge.label}
+                        </span>
+                      </Badge>
+                    </td>
+                    <td style={tdStyle}>
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <Switch
+                          size="sm"
+                          checked={plugin.isEnabled}
+                          onChange={() => handleToggle(plugin)}
+                          disabled={
+                            togglingCode === plugin.code ||
+                            plugin.status === "ERROR" ||
+                            plugin.status === "TP_ERROR"
+                          }
+                        />
+                      </div>
+                    </td>
+                    <td style={tdStyle}>
+                      {plugin.consecutiveErrors > 0 ? (
+                        <Badge variant="danger">
+                          {plugin.consecutiveErrors}
+                        </Badge>
+                      ) : (
+                        <span style={{ color: "#d1d5db" }}>0</span>
+                      )}
+                    </td>
+                    <td style={tdStyle}>{formatDate(plugin.lastUsedAt)}</td>
+                    <td
                       style={{
-                        background: "#f3f4f6",
-                        padding: "2px 6px",
-                        borderRadius: 4,
-                        fontSize: 12,
-                        fontFamily: "monospace",
+                        ...tdStyle,
+                        textAlign: "right",
+                        whiteSpace: "nowrap",
                       }}
                     >
-                      {plugin.code}
-                    </code>
-                  </td>
-                  <td style={tdStyle}>
-                    <Badge variant="outline">{plugin.category}</Badge>
-                  </td>
-                  <td style={tdStyle}>
-                    <Badge variant={pluginStatusVariant(plugin.status)}>
-                      {plugin.status === "ERROR" && (
-                        <span style={{ display: "inline-flex", marginRight: 4 }}>
-                          <Icon name="alert-circle" size={12} />
-                        </span>
-                      )}
-                      {plugin.status}
-                    </Badge>
-                  </td>
-                  <td style={tdStyle}>
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <Switch
-                        size="sm"
-                        checked={plugin.status === "ACTIVE"}
-                        onChange={() => handleToggle(plugin)}
-                        disabled={
-                          togglingCode === plugin.code ||
-                          plugin.status === "ERROR"
-                        }
-                      />
-                    </div>
-                  </td>
-                  <td style={tdStyle}>{formatDate(plugin.lastUsedAt)}</td>
-                  <td
-                    style={{
-                      ...tdStyle,
-                      textAlign: "right",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                      {onViewLogs && (
+                      <div
+                        style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {onViewLogs && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onViewLogs(plugin.code)}
+                          >
+                            <Icon name="terminal" size={14} />
+                          </Button>
+                        )}
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
-                          onClick={() => onViewLogs(plugin.code)}
+                          onClick={() => router.push(`/plugins/${plugin.code}`)}
                         >
                           <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                            <Icon name="terminal" size={14} />
-                            Logs
+                            <Icon name="settings" size={14} />
+                            Configure
                           </span>
                         </Button>
-                      )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleToggle(plugin)}
-                        disabled={
-                          togglingCode === plugin.code ||
-                          plugin.status === "ERROR"
-                        }
-                      >
-                        {plugin.status === "ACTIVE" ? (
-                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                            <Icon name="pause" size={14} />
-                            Disable
-                          </span>
-                        ) : (
-                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                            <Icon name="play" size={14} />
-                            Enable
-                          </span>
-                        )}
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

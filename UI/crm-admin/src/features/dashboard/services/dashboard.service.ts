@@ -3,10 +3,15 @@ import apiClient from "@/services/api-client";
 import type {
   DashboardQueryParams,
   ExecutiveKpis,
+  MyDashboardData,
   PipelineStage,
   FunnelStep,
   RevenueDataPoint,
   LeadSourceItem,
+  LostReasonItem,
+  HeatmapCell,
+  AgingBucket,
+  VelocityMetrics,
   ReportDefinition,
   GenerateReportParams,
   ExportReportParams,
@@ -40,7 +45,7 @@ export const dashboardService = {
   },
 
   getMyDashboard() {
-    return apiClient.get<ApiResponse<ExecutiveKpis>>(`${DASHBOARD_URL}/my`);
+    return apiClient.get<ApiResponse<MyDashboardData>>(`${DASHBOARD_URL}/my`);
   },
 };
 
@@ -58,19 +63,19 @@ export const analyticsService = {
   },
 
   getLostReasons(params: DashboardQueryParams) {
-    return apiClient.get<ApiResponse<Record<string, number>[]>>(`${ANALYTICS_URL}/lost-reasons`, { params });
+    return apiClient.get<ApiResponse<LostReasonItem[]>>(`${ANALYTICS_URL}/lost-reasons`, { params });
   },
 
   getActivityHeatmap(params: DashboardQueryParams) {
-    return apiClient.get<ApiResponse<unknown>>(`${ANALYTICS_URL}/activity-heatmap`, { params });
+    return apiClient.get<ApiResponse<HeatmapCell[]>>(`${ANALYTICS_URL}/activity-heatmap`, { params });
   },
 
   getAging(params: DashboardQueryParams) {
-    return apiClient.get<ApiResponse<unknown>>(`${ANALYTICS_URL}/aging`, { params });
+    return apiClient.get<ApiResponse<AgingBucket[]>>(`${ANALYTICS_URL}/aging`, { params });
   },
 
   getVelocity(params: DashboardQueryParams) {
-    return apiClient.get<ApiResponse<unknown>>(`${ANALYTICS_URL}/velocity`, { params });
+    return apiClient.get<ApiResponse<VelocityMetrics>>(`${ANALYTICS_URL}/velocity`, { params });
   },
 };
 

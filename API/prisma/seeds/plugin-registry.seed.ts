@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 
 /**
- * Seed data for PluginRegistry — 12 plugin definitions.
+ * Seed data for PluginRegistry — 15 plugin definitions.
  * Run: npx prisma db seed  (or call seedPluginRegistry(prisma) directly)
  */
 
@@ -91,6 +91,26 @@ const PLUGINS = [
     sortOrder: 4,
   },
 
+  {
+    code: 'msg91',
+    name: 'MSG91',
+    description: 'Indian bulk SMS, OTP, and transactional messaging via MSG91',
+    category: 'COMMUNICATION' as const,
+    configSchema: {
+      fields: [
+        { name: 'authKey', label: 'Auth Key', type: 'secret', required: true },
+        { name: 'senderId', label: 'Sender ID (6 chars)', type: 'string', required: true },
+        { name: 'flowId', label: 'Default Flow ID', type: 'string', required: false },
+        { name: 'otpTemplateId', label: 'OTP Template ID', type: 'string', required: false },
+      ],
+    },
+    hookPoints: ['lead.created', 'demo.reminder', 'payment.reminder', 'otp.requested'],
+    menuCodes: ['sms-templates', 'sms-history', 'otp-settings'],
+    iconUrl: '/icons/msg91.svg',
+    setupGuideUrl: '/docs/integrations/msg91',
+    sortOrder: 5,
+  },
+
   // ═══ PAYMENT ═══
   {
     code: 'razorpay',
@@ -138,6 +158,50 @@ const PLUGINS = [
     },
     iconUrl: '/icons/stripe.svg',
     setupGuideUrl: '/docs/integrations/stripe',
+    sortOrder: 2,
+  },
+
+  // ═══ ACCOUNTING ═══
+  {
+    code: 'tally_erp',
+    name: 'Tally ERP / TallyPrime',
+    description: 'Sync invoices, payments, and contacts with Tally accounting software',
+    category: 'ANALYTICS' as const,
+    configSchema: {
+      fields: [
+        { name: 'serverUrl', label: 'Tally Server URL', type: 'string', required: true, default: 'http://localhost' },
+        { name: 'port', label: 'Tally Port', type: 'number', required: true, default: 9000 },
+        { name: 'companyName', label: 'Company Name', type: 'string', required: true },
+        { name: 'masterPassword', label: 'Tally Master Password', type: 'secret', required: false },
+      ],
+    },
+    hookPoints: ['invoice.created', 'payment.received', 'contact.created'],
+    menuCodes: ['tally-sync', 'tally-logs'],
+    iconUrl: '/icons/tally.svg',
+    setupGuideUrl: '/docs/integrations/tally',
+    sortOrder: 1,
+  },
+  {
+    code: 'cleartax_gst',
+    name: 'ClearTax GST',
+    description: 'Auto-validate GSTIN, generate e-invoices, and file GST returns',
+    category: 'ANALYTICS' as const,
+    configSchema: {
+      fields: [
+        { name: 'apiToken', label: 'API Token', type: 'secret', required: true },
+        { name: 'gstin', label: 'GSTIN', type: 'string', required: true },
+        { name: 'environment', label: 'Environment', type: 'select', options: ['sandbox', 'production'], default: 'sandbox' },
+      ],
+    },
+    hookPoints: ['invoice.created', 'invoice.updated', 'contact.created', 'organization.created'],
+    menuCodes: ['gst-filing', 'e-invoices', 'gstin-lookup'],
+    webhookConfig: {
+      inbound: '/webhooks/cleartax_gst/{tenantId}',
+      verificationMethod: 'signature',
+      signatureHeader: 'X-ClearTax-Signature',
+    },
+    iconUrl: '/icons/cleartax.svg',
+    setupGuideUrl: '/docs/integrations/cleartax-gst',
     sortOrder: 2,
   },
 

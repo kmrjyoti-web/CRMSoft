@@ -56,9 +56,15 @@ function UsageBar({ item }: { item: LimitWithUsage }) {
 
 export function SubscriptionOverview() {
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const { data: subscription, isLoading: subLoading } = useCurrentSubscription();
-  const { data: limitsData, isLoading: limitsLoading } = useLimitsWithUsage();
-  const { data: invoices } = useTenantInvoices();
+  const { data: subRes, isLoading: subLoading } = useCurrentSubscription();
+  const { data: limitsRes, isLoading: limitsLoading } = useLimitsWithUsage();
+  const { data: invoicesRes } = useTenantInvoices();
+
+  // API responses are wrapped: { success, data: actualPayload }
+  const subscription = (subRes as any)?.data ?? subRes;
+  const limitsData = (limitsRes as any)?.data ?? limitsRes;
+  const rawInvoices = (invoicesRes as any)?.data ?? invoicesRes;
+  const invoices: any[] = Array.isArray(rawInvoices) ? rawInvoices : [];
 
   if (subLoading || limitsLoading) {
     return (

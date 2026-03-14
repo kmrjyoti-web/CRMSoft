@@ -92,4 +92,7 @@ export class TenantRegisterDto {
 
   @ApiPropertyOptional({ description: 'Plan ID to subscribe to (defaults to first active plan)' })
   @IsOptional() @IsUUID() planId?: string;
+
+  @ApiPropertyOptional({ description: 'Business type code (e.g., IT_SERVICES, RESTAURANT_FOOD)' })
+  @IsOptional() @IsString() businessTypeCode?: string;
 }

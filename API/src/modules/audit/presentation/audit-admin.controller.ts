@@ -10,7 +10,7 @@ import { CleanupOldLogsCommand } from '../application/commands/cleanup-old-logs/
 import { AuditCleanupService } from '../services/audit-cleanup.service';
 import { AuditSkip } from '../decorators/audit-skip.decorator';
 
-@Controller('audit')
+@Controller('admin/audit')
 @UseGuards(JwtAuthGuard)
 @AuditSkip()
 export class AuditAdminController {

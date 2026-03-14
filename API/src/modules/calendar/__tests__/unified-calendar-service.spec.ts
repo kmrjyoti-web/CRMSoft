@@ -91,7 +91,7 @@ describe('UnifiedCalendarService', () => {
 
     // The task findMany should have been called with tenantId but no assignedToId filter
     const taskCall = prisma.task.findMany.mock.calls[0][0];
-    expect(taskCall.where.tenantId).toBe(tenantId);
+    expect(taskCall.where.tenantId).toEqual({ in: [tenantId, ''] });
     expect(taskCall.where.assignedToId).toBeUndefined();
   });
 

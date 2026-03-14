@@ -1,7 +1,7 @@
 "use client";
 
-import { LocationList } from "@/features/business-locations/components/LocationList";
+import { CompanyLocationsTree } from "@/features/business-locations/components/CompanyLocationsTree";
 
 export default function LocationsPage() {
-  return <LocationList />;
+  return <CompanyLocationsTree />;
 }

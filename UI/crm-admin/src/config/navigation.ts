@@ -32,10 +32,19 @@ export const DEFAULT_NAV: NavItem[] = [
   {
     label: 'MIS', path: '/reports', icon: 'bar-chart-3',
     children: [
-      { label: 'All Reports', path: '/reports', icon: 'bar-chart' },
-      { label: 'Sales Reports', path: '/reports?category=SALES', icon: 'dollar-sign' },
-      { label: 'Report Designer', path: '/settings/templates', icon: 'pen-tool' },
-      { label: 'My Reports', path: '/reports/saved', icon: 'folder-open' },
+      {
+        label: 'BI', path: '/analytics', icon: 'pie-chart',
+        children: [
+          { label: 'All BI', path: '/reports', icon: 'layout-dashboard' },
+        ],
+      },
+      {
+        label: 'Report', path: '/reports', icon: 'file-bar-chart',
+        children: [
+          { label: 'Report Designer', path: '/settings/templates', icon: 'pen-tool' },
+          { label: 'My Reports', path: '/reports/saved', icon: 'bookmark' },
+        ],
+      },
       { label: 'Scheduled Reports', path: '/reports/scheduled', icon: 'clock' },
     ],
   },
@@ -46,6 +55,7 @@ export const DEFAULT_NAV: NavItem[] = [
   {
     label: 'CRM', path: '/contacts', icon: 'users',
     children: [
+      { label: 'Dashboard', path: '/contacts/dashboard', icon: 'layout-dashboard', permission: 'contacts:view' },
       {
         label: 'Contact Master', path: '/contacts', icon: 'user-check',
         children: [
@@ -150,8 +160,9 @@ export const DEFAULT_NAV: NavItem[] = [
   // 7. ACCOUNTING TRANSACTIONS
   // ─────────────────────────────────────────────────────────────
   {
-    label: 'Accounting Trans.', path: '/accounts/journal-entries', icon: 'receipt',
+    label: 'Accounting Trans.', path: '/accounts/transactions', icon: 'receipt',
     children: [
+      { label: 'Dashboard', path: '/accounts/transactions', icon: 'layout-dashboard', permission: 'accounts:view' },
       { label: 'Journal Entry', path: '/accounts/journal-entries', icon: 'book-open', permission: 'accounts:view' },
       { label: 'Payment In', path: '/accounts/payments?type=receipt', icon: 'arrow-down-circle' },
       { label: 'Payment Out', path: '/accounts/payments?type=payment', icon: 'arrow-up-circle' },
@@ -188,28 +199,7 @@ export const DEFAULT_NAV: NavItem[] = [
   },
 
   // ─────────────────────────────────────────────────────────────
-  // 10. REPORTS
-  // ─────────────────────────────────────────────────────────────
-  {
-    label: 'Reports', path: '/accounts/reports', icon: 'bar-chart-3',
-    children: [
-      { label: 'Profit & Loss', path: '/accounts/reports/profit-loss', icon: 'trending-up' },
-      { label: 'Balance Sheet', path: '/accounts/reports/balance-sheet', icon: 'scale' },
-      { label: 'Trial Balance', path: '/accounts/reports/trial-balance', icon: 'file-bar-chart' },
-      { label: 'Cash Flow', path: '/accounts/reports/cash-flow', icon: 'droplets' },
-      { label: 'GSTR-1', path: '/accounts/gst', icon: 'file-badge' },
-      { label: 'GSTR-3B', path: '/accounts/gst', icon: 'file-badge' },
-      { label: 'Input Tax Credit', path: '/accounts/gst', icon: 'receipt' },
-      { label: 'Stock Ledger', path: '/inventory/reports/ledger', icon: 'book-open' },
-      { label: 'Stock Valuation', path: '/inventory/reports/valuation', icon: 'indian-rupee' },
-      { label: 'Sales Reports', path: '/reports?category=SALES', icon: 'dollar-sign' },
-      { label: 'Purchase Reports', path: '/reports?category=PURCHASE', icon: 'shopping-cart' },
-      { label: 'TDS Reports', path: '/accounts/tds', icon: 'percent' },
-    ],
-  },
-
-  // ─────────────────────────────────────────────────────────────
-  // 11. COMMUNICATION
+  // 10. COMMUNICATION
   // ─────────────────────────────────────────────────────────────
   {
     label: 'Communication', path: '/communication/templates', icon: 'message-circle',

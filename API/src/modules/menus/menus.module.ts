@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
+import { PrismaService } from '../../core/prisma/prisma.service';
 import { MenusController } from './presentation/menus.controller';
 import { MenuPermissionController } from './presentation/menu-permission.controller';
 import { CreateMenuHandler } from './application/commands/create-menu/create-menu.handler';
@@ -24,7 +25,7 @@ const QueryHandlers = [
 @Module({
   imports: [CqrsModule],
   controllers: [MenusController, MenuPermissionController],
-  providers: [...CommandHandlers, ...QueryHandlers, MenuPermissionService],
+  providers: [...CommandHandlers, ...QueryHandlers, MenuPermissionService, PrismaService],
   exports: [MenuPermissionService],
 })
 export class MenusModule {}

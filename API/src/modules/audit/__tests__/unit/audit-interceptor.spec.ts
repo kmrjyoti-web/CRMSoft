@@ -6,6 +6,7 @@ describe('AuditInterceptor', () => {
   let auditCoreService: any;
   let snapshotService: any;
   let entityResolver: any;
+  let tenantContext: any;
   let reflector: any;
 
   beforeEach(() => {
@@ -16,11 +17,14 @@ describe('AuditInterceptor', () => {
     entityResolver = {
       resolve: jest.fn().mockReturnValue({ entityType: 'LEAD', entityId: 'lead-1', action: 'CREATE', module: 'leads' }),
     };
+    tenantContext = {
+      getTenantId: jest.fn().mockReturnValue('tenant-1'),
+    };
     reflector = {
       getAllAndOverride: jest.fn().mockReturnValue(false),
       get: jest.fn().mockReturnValue(null),
     };
-    interceptor = new AuditInterceptor(auditCoreService, snapshotService, entityResolver, reflector);
+    interceptor = new AuditInterceptor(auditCoreService, snapshotService, entityResolver, tenantContext, reflector);
   });
 
   const createContext = (method: string, url: string, user?: any) => ({

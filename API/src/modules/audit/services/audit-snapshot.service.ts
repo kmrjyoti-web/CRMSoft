@@ -82,6 +82,29 @@ export class AuditSnapshotService {
           entity = await this.prisma.salesTarget.findUnique({ where: { id: entityId } });
           break;
 
+        case 'PRODUCT':
+          entity = await this.prisma.product.findUnique({ where: { id: entityId } });
+          break;
+
+        case 'INVOICE':
+          entity = await this.prisma.invoice.findUnique({
+            where: { id: entityId },
+            include: { contact: { select: { firstName: true, lastName: true } } },
+          });
+          break;
+
+        case 'PAYMENT':
+          entity = await this.prisma.payment.findUnique({ where: { id: entityId } });
+          break;
+
+        case 'WORKFLOW':
+          entity = await this.prisma.workflow.findUnique({ where: { id: entityId } });
+          break;
+
+        case 'COMMUNICATION':
+          entity = await this.prisma.communication.findUnique({ where: { id: entityId } });
+          break;
+
         default:
           return null;
       }
@@ -119,6 +142,16 @@ export class AuditSnapshotService {
         return snapshot.title || `Follow-Up ${entityId.substring(0, 8)}`;
       case 'SALES_TARGET':
         return snapshot.name || `Target ${snapshot.metric || entityId.substring(0, 8)}`;
+      case 'PRODUCT':
+        return snapshot.name || `Product ${entityId.substring(0, 8)}`;
+      case 'INVOICE':
+        return snapshot.invoiceNo || `Invoice ${entityId.substring(0, 8)}`;
+      case 'PAYMENT':
+        return snapshot.referenceNumber || `Payment ${entityId.substring(0, 8)}`;
+      case 'WORKFLOW':
+        return snapshot.name || `Workflow ${entityId.substring(0, 8)}`;
+      case 'COMMUNICATION':
+        return snapshot.subject || `Communication ${entityId.substring(0, 8)}`;
       default:
         return `${entityType} ${entityId.substring(0, 8)}`;
     }

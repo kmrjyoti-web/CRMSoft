@@ -30,6 +30,8 @@ export interface RawContactItem {
   verifiedById?: string;
   contactId?: string;
   isActive?: boolean;
+  entityVerificationStatus?: string;
+  entityVerifiedAt?: string | null;
   createdById: string;
   createdAt: string;
   updatedAt: string;

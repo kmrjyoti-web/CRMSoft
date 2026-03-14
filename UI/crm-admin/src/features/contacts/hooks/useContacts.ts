@@ -80,6 +80,13 @@ export function useRestoreContact() {
   });
 }
 
+export function useCRMDashboard(params?: { dateFrom?: string; dateTo?: string }) {
+  return useQuery({
+    queryKey: [KEY, "dashboard", params],
+    queryFn: () => contactsService.getDashboard(params),
+  });
+}
+
 export function usePermanentDeleteContact() {
   const qc = useQueryClient();
   return useMutation({

@@ -1,10 +1,10 @@
-import { GstCalculatorService } from '../../services/gst-calculator.service';
+import { ProductTaxGstCalculatorService } from '../../services/gst-calculator.service';
 
-describe('GstCalculatorService', () => {
-  let service: GstCalculatorService;
+describe('ProductTaxGstCalculatorService', () => {
+  let service: ProductTaxGstCalculatorService;
 
   beforeEach(() => {
-    service = new GstCalculatorService();
+    service = new ProductTaxGstCalculatorService();
   });
 
   it('should calculate intra-state GST (CGST + SGST)', () => {

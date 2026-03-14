@@ -124,9 +124,9 @@ export async function seedTaskEngine(prisma: PrismaClient) {
 
   for (const nc of notifConfigs) {
     await prisma.notificationConfig.upsert({
-      where: { tenantId_eventType: { tenantId: '', eventType: nc.eventType as any } },
+      where: { tenantId_eventCode: { tenantId: '', eventCode: nc.eventType } },
       update: { channels: nc.channels },
-      create: { tenantId: '', eventType: nc.eventType as any, channels: nc.channels },
+      create: { tenantId: '', eventCode: nc.eventType, eventType: nc.eventType as any, channels: nc.channels },
     });
   }
   console.log(`✅ ${notifConfigs.length} notification configs`);

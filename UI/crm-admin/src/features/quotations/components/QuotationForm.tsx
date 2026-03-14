@@ -7,7 +7,8 @@ import { useForm, Controller, useFieldArray } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
 
-import { Button, Icon, Input, DatePicker, NumberInput, CurrencyInput, Fieldset, Typography, Modal } from "@/components/ui";
+import { Button, Icon, Input, NumberInput, CurrencyInput, Fieldset, Typography, Modal } from "@/components/ui";
+import { SmartDateInput } from "@/components/common/SmartDateInput";
 import { LookupSelect } from "@/components/common/LookupSelect";
 import { ProductSelect } from "@/components/common/ProductSelect";
 import type { ProductSelectOption } from "@/components/common/ProductSelect";
@@ -756,10 +757,10 @@ export function QuotationForm({ quotationId, leadId: defaultLeadId, mode = "page
                 name="validFrom"
                 control={control}
                 render={({ field }) => (
-                  <DatePicker
+                  <SmartDateInput
                     label="Valid From"
-                    value={field.value ?? ""}
-                    onChange={(v) => field.onChange(v)}
+                    value={field.value || null}
+                    onChange={(v) => field.onChange(v ?? "")}
                   />
                 )}
               />
@@ -767,10 +768,10 @@ export function QuotationForm({ quotationId, leadId: defaultLeadId, mode = "page
                 name="validUntil"
                 control={control}
                 render={({ field }) => (
-                  <DatePicker
+                  <SmartDateInput
                     label="Valid Until"
-                    value={field.value ?? ""}
-                    onChange={(v) => field.onChange(v)}
+                    value={field.value || null}
+                    onChange={(v) => field.onChange(v ?? "")}
                   />
                 )}
               />

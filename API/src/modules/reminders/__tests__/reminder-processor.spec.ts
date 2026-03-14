@@ -15,6 +15,7 @@ describe('Reminder Handlers', () => {
           { id: 'rem-1', channel: 'IN_APP', title: 'Test', recipientId: 'user-1', recipient: { id: 'user-1', email: 'test@test.com', firstName: 'Raj' } },
         ]),
         update: jest.fn().mockResolvedValue({ id: 'rem-1', isSent: true }),
+        updateMany: jest.fn().mockResolvedValue({ count: 0 }),
       },
     };
   });

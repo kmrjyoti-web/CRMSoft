@@ -17,6 +17,8 @@ export interface OrganizationItem {
   numberOfEmployees?: number | null;
   notes?: string;
   isActive: boolean;
+  entityVerificationStatus?: string;
+  entityVerifiedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }

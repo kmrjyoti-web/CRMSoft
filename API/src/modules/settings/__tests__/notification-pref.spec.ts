@@ -1,7 +1,7 @@
 import { NotificationPrefService } from '../services/notification-pref.service';
 
 const mockPrisma = {
-  tenantNotificationSetting: {
+  notificationConfig: {
     findUnique: jest.fn(),
     findMany: jest.fn(),
     update: jest.fn(),
@@ -18,38 +18,38 @@ describe('NotificationPrefService', () => {
   });
 
   it('should return event config with correct channels', async () => {
-    mockPrisma.tenantNotificationSetting.findUnique.mockResolvedValue({
+    mockPrisma.notificationConfig.findUnique.mockResolvedValue({
       eventCode: 'LEAD_ASSIGNED',
-      inAppEnabled: true,
-      emailEnabled: true,
-      smsEnabled: false,
-      whatsappEnabled: false,
-      pushEnabled: false,
-      notifyOwner: true,
+      enableInAppAlert: true,
+      enableEmail: true,
+      enableSms: false,
+      enableWhatsapp: false,
+      enablePush: false,
+      notifyAssignee: true,
     });
 
     const result = await service.getForEvent('t1', 'LEAD_ASSIGNED');
     expect(result).toBeDefined();
-    expect(result!.inAppEnabled).toBe(true);
-    expect(result!.emailEnabled).toBe(true);
-    expect(result!.smsEnabled).toBe(false);
+    expect(result!.enableInAppAlert).toBe(true);
+    expect(result!.enableEmail).toBe(true);
+    expect(result!.enableSms).toBe(false);
   });
 
   it('should update a single event channel toggle', async () => {
-    mockPrisma.tenantNotificationSetting.update.mockResolvedValue({
+    mockPrisma.notificationConfig.update.mockResolvedValue({
       eventCode: 'LEAD_WON',
-      emailEnabled: false,
+      enableEmail: false,
     });
 
-    const result = await service.update('t1', 'LEAD_WON', { emailEnabled: false });
-    expect(mockPrisma.tenantNotificationSetting.update).toHaveBeenCalledWith({
+    const result = await service.update('t1', 'LEAD_WON', { enableEmail: false });
+    expect(mockPrisma.notificationConfig.update).toHaveBeenCalledWith({
       where: { tenantId_eventCode: { tenantId: 't1', eventCode: 'LEAD_WON' } },
-      data: { emailEnabled: false },
+      data: { enableEmail: false },
     });
   });
 
   it('should group preferences by category', async () => {
-    mockPrisma.tenantNotificationSetting.findMany.mockResolvedValue([
+    mockPrisma.notificationConfig.findMany.mockResolvedValue([
       { eventCode: 'LEAD_CREATED', eventCategory: 'LEAD' },
       { eventCode: 'LEAD_ASSIGNED', eventCategory: 'LEAD' },
       { eventCode: 'DEMO_SCHEDULED', eventCategory: 'DEMO' },
@@ -61,9 +61,9 @@ describe('NotificationPrefService', () => {
   });
 
   it('should send test notification and return active channels', async () => {
-    mockPrisma.tenantNotificationSetting.findUnique.mockResolvedValue({
-      inAppEnabled: true, emailEnabled: true, smsEnabled: false,
-      whatsappEnabled: false, pushEnabled: true,
+    mockPrisma.notificationConfig.findUnique.mockResolvedValue({
+      enableInAppAlert: true, enableEmail: true, enableSms: false,
+      enableWhatsapp: false, enablePush: true,
     });
 
     const result = await service.sendTest('t1', 'LEAD_WON');

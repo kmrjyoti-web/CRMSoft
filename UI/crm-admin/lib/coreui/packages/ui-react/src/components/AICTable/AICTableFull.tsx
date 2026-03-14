@@ -312,14 +312,16 @@ export const AICTableFull = forwardRef<HTMLDivElement, AICTableFullProps>(functi
 
           <div className="h-5 w-px bg-gray-300 mx-1" />
 
-          <div className="flex rounded-md shadow-sm">
-            <button onClick={onCreate} className="px-3 py-1.5 text-sm font-medium text-white bg-[#f26b3a] border border-transparent rounded-l-md hover:bg-[#e05a29] whitespace-nowrap">
-              Create {title?.replace(/s$/, '') || 'Record'}
-            </button>
-            <button className="px-2 py-1.5 text-white bg-[#f26b3a] border-l border-[#d95322] rounded-r-md hover:bg-[#e05a29]">
-              <ChevronDown size={14} />
-            </button>
-          </div>
+          {onCreate && (
+            <div className="flex rounded-md shadow-sm">
+              <button onClick={onCreate} className="px-3 py-1.5 text-sm font-medium text-white bg-[#f26b3a] border border-transparent rounded-l-md hover:bg-[#e05a29] whitespace-nowrap">
+                Create {title?.replace(/s$/, '') || 'Record'}
+              </button>
+              <button className="px-2 py-1.5 text-white bg-[#f26b3a] border-l border-[#d95322] rounded-r-md hover:bg-[#e05a29]">
+                <ChevronDown size={14} />
+              </button>
+            </div>
+          )}
           {headerActions}
         </div>
       </header>

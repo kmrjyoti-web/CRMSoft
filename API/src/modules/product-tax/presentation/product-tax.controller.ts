@@ -6,7 +6,7 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { ApiResponse } from '../../../common/utils/api-response';
 import { RequirePermissions } from '../../../core/permissions/decorators/require-permissions.decorator';
-import { GstCalculatorService } from '../services/gst-calculator.service';
+import { ProductTaxGstCalculatorService } from '../services/gst-calculator.service';
 import { SetTaxDetailsDto, CalculateGstDto } from './dto/product-tax.dto';
 
 @ApiTags('Product Tax')
@@ -15,7 +15,7 @@ import { SetTaxDetailsDto, CalculateGstDto } from './dto/product-tax.dto';
 export class ProductTaxController {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly gstCalculator: GstCalculatorService,
+    private readonly gstCalculator: ProductTaxGstCalculatorService,
   ) {}
 
   @Post(':productId/details')

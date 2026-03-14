@@ -22,6 +22,23 @@ interface SettingsGroup {
 
 const SETTINGS_GROUPS: SettingsGroup[] = [
   {
+    title: "Company",
+    items: [
+      {
+        label: "Company Profile",
+        description: "Business info, address, GST, financial year, inventory settings",
+        icon: "building-2",
+        path: "/settings/company",
+      },
+      {
+        label: "Operating Locations",
+        description: "Countries, states, cities and pincodes — drives GST inter/intra-state",
+        icon: "map-pin",
+        path: "/settings/locations",
+      },
+    ],
+  },
+  {
     title: "General",
     items: [
       {
@@ -100,6 +117,12 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
         description: "Configure AI providers, default models, and monitor usage",
         icon: "cpu",
         path: "/settings/ai",
+      },
+      {
+        label: "Plugin Store",
+        description: "Browse, install, and manage third-party plugins",
+        icon: "package",
+        path: "/plugins/catalog",
       },
     ],
   },

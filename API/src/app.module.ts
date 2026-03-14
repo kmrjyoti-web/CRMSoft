@@ -78,6 +78,19 @@ import { SubscriptionPackageModule } from './modules/subscription-package/subscr
 import { HelpModule } from './modules/help/help.module';
 import { PluginsModule } from './modules/plugins/plugins.module';
 import { VerificationModule } from './modules/verification/verification.module';
+import { DocumentTemplatesModule } from './modules/document-templates/document-templates.module';
+import { SupportModule } from './modules/support/support.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
+import { ProcurementModule } from './modules/procurement/procurement.module';
+import { AccountsModule } from './modules/accounts/accounts.module';
+import { SalesModule } from './modules/sales/sales.module';
+import { KeyboardShortcutsModule } from './modules/keyboard-shortcuts/keyboard-shortcuts.module';
+import { EntityVerificationModule } from './modules/entity-verification/entity-verification.module';
+import { SmartSearchModule } from './modules/search/smart-search.module';
+import { AmcWarrantyModule } from './modules/amc-warranty/amc-warranty.module';
+import { SelfHostedAiModule } from './modules/self-hosted-ai/self-hosted-ai.module';
+import { CalendarHighlightsModule } from './modules/calendar-highlights/calendar-highlights.module';
+import { TenantAuditMiddleware } from './modules/tenant/infrastructure/tenant-audit.middleware';
 
 @Module({
   imports: [
@@ -153,6 +166,18 @@ import { VerificationModule } from './modules/verification/verification.module';
     HelpModule,
     PluginsModule,
     VerificationModule,
+    DocumentTemplatesModule,
+    SupportModule,
+    InventoryModule,
+    ProcurementModule,
+    AccountsModule,
+    SalesModule,
+    KeyboardShortcutsModule,
+    EntityVerificationModule,
+    SmartSearchModule,
+    AmcWarrantyModule,
+    SelfHostedAiModule,
+    CalendarHighlightsModule,
     ErrorsModule,
   ],
   controllers: [],
@@ -173,5 +198,6 @@ import { VerificationModule } from './modules/verification/verification.module';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(RequestLoggerMiddleware).forRoutes('*');
+    consumer.apply(TenantAuditMiddleware).forRoutes('*');
   }
 }

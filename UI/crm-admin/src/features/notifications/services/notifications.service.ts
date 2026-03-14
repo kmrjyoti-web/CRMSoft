@@ -4,6 +4,7 @@ import type {
   Notification,
   NotificationPreference,
   NotificationStats,
+  NotificationConfig,
   NotificationListParams,
   UpdatePreferencesDto,
 } from "../types/notifications.types";
@@ -75,5 +76,30 @@ export const notificationsService = {
   updatePreferences: (dto: UpdatePreferencesDto) =>
     apiClient
       .put<ApiResponse<NotificationPreference>>(`${SETTINGS_URL}/preferences`, dto)
+      .then((r) => r.data),
+
+  // ── Admin: Notification Config ────────────────────────
+  getConfigs: () =>
+    apiClient
+      .get<ApiResponse<NotificationConfig[]>>("/api/v1/notification-configs")
+      .then((r) => r.data),
+
+  updateConfig: (
+    eventType: string,
+    data: { channels: string[]; templateId?: string },
+  ) =>
+    apiClient
+      .put<ApiResponse<NotificationConfig>>(
+        `/api/v1/notification-configs/${eventType}`,
+        data,
+      )
+      .then((r) => r.data),
+
+  getConfigAnalytics: (startDate?: string, endDate?: string) =>
+    apiClient
+      .get<ApiResponse<Record<string, unknown>>>(
+        "/api/v1/notification-configs/analytics",
+        { params: { startDate, endDate } },
+      )
       .then((r) => r.data),
 };

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 import { Button, Badge, Icon, Input, SelectInput, Modal } from "@/components/ui";
@@ -14,21 +15,19 @@ import type {
   PluginCatalogItem,
   PluginCredentialField,
 } from "../types/plugin-store.types";
+import { CATEGORY_CONFIG } from "../types/plugin-store.types";
 
-// ── Category options ──────────────────────────────────────────────────────────
+// ── Category options (from CATEGORY_CONFIG) ─────────────────────────
 
 const CATEGORY_OPTIONS = [
   { label: "All Categories", value: "" },
-  { label: "Communication", value: "COMMUNICATION" },
-  { label: "Payment", value: "PAYMENT" },
-  { label: "Analytics", value: "ANALYTICS" },
-  { label: "Storage", value: "STORAGE" },
-  { label: "Automation", value: "AUTOMATION" },
-  { label: "CRM", value: "CRM" },
-  { label: "Other", value: "OTHER" },
+  ...Object.entries(CATEGORY_CONFIG).map(([key, cfg]) => ({
+    label: cfg.label,
+    value: key,
+  })),
 ];
 
-// ── Credential field sub-component ───────────────────────────────────────────
+// ── Credential field sub-component ──────────────────────────────────
 
 function CredentialFieldInput({
   field,
@@ -52,7 +51,7 @@ function CredentialFieldInput({
   );
 }
 
-// ── Install Modal ─────────────────────────────────────────────────────────────
+// ── Install Modal ───────────────────────────────────────────────────
 
 function InstallModal({
   plugin,
@@ -158,15 +157,23 @@ function InstallModal({
   );
 }
 
-// ── Plugin Card ───────────────────────────────────────────────────────────────
+// ── Plugin Card ─────────────────────────────────────────────────────
 
 function PluginCard({
   plugin,
   onInstall,
+  onViewDetail,
 }: {
   plugin: PluginCatalogItem;
   onInstall: (plugin: PluginCatalogItem) => void;
+  onViewDetail: (code: string) => void;
 }) {
+  const catCfg = CATEGORY_CONFIG[plugin.category] ?? {
+    label: plugin.category,
+    icon: "zap",
+    color: "#6b7280",
+  };
+
   return (
     <div
       style={{
@@ -178,6 +185,17 @@ function PluginCard({
         flexDirection: "column",
         gap: 12,
         boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+        cursor: "pointer",
+        transition: "border-color 0.15s, box-shadow 0.15s",
+      }}
+      onClick={() => onViewDetail(plugin.code)}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = "#93c5fd";
+        e.currentTarget.style.boxShadow = "0 2px 8px rgba(59,130,246,0.1)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = "#e5e7eb";
+        e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.06)";
       }}
     >
       {/* Header */}
@@ -187,14 +205,14 @@ function PluginCard({
             width: 44,
             height: 44,
             borderRadius: 10,
-            background: "#f0fdf4",
+            background: `${catCfg.color}15`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
           }}
         >
-          <Icon name="zap" size={22} color="#16a34a" />
+          <Icon name={catCfg.icon} size={22} color={catCfg.color} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
@@ -215,11 +233,18 @@ function PluginCard({
             </div>
           )}
         </div>
-        {plugin.isInstalled ? (
-          <Badge variant="success">Installed</Badge>
-        ) : (
-          <Badge variant="outline">v{plugin.version}</Badge>
-        )}
+        <div style={{ display: "flex", gap: 4 }}>
+          {plugin.isPremium && (
+            <Badge variant="warning">
+              <Icon name="crown" size={11} />
+            </Badge>
+          )}
+          {plugin.isInstalled ? (
+            <Badge variant="success">Installed</Badge>
+          ) : (
+            <Badge variant="outline">v{plugin.version}</Badge>
+          )}
+        </div>
       </div>
 
       {/* Description */}
@@ -240,7 +265,9 @@ function PluginCard({
 
       {/* Category + hooks */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-        <Badge variant="secondary">{plugin.category}</Badge>
+        <Badge variant="secondary" style={{ background: `${catCfg.color}15`, color: catCfg.color }}>
+          {catCfg.label}
+        </Badge>
         {plugin.requiresCredentials && (
           <Badge variant="warning">
             <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
@@ -249,49 +276,49 @@ function PluginCard({
             </span>
           </Badge>
         )}
-        {plugin.hooks && plugin.hooks.length > 0 && (
+        {plugin.hookPoints && plugin.hookPoints.length > 0 && (
           <Badge variant="outline">
-            {plugin.hooks.length} hook{plugin.hooks.length !== 1 ? "s" : ""}
+            {plugin.hookPoints.length} hook{plugin.hookPoints.length !== 1 ? "s" : ""}
           </Badge>
         )}
       </div>
 
-      {/* Install button */}
-      {plugin.isInstalled ? (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            color: "#16a34a",
-            fontSize: 13,
-            fontWeight: 500,
-            marginTop: "auto",
-          }}
-        >
-          <Icon name="check-circle" size={16} color="#16a34a" />
-          Already installed
-        </div>
-      ) : (
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => onInstall(plugin)}
-          style={{ marginTop: "auto", width: "100%" }}
-        >
-          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <Icon name="download" size={14} />
-            Install
-          </span>
-        </Button>
-      )}
+      {/* Actions */}
+      <div style={{ marginTop: "auto", display: "flex", gap: 8 }}>
+        {plugin.isInstalled ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => { e.stopPropagation(); onViewDetail(plugin.code); }}
+            style={{ flex: 1 }}
+          >
+            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <Icon name="settings" size={14} />
+              Configure
+            </span>
+          </Button>
+        ) : (
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={(e) => { e.stopPropagation(); onInstall(plugin); }}
+            style={{ flex: 1 }}
+          >
+            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <Icon name="download" size={14} />
+              Install
+            </span>
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
 
-// ── Main Component ────────────────────────────────────────────────────────────
+// ── Main Component ──────────────────────────────────────────────────
 
 export function PluginCatalog() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("");
   const [selectedPlugin, setSelectedPlugin] = useState<PluginCatalogItem | null>(null);
@@ -312,6 +339,10 @@ export function PluginCatalog() {
   const handleInstallClick = (plugin: PluginCatalogItem) => {
     setSelectedPlugin(plugin);
     setModalOpen(true);
+  };
+
+  const handleViewDetail = (code: string) => {
+    router.push(`/plugins/${code}`);
   };
 
   const handleInstall = async (code: string, credentials: Record<string, string>) => {
@@ -382,7 +413,7 @@ export function PluginCatalog() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
               gap: 16,
             }}
           >
@@ -391,6 +422,7 @@ export function PluginCatalog() {
                 key={plugin.id}
                 plugin={plugin}
                 onInstall={handleInstallClick}
+                onViewDetail={handleViewDetail}
               />
             ))}
           </div>

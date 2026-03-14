@@ -16,6 +16,8 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import { useConfirmDialog } from "@/components/common/useConfirmDialog";
 import { formatDate } from "@/lib/format-date";
 
+import { VerifyButton } from "@/features/entity-verification";
+
 import {
   useOrganizationDetail,
   useDeactivateOrganization,
@@ -99,7 +101,15 @@ export function OrganizationDetail({ organizationId }: OrganizationDetailProps) 
       <PageHeader
         title={organization.name}
         actions={
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <VerifyButton
+              entityType="ORGANIZATION"
+              entityId={organizationId}
+              entityName={organization.name}
+              entityEmail={organization.email}
+              entityPhone={organization.phone}
+              initialStatus={organization.entityVerificationStatus ?? "UNVERIFIED"}
+            />
             <Button variant="outline" onClick={() => router.back()}>
               <Icon name="arrow-left" size={16} /> Back
             </Button>

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { WalletTransactionService } from './wallet-transaction.service';
 import { CouponService } from './coupon.service';
+import { industryFilter } from '../../../common/utils/industry-filter.util';
 
 @Injectable()
 export class RechargeService {
@@ -13,9 +14,11 @@ export class RechargeService {
 
   // ─── Recharge Plans CRUD ───
 
-  async listPlans(activeOnly = true) {
+  async listPlans(activeOnly = true, industryCode?: string) {
+    const where: any = { ...industryFilter(industryCode) };
+    if (activeOnly) where.isActive = true;
     return this.prisma.rechargePlan.findMany({
-      where: activeOnly ? { isActive: true } : undefined,
+      where: Object.keys(where).length > 0 ? where : undefined,
       orderBy: { sortOrder: 'asc' },
     });
   }

@@ -30,4 +30,12 @@ export const registrationService = {
         const outer = r.data.data as PlanOption[] & { data?: PlanOption[] };
         return (outer as any).data ?? outer;
       }),
+
+  getBusinessTypes: () =>
+    api
+      .get<ApiResponse<any[]>>("/api/v1/business-types/public/list")
+      .then((r) => {
+        const outer = r.data.data as any[] & { data?: any[] };
+        return (outer as any).data ?? outer;
+      }),
 };

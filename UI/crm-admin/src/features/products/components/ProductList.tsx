@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 
-import { TableFull } from '@/components/ui';
+import { TableFull, Badge } from '@/components/ui';
 import { TableSkeleton } from '@/components/common/TableSkeleton';
 import { useTableFilters } from '@/hooks/useTableFilters';
 import { useEntityPanel } from '@/hooks/useEntityPanel';
@@ -19,15 +19,16 @@ import type { ProductListItem, ProductListParams } from '../types/products.types
 // -- Columns ------------------------------------------------------------------
 
 const PRODUCT_COLUMNS = [
-  { id: 'name', label: 'Name', visible: true },
-  { id: 'code', label: 'Code', visible: true },
-  { id: 'mrp', label: 'MRP', visible: true },
-  { id: 'salePrice', label: 'Sale Price', visible: true },
-  { id: 'hsnCode', label: 'HSN Code', visible: true },
-  { id: 'primaryUnit', label: 'Unit', visible: true },
-  { id: 'status', label: 'Status', visible: true },
-  { id: 'tags', label: 'Tags', visible: false },
-  { id: 'createdAt', label: 'Created', visible: false },
+  { id: 'name',          label: 'Name',           visible: true },
+  { id: 'code',          label: 'Code',           visible: true },
+  { id: 'inventoryType', label: 'Inventory Type', visible: true },
+  { id: 'mrp',           label: 'MRP',            visible: true },
+  { id: 'salePrice',     label: 'Sale Price',     visible: true },
+  { id: 'hsnCode',       label: 'HSN Code',       visible: true },
+  { id: 'primaryUnit',   label: 'Unit',           visible: true },
+  { id: 'status',        label: 'Status',         visible: true },
+  { id: 'tags',          label: 'Tags',           visible: false },
+  { id: 'createdAt',     label: 'Created',        visible: false },
 ];
 
 // -- Status colors ------------------------------------------------------------
@@ -95,6 +96,9 @@ export function ProductList() {
       id: p.id,
       name: p.name,
       code: p.code,
+      inventoryType: (p as any).inventoryType === 'SERVICE'
+        ? <Badge variant="secondary">Service</Badge>
+        : <Badge variant="primary">Product</Badge>,
       mrp: p.mrp != null ? `₹${Number(p.mrp).toLocaleString('en-IN')}` : '—',
       salePrice: p.salePrice != null ? `₹${Number(p.salePrice).toLocaleString('en-IN')}` : '—',
       hsnCode: p.hsnCode ?? '—',

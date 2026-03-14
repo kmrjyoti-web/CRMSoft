@@ -16,6 +16,8 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import { useConfirmDialog } from "@/components/common/useConfirmDialog";
 import { formatDate } from "@/lib/format-date";
 
+import { VerifyButton } from "@/features/entity-verification";
+
 import {
   useContactDetail,
   useDeactivateContact,
@@ -96,13 +98,28 @@ export function ContactDetail({ contactId }: ContactDetailProps) {
     );
   }
 
+  const primaryEmail = contact.communications?.find(
+    (c: ContactCommunication) => c.type === "EMAIL" && c.isPrimary
+  )?.value ?? contact.communications?.find((c: ContactCommunication) => c.type === "EMAIL")?.value;
+  const primaryPhone = contact.communications?.find(
+    (c: ContactCommunication) => (c.type === "PHONE" || c.type === "MOBILE") && c.isPrimary
+  )?.value ?? contact.communications?.find((c: ContactCommunication) => c.type === "PHONE" || c.type === "MOBILE")?.value;
+
   return (
     <div className="p-6">
       <PageHeader
         title={`${contact.firstName} ${contact.lastName}`}
         subtitle={contact.designation ?? undefined}
         actions={
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <VerifyButton
+              entityType="CONTACT"
+              entityId={contactId}
+              entityName={`${contact.firstName} ${contact.lastName}`}
+              entityEmail={primaryEmail}
+              entityPhone={primaryPhone}
+              initialStatus={contact.entityVerificationStatus ?? "UNVERIFIED"}
+            />
             <Button variant="outline" onClick={() => router.push("/contacts")}>
               <Icon name="arrow-left" size={16} /> Back
             </Button>

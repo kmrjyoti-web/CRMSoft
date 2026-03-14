@@ -16,6 +16,17 @@ import { ModuleDefinitionService } from './services/module-definition.service';
 import { ModuleAccessService } from './services/module-access.service';
 import { TenantActivityService } from './services/tenant-activity.service';
 import { VendorDashboardService } from './services/vendor-dashboard.service';
+import { ModuleRegistryService } from './services/module-registry.service';
+import { PackageBuilderService } from './services/package-builder.service';
+import { PageScannerService } from './services/page-scanner.service';
+import { PageRegistryService } from './services/page-registry.service';
+import { PageMenuSyncService } from './services/page-menu-sync.service';
+import { PageRegistryBootstrapService } from './services/page-registry-bootstrap.service';
+import { VersionControlService } from './services/version-control.service';
+import { IndustryPatchingService } from './services/industry-patching.service';
+import { RollbackEngineService } from './services/rollback-engine.service';
+import { NotionDocsService } from './services/notion-docs.service';
+import { TenantAuditService } from './services/tenant-audit.service';
 
 // Infrastructure
 import { TenantContextService } from './infrastructure/tenant-context.service';
@@ -66,6 +77,28 @@ import { TenantProfileController } from './presentation/tenant-profile.controlle
 import { LicenseController } from './presentation/license.controller';
 import { SoftwareOfferController } from './presentation/software-offer.controller';
 import { ModuleAccessController } from './presentation/module-access.controller';
+import { VendorModulesController } from './presentation/vendor-modules.controller';
+import { VendorLicensesController } from './presentation/vendor-licenses.controller';
+import { VendorTenantsController } from './presentation/vendor-tenants.controller';
+import { VendorPackagesController } from './presentation/vendor-packages.controller';
+import { VendorPartnersController } from './presentation/vendor-partners.controller';
+import { VendorDevRequestsController } from './presentation/vendor-dev-requests.controller';
+import { VendorWalletController } from './presentation/vendor-wallet.controller';
+import { VendorAiTokensController } from './presentation/vendor-ai-tokens.controller';
+import { VendorWebhooksController } from './presentation/vendor-webhooks.controller';
+import { SystemHealthController } from './presentation/system-health.controller';
+import { VendorErrorLogsController } from './presentation/vendor-error-logs.controller';
+import { VendorDbAdminController } from './presentation/vendor-db-admin.controller';
+import { VendorAuditLogsController } from './presentation/vendor-audit-logs.controller';
+import { ModuleRegistryController } from './presentation/module-registry.controller';
+import { PackageBuilderController } from './presentation/package-builder.controller';
+import { PageRegistryController } from './presentation/page-registry.controller';
+import { VendorVersionsController, TenantForceUpdateController } from './presentation/vendor-versions.controller';
+import { VendorTenantAuditController } from './presentation/vendor-tenant-audit.controller';
+import { TenantAuditStatusController } from './presentation/tenant-audit-status.controller';
+
+// Guards
+import { VendorGuard } from './infrastructure/vendor.guard';
 
 const CommandHandlers = [
   CreateTenantHandler,
@@ -111,6 +144,26 @@ const QueryHandlers = [
     LicenseController,
     SoftwareOfferController,
     ModuleAccessController,
+    VendorModulesController,
+    VendorLicensesController,
+    VendorTenantsController,
+    VendorPackagesController,
+    VendorPartnersController,
+    VendorDevRequestsController,
+    VendorWalletController,
+    VendorAiTokensController,
+    VendorWebhooksController,
+    SystemHealthController,
+    VendorErrorLogsController,
+    VendorDbAdminController,
+    VendorAuditLogsController,
+    ModuleRegistryController,
+    PackageBuilderController,
+    PageRegistryController,
+    VendorVersionsController,
+    TenantForceUpdateController,
+    VendorTenantAuditController,
+    TenantAuditStatusController,
   ],
   providers: [
     // Services
@@ -127,6 +180,17 @@ const QueryHandlers = [
     ModuleAccessService,
     TenantActivityService,
     VendorDashboardService,
+    ModuleRegistryService,
+    PackageBuilderService,
+    PageScannerService,
+    PageRegistryService,
+    PageMenuSyncService,
+    PageRegistryBootstrapService,
+    VersionControlService,
+    IndustryPatchingService,
+    RollbackEngineService,
+    NotionDocsService,
+    TenantAuditService,
     // Infrastructure
     TenantContextService,
     TenantContextInterceptor,
@@ -136,6 +200,7 @@ const QueryHandlers = [
     PlanLimitGuard,
     FeatureFlagGuard,
     ModuleAccessGuard,
+    VendorGuard,
     // CQRS
     ...CommandHandlers,
     ...QueryHandlers,
@@ -149,6 +214,7 @@ const QueryHandlers = [
     ModuleAccessService,
     LicenseService,
     TenantActivityService,
+    TenantAuditService,
   ],
 })
 export class TenantModule {}

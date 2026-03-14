@@ -67,6 +67,7 @@ describe('BusinessTypeService', () => {
       expect(mockPrisma.businessTypeRegistry.findMany).toHaveBeenCalledWith({
         where: { isActive: true },
         orderBy: { sortOrder: 'asc' },
+        include: { _count: { select: { tenants: true } } },
       });
     });
 
@@ -78,6 +79,7 @@ describe('BusinessTypeService', () => {
       expect(mockPrisma.businessTypeRegistry.findMany).toHaveBeenCalledWith({
         where: {},
         orderBy: { sortOrder: 'asc' },
+        include: { _count: { select: { tenants: true } } },
       });
     });
   });

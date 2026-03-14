@@ -6,7 +6,7 @@ import type {
   EmailTrackingFilters,
 } from "../types/email-tracking.types";
 
-const BASE = "/email-tracking";
+const BASE = "/api/v1/email-tracking";
 
 // Note: open/click/bounce endpoints are public (no auth) — used by email clients.
 // The admin UI queries communication logs for tracking data.

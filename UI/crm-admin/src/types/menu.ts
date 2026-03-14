@@ -6,7 +6,7 @@ export interface MenuTreeItem {
   code: string;
   icon: string;
   route: string | null;
-  menuType: "group" | "item" | "divider";
+  menuType: "group" | "item" | "divider" | "title" | "GROUP" | "ITEM" | "DIVIDER" | "TITLE";
   badgeColor?: string;
   badgeText?: string;
   openInNewTab?: boolean;

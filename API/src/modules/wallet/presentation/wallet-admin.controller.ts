@@ -22,7 +22,7 @@ import { CreateServiceRateDto, UpdateServiceRateDto } from './dto/create-service
 @ApiBearerAuth()
 @SuperAdminRoute()
 @UseGuards(SuperAdminGuard)
-@Controller('admin')
+@Controller('admin/wallet')
 export class WalletAdminController {
   constructor(
     private readonly walletService: WalletService,

@@ -6,7 +6,7 @@ import type {
   DenyPermissionDto,
 } from "../types/user-overrides.types";
 
-const BASE = "/user-overrides";
+const BASE = "/api/v1/user-overrides";
 
 export function grantPermission(userId: string, dto: GrantPermissionDto) {
   return apiClient.post<ApiResponse<UserOverride>>(`${BASE}/${userId}/grant`, dto).then((r) => r.data);

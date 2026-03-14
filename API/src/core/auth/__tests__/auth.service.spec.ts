@@ -50,6 +50,7 @@ describe('AuthService — Multi-Login', () => {
       superAdmin: { findUnique: jest.fn(), update: jest.fn() },
       customerProfile: { upsert: jest.fn() },
       referralPartner: { upsert: jest.fn() },
+      tenant: { findUnique: jest.fn().mockResolvedValue({ id: 't-1', name: 'Test Tenant', slug: 'test', status: 'ACTIVE', onboardingStep: 'DONE', industryCode: null }) },
     };
     jwt = {
       signAsync: jest.fn().mockResolvedValue('mock-token'),

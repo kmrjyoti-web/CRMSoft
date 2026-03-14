@@ -14,7 +14,7 @@ import { ApiResponse } from '../../../common/utils/api-response';
 @ApiBearerAuth()
 @SuperAdminRoute()
 @UseGuards(SuperAdminGuard)
-@Controller('admin')
+@Controller('admin/module-access')
 export class ModuleAccessController {
   constructor(
     private readonly moduleDefinitionService: ModuleDefinitionService,

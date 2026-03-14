@@ -25,11 +25,22 @@ export const MENU_SEED_DATA: MenuSeedItem[] = [
     name: 'MIS', code: 'MIS', icon: 'bar-chart-3', menuType: 'GROUP',
     route: '/reports', permissionModule: 'reports', permissionAction: 'read',
     children: [
-      { name: 'All Reports', code: 'MIS_ALL', icon: 'bar-chart', route: '/reports', permissionModule: 'reports', permissionAction: 'read' },
-      { name: 'Sales Reports', code: 'MIS_SALES', icon: 'dollar-sign', route: '/reports?category=SALES', permissionModule: 'reports', permissionAction: 'read' },
-      { name: 'Report Designer', code: 'MIS_DESIGNER', icon: 'pen-tool', route: '/settings/templates', permissionModule: 'reports', permissionAction: 'read' },
-      { name: 'My Reports', code: 'MIS_MY', icon: 'folder-open', route: '/reports/saved', permissionModule: 'reports', permissionAction: 'read' },
-      { name: 'Scheduled Reports', code: 'MIS_SCHEDULED', icon: 'clock', route: '/reports/scheduled', permissionModule: 'reports', permissionAction: 'read' },
+      {
+        name: 'BI', code: 'MIS_BI', icon: 'pie-chart', menuType: 'GROUP',
+        permissionModule: 'analytics', permissionAction: 'read',
+        children: [
+          { name: 'All BI', code: 'BI_ALL', icon: 'layout-dashboard', menuType: 'ITEM', route: '/reports', permissionModule: 'reports', permissionAction: 'read' },
+        ],
+      },
+      {
+        name: 'Report', code: 'MIS_REPORT', icon: 'file-bar-chart', menuType: 'GROUP',
+        permissionModule: 'reports', permissionAction: 'read',
+        children: [
+          { name: 'Report Designer', code: 'RPT_DESIGNER', icon: 'pen-tool', menuType: 'ITEM', route: '/settings/templates', permissionModule: 'reports', permissionAction: 'read' },
+          { name: 'My Reports', code: 'RPT_MY', icon: 'bookmark', menuType: 'ITEM', route: '/reports/saved', permissionModule: 'reports', permissionAction: 'read' },
+        ],
+      },
+      { name: 'Scheduled Reports', code: 'MIS_SCHEDULED', icon: 'clock', menuType: 'ITEM', route: '/reports/scheduled', permissionModule: 'reports', permissionAction: 'read' },
     ],
   },
 
@@ -40,6 +51,7 @@ export const MENU_SEED_DATA: MenuSeedItem[] = [
     name: 'CRM', code: 'CRM', icon: 'users', menuType: 'GROUP',
     route: '/contacts', permissionModule: 'contacts', permissionAction: 'read',
     children: [
+      { name: 'Dashboard', code: 'CRM_DASH', icon: 'layout-dashboard', menuType: 'ITEM', route: '/contacts/dashboard', permissionModule: 'contacts', permissionAction: 'read' },
       {
         name: 'Contact Master', code: 'CRM_CONTACT_ROW', icon: 'user-check', menuType: 'GROUP',
         permissionModule: 'contacts', permissionAction: 'read',
@@ -153,8 +165,9 @@ export const MENU_SEED_DATA: MenuSeedItem[] = [
   // ─────────────────────────────────────────────────────────────
   {
     name: 'Accounting Trans.', code: 'ACC_TRANS', icon: 'receipt', menuType: 'GROUP',
-    route: '/accounts/journal-entries', permissionModule: 'accounts', permissionAction: 'read',
+    route: '/accounts/transactions', permissionModule: 'accounts', permissionAction: 'read',
     children: [
+      { name: 'Dashboard', code: 'ACC_DASH', icon: 'layout-dashboard', route: '/accounts/transactions', permissionModule: 'accounts', permissionAction: 'read' },
       { name: 'Journal Entry', code: 'ACC_JOURNAL', icon: 'book-open', route: '/accounts/journal-entries', permissionModule: 'accounts', permissionAction: 'read' },
       { name: 'Payment In', code: 'ACC_PAY_IN', icon: 'arrow-down-circle', route: '/accounts/payments?type=receipt', permissionModule: 'accounts', permissionAction: 'read' },
       { name: 'Payment Out', code: 'ACC_PAY_OUT', icon: 'arrow-up-circle', route: '/accounts/payments?type=payment', permissionModule: 'accounts', permissionAction: 'read' },
@@ -193,29 +206,7 @@ export const MENU_SEED_DATA: MenuSeedItem[] = [
   },
 
   // ─────────────────────────────────────────────────────────────
-  // 10. REPORTS
-  // ─────────────────────────────────────────────────────────────
-  {
-    name: 'Reports', code: 'REPORTS', icon: 'bar-chart-3', menuType: 'GROUP',
-    route: '/accounts/reports', permissionModule: 'reports', permissionAction: 'read',
-    children: [
-      { name: 'Profit & Loss', code: 'RPT_PL', icon: 'trending-up', route: '/accounts/reports/profit-loss', permissionModule: 'accounts', permissionAction: 'read' },
-      { name: 'Balance Sheet', code: 'RPT_BS', icon: 'scale', route: '/accounts/reports/balance-sheet', permissionModule: 'accounts', permissionAction: 'read' },
-      { name: 'Trial Balance', code: 'RPT_TB', icon: 'file-bar-chart', route: '/accounts/reports/trial-balance', permissionModule: 'accounts', permissionAction: 'read' },
-      { name: 'Cash Flow', code: 'RPT_CF', icon: 'droplets', route: '/accounts/reports/cash-flow', permissionModule: 'accounts', permissionAction: 'read' },
-      { name: 'GSTR-1', code: 'RPT_GSTR1', icon: 'file-badge', route: '/accounts/gst', permissionModule: 'accounts', permissionAction: 'read' },
-      { name: 'GSTR-3B', code: 'RPT_GSTR3B', icon: 'file-badge', route: '/accounts/gst', permissionModule: 'accounts', permissionAction: 'read' },
-      { name: 'Input Tax Credit', code: 'RPT_ITC', icon: 'receipt', route: '/accounts/gst', permissionModule: 'accounts', permissionAction: 'read' },
-      { name: 'Stock Ledger', code: 'RPT_STOCK', icon: 'book-open', route: '/inventory/reports/ledger', permissionModule: 'inventory', permissionAction: 'read' },
-      { name: 'Stock Valuation', code: 'RPT_STOCK_VAL', icon: 'indian-rupee', route: '/inventory/reports/valuation', permissionModule: 'inventory', permissionAction: 'read' },
-      { name: 'Sales Reports', code: 'RPT_SALES', icon: 'dollar-sign', route: '/reports?category=SALES', permissionModule: 'reports', permissionAction: 'read' },
-      { name: 'Purchase Reports', code: 'RPT_PURCHASE', icon: 'shopping-cart', route: '/reports?category=PURCHASE', permissionModule: 'reports', permissionAction: 'read' },
-      { name: 'TDS Reports', code: 'RPT_TDS', icon: 'percent', route: '/accounts/tds', permissionModule: 'accounts', permissionAction: 'read' },
-    ],
-  },
-
-  // ─────────────────────────────────────────────────────────────
-  // 11. COMMUNICATION
+  // 10. COMMUNICATION
   // ─────────────────────────────────────────────────────────────
   {
     name: 'Communication', code: 'COMMUNICATION', icon: 'message-circle', menuType: 'GROUP',
@@ -244,6 +235,21 @@ export const MENU_SEED_DATA: MenuSeedItem[] = [
       { name: 'Import Profiles', code: 'TOOLS_IMPORT', icon: 'upload', route: '/import/profiles', permissionModule: 'settings', permissionAction: 'read' },
       { name: 'Sync', code: 'TOOLS_SYNC', icon: 'refresh-cw', route: '/sync/dashboard', permissionModule: 'settings', permissionAction: 'read' },
       { name: 'Approvals', code: 'TOOLS_APPROVALS', icon: 'check-square', route: '/approvals', permissionModule: 'settings', permissionAction: 'read' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────
+  // AI HUB
+  // ─────────────────────────────────────────────────────────────
+  {
+    name: 'AI Hub', code: 'AI_HUB', icon: 'brain', menuType: 'GROUP',
+    route: '/ai/settings', permissionModule: 'settings', permissionAction: 'read',
+    children: [
+      { name: 'AI Settings', code: 'AI_SETTINGS', icon: 'settings', route: '/ai/settings', permissionModule: 'settings', permissionAction: 'read' },
+      { name: 'Training', code: 'AI_TRAINING', icon: 'database', route: '/ai/training', permissionModule: 'settings', permissionAction: 'read' },
+      { name: 'Chat Test', code: 'AI_CHAT', icon: 'message-square', route: '/ai/chat', permissionModule: 'settings', permissionAction: 'read' },
+      { name: 'System Prompts', code: 'AI_PROMPTS', icon: 'terminal', route: '/ai/prompts', permissionModule: 'settings', permissionAction: 'read' },
+      { name: 'Chat Widget', code: 'AI_WIDGET', icon: 'layout', route: '/ai/widget-config', permissionModule: 'settings', permissionAction: 'read' },
     ],
   },
 

@@ -1,7 +1,9 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { EncryptionService } from '../../tenant-config/services/encryption.service';
 import { PluginCategory } from '@prisma/client';
+import { PluginMenuService } from './plugin-menu.service';
+import { industryFilter } from '../../../common/utils/industry-filter.util';
 
 interface PluginCredentials {
   [key: string]: string | number | boolean;
@@ -14,22 +16,24 @@ export class PluginService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly encryption: EncryptionService,
+    @Inject(forwardRef(() => PluginMenuService))
+    private readonly menuService: PluginMenuService,
   ) {}
 
   // ═══════════════════════════════════════════════════════
   // PLUGIN REGISTRY (Read-only for tenants)
   // ═══════════════════════════════════════════════════════
 
-  async getAllPlugins() {
+  async getAllPlugins(industryCode?: string) {
     return this.prisma.pluginRegistry.findMany({
-      where: { status: 'PLUGIN_ACTIVE' },
+      where: { status: 'PLUGIN_ACTIVE', ...industryFilter(industryCode) } as any,
       orderBy: [{ category: 'asc' }, { sortOrder: 'asc' }],
     });
   }
 
-  async getPluginsByCategory(category: PluginCategory) {
+  async getPluginsByCategory(category: PluginCategory, industryCode?: string) {
     return this.prisma.pluginRegistry.findMany({
-      where: { category, status: 'PLUGIN_ACTIVE' },
+      where: { category, status: 'PLUGIN_ACTIVE', ...industryFilter(industryCode) } as any,
       orderBy: { sortOrder: 'asc' },
     });
   }
@@ -129,6 +133,13 @@ export class PluginService {
 
     this.logger.log(`Plugin "${pluginCode}" enabled for tenant ${tenantId}`);
 
+    // Auto-enable associated menus
+    try {
+      await this.menuService.enableMenusForPlugin(tenantId, pluginCode);
+    } catch (err) {
+      this.logger.warn(`Failed to auto-enable menus for plugin "${pluginCode}": ${err.message}`);
+    }
+
     return {
       ...tenantPlugin,
       credentials: undefined, // Never return encrypted credentials
@@ -155,6 +166,14 @@ export class PluginService {
     });
 
     this.logger.log(`Plugin "${pluginCode}" disabled for tenant ${tenantId}`);
+
+    // Auto-disable associated menus
+    try {
+      await this.menuService.disableMenusForPlugin(tenantId, pluginCode);
+    } catch (err) {
+      this.logger.warn(`Failed to auto-disable menus for plugin "${pluginCode}": ${err.message}`);
+    }
+
     return tenantPlugin;
   }
 

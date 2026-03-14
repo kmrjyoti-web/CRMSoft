@@ -21,11 +21,14 @@ export interface AuthState {
   isAuthenticated: boolean;
   isSuperAdmin: boolean;
   onboardingStep: string | null;
+  terminology: Record<string, any> | null;
+  industryCode: string | null;
 
-  setAuth: (res: Partial<LoginResponse> & { accessToken: string; tenant?: { name?: string; onboardingStep?: string } }) => void;
+  setAuth: (res: Partial<LoginResponse> & { accessToken: string; tenant?: { name?: string; onboardingStep?: string; industryCode?: string } }) => void;
   clearAuth: () => void;
   setUser: (user: User) => void;
   setOnboardingStep: (step: string) => void;
+  setTerminology: (t: Record<string, any>) => void;
 }
 
 const INITIAL_STATE = {
@@ -39,6 +42,8 @@ const INITIAL_STATE = {
   isAuthenticated: false,
   isSuperAdmin: false,
   onboardingStep: null as string | null,
+  terminology: null as Record<string, any> | null,
+  industryCode: null as string | null,
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -70,6 +75,8 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: true,
           isSuperAdmin: decoded?.isSuperAdmin === true,
           onboardingStep: (res as any)?.tenant?.onboardingStep ?? state.onboardingStep,
+          terminology: (res as any)?.terminology ?? state.terminology,
+          industryCode: (res as any)?.tenant?.industryCode ?? state.industryCode,
         }));
       },
 
@@ -78,6 +85,8 @@ export const useAuthStore = create<AuthState>()(
       setUser: (user) => set({ user }),
 
       setOnboardingStep: (step) => set({ onboardingStep: step }),
+
+      setTerminology: (t) => set({ terminology: t }),
     }),
     { name: "crm-auth" },
   ),

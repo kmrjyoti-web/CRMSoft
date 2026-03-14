@@ -184,10 +184,18 @@ export class LicenseService {
     const limit = query.limit ?? 20;
     const skip = (page - 1) * limit;
 
+    // Map frontend-friendly status values to Prisma enum
+    const STATUS_MAP: Record<string, string> = {
+      ACTIVE: 'LIC_ACTIVE',
+      EXPIRED: 'LIC_EXPIRED',
+      REVOKED: 'LIC_REVOKED',
+      SUSPENDED: 'LIC_SUSPENDED',
+    };
+
     const where: any = {};
 
     if (query.status) {
-      where.status = query.status;
+      where.status = STATUS_MAP[query.status] ?? query.status;
     }
 
     if (query.search) {

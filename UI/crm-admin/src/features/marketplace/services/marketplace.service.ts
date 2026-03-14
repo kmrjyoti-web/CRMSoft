@@ -22,7 +22,7 @@ import type {
   MarketplaceFilters,
 } from "../types/marketplace.types";
 
-const BASE = "/marketplace";
+const BASE = "/api/v1/marketplace";
 
 // ── Modules ──────────────────────────────────────────
 export function listModules(filters?: MarketplaceFilters) {

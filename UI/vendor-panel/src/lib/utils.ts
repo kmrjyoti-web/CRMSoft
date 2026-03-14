@@ -57,7 +57,8 @@ export function slugify(text: string): string {
     .trim();
 }
 
-export function truncate(text: string, length: number): string {
+export function truncate(text: string | null | undefined, length: number): string {
+  if (!text) return '-';
   if (text.length <= length) return text;
   return text.slice(0, length) + '...';
 }

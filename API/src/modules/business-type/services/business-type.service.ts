@@ -1,4 +1,5 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { BUSINESS_TYPE_SEED_DATA } from './business-type-seed-data';
 
@@ -26,6 +27,11 @@ export class BusinessTypeService {
             excludedModules: bt.excludedModules,
             dashboardWidgets: bt.dashboardWidgets,
             workflowTemplates: bt.workflowTemplates,
+            extraFields: bt.extraFields ?? {},
+            defaultLeadStages: bt.defaultLeadStages ?? Prisma.DbNull,
+            defaultActivityTypes: bt.defaultActivityTypes ?? Prisma.DbNull,
+            registrationFields: bt.registrationFields ?? Prisma.DbNull,
+            isDefault: bt.isDefault ?? false,
           },
           create: {
             typeCode: bt.typeCode,
@@ -40,6 +46,11 @@ export class BusinessTypeService {
             excludedModules: bt.excludedModules,
             dashboardWidgets: bt.dashboardWidgets,
             workflowTemplates: bt.workflowTemplates,
+            extraFields: bt.extraFields ?? {},
+            defaultLeadStages: bt.defaultLeadStages ?? Prisma.DbNull,
+            defaultActivityTypes: bt.defaultActivityTypes ?? Prisma.DbNull,
+            registrationFields: bt.registrationFields ?? Prisma.DbNull,
+            isDefault: bt.isDefault ?? false,
             sortOrder: BUSINESS_TYPE_SEED_DATA.indexOf(bt),
           },
         }),
@@ -49,18 +60,23 @@ export class BusinessTypeService {
     return results;
   }
 
-  /** List all active business types. */
+  /** List all active business types (includes tenant count). */
   async listAll(activeOnly = true) {
     return this.prisma.businessTypeRegistry.findMany({
       where: activeOnly ? { isActive: true } : {},
       orderBy: { sortOrder: 'asc' },
+      include: { _count: { select: { tenants: true } } },
     });
   }
 
-  /** Get a single business type by code. */
+  /** Get a single business type by code (includes packages). */
   async getByCode(typeCode: string) {
     const bt = await this.prisma.businessTypeRegistry.findUnique({
       where: { typeCode },
+      include: {
+        industryPackages: { include: { package: true }, orderBy: { sortOrder: 'asc' } },
+        _count: { select: { tenants: true } },
+      },
     });
     if (!bt) throw new NotFoundException(`Business type '${typeCode}' not found`);
     return bt;
@@ -116,6 +132,45 @@ export class BusinessTypeService {
       workflowTemplates: bt ? (bt.workflowTemplates as string[]) : [],
       tradeProfile: tenant.tradeProfileJson ?? {},
     };
+  }
+
+  /** Update a business type by code (vendor portal). */
+  async update(typeCode: string, data: Record<string, any>) {
+    const bt = await this.getByCode(typeCode);
+    const { typeName, description, icon, colorTheme, terminologyMap, extraFields,
+      defaultModules, recommendedModules, excludedModules, defaultLeadStages,
+      defaultActivityTypes, registrationFields, dashboardWidgets, isActive, sortOrder,
+    } = data;
+    return this.prisma.businessTypeRegistry.update({
+      where: { id: bt.id },
+      data: {
+        ...(typeName !== undefined && { typeName }),
+        ...(description !== undefined && { description }),
+        ...(icon !== undefined && { icon }),
+        ...(colorTheme !== undefined && { colorTheme }),
+        ...(terminologyMap !== undefined && { terminologyMap }),
+        ...(extraFields !== undefined && { extraFields }),
+        ...(defaultModules !== undefined && { defaultModules }),
+        ...(recommendedModules !== undefined && { recommendedModules }),
+        ...(excludedModules !== undefined && { excludedModules }),
+        ...(defaultLeadStages !== undefined && { defaultLeadStages }),
+        ...(defaultActivityTypes !== undefined && { defaultActivityTypes }),
+        ...(registrationFields !== undefined && { registrationFields }),
+        ...(dashboardWidgets !== undefined && { dashboardWidgets }),
+        ...(isActive !== undefined && { isActive }),
+        ...(sortOrder !== undefined && { sortOrder }),
+      },
+    });
+  }
+
+  /** List tenants using a specific business type. */
+  async getTenants(typeCode: string) {
+    const bt = await this.getByCode(typeCode);
+    return this.prisma.tenant.findMany({
+      where: { businessTypeId: bt.id },
+      select: { id: true, name: true, slug: true, status: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   /** Assign a business type to a tenant. */

@@ -171,6 +171,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       module: this.extractModuleFromPath(request.url),
       requestBody: request.body,
       queryParams: request.query,
+      requestHeaders: ErrorLoggerService.sanitizeHeaders(request.headers),
+      responseBody: errorResponse,
+      responseTimeMs: request['_startTime'] ? Date.now() - request['_startTime'] : undefined,
+      userName: request.user?.name,
+      userRole: request.user?.role || request.user?.roleName,
+      tenantName: request.user?.tenantName,
     });
 
     // SEND RESPONSE

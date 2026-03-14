@@ -336,7 +336,7 @@ export class AuthService {
   async registerTenant(data: {
     companyName: string; slug: string; email: string;
     password: string; firstName: string; lastName: string;
-    phone?: string; planId?: string;
+    phone?: string; planId?: string; businessTypeCode?: string;
   }) {
     // Check email uniqueness
     const existingUser = await this.prisma.user.findFirst({ where: { email: data.email } });
@@ -377,6 +377,19 @@ export class AuthService {
       planId,
     });
 
+    // Assign business type if provided
+    if (data.businessTypeCode) {
+      const bt = await this.prisma.businessTypeRegistry.findUnique({
+        where: { typeCode: data.businessTypeCode },
+      });
+      if (bt) {
+        await this.prisma.tenant.update({
+          where: { id: tenant.id },
+          data: { businessTypeId: bt.id, industryCode: data.businessTypeCode },
+        });
+      }
+    }
+
     // Generate JWT tokens (auto-login)
     const tokens = await this.generateTokens(
       adminUser.id, adminUser.email, 'ADMIN', 'ADMIN', tenant.id,
@@ -397,6 +410,7 @@ export class AuthService {
         slug: tenant.slug,
         status: tenant.status,
         onboardingStep: tenant.onboardingStep,
+        industryCode: data.businessTypeCode ?? null,
       },
       ...tokens,
     };
@@ -430,6 +444,29 @@ export class AuthService {
           }),
           this.jwt.signAsync(newPayload, {
             secret: this.config.get('JWT_REFRESH_SECRET'), expiresIn: '1d',
+          }),
+        ]);
+        return { accessToken, refreshToken };
+      }
+
+      // Vendor refresh
+      if (payload.vendorId || payload.userType === 'VENDOR') {
+        const vendor = await this.prisma.marketplaceVendor.findUnique({
+          where: { id: payload.sub },
+        });
+        if (!vendor || vendor.status === 'SUSPENDED') {
+          throw new UnauthorizedException('Invalid');
+        }
+        const newPayload = {
+          sub: vendor.id, email: vendor.contactEmail,
+          role: 'VENDOR', userType: 'VENDOR', vendorId: vendor.id,
+        };
+        const [accessToken, refreshToken] = await Promise.all([
+          this.jwt.signAsync(newPayload, {
+            secret: this.config.get('JWT_SECRET'), expiresIn: '1d',
+          }),
+          this.jwt.signAsync(newPayload, {
+            secret: this.config.get('JWT_REFRESH_SECRET'), expiresIn: '7d',
           }),
         ]);
         return { accessToken, refreshToken };
@@ -475,6 +512,28 @@ export class AuthService {
     });
     if (!user) throw new NotFoundException('User not found');
     return user;
+  }
+
+  async getVendorProfile(vendorId: string) {
+    const vendor = await this.prisma.marketplaceVendor.findUnique({ where: { id: vendorId } });
+    if (!vendor) throw new NotFoundException('Vendor not found');
+    const firstName = vendor.contactName?.split(' ')[0] ?? vendor.companyName;
+    const lastName = vendor.contactName?.split(' ').slice(1).join(' ') ?? '';
+    return {
+      id: vendor.id,
+      email: vendor.contactEmail,
+      firstName,
+      lastName,
+      userType: 'VENDOR',
+      role: { id: null, name: 'VENDOR', displayName: 'Vendor' },
+      vendor: {
+        id: vendor.id,
+        companyName: vendor.companyName,
+        contactEmail: vendor.contactEmail,
+        gstNumber: vendor.gstNumber,
+        status: vendor.status,
+      },
+    };
   }
 
   async getSuperAdminProfile(adminId: string) {
@@ -537,7 +596,7 @@ export class AuthService {
     // Fetch tenant info for response
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: user.tenantId },
-      select: { id: true, name: true, slug: true, status: true, onboardingStep: true },
+      select: { id: true, name: true, slug: true, status: true, onboardingStep: true, industryCode: true },
     });
 
     const tokens = await this.generateTokens(

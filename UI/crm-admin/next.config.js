@@ -3,6 +3,17 @@ const path = require('path');
 /** @type {import('next').NextConfig} */
 module.exports = {
   output: 'standalone',
+  // Prevent browser from caching HTML pages so stale chunk URLs never cause 404s
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store, must-revalidate' },
+        ],
+      },
+    ];
+  },
   typescript: {
     ignoreBuildErrors: true,
   },

@@ -184,6 +184,11 @@ export class AuthController {
       const all = await this.permissionChain.getAllPermissionCodes();
       return ApiResponse.success(all);
     }
+    // Vendors get ALL permissions (they manage their own portal)
+    if (user.vendorId || user.userType === 'VENDOR') {
+      const all = await this.permissionChain.getAllPermissionCodes();
+      return ApiResponse.success(all);
+    }
     const codes = await this.permissionChain.getEffectivePermissions(user.id);
     return ApiResponse.success(codes);
   }
@@ -196,6 +201,10 @@ export class AuthController {
     if (user.isSuperAdmin) {
       const admin = await this.auth.getSuperAdminProfile(user.id);
       return ApiResponse.success(admin);
+    }
+    if (user.vendorId || user.userType === 'VENDOR') {
+      const vendor = await this.auth.getVendorProfile(user.vendorId ?? user.sub);
+      return ApiResponse.success(vendor);
     }
     return ApiResponse.success(await this.auth.getProfile(user.id));
   }

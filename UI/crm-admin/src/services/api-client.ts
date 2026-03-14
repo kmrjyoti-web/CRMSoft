@@ -31,6 +31,11 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     config.headers["X-Tenant-ID"] = tenantId;
   }
 
+  const industryCode = useAuthStore.getState().industryCode;
+  if (industryCode) {
+    config.headers['X-Industry-Code'] = industryCode;
+  }
+
   if (isDev) {
     console.log(
       `[API] → ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`,

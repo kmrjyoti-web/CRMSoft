@@ -3,6 +3,7 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { PluginService } from '../services/plugin.service';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { EncryptionService } from '../../tenant-config/services/encryption.service';
+import { PluginMenuService } from '../services/plugin-menu.service';
 
 describe('PluginService', () => {
   let service: PluginService;
@@ -56,12 +57,18 @@ describe('PluginService', () => {
     decrypt: jest.fn().mockReturnValue({ phoneNumberId: '123', accessToken: 'tok_xxx' }),
   };
 
+  const mockMenuService = {
+    enableMenusForPlugin: jest.fn().mockResolvedValue({ enabled: [] }),
+    disableMenusForPlugin: jest.fn().mockResolvedValue({ disabled: [] }),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PluginService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: EncryptionService, useValue: mockEncryption },
+        { provide: PluginMenuService, useValue: mockMenuService },
       ],
     }).compile();
 
@@ -77,7 +84,7 @@ describe('PluginService', () => {
 
       expect(result).toHaveLength(1);
       expect(mockPrisma.pluginRegistry.findMany).toHaveBeenCalledWith({
-        where: { status: 'PLUGIN_ACTIVE' },
+        where: { status: 'PLUGIN_ACTIVE', industryCode: null },
         orderBy: [{ category: 'asc' }, { sortOrder: 'asc' }],
       });
     });
@@ -108,7 +115,7 @@ describe('PluginService', () => {
       const result = await service.getPluginsByCategory('COMMUNICATION' as any);
 
       expect(mockPrisma.pluginRegistry.findMany).toHaveBeenCalledWith({
-        where: { category: 'COMMUNICATION', status: 'PLUGIN_ACTIVE' },
+        where: { category: 'COMMUNICATION', status: 'PLUGIN_ACTIVE', industryCode: null },
         orderBy: { sortOrder: 'asc' },
       });
     });

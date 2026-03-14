@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Put, Delete, Param, Body, Query,
+  Controller, Get, Post, Put, Delete, Param, Body, Query, Req,
   HttpCode, HttpStatus, NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -37,8 +37,10 @@ export class RolesController {
 
   @Get()
   @ApiOperation({ summary: 'List all roles with user counts' })
-  async findAll(@Query('search') search?: string) {
+  async findAll(@Req() req: any, @Query('search') search?: string) {
+    const tenantId = req.user?.tenantId;
     const where: any = {};
+    if (tenantId) where.tenantId = tenantId;
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -128,11 +130,18 @@ export class RolesController {
 
   @Put(':id/permissions')
   @ApiOperation({ summary: 'Update role permissions (replace all)' })
-  async updatePermissions(@Param('id') id: string, @Body() dto: UpdateRolePermissionsDto) {
-    await this.prisma.rolePermission.deleteMany({ where: { roleId: id } });
+  async updatePermissions(@Req() req: any, @Param('id') id: string, @Body() dto: UpdateRolePermissionsDto) {
+    const tenantId = req.user?.tenantId;
+    const deleteWhere: any = { roleId: id };
+    if (tenantId) deleteWhere.tenantId = tenantId;
+    await this.prisma.rolePermission.deleteMany({ where: deleteWhere });
     if (dto.permissionIds.length > 0) {
       await this.prisma.rolePermission.createMany({
-        data: dto.permissionIds.map((pid) => ({ roleId: id, permissionId: pid })),
+        data: dto.permissionIds.map((pid) => ({
+          roleId: id,
+          permissionId: pid,
+          ...(tenantId ? { tenantId } : {}),
+        })),
       });
     }
     return ApiResponse.success({ roleId: id, permissionCount: dto.permissionIds.length }, 'Permissions updated');

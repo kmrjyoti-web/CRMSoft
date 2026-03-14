@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { MENU_SEED_DATA } from '../../modules/menus/presentation/menu-seed-data';
+import { BUSINESS_TYPE_SEED_DATA } from '../../modules/business-type/services/business-type-seed-data';
 
 @Injectable()
 export class PlatformBootstrapService implements OnModuleInit {
@@ -16,8 +17,22 @@ export class PlatformBootstrapService implements OnModuleInit {
   async onModuleInit() {
     await this.ensureSuperAdmin();
     await this.ensureDemoVendor();
-    await this.ensureMissingPermissions();
-    await this.ensureTenantMenus();
+    // Run heavy tasks in background so they don't block app startup
+    this.runBackgroundTasks();
+  }
+
+  private runBackgroundTasks() {
+    Promise.all([
+      this.ensureMissingPermissions().catch((e) =>
+        this.logger.error('ensureMissingPermissions failed', e),
+      ),
+      this.ensureTenantMenus().catch((e) =>
+        this.logger.error('ensureTenantMenus failed', e),
+      ),
+      this.ensureBusinessTypes().catch((e) =>
+        this.logger.error('ensureBusinessTypes failed', e),
+      ),
+    ]).then(() => this.logger.log('Background bootstrap tasks completed'));
   }
 
   /** Create a platform SuperAdmin if none exists. */
@@ -97,7 +112,7 @@ export class PlatformBootstrapService implements OnModuleInit {
    * For each missing permission, create it and assign to all ADMIN roles across tenants.
    */
   private async ensureMissingPermissions() {
-    const missingModules = ['audit', 'settings', 'wallet', 'raw_contacts'];
+    const missingModules = ['audit', 'settings', 'wallet', 'raw_contacts', 'inventory'];
     const actions = ['create', 'read', 'update', 'delete', 'export'];
 
     const created: string[] = [];
@@ -137,12 +152,23 @@ export class PlatformBootstrapService implements OnModuleInit {
 
   /** Re-seed menus for any tenant that has fewer than expected menus or stale permissionAction values. */
   private async ensureTenantMenus() {
+    // Step 0: Clean up orphaned menus with empty tenantId (from older seed runs)
+    const orphanedCount = await this.prisma.menu.count({ where: { tenantId: '' } });
+    if (orphanedCount > 0) {
+      await this.prisma.menu.deleteMany({ where: { tenantId: '', parentId: { not: null } } });
+      await this.prisma.menu.deleteMany({ where: { tenantId: '' } });
+      this.logger.warn(`Cleaned up ${orphanedCount} orphaned menus (empty tenantId)`);
+    }
+
     const expectedCount = this.countExpectedMenus();
     const tenants = await this.prisma.tenant.findMany({
       select: { id: true, name: true, slug: true },
     });
 
     for (const tenant of tenants) {
+      // Step 1: Deduplicate — remove duplicate menus with same code for this tenant
+      await this.deduplicateMenus(tenant.id);
+
       const menuCount = await this.prisma.menu.count({
         where: { tenantId: tenant.id },
       });
@@ -170,6 +196,39 @@ export class PlatformBootstrapService implements OnModuleInit {
     }
   }
 
+  /** Remove duplicate menus (same tenantId + code), keeping only the newest one. */
+  private async deduplicateMenus(tenantId: string) {
+    const allMenus = await this.prisma.menu.findMany({
+      where: { tenantId },
+      select: { id: true, code: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const seen = new Set<string>();
+    const duplicateIds: string[] = [];
+
+    for (const menu of allMenus) {
+      if (seen.has(menu.code)) {
+        duplicateIds.push(menu.id);
+      } else {
+        seen.add(menu.code);
+      }
+    }
+
+    if (duplicateIds.length > 0) {
+      // Delete children of duplicates first
+      await this.prisma.menu.deleteMany({
+        where: { parentId: { in: duplicateIds } },
+      });
+      await this.prisma.menu.deleteMany({
+        where: { id: { in: duplicateIds } },
+      });
+      this.logger.warn(
+        `Tenant ${tenantId}: removed ${duplicateIds.length} duplicate menus`,
+      );
+    }
+  }
+
   /** Count how many menu items MENU_SEED_DATA produces (parents + children). */
   private countExpectedMenus(): number {
     let count = 0;
@@ -178,6 +237,55 @@ export class PlatformBootstrapService implements OnModuleInit {
       if (item.children) count += item.children.length;
     }
     return count;
+  }
+
+  /** Seed business types if table is empty or missing entries. */
+  private async ensureBusinessTypes() {
+    const count = await this.prisma.businessTypeRegistry.count();
+    if (count >= BUSINESS_TYPE_SEED_DATA.length) {
+      this.logger.log(`Business types already seeded (${count} entries)`);
+      return;
+    }
+
+    for (let i = 0; i < BUSINESS_TYPE_SEED_DATA.length; i++) {
+      const bt = BUSINESS_TYPE_SEED_DATA[i];
+      await this.prisma.businessTypeRegistry.upsert({
+        where: { typeCode: bt.typeCode },
+        update: {
+          typeName: bt.typeName,
+          industryCategory: bt.industryCategory as any,
+          description: bt.description,
+          icon: bt.icon,
+          colorTheme: bt.colorTheme,
+          terminologyMap: bt.terminologyMap,
+          defaultModules: bt.defaultModules,
+          recommendedModules: bt.recommendedModules,
+          excludedModules: bt.excludedModules,
+          dashboardWidgets: bt.dashboardWidgets,
+          workflowTemplates: bt.workflowTemplates,
+          extraFields: bt.extraFields ?? {},
+          isDefault: bt.isDefault ?? false,
+        },
+        create: {
+          typeCode: bt.typeCode,
+          typeName: bt.typeName,
+          industryCategory: bt.industryCategory as any,
+          description: bt.description,
+          icon: bt.icon,
+          colorTheme: bt.colorTheme,
+          terminologyMap: bt.terminologyMap,
+          defaultModules: bt.defaultModules,
+          recommendedModules: bt.recommendedModules,
+          excludedModules: bt.excludedModules,
+          dashboardWidgets: bt.dashboardWidgets,
+          workflowTemplates: bt.workflowTemplates,
+          extraFields: bt.extraFields ?? {},
+          isDefault: bt.isDefault ?? false,
+          sortOrder: i,
+        },
+      });
+    }
+    this.logger.log(`Business types seeded: ${BUSINESS_TYPE_SEED_DATA.length} industries`);
   }
 
   /**

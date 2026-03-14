@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   BarChart,
   Bar,
@@ -15,42 +15,51 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  FunnelChart,
+  Funnel,
+  LabelList,
 } from "recharts";
-import { Button, DatePicker } from "@/components/ui";
-import { PageHeader } from "@/components/common/PageHeader";
+import { Icon } from "@/components/ui";
+import { AICDatePicker } from "@/components/shared/AICDatePicker";
+import type { DateRange } from "@/components/shared/AICDatePicker";
 import { HelpButton } from "@/components/common/HelpButton";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { formatINR } from "@/lib/format-currency";
+import { format, subDays } from "date-fns";
 import {
   useExecutiveDashboard,
   usePipeline,
+  useFunnel,
   useRevenueAnalytics,
   useLeadSources,
 } from "../hooks/useDashboard";
-import { getDateRange } from "../utils/date-range";
 import { DashboardUserHelp } from "../help/DashboardUserHelp";
 import { DashboardDevHelp } from "../help/DashboardDevHelp";
-import type { DateRangePreset } from "../utils/date-range";
 import { CHART_COLORS } from "../utils/chart-colors";
 import { KpiCard } from "./KpiCard";
 
 export function DashboardOverview() {
-  const [preset, setPreset] = useState<DateRangePreset>("30d");
-  const initialRange = useMemo(() => getDateRange("30d"), []);
-  const [dateFrom, setDateFrom] = useState(initialRange.dateFrom);
-  const [dateTo, setDateTo] = useState(initialRange.dateTo);
+  const [dateRange, setDateRange] = useState<DateRange>(() => ({
+    start: subDays(new Date(), 30),
+    end: new Date(),
+  }));
 
-  const handlePreset = (p: DateRangePreset) => {
-    setPreset(p);
-    const range = getDateRange(p);
-    setDateFrom(range.dateFrom);
-    setDateTo(range.dateTo);
-  };
+  const handleRangeChange = useCallback((range: DateRange | null) => {
+    if (range) setDateRange(range);
+  }, []);
 
-  const params = useMemo(() => ({ dateFrom, dateTo }), [dateFrom, dateTo]);
+  const params = useMemo(
+    () => ({
+      dateFrom: format(dateRange.start, "yyyy-MM-dd"),
+      dateTo: format(dateRange.end, "yyyy-MM-dd"),
+    }),
+    [dateRange],
+  );
+
   const { data: kpiData, isLoading: kpiLoading } =
     useExecutiveDashboard(params);
   const { data: pipelineData } = usePipeline(params);
+  const { data: funnelData } = useFunnel(params);
   const { data: revenueData } = useRevenueAnalytics(params);
   const { data: sourcesData } = useLeadSources(params);
 
@@ -64,14 +73,24 @@ export function DashboardOverview() {
       ? (rawPipeline as any).stages
       : [];
 
+  const rawFunnel = funnelData?.data;
+  const funnel: { stage: string; count: number; percentage: number; fill: string }[] = Array.isArray(rawFunnel)
+    ? rawFunnel.map((s: any, i: number) => ({
+        stage: s.stage ?? s.name ?? `Stage ${i + 1}`,
+        count: s.count ?? 0,
+        percentage: s.percentage ?? 0,
+        fill: CHART_COLORS[i % CHART_COLORS.length],
+      }))
+    : [];
+
   const rawRevenue = revenueData?.data;
   const revenue: Record<string, unknown>[] = Array.isArray(rawRevenue)
-    ? rawRevenue
+    ? (rawRevenue as any[])
     : [];
 
   const rawSources = sourcesData?.data;
   const sources: Record<string, unknown>[] = Array.isArray(rawSources)
-    ? rawSources.map((s: Record<string, unknown>) => ({
+    ? (rawSources as any[]).map((s) => ({
         ...s,
         count: s.count ?? s.totalLeads ?? 0,
         percentage: s.percentage ?? s.conversionRate ?? 0,
@@ -84,88 +103,92 @@ export function DashboardOverview() {
 
   return (
     <div>
-      <PageHeader
-        title="Executive Dashboard"
-        actions={
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              flexWrap: "wrap",
-            }}
-          >
-            <HelpButton
-              panelId="dashboard-help"
-              title="Dashboard — Help"
-              userContent={<DashboardUserHelp />}
-              devContent={<DashboardDevHelp />}
-              showLabel={false}
-            />
-            {(
-              ["7d", "30d", "90d", "thisMonth", "lastMonth"] as DateRangePreset[]
-            ).map((p) => (
-              <Button
-                key={p}
-                size="sm"
-                variant={preset === p ? "primary" : "outline"}
-                onClick={() => handlePreset(p)}
-              >
-                {p === "7d"
-                  ? "7D"
-                  : p === "30d"
-                    ? "30D"
-                    : p === "90d"
-                      ? "90D"
-                      : p === "thisMonth"
-                        ? "This Month"
-                        : "Last Month"}
-              </Button>
-            ))}
-            <DatePicker
-              label="From"
-              value={dateFrom}
-              onChange={(v) => {
-                setDateFrom(v);
-                setPreset("custom");
-              }}
-            />
-            <DatePicker
-              label="To"
-              value={dateTo}
-              onChange={(v) => {
-                setDateTo(v);
-                setPreset("custom");
-              }}
-            />
-          </div>
-        }
-      />
+      {/* ── Toolbar Header (matches Raw Contacts style) ── */}
+      <div className="flex items-center justify-between gap-4 flex-wrap mb-5 py-2 border-b border-gray-200">
+        <div className="flex items-center gap-3">
+          <h1 className="text-lg font-semibold text-gray-800 m-0">
+            Executive Dashboard
+          </h1>
+          <div className="h-5 w-px bg-gray-300" />
+          <HelpButton
+            panelId="dashboard-help"
+            title="Dashboard — Help"
+            userContent={<DashboardUserHelp />}
+            devContent={<DashboardDevHelp />}
+            showLabel
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <AICDatePicker
+            mode="range"
+            dateRange={dateRange}
+            onRangeChange={handleRangeChange}
+            showPresets
+            showHighlights
+            placeholder="Select date range"
+            size="sm"
+            dropdownAlign="right"
+          />
+        </div>
+      </div>
 
+      {/* 8 KPI Cards — 2 rows of 4 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <KpiCard
           title="Total Leads"
           value={kpis?.totalLeads ?? 0}
           icon="trending-up"
           color="#3b82f6"
+          variant="clean"
+        />
+        <KpiCard
+          title="Active Leads"
+          value={kpis?.activeLeads ?? 0}
+          icon="users"
+          color="#06b6d4"
+          variant="clean"
         />
         <KpiCard
           title="Won Deals"
           value={kpis?.wonDeals ?? 0}
           icon="check-circle"
           color="#10b981"
+          variant="clean"
+        />
+        <KpiCard
+          title="Lost Deals"
+          value={kpis?.lostDeals ?? 0}
+          icon="x-circle"
+          color="#ef4444"
+          variant="clean"
         />
         <KpiCard
           title="Revenue"
           value={formatINR(Number(kpis?.totalRevenue ?? 0))}
-          icon="credit-card"
+          icon="indian-rupee"
           color="#f59e0b"
+          variant="clean"
+        />
+        <KpiCard
+          title="Avg Deal Size"
+          value={formatINR(Number(kpis?.avgDealSize ?? 0))}
+          icon="bar-chart"
+          color="#8b5cf6"
+          variant="clean"
         />
         <KpiCard
           title="Conversion Rate"
           value={`${kpis?.conversionRate ?? 0}%`}
           icon="percent"
-          color="#8b5cf6"
+          color="#ec4899"
+          variant="clean"
+        />
+        <KpiCard
+          title="Pending Activities"
+          value={kpis?.pendingActivities ?? 0}
+          icon="clock"
+          color="#f97316"
+          variant="clean"
         />
       </div>
 
@@ -262,7 +285,7 @@ export function DashboardOverview() {
           </ResponsiveContainer>
         </div>
 
-        {/* Quick Stats */}
+        {/* Conversion Funnel */}
         <div className="rounded-lg border border-gray-200 bg-white p-5">
           <h3
             style={{
@@ -272,70 +295,36 @@ export function DashboardOverview() {
               color: "#1e293b",
             }}
           >
-            Quick Stats
+            Conversion Funnel
           </h3>
-          <dl
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 16,
-            }}
-          >
-            <div>
-              <dt style={{ fontSize: 12, color: "#64748b" }}>Avg Deal Size</dt>
-              <dd
-                style={{
-                  fontSize: 18,
-                  fontWeight: 600,
-                  color: "#1e293b",
-                  marginTop: 4,
-                }}
-              >
-                {formatINR(Number(kpis?.avgDealSize ?? 0))}
-              </dd>
+          {funnel.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <FunnelChart>
+                <Tooltip formatter={((value: number) => [value, "Leads"]) as any} />
+                <Funnel dataKey="count" data={funnel} isAnimationActive>
+                  <LabelList
+                    position="right"
+                    fill="#374151"
+                    stroke="none"
+                    dataKey="stage"
+                    fontSize={12}
+                  />
+                  <LabelList
+                    position="center"
+                    fill="#fff"
+                    stroke="none"
+                    dataKey="count"
+                    fontSize={14}
+                    fontWeight={600}
+                  />
+                </Funnel>
+              </FunnelChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ textAlign: "center", padding: 48, color: "#9ca3af", fontSize: 14 }}>
+              No funnel data available
             </div>
-            <div>
-              <dt style={{ fontSize: 12, color: "#64748b" }}>
-                Pending Activities
-              </dt>
-              <dd
-                style={{
-                  fontSize: 18,
-                  fontWeight: 600,
-                  color: "#1e293b",
-                  marginTop: 4,
-                }}
-              >
-                {kpis?.pendingActivities ?? 0}
-              </dd>
-            </div>
-            <div>
-              <dt style={{ fontSize: 12, color: "#64748b" }}>Active Leads</dt>
-              <dd
-                style={{
-                  fontSize: 18,
-                  fontWeight: 600,
-                  color: "#1e293b",
-                  marginTop: 4,
-                }}
-              >
-                {kpis?.activeLeads ?? 0}
-              </dd>
-            </div>
-            <div>
-              <dt style={{ fontSize: 12, color: "#64748b" }}>Lost Deals</dt>
-              <dd
-                style={{
-                  fontSize: 18,
-                  fontWeight: 600,
-                  color: "#1e293b",
-                  marginTop: 4,
-                }}
-              >
-                {kpis?.lostDeals ?? 0}
-              </dd>
-            </div>
-          </dl>
+          )}
         </div>
       </div>
     </div>

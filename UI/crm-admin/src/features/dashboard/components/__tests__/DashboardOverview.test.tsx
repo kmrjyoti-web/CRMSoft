@@ -81,7 +81,7 @@ describe("DashboardOverview", () => {
     expect(document.querySelector("[class*=spinner]") || document.body.textContent).toBeTruthy();
   });
 
-  it("renders PageHeader with title", () => {
+  it("renders toolbar with title", () => {
     mockKpiData = mockKpis;
     renderWithProvider(<DashboardOverview />);
     expect(screen.getByText("Executive Dashboard")).toBeInTheDocument();

@@ -9,13 +9,14 @@ import { useForm, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
 
-import { Button, Icon, Input, InputMask, CurrencyInput, Fieldset } from "@/components/ui";
+import { Button, Icon, Input, CurrencyInput, Fieldset } from "@/components/ui";
 
 import { FormErrors } from "@/components/common/FormErrors";
 import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { LookupSelect } from "@/components/common/LookupSelect";
 import { PageHeader } from "@/components/common/PageHeader";
+import { AddressFields } from "@/components/common/AddressFields";
 
 import { useSidePanelStore } from "@/stores/side-panel.store";
 
@@ -48,9 +49,11 @@ const organizationSchema = z.object({
     .or(z.literal("")),
   phone: z.string().optional(),
   address: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
+  countryCode: z.string().optional(),
   country: z.string().optional(),
+  stateCode: z.string().optional(),
+  state: z.string().optional(),
+  city: z.string().optional(),
   pincode: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -86,6 +89,8 @@ export function OrganizationForm({ organizationId, mode = "page", panelId, onSuc
     control,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<OrganizationFormValues>({
     resolver: zodResolver(organizationSchema),
@@ -103,9 +108,11 @@ export function OrganizationForm({ organizationId, mode = "page", panelId, onSuc
       email: "",
       phone: "",
       address: "",
-      city: "",
-      state: "",
+      countryCode: "IN",
       country: "",
+      stateCode: "",
+      state: "",
+      city: "",
       pincode: "",
       notes: "",
     },
@@ -132,9 +139,11 @@ export function OrganizationForm({ organizationId, mode = "page", panelId, onSuc
       email: o.email ?? "",
       phone: o.phone ?? "",
       address: o.address ?? "",
-      city: o.city ?? "",
-      state: o.state ?? "",
+      countryCode: (o as any).countryCode ?? "IN",
       country: o.country ?? "",
+      stateCode: (o as any).stateCode ?? "",
+      state: o.state ?? "",
+      city: o.city ?? "",
       pincode: o.pincode ?? "",
       notes: o.notes ?? "",
     });
@@ -469,81 +478,37 @@ export function OrganizationForm({ organizationId, mode = "page", panelId, onSuc
         {/* Address */}
         {showAddress && (
           <Fieldset label="Address">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {isFieldVisible("address") && (
-                <div className="sm:col-span-2">
-                  <Controller
-                    name="address"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        label={getFieldLabel("address")}
-                        value={field.value ?? ""}
-                        onChange={field.onChange}
-                        leftIcon={<Icon name="map-pin" size={16} />}
-                      />
-                    )}
-                  />
-                </div>
-              )}
-              {isFieldVisible("city") && (
+            {isFieldVisible("address") && (
+              <div className="mb-4">
                 <Controller
-                  name="city"
+                  name="address"
                   control={control}
                   render={({ field }) => (
                     <Input
-                      label={getFieldLabel("city")}
+                      label={getFieldLabel("address")}
                       value={field.value ?? ""}
                       onChange={field.onChange}
                       leftIcon={<Icon name="map-pin" size={16} />}
                     />
                   )}
                 />
-              )}
-              {isFieldVisible("state") && (
-                <Controller
-                  name="state"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      label={getFieldLabel("state")}
-                      value={field.value ?? ""}
-                      onChange={field.onChange}
-                      leftIcon={<Icon name="map-pin" size={16} />}
-                    />
-                  )}
-                />
-              )}
-              {isFieldVisible("country") && (
-                <Controller
-                  name="country"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      label={getFieldLabel("country")}
-                      value={field.value ?? ""}
-                      onChange={field.onChange}
-                      leftIcon={<Icon name="globe" size={16} />}
-                    />
-                  )}
-                />
-              )}
-              {isFieldVisible("pincode") && (
-                <Controller
-                  name="pincode"
-                  control={control}
-                  render={({ field }) => (
-                    <InputMask
-                      label={getFieldLabel("pincode")}
-                      maskType="custom"
-                      customMask="999999"
-                      value={field.value ?? ""}
-                      onChange={field.onChange}
-                    />
-                  )}
-                />
-              )}
-            </div>
+              </div>
+            )}
+            <AddressFields
+              countryCode={watch("countryCode") ?? "IN"}
+              stateCode={watch("stateCode") ?? ""}
+              city={watch("city") ?? ""}
+              pincode={watch("pincode") ?? ""}
+              columns={2}
+              onChange={(patch) => {
+                if (patch.countryCode !== undefined) setValue("countryCode", patch.countryCode);
+                if (patch.country   !== undefined) setValue("country",     patch.country);
+                if (patch.stateCode !== undefined) setValue("stateCode",   patch.stateCode);
+                if (patch.state     !== undefined) setValue("state",       patch.state);
+                if (patch.city      !== undefined) setValue("city",        patch.city);
+                if (patch.pincode   !== undefined) setValue("pincode",     patch.pincode);
+              }}
+            />
           </Fieldset>
         )}
 

@@ -11,13 +11,13 @@ import {
   Button,
   Icon,
   Input,
-  DatePicker,
   NumberInput,
   CurrencyInput,
   Fieldset,
   Typography,
   Modal,
 } from "@/components/ui";
+import { SmartDateInput } from "@/components/common/SmartDateInput";
 import { LookupSelect } from "@/components/common/LookupSelect";
 import { ProductSelect } from "@/components/common/ProductSelect";
 import type { ProductSelectOption } from "@/components/common/ProductSelect";
@@ -29,6 +29,7 @@ import { FormErrors } from "@/components/common/FormErrors";
 import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
+import { AddressFields } from "@/components/common/AddressFields";
 import { useSidePanelStore } from "@/stores/side-panel.store";
 
 import {
@@ -131,6 +132,8 @@ export function InvoiceForm({ invoiceId, leadId: defaultLeadId, mode = "page", p
   const updatePanelConfig = useSidePanelStore((s) => s.updatePanelConfig);
 
   const [isInterState, setIsInterState] = useState(false);
+  const [billingStateCode, setBillingStateCode] = useState("");
+  const [shippingStateCode, setShippingStateCode] = useState("");
   const [showNotesModal, setShowNotesModal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showInternalNotesModal, setShowInternalNotesModal] = useState(false);
@@ -391,10 +394,11 @@ export function InvoiceForm({ invoiceId, leadId: defaultLeadId, mode = "page", p
               name="dueDate"
               control={control}
               render={({ field }) => (
-                <DatePicker
-                  label="Due Date *"
-                  value={field.value ?? ""}
-                  onChange={(v) => field.onChange(v)}
+                <SmartDateInput
+                  label="Due Date"
+                  required
+                  value={field.value || null}
+                  onChange={(v) => field.onChange(v ?? "")}
                 />
               )}
             />
@@ -404,10 +408,10 @@ export function InvoiceForm({ invoiceId, leadId: defaultLeadId, mode = "page", p
               name="invoiceDate"
               control={control}
               render={({ field }) => (
-                <DatePicker
+                <SmartDateInput
                   label="Invoice Date"
-                  value={field.value ?? ""}
-                  onChange={(v) => field.onChange(v)}
+                  value={field.value || null}
+                  onChange={(v) => field.onChange(v ?? "")}
                 />
               )}
             />
@@ -417,10 +421,10 @@ export function InvoiceForm({ invoiceId, leadId: defaultLeadId, mode = "page", p
               name="supplyDate"
               control={control}
               render={({ field }) => (
-                <DatePicker
+                <SmartDateInput
                   label="Supply Date"
-                  value={field.value ?? ""}
-                  onChange={(v) => field.onChange(v)}
+                  value={field.value || null}
+                  onChange={(v) => field.onChange(v ?? "")}
                 />
               )}
             />
@@ -509,47 +513,21 @@ export function InvoiceForm({ invoiceId, leadId: defaultLeadId, mode = "page", p
               )}
             />
 
-            <Controller
-              name="billingCity"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  label="City"
-                  leftIcon={<Icon name="building-2" size={16} />}
-                  placeholder="City"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-
-            <Controller
-              name="billingState"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  label="State"
-                  leftIcon={<Icon name="map" size={16} />}
-                  placeholder="State"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-
-            <Controller
-              name="billingPincode"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  label="Pincode"
-                  leftIcon={<Icon name="hash" size={16} />}
-                  placeholder="Pincode"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                />
-              )}
-            />
+            <div className="sm:col-span-3">
+              <AddressFields
+                stateCode={billingStateCode}
+                city={String(watch("billingCity") ?? "")}
+                pincode={String(watch("billingPincode") ?? "")}
+                showCountry={false}
+                columns={3}
+                onChange={(patch) => {
+                  if (patch.stateCode !== undefined) setBillingStateCode(patch.stateCode);
+                  if (patch.state !== undefined) setValue("billingState", patch.state);
+                  if (patch.city !== undefined) setValue("billingCity", patch.city);
+                  if (patch.pincode !== undefined) setValue("billingPincode", patch.pincode);
+                }}
+              />
+            </div>
 
             <Controller
               name="billingGstNumber"
@@ -600,47 +578,21 @@ export function InvoiceForm({ invoiceId, leadId: defaultLeadId, mode = "page", p
               )}
             />
 
-            <Controller
-              name="shippingCity"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  label="City"
-                  leftIcon={<Icon name="building-2" size={16} />}
-                  placeholder="City"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-
-            <Controller
-              name="shippingState"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  label="State"
-                  leftIcon={<Icon name="map" size={16} />}
-                  placeholder="State"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-
-            <Controller
-              name="shippingPincode"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  label="Pincode"
-                  leftIcon={<Icon name="hash" size={16} />}
-                  placeholder="Pincode"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                />
-              )}
-            />
+            <div className="sm:col-span-3">
+              <AddressFields
+                stateCode={shippingStateCode}
+                city={String(watch("shippingCity") ?? "")}
+                pincode={String(watch("shippingPincode") ?? "")}
+                showCountry={false}
+                columns={3}
+                onChange={(patch) => {
+                  if (patch.stateCode !== undefined) setShippingStateCode(patch.stateCode);
+                  if (patch.state !== undefined) setValue("shippingState" as any, patch.state);
+                  if (patch.city !== undefined) setValue("shippingCity", patch.city);
+                  if (patch.pincode !== undefined) setValue("shippingPincode", patch.pincode);
+                }}
+              />
+            </div>
           </div>
         </Fieldset>
 

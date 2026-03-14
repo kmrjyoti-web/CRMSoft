@@ -29,6 +29,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       };
     }
 
+    // Vendor — no User DB lookup needed (vendors are in marketplaceVendor table)
+    if ((payload as any).vendorId || payload.userType === 'VENDOR') {
+      return {
+        id: payload.sub,
+        email: payload.email,
+        role: 'VENDOR',
+        userType: 'VENDOR',
+        vendorId: (payload as any).vendorId ?? payload.sub,
+      };
+    }
+
     // Regular tenant user — explicit tenantId (interceptor hasn't run yet)
     const user = await this.prisma.user.findFirst({
       where: { id: payload.sub, tenantId: payload.tenantId },
@@ -45,6 +56,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('User not found or inactive');
     }
 
+    // Lookup tenant's industry code for cross-cutting filters
+    let businessTypeCode: string | undefined;
+    if (user.tenantId) {
+      const tenant = await this.prisma.tenant.findUnique({
+        where: { id: user.tenantId },
+        select: { industryCode: true },
+      });
+      businessTypeCode = tenant?.industryCode ?? undefined;
+    }
+
     return {
       id: user.id,
       email: user.email,
@@ -57,6 +78,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       departmentId: user.departmentId,
       departmentPath: user.department?.path,
       tenantId: user.tenantId,
+      businessTypeCode,
     };
   }
 }

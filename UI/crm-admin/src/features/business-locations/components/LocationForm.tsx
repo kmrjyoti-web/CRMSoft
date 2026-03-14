@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import { Button, Card, Input, SelectInput, Icon } from "@/components/ui";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { AddressFields } from "@/components/common/AddressFields";
 
 import {
   useCreateLocation,
@@ -47,6 +48,8 @@ export function LocationForm({ location, parentId, onClose }: LocationFormProps)
   const createMut = useCreateLocation();
   const updateMut = useUpdateLocation();
   const saving = createMut.isPending || updateMut.isPending;
+  const [locCountryCode, setLocCountryCode] = useState("IN");
+  const [locStateCode, setLocStateCode] = useState("");
 
   const { data: locationsData } = useBusinessLocations();
   const parentOptions = useMemo(() => {
@@ -210,51 +213,21 @@ export function LocationForm({ location, parentId, onClose }: LocationFormProps)
             />
 
             {/* City / State / Country / Postal */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-              <div>
-                <Input
-                  label="City"
-                  leftIcon={<Icon name="building" size={16} />}
-                  {...register("city", { required: "City is required" })}
-                />
-                {errors.city && (
-                  <p style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px" }}>{errors.city.message}</p>
-                )}
-              </div>
-              <div>
-                <Input
-                  label="State"
-                  leftIcon={<Icon name="map" size={16} />}
-                  {...register("state", { required: "State is required" })}
-                />
-                {errors.state && (
-                  <p style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px" }}>{errors.state.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-              <div>
-                <Input
-                  label="Country"
-                  leftIcon={<Icon name="globe" size={16} />}
-                  {...register("country", { required: "Country is required" })}
-                />
-                {errors.country && (
-                  <p style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px" }}>{errors.country.message}</p>
-                )}
-              </div>
-              <div>
-                <Input
-                  label="Postal Code"
-                  leftIcon={<Icon name="mail" size={16} />}
-                  {...register("postalCode", { required: "Postal code is required" })}
-                />
-                {errors.postalCode && (
-                  <p style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px" }}>{errors.postalCode.message}</p>
-                )}
-              </div>
-            </div>
+            <AddressFields
+              countryCode={locCountryCode}
+              stateCode={locStateCode}
+              city={String(watch("city") ?? "")}
+              pincode={String(watch("postalCode") ?? "")}
+              columns={2}
+              onChange={(patch) => {
+                if (patch.countryCode !== undefined) setLocCountryCode(patch.countryCode);
+                if (patch.country !== undefined) setValue("country", patch.country);
+                if (patch.stateCode !== undefined) setLocStateCode(patch.stateCode);
+                if (patch.state !== undefined) setValue("state", patch.state);
+                if (patch.city !== undefined) setValue("city", patch.city);
+                if (patch.pincode !== undefined) setValue("postalCode", patch.pincode);
+              }}
+            />
 
             {/* Phone / Email */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>

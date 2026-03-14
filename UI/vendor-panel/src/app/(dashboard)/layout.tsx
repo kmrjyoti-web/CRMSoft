@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
@@ -11,16 +11,26 @@ import { cn } from '@/lib/utils';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated, isLoading, fetchMe } = useAuthStore();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isLoading = useAuthStore((s) => s.isLoading);
   const { sidebarCollapsed } = useUIStore();
+  const hasFetched = useRef(false);
 
   useEffect(() => {
     if (!isAuthenticated && !isLoading) {
       router.push('/login');
-    } else if (isAuthenticated) {
-      fetchMe();
     }
-  }, [isAuthenticated, isLoading, router, fetchMe]);
+  }, [isAuthenticated, isLoading, router]);
+
+  // Fetch user profile once on mount
+  useEffect(() => {
+    if (isAuthenticated && !hasFetched.current) {
+      hasFetched.current = true;
+      useAuthStore.getState().fetchMe().catch(() => {
+        // Ignore fetchMe errors — vendor JWT may not support /auth/me
+      });
+    }
+  }, [isAuthenticated]);
 
   if (!isAuthenticated) {
     return (

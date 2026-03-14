@@ -7,6 +7,7 @@ import type {
   ContactListParams,
   ContactCreateData,
   ContactUpdateData,
+  CRMDashboardData,
 } from "../types/contacts.types";
 
 const BASE_URL = "/api/v1/contacts";
@@ -55,5 +56,10 @@ export const contactsService = {
   permanentDelete: (id: string) =>
     apiClient
       .delete<ApiResponse<void>>(`${BASE_URL}/${id}/permanent`)
+      .then((r) => r.data),
+
+  getDashboard: (params?: { dateFrom?: string; dateTo?: string }) =>
+    apiClient
+      .get<ApiResponse<CRMDashboardData>>(`${BASE_URL}/dashboard`, { params })
       .then((r) => r.data),
 };

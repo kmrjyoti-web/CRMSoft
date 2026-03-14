@@ -30,6 +30,9 @@ export class TenantGuard implements CanActivate {
     // Super admins bypass tenant check
     if (user?.isSuperAdmin) return true;
 
+    // Vendors bypass tenant check (they operate cross-tenant)
+    if (user?.vendorId || user?.userType === 'VENDOR') return true;
+
     if (!user?.tenantId) {
       throw new UnauthorizedException('Tenant context required');
     }

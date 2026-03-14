@@ -16,36 +16,69 @@ const __dirname = path.dirname(__filename);
 // Icon mapping based on route folder name
 const ICON_MAP = {
   dashboard: 'LayoutDashboard',
-  listings: 'Package',
-  orders: 'ShoppingCart',
-  enquiries: 'MessageSquare',
-  posts: 'FileText',
-  analytics: 'BarChart3',
   settings: 'Settings',
   profile: 'User',
-  products: 'Package',
-  inventory: 'Warehouse',
-  categories: 'FolderTree',
+  // Software Vendor features
+  'vendor-dashboard': 'BarChart3',
+  plans: 'CreditCard',
+  modules: 'Layers',
+  packages: 'Package',
+  licenses: 'Key',
+  partners: 'Users',
+  wallet: 'Wallet',
+  'wallet-analytics': 'PieChart',
   offers: 'Gift',
+  'recharge-plans': 'Zap',
   coupons: 'Ticket',
-  promotions: 'Megaphone',
-  reviews: 'Star',
-  payouts: 'Wallet',
-  billing: 'Receipt',
-  subscription: 'CreditCard',
-  plans: 'Layers',
-  documents: 'FileText',
-  notifications: 'Bell',
-  'api-keys': 'Key',
+  'service-rates': 'Receipt',
+  tenants: 'Building',
+  'ai-tokens': 'Brain',
+  'subscription-analytics': 'TrendingUp',
+  // Dev-ops features
+  'error-logs': 'AlertTriangle',
+  'audit-logs': 'FileSearch',
+  'system-health': 'Activity',
+  'module-builder': 'Hammer',
+  webhooks: 'Webhook',
+  'dev-requests': 'ClipboardList',
+  'db-admin': 'Database',
+  // Developer Tools
+  'dev-tools': 'Code',
+  'ui-kit': 'Palette',
+  'api-docs': 'BookOpen',
 };
 
 // Module requirements for gating (folder name → required module key)
-const MODULE_REQUIREMENTS = {
-  offers: 'offers',
-  coupons: 'offers',
-  promotions: 'offers',
-  analytics: 'analytics',
-  'api-keys': 'api-access',
+// Vendor portal is the admin tool — nothing should be locked here
+const MODULE_REQUIREMENTS = {};
+
+// Section grouping for sidebar
+const SECTION_MAP = {
+  'vendor-dashboard': 'SOFTWARE_VENDOR',
+  plans: 'SOFTWARE_VENDOR',
+  tenants: 'SOFTWARE_VENDOR',
+  licenses: 'SOFTWARE_VENDOR',
+  offers: 'SOFTWARE_VENDOR',
+  modules: 'SOFTWARE_VENDOR',
+  packages: 'SOFTWARE_VENDOR',
+  'recharge-plans': 'SOFTWARE_VENDOR',
+  coupons: 'SOFTWARE_VENDOR',
+  'service-rates': 'SOFTWARE_VENDOR',
+  partners: 'SOFTWARE_VENDOR',
+  wallet: 'SOFTWARE_VENDOR',
+  'wallet-analytics': 'SOFTWARE_VENDOR',
+  'ai-tokens': 'SOFTWARE_VENDOR',
+  'subscription-analytics': 'SOFTWARE_VENDOR',
+  'error-logs': 'DEV_OPS',
+  'audit-logs': 'DEV_OPS',
+  'system-health': 'DEV_OPS',
+  webhooks: 'DEV_OPS',
+  'db-admin': 'DEV_OPS',
+  'dev-requests': 'DEV_OPS',
+  'module-builder': 'DEV_OPS',
+  'dev-tools': 'DEVELOPER_TOOLS',
+  profile: 'OTHER',
+  settings: 'OTHER',
 };
 
 function pathToLabel(routePath) {
@@ -88,6 +121,7 @@ function scanRoutes(dir, basePath = '') {
         icon: ICON_MAP[folderName] || 'Circle',
         parentKey: parentKey || undefined,
         moduleKey: MODULE_REQUIREMENTS[folderName] || undefined,
+        section: SECTION_MAP[folderName] || 'OTHER',
         displayOrder: routes.length + 1,
       });
     }
@@ -113,6 +147,7 @@ if (fs.existsSync(dashboardPage)) {
     icon: 'LayoutDashboard',
     parentKey: undefined,
     moduleKey: undefined,
+    section: 'DEV_OPS',
     displayOrder: 0,
   });
 }

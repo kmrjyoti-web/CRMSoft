@@ -34,6 +34,8 @@ export const useAuthStore = create<AuthState>()(
           const data = res.data;
           localStorage.setItem('vendor_token', data.accessToken);
           localStorage.setItem('vendor_tenant_id', data.tenantId);
+          // Set cookie so Next.js middleware can detect auth
+          document.cookie = `vendor_token=${data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
           set({
             token: data.accessToken,
             tenantId: data.tenantId,
@@ -52,6 +54,8 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         localStorage.removeItem('vendor_token');
         localStorage.removeItem('vendor_tenant_id');
+        // Clear the cookie so middleware redirects to login
+        document.cookie = 'vendor_token=; path=/; max-age=0';
         set({ user: null, vendor: null, token: null, tenantId: null, isAuthenticated: false });
       },
 
@@ -67,6 +71,7 @@ export const useAuthStore = create<AuthState>()(
       setAuth: (token, tenantId, user, vendor) => {
         localStorage.setItem('vendor_token', token);
         localStorage.setItem('vendor_tenant_id', tenantId);
+        document.cookie = `vendor_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
         set({ token, tenantId, user, vendor: vendor ?? null, isAuthenticated: true });
       },
     }),

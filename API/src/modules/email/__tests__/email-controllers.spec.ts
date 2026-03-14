@@ -10,6 +10,9 @@ import { ConnectAccountCommand } from '../application/commands/connect-account/c
 import { CreateTemplateCommand } from '../application/commands/create-template/create-template.command';
 import { CreateSignatureCommand } from '../application/commands/create-signature/create-signature.command';
 import { CreateCampaignCommand } from '../application/commands/create-campaign/create-campaign.command';
+import { ImapSmtpService } from '../services/imap-smtp.service';
+import { GmailService } from '../services/gmail.service';
+import { OutlookService } from '../services/outlook.service';
 
 describe('Email Controllers', () => {
   let commandBus: any;
@@ -41,6 +44,9 @@ describe('Email Controllers', () => {
       providers: [
         { provide: CommandBus, useValue: commandBus },
         { provide: QueryBus, useValue: queryBus },
+        { provide: ImapSmtpService, useValue: { testConnection: jest.fn() } },
+        { provide: GmailService, useValue: { getAuthUrl: jest.fn(), handleOAuthCallback: jest.fn() } },
+        { provide: OutlookService, useValue: { getAuthUrl: jest.fn(), handleOAuthCallback: jest.fn() } },
       ],
     }).compile();
 

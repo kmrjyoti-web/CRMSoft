@@ -18,6 +18,7 @@ export class AuditCoreService {
   ) {}
 
   async log(params: {
+    tenantId?: string;
     entityType: string;
     entityId: string;
     action: string;
@@ -68,6 +69,7 @@ export class AuditCoreService {
 
       const auditLog = await this.prisma.auditLog.create({
         data: {
+          tenantId: params.tenantId || '',
           entityType: params.entityType as any,
           entityId: params.entityId,
           entityLabel,

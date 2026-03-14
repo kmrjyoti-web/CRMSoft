@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
+import { industryFilter } from '../../../common/utils/industry-filter.util';
 
 @Injectable()
 export class CouponService {
@@ -57,8 +58,8 @@ export class CouponService {
 
   // ─── Admin CRUD ───
 
-  async findAll(params?: { isActive?: boolean }) {
-    const where: any = {};
+  async findAll(params?: { isActive?: boolean; industryCode?: string }) {
+    const where: any = { ...industryFilter(params?.industryCode) };
     if (params?.isActive !== undefined) where.isActive = params.isActive;
     return this.prisma.coupon.findMany({ where, orderBy: { createdAt: 'desc' } });
   }

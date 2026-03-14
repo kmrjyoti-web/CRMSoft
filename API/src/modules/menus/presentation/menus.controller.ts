@@ -2,6 +2,7 @@ import {
   Controller, Post, Get, Put, Param, Body,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { PrismaService } from '../../../core/prisma/prisma.service';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 // import { Public } from '../../../common/decorators/roles.decorator';
 import { RequirePermissions } from '../../../core/permissions/decorators/require-permissions.decorator';
@@ -24,6 +25,7 @@ export class MenusController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly prisma: PrismaService,
   ) {}
 
   /** POST / — Create menu item (admin). */
@@ -43,8 +45,10 @@ export class MenusController {
   /** GET /tree — Full menu tree (admin). */
   @Get('tree')
   @RequirePermissions('menus:read')
-  async getTree() {
-    const result = await this.queryBus.execute(new GetMenuTreeQuery());
+  async getTree(@CurrentUser() user: any) {
+    const result = await this.queryBus.execute(
+      new GetMenuTreeQuery(true, user.tenantId, user.isSuperAdmin),
+    );
     return ApiResponse.success(result);
   }
 
@@ -98,10 +102,96 @@ export class MenusController {
   /** POST /seed — Bulk seed menus (admin). */
   @Post('seed')
   @RequirePermissions('menus:create')
-  async seed() {
+  async seed(@CurrentUser() user: any) {
     const result = await this.commandBus.execute(
-      new BulkSeedMenusCommand(MENU_SEED_DATA),
+      new BulkSeedMenusCommand(MENU_SEED_DATA, user.tenantId, user.isSuperAdmin),
     );
     return ApiResponse.success(result, 'Menus seeded');
+  }
+
+  /** GET /discovery — List unmapped routes (admin only). */
+  @Get('discovery')
+  @RequirePermissions('menus:read')
+  async getDiscovery(@CurrentUser() user: any) {
+    const tenantId = user.tenantId || await this.getDefaultTenantId();
+    const menus = await this.prisma.menu.findMany({
+      where: { tenantId, isActive: true },
+      select: { route: true, code: true, isAdminOnly: true },
+    });
+    const menuRoutes = new Set(
+      menus.filter(m => m.route && !m.isAdminOnly).map(m => m.route!.split('?')[0]),
+    );
+
+    // Get all unmapped items from DB
+    const unmappedGroup = await this.prisma.menu.findFirst({
+      where: { tenantId, code: '_UNMAPPED', isActive: true },
+    });
+    const unmappedItems = unmappedGroup
+      ? await this.prisma.menu.findMany({
+          where: { tenantId, isAdminOnly: true, route: { not: null }, isActive: true },
+          select: { route: true, name: true, code: true },
+        })
+      : [];
+
+    // Build categories from unmapped items
+    const categories: Record<string, any[]> = {};
+    for (const item of unmappedItems) {
+      const cat = this.getRouteCategory(item.route!);
+      if (!categories[cat]) categories[cat] = [];
+      categories[cat].push({ route: item.route, name: item.name, category: cat });
+    }
+
+    return ApiResponse.success({
+      totalRoutes: menuRoutes.size + unmappedItems.length,
+      mappedRoutes: menuRoutes.size,
+      unmappedRoutes: unmappedItems.map(i => ({
+        route: i.route,
+        name: i.name,
+        category: this.getRouteCategory(i.route!),
+      })),
+      categories,
+    });
+  }
+
+  /** POST /discovery/refresh — Re-run discovery and update unmapped group. */
+  @Post('discovery/refresh')
+  @RequirePermissions('menus:create')
+  async refreshDiscovery(@CurrentUser() user: any) {
+    // This endpoint triggers the discovery script logic server-side
+    // For now, it returns the current count
+    const tenantId = user.tenantId || await this.getDefaultTenantId();
+    const unmappedGroup = await this.prisma.menu.findFirst({
+      where: { tenantId, code: '_UNMAPPED', isActive: true },
+    });
+    const unmappedCount = unmappedGroup
+      ? await this.prisma.menu.count({ where: { tenantId, isAdminOnly: true, route: { not: null }, isActive: true } })
+      : 0;
+    return ApiResponse.success(
+      { unmapped: unmappedCount, message: 'Run node scripts/create-unmapped-menu.js to refresh.' },
+      'Discovery info',
+    );
+  }
+
+  private getRouteCategory(route: string): string {
+    const map: [string, string][] = [
+      ['/accounts', 'Accounts'], ['/admin', 'Admin'], ['/campaigns', 'Communication'],
+      ['/communication', 'Communication'], ['/demos', 'CRM'], ['/email', 'Communication'],
+      ['/finance', 'Finance'], ['/import', 'Tools'], ['/inventory', 'Inventory'],
+      ['/master', 'Master'], ['/notifications', 'Settings'], ['/onboarding', 'Settings'],
+      ['/ownership', 'Settings'], ['/performance', 'CRM'], ['/plugins', 'Tools'],
+      ['/post-sales', 'Support'], ['/pricing', 'Master'], ['/procurement', 'Purchase'],
+      ['/products', 'Master'], ['/recycle-bin', 'Tools'], ['/reports', 'Reports'],
+      ['/sales', 'Sale'], ['/settings', 'Settings'], ['/support', 'Support'],
+      ['/whatsapp', 'Communication'], ['/workflows', 'Tools'],
+    ];
+    for (const [prefix, cat] of map) {
+      if (route.startsWith(prefix)) return cat;
+    }
+    return 'Other';
+  }
+
+  private async getDefaultTenantId(): Promise<string> {
+    const t = await this.prisma.tenant.findFirst({ where: { slug: 'default' } });
+    return t?.id ?? '';
   }
 }

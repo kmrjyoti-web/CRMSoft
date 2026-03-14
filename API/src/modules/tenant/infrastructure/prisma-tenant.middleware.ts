@@ -11,6 +11,13 @@ const GLOBAL_MODELS = new Set([
   'SuperAdmin',
   'Permission',
   'GlobalDefaultCredential',
+  'PageRegistry',
+  'BusinessTypeRegistry',
+  'MarketplaceVendor',
+  'AppVersion',
+  'IndustryPatch',
+  'TenantVersion',
+  'VersionBackup',
 ]);
 
 export function createTenantMiddleware(

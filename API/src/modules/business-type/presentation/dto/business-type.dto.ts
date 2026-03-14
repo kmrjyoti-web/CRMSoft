@@ -19,6 +19,24 @@ export class TerminologyItemDto {
   @ApiPropertyOptional() @IsOptional() @IsString() userHelpText?: string;
 }
 
+export class UpdateBusinessTypeDto {
+  @ApiPropertyOptional() @IsOptional() @IsString() typeName?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() icon?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() colorTheme?: string;
+  @ApiPropertyOptional() @IsOptional() @IsObject() terminologyMap?: Record<string, any>;
+  @ApiPropertyOptional() @IsOptional() @IsObject() extraFields?: Record<string, any>;
+  @ApiPropertyOptional() @IsOptional() defaultModules?: string[];
+  @ApiPropertyOptional() @IsOptional() recommendedModules?: string[];
+  @ApiPropertyOptional() @IsOptional() excludedModules?: string[];
+  @ApiPropertyOptional() @IsOptional() defaultLeadStages?: any;
+  @ApiPropertyOptional() @IsOptional() defaultActivityTypes?: any;
+  @ApiPropertyOptional() @IsOptional() registrationFields?: any;
+  @ApiPropertyOptional() @IsOptional() dashboardWidgets?: string[];
+  @ApiPropertyOptional() @IsOptional() isActive?: boolean;
+  @ApiPropertyOptional() @IsOptional() sortOrder?: number;
+}
+
 export class BulkTerminologyDto {
   @ApiProperty({ type: [TerminologyItemDto] })
   @IsArray()

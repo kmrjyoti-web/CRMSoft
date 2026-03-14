@@ -19,7 +19,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 
-import { Button, Icon, Badge, Modal, Input, SelectInput, Switch } from "@/components/ui";
+import { Button, Icon, Badge, Switch } from "@/components/ui";
 
 import { EmptyState } from "@/components/common/EmptyState";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
@@ -27,22 +27,11 @@ import { PageHeader } from "@/components/common/PageHeader";
 
 import {
   useMenuTree,
-  useCreateMenu,
   useUpdateMenu,
-  useDeactivateMenu,
   useReorderMenus,
-  useResetMenuDefaults,
 } from "../hooks/useMenus";
 
-import type { MenuAdminItem, MenuType } from "../types/settings.types";
-
-// ── Constants ────────────────────────────────────────────
-
-const MENU_TYPE_OPTIONS = [
-  { label: "Group", value: "GROUP" },
-  { label: "Item", value: "ITEM" },
-  { label: "Divider", value: "DIVIDER" },
-];
+import type { MenuAdminItem } from "../types/settings.types";
 
 // ── SortableMenuItem ─────────────────────────────────────
 
@@ -51,15 +40,13 @@ function SortableMenuItem({
   depth,
   expandedIds,
   onToggle,
-  onEdit,
-  onDeactivate,
+  onToggleVisibility,
 }: {
   item: MenuAdminItem;
   depth: number;
   expandedIds: Set<string>;
   onToggle: (id: string) => void;
-  onEdit: (item: MenuAdminItem) => void;
-  onDeactivate: (id: string) => void;
+  onToggleVisibility: (id: string, isActive: boolean) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: item.id });
@@ -79,8 +66,9 @@ function SortableMenuItem({
     display: "flex",
     alignItems: "center",
     borderBottom: "1px solid #f1f5f9",
-    backgroundColor: "#fff",
+    backgroundColor: item.isActive ? "#fff" : "#fafafa",
     minHeight: 44,
+    opacity: item.isActive ? 1 : 0.6,
   };
 
   return (
@@ -129,6 +117,20 @@ function SortableMenuItem({
         {item.name}
       </span>
 
+      {/* Route (read-only) */}
+      {item.route && (
+        <span
+          style={{
+            fontSize: 12,
+            color: "#94a3b8",
+            marginRight: 8,
+            fontFamily: "monospace",
+          }}
+        >
+          {item.route}
+        </span>
+      )}
+
       {/* Type badge */}
       <Badge
         variant={
@@ -138,83 +140,37 @@ function SortableMenuItem({
               ? "default"
               : "secondary"
         }
-        style={{ marginRight: 8 }}
+        style={{ marginRight: 12 }}
       >
         {item.menuType}
       </Badge>
 
-      {/* Active indicator */}
-      {!item.isActive && (
-        <Badge variant="danger" style={{ marginRight: 8 }}>
-          Inactive
-        </Badge>
-      )}
-
-      {/* Actions */}
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={() => onEdit(item)}
-        style={{ marginRight: 4 }}
-      >
-        Edit
-      </Button>
-      {item.isActive && (
-        <Button size="sm" variant="danger" onClick={() => onDeactivate(item.id)}>
-          Deactivate
-        </Button>
+      {/* Visibility toggle */}
+      {item.menuType !== "DIVIDER" && (
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ fontSize: 12, color: "#6b7280" }}>
+            {item.isActive ? "Visible" : "Hidden"}
+          </span>
+          <Switch
+            checked={item.isActive}
+            onChange={(checked: boolean) => onToggleVisibility(item.id, checked)}
+          />
+        </div>
       )}
     </div>
   );
 }
 
-// ── Helpers ──────────────────────────────────────────────
-
-/** Flatten tree to find GROUP-type items for the parent selector */
-function flattenGroups(
-  items: MenuAdminItem[],
-  depth = 0,
-): { label: string; value: string }[] {
-  const result: { label: string; value: string }[] = [];
-  for (const item of items) {
-    if (item.menuType === "GROUP") {
-      const prefix = "\u00A0\u00A0".repeat(depth);
-      result.push({ label: `${prefix}${item.name}`, value: item.id });
-    }
-    if (item.children && item.children.length > 0) {
-      result.push(...flattenGroups(item.children, depth + 1));
-    }
-  }
-  return result;
-}
-
-// ── MenuEditor ───────────────────────────────────────────
+// ── MenuEditor (Menu Preferences) ────────────────────────
 
 export function MenuEditor() {
   const { data: treeData, isLoading } = useMenuTree();
-  const createMutation = useCreateMenu();
   const updateMutation = useUpdateMenu();
-  const deactivateMutation = useDeactivateMenu();
   const reorderMutation = useReorderMenus();
-  const resetMutation = useResetMenuDefaults();
 
   // ── State ──
 
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<MenuAdminItem | null>(null);
-  const [confirmResetOpen, setConfirmResetOpen] = useState(false);
-
-  // Form fields
-  const [formName, setFormName] = useState("");
-  const [formCode, setFormCode] = useState("");
-  const [formIcon, setFormIcon] = useState("");
-  const [formRoute, setFormRoute] = useState("");
-  const [formParentId, setFormParentId] = useState("");
-  const [formMenuType, setFormMenuType] = useState<MenuType>("ITEM");
-  const [formPermModule, setFormPermModule] = useState("");
-  const [formPermAction, setFormPermAction] = useState("");
-  const [formOpenInNewTab, setFormOpenInNewTab] = useState(false);
 
   // ── DnD sensors ──
 
@@ -240,138 +196,22 @@ export function MenuEditor() {
     });
   }, []);
 
-  // ── Form reset ──
+  // ── Toggle visibility ──
 
-  const resetForm = useCallback(() => {
-    setFormName("");
-    setFormCode("");
-    setFormIcon("");
-    setFormRoute("");
-    setFormParentId("");
-    setFormMenuType("ITEM");
-    setFormPermModule("");
-    setFormPermAction("");
-    setFormOpenInNewTab(false);
-  }, []);
-
-  // ── Open modal for add ──
-
-  const handleAdd = useCallback(() => {
-    setEditingItem(null);
-    resetForm();
-    setModalOpen(true);
-  }, [resetForm]);
-
-  // ── Open modal for edit ──
-
-  const handleEdit = useCallback((item: MenuAdminItem) => {
-    setEditingItem(item);
-    setFormName(item.name);
-    setFormCode(item.code ?? "");
-    setFormIcon(item.icon ?? "");
-    setFormRoute(item.route ?? "");
-    setFormParentId(item.parentId ?? "");
-    setFormMenuType(item.menuType);
-    setFormPermModule(item.permissionModule ?? "");
-    setFormPermAction(item.permissionAction ?? "");
-    setFormOpenInNewTab(item.openInNewTab ?? false);
-    setModalOpen(true);
-  }, []);
-
-  // ── Close modal ──
-
-  const handleCloseModal = useCallback(() => {
-    setModalOpen(false);
-    setEditingItem(null);
-    resetForm();
-  }, [resetForm]);
-
-  // ── Reset to defaults ──
-
-  const handleResetDefaults = useCallback(async () => {
-    try {
-      const result = await resetMutation.mutateAsync();
-      setConfirmResetOpen(false);
-      toast.success(`Menus reset to defaults (${result?.data?.seeded ?? 0} items)`);
-    } catch {
-      toast.error("Failed to reset menus");
-    }
-  }, [resetMutation]);
-
-  // ── Deactivate ──
-
-  const handleDeactivate = useCallback(
-    async (id: string) => {
+  const handleToggleVisibility = useCallback(
+    async (id: string, isActive: boolean) => {
       try {
-        await deactivateMutation.mutateAsync(id);
-        toast.success("Menu item deactivated");
+        await updateMutation.mutateAsync({
+          id,
+          data: { isActive },
+        });
+        toast.success(isActive ? "Menu item shown" : "Menu item hidden");
       } catch {
-        toast.error("Failed to deactivate menu item");
+        toast.error("Failed to update visibility");
       }
     },
-    [deactivateMutation],
+    [updateMutation],
   );
-
-  // ── Save (create or update) ──
-
-  const handleSave = useCallback(async () => {
-    if (!formName.trim()) {
-      toast.error("Name is required");
-      return;
-    }
-
-    try {
-      if (editingItem) {
-        await updateMutation.mutateAsync({
-          id: editingItem.id,
-          data: {
-            name: formName.trim(),
-            code: formCode.trim() || undefined,
-            icon: formIcon.trim() || undefined,
-            route: formRoute.trim() || undefined,
-            parentId: formParentId || undefined,
-            menuType: formMenuType,
-            permissionModule: formPermModule.trim() || undefined,
-            permissionAction: formPermAction.trim() || undefined,
-            openInNewTab: formOpenInNewTab,
-          },
-        });
-        toast.success("Menu item updated");
-      } else {
-        await createMutation.mutateAsync({
-          name: formName.trim(),
-          code: formCode.trim() || undefined,
-          icon: formIcon.trim() || undefined,
-          route: formRoute.trim() || undefined,
-          parentId: formParentId || undefined,
-          menuType: formMenuType,
-          permissionModule: formPermModule.trim() || undefined,
-          permissionAction: formPermAction.trim() || undefined,
-          openInNewTab: formOpenInNewTab,
-        });
-        toast.success("Menu item created");
-      }
-      handleCloseModal();
-    } catch {
-      toast.error(
-        `Failed to ${editingItem ? "update" : "create"} menu item`,
-      );
-    }
-  }, [
-    editingItem,
-    formName,
-    formCode,
-    formIcon,
-    formRoute,
-    formParentId,
-    formMenuType,
-    formPermModule,
-    formPermAction,
-    formOpenInNewTab,
-    createMutation,
-    updateMutation,
-    handleCloseModal,
-  ]);
 
   // ── Drag end handler ──
 
@@ -383,7 +223,6 @@ export function MenuEditor() {
       const activeId = active.id as string;
       const overId = over.id as string;
 
-      // Find the parent of both items to verify they are siblings
       function findParentAndSiblings(
         items: MenuAdminItem[],
         parentId?: string,
@@ -440,8 +279,7 @@ export function MenuEditor() {
                 depth={depth}
                 expandedIds={expandedIds}
                 onToggle={handleToggle}
-                onEdit={handleEdit}
-                onDeactivate={handleDeactivate}
+                onToggleVisibility={handleToggleVisibility}
               />
               {item.children &&
                 item.children.length > 0 &&
@@ -452,15 +290,8 @@ export function MenuEditor() {
         </SortableContext>
       );
     },
-    [expandedIds, handleToggle, handleEdit, handleDeactivate],
+    [expandedIds, handleToggle, handleToggleVisibility],
   );
-
-  // ── Parent options for select ──
-
-  const parentOptions = [
-    { label: "None (Root)", value: "" },
-    ...flattenGroups(tree),
-  ];
 
   // ── Loading ──
 
@@ -471,21 +302,8 @@ export function MenuEditor() {
   return (
     <div className="p-6">
       <PageHeader
-        title="Menu Editor"
-        actions={
-          <div style={{ display: "flex", gap: 8 }}>
-            <Button
-              variant="outline"
-              onClick={() => setConfirmResetOpen(true)}
-              loading={resetMutation.isPending}
-            >
-              <Icon name="rotate-ccw" size={16} /> Reset to Defaults
-            </Button>
-            <Button variant="primary" onClick={handleAdd}>
-              <Icon name="plus" size={16} /> Add Menu Item
-            </Button>
-          </div>
-        }
+        title="Menu Preferences"
+        subtitle="Customize menu order and visibility for your team. Contact your vendor to add or modify menu items."
       />
 
       {/* Tree view */}
@@ -493,178 +311,33 @@ export function MenuEditor() {
         <EmptyState
           icon="menu"
           title="No menu items"
-          description="Get started by adding your first menu item."
-          action={{ label: "Add Menu Item", onClick: handleAdd }}
+          description="Menu items will appear here once configured by your vendor."
         />
       ) : (
-        <div
-          style={{
-            border: "1px solid #e2e8f0",
-            borderRadius: 8,
-            overflow: "hidden",
-          }}
-        >
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
+        <>
+          <div
+            className="mb-3 flex items-center gap-2 text-sm text-gray-500"
           >
-            {renderTree(tree, 0)}
-          </DndContext>
-        </div>
+            <Icon name="info" size={14} />
+            <span>Drag items to reorder. Use the toggle to show or hide menu items.</span>
+          </div>
+          <div
+            style={{
+              border: "1px solid #e2e8f0",
+              borderRadius: 8,
+              overflow: "hidden",
+            }}
+          >
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              {renderTree(tree, 0)}
+            </DndContext>
+          </div>
+        </>
       )}
-
-      {/* Modal for add/edit */}
-      <Modal
-        open={modalOpen}
-        onClose={handleCloseModal}
-        title={editingItem ? "Edit Menu Item" : "Add Menu Item"}
-        size="lg"
-        footer={
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-            <Button variant="outline" onClick={handleCloseModal}>
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              onClick={handleSave}
-              loading={createMutation.isPending || updateMutation.isPending}
-              disabled={createMutation.isPending || updateMutation.isPending}
-            >
-              {editingItem ? "Update" : "Save"}
-            </Button>
-          </div>
-        }
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {/* Name */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Name <span className="text-red-500">*</span>
-            </label>
-            <Input
-              placeholder="Menu item name"
-              value={formName}
-              onChange={(value: string) => setFormName(value)}
-            />
-          </div>
-
-          {/* Code */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Code
-            </label>
-            <Input
-              placeholder="Unique code"
-              value={formCode}
-              onChange={(value: string) => setFormCode(value)}
-            />
-          </div>
-
-          {/* Icon */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Icon
-            </label>
-            <Input
-              placeholder="e.g. home, users, settings"
-              value={formIcon}
-              onChange={(value: string) => setFormIcon(value)}
-            />
-          </div>
-
-          {/* Route */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Route
-            </label>
-            <Input
-              placeholder="/path"
-              value={formRoute}
-              onChange={(value: string) => setFormRoute(value)}
-            />
-          </div>
-
-          {/* Parent */}
-          <SelectInput
-            label="Parent"
-            options={parentOptions}
-            value={formParentId}
-            onChange={(value: string | number | boolean | null) =>
-              setFormParentId(String(value ?? ""))
-            }
-          />
-
-          {/* Menu Type */}
-          <SelectInput
-            label="Type"
-            options={MENU_TYPE_OPTIONS}
-            value={formMenuType}
-            onChange={(value: string | number | boolean | null) =>
-              setFormMenuType((value as MenuType) ?? "ITEM")
-            }
-          />
-
-          {/* Permission Module */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Permission Module
-            </label>
-            <Input
-              placeholder="e.g. leads, contacts"
-              value={formPermModule}
-              onChange={(value: string) => setFormPermModule(value)}
-            />
-          </div>
-
-          {/* Permission Action */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Permission Action
-            </label>
-            <Input
-              placeholder="e.g. read, write, delete"
-              value={formPermAction}
-              onChange={(value: string) => setFormPermAction(value)}
-            />
-          </div>
-
-          {/* Open in New Tab */}
-          <Switch
-            label="Open in new tab"
-            checked={formOpenInNewTab}
-            onChange={(value: boolean) => setFormOpenInNewTab(value)}
-          />
-        </div>
-      </Modal>
-
-      {/* Confirmation modal for Reset to Defaults */}
-      <Modal
-        open={confirmResetOpen}
-        onClose={() => setConfirmResetOpen(false)}
-        title="Reset Menus to Defaults"
-        size="sm"
-        footer={
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-            <Button variant="outline" onClick={() => setConfirmResetOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              variant="danger"
-              onClick={handleResetDefaults}
-              loading={resetMutation.isPending}
-              disabled={resetMutation.isPending}
-            >
-              Reset
-            </Button>
-          </div>
-        }
-      >
-        <p style={{ margin: 0, color: "#374151" }}>
-          This will <strong>delete all current menu items</strong> and restore the
-          system defaults. Any custom menus you added will be lost. Are you sure?
-        </p>
-      </Modal>
     </div>
   );
 }

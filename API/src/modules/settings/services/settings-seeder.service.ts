@@ -10,6 +10,7 @@ const SEED_SEQUENCES = [
   { entityName: 'Invoice', prefix: 'INV', formatPattern: '{PREFIX}-{YYYY}-{MM}-{SEQ:4}', resetPolicy: SequenceResetPolicy.YEARLY },
   { entityName: 'Ticket', prefix: 'TKT', formatPattern: '{PREFIX}-{YYYY}-{SEQ:5}', resetPolicy: SequenceResetPolicy.YEARLY },
   { entityName: 'Activity', prefix: 'ACT', formatPattern: '{PREFIX}-{YYYY}{MM}{DD}-{SEQ:4}', resetPolicy: SequenceResetPolicy.DAILY },
+  { entityName: 'ProformaInvoice', prefix: 'PI', formatPattern: '{PREFIX}-{YYYY}-{SEQ:5}', resetPolicy: SequenceResetPolicy.YEARLY },
 ];
 
 const WEEK_SCHEDULE = [
@@ -151,14 +152,14 @@ export class SettingsSeederService {
 
   private async seedNotifPrefs(tid: string) {
     for (const e of NOTIF_EVENTS) {
-      await this.prisma.tenantNotificationSetting.upsert({
+      await this.prisma.notificationConfig.upsert({
         where: { tenantId_eventCode: { tenantId: tid, eventCode: e.code } },
         update: {},
         create: {
           tenantId: tid, eventCode: e.code, eventName: e.name, eventCategory: e.cat,
-          inAppEnabled: e.inApp, emailEnabled: e.email,
-          notifyOwner: e.owner, notifyCreator: e.creator, notifyManager: e.manager, notifyAdmin: e.admin,
-          isSystemDefault: true,
+          enableInAppAlert: e.inApp, enableEmail: e.email,
+          notifyAssignee: e.owner, notifyCreator: e.creator, notifyManager: e.manager, notifyAdmin: e.admin,
+          isSystem: true,
         },
       });
     }

@@ -8,6 +8,7 @@ export interface AutoMenuItem {
   path: string;
   icon: string;
   moduleKey?: string;
+  section?: string;
   isLocked: boolean;
   lockReason?: string;
   children: AutoMenuItem[];
@@ -40,6 +41,7 @@ class AutoMenuService {
           path: route.path,
           icon: route.icon,
           moduleKey: route.moduleKey,
+          section: route.section,
           isLocked,
           lockReason: isLocked
             ? `Upgrade your subscription to access ${route.label}`

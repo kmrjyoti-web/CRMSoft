@@ -73,6 +73,20 @@ services:
       - crm-network
     restart: unless-stopped
 
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - crm-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          memory: 4G
+
 networks:
   crm-network:
     driver: bridge
@@ -80,3 +94,4 @@ networks:
 volumes:
   postgres_data:
   redis_data:
+  ollama_data:

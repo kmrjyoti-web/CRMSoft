@@ -1,5 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { seedLeadWorkflow } from './workflow-lead-pipeline.seed';
+import { seedDemoWorkflow } from './workflow-demo.seed';
+import { seedTourPlanWorkflow } from './workflow-tour-plan.seed';
+import { seedQuotationWorkflow } from './workflow-quotation.seed';
+import { seedSaleOrderWorkflow } from './workflow-sale-order.seed';
+import { seedDeliveryChallanWorkflow } from './workflow-delivery-challan.seed';
+import { seedCreditNoteWorkflow } from './workflow-credit-note.seed';
 
 const DEFAULT_PASSWORD = 'Test@123';
 const SALT_ROUNDS = 12;
@@ -509,6 +516,112 @@ export async function seedDemoData(prisma: PrismaClient) {
     console.log(`  ✅ ${newRoles.length} new roles → default tenant`);
   }
 
+  // ─── STEP 2.5: Assign Permissions to Roles ───
+  console.log('\n  📋 Assigning permissions to roles...');
+
+  const allPermissions = await prisma.permission.findMany();
+
+  // Define which modules each role type can access
+  const ADMIN_MODULES = allPermissions.map(p => p.id); // ADMIN gets all permissions
+
+  const MANAGER_MODULES = ['contacts','raw_contacts','organizations','leads','activities','demos',
+    'tour-plans','quotations','invoices','payments','installations','trainings','support-tickets',
+    'communications','reports','dashboard','analytics','performance','follow-ups','reminders',
+    'recurrence','calendar','products','product_pricing','custom_fields','wallet','notifications'];
+
+  const SALES_MODULES = ['contacts','raw_contacts','organizations','leads','activities','demos',
+    'tour-plans','quotations','follow-ups','reminders','recurrence','calendar','dashboard',
+    'communications','products','product_pricing','notifications'];
+
+  const SUPPORT_MODULES = ['contacts','organizations','support-tickets','communications',
+    'installations','trainings','dashboard','calendar','notifications'];
+
+  const VIEWER_MODULES = ['contacts','organizations','leads','activities','dashboard','analytics',
+    'reports','products'];
+  const VIEWER_ACTIONS = ['read','export'];
+
+  for (const [slug, tenantId] of Object.entries(tenantIds)) {
+    const tenantRoles = await prisma.role.findMany({ where: { tenantId } });
+
+    for (const role of tenantRoles) {
+      let permIds: string[] = [];
+
+      if (role.name === 'ADMIN' || role.name === 'SUPER_ADMIN') {
+        permIds = allPermissions.map(p => p.id);
+      } else if (role.name === 'MANAGER' || role.name === 'TEAM_LEAD') {
+        permIds = allPermissions
+          .filter(p => MANAGER_MODULES.includes(p.module))
+          .map(p => p.id);
+      } else if (['SALES_EXECUTIVE','SR_SALES_EXECUTIVE','FIELD_SALES','TELECALLER','MARKETING_STAFF'].includes(role.name)) {
+        permIds = allPermissions
+          .filter(p => SALES_MODULES.includes(p.module))
+          .map(p => p.id);
+      } else if (['SUPPORT_AGENT','ACCOUNT_MANAGER'].includes(role.name)) {
+        permIds = allPermissions
+          .filter(p => SUPPORT_MODULES.includes(p.module))
+          .map(p => p.id);
+      } else if (role.name === 'VIEWER') {
+        permIds = allPermissions
+          .filter(p => VIEWER_MODULES.includes(p.module) && VIEWER_ACTIONS.includes(p.action))
+          .map(p => p.id);
+      } else if (role.name === 'DATA_ENTRY') {
+        permIds = allPermissions
+          .filter(p => ['contacts','raw_contacts','organizations','leads','products'].includes(p.module) && ['create','read','update'].includes(p.action))
+          .map(p => p.id);
+      }
+      // CUSTOMER, REFERRAL_PARTNER, VENDOR, APPROVER — skip (no CRM permissions)
+
+      if (permIds.length > 0) {
+        // Delete existing to avoid duplicates, then create fresh
+        await prisma.rolePermission.deleteMany({ where: { tenantId, roleId: role.id } });
+        await prisma.rolePermission.createMany({
+          data: permIds.map(pid => ({ tenantId, roleId: role.id, permissionId: pid })),
+          skipDuplicates: true,
+        });
+      }
+    }
+    console.log(`  ✅ Permissions assigned → ${slug}`);
+
+    // ─── Auto-Number Sequences for this tenant ───
+    const autoNumberSequences = [
+      { entityName: 'Lead', prefix: 'L', formatPattern: '{PREFIX}-{YYYY}-{SEQ:5}', resetPolicy: 'YEARLY' },
+      { entityName: 'Contact', prefix: 'C', formatPattern: '{PREFIX}-{YYYY}-{SEQ:5}', resetPolicy: 'YEARLY' },
+      { entityName: 'Organization', prefix: 'ORG', formatPattern: '{PREFIX}-{YYYY}-{SEQ:5}', resetPolicy: 'YEARLY' },
+      { entityName: 'Quotation', prefix: 'QTN', formatPattern: '{PREFIX}/{YY}{MM}/{SEQ:4}', resetPolicy: 'MONTHLY' },
+      { entityName: 'Invoice', prefix: 'INV', formatPattern: '{PREFIX}-{YYYY}-{MM}-{SEQ:4}', resetPolicy: 'YEARLY' },
+      { entityName: 'Ticket', prefix: 'TKT', formatPattern: '{PREFIX}-{YYYY}-{SEQ:5}', resetPolicy: 'YEARLY' },
+      { entityName: 'Activity', prefix: 'ACT', formatPattern: '{PREFIX}-{YYYY}{MM}{DD}-{SEQ:4}', resetPolicy: 'DAILY' },
+      { entityName: 'Payment', prefix: 'PAY', formatPattern: 'PAY-{YYYY}-{SEQ:5}', resetPolicy: 'YEARLY' },
+      { entityName: 'Receipt', prefix: 'RCT', formatPattern: 'RCT-{YYYY}-{SEQ:5}', resetPolicy: 'YEARLY' },
+      { entityName: 'Refund', prefix: 'RFD', formatPattern: 'RFD-{YYYY}-{SEQ:5}', resetPolicy: 'YEARLY' },
+      { entityName: 'CreditNote', prefix: 'CN', formatPattern: 'CN-{YYYY}/{MM}-{SEQ:4}', resetPolicy: 'YEARLY' },
+      { entityName: 'ProformaInvoice', prefix: 'PI', formatPattern: 'PI-{YYYY}-{SEQ:5}', resetPolicy: 'YEARLY' },
+      { entityName: 'SaleOrder', prefix: 'SO', formatPattern: 'SO-{YYYY}-{SEQ:4}', resetPolicy: 'YEARLY' },
+      { entityName: 'DeliveryChallan', prefix: 'DC', formatPattern: 'DC-{YYYY}-{SEQ:4}', resetPolicy: 'YEARLY' },
+      { entityName: 'SaleReturn', prefix: 'SR', formatPattern: 'SR-{YYYY}-{SEQ:4}', resetPolicy: 'YEARLY' },
+      { entityName: 'DebitNote', prefix: 'DN', formatPattern: 'DN-{YYYY}-{SEQ:4}', resetPolicy: 'YEARLY' },
+    ];
+    for (const seq of autoNumberSequences) {
+      await prisma.autoNumberSequence.upsert({
+        where: { tenantId_entityName: { tenantId, entityName: seq.entityName } },
+        update: {},
+        create: {
+          tenantId,
+          entityName: seq.entityName,
+          prefix: seq.prefix,
+          formatPattern: seq.formatPattern,
+          currentSequence: 0,
+          seqPadding: 5,
+          startFrom: 1,
+          incrementBy: 1,
+          resetPolicy: seq.resetPolicy as any,
+          isActive: true,
+        },
+      });
+    }
+    console.log(`  ✅ Auto-number sequences seeded → ${slug}`);
+  }
+
   // ─── STEP 3: Create Users ───
   console.log('\n  📋 Creating demo users...');
 
@@ -621,6 +734,30 @@ export async function seedDemoData(prisma: PrismaClient) {
   // Create marketplace customers in default tenant
   if (defaultTenant) {
     await createTenantUsers(defaultTenant.id, MARKETPLACE_CUSTOMERS, 'Marketplace Customers');
+  }
+
+  // ─── STEP 4: Seed Workflows for Demo Tenants ───
+  console.log('\n  📊 Seeding workflows for demo tenants...');
+  for (const t of DEMO_TENANTS) {
+    const tenantId = tenantIds[t.slug];
+    if (!tenantId) continue;
+    // Find the ADMIN user for this tenant to use as createdById
+    const adminUser = await prisma.user.findFirst({
+      where: { tenantId, role: { name: 'ADMIN' } },
+      select: { id: true },
+    });
+    if (!adminUser) {
+      console.warn(`  ⚠️ No admin user found for ${t.slug}, skipping workflows`);
+      continue;
+    }
+    await seedLeadWorkflow(prisma, adminUser.id, tenantId);
+    await seedDemoWorkflow(prisma, adminUser.id, tenantId);
+    await seedTourPlanWorkflow(prisma, adminUser.id, tenantId);
+    await seedQuotationWorkflow(prisma, adminUser.id, tenantId);
+    await seedSaleOrderWorkflow(prisma, adminUser.id, tenantId);
+    await seedDeliveryChallanWorkflow(prisma, adminUser.id, tenantId);
+    await seedCreditNoteWorkflow(prisma, adminUser.id, tenantId);
+    console.log(`  ✅ 7 workflows seeded → ${t.slug}`);
   }
 
   // ─── SUMMARY ───

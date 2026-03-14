@@ -29,21 +29,22 @@ const AUDIT_COLUMNS = [
 
 const ENTITY_TYPE_OPTIONS = [
   { value: "", label: "All Types" },
-  { value: "contact", label: "Contact" },
-  { value: "organization", label: "Organization" },
-  { value: "lead", label: "Lead" },
-  { value: "activity", label: "Activity" },
-  { value: "user", label: "User" },
-  { value: "role", label: "Role" },
-  { value: "raw_contact", label: "Raw Contact" },
-  { value: "quotation", label: "Quotation" },
-  { value: "invoice", label: "Invoice" },
-  { value: "payment", label: "Payment" },
-  { value: "installation", label: "Installation" },
-  { value: "training", label: "Training" },
-  { value: "ticket", label: "Ticket" },
-  { value: "workflow", label: "Workflow" },
-  { value: "template", label: "Template" },
+  { value: "CONTACT", label: "Contact" },
+  { value: "ORGANIZATION", label: "Organization" },
+  { value: "LEAD", label: "Lead" },
+  { value: "ACTIVITY", label: "Activity" },
+  { value: "PRODUCT", label: "Product" },
+  { value: "USER", label: "User" },
+  { value: "ROLE", label: "Role" },
+  { value: "RAW_CONTACT", label: "Raw Contact" },
+  { value: "QUOTATION", label: "Quotation" },
+  { value: "INVOICE", label: "Invoice" },
+  { value: "PAYMENT", label: "Payment" },
+  { value: "INSTALLATION", label: "Installation" },
+  { value: "TRAINING", label: "Training" },
+  { value: "TICKET", label: "Ticket" },
+  { value: "WORKFLOW", label: "Workflow" },
+  { value: "TEMPLATE", label: "Template" },
 ];
 
 const ACTION_OPTIONS = [
@@ -51,7 +52,9 @@ const ACTION_OPTIONS = [
   { value: "CREATE", label: "Create" },
   { value: "UPDATE", label: "Update" },
   { value: "DELETE", label: "Delete" },
+  { value: "SOFT_DELETE", label: "Soft Delete" },
   { value: "RESTORE", label: "Restore" },
+  { value: "STATUS_CHANGE", label: "Status Change" },
   { value: "PERMANENT_DELETE", label: "Permanent Delete" },
   { value: "LOGIN", label: "Login" },
   { value: "LOGOUT", label: "Logout" },
@@ -120,8 +123,11 @@ export function AuditLogList() {
   const responseData = data?.data;
   const items: AuditLogItem[] = useMemo(() => {
     if (Array.isArray(responseData)) return responseData;
-    const nested = responseData as unknown as { data?: AuditLogItem[] };
-    return nested?.data ?? [];
+    const nested = responseData as unknown as {
+      feed?: AuditLogItem[];
+      data?: AuditLogItem[];
+    };
+    return nested?.feed ?? nested?.data ?? [];
   }, [responseData]);
 
   const tableData = useMemo(() => flattenLogs(items), [items]);

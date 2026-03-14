@@ -185,6 +185,11 @@ export class CreateProductDto {
   @IsOptional() @IsUUID()
   manufacturerId?: string;
 
+  // Inventory
+  @ApiPropertyOptional({ example: 'PRODUCT', description: 'PRODUCT or SERVICE' })
+  @IsOptional() @IsString()
+  inventoryType?: string;
+
   // Meta
   @ApiPropertyOptional({ type: [String], example: ['electronics', 'wireless'] })
   @IsOptional() @IsArray() @IsString({ each: true })

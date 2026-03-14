@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  Mail, Lock, Building2, Search, Plus, Pencil, Trash2,
+  Mail, Lock, Building2, Search, Plus, Pencil, Trash2, Smartphone,
   Eye, EyeOff, Download, Upload, Filter, ChevronDown,
   ChevronRight, ChevronLeft, ChevronUp, Check, X,
   MoreVertical, MoreHorizontal, Settings, User, Users,
@@ -10,7 +10,7 @@ import {
   ArrowUp, ArrowDown, RefreshCw, ExternalLink, Copy,
   FileText, FileSpreadsheet, FileJson, File, Folder, Image, Paperclip, Send,
   Star, Heart, Bookmark, Flag, Tag, Hash,
-  Home, BarChart2, PieChart, TrendingUp, DollarSign, IndianRupee,
+  Home, BarChart2, BarChart3, PieChart, TrendingUp, DollarSign, IndianRupee,
   CreditCard, ShoppingCart, Package, Truck, MapPin,
   Globe, Wifi, WifiOff, Loader2, LogOut, Menu,
   Maximize2, Minimize2, Maximize, Minimize, Minus, Shrink, Expand,
@@ -27,6 +27,12 @@ import {
   Bot, Radio, UserX, Video, Cpu, Crown, Wallet, Receipt, ArrowUpCircle,
   UploadCloud, FolderPlus, Edit2, GitCommit, Share2, Cloud, FileX2, Move, Music, Table2, AlignLeft,
   Layout, Pause, Play, Square, TrendingDown, Terminal, ScrollText, Gift,
+  ToggleLeft, HardDrive, PauseCircle, Store, Factory, Sparkles, Brain,
+  Landmark, Printer, PenTool, Library, FolderOpen,
+  Warehouse, ArrowLeftRight, ClipboardList, Tags, Award, ScanLine,
+  FileQuestion, GitCompare, PackageCheck, Calculator,
+  Coins, FolderTree, Scale, Banknote, Ruler, LifeBuoy, Droplets,
+  ArrowDownCircle, FileBadge, FileBarChart2, FileMinus, FilePlus, PlusCircle,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -100,6 +106,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   'file-text': FileText,
   'file-spreadsheet': FileSpreadsheet,
   'file-json': FileJson,
+  'file-question': FileQuestion,
   folder: Folder,
   image: Image,
   paperclip: Paperclip,
@@ -114,8 +121,11 @@ const ICON_MAP: Record<string, LucideIcon> = {
   'indian-rupee': IndianRupee,
   'credit-card': CreditCard,
   cart: ShoppingCart,
+  'shopping-cart': ShoppingCart,
   package: Package,
+  'package-check': PackageCheck,
   truck: Truck,
+  calculator: Calculator,
 
   // Rating & Marking
   star: Star,
@@ -177,6 +187,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
   // Sidebar / Navigation
   'git-branch': GitBranch,
+  'git-compare': GitCompare,
   'book-open': BookOpen,
   headphones: Headphones,
   'trash-2': Trash2,
@@ -199,6 +210,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   'message-circle': MessageCircle,
   'user-check': UserCheck,
   'bar-chart-2': BarChart2,
+  'bar-chart-3': BarChart3,
 
   // Config & Integration icons
   save: Save,
@@ -227,9 +239,21 @@ const ICON_MAP: Record<string, LucideIcon> = {
   receipt: Receipt,
   'arrow-up-circle': ArrowUpCircle,
 
+  landmark: Landmark,
+  printer: Printer,
+  'pen-tool': PenTool,
+  warehouse: Warehouse,
+  tags: Tags,
+  award: Award,
+  'scan-line': ScanLine,
+  'arrow-left-right': ArrowLeftRight,
+  'clipboard-list': ClipboardList,
+
   // Document management
   'upload-cloud': UploadCloud,
   'folder-plus': FolderPlus,
+  'folder-open': FolderOpen,
+  library: Library,
   'edit-2': Edit2,
   'git-commit': GitCommit,
   'share-2': Share2,
@@ -248,6 +272,34 @@ const ICON_MAP: Record<string, LucideIcon> = {
   terminal: Terminal,
   'scroll-text': ScrollText,
   gift: Gift,
+  'toggle-left': ToggleLeft,
+  'hard-drive': HardDrive,
+  'pause-circle': PauseCircle,
+  store: Store,
+  factory: Factory,
+  sparkles: Sparkles,
+  brain: Brain,
+
+  // Master menu & accounting icons
+  coins: Coins,
+  'folder-tree': FolderTree,
+  scale: Scale,
+  banknote: Banknote,
+  ruler: Ruler,
+  'life-buoy': LifeBuoy,
+  droplets: Droplets,
+  'arrow-down-circle': ArrowDownCircle,
+  'file-badge': FileBadge,
+  'file-bar-chart': FileBarChart2,
+  'file-minus': FileMinus,
+  'file-plus': FilePlus,
+  'plus-circle': PlusCircle,
+
+  // Alias — wrench maps to the same Wrench component as 'tool'
+  wrench: Wrench,
+
+  // Device
+  smartphone: Smartphone,
 };
 
 export type IconName = keyof typeof ICON_MAP;

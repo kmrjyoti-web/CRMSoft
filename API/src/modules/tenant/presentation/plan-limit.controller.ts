@@ -13,7 +13,7 @@ import { ApiResponse } from '../../../common/utils/api-response';
 @ApiBearerAuth()
 @SuperAdminRoute()
 @UseGuards(SuperAdminGuard)
-@Controller('admin/plans')
+@Controller('admin/plan-limits')
 export class PlanLimitController {
   constructor(private readonly planLimitService: PlanLimitService) {}
 

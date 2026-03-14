@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback, type ReactNode } from "react";
+import { useEffect, useRef, useCallback, type ReactNode } from "react";
 
 import { useRouter, usePathname } from "next/navigation";
 
@@ -8,12 +8,14 @@ import {
   useLayout,
   useMargLayout,
   MargThemeCustomizer,
-  MargShortcuts,
 } from "@/components/ui";
-import { DEFAULT_NAV } from "@/config/navigation";
+import { ShortcutPanel } from "@/features/shortcuts/components/ShortcutPanel";
+import { useShortcutsStore } from "@/features/shortcuts/stores/shortcuts.store";
+import { useKeyboardListener } from "@/features/shortcuts/hooks/useKeyboardListener";
 import { authService } from "@/features/auth/services/auth.service";
 import { menuService } from "@/services/menu.service";
 import { permissionService } from "@/services/permission.service";
+import api from "@/services/api-client";
 import { useAuthStore } from "@/stores/auth.store";
 import { useMenuStore } from "@/stores/menu.store";
 import { usePermissionStore } from "@/stores/permission.store";
@@ -23,7 +25,12 @@ import type { MenuTreeItem } from "@/types/menu";
 
 import { SidePanelRenderer, SidePanelTaskbar } from "@/components/common/SidePanel";
 import { useSidePanelStore } from "@/stores/side-panel.store";
+import { useTabStore } from "@/stores/tab.store";
+import { TabBar } from "@/components/workspace/TabBar";
+import { POSFormLayout } from "@/components/workspace/POSFormLayout";
+import { WorkspaceKeyboard } from "@/components/workspace/WorkspaceKeyboard";
 
+import { AiChatWidget } from "@/features/self-hosted-ai/components/AiChatWidget";
 import { CRMHeader } from "./_components/CRMHeader";
 import { CRMSidebar } from "./_components/CRMSidebar";
 
@@ -61,34 +68,37 @@ function transformMenu(
     });
 }
 
+/** Codes that belong only in the Vendor Portal (3006), not in CRM Portal. */
+const VENDOR_ONLY_CODES = new Set([
+  "SOFTWARE_VENDOR_GROUP",
+  "DEVELOPER_GROUP",
+  "DIV_5", // divider before Developer
+  "DIV_6", // divider before Software Vendor
+]);
+
+/** Test admin email from env — sees all menus unfiltered. */
+const TEST_ADMIN_EMAIL = process.env.NEXT_PUBLIC_TEST_ADMIN_EMAIL ?? "";
+
 /** For SuperAdmin: split menu into Admin + Platform sections. */
 function buildPlatformMenu(tree: MenuTreeItem[]): MenuTreeItem[] {
   const vendorGroup = tree.find((item) => item.code === "SOFTWARE_VENDOR_GROUP");
-  const crmMenus = tree.filter((item) => item.code !== "SOFTWARE_VENDOR_GROUP");
+  const crmMenus = tree.filter(
+    (item) => item.code !== "SOFTWARE_VENDOR_GROUP" && item.code !== "DEVELOPER_GROUP"
+      && item.code !== "DIV_5" && item.code !== "DIV_6",
+  );
 
   const result: MenuTreeItem[] = [
-    { id: "__section_admin", name: "Admin", code: "SECTION_ADMIN", icon: null, route: null, menuType: "TITLE", openInNewTab: false, children: [] },
+    { id: "__section_admin", name: "Admin", code: "SECTION_ADMIN", icon: "", route: null, menuType: "TITLE", openInNewTab: false, children: [] },
     ...crmMenus,
-    { id: "__section_platform", name: "Platform", code: "SECTION_PLATFORM", icon: null, route: null, menuType: "TITLE", openInNewTab: false, children: [] },
+    { id: "__section_platform", name: "Platform", code: "SECTION_PLATFORM", icon: "", route: null, menuType: "TITLE", openInNewTab: false, children: [] },
     ...(vendorGroup?.children ?? []),
   ];
   return result;
 }
 
-// ── Convert fallback NavItem[] → MenuItem[] ─────────────
-
-function navToMenuItems(): MenuItem[] {
-  return DEFAULT_NAV.map((n) => ({
-    label: n.label,
-    icon: n.icon,
-    link: n.children?.length ? undefined : n.path,
-    hasSub: !!(n.children?.length),
-    subItems: n.children?.map((c) => ({
-      label: c.label,
-      icon: c.icon,
-      link: c.path,
-    })),
-  }));
+/** For regular CRM users: remove vendor-only sections. */
+function filterCrmMenu(tree: MenuTreeItem[]): MenuTreeItem[] {
+  return tree.filter((item) => !VENDOR_ONLY_CODES.has(item.code));
 }
 
 // ── Protected Layout ───────────────────────────────────
@@ -97,7 +107,6 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const fetchedRef = useRef(false);
-  const [showShortcuts, setShowShortcuts] = useState(false);
 
   const user = useAuthStore((s) => s.user);
   const tenantCode = useAuthStore((s) => s.tenantCode);
@@ -108,53 +117,62 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
   const margInit = useMargLayout((s) => s.init);
   const isSidebarClosed = useLayout((s) => s.isSidebarClosed);
   const toggleSidebar = useLayout((s) => s.toggleSidebar);
+  const isPOSMode = useTabStore((s) => s.isPOSMode);
 
   const handleLogout = useCallback(() => {
     authService.logout();
   }, []);
 
-  // Global keyboard shortcut: Ctrl+Shift+K → Shortcuts modal
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && e.key === "K") {
-        e.preventDefault();
-        setShowShortcuts((v) => !v);
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
+  const openShortcutPanel = useShortcutsStore((s) => s.openPanel);
+  useKeyboardListener();
 
-  // Initialize layout
+  // Initialize layout — clear CoreUI default dev menu items immediately
   useEffect(() => {
+    setMenuItems([]); // Clear first so skeleton shows, not stale static items
     margInit();
-  }, [margInit]);
+    setMenuItems([]); // Clear again in case margInit re-injects defaults
+  }, [margInit, setMenuItems]);
 
   // Fetch menu on mount
   useEffect(() => {
     if (fetchedRef.current) return;
     fetchedRef.current = true;
 
-    menuService
-      .getMyMenu()
-      .then((tree) => {
+    useMenuStore.getState().setLoading();
+    // Fetch both menu and permissions, then apply RBAC filtering
+    const menuPromise = menuService.getMyMenu();
+    const permPromise = permissionService.getMyPermissions().catch(() => [] as string[]);
+
+    Promise.all([menuPromise, permPromise])
+      .then(([tree, codes]) => {
         useMenuStore.getState().setMenu(tree);
-        const menuTree = isSuperAdmin ? buildPlatformMenu(tree) : tree;
-        setMenuItems(transformMenu(menuTree));
+        usePermissionStore.getState().setCodes(codes);
+
+        const isTestAdmin = TEST_ADMIN_EMAIL && user?.email === TEST_ADMIN_EMAIL;
+        const menuTree = isSuperAdmin
+          ? buildPlatformMenu(tree)
+          : isTestAdmin
+            ? tree  // Test admin sees ALL menus unfiltered
+            : filterCrmMenu(tree);
+        // SuperAdmin & test admin see all; regular users filtered by RBAC permission codes
+        const permCodes = (isSuperAdmin || isTestAdmin) ? undefined : (codes.length > 0 ? codes : undefined);
+        setMenuItems(transformMenu(menuTree, permCodes));
       })
       .catch(() => {
-        // API menu unavailable — use fallback navigation
-        setMenuItems(navToMenuItems());
+        useMenuStore.getState().setError();
+        // Keep menu empty — sidebar shows "No menu items" empty state
+        setMenuItems([]);
       });
 
-    permissionService
-      .getMyPermissions()
-      .then((codes) => {
-        usePermissionStore.getState().setCodes(codes);
-      })
-      .catch(() => {
-        // Permissions endpoint not yet available
-      });
+    // Fetch terminology for the current industry
+    if (!isSuperAdmin) {
+      api.get('/api/v1/business-types/terminology/resolved')
+        .then((r: any) => {
+          const data = r?.data?.data?.data ?? r?.data?.data ?? {};
+          useAuthStore.getState().setTerminology(data);
+        })
+        .catch(() => {});
+    }
   }, [setMenuItems]);
 
   // Sync active menu item on route change
@@ -183,7 +201,10 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
   const userRole = user?.roleDisplayName ?? user?.role;
 
   return (
-    <div className="marg-layout-wrapper">
+    <div className={`marg-layout-wrapper${isPOSMode ? " pos-mode" : ""}`}>
+      {/* Global keyboard handler for POS workspace */}
+      <WorkspaceKeyboard />
+
       {/* Mobile Sidebar Backdrop */}
       {!isSidebarClosed && (
         <div
@@ -192,8 +213,8 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
         />
       )}
 
-      {/* Sidebar */}
-      <div className={`sidebar-area${isSidebarClosed ? " collapsed" : ""}`}>
+      {/* Sidebar — icon-only in POS mode */}
+      <div className={`sidebar-area${isSidebarClosed || isPOSMode ? " collapsed" : ""}`}>
         <CRMSidebar
           onNavigate={handleNavigate}
           userName={userName}
@@ -213,11 +234,16 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
             userRole={userRole}
             isSuperAdmin={isSuperAdmin}
             onLogout={handleLogout}
-            onOpenShortcuts={() => setShowShortcuts(true)}
+            onOpenShortcuts={openShortcutPanel}
           />
         </div>
+
+        {/* POS Tab Bar — appears above content when tabs are open */}
+        <TabBar />
+
         <main className="content-area">
-          {children}
+          {/* POS workspace canvas — shown instead of route content when a tab is active */}
+          {isPOSMode ? <POSFormLayout /> : children}
         </main>
       </div>
 
@@ -233,13 +259,14 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
       {/* Theme Customizer (gear icon on right edge) */}
       <MargThemeCustomizer />
 
-      {/* Shortcuts Modal */}
-      {showShortcuts && (
-        <MargShortcuts onClose={() => setShowShortcuts(false)} />
-      )}
+      {/* Keyboard Shortcuts Panel */}
+      <ShortcutPanel />
 
       {/* Side Panel Renderer (portals to body) */}
       <SidePanelRenderer />
+
+      {/* AI Chat Widget (floats over content) */}
+      <AiChatWidget />
     </div>
   );
 }

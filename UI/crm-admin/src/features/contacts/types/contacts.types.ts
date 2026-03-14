@@ -24,6 +24,8 @@ export interface ContactItem {
   notes?: string;
   isActive: boolean;
   organizationId?: string;
+  entityVerificationStatus?: string;
+  entityVerifiedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -127,6 +129,51 @@ export interface ContactUpdateData {
   communications?: CommunicationInput[];
   organizationId?: string;
   filterIds?: string[];
+}
+
+// ── CRM Dashboard ───────────────────────────────────────
+
+export interface CRMDashboardStats {
+  totalContacts: number;
+  activeContacts: number;
+  inactiveContacts: number;
+  verifiedContacts: number;
+  notVerifiedContacts: number;
+  totalOrganizations: number;
+  verifiedOrganizations: number;
+  totalCustomers: number;
+}
+
+export interface IndustryWiseData {
+  industry: string;
+  count: number;
+  percentage: number;
+}
+
+export interface SourceWiseData {
+  source: string;
+  count: number;
+  percentage: number;
+}
+
+export interface VerificationTrend {
+  period: string;
+  verified: number;
+  unverified: number;
+}
+
+export interface DepartmentWiseData {
+  department: string;
+  count: number;
+}
+
+export interface CRMDashboardData {
+  stats: CRMDashboardStats;
+  industryWise: IndustryWiseData[];
+  sourceWise: SourceWiseData[];
+  verificationTrend: VerificationTrend[];
+  departmentWise: DepartmentWiseData[];
+  recentContacts: ContactListItem[];
 }
 
 // ── Query Params ─────────────────────────────────────────

@@ -9,11 +9,32 @@ export class CompanyProfileService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  /** Get full company profile. */
+  /** Get full company profile. Auto-creates with defaults if none exists. */
   async get(tenantId: string): Promise<CompanyProfile> {
     const profile = await this.prisma.companyProfile.findUnique({ where: { tenantId } });
-    if (!profile) throw AppError.from('TENANT_NOT_FOUND');
-    return profile;
+    if (profile) return profile;
+    // Auto-create with Indian defaults on first access
+    return this.prisma.companyProfile.create({
+      data: {
+        tenantId,
+        companyName: 'My Company',
+        country: 'India',
+        countryCode: 'IN',
+        currencyCode: 'INR',
+        currencySymbol: '₹',
+        numberFormat: 'INDIAN',
+        financialYearStart: 4,
+        financialYearEnd: 3,
+        timezone: 'Asia/Kolkata',
+        locale: 'en-IN',
+        dateFormat: 'DD/MM/YYYY',
+        accountingMethod: 'ACCRUAL',
+        inventoryMethod: 'FIFO',
+        workingPattern: 'STANDARD',
+        workingDays: ['MON','TUE','WED','THU','FRI','SAT'],
+        weekOff: ['SUN'],
+      } as any,
+    });
   }
 
   /** Update company profile. */

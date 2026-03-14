@@ -142,3 +142,53 @@ export interface ExportHistoryParams {
   page?: number;
   limit?: number;
 }
+
+// ── Activity Heatmap ─────────────────────────────────────────────────
+
+export interface HeatmapCell {
+  day: number;   // 0=Sun … 6=Sat
+  hour: number;  // 0–23
+  count: number;
+}
+
+// ── Lost Reasons ─────────────────────────────────────────────────────
+
+export interface LostReasonItem {
+  reason: string;
+  count: number;
+  percentage: number;
+}
+
+// ── Aging Distribution ───────────────────────────────────────────────
+
+export interface AgingBucket {
+  bucket: string;      // e.g. "0-7 days", "8-15 days"
+  count: number;
+  avgValue: number;
+}
+
+// ── Velocity Metrics ─────────────────────────────────────────────────
+
+export interface VelocityMetrics {
+  avgDaysToClose: number;
+  avgDaysInStage: Record<string, number>;
+  trend: { period: string; avgDays: number }[];
+}
+
+// ── My Dashboard (personal) ──────────────────────────────────────────
+
+export interface MyDashboardData {
+  totalLeads: number;
+  activeLeads: number;
+  wonDeals: number;
+  lostDeals: number;
+  totalRevenue: number;
+  conversionRate: number;
+  avgDealSize: number;
+  pendingActivities: number;
+  todayActivities: number;
+  overdueFollowUps: number;
+  recentLeads: { id: string; title: string; status: string; value: number; createdAt: string }[];
+  upcomingActivities: { id: string; title: string; type: string; dueDate: string }[];
+  [key: string]: unknown;
+}

@@ -5,6 +5,7 @@
  *   - terminologyMap: key → label overrides (e.g. "Product" → "Service")
  *   - defaultModules / recommendedModules / excludedModules
  *   - dashboardWidgets / workflowTemplates
+ *   - extraFields / defaultLeadStages / defaultActivityTypes / registrationFields
  */
 export const BUSINESS_TYPE_SEED_DATA = [
   {
@@ -20,6 +21,18 @@ export const BUSINESS_TYPE_SEED_DATA = [
     excludedModules: [],
     dashboardWidgets: ['revenue_chart', 'lead_funnel', 'top_products', 'recent_activities'],
     workflowTemplates: ['lead_to_quote', 'quote_to_invoice'],
+    isDefault: true,
+    extraFields: {
+      product: [
+        { field: 'barcode', label: 'Barcode', type: 'string' },
+        { field: 'shelfLife', label: 'Shelf Life (days)', type: 'number' },
+        { field: 'reorderLevel', label: 'Reorder Level', type: 'number', required: true },
+        { field: 'warehouseLocation', label: 'Warehouse', type: 'string' },
+      ],
+    },
+    defaultLeadStages: ['New', 'Contacted', 'Quote Sent', 'Negotiation', 'Won', 'Lost'],
+    defaultActivityTypes: ['Call', 'Email', 'Meeting', 'Follow-up'],
+    registrationFields: null,
   },
   {
     typeCode: 'IT_SERVICES',
@@ -34,6 +47,13 @@ export const BUSINESS_TYPE_SEED_DATA = [
     excludedModules: [],
     dashboardWidgets: ['revenue_chart', 'project_status', 'lead_funnel', 'task_board'],
     workflowTemplates: ['lead_to_proposal', 'proposal_to_project'],
+    extraFields: {},
+    defaultLeadStages: ['New', 'Contacted', 'Demo Scheduled', 'Proposal Sent', 'Negotiation', 'Won', 'Lost'],
+    defaultActivityTypes: ['Call', 'Email', 'Meeting', 'Demo', 'Support'],
+    registrationFields: [
+      { field: 'companyUrl', label: 'Company Website', type: 'string' },
+      { field: 'teamSize', label: 'Team Size', type: 'number' },
+    ],
   },
   {
     typeCode: 'MANUFACTURING',
@@ -48,6 +68,10 @@ export const BUSINESS_TYPE_SEED_DATA = [
     excludedModules: [],
     dashboardWidgets: ['production_overview', 'order_pipeline', 'revenue_chart', 'top_products'],
     workflowTemplates: ['inquiry_to_order', 'order_to_dispatch'],
+    extraFields: {},
+    defaultLeadStages: null,
+    defaultActivityTypes: null,
+    registrationFields: null,
   },
   {
     typeCode: 'REAL_ESTATE',
@@ -62,6 +86,10 @@ export const BUSINESS_TYPE_SEED_DATA = [
     excludedModules: ['PRODUCTS'],
     dashboardWidgets: ['property_listings', 'lead_funnel', 'site_visits', 'revenue_chart'],
     workflowTemplates: ['prospect_to_visit', 'visit_to_booking'],
+    extraFields: {},
+    defaultLeadStages: null,
+    defaultActivityTypes: null,
+    registrationFields: null,
   },
   {
     typeCode: 'HEALTHCARE_CLINIC',
@@ -76,6 +104,21 @@ export const BUSINESS_TYPE_SEED_DATA = [
     excludedModules: ['QUOTATIONS', 'PRODUCTS'],
     dashboardWidgets: ['appointments_today', 'patient_stats', 'follow_up_due', 'revenue_chart'],
     workflowTemplates: ['appointment_reminder', 'follow_up_after_visit'],
+    extraFields: {
+      product: [
+        { field: 'specialization', label: 'Specialization', type: 'string' },
+        { field: 'duration', label: 'Duration (min)', type: 'number' },
+      ],
+      contact: [
+        { field: 'bloodGroup', label: 'Blood Group', type: 'select', options: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] },
+        { field: 'allergies', label: 'Allergies', type: 'tags' },
+      ],
+    },
+    defaultLeadStages: ['New Enquiry', 'Consultation Scheduled', 'Under Treatment', 'Completed', 'Follow-up'],
+    defaultActivityTypes: ['Call', 'WhatsApp', 'Visit', 'Consultation', 'Follow-up'],
+    registrationFields: [
+      { field: 'medicalLicense', label: 'Medical License No', type: 'string', required: true },
+    ],
   },
   {
     typeCode: 'EDUCATION',
@@ -90,6 +133,18 @@ export const BUSINESS_TYPE_SEED_DATA = [
     excludedModules: ['QUOTATIONS'],
     dashboardWidgets: ['enrollment_funnel', 'batch_overview', 'fee_collection', 'recent_enquiries'],
     workflowTemplates: ['enquiry_to_enrollment', 'fee_reminder'],
+    extraFields: {
+      product: [
+        { field: 'duration', label: 'Duration', type: 'string' },
+        { field: 'batchSize', label: 'Max Batch Size', type: 'number' },
+        { field: 'mode', label: 'Mode', type: 'select', options: ['Online', 'Offline', 'Hybrid'] },
+      ],
+    },
+    defaultLeadStages: ['New Enquiry', 'Demo Attended', 'Fee Discussed', 'Enrolled', 'Dropped'],
+    defaultActivityTypes: ['Call', 'WhatsApp', 'Demo', 'Parent Meeting', 'Follow-up'],
+    registrationFields: [
+      { field: 'affiliationNo', label: 'Affiliation Number', type: 'string' },
+    ],
   },
   {
     typeCode: 'RESTAURANT_FOOD',
@@ -104,6 +159,22 @@ export const BUSINESS_TYPE_SEED_DATA = [
     excludedModules: ['LEADS', 'QUOTATIONS', 'TOUR_PLANS'],
     dashboardWidgets: ['daily_sales', 'top_items', 'customer_count', 'revenue_chart'],
     workflowTemplates: ['order_to_delivery'],
+    extraFields: {
+      product: [
+        { field: 'cuisineType', label: 'Cuisine', type: 'select', options: ['North Indian', 'South Indian', 'Chinese', 'Italian', 'Continental', 'Thai', 'Mexican'], required: true },
+        { field: 'spiceLevel', label: 'Spice Level', type: 'select', options: ['Mild', 'Medium', 'Hot', 'Extra Hot'] },
+        { field: 'prepTime', label: 'Prep Time (min)', type: 'number' },
+        { field: 'isVeg', label: 'Vegetarian', type: 'boolean', required: true },
+        { field: 'calories', label: 'Calories', type: 'number' },
+        { field: 'allergens', label: 'Allergens', type: 'tags' },
+      ],
+    },
+    defaultLeadStages: ['New Enquiry', 'Menu Shared', 'Date Confirmed', 'Advance Paid', 'Event Done', 'Feedback'],
+    defaultActivityTypes: ['Call', 'WhatsApp', 'Visit', 'Tasting', 'Event'],
+    registrationFields: [
+      { field: 'fssaiLicense', label: 'FSSAI License', type: 'string', required: true },
+      { field: 'seatingCapacity', label: 'Seating Capacity', type: 'number' },
+    ],
   },
   {
     typeCode: 'ECOMMERCE',
@@ -118,6 +189,10 @@ export const BUSINESS_TYPE_SEED_DATA = [
     excludedModules: ['TOUR_PLANS'],
     dashboardWidgets: ['order_pipeline', 'revenue_chart', 'top_products', 'customer_stats'],
     workflowTemplates: ['cart_recovery', 'order_confirmation'],
+    extraFields: {},
+    defaultLeadStages: null,
+    defaultActivityTypes: null,
+    registrationFields: null,
   },
   {
     typeCode: 'CONSULTING',
@@ -132,6 +207,10 @@ export const BUSINESS_TYPE_SEED_DATA = [
     excludedModules: [],
     dashboardWidgets: ['pipeline_value', 'lead_funnel', 'task_board', 'revenue_chart'],
     workflowTemplates: ['opportunity_to_proposal', 'engagement_lifecycle'],
+    extraFields: {},
+    defaultLeadStages: null,
+    defaultActivityTypes: null,
+    registrationFields: null,
   },
   {
     typeCode: 'CONSTRUCTION',
@@ -146,6 +225,10 @@ export const BUSINESS_TYPE_SEED_DATA = [
     excludedModules: [],
     dashboardWidgets: ['project_pipeline', 'material_tracker', 'revenue_chart', 'lead_funnel'],
     workflowTemplates: ['inquiry_to_estimate', 'project_lifecycle'],
+    extraFields: {},
+    defaultLeadStages: null,
+    defaultActivityTypes: null,
+    registrationFields: null,
   },
   {
     typeCode: 'TRAVEL_TOURISM',
@@ -160,6 +243,19 @@ export const BUSINESS_TYPE_SEED_DATA = [
     excludedModules: ['PRODUCTS'],
     dashboardWidgets: ['booking_pipeline', 'upcoming_trips', 'revenue_chart', 'customer_stats'],
     workflowTemplates: ['inquiry_to_booking', 'pre_trip_reminder'],
+    extraFields: {
+      product: [
+        { field: 'duration', label: 'Duration (days)', type: 'number', required: true },
+        { field: 'destinations', label: 'Destinations', type: 'tags', required: true },
+        { field: 'inclusions', label: 'Inclusions', type: 'tags' },
+        { field: 'exclusions', label: 'Exclusions', type: 'tags' },
+        { field: 'maxGroupSize', label: 'Max Group Size', type: 'number' },
+        { field: 'difficulty', label: 'Difficulty', type: 'select', options: ['Easy', 'Moderate', 'Challenging', 'Extreme'] },
+      ],
+    },
+    defaultLeadStages: ['Enquiry', 'Itinerary Shared', 'Confirmed', 'Payment Done', 'Trip Started', 'Completed', 'Feedback'],
+    defaultActivityTypes: ['Call', 'WhatsApp', 'Site Visit', 'Itinerary Review', 'Pickup'],
+    registrationFields: [{ field: 'iataCode', label: 'IATA Code', type: 'string' }],
   },
   {
     typeCode: 'AUTOMOTIVE',
@@ -174,6 +270,10 @@ export const BUSINESS_TYPE_SEED_DATA = [
     excludedModules: [],
     dashboardWidgets: ['inventory_status', 'lead_funnel', 'test_drive_schedule', 'revenue_chart'],
     workflowTemplates: ['walkin_to_testdrive', 'testdrive_to_booking'],
+    extraFields: {},
+    defaultLeadStages: null,
+    defaultActivityTypes: null,
+    registrationFields: null,
   },
   {
     typeCode: 'EVENT_MANAGEMENT',
@@ -188,6 +288,10 @@ export const BUSINESS_TYPE_SEED_DATA = [
     excludedModules: [],
     dashboardWidgets: ['upcoming_events', 'lead_funnel', 'revenue_chart', 'task_board'],
     workflowTemplates: ['inquiry_to_proposal', 'event_execution'],
+    extraFields: {},
+    defaultLeadStages: null,
+    defaultActivityTypes: null,
+    registrationFields: null,
   },
   {
     typeCode: 'FINANCIAL_SERVICES',
@@ -202,6 +306,10 @@ export const BUSINESS_TYPE_SEED_DATA = [
     excludedModules: ['PRODUCTS'],
     dashboardWidgets: ['application_pipeline', 'policy_renewals', 'revenue_chart', 'client_stats'],
     workflowTemplates: ['application_to_approval', 'renewal_reminder'],
+    extraFields: {},
+    defaultLeadStages: null,
+    defaultActivityTypes: null,
+    registrationFields: null,
   },
   {
     typeCode: 'LAUNDRY_SERVICES',
@@ -216,5 +324,9 @@ export const BUSINESS_TYPE_SEED_DATA = [
     excludedModules: ['LEADS', 'QUOTATIONS', 'PRODUCTS', 'TOUR_PLANS', 'ORGANIZATIONS'],
     dashboardWidgets: ['daily_orders', 'revenue_chart', 'customer_stats', 'pending_pickups'],
     workflowTemplates: ['order_to_delivery'],
+    extraFields: {},
+    defaultLeadStages: null,
+    defaultActivityTypes: null,
+    registrationFields: null,
   },
 ];

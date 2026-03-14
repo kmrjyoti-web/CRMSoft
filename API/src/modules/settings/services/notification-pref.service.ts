@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
-import { NotificationEventCategory, TenantNotificationSetting } from '@prisma/client';
+import { NotificationConfig, Prisma } from '@prisma/client';
 
 @Injectable()
 export class NotificationPrefService {
@@ -12,21 +12,21 @@ export class NotificationPrefService {
    * Get notification config for a specific event.
    * Called by NotificationService when an event occurs.
    */
-  async getForEvent(tenantId: string, eventCode: string): Promise<TenantNotificationSetting | null> {
-    return this.prisma.tenantNotificationSetting.findUnique({
+  async getForEvent(tenantId: string, eventCode: string): Promise<NotificationConfig | null> {
+    return this.prisma.notificationConfig.findUnique({
       where: { tenantId_eventCode: { tenantId, eventCode } },
     });
   }
 
   /** Get all preferences grouped by category. */
-  async getAllGrouped(tenantId: string): Promise<Record<string, TenantNotificationSetting[]>> {
-    const all = await this.prisma.tenantNotificationSetting.findMany({
+  async getAllGrouped(tenantId: string): Promise<Record<string, NotificationConfig[]>> {
+    const all = await this.prisma.notificationConfig.findMany({
       where: { tenantId },
       orderBy: [{ eventCategory: 'asc' }, { eventName: 'asc' }],
     });
-    const grouped: Record<string, TenantNotificationSetting[]> = {};
+    const grouped: Record<string, NotificationConfig[]> = {};
     for (const pref of all) {
-      const cat = pref.eventCategory;
+      const cat = pref.eventCategory ?? 'SYSTEM';
       if (!grouped[cat]) grouped[cat] = [];
       grouped[cat].push(pref);
     }
@@ -37,9 +37,9 @@ export class NotificationPrefService {
   async update(
     tenantId: string,
     eventCode: string,
-    data: Partial<TenantNotificationSetting>,
-  ): Promise<TenantNotificationSetting> {
-    return this.prisma.tenantNotificationSetting.update({
+    data: Prisma.NotificationConfigUpdateInput,
+  ): Promise<NotificationConfig> {
+    return this.prisma.notificationConfig.update({
       where: { tenantId_eventCode: { tenantId, eventCode } },
       data,
     });
@@ -48,11 +48,11 @@ export class NotificationPrefService {
   /** Bulk update multiple events. */
   async bulkUpdate(
     tenantId: string,
-    updates: { eventCode: string; changes: Partial<TenantNotificationSetting> }[],
+    updates: { eventCode: string; changes: Prisma.NotificationConfigUpdateInput }[],
   ): Promise<void> {
     await this.prisma.$transaction(
       updates.map((u) =>
-        this.prisma.tenantNotificationSetting.update({
+        this.prisma.notificationConfig.update({
           where: { tenantId_eventCode: { tenantId, eventCode: u.eventCode } },
           data: u.changes,
         }),
@@ -65,11 +65,11 @@ export class NotificationPrefService {
     const pref = await this.getForEvent(tenantId, eventCode);
     if (!pref) return { sent: false, channels: [] };
     const channels: string[] = [];
-    if (pref.inAppEnabled) channels.push('IN_APP');
-    if (pref.emailEnabled) channels.push('EMAIL');
-    if (pref.smsEnabled) channels.push('SMS');
-    if (pref.whatsappEnabled) channels.push('WHATSAPP');
-    if (pref.pushEnabled) channels.push('PUSH');
+    if (pref.enableInAppAlert) channels.push('IN_APP');
+    if (pref.enableEmail) channels.push('EMAIL');
+    if (pref.enableSms) channels.push('SMS');
+    if (pref.enableWhatsapp) channels.push('WHATSAPP');
+    if (pref.enablePush) channels.push('PUSH');
     this.logger.log(`Test notification for ${eventCode}: ${channels.join(', ')}`);
     return { sent: true, channels };
   }

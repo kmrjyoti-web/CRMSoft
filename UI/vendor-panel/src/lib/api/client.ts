@@ -36,12 +36,17 @@ apiClient.interceptors.response.use(
     const message = error.response?.data?.message || 'Something went wrong';
 
     if (status === 401) {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('vendor_token');
-        localStorage.removeItem('vendor_tenant_id');
-        window.location.href = '/login';
+      // Don't redirect for /auth/me failures (vendor JWT may not support it)
+      const url = error.config?.url || '';
+      if (!url.includes('/auth/me')) {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('vendor_token');
+          localStorage.removeItem('vendor_tenant_id');
+          document.cookie = 'vendor_token=; path=/; max-age=0';
+          window.location.href = '/login';
+        }
+        toast.error('Session expired. Please login again.');
       }
-      toast.error('Session expired. Please login again.');
     } else if (status === 403) {
       toast.error('You do not have permission for this action.');
     } else if (status === 422) {

@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  LayoutDashboard, Package, FileText, ShoppingCart, MessageSquare,
-  BarChart3, Settings, ChevronLeft, ChevronRight, LogOut, Store,
-  User, Lock, Sparkles, Circle,
+  LayoutDashboard, Package, Settings, ChevronLeft, ChevronRight, LogOut, Store,
+  User, Lock, Sparkles, Circle, Layers, Key, Users, Wallet,
+  AlertTriangle, FileSearch, Activity, Hammer, BarChart3, Building,
+  Brain, Webhook, ClipboardList, Database,
+  CreditCard, Gift, Ticket, Zap, Receipt, PieChart, TrendingUp, Code, Palette, BookOpen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/ui-store';
@@ -18,9 +20,20 @@ import type { AutoMenuItem } from '@/features/menu/auto-menu.service';
 
 // Icon component map keyed by discovered-routes icon name
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  LayoutDashboard, Package, ShoppingCart, MessageSquare,
-  FileText, BarChart3, Settings, User, Circle,
+  LayoutDashboard, Package, Settings, User, Circle,
+  Layers, Key, Users, Wallet,
+  AlertTriangle, FileSearch, Activity, Hammer, BarChart3, Building,
+  Brain, Webhook, ClipboardList, Database,
+  CreditCard, Gift, Ticket, Zap, Receipt, PieChart, TrendingUp, Code, Palette, BookOpen,
 };
+
+const SECTION_LABELS: Record<string, string> = {
+  SOFTWARE_VENDOR: 'Software Vendor',
+  DEV_OPS: 'Dev Ops',
+  DEVELOPER_TOOLS: 'Developer Tools',
+};
+
+const SECTION_ORDER = ['SOFTWARE_VENDOR', 'DEV_OPS', 'DEVELOPER_TOOLS', 'OTHER'];
 
 function MenuItemRow({
   item,
@@ -80,10 +93,33 @@ function MenuItemRow({
   );
 }
 
+function SectionHeader({ label }: { label: string }) {
+  return (
+    <div className="px-3 pt-4 pb-1">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+        {label}
+      </span>
+    </div>
+  );
+}
+
 export function Sidebar() {
   const { sidebarCollapsed, toggleSidebar } = useUIStore();
   const { user, vendor, logout } = useAuthStore();
   const { menu, isLoading } = useMenu();
+
+  const groupedSections = useMemo(() => {
+    const groups: Record<string, AutoMenuItem[]> = {};
+    for (const item of menu) {
+      const section = item.section || 'OTHER';
+      if (!groups[section]) groups[section] = [];
+      groups[section].push(item);
+    }
+    // Return ordered sections
+    return SECTION_ORDER
+      .filter((s) => groups[s]?.length)
+      .map((s) => ({ section: s, label: SECTION_LABELS[s], items: groups[s] }));
+  }, [menu]);
 
   return (
     <aside
@@ -99,7 +135,7 @@ export function Sidebar() {
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Store className="h-4 w-4 text-white" />
             </div>
-            <span className="font-semibold text-lg">Vendor Portal</span>
+            <span className="font-semibold text-lg">Dev Portal</span>
           </Link>
         )}
         <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-8 w-8 shrink-0">
@@ -108,7 +144,7 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 p-2 overflow-y-auto">
+      <nav className="flex-1 p-2 overflow-y-auto">
         {isLoading ? (
           // Skeleton while menu loads
           <div className="space-y-2 animate-pulse">
@@ -117,12 +153,19 @@ export function Sidebar() {
             ))}
           </div>
         ) : (
-          menu.map((item) => (
-            <MenuItemRow
-              key={item.key}
-              item={item}
-              sidebarCollapsed={sidebarCollapsed}
-            />
+          groupedSections.map(({ section, label, items }) => (
+            <div key={section}>
+              {label && !sidebarCollapsed && <SectionHeader label={label} />}
+              <div className="space-y-1">
+                {items.map((item) => (
+                  <MenuItemRow
+                    key={item.key}
+                    item={item}
+                    sidebarCollapsed={sidebarCollapsed}
+                  />
+                ))}
+              </div>
+            </div>
           ))
         )}
       </nav>

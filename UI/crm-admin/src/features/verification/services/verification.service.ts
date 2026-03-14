@@ -11,7 +11,7 @@ import type {
   SubmitGstDto,
 } from "../types/verification.types";
 
-const BASE = "/verification";
+const BASE = "/api/v1/verification";
 
 export function getVerificationStatus() {
   return apiClient.get<ApiResponse<VerificationStatus>>(`${BASE}/status`).then((r) => r.data);

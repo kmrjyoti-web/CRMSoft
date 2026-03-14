@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional, Inject } from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
 
 export interface ErrorLogEntry {
@@ -20,6 +20,13 @@ export interface ErrorLogEntry {
   requestBody?: any;
   queryParams?: any;
   metadata?: any;
+  requestHeaders?: any;
+  responseBody?: any;
+  responseTimeMs?: number;
+  userName?: string;
+  userRole?: string;
+  tenantName?: string;
+  industryCode?: string;
 }
 
 /** Sensitive keys to redact from request bodies. */
@@ -33,7 +40,10 @@ const SENSITIVE_KEYS = ['password', 'token', 'secret', 'authorization', 'apiKey'
 export class ErrorLoggerService {
   private readonly logger = new Logger('ErrorLogger');
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() @Inject('ErrorAutoReportService') private readonly autoReportService?: any,
+  ) {}
 
   /** Log an error entry (async, fire-and-forget). */
   log(entry: ErrorLogEntry): void {
@@ -45,10 +55,13 @@ export class ErrorLoggerService {
       this.logger.warn(`${tag} — ${entry.message}`);
     }
 
-    // Async DB persist (fire-and-forget)
-    if (entry.statusCode >= 500 || this.shouldPersist(entry.errorCode)) {
-      this.persistAsync(entry);
-    }
+    // Async DB persist (fire-and-forget) — persist ALL errors
+    this.persistAsync(entry);
+  }
+
+  /** Get a single error log by ID. */
+  async getById(id: string) {
+    return this.prisma.errorLog.findUnique({ where: { id } });
   }
 
   /** Look up error logs by trace/request ID. */
@@ -67,6 +80,9 @@ export class ErrorLoggerService {
     tenantId?: string;
     layer?: string;
     severity?: string;
+    status?: string;
+    dateFrom?: string;
+    dateTo?: string;
   }) {
     const page = options.page || 1;
     const limit = options.limit || 20;
@@ -75,6 +91,12 @@ export class ErrorLoggerService {
     if (options.tenantId) where.tenantId = options.tenantId;
     if (options.layer) where.layer = options.layer;
     if (options.severity) where.severity = options.severity;
+    if (options.status) where.status = options.status;
+    if (options.dateFrom || options.dateTo) {
+      where.createdAt = {};
+      if (options.dateFrom) where.createdAt.gte = new Date(options.dateFrom);
+      if (options.dateTo) where.createdAt.lte = new Date(options.dateTo);
+    }
 
     const [data, total] = await Promise.all([
       this.prisma.errorLog.findMany({
@@ -99,28 +121,39 @@ export class ErrorLoggerService {
     };
   }
 
-  /** Get error statistics grouped by code. */
+  /** Get error statistics grouped by code and severity. */
   async getStats(options?: { tenantId?: string; since?: string }) {
     const where: any = {};
     if (options?.tenantId) where.tenantId = options.tenantId;
     if (options?.since) where.createdAt = { gte: new Date(options.since) };
 
-    const [stats, total] = await Promise.all([
+    const [byCodeStats, bySeverityStats, total] = await Promise.all([
       this.prisma.errorLog.groupBy({
         by: ['errorCode'],
         where,
         _count: { id: true },
         orderBy: { _count: { id: 'desc' } },
       }),
+      this.prisma.errorLog.groupBy({
+        by: ['severity'],
+        where,
+        _count: { id: true },
+      }),
       this.prisma.errorLog.count({ where }),
     ]);
 
+    const bySeverity: Record<string, number> = { INFO: 0, WARNING: 0, ERROR: 0, CRITICAL: 0 };
+    for (const s of bySeverityStats) {
+      bySeverity[s.severity] = s._count.id;
+    }
+
     return {
       total,
-      byCode: stats.map((s) => ({
+      byCode: byCodeStats.map((s) => ({
         errorCode: s.errorCode,
         count: s._count.id,
       })),
+      bySeverity,
     };
   }
 
@@ -131,6 +164,77 @@ export class ErrorLoggerService {
       orderBy: { createdAt: 'desc' },
       take: limit,
     });
+  }
+
+  /** Resolve an error log. */
+  async resolve(id: string, data: { resolvedById: string; resolution: string }) {
+    return this.prisma.errorLog.update({
+      where: { id },
+      data: {
+        status: 'RESOLVED',
+        resolvedAt: new Date(),
+        resolvedById: data.resolvedById,
+        resolution: data.resolution,
+      },
+    });
+  }
+
+  /** Assign an error log to someone. */
+  async assign(id: string, data: { assignedToId: string; assignedToName: string }) {
+    return this.prisma.errorLog.update({
+      where: { id },
+      data: {
+        status: 'ASSIGNED',
+        assignedToId: data.assignedToId,
+        assignedToName: data.assignedToName,
+      },
+    });
+  }
+
+  /** Mark an error log as ignored. */
+  async ignore(id: string) {
+    return this.prisma.errorLog.update({
+      where: { id },
+      data: { status: 'IGNORED' },
+    });
+  }
+
+  /** Get error count trends grouped by day. */
+  async getTrends(options?: { tenantId?: string; days?: number }) {
+    const days = options?.days || 14;
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const where: any = { createdAt: { gte: since } };
+    if (options?.tenantId) where.tenantId = options.tenantId;
+
+    const logs = await this.prisma.errorLog.findMany({
+      where,
+      select: { createdAt: true, severity: true },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    // Group by date string
+    const trendMap: Record<string, { total: number; bySeverity: Record<string, number> }> = {};
+    for (let d = 0; d < days; d++) {
+      const date = new Date(since);
+      date.setDate(date.getDate() + d);
+      const key = date.toISOString().slice(0, 10);
+      trendMap[key] = { total: 0, bySeverity: { INFO: 0, WARNING: 0, ERROR: 0, CRITICAL: 0 } };
+    }
+
+    for (const log of logs) {
+      const key = log.createdAt.toISOString().slice(0, 10);
+      if (trendMap[key]) {
+        trendMap[key].total++;
+        trendMap[key].bySeverity[log.severity]++;
+      }
+    }
+
+    return Object.entries(trendMap).map(([date, counts]) => ({
+      date,
+      ...counts,
+    }));
   }
 
   /** Sanitize request body by redacting sensitive fields. */
@@ -157,7 +261,7 @@ export class ErrorLoggerService {
 
   private async persistAsync(entry: ErrorLogEntry): Promise<void> {
     try {
-      await this.prisma.errorLog.create({
+      const created = await this.prisma.errorLog.create({
         data: {
           requestId: entry.requestId,
           errorCode: entry.errorCode,
@@ -177,21 +281,22 @@ export class ErrorLoggerService {
           requestBody: entry.requestBody ? ErrorLoggerService.sanitizeBody(entry.requestBody) : undefined,
           queryParams: entry.queryParams,
           metadata: entry.metadata,
+          requestHeaders: entry.requestHeaders ? ErrorLoggerService.sanitizeHeaders(entry.requestHeaders) : undefined,
+          responseBody: entry.responseBody ? JSON.parse(JSON.stringify(entry.responseBody)) : undefined,
+          responseTimeMs: entry.responseTimeMs,
+          userName: entry.userName,
+          userRole: entry.userRole,
+          tenantName: entry.tenantName,
+          industryCode: entry.industryCode,
         },
       });
+
+      // Auto-report for HIGH severity errors
+      if ((entry.severity === 'ERROR' || entry.severity === 'CRITICAL') && this.autoReportService) {
+        this.autoReportService.checkAndReport(created);
+      }
     } catch (err) {
       this.logger.error(`Failed to persist error log: ${err.message}`);
     }
-  }
-
-  private shouldPersist(errorCode: string): boolean {
-    const persistCodes = [
-      'AUTH_TOKEN_INVALID',
-      'AUTH_ACCOUNT_LOCKED',
-      'ENCRYPTION_FAILED',
-      'CREDENTIAL_VERIFICATION_FAILED',
-      'WORKFLOW_EXECUTION_FAILED',
-    ];
-    return persistCodes.includes(errorCode);
   }
 }
