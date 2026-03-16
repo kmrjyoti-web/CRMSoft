@@ -12,8 +12,15 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     @Optional() @Inject(TenantContextService)
     private readonly tenantContext?: TenantContextService,
   ) {
+    // Append connection_limit for Supabase session pooler (free tier has low pool_size)
+    let dbUrl = process.env.DATABASE_URL || '';
+    if (process.env.NODE_ENV === 'production' && dbUrl && !dbUrl.includes('connection_limit')) {
+      const sep = dbUrl.includes('?') ? '&' : '?';
+      dbUrl = `${dbUrl}${sep}connection_limit=5&pool_timeout=30`;
+    }
     super({
       log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
+      datasources: { db: { url: dbUrl } },
     });
   }
 
