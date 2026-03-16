@@ -30,8 +30,12 @@ async function bootstrap() {
     },
   }));
   app.enableCors({
-    origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:4200'],
+    origin: process.env.CORS_ORIGINS
+      ? process.env.CORS_ORIGINS.split(',').map((s) => s.trim())
+      : true,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Tenant-ID', 'X-Industry-Code'],
   });
   app.setGlobalPrefix(process.env.API_PREFIX || 'api/v1');
 
