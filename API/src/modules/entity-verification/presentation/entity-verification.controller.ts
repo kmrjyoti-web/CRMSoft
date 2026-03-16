@@ -64,6 +64,17 @@ export class EntityVerificationController {
     return ApiResponse.success(result);
   }
 
+  @Post('reset/:entityType/:entityId')
+  @HttpCode(200)
+  async resetVerification(
+    @CurrentUser() user: any,
+    @Param('entityType') entityType: string,
+    @Param('entityId') entityId: string,
+  ) {
+    const result = await this.service.resetVerification(user.tenantId ?? '', entityType, entityId);
+    return ApiResponse.success(result);
+  }
+
   @Post('expire-old')
   @HttpCode(200)
   async expireOld() {

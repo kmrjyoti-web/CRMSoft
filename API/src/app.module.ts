@@ -90,6 +90,7 @@ import { SmartSearchModule } from './modules/search/smart-search.module';
 import { AmcWarrantyModule } from './modules/amc-warranty/amc-warranty.module';
 import { SelfHostedAiModule } from './modules/self-hosted-ai/self-hosted-ai.module';
 import { CalendarHighlightsModule } from './modules/calendar-highlights/calendar-highlights.module';
+import { ControlRoomModule } from './modules/control-room/control-room.module';
 import { TenantAuditMiddleware } from './modules/tenant/infrastructure/tenant-audit.middleware';
 
 @Module({
@@ -178,6 +179,7 @@ import { TenantAuditMiddleware } from './modules/tenant/infrastructure/tenant-au
     AmcWarrantyModule,
     SelfHostedAiModule,
     CalendarHighlightsModule,
+    ControlRoomModule,
     ErrorsModule,
   ],
   controllers: [],

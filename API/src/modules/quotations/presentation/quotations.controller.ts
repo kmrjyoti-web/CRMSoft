@@ -39,7 +39,7 @@ export class QuotationsController {
   @RequirePermissions('quotations:create')
   async create(@Body() dto: CreateQuotationDto, @CurrentUser() user: any) {
     const result = await this.commandBus.execute(new CreateQuotationCommand(
-      user.id, `${user.firstName} ${user.lastName}`, dto.leadId, dto.contactPersonId, dto.organizationId,
+      user.id, `${user.firstName} ${user.lastName}`, user.tenantId, dto.leadId, dto.contactPersonId, dto.organizationId,
       dto.title, dto.summary, dto.coverNote, dto.priceType, dto.minAmount, dto.maxAmount, dto.plusMinusPercent,
       dto.validFrom ? new Date(dto.validFrom) : undefined, dto.validUntil ? new Date(dto.validUntil) : undefined,
       dto.paymentTerms, dto.deliveryTerms, dto.warrantyTerms, dto.termsConditions,

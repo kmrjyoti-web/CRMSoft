@@ -262,6 +262,7 @@ export const MENU_SEED_DATA: MenuSeedItem[] = [
     name: 'Settings', code: 'SETTINGS', icon: 'settings', menuType: 'GROUP',
     route: '/settings', permissionModule: 'settings', permissionAction: 'read',
     children: [
+      { name: 'Control Room', code: 'SET_CONTROL_ROOM', icon: 'sliders', route: '/settings/control-room', permissionModule: 'settings', permissionAction: 'read' },
       { name: 'Users', code: 'SET_USERS', icon: 'users', route: '/settings/users', permissionModule: 'users', permissionAction: 'read' },
       { name: 'Roles', code: 'SET_ROLES', icon: 'shield', route: '/settings/roles', permissionModule: 'roles', permissionAction: 'read' },
       { name: 'Permissions', code: 'SET_PERMS', icon: 'lock', route: '/settings/permissions', permissionModule: 'roles', permissionAction: 'read' },

@@ -30,6 +30,7 @@ export class OrganizationMapper {
   static toPersistence(entity: OrganizationEntity): any {
     return {
       id: entity.id,
+      tenantId: entity.tenantId,
       name: entity.name,
       email: entity.email || null,
       phone: entity.phone || null,

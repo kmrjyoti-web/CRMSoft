@@ -2,6 +2,7 @@ export class CreateQuotationCommand {
   constructor(
     public readonly userId: string,
     public readonly userName: string,
+    public readonly tenantId: string,
     public readonly leadId: string,
     public readonly contactPersonId?: string,
     public readonly organizationId?: string,

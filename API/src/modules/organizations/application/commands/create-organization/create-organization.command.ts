@@ -2,6 +2,7 @@ export class CreateOrganizationCommand {
   constructor(
     public readonly name: string,
     public readonly createdById: string,
+    public readonly tenantId: string,
     public readonly website?: string,
     public readonly email?: string,
     public readonly phone?: string,

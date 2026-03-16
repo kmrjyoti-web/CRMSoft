@@ -9,12 +9,14 @@ export class QuotationNumberService {
    * Generate unique quotation number: QTN-YYYY-NNNNN
    * Sequential per year, zero-padded to 5 digits.
    */
-  async generateNumber(): Promise<string> {
+  async generateNumber(tenantId?: string): Promise<string> {
     const year = new Date().getFullYear();
     const prefix = `QTN-${year}-`;
+    const where: any = { quotationNo: { startsWith: prefix } };
+    if (tenantId) where.tenantId = tenantId;
 
     const last = await this.prisma.quotation.findFirst({
-      where: { quotationNo: { startsWith: prefix } },
+      where,
       orderBy: { quotationNo: 'desc' },
       select: { quotationNo: true },
     });

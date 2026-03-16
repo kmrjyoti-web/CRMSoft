@@ -28,6 +28,7 @@ export class CreateOrganizationHandler implements ICommandHandler<CreateOrganiza
     // 2. Create domain entity (validates business rules)
     const org = OrganizationEntity.create(randomUUID(), {
       name: command.name,
+      tenantId: command.tenantId,
       website: command.website,
       email: command.email,
       phone: command.phone,

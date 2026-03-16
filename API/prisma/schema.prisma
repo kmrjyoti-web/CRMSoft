@@ -875,6 +875,7 @@ model Contact {
   tourPlanVisits       TourPlanVisit[]
   invoices             Invoice[]
   proformaInvoices     ProformaInvoice[]
+  quotations           Quotation[] @relation("QuotationContactPerson")
 
   @@index([firstName, lastName])
   @@index([tenantId])
@@ -939,6 +940,7 @@ model Organization {
   locations          OrganizationLocation[]
   invoices           Invoice[]
   proformaInvoices   ProformaInvoice[]
+  quotations         Quotation[] @relation("QuotationOrganization")
 
   @@index([tenantId])
   @@index([isDeleted])
@@ -1229,8 +1231,10 @@ model Quotation {
   // ─── RELATIONS ───
   leadId          String  @map("lead_id")
   lead            Lead    @relation(fields: [leadId], references: [id])
-  contactPersonId String? @map("contact_person_id")
-  organizationId  String? @map("organization_id")
+  contactPersonId String?       @map("contact_person_id")
+  contactPerson   Contact?      @relation("QuotationContactPerson", fields: [contactPersonId], references: [id])
+  organizationId  String?       @map("organization_id")
+  organization    Organization? @relation("QuotationOrganization", fields: [organizationId], references: [id])
 
   // ─── REVISION CHAIN ───
   parentQuotationId String?     @map("parent_quotation_id")
@@ -11448,4 +11452,118 @@ model AiSystemPrompt {
 
   @@index([tenantId, category])
   @@map("ai_system_prompts")
+}
+
+// ═══════════════════════════════════════════════════════
+// CONTROL ROOM — 7-Level Rule Override System
+// ═══════════════════════════════════════════════════════
+
+model ControlRoomRule {
+  id              String    @id @default(uuid())
+  ruleCode        String    @unique @map("rule_code")
+  category        String    // GENERAL, SALE, PURCHASE, ACCOUNTING, INVENTORY, TAXATION, TRANSACTION, EMAIL_SMS, INTEGRATION, WORKFLOW, MASTER, ADDITIONAL
+  subCategory     String?   @map("sub_category")
+  label           String
+  description     String?   @db.Text
+  helpUrl         String?   @map("help_url")
+  sortOrder       Int       @default(0) @map("sort_order")
+  valueType       String    @map("value_type") // BOOLEAN, STRING, NUMBER, SELECT, MULTI_SELECT, JSON, CONFIGURE
+  defaultValue    String?   @map("default_value")
+  selectOptions   Json?     @map("select_options")
+  minValue        Decimal?  @map("min_value") @db.Decimal(12, 2)
+  maxValue        Decimal?  @map("max_value") @db.Decimal(12, 2)
+  allowedLevels   Json      @default("[\"INDUSTRY\",\"CONTROL_ROOM\"]") @map("allowed_levels")
+  applicableModules Json?   @map("applicable_modules")
+  industrySpecific Boolean  @default(false) @map("industry_specific")
+  requiresModule  String?   @map("requires_module")
+  isActive        Boolean   @default(true) @map("is_active")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  values          ControlRoomValue[]
+  drafts          ControlRoomDraft[]
+
+  @@index([category, sortOrder])
+  @@map("control_room_rules")
+}
+
+model ControlRoomValue {
+  id            String    @id @default(uuid())
+  tenantId      String?   @map("tenant_id")
+  ruleId        String    @map("rule_id")
+  level         String    // INDUSTRY, WORKING, ACCOUNTING, INVENTORY, CONTROL_ROOM, PAGE, RBAC
+  value         String    @db.Text
+  pageCode      String?   @map("page_code")
+  roleId        String?   @map("role_id")
+  userId        String?   @map("user_id")
+  industryCode  String?   @map("industry_code")
+  setByUserId   String?   @map("set_by_user_id")
+  setByUserName String?   @map("set_by_user_name")
+  setAt         DateTime  @default(now()) @map("set_at")
+  isActive      Boolean   @default(true) @map("is_active")
+
+  rule          ControlRoomRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, ruleId, level, pageCode, roleId, userId])
+  @@index([tenantId, level])
+  @@index([ruleId, tenantId])
+  @@map("control_room_values")
+}
+
+model ControlRoomAuditLog {
+  id              String    @id @default(uuid())
+  tenantId        String    @map("tenant_id")
+  ruleId          String    @map("rule_id")
+  ruleCode        String    @map("rule_code")
+  level           String
+  previousValue   String?   @map("previous_value") @db.Text
+  newValue        String    @map("new_value") @db.Text
+  pageCode        String?   @map("page_code")
+  roleId          String?   @map("role_id")
+  userId          String?   @map("user_id")
+  changedByUserId String    @map("changed_by_user_id")
+  changedByUserName String  @map("changed_by_user_name")
+  changeReason    String?   @map("change_reason")
+  ipAddress       String?   @map("ip_address")
+  batchId         String?   @map("batch_id")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  @@index([tenantId, createdAt])
+  @@index([ruleCode, tenantId])
+  @@index([batchId])
+  @@map("control_room_audit_logs")
+}
+
+model TenantRuleCacheVersion {
+  id            String    @id @default(uuid())
+  tenantId      String    @unique @map("tenant_id")
+  version       Int       @default(1)
+  lastChangedAt DateTime  @default(now()) @map("last_changed_at")
+  lastChangedBy String?   @map("last_changed_by")
+
+  @@map("tenant_rule_cache_versions")
+}
+
+model ControlRoomDraft {
+  id              String    @id @default(uuid())
+  tenantId        String    @map("tenant_id")
+  ruleId          String    @map("rule_id")
+  ruleCode        String    @map("rule_code")
+  level           String
+  previousValue   String?   @map("previous_value") @db.Text
+  newValue        String    @map("new_value") @db.Text
+  pageCode        String?   @map("page_code")
+  roleId          String?   @map("role_id")
+  userId          String?   @map("user_id")
+  status          String    @default("DRAFT")
+  createdByUserId String    @map("created_by_user_id")
+  createdByUserName String? @map("created_by_user_name")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  appliedAt       DateTime? @map("applied_at")
+
+  rule            ControlRoomRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, ruleId, level])
+  @@index([tenantId, status])
+  @@map("control_room_drafts")
 }

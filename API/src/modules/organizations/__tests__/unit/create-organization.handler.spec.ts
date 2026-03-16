@@ -20,7 +20,7 @@ describe('CreateOrganizationHandler', () => {
 
   it('should create organization and return UUID', async () => {
     const id = await handler.execute(
-      new CreateOrganizationCommand('TechCorp', 'user-1'),
+      new CreateOrganizationCommand('TechCorp', 'user-1', 'tenant-1'),
     );
     expect(id).toBeDefined();
     expect(id.length).toBe(36);
@@ -30,7 +30,7 @@ describe('CreateOrganizationHandler', () => {
   it('should create filter associations', async () => {
     await handler.execute(
       new CreateOrganizationCommand(
-        'TechCorp', 'user-1', undefined, undefined, undefined,
+        'TechCorp', 'user-1', 'tenant-1', undefined, undefined, undefined,
         undefined, undefined, undefined, undefined, undefined,
         undefined, undefined, undefined, undefined, ['f-1', 'f-2'],
       ),
@@ -43,20 +43,20 @@ describe('CreateOrganizationHandler', () => {
       OrganizationEntity.create('existing', { name: 'TechCorp', createdById: 'u-1' }),
     );
     await expect(
-      handler.execute(new CreateOrganizationCommand('TechCorp', 'user-1')),
+      handler.execute(new CreateOrganizationCommand('TechCorp', 'user-1', 'tenant-1')),
     ).rejects.toThrow(ConflictException);
     expect(repo.save).not.toHaveBeenCalled();
   });
 
   it('should throw when name too short', async () => {
     await expect(
-      handler.execute(new CreateOrganizationCommand('A', 'user-1')),
+      handler.execute(new CreateOrganizationCommand('A', 'user-1', 'tenant-1')),
     ).rejects.toThrow('at least 2 characters');
   });
 
   it('should throw when email invalid', async () => {
     await expect(
-      handler.execute(new CreateOrganizationCommand('Corp', 'user-1', undefined, 'bad')),
+      handler.execute(new CreateOrganizationCommand('Corp', 'user-1', 'tenant-1', undefined, 'bad')),
     ).rejects.toThrow('Invalid email');
   });
 });

@@ -14,13 +14,13 @@ export class CreateQuotationHandler implements ICommandHandler<CreateQuotationCo
   ) {}
 
   async execute(cmd: CreateQuotationCommand) {
-    const lead = await this.prisma.lead.findUnique({
-      where: { id: cmd.leadId },
+    const lead = await this.prisma.lead.findFirst({
+      where: { id: cmd.leadId, tenantId: cmd.tenantId },
       include: { organization: { select: { id: true, state: true } } },
     });
     if (!lead) throw new NotFoundException('Lead not found');
 
-    const quotationNo = await this.numberService.generateNumber();
+    const quotationNo = await this.numberService.generateNumber(cmd.tenantId);
     const customerState = lead.organization?.state || undefined;
 
     // Resolve product details for items with productId
@@ -32,8 +32,8 @@ export class CreateQuotationHandler implements ICommandHandler<CreateQuotationCo
       let mrp = item.mrp;
 
       if (item.productId) {
-        const product = await this.prisma.product.findUnique({
-          where: { id: item.productId },
+        const product = await this.prisma.product.findFirst({
+          where: { id: item.productId, tenantId: cmd.tenantId },
           select: { code: true, hsnCode: true, gstRate: true, mrp: true },
         });
         if (product) {
@@ -51,6 +51,7 @@ export class CreateQuotationHandler implements ICommandHandler<CreateQuotationCo
       }, this.calculator.isInterState(customerState));
 
       lineItemData.push({
+        tenantId: cmd.tenantId,
         productId: item.productId, productCode, productName: item.productName,
         description: item.description, hsnCode,
         quantity: item.quantity, unit: item.unit, unitPrice: item.unitPrice,
@@ -68,6 +69,7 @@ export class CreateQuotationHandler implements ICommandHandler<CreateQuotationCo
 
     const quotation = await this.prisma.quotation.create({
       data: {
+        tenantId: cmd.tenantId,
         quotationNo, status: 'DRAFT', title: cmd.title, summary: cmd.summary,
         coverNote: cmd.coverNote,
         priceType: (cmd.priceType as any) || 'FIXED',
@@ -87,11 +89,12 @@ export class CreateQuotationHandler implements ICommandHandler<CreateQuotationCo
     });
 
     // Recalculate totals
-    await this.calculator.recalculate(quotation.id, customerState);
+    await this.calculator.recalculate(quotation.id, customerState, cmd.tenantId);
 
     // Log activity
     await this.prisma.quotationActivity.create({
       data: {
+        tenantId: cmd.tenantId,
         quotationId: quotation.id, action: 'CREATED',
         description: `Quotation ${quotationNo} created`,
         newValue: 'DRAFT', changedField: 'status',
@@ -99,8 +102,8 @@ export class CreateQuotationHandler implements ICommandHandler<CreateQuotationCo
       },
     });
 
-    return this.prisma.quotation.findUnique({
-      where: { id: quotation.id },
+    return this.prisma.quotation.findFirst({
+      where: { id: quotation.id, tenantId: cmd.tenantId },
       include: { lineItems: true, lead: true },
     });
   }

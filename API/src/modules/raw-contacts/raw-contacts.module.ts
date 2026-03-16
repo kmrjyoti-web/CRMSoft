@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TableConfigModule } from '../table-config/table-config.module';
+import { AccountsModule } from '../accounts/accounts.module';
+import { ControlRoomModule } from '../control-room/control-room.module';
 import { RawContactsController } from './presentation/raw-contacts.controller';
 import { RawContactRepository } from './infrastructure/repositories/raw-contact.repository';
 import { RAW_CONTACT_REPOSITORY } from './domain/interfaces/raw-contact-repository.interface';
@@ -36,7 +38,7 @@ const QueryHandlers = [GetRawContactByIdHandler, GetRawContactsListHandler];
 const EventHandlers = [OnRawContactCreatedHandler, OnRawContactVerifiedHandler];
 
 @Module({
-  imports: [CqrsModule, TableConfigModule],
+  imports: [CqrsModule, TableConfigModule, AccountsModule, ControlRoomModule],
   controllers: [RawContactsController],
   providers: [
     { provide: RAW_CONTACT_REPOSITORY, useClass: RawContactRepository },

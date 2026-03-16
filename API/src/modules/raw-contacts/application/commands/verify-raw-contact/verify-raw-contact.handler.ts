@@ -36,11 +36,19 @@ export class VerifyRawContactHandler implements ICommandHandler<VerifyRawContact
       throw new NotFoundException(`RawContact ${command.rawContactId} not found`);
     }
 
-    // 2. Create Contact record
+    // 2. Get tenantId from the raw contact DB record
+    const rawContactDb = await this.prisma.rawContact.findUnique({
+      where: { id: command.rawContactId },
+      select: { tenantId: true },
+    });
+    const tenantId = rawContactDb?.tenantId ?? '';
+
+    // 3. Create Contact record
     const contactId = randomUUID();
     await this.prisma.contact.create({
       data: {
         id: contactId,
+        tenantId,
         firstName: rawContact.firstName,
         lastName: rawContact.lastName,
         designation: rawContact.designation,
@@ -50,17 +58,17 @@ export class VerifyRawContactHandler implements ICommandHandler<VerifyRawContact
       },
     });
 
-    // 3. Domain validates transition (RAW → VERIFIED)
+    // 4. Domain validates transition (RAW → VERIFIED)
     const withEvents = this.publisher.mergeObjectContext(rawContact);
     withEvents.verify(contactId, command.verifiedById);
 
-    // 4. Update all Communications → link to new Contact
+    // 5. Update all Communications → link to new Contact
     await this.prisma.communication.updateMany({
       where: { rawContactId: rawContact.id },
       data: { contactId },
     });
 
-    // 5. Copy filters from raw_contact_filters → contact_filters
+    // 6. Copy filters from raw_contact_filters → contact_filters
     const rawFilters = await this.prisma.rawContactFilter.findMany({
       where: { rawContactId: rawContact.id },
     });
@@ -74,7 +82,7 @@ export class VerifyRawContactHandler implements ICommandHandler<VerifyRawContact
       });
     }
 
-    // 6. If organization provided → create mapping
+    // 7. If organization provided → create mapping
     if (command.organizationId) {
       await this.prisma.contactOrganization.create({
         data: {
@@ -93,10 +101,10 @@ export class VerifyRawContactHandler implements ICommandHandler<VerifyRawContact
       });
     }
 
-    // 7. Save raw contact (now VERIFIED with contactId)
+    // 8. Save raw contact (now VERIFIED with contactId)
     await this.repo.save(withEvents);
 
-    // 8. Publish events
+    // 9. Publish events (triggers OnRawContactVerifiedHandler → auto-create ledger)
     withEvents.commit();
 
     this.logger.log(

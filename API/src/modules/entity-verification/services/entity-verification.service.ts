@@ -74,6 +74,9 @@ export class EntityVerificationService {
     if (status === 'VERIFIED') {
       data.entityVerifiedAt = new Date();
       if (via) data.entityVerifiedVia = via;
+    } else if (status === 'UNVERIFIED') {
+      data.entityVerifiedAt = null;
+      data.entityVerifiedVia = null;
     }
     switch (entityType) {
       case 'CONTACT':
@@ -95,7 +98,8 @@ export class EntityVerificationService {
     const entity = await this.getEntity(tenantId, dto.entityType, dto.entityId);
 
     if (entity.verificationStatus === 'VERIFIED') {
-      throw new BadRequestException('Entity is already verified.');
+      this.logger.log(`Re-verification requested for already verified entity ${dto.entityId}. Resetting status.`);
+      await this.updateEntityStatus(tenantId, dto.entityType, dto.entityId, 'UNVERIFIED');
     }
 
     // Validate channel has required contact info
@@ -106,11 +110,20 @@ export class EntityVerificationService {
       throw new BadRequestException('Entity has no phone number. Add phone first.');
     }
 
-    // Expire existing pending records
-    await this.prisma.entityVerificationRecord.updateMany({
-      where: { tenantId, entityType: dto.entityType, entityId: dto.entityId, status: 'PENDING' },
+    // Expire existing pending records (skip records created in the last 10s to prevent double-click race)
+    const expired = await this.prisma.entityVerificationRecord.updateMany({
+      where: {
+        tenantId,
+        entityType: dto.entityType,
+        entityId: dto.entityId,
+        status: 'PENDING',
+        createdAt: { lt: new Date(Date.now() - 10_000) },
+      },
       data: { status: 'EXPIRED' },
     });
+    if (expired.count > 0) {
+      this.logger.log(`Expired ${expired.count} pending records for ${dto.entityType}/${dto.entityId}`);
+    }
 
     if (dto.mode === 'OTP') {
       return this.sendOtp(tenantId, userId, userName, entity, dto);
@@ -163,6 +176,7 @@ export class EntityVerificationService {
       channel: dto.channel,
       sentTo,
       expiresIn: '5 minutes',
+      otpExpiresAt: record.otpExpiresAt?.toISOString(),
       ...(isDev ? { devOtp: otp } : {}),
     };
   }
@@ -229,8 +243,15 @@ export class EntityVerificationService {
       where: { id: recordId, tenantId },
     });
 
-    if (!record || record.status !== 'PENDING') {
-      throw new BadRequestException('Invalid or already processed verification.');
+    if (!record) {
+      this.logger.warn(`verifyOtp: record not found — recordId=${recordId}, tenantId=${tenantId}`);
+      throw new BadRequestException('Verification record not found. Please initiate verification again.');
+    }
+    if (record.status !== 'PENDING') {
+      this.logger.warn(`verifyOtp: record status is ${record.status}, not PENDING — recordId=${recordId}`);
+      throw new BadRequestException(
+        `This verification is already ${record.status.toLowerCase()}. Please click "Send Verification" to start a new one.`,
+      );
     }
     if (!record.otpExpiresAt || new Date() > record.otpExpiresAt) {
       await this.prisma.entityVerificationRecord.update({
@@ -263,6 +284,19 @@ export class EntityVerificationService {
     await this.updateEntityStatus(tenantId, record.entityType, record.entityId, 'VERIFIED', via);
 
     return { success: true, message: `${record.entityName ?? 'Entity'} verified successfully.` };
+  }
+
+  // ── Reset verification (delete all records, set entity back to UNVERIFIED) ──
+  async resetVerification(tenantId: string, entityType: string, entityId: string) {
+    // Delete all verification records for this entity
+    const { count } = await this.prisma.entityVerificationRecord.deleteMany({
+      where: { tenantId, entityType, entityId },
+    });
+
+    // Reset entity status to UNVERIFIED
+    await this.updateEntityStatus(tenantId, entityType, entityId, 'UNVERIFIED');
+
+    return { success: true, deletedRecords: count, message: 'Verification reset. You can now verify again.' };
   }
 
   // ── Resend ───────────────────────────────────────────────

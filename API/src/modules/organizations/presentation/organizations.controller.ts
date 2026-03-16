@@ -32,10 +32,12 @@ export class OrganizationsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new organization' })
-  async create(@Body() dto: CreateOrganizationDto, @CurrentUser('id') userId: string) {
+  async create(@Body() dto: CreateOrganizationDto, @CurrentUser() user: any) {
+    const userId = user.id;
+    const tenantId = user.tenantId ?? '';
     const id = await this.commandBus.execute(
       new CreateOrganizationCommand(
-        dto.name, userId, dto.website, dto.email, dto.phone,
+        dto.name, userId, tenantId, dto.website, dto.email, dto.phone,
         dto.gstNumber, dto.address, dto.city, dto.state,
         dto.country, dto.pincode, dto.industry, dto.annualRevenue,
         dto.notes, dto.filterIds,

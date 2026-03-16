@@ -5,6 +5,7 @@ import { OrganizationDeactivatedEvent } from '../events/organization-deactivated
 
 export interface CreateOrganizationProps {
   name: string;
+  tenantId?: string;
   website?: string;
   email?: string;
   phone?: string;
@@ -38,6 +39,7 @@ export interface UpdateOrganizationProps {
 
 export class OrganizationEntity extends AggregateRoot {
   private _name: string;
+  private _tenantId: string;
   private _website?: string;
   private _email?: string;
   private _phone?: string;
@@ -71,6 +73,7 @@ export class OrganizationEntity extends AggregateRoot {
     const org = new OrganizationEntity();
     org._id = id;
     org._name = props.name.trim();
+    org._tenantId = props.tenantId ?? '';
     org._website = props.website?.trim();
     org._email = props.email?.trim().toLowerCase();
     org._phone = props.phone?.trim();
@@ -104,6 +107,7 @@ export class OrganizationEntity extends AggregateRoot {
     const org = new OrganizationEntity();
     org._id = data.id;
     org._name = data.name;
+    org._tenantId = data.tenantId ?? '';
     org._website = data.website ?? undefined;
     org._email = data.email ?? undefined;
     org._phone = data.phone ?? undefined;
@@ -214,6 +218,7 @@ export class OrganizationEntity extends AggregateRoot {
 
   // ─── Getters ───
   get name(): string { return this._name; }
+  get tenantId(): string { return this._tenantId; }
   get website(): string | undefined { return this._website; }
   get email(): string | undefined { return this._email; }
   get phone(): string | undefined { return this._phone; }
