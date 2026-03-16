@@ -1,4 +1,4 @@
-import { apiClient } from "@/services/api-client";
+import apiClient from "@/services/api-client";
 import type { ApiResponse } from "@/types/api-response";
 import type { Comment, CreateCommentDto, UpdateCommentDto, ReplyCommentDto } from "../types/comments.types";
 
