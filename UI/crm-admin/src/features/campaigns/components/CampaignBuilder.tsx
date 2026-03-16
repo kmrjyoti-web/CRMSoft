@@ -14,6 +14,7 @@ import {
   RichTextEditor,
   DatePicker,
   Checkbox,
+  TextareaInput,
 } from "@/components/ui";
 
 import {
@@ -361,27 +362,12 @@ export function CampaignBuilder({ campaignId }: CampaignBuilderProps) {
               />
             </div>
 
-            <div>
-              <label style={{ display: "block", fontSize: 14, fontWeight: 500, color: "#374151", marginBottom: 8 }}>
-                Plain Text Body (optional)
-              </label>
-              <textarea
-                value={form.bodyText}
-                onChange={(e) => updateField("bodyText", e.target.value)}
-                rows={6}
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  borderRadius: 8,
-                  border: "1px solid #d1d5db",
-                  fontSize: 14,
-                  fontFamily: "monospace",
-                  resize: "vertical",
-                  outline: "none",
-                }}
-                placeholder="Optional plain text version for email clients that don't support HTML..."
-              />
-            </div>
+            <TextareaInput
+              label="Plain Text Body (optional)"
+              value={form.bodyText}
+              onChange={(e) => updateField("bodyText", e.target.value)}
+              rows={6}
+            />
           </div>
         )}
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { Input, SelectInput, Icon, Button } from '@/components/ui';
+import { Input, SelectInput, Icon, Button, TextareaInput } from '@/components/ui';
 import type { ChatbotNode } from '../types/chatbot.types';
 
 interface ChatbotNodeEditorProps {
@@ -59,25 +59,12 @@ export function ChatbotNodeEditor({
 
         {/* Text/Message */}
         {['TEXT_REPLY', 'WELCOME', 'MEDIA_REPLY'].includes(node.type) && (
-          <div>
-            <label style={{ fontSize: 12, fontWeight: 500, color: '#64748b', marginBottom: 4, display: 'block' }}>
-              Message
-            </label>
-            <textarea
-              value={data.message ?? ''}
-              onChange={(e) => updateField('message', e.target.value)}
-              style={{
-                width: '100%',
-                minHeight: 80,
-                padding: 8,
-                border: '1px solid #e5e7eb',
-                borderRadius: 6,
-                fontSize: 13,
-                fontFamily: 'inherit',
-                resize: 'vertical',
-              }}
-            />
-          </div>
+          <TextareaInput
+            label="Message"
+            value={data.message ?? ''}
+            onChange={(e) => updateField('message', e.target.value)}
+            rows={3}
+          />
         )}
 
         {/* Keywords for KEYWORD_TRIGGER */}
@@ -92,26 +79,12 @@ export function ChatbotNodeEditor({
 
         {/* Menu items */}
         {node.type === 'MENU' && (
-          <div>
-            <label style={{ fontSize: 12, fontWeight: 500, color: '#64748b', marginBottom: 4, display: 'block' }}>
-              Menu Items (one per line)
-            </label>
-            <textarea
-              value={data.menuItems ?? ''}
-              onChange={(e) => updateField('menuItems', e.target.value)}
-              placeholder="Option 1&#10;Option 2&#10;Option 3"
-              style={{
-                width: '100%',
-                minHeight: 80,
-                padding: 8,
-                border: '1px solid #e5e7eb',
-                borderRadius: 6,
-                fontSize: 13,
-                fontFamily: 'inherit',
-                resize: 'vertical',
-              }}
-            />
-          </div>
+          <TextareaInput
+            label="Menu Items (one per line)"
+            value={data.menuItems ?? ''}
+            onChange={(e) => updateField('menuItems', e.target.value)}
+            rows={3}
+          />
         )}
 
         {/* Condition */}

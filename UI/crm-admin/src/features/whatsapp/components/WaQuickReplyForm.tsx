@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { Button, Input, Icon } from '@/components/ui';
+import { Button, Input, Icon, TextareaInput } from '@/components/ui';
 import { useCreateQuickReply } from '../hooks/useWaQuickReplies';
 
 const schema = z.object({
@@ -61,22 +61,11 @@ export function WaQuickReplyForm({ onSuccess, onCancel }: WaQuickReplyFormProps)
       {errors.shortcut && <p style={{ color: '#ef4444', fontSize: 12, marginTop: -8 }}>{errors.shortcut.message}</p>}
 
       <div>
-        <label style={{ fontSize: 12, fontWeight: 500, color: '#64748b', marginBottom: 4, display: 'block' }}>
-          Content
-        </label>
-        <textarea
-          {...register('content')}
-          placeholder="Quick reply message content..."
-          style={{
-            width: '100%',
-            minHeight: 100,
-            padding: 10,
-            border: '1px solid #e5e7eb',
-            borderRadius: 8,
-            fontSize: 14,
-            fontFamily: 'inherit',
-            resize: 'vertical',
-          }}
+        <TextareaInput
+          label="Content"
+          value={watch('content')}
+          onChange={(e) => setValue('content', e.target.value)}
+          rows={4}
         />
         {errors.content && <p style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.content.message}</p>}
       </div>

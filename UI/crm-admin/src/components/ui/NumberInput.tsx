@@ -1,7 +1,21 @@
 'use client';
 
-import { forwardRef, useState } from 'react';
+import { forwardRef, useCallback, useRef, useState } from 'react';
 import { AICNumber } from '@coreui/ui-react';
+
+const MAX_INTEGER_DIGITS = 12;
+
+function handleMaxDigits(e: React.KeyboardEvent<HTMLDivElement>) {
+  const input = (e.target as HTMLElement).closest('input') ?? (e.target as HTMLInputElement);
+  if (input?.tagName !== 'INPUT') return;
+  const allowed = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
+  if (allowed.includes(e.key)) return;
+  if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) return;
+  if (!/^[0-9]$/.test(e.key)) return;
+  const val = input.value ?? '';
+  const intPart = val.split('.')[0]?.replace(/[^0-9]/g, '') ?? '';
+  if (intPart.length >= MAX_INTEGER_DIGITS) e.preventDefault();
+}
 
 type AICNumberProps = React.ComponentProps<typeof AICNumber>;
 
@@ -30,6 +44,7 @@ export const NumberInput = forwardRef<HTMLElement, NumberInputProps>((props, ref
     value,
     onFocus,
     onBlur,
+    onChange,
     leftIcon: _leftIcon,  // AICNumber has no leftIcon — consumed and ignored
     error,
     placeholder,
@@ -39,6 +54,11 @@ export const NumberInput = forwardRef<HTMLElement, NumberInputProps>((props, ref
   } = props;
 
   const [focused, setFocused] = useState(false);
+
+  // Stabilize onChange so AICNumber's useCallback/useEffect deps don't change every render
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  const stableOnChange = useCallback((v: number | null) => onChangeRef.current?.(v), []);
 
   // Float label only when: focused, has value, or caller passed an explicit non-blank placeholder.
   // We always pass placeholder=" " to AICNumber to suppress its default "Enter number".
@@ -103,16 +123,18 @@ export const NumberInput = forwardRef<HTMLElement, NumberInputProps>((props, ref
   // ── No floating label ───────────────────────────────────────────────
   if (!label) {
     return (
-      <div className="relative w-full">
+      <div className="relative w-full [&_input]:text-right" onKeyDown={handleMaxDigits}>
         <AICNumber
           ref={ref as any}
           size="sm"
           variant="outlined"
           label=""
           value={value}
+          onChange={stableOnChange}
           currency={currencySymbol}
           error={error}
           placeholder={resolvedPlaceholder}
+          showSpinner={false}
           onFocus={onFocus}
           onBlur={onBlur}
           {...rest}
@@ -124,16 +146,18 @@ export const NumberInput = forwardRef<HTMLElement, NumberInputProps>((props, ref
 
   // ── With floating label ─────────────────────────────────────────────
   return (
-    <div className="relative w-full">
+    <div className="relative w-full min-w-[140px] [&_input]:text-right" onKeyDown={handleMaxDigits}>
       <AICNumber
         ref={ref as any}
         size="sm"
         variant="outlined"
         label=""
         value={value}
+        onChange={stableOnChange}
         currency={currencySymbol}
         error={error}
         placeholder={resolvedPlaceholder}
+        showSpinner={false}
         onFocus={(e: any) => { setFocused(true); onFocus?.(e); }}
         onBlur={(e: any) => { setFocused(false); onBlur?.(e); }}
         {...rest}

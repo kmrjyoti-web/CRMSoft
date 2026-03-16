@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 import toast from "react-hot-toast";
 
-import { Button, Icon, Badge } from "@/components/ui";
+import { Button, Icon, Badge, TextareaInput } from "@/components/ui";
 
 import { EmptyState } from "@/components/common/EmptyState";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
@@ -288,10 +288,9 @@ export function RawContactDetail({ rawContactId }: RawContactDetailProps) {
               <h3 className="mb-4 text-sm font-semibold uppercase text-gray-500">
                 Rejection Reason (optional)
               </h3>
-              <textarea
-                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
+              <TextareaInput
+                label="Rejection Reason"
                 rows={2}
-                placeholder="Enter reason if rejecting..."
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
               />

@@ -41,6 +41,10 @@ import { ORGANIZATION_FILTER_CONFIG, ORGANIZATION_LOOKUP_MAPPINGS } from "../uti
 import { OrganizationListUserHelp } from "../help/OrganizationListUserHelp";
 import { OrganizationListDevHelp } from "../help/OrganizationListDevHelp";
 
+import { useSidePanelStore } from "@/stores/side-panel.store";
+import { LedgerForm } from "@/features/accounts/components/LedgerForm";
+import type { SourceEntity } from "@/features/accounts/components/LedgerSourcePicker";
+
 import type {
   OrganizationListItem,
   OrganizationListParams,
@@ -57,7 +61,6 @@ const ORGANIZATION_COLUMNS = [
   { id: "verify", label: "ID Verify", visible: true },
   { id: "status", label: "Status", visible: true },
   { id: "createdAt", label: "Created", visible: true },
-  { id: "rowActions", label: "", visible: true },
 ];
 
 // -- Bulk edit fields --------------------------------------------------------
@@ -102,7 +105,7 @@ export function OrganizationList() {
     idProp: "organizationId",
     editRoute: "/organizations/:id/edit",
     createRoute: "/organizations/new",
-    displayField: "name",
+    displayField: "_rawName",
   });
 
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
@@ -216,16 +219,74 @@ export function OrganizationList() {
     [confirm, softDeleteMutation],
   );
 
+  // ── Convert to Ledger (opens LedgerForm in drawer) ───────
+
+  const openPanel = useSidePanelStore((s) => s.openPanel);
+
+  const handleConvertToLedger = useCallback(
+    (row: Record<string, unknown>) => {
+      const orgIdx = row._orgIdx as number;
+      const org = organizations[orgIdx];
+      if (!org) return;
+
+      const evs = (org as any).entityVerificationStatus ?? "UNVERIFIED";
+      if (evs !== "VERIFIED") {
+        toast.error("Organization must be verified before converting to ledger");
+        return;
+      }
+
+      // Build source entity for pre-fill
+      const sourceEntity: SourceEntity = {
+        type: "organization",
+        id: org.id,
+        name: org.name,
+        mobile: org.phone ?? "",
+        email: org.email ?? "",
+        gstin: org.gstNumber ?? "",
+        address: org.address ?? "",
+        city: org.city ?? "",
+        state: org.state ?? "",
+        pincode: org.pincode ?? "",
+        country: org.country ?? "India",
+        panNo: "",
+        phoneOffice: "",
+        contactPerson: "",
+        _raw: org,
+      };
+
+      const panelId = `ledger-convert-${org.id}`;
+      openPanel({
+        id: panelId,
+        title: `New Ledger — ${org.name}`,
+        width: 720,
+        content: (
+          <LedgerForm
+            mode="panel"
+            panelId={panelId}
+            initialSourceEntity={sourceEntity}
+            onSuccess={() => {
+              toast.success(`Ledger created for "${org.name}"`);
+              useSidePanelStore.getState().closePanel(panelId);
+            }}
+            onCancel={() => useSidePanelStore.getState().closePanel(panelId)}
+          />
+        ),
+      });
+    },
+    [organizations, openPanel],
+  );
+
   const tableData = useMemo(() => {
     const flat = flattenOrganizations(organizations);
     return flat.map((row, idx) => ({
       ...row,
+      _rawName: organizations[idx].name,
       name: (
         <span
           className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium"
           onClick={(e) => {
             e.stopPropagation();
-            handleRowView(row);
+            handleRowView({ ...row, name: organizations[idx].name });
           }}
         >
           {organizations[idx].name}
@@ -255,24 +316,10 @@ export function OrganizationList() {
           />
         </div>
       ),
-      rowActions: (
-        <div onClick={(e) => e.stopPropagation()}>
-          <ActionsMenu items={[
-            { label: "Edit", icon: "edit", onClick: () => handleRowView(row) },
-            {
-              label: "Verify Identity",
-              icon: "shield-check",
-              onClick: () => {
-                setVerifyTarget(organizations[idx]);
-                setVerifyOpen(true);
-              },
-            },
-            { label: "Delete", icon: "trash-2", onClick: () => handleRowArchive(row), variant: "danger" as const },
-          ]} />
-        </div>
-      ),
+      _verifyStatus: (organizations[idx] as any).entityVerificationStatus ?? "UNVERIFIED",
+      _orgIdx: idx,
     }));
-  }, [organizations, handleToggleActive, togglingId, handleRowView, handleRowArchive]);
+  }, [organizations, handleToggleActive, togglingId, handleRowView]);
 
   // ── Bulk edit handlers ─────────────────────────────────────
 
@@ -344,10 +391,42 @@ export function OrganizationList() {
           activeFilters={activeFilters}
           onFilterChange={handleFilterChange}
           onFilterClear={clearFilters}
-          onRowEdit={handleRowView}
           onCreate={handleCreate}
-          onRowDelete={handleRowArchive}
-          onRowArchive={handleRowArchive}
+          customMenuActions={[
+            {
+              id: "dashboard",
+              label: "Dashboard",
+              icon: <Icon name="layout-dashboard" size={14} />,
+              onClick: (row: Record<string, unknown>) => handleRowView(row),
+            },
+            {
+              id: "edit",
+              label: "Edit",
+              icon: <Icon name="edit" size={14} />,
+              onClick: (row: Record<string, unknown>) => handleRowView(row),
+            },
+            {
+              id: "view-log",
+              label: "View Log",
+              icon: <Icon name="history" size={14} />,
+              onClick: (row: Record<string, unknown>) => router.push(`/organizations/${row.id}`),
+            },
+            {
+              id: "convert-to-ledger",
+              label: "Convert to Ledger",
+              icon: <Icon name="book-open" size={14} />,
+              dividerBefore: true,
+              onClick: (row: Record<string, unknown>) => handleConvertToLedger(row),
+            },
+            {
+              id: "delete",
+              label: "Delete",
+              icon: <Icon name="trash-2" size={14} />,
+              danger: true,
+              dividerBefore: true,
+              onClick: (row: Record<string, unknown>) => handleRowArchive(row),
+            },
+          ]}
           selectedIds={selectedIds}
           onSelectionChange={handleSelectionChange}
           headerActions={
@@ -557,6 +636,9 @@ export function OrganizationList() {
           currentStatus={(verifyTarget as any).entityVerificationStatus ?? "UNVERIFIED"}
           onClose={() => { setVerifyOpen(false); setVerifyTarget(null); }}
           onVerified={() => { setVerifyOpen(false); setVerifyTarget(null); }}
+          onSaveBeforeVerify={async (data) => {
+            await updateMutation.mutateAsync({ id: verifyTarget.id, data });
+          }}
         />
       )}
 

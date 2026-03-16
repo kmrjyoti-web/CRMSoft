@@ -93,6 +93,7 @@ export function SidePanel({ panel }: SidePanelProps) {
 
       <SidePanelFooter
         buttons={config.footerButtons}
+        footerLeft={config.footerLeft}
         onClose={() => closePanel(config.id)}
       />
     </div>

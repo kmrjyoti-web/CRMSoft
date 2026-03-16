@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui";
+import { Button, TextareaInput } from "@/components/ui";
 
 // ── Props ───────────────────────────────────────────────
 
@@ -47,23 +47,13 @@ export function CommentForm({
         marginBottom: 16,
       }}
     >
-      <textarea
+      <TextareaInput
+        label="Comment"
         value={content}
         onChange={(e) => setContent(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder={placeholder}
         autoFocus={autoFocus}
         rows={3}
-        style={{
-          width: "100%",
-          padding: 8,
-          borderRadius: 8,
-          border: "1px solid #d1d5db",
-          fontSize: 14,
-          resize: "vertical",
-          fontFamily: "inherit",
-          marginBottom: 8,
-        }}
       />
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <Button

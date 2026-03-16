@@ -202,18 +202,32 @@ export const AICNumber = React.forwardRef<HTMLInputElement, AICNumberProps>(
       precision,
     };
 
+    // Keep onChange stable so dispatch never changes identity due to prop identity changes
+    const onChangeRef = useRef(onChange);
+    onChangeRef.current = onChange;
+
+    // Pending notification — set inside setInternalState, flushed after via useEffect
+    const pendingNotifyRef = useRef<{ value: number | null } | null>(null);
+
+    useEffect(() => {
+      if (pendingNotifyRef.current !== null) {
+        const v = pendingNotifyRef.current.value;
+        pendingNotifyRef.current = null;
+        onChangeRef.current?.(v);
+      }
+    });
+
     const dispatch = useCallback(
       (action: AICNumberAction) => {
         setInternalState((prev) => {
           const next = aicNumberReducer(prev, action, reducerConfig);
-          // Notify parent on value changes
           if (next.value !== prev.value && action.type !== "FOCUS" && action.type !== "BLUR") {
-            onChange?.(next.value);
+            pendingNotifyRef.current = { value: next.value };
           }
           return next;
         });
       },
-      [step, min, max, precision, onChange],
+      [step, min, max, precision],
     );
 
     // Sync controlled value

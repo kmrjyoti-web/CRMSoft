@@ -13,6 +13,7 @@ import {
   Typography,
   CurrencyInput,
   DatePicker,
+  TextareaInput,
 } from "@/components/ui";
 import { LookupSelect } from "@/components/common/LookupSelect";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
@@ -911,18 +912,12 @@ export function InvoiceDetail({ invoiceId }: InvoiceDetailProps) {
             </div>
           )}
 
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Notes
-            </label>
-            <textarea
-              className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-              value={paymentNotes}
-              onChange={(e) => setPaymentNotes(e.target.value)}
-              rows={3}
-              placeholder="Optional payment notes"
-            />
-          </div>
+          <TextareaInput
+            label="Notes"
+            value={paymentNotes}
+            onChange={(e) => setPaymentNotes(e.target.value)}
+            rows={3}
+          />
         </div>
       </Modal>
 
@@ -951,18 +946,12 @@ export function InvoiceDetail({ invoiceId }: InvoiceDetailProps) {
         }
       >
         <div className="space-y-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Reason <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-              value={cancelReason}
-              onChange={(e) => setCancelReason(e.target.value)}
-              rows={3}
-              placeholder="Why is this invoice being cancelled?"
-            />
-          </div>
+          <TextareaInput
+            label="Reason"
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+            rows={3}
+          />
         </div>
       </Modal>
 
@@ -997,18 +986,12 @@ export function InvoiceDetail({ invoiceId }: InvoiceDetailProps) {
             value={creditNoteAmount}
             onChange={(value: number | null) => setCreditNoteAmount(value)}
           />
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Reason <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-              value={creditNoteReason}
-              onChange={(e) => setCreditNoteReason(e.target.value)}
-              rows={3}
-              placeholder="Reason for the credit note"
-            />
-          </div>
+          <TextareaInput
+            label="Reason"
+            value={creditNoteReason}
+            onChange={(e) => setCreditNoteReason(e.target.value)}
+            rows={3}
+          />
         </div>
       </Modal>
     </div>

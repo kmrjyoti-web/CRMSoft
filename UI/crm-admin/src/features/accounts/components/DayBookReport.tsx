@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Button } from "@/components/ui";
+import { Card, Button, DatePicker } from "@/components/ui";
 import { useDayBook } from "../hooks/useAccounts";
 
 export function DayBookReport() {
@@ -18,9 +18,7 @@ export function DayBookReport() {
       <Card className="p-4">
         <div className="flex items-end gap-4">
           <div>
-            <label className="text-sm text-gray-500">Date</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
-              className="block border rounded px-3 py-2" />
+            <DatePicker label="Date" value={date} onChange={(v) => setDate(String(v ?? ""))} />
           </div>
           <Button onClick={() => setQueryDate(date)}>View</Button>
         </div>

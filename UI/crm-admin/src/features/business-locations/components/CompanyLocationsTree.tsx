@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Badge, Icon, Modal, Input, SelectInput, Card, Toolbar } from "@/components/ui";
+import { Button, Badge, Icon, Modal, Input, SelectInput, Card, Toolbar, TextareaInput } from "@/components/ui";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import {
   useCompanyLocationTree,
@@ -276,14 +276,13 @@ function AddStatesModal({
                     onChange={(e) => setSelections((p) => ({ ...p, [code]: { ...p[code], isHeadquarter: e.target.checked } }))}
                   /> HQ
                 </label>
-                <input
-                  placeholder="State GSTIN (optional)"
-                  value={item.stateGstin ?? ""}
-                  onChange={(e) => setSelections((p) => ({ ...p, [code]: { ...p[code], stateGstin: e.target.value } }))}
-                  style={{
-                    border: "1px solid #d1d5db", borderRadius: "4px", padding: "3px 8px", fontSize: "12px", width: "180px",
-                  }}
-                />
+                <div style={{ width: "180px" }}>
+                  <Input
+                    label="State GSTIN (optional)"
+                    value={item.stateGstin ?? ""}
+                    onChange={(v) => setSelections((p) => ({ ...p, [code]: { ...p[code], stateGstin: v } }))}
+                  />
+                </div>
               </div>
             </div>
           );
@@ -554,14 +553,13 @@ function AddPincodesModal({
         {/* Bulk */}
         {method === "bulk" && (
           <div>
-            <textarea
+            <TextareaInput
+              label="Pincodes (comma or newline separated)"
               value={bulkText}
               onChange={(e) => setBulkText(e.target.value)}
-              placeholder="Paste pincodes (comma or newline separated)&#10;411001, 411002, 411014&#10;411028"
-              style={{
-                width: "100%", minHeight: "100px", border: "1px solid #d1d5db", borderRadius: "6px",
-                padding: "8px 12px", fontSize: "13px", resize: "vertical", fontFamily: "monospace",
-              }}
+              placeholder="411001, 411002, 411014&#10;411028"
+              rows={4}
+              style={{ fontFamily: "monospace" }}
             />
           </div>
         )}

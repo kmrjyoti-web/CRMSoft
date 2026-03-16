@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
-import { Button, Icon, Input, Modal, SelectInput, Switch, DatePicker } from '@/components/ui';
+import { Button, Icon, Input, Modal, SelectInput, Switch, DatePicker, TextareaInput } from '@/components/ui';
 
 import { useCreateEvent, useUpdateEvent } from '../hooks/useCalendar';
 import type {
@@ -264,22 +264,11 @@ export function EventForm({ open, onClose, event, defaultDate }: EventFormProps)
 
         {/* Description */}
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#374151', marginBottom: 6 }}>
-            Description
-          </label>
-          <textarea
+          <TextareaInput
+            label="Description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              borderRadius: 6,
-              border: '1px solid #d1d5db',
-              fontSize: 14,
-              resize: 'vertical',
-              fontFamily: 'inherit',
-            }}
           />
         </div>
 

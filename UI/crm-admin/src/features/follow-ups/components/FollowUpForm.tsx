@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-import { Button, Input, SelectInput, DatePicker, Icon } from "@/components/ui";
+import { Button, Input, SelectInput, DatePicker, Icon, TextareaInput } from "@/components/ui";
 import { UserSelect } from "@/components/common/UserSelect";
 
 import { useFollowUp, useCreateFollowUp, useUpdateFollowUp } from "../hooks/useFollowUps";
@@ -13,6 +13,8 @@ interface FollowUpFormProps {
   followUpId?: string;
   entityType?: string;
   entityId?: string;
+  mode?: "page" | "panel";
+  panelId?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -23,10 +25,13 @@ export function FollowUpForm({
   followUpId,
   entityType: defaultEntityType,
   entityId: defaultEntityId,
+  mode,
+  panelId,
   onSuccess,
   onCancel,
 }: FollowUpFormProps) {
   const isEdit = !!followUpId;
+  const isPanel = mode === "panel";
   const { data: existing } = useFollowUp(followUpId ?? "");
   const createMutation = useCreateFollowUp();
   const updateMutation = useUpdateFollowUp();
@@ -53,7 +58,8 @@ export function FollowUpForm({
     }
   }, [isEdit, existing]);
 
-  const handleSubmit = () => {
+  const handleSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!title.trim() || !dueDate) return;
 
     const dto = {
@@ -96,97 +102,87 @@ export function FollowUpForm({
     { label: "Urgent", value: "URGENT" },
   ];
 
+  const formContent = (
+    <div className="flex flex-col gap-4">
+      <Input
+        label="Title"
+        value={title}
+        onChange={(val: string) => setTitle(val)}
+        leftIcon={<Icon name="file-text" size={16} />}
+        required
+      />
+
+      <TextareaInput
+        label="Description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        rows={3}
+      />
+
+      <DatePicker
+        label="Due Date"
+        value={dueDate}
+        onChange={(v: string | Date | null) => setDueDate(v ? String(v) : "")}
+        required
+      />
+
+      <SelectInput
+        label="Priority"
+        options={priorityOptions}
+        value={priority}
+        onChange={(val: string | number | boolean | null) => setPriority(String(val ?? "MEDIUM"))}
+        leftIcon={<Icon name="alert-triangle" size={16} />}
+      />
+
+      <UserSelect
+        label="Assigned To"
+        value={assignedToId}
+        onChange={(val: string | number | boolean | null) =>
+          setAssignedToId(val ? String(val) : null)
+        }
+      />
+
+      <Input
+        label="Entity Type"
+        value={entityType}
+        onChange={(val: string) => setEntityType(val)}
+        leftIcon={<Icon name="tag" size={16} />}
+        disabled={!!defaultEntityType}
+      />
+
+      <Input
+        label="Entity ID"
+        value={entityId}
+        onChange={(val: string) => setEntityId(val)}
+        leftIcon={<Icon name="hash" size={16} />}
+        disabled={!!defaultEntityId}
+      />
+    </div>
+  );
+
+  // Panel mode: wrap in form with ID for SidePanel footer save button
+  if (isPanel) {
+    return (
+      <form
+        id={`sp-form-follow-up-${followUpId || "new"}`}
+        onSubmit={handleSubmit}
+        className="p-4"
+      >
+        {formContent}
+      </form>
+    );
+  }
+
+  // Standalone mode: card with header + footer buttons
   return (
-    <div
-      style={{
-        background: "#fff",
-        borderRadius: 12,
-        padding: 20,
-        border: "1px solid #e5e7eb",
-      }}
-    >
-      <h3 style={{ margin: "0 0 16px 0", fontSize: 16, fontWeight: 600 }}>
+    <div className="bg-white rounded-xl p-5 border border-gray-200">
+      <h3 className="text-base font-semibold mb-4">
         {isEdit ? "Edit Follow-up" : "New Follow-up"}
       </h3>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <Input
-          label="Title"
-          value={title}
-          onChange={(val: string) => setTitle(val)}
-          leftIcon={<Icon name="file-text" size={16} />}
-          required
-        />
+      {formContent}
 
-        <div>
-          <label
-            style={{
-              display: "block",
-              fontSize: 13,
-              fontWeight: 500,
-              color: "#374151",
-              marginBottom: 4,
-            }}
-          >
-            Description
-          </label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            style={{
-              width: "100%",
-              padding: 8,
-              borderRadius: 8,
-              border: "1px solid #d1d5db",
-              fontSize: 14,
-              resize: "vertical",
-              fontFamily: "inherit",
-            }}
-          />
-        </div>
-
-        <DatePicker
-          label="Due Date"
-          value={dueDate}
-          onChange={(v: string) => setDueDate(v)}
-          required
-        />
-
-        <SelectInput
-          label="Priority"
-          options={priorityOptions}
-          value={priority}
-          onChange={(val: string | number | boolean | null) => setPriority(String(val ?? "MEDIUM"))}
-          leftIcon={<Icon name="alert-triangle" size={16} />}
-        />
-
-        <UserSelect
-          label="Assigned To"
-          value={assignedToId}
-          onChange={(val: string | number | boolean | null) =>
-            setAssignedToId(val ? String(val) : null)
-          }
-        />
-
-        <Input
-          label="Entity Type"
-          value={entityType}
-          onChange={(val: string) => setEntityType(val)}
-          leftIcon={<Icon name="tag" size={16} />}
-          disabled={!!defaultEntityType}
-        />
-
-        <Input
-          label="Entity ID"
-          value={entityId}
-          onChange={(val: string) => setEntityId(val)}
-          leftIcon={<Icon name="hash" size={16} />}
-          disabled={!!defaultEntityId}
-        />
-      </div>
-
-      <div style={{ display: "flex", gap: 8, marginTop: 20, justifyContent: "flex-end" }}>
+      <div className="flex gap-2 mt-5 justify-end">
         {onCancel && (
           <Button variant="ghost" onClick={onCancel} disabled={isSubmitting}>
             Cancel
@@ -194,7 +190,7 @@ export function FollowUpForm({
         )}
         <Button
           variant="primary"
-          onClick={handleSubmit}
+          onClick={() => handleSubmit()}
           disabled={!title.trim() || !dueDate || isSubmitting}
         >
           {isSubmitting ? "Saving..." : isEdit ? "Update" : "Create"}

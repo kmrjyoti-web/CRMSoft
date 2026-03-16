@@ -9,6 +9,7 @@ import {
   Button,
   Modal,
   Typography,
+  TextareaInput,
 } from "@/components/ui";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -580,18 +581,12 @@ export function ProformaDetail({ proformaId }: ProformaDetailProps) {
         }
       >
         <div className="space-y-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Reason <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-              value={cancelReason}
-              onChange={(e) => setCancelReason(e.target.value)}
-              rows={3}
-              placeholder="Why is this proforma invoice being cancelled?"
-            />
-          </div>
+          <TextareaInput
+            label="Reason"
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+            rows={3}
+          />
         </div>
       </Modal>
 

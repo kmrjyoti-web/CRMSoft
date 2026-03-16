@@ -7,7 +7,7 @@ import { useForm, Controller, useFieldArray } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
 
-import { Button, Icon, Input, NumberInput, CurrencyInput, Fieldset, Typography, Modal, SelectInput } from "@/components/ui";
+import { Button, Icon, Input, NumberInput, CurrencyInput, Fieldset, Typography, Modal, SelectInput, TextareaInput } from "@/components/ui";
 import { SmartDateInput } from "@/components/common/SmartDateInput";
 import { LookupSelect } from "@/components/common/LookupSelect";
 import { ProductSelect } from "@/components/common/ProductSelect";
@@ -568,18 +568,10 @@ export function SaleOrderForm({ soId, mode = "page", panelId, onSuccess }: SaleO
         >
           <div className="space-y-4">
             <Controller name="paymentTerms" control={control} render={({ field }) => (
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Payment Terms</label>
-                <textarea className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                  value={field.value ?? ""} onChange={field.onChange} rows={3} />
-              </div>
+              <TextareaInput label="Payment Terms" value={field.value ?? ""} onChange={field.onChange} rows={3} />
             )} />
             <Controller name="deliveryTerms" control={control} render={({ field }) => (
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Delivery Terms</label>
-                <textarea className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                  value={field.value ?? ""} onChange={field.onChange} rows={3} />
-              </div>
+              <TextareaInput label="Delivery Terms" value={field.value ?? ""} onChange={field.onChange} rows={3} />
             )} />
           </div>
         </Modal>
@@ -588,8 +580,7 @@ export function SaleOrderForm({ soId, mode = "page", panelId, onSuccess }: SaleO
           footer={<div className="flex justify-end"><Button type="button" variant="primary" onClick={() => setShowNotesModal(false)}>Done</Button></div>}
         >
           <Controller name="internalNotes" control={control} render={({ field }) => (
-            <textarea className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-              value={field.value ?? ""} onChange={field.onChange} rows={5} placeholder="Internal notes..." />
+            <TextareaInput label="Internal Notes" value={field.value ?? ""} onChange={field.onChange} rows={5} />
           )} />
         </Modal>
 

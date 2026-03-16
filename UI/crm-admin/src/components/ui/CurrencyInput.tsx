@@ -1,7 +1,21 @@
 'use client';
 
-import { forwardRef, useState } from 'react';
+import { forwardRef, useCallback, useRef, useState } from 'react';
 import { AICCurrencyInput } from '@coreui/ui-react';
+
+const MAX_INTEGER_DIGITS = 12;
+
+function handleMaxDigits(e: React.KeyboardEvent<HTMLDivElement>) {
+  const input = (e.target as HTMLElement).closest('input') ?? (e.target as HTMLInputElement);
+  if (input?.tagName !== 'INPUT') return;
+  const allowed = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
+  if (allowed.includes(e.key)) return;
+  if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) return;
+  if (!/^[0-9]$/.test(e.key)) return;
+  const val = input.value ?? '';
+  const intPart = val.split('.')[0]?.replace(/[^0-9]/g, '') ?? '';
+  if (intPart.length >= MAX_INTEGER_DIGITS) e.preventDefault();
+}
 
 type AICCurrencyInputProps = React.ComponentProps<typeof AICCurrencyInput>;
 
@@ -11,8 +25,13 @@ type CurrencyInputProps = Omit<AICCurrencyInputProps, 'label'> & {
 };
 
 export const CurrencyInput = forwardRef<HTMLElement, CurrencyInputProps>((props, ref) => {
-  const { label, value, onFocus, onBlur, error, placeholder, required, ...rest } = props;
+  const { label, value, onFocus, onBlur, onChange, error, placeholder, required, ...rest } = props;
   const [focused, setFocused] = useState(false);
+
+  // Stabilize onChange so AICCurrencyInput's useCallback/useEffect deps don't change every render
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  const stableOnChange = useCallback((v: number | null) => onChangeRef.current?.(v), []);
 
   const hasExplicitPlaceholder = placeholder != null && placeholder.trim() !== '';
   const isActive = focused || value != null || hasExplicitPlaceholder;
@@ -20,19 +39,22 @@ export const CurrencyInput = forwardRef<HTMLElement, CurrencyInputProps>((props,
   // No floating label — pass through directly
   if (!label) {
     return (
-      <AICCurrencyInput
-        ref={ref as any}
-        size="sm"
-        variant="outlined"
-        label=""
-        value={value}
-        error={error}
-        placeholder={placeholder ?? ' '}
-        required={required}
-        onFocus={onFocus}
-        onBlur={onBlur}
-        {...rest}
-      />
+      <div className="relative w-full" onKeyDown={handleMaxDigits}>
+        <AICCurrencyInput
+          ref={ref as any}
+          size="sm"
+          variant="outlined"
+          label=""
+          value={value}
+          onChange={stableOnChange}
+          error={error}
+          placeholder={placeholder ?? ' '}
+          required={required}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          {...rest}
+        />
+      </div>
     );
   }
 
@@ -44,13 +66,14 @@ export const CurrencyInput = forwardRef<HTMLElement, CurrencyInputProps>((props,
   ].join(' ');
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full min-w-[140px]" onKeyDown={handleMaxDigits}>
       <AICCurrencyInput
         ref={ref as any}
         size="sm"
         variant="outlined"
         label=""
         value={value}
+        onChange={stableOnChange}
         error={error}
         placeholder={hasExplicitPlaceholder ? placeholder! : ' '}
         required={required}

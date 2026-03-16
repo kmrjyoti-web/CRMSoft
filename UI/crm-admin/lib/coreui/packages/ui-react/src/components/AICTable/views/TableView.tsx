@@ -7,6 +7,15 @@ import {
 import type { ColumnDef, ValidationRule, AICTableFullDensity } from '../types';
 import { validateRecord } from '../utils/validation';
 
+export interface RowMenuAction {
+  id: string;
+  label: string;
+  icon?: React.ReactNode;
+  onClick: (row: any) => void;
+  danger?: boolean;
+  dividerBefore?: boolean;
+}
+
 export interface TableViewProps {
   data: any[];
   density?: AICTableFullDensity;
@@ -20,6 +29,8 @@ export interface TableViewProps {
   onRowDelete?: (row: any) => void;
   onRowCopy?: (row: any) => void;
   onRowArchive?: (row: any) => void;
+  /** Custom 3-dot menu actions — replaces the default Edit/Copy/Archive/Delete menu */
+  customMenuActions?: RowMenuAction[];
   selectedIds?: Set<string>;
   onSelectionChange?: (ids: Set<string>) => void;
 }
@@ -37,6 +48,7 @@ export function TableView({
   onRowDelete,
   onRowCopy,
   onRowArchive,
+  customMenuActions,
   selectedIds,
   onSelectionChange,
 }: TableViewProps) {
@@ -291,23 +303,58 @@ export function TableView({
     );
   };
 
-  const renderActionMenu = (row: any) => (
-    <div className="row-context-menu absolute right-8 top-8 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-30 py-1">
-      <button onClick={(e) => handleEdit(row, e)} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
-        <Edit2 size={14} className="mr-2" /> Edit
-      </button>
-      <button onClick={(e) => handleCopy(row, e)} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
-        <Copy size={14} className="mr-2" /> Copy
-      </button>
-      <button onClick={(e) => handleArchive(row, e)} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
-        <Archive size={14} className="mr-2" /> Archive
-      </button>
-      <div className="border-t border-gray-100 my-1" />
-      <button onClick={(e) => handleDelete(row, e)} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center">
-        <Trash2 size={14} className="mr-2" /> Delete
-      </button>
-    </div>
-  );
+  const renderActionMenu = (row: any) => {
+    // Custom menu actions take priority
+    if (customMenuActions && customMenuActions.length > 0) {
+      return (
+        <div className="row-context-menu absolute right-8 top-8 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-30 py-1">
+          {customMenuActions.map((action) => (
+            <React.Fragment key={action.id}>
+              {action.dividerBefore && <div className="border-t border-gray-100 my-1" />}
+              <button
+                onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); action.onClick(row); }}
+                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center ${action.danger ? 'text-red-600' : 'text-gray-700'}`}
+              >
+                {action.icon && <span className="mr-2 flex-shrink-0">{action.icon}</span>}
+                {action.label}
+              </button>
+            </React.Fragment>
+          ))}
+        </div>
+      );
+    }
+
+    // Default menu — only show items with handlers
+    const hasAny = onRowEdit || onRowCopy || onRowArchive || onRowDelete;
+    if (!hasAny) return null;
+    return (
+      <div className="row-context-menu absolute right-8 top-8 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-30 py-1">
+        {onRowEdit && (
+          <button onClick={(e) => handleEdit(row, e)} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+            <Edit2 size={14} className="mr-2" /> Edit
+          </button>
+        )}
+        {onRowCopy && (
+          <button onClick={(e) => handleCopy(row, e)} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+            <Copy size={14} className="mr-2" /> Copy
+          </button>
+        )}
+        {onRowArchive && (
+          <button onClick={(e) => handleArchive(row, e)} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+            <Archive size={14} className="mr-2" /> Archive
+          </button>
+        )}
+        {onRowDelete && (onRowEdit || onRowCopy || onRowArchive) && (
+          <div className="border-t border-gray-100 my-1" />
+        )}
+        {onRowDelete && (
+          <button onClick={(e) => handleDelete(row, e)} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center">
+            <Trash2 size={14} className="mr-2" /> Delete
+          </button>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div ref={tableContainerRef} className="w-full h-full overflow-auto">
@@ -431,19 +478,25 @@ export function TableView({
               })}
               <td className={`${cellPadding} whitespace-nowrap text-right font-medium relative border-b border-r border-gray-200 w-24`}>
                 <div className="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
-                  <button onClick={(e) => handleEdit(row, e)} className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full" title="Edit">
-                    <Edit2 size={16} />
-                  </button>
-                  <button onClick={(e) => handleDelete(row, e)} className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full" title="Delete">
-                    <Trash2 size={16} />
-                  </button>
-                  <button
-                    onClick={(e) => toggleMenu(row.id, e)}
-                    className="row-action-button p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full"
-                    title="More actions"
-                  >
-                    <MoreHorizontal size={16} />
-                  </button>
+                  {onRowEdit && (
+                    <button onClick={(e) => handleEdit(row, e)} className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full" title="Edit">
+                      <Edit2 size={16} />
+                    </button>
+                  )}
+                  {onRowDelete && (
+                    <button onClick={(e) => handleDelete(row, e)} className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full" title="Delete">
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                  {(customMenuActions?.length || onRowCopy || onRowArchive) ? (
+                    <button
+                      onClick={(e) => toggleMenu(row.id, e)}
+                      className="row-action-button p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full"
+                      title="More actions"
+                    >
+                      <MoreHorizontal size={16} />
+                    </button>
+                  ) : null}
                 </div>
                 {openMenuId === row.id && renderActionMenu(row)}
               </td>

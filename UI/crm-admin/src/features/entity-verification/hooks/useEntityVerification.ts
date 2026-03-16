@@ -29,6 +29,22 @@ export function usePendingVerifications() {
   });
 }
 
+export function useResetVerification() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ entityType, entityId }: { entityType: string; entityId: string }) =>
+      entityVerificationService.resetVerification(entityType, entityId),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({
+        queryKey: ["entity-verification-status", vars.entityType, vars.entityId],
+      });
+      qc.invalidateQueries({
+        queryKey: ["entity-verification-history", vars.entityType, vars.entityId],
+      });
+    },
+  });
+}
+
 export function useInitiateVerification() {
   const qc = useQueryClient();
   return useMutation({

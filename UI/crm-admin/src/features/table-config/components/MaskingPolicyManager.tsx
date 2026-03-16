@@ -4,7 +4,7 @@ import { useMemo, useCallback, useState } from "react";
 
 import toast from "react-hot-toast";
 
-import { TableFull, Button, Icon, Switch } from "@/components/ui";
+import { TableFull, Button, Icon, Switch, SelectInput } from "@/components/ui";
 
 import { useConfirmDialog } from "@/components/common/useConfirmDialog";
 
@@ -124,45 +124,42 @@ export function MaskingPolicyManager() {
         <div className="p-4 border-b bg-gray-50 space-y-3">
           <h4 className="text-sm font-medium">New Masking Policy</h4>
           <div className="flex flex-wrap gap-3">
-            <select
-              value={newPolicy.tableKey}
-              onChange={(e) =>
-                setNewPolicy((prev) => ({
-                  ...prev,
-                  tableKey: e.target.value,
-                  columnId: MASKABLE_COLUMNS[e.target.value]?.[0] ?? "",
-                }))
-              }
-              className="text-sm border rounded px-2 py-1.5"
-            >
-              {TABLE_KEYS.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
+            <div style={{ minWidth: 160 }}>
+              <SelectInput
+                label="Table"
+                value={newPolicy.tableKey}
+                onChange={(v) =>
+                  setNewPolicy((prev) => ({
+                    ...prev,
+                    tableKey: String(v ?? "contacts"),
+                    columnId: MASKABLE_COLUMNS[String(v ?? "contacts")]?.[0] ?? "",
+                  }))
+                }
+                options={TABLE_KEYS.map((t) => ({ value: t.value, label: t.label }))}
+              />
+            </div>
 
-            <select
-              value={newPolicy.columnId}
-              onChange={(e) => setNewPolicy((prev) => ({ ...prev, columnId: e.target.value }))}
-              className="text-sm border rounded px-2 py-1.5"
-            >
-              {availableColumns.map((col) => (
-                <option key={col} value={col}>
-                  {col}
-                </option>
-              ))}
-            </select>
+            <div style={{ minWidth: 140 }}>
+              <SelectInput
+                label="Column"
+                value={newPolicy.columnId}
+                onChange={(v) => setNewPolicy((prev) => ({ ...prev, columnId: String(v ?? "") }))}
+                options={availableColumns.map((col) => ({ value: col, label: col }))}
+              />
+            </div>
 
-            <select
-              value={newPolicy.maskType}
-              onChange={(e) => setNewPolicy((prev) => ({ ...prev, maskType: e.target.value as any }))}
-              className="text-sm border rounded px-2 py-1.5"
-            >
-              <option value="FULL">Full Mask (****)</option>
-              <option value="PARTIAL">Partial Mask (start + end visible)</option>
-              <option value="NONE">No Mask</option>
-            </select>
+            <div style={{ minWidth: 220 }}>
+              <SelectInput
+                label="Mask Type"
+                value={newPolicy.maskType}
+                onChange={(v) => setNewPolicy((prev) => ({ ...prev, maskType: (v as any) ?? "PARTIAL" }))}
+                options={[
+                  { value: "FULL", label: "Full Mask (****)" },
+                  { value: "PARTIAL", label: "Partial Mask (start + end visible)" },
+                  { value: "NONE", label: "No Mask" },
+                ]}
+              />
+            </div>
           </div>
 
           {/* Unmask mode — two clear options */}

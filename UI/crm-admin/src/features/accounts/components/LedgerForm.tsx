@@ -82,6 +82,8 @@ interface LedgerFormProps {
   panelId?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
+  /** Pre-fill source entity (used by "Convert to Ledger" from org/contact list) */
+  initialSourceEntity?: SourceEntity | null;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────
@@ -92,6 +94,7 @@ export function LedgerForm({
   panelId,
   onSuccess,
   onCancel,
+  initialSourceEntity,
 }: LedgerFormProps) {
   const isEdit = !!ledgerId;
   const updatePanelConfig = useSidePanelStore((s) => s.updatePanelConfig);
@@ -105,7 +108,7 @@ export function LedgerForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Source entity (from picker — create mode only)
-  const [sourceEntity, setSourceEntity] = useState<SourceEntity | null>(null);
+  const [sourceEntity, setSourceEntity] = useState<SourceEntity | null>(initialSourceEntity ?? null);
 
   const [form, setForm] = useState({
     code: "",

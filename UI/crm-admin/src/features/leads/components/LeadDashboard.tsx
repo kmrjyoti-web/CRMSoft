@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 
 import toast from "react-hot-toast";
 
-import { Badge, Icon, Button } from "@/components/ui";
+import { Badge, Icon, Button, TextareaInput, SelectInput } from "@/components/ui";
 import {
   EntityDashboardLayout,
   type DashboardTab,
@@ -521,9 +521,8 @@ export function LeadDashboard({
                 </div>
 
                 {/* ── Description ───────────────────── */}
-                <textarea
-                  className="quick-add-card__desc"
-                  placeholder="Enter description or press Space to add details"
+                <TextareaInput
+                  label="Description"
                   value={actDescription}
                   onChange={(e) => setActDescription(e.target.value)}
                   rows={2}
@@ -609,16 +608,13 @@ export function LeadDashboard({
                 <div className="quick-add-card__type-row">
                   <Icon name={getActivityIcon(actType)} size={14} color={getActivityColor(actType)} />
                   <span className="quick-add-card__type-label">Type:</span>
-                  <select
-                    value={actType}
-                    onChange={(e) => setActType(e.target.value as ActivityType)}
-                    className="quick-add-card__type-select"
-                    style={{ color: getActivityColor(actType) }}
-                  >
-                    {ACTIVITY_TYPE_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </select>
+                  <div style={{ flex: 1 }}>
+                    <SelectInput
+                      value={actType}
+                      onChange={(v) => setActType((v as ActivityType) ?? "CALL")}
+                      options={ACTIVITY_TYPE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                    />
+                  </div>
                 </div>
 
                 {/* ── Customer (Contact) Row ──────── */}

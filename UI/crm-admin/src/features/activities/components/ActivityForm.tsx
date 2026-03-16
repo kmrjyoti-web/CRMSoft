@@ -15,6 +15,7 @@ import {
   DatePicker,
   NumberInput,
   Fieldset,
+  TextareaInput,
 } from "@/components/ui";
 import { LookupSelect } from "@/components/common/LookupSelect";
 import { useSidePanelStore } from "@/stores/side-panel.store";
@@ -266,24 +267,20 @@ export function ActivityForm({ activityId, mode = "page", panelId, onSuccess, on
               )}
             />
           </div>
-          <Controller
-            name="description"
-            control={control}
-            render={({ field }) => (
-              <div className="mt-4">
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Description
-                </label>
-                <textarea
-                  className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
+          <div className="mt-4">
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <TextareaInput
+                  label="Description"
                   rows={3}
-                  placeholder="Activity description"
                   value={field.value ?? ""}
                   onChange={(e) => field.onChange(e.target.value)}
                 />
-              </div>
-            )}
-          />
+              )}
+            />
+          </div>
         </Fieldset>
 
         {/* Schedule */}

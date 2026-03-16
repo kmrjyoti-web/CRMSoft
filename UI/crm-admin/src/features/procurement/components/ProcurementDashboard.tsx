@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Card, Badge, Icon } from "@/components/ui";
 import { useProcurementDashboard } from "../hooks/useProcurement";
 import type { ProcurementDashboard as DashboardData } from "../types/procurement.types";
@@ -18,52 +19,33 @@ function fmtDate(d: string) {
   return new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+// ── Nav links ────────────────────────────────────────────────────────────────
 
-function KpiTile({ label, value, sub, icon, color, onClick }: {
-  label: string; value: string | number; sub?: string;
-  icon: string; color: string; onClick?: () => void;
-}) {
-  return (
-    <Card
-      onClick={onClick}
-      style={{ cursor: onClick ? "pointer" : "default" }}
-      className="h-100"
-    >
-      <div className="p-3 d-flex align-items-center gap-3">
-        <div style={{
-          flexShrink: 0, width: 44, height: 44, borderRadius: 10,
-          background: `${color}18`, display: "flex",
-          alignItems: "center", justifyContent: "center",
-        }}>
-          <Icon name={icon} size={20} color={color} />
-        </div>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.1, color: "#111827" }}>
-            {value}
-          </div>
-          <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>{label}</div>
-          {sub && <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 1 }}>{sub}</div>}
-        </div>
-      </div>
-    </Card>
-  );
-}
+const NAV_LINKS = [
+  { label: "RFQs",           href: "/procurement/rfq",              icon: "file-question" },
+  { label: "Quotations",     href: "/procurement/quotations",       icon: "file-text" },
+  { label: "POs",            href: "/procurement/purchase-orders",   icon: "clipboard-list" },
+  { label: "GRNs",           href: "/procurement/goods-receipts",    icon: "package-check" },
+  { label: "Invoices",       href: "/procurement/invoices",          icon: "receipt" },
+  { label: "Compare",        href: "/procurement/compare",           icon: "git-compare" },
+] as const;
+
+// ── Sub-components ───────────────────────────────────────────────────────────
 
 function PipelineStage({ label, count, color, pct }: {
   label: string; count: number; color: string; pct: number;
 }) {
   return (
     <div>
-      <div className="d-flex justify-content-between align-items-center mb-1">
-        <span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>{label}</span>
-        <span style={{ fontSize: 12, fontWeight: 700, color }}>{count}</span>
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-xs text-gray-700 font-medium">{label}</span>
+        <span className="text-xs font-bold" style={{ color }}>{count}</span>
       </div>
-      <div style={{ height: 6, borderRadius: 3, background: "#f3f4f6", overflow: "hidden" }}>
-        <div style={{
-          height: "100%", borderRadius: 3, background: color,
-          width: `${Math.min(pct, 100)}%`, transition: "width 0.6s ease",
-        }} />
+      <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{ background: color, width: `${Math.min(pct, 100)}%` }}
+        />
       </div>
     </div>
   );
@@ -74,7 +56,7 @@ function StatusFlow({ stages, total }: {
   total: number;
 }) {
   return (
-    <div className="d-flex flex-column gap-2">
+    <div className="flex flex-col gap-2">
       {stages.map((s) => (
         <PipelineStage key={s.label} label={s.label} count={s.count} color={s.color}
           pct={total > 0 ? (s.count / total) * 100 : 0} />
@@ -83,22 +65,26 @@ function StatusFlow({ stages, total }: {
   );
 }
 
-function SectionCard({ title, icon, children, badge }: {
+function SectionCard({ title, icon, children, badge, linkHref, linkLabel }: {
   title: string; icon: string; children: React.ReactNode; badge?: number;
+  linkHref?: string; linkLabel?: string;
 }) {
   return (
-    <Card className="h-100">
-      <div className="p-4" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        <div className="d-flex align-items-center gap-2 mb-3">
-          <Icon name={icon} size={15} color="#6b7280" />
-          <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{title}</span>
-          {badge !== undefined && badge > 0 && (
-            <Badge variant="warning" style={{ fontSize: 10, padding: "1px 6px" }}>{badge}</Badge>
-          )}
-        </div>
-        <div style={{ flex: 1 }}>{children}</div>
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col">
+      <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+        <Icon name={icon as any} size={14} color="#6b7280" />
+        <span className="text-sm font-semibold text-gray-700">{title}</span>
+        {badge !== undefined && badge > 0 && (
+          <Badge variant="warning" style={{ fontSize: 10, padding: "1px 6px" }}>{badge}</Badge>
+        )}
+        {linkHref && (
+          <Link href={linkHref} className="ml-auto text-xs text-blue-600 no-underline hover:underline flex items-center gap-1">
+            {linkLabel ?? "View all"} <Icon name="arrow-right" size={11} />
+          </Link>
+        )}
       </div>
-    </Card>
+      <div className="p-4 flex-1">{children}</div>
+    </div>
   );
 }
 
@@ -111,13 +97,13 @@ export function ProcurementDashboard() {
 
   if (isLoading) {
     return (
-      <div className="p-6 d-flex align-items-center gap-2" style={{ color: "#9ca3af" }}>
+      <div className="p-6 flex items-center gap-2 text-gray-400">
         <Icon name="loader" size={18} className="animate-spin" /> Loading…
       </div>
     );
   }
   if (!d) {
-    return <div className="p-6 text-center" style={{ color: "#9ca3af", fontSize: 14 }}>No data available</div>;
+    return <div className="p-6 text-center text-gray-400 text-sm">No data available</div>;
   }
 
   const rfqTotal = d.rfq.draft + d.rfq.sent + d.rfq.closed;
@@ -125,148 +111,155 @@ export function ProcurementDashboard() {
     d.purchaseOrders.approved + d.purchaseOrders.completed;
   const grnTotal = d.goodsReceipts.draft + d.goodsReceipts.accepted + d.goodsReceipts.rejected;
 
+  const kpiItems = [
+    { label: "RFQs",      value: d.rfq.sent,                          sub: `${rfqTotal} total`,          color: "#3b82f6" },
+    { label: "PO Value",   value: fmt(d.purchaseOrders.totalValue),     sub: `${d.purchaseOrders.approved} approved`, color: "#22c55e" },
+    { label: "Approvals",  value: d.purchaseOrders.pendingApproval,     sub: "pending",                    color: "#f59e0b" },
+    { label: "Payable",    value: fmt(d.invoices.totalPayable),         sub: `${d.invoices.pending} unpaid`, color: "#ef4444" },
+  ];
+
   return (
-    <div className="p-4" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <div className="h-full flex flex-col bg-white">
+      {/* ── Toolbar (matches TableFull header bar) ────────────── */}
+      <header className="flex items-center justify-between px-4 py-2 border-b border-gray-200 bg-white shadow-sm z-40">
+        <div className="flex items-center gap-3">
+          <h1 className="text-lg font-semibold text-gray-900">Procurement</h1>
+          <div className="h-5 w-px bg-gray-300" />
 
-      {/* Header */}
-      <div className="d-flex align-items-center justify-content-between">
-        <div>
-          <h5 style={{ fontWeight: 700, margin: 0, color: "#111827" }}>Procurement Dashboard</h5>
-          <p style={{ margin: 0, fontSize: 12, color: "#9ca3af", marginTop: 2 }}>Purchase pipeline at a glance</p>
+          {/* Inline KPI stats */}
+          <div className="flex items-center gap-5">
+            {kpiItems.map((k) => (
+              <div key={k.label} className="flex items-center gap-1.5">
+                <span className="text-base font-bold" style={{ color: k.color }}>
+                  {k.value}
+                </span>
+                <span className="text-xs text-gray-400">{k.label}</span>
+                {k.sub && (
+                  <span className="text-[10px] text-gray-300">({k.sub})</span>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-        {d.pendingApprovals.totalCount > 0 && (
-          <div
-            onClick={() => router.push("/procurement/purchase-orders")}
-            className="d-flex align-items-center gap-2"
-            style={{ cursor: "pointer", background: "#fff7ed", border: "1px solid #fed7aa", borderRadius: 8, padding: "6px 12px" }}
-          >
-            <Icon name="bell" size={14} color="#f97316" />
-            <span style={{ fontSize: 12, color: "#ea580c", fontWeight: 600 }}>
-              {d.pendingApprovals.totalCount} pending approval{d.pendingApprovals.totalCount !== 1 ? "s" : ""}
-            </span>
-          </div>
-        )}
-      </div>
 
-      {/* KPI Strip */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-        <KpiTile label="Open RFQs" value={d.rfq.sent} sub={`${rfqTotal} total`}
-          icon="file-question" color="#3b82f6" onClick={() => router.push("/procurement/rfq")} />
-        <KpiTile label="PO Value" value={fmt(d.purchaseOrders.totalValue)}
-          sub={`${d.purchaseOrders.approved} approved POs`}
-          icon="indian-rupee" color="#22c55e" onClick={() => router.push("/procurement/purchase-orders")} />
-        <KpiTile label="Pending Approvals" value={d.purchaseOrders.pendingApproval}
-          sub="purchase orders" icon="clock" color="#f59e0b"
-          onClick={() => router.push("/procurement/purchase-orders")} />
-        <KpiTile label="Payable" value={fmt(d.invoices.totalPayable)}
-          sub={`${d.invoices.pending} unpaid invoices`} icon="receipt" color="#ef4444"
-          onClick={() => router.push("/procurement/invoices")} />
-      </div>
-
-      {/* Pipeline Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-        <SectionCard title="RFQ Pipeline" icon="file-question">
-          <StatusFlow total={rfqTotal} stages={[
-            { label: "Draft", count: d.rfq.draft, color: "#94a3b8" },
-            { label: "Sent to Vendors", count: d.rfq.sent, color: "#3b82f6" },
-            { label: "Closed", count: d.rfq.closed, color: "#22c55e" },
-          ]} />
-          <div onClick={() => router.push("/procurement/rfq")}
-            className="d-flex align-items-center gap-1 mt-3"
-            style={{ cursor: "pointer", color: "#3b82f6", fontSize: 12, fontWeight: 500 }}>
-            View all RFQs <Icon name="arrow-right" size={12} />
-          </div>
-        </SectionCard>
-
-        <SectionCard title="Purchase Orders" icon="clipboard-list" badge={d.purchaseOrders.pendingApproval}>
-          <StatusFlow total={poTotal} stages={[
-            { label: "Draft", count: d.purchaseOrders.draft, color: "#94a3b8" },
-            { label: "Pending Approval", count: d.purchaseOrders.pendingApproval, color: "#f59e0b" },
-            { label: "Approved", count: d.purchaseOrders.approved, color: "#3b82f6" },
-            { label: "Completed", count: d.purchaseOrders.completed, color: "#22c55e" },
-          ]} />
-          <div onClick={() => router.push("/procurement/purchase-orders")}
-            className="d-flex align-items-center gap-1 mt-3"
-            style={{ cursor: "pointer", color: "#3b82f6", fontSize: 12, fontWeight: 500 }}>
-            View all POs <Icon name="arrow-right" size={12} />
-          </div>
-        </SectionCard>
-
-        <SectionCard title="Goods Receipts" icon="package-check">
-          <StatusFlow total={grnTotal} stages={[
-            { label: "Draft", count: d.goodsReceipts.draft, color: "#94a3b8" },
-            { label: "Accepted", count: d.goodsReceipts.accepted, color: "#22c55e" },
-            { label: "Rejected", count: d.goodsReceipts.rejected, color: "#ef4444" },
-          ]} />
-          {d.goodsReceipts.rejected > 0 && (
-            <div className="d-flex align-items-center gap-1 mt-2"
-              style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 6, padding: "4px 8px", fontSize: 11, color: "#dc2626" }}>
-              <Icon name="alert-circle" size={11} />
-              &nbsp;{d.goodsReceipts.rejected} GRN{d.goodsReceipts.rejected !== 1 ? "s" : ""} rejected
-            </div>
+        <div className="flex items-center gap-2">
+          {/* Pending approvals badge */}
+          {d.pendingApprovals.totalCount > 0 && (
+            <button
+              onClick={() => router.push("/procurement/purchase-orders")}
+              className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-orange-600 bg-orange-50 border border-orange-200 rounded-md hover:bg-orange-100 transition-colors"
+            >
+              <Icon name="bell" size={12} />
+              {d.pendingApprovals.totalCount} pending
+            </button>
           )}
-          <div onClick={() => router.push("/procurement/goods-receipts")}
-            className="d-flex align-items-center gap-1 mt-3"
-            style={{ cursor: "pointer", color: "#3b82f6", fontSize: 12, fontWeight: 500 }}>
-            View all GRNs <Icon name="arrow-right" size={12} />
+
+          <div className="h-5 w-px bg-gray-300" />
+
+          {/* Nav links as pill buttons */}
+          <div className="flex items-center bg-gray-100 rounded-md p-0.5">
+            {NAV_LINKS.map(({ label, href, icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-gray-500 hover:text-gray-700 rounded transition-colors no-underline"
+              >
+                <Icon name={icon as any} size={11} />
+                {label}
+              </Link>
+            ))}
           </div>
-        </SectionCard>
-      </div>
+        </div>
+      </header>
 
-      {/* Bottom Row */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+      {/* ── Content area ──────────────────────────────────────── */}
+      <div className="flex-1 overflow-y-auto p-5 space-y-4">
 
-        <SectionCard title="Recent Purchase Orders" icon="clock">
-          {d.recentPOs.length === 0 ? (
-            <p style={{ fontSize: 13, color: "#9ca3af", textAlign: "center", margin: "12px 0" }}>No recent POs</p>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {d.recentPOs.slice(0, 5).map((po) => (
-                <div key={po.id}
-                  className="d-flex align-items-center justify-content-between"
-                  onClick={() => router.push("/procurement/purchase-orders")}
-                  style={{ padding: "6px 8px", borderRadius: 6, background: "#f9fafb", cursor: "pointer" }}>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>{po.poNumber}</div>
-                    <div style={{ fontSize: 11, color: "#9ca3af" }}>{fmtDate(po.createdAt)}</div>
+        {/* Pipeline Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <SectionCard title="RFQ Pipeline" icon="file-question" linkHref="/procurement/rfq" linkLabel="View RFQs">
+            <StatusFlow total={rfqTotal} stages={[
+              { label: "Draft", count: d.rfq.draft, color: "#94a3b8" },
+              { label: "Sent to Vendors", count: d.rfq.sent, color: "#3b82f6" },
+              { label: "Closed", count: d.rfq.closed, color: "#22c55e" },
+            ]} />
+          </SectionCard>
+
+          <SectionCard title="Purchase Orders" icon="clipboard-list" badge={d.purchaseOrders.pendingApproval} linkHref="/procurement/purchase-orders" linkLabel="View POs">
+            <StatusFlow total={poTotal} stages={[
+              { label: "Draft", count: d.purchaseOrders.draft, color: "#94a3b8" },
+              { label: "Pending Approval", count: d.purchaseOrders.pendingApproval, color: "#f59e0b" },
+              { label: "Approved", count: d.purchaseOrders.approved, color: "#3b82f6" },
+              { label: "Completed", count: d.purchaseOrders.completed, color: "#22c55e" },
+            ]} />
+          </SectionCard>
+
+          <SectionCard title="Goods Receipts" icon="package-check" linkHref="/procurement/goods-receipts" linkLabel="View GRNs">
+            <StatusFlow total={grnTotal} stages={[
+              { label: "Draft", count: d.goodsReceipts.draft, color: "#94a3b8" },
+              { label: "Accepted", count: d.goodsReceipts.accepted, color: "#22c55e" },
+              { label: "Rejected", count: d.goodsReceipts.rejected, color: "#ef4444" },
+            ]} />
+            {d.goodsReceipts.rejected > 0 && (
+              <div className="flex items-center gap-1 mt-2 bg-red-50 border border-red-200 rounded px-2 py-1 text-[11px] text-red-600">
+                <Icon name="alert-circle" size={11} />
+                {d.goodsReceipts.rejected} GRN{d.goodsReceipts.rejected !== 1 ? "s" : ""} rejected
+              </div>
+            )}
+          </SectionCard>
+        </div>
+
+        {/* Bottom Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <SectionCard title="Recent Purchase Orders" icon="clock" linkHref="/procurement/purchase-orders">
+            {d.recentPOs.length === 0 ? (
+              <p className="text-center text-gray-400 text-sm py-3">No recent POs</p>
+            ) : (
+              <div className="flex flex-col gap-1.5">
+                {d.recentPOs.slice(0, 5).map((po) => (
+                  <div key={po.id}
+                    onClick={() => router.push("/procurement/purchase-orders")}
+                    className="flex items-center justify-between px-2.5 py-2 rounded-md bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors"
+                  >
+                    <div>
+                      <div className="text-sm font-semibold text-gray-900">{po.poNumber}</div>
+                      <div className="text-[11px] text-gray-400">{fmtDate(po.createdAt)}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-gray-700">{fmt(po.grandTotal)}</span>
+                      <Badge
+                        variant={po.status === "COMPLETED" ? "success" : po.status === "APPROVED" ? "primary" : po.status === "PENDING_APPROVAL" ? "warning" : "default"}
+                        style={{ fontSize: 10, padding: "2px 6px" }}>
+                        {po.status.replace(/_/g, " ")}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="d-flex align-items-center gap-2">
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{fmt(po.grandTotal)}</span>
-                    <Badge
-                      variant={po.status === "COMPLETED" ? "success" : po.status === "APPROVED" ? "primary" : po.status === "PENDING_APPROVAL" ? "warning" : "default"}
-                      style={{ fontSize: 10, padding: "2px 6px" }}>
-                      {po.status.replace(/_/g, " ")}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </SectionCard>
+                ))}
+              </div>
+            )}
+          </SectionCard>
 
-        <SectionCard title="Invoice Status" icon="receipt">
-          <StatusFlow total={d.invoices.total || 1} stages={[
-            { label: "Draft", count: d.invoices.draft, color: "#94a3b8" },
-            { label: "Pending", count: d.invoices.pending, color: "#f59e0b" },
-            { label: "Approved", count: d.invoices.approved, color: "#3b82f6" },
-            { label: "Paid", count: d.invoices.paid, color: "#22c55e" },
-          ]} />
-          <div style={{
-            marginTop: 12, padding: "10px 12px", borderRadius: 8,
-            background: d.invoices.totalPayable > 0 ? "#fef2f2" : "#f0fdf4",
-            border: `1px solid ${d.invoices.totalPayable > 0 ? "#fecaca" : "#bbf7d0"}`,
-          }}>
-            <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 2 }}>Outstanding Payable</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: d.invoices.totalPayable > 0 ? "#dc2626" : "#16a34a" }}>
-              {fmt(d.invoices.totalPayable)}
+          <SectionCard title="Invoice Status" icon="receipt" linkHref="/procurement/invoices">
+            <StatusFlow total={d.invoices.total || 1} stages={[
+              { label: "Draft", count: d.invoices.draft, color: "#94a3b8" },
+              { label: "Pending", count: d.invoices.pending, color: "#f59e0b" },
+              { label: "Approved", count: d.invoices.approved, color: "#3b82f6" },
+              { label: "Paid", count: d.invoices.paid, color: "#22c55e" },
+            ]} />
+            <div className={`mt-3 px-3 py-2.5 rounded-lg border ${
+              d.invoices.totalPayable > 0
+                ? "bg-red-50 border-red-200"
+                : "bg-green-50 border-green-200"
+            }`}>
+              <div className="text-[11px] text-gray-500 mb-0.5">Outstanding Payable</div>
+              <div className={`text-xl font-bold ${
+                d.invoices.totalPayable > 0 ? "text-red-600" : "text-green-600"
+              }`}>
+                {fmt(d.invoices.totalPayable)}
+              </div>
             </div>
-          </div>
-          <div onClick={() => router.push("/procurement/invoices")}
-            className="d-flex align-items-center gap-1 mt-3"
-            style={{ cursor: "pointer", color: "#3b82f6", fontSize: 12, fontWeight: 500 }}>
-            View all invoices <Icon name="arrow-right" size={12} />
-          </div>
-        </SectionCard>
+          </SectionCard>
+        </div>
       </div>
     </div>
   );

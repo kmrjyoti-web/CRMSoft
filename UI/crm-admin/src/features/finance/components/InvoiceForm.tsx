@@ -16,6 +16,7 @@ import {
   Fieldset,
   Typography,
   Modal,
+  TextareaInput,
 } from "@/components/ui";
 import { SmartDateInput } from "@/components/common/SmartDateInput";
 import { LookupSelect } from "@/components/common/LookupSelect";
@@ -961,12 +962,11 @@ export function InvoiceForm({ invoiceId, leadId: defaultLeadId, mode = "page", p
             name="notes"
             control={control}
             render={({ field }) => (
-              <textarea
-                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
+              <TextareaInput
+                label="Notes"
                 value={field.value ?? ""}
                 onChange={field.onChange}
                 rows={5}
-                placeholder="Notes visible on invoice..."
               />
             )}
           />
@@ -990,12 +990,11 @@ export function InvoiceForm({ invoiceId, leadId: defaultLeadId, mode = "page", p
             name="termsAndConditions"
             control={control}
             render={({ field }) => (
-              <textarea
-                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
+              <TextareaInput
+                label="Terms & Conditions"
                 value={field.value ?? ""}
                 onChange={field.onChange}
                 rows={5}
-                placeholder="Payment terms, late fees, etc..."
               />
             )}
           />
@@ -1019,12 +1018,11 @@ export function InvoiceForm({ invoiceId, leadId: defaultLeadId, mode = "page", p
             name="internalNotes"
             control={control}
             render={({ field }) => (
-              <textarea
-                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
+              <TextareaInput
+                label="Internal Notes"
                 value={field.value ?? ""}
                 onChange={field.onChange}
                 rows={5}
-                placeholder="Internal notes (not visible to customer)..."
               />
             )}
           />

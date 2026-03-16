@@ -17,7 +17,7 @@ interface DiscountInputProps {
 }
 
 const DISCOUNT_TYPES = [
-  { label: '%', value: 'PERCENT' },
+  { label: '%', value: 'PERCENTAGE' },
   { label: '₹', value: 'FLAT' },
 ];
 
@@ -42,6 +42,8 @@ export const DiscountInput = forwardRef<HTMLInputElement, DiscountInputProps>(
 
     const isActive = focused || value != null;
 
+    const MAX_INTEGER_DIGITS = 5;
+
     const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
       const allowed = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
       if (allowed.includes(e.key)) return;
@@ -50,7 +52,11 @@ export const DiscountInput = forwardRef<HTMLInputElement, DiscountInputProps>(
         if (e.currentTarget.value.includes('.')) e.preventDefault();
         return;
       }
-      if (!/^[0-9]$/.test(e.key)) e.preventDefault();
+      if (!/^[0-9]$/.test(e.key)) { e.preventDefault(); return; }
+      // Enforce max 5 integer digits
+      const current = e.currentTarget.value;
+      const intPart = current.split('.')[0] ?? '';
+      if (!current.includes('.') && intPart.length >= MAX_INTEGER_DIGITS) e.preventDefault();
     }, []);
 
     const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,6 +67,9 @@ export const DiscountInput = forwardRef<HTMLInputElement, DiscountInputProps>(
         return;
       }
       if (!/^\d*\.?\d*$/.test(val)) return;
+      // Enforce max 5 integer digits
+      const intPart = val.split('.')[0] ?? '';
+      if (intPart.length > MAX_INTEGER_DIGITS) return;
       setRawValue(val);
       const num = parseFloat(val);
       if (!isNaN(num)) onChange(num);
@@ -77,7 +86,7 @@ export const DiscountInput = forwardRef<HTMLInputElement, DiscountInputProps>(
       if (value != null) {
         let clamped = Math.max(0, value);
         // For percent, cap at 100
-        if (discountType === 'PERCENT' && clamped > 100) clamped = 100;
+        if (discountType === 'PERCENTAGE' && clamped > 100) clamped = 100;
         clamped = parseFloat(clamped.toFixed(decimalPlaces));
         if (clamped !== value) onChange(clamped);
       } else {
@@ -100,7 +109,7 @@ export const DiscountInput = forwardRef<HTMLInputElement, DiscountInputProps>(
       : 'border-gray-300 focus-within:border-[var(--color-primary)] focus-within:ring-1 focus-within:ring-[var(--color-primary-light,#dbeafe)]';
 
     return (
-      <div className={`relative w-full ${className ?? ''}`}>
+      <div className={`relative w-[160px] min-w-[160px] ${className ?? ''}`}>
         <div
           className={[
             'flex items-stretch rounded-md border overflow-hidden transition-colors',
@@ -118,6 +127,7 @@ export const DiscountInput = forwardRef<HTMLInputElement, DiscountInputProps>(
             ref={ref}
             type="text"
             inputMode="decimal"
+            maxLength={8}
             value={displayValue}
             onChange={handleChange}
             onKeyDown={handleKeyDown}

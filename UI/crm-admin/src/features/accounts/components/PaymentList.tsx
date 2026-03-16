@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { TableFull, Badge, Button } from "@/components/ui";
+import { TableFull, Badge, Button, SelectInput } from "@/components/ui";
 import { Icon } from "@/components/ui";
 import { usePaymentList } from "../hooks/useAccounts";
 import { useEntityPanel } from "@/hooks/useEntityPanel";
@@ -130,20 +130,19 @@ export function PaymentList() {
       </div>
 
       {/* Status dropdown */}
-      <select
-        value={statusFilter}
-        onChange={(e) => setStatusFilter(e.target.value)}
-        style={{
-          fontSize: 12, border: "1px solid #d1d5db", borderRadius: 6,
-          padding: "4px 8px", background: "#fff", color: "#374151", cursor: "pointer",
-        }}
-      >
-        <option value="ALL">All Status</option>
-        <option value="DRAFT">Draft</option>
-        <option value="PENDING_APPROVAL">Pending Approval</option>
-        <option value="APPROVED">Approved</option>
-        <option value="CANCELLED">Cancelled</option>
-      </select>
+      <div style={{ minWidth: 160 }}>
+        <SelectInput
+          value={statusFilter}
+          onChange={(v) => setStatusFilter(String(v ?? "ALL"))}
+          options={[
+            { value: "ALL", label: "All Status" },
+            { value: "DRAFT", label: "Draft" },
+            { value: "PENDING_APPROVAL", label: "Pending Approval" },
+            { value: "APPROVED", label: "Approved" },
+            { value: "CANCELLED", label: "Cancelled" },
+          ]}
+        />
+      </div>
     </div>
   );
 

@@ -7,7 +7,7 @@ import { useForm, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
 
-import { Button, Icon, Input, SelectInput, DatePicker, Fieldset } from "@/components/ui";
+import { Button, Icon, Input, SelectInput, DatePicker, Fieldset, TextareaInput } from "@/components/ui";
 import { FormErrors } from "@/components/common/FormErrors";
 import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
@@ -299,18 +299,12 @@ export function DemoForm({ demoId, mode = "page", panelId, onSuccess, onCancel }
               name="notes"
               control={control}
               render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Notes
-                  </label>
-                  <textarea
-                    className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                    rows={3}
-                    placeholder="Additional notes"
-                    value={field.value ?? ""}
-                    onChange={(e) => field.onChange(e.target.value)}
-                  />
-                </div>
+                <TextareaInput
+                  label="Notes"
+                  rows={3}
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
               )}
             />
           </div>

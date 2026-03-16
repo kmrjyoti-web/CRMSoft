@@ -50,6 +50,7 @@ export const AICTableFull = forwardRef<HTMLDivElement, AICTableFullProps>(functi
     onRowDelete,
     onRowCopy,
     onRowArchive,
+    customMenuActions,
     onCreate,
     filterConfig,
     onFilterChange,
@@ -141,6 +142,7 @@ export const AICTableFull = forwardRef<HTMLDivElement, AICTableFullProps>(functi
             onRowDelete={onRowDelete}
             onRowCopy={onRowCopy}
             onRowArchive={onRowArchive}
+            customMenuActions={customMenuActions}
             selectedIds={selectedIds}
             onSelectionChange={onSelectionChange}
           />

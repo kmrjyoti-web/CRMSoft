@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { Button, Card, Icon, Input, SelectInput } from '@/components/ui';
+import { Button, Card, Icon, Input, SelectInput, TextareaInput } from '@/components/ui';
 import { PageHeader } from '@/components/common';
 import { useCreateTicket } from '../hooks/useSupport';
 import type { CreateTicketPayload } from '../types/support.types';
@@ -125,31 +125,11 @@ export function CreateTicketForm() {
           </div>
 
           <div style={{ marginBottom: 20 }}>
-            <label
-              style={{
-                display: 'block',
-                fontSize: 13,
-                fontWeight: 500,
-                color: '#374151',
-                marginBottom: 6,
-              }}
-            >
-              Description
-            </label>
-            <textarea
+            <TextareaInput
+              label="Description"
               value={form.description}
               onChange={(e) => updateField('description', e.target.value)}
               rows={6}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: 6,
-                fontSize: 14,
-                resize: 'vertical',
-                fontFamily: 'inherit',
-              }}
-              placeholder="Describe the issue in detail..."
             />
           </div>
 

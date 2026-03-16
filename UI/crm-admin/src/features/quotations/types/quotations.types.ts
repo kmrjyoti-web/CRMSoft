@@ -27,6 +27,8 @@ export type SendChannel = "EMAIL" | "WHATSAPP" | "PORTAL" | "MANUAL" | "DOWNLOAD
 export interface LineItem {
   id: string;
   quotationId: string;
+  productId?: string;
+  productCode?: string;
   productName: string;
   description?: string;
   hsnCode?: string;
@@ -110,6 +112,18 @@ export interface QuotationLead {
   id: string;
   leadNumber: string;
   contact?: { id: string; firstName: string; lastName: string };
+  organization?: { id: string; name: string };
+}
+
+export interface QuotationContactPerson {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface QuotationOrganization {
+  id: string;
+  name: string;
 }
 
 export interface QuotationCreatedBy {
@@ -139,6 +153,8 @@ export interface QuotationListItem extends QuotationItem {
 
 export interface QuotationDetail extends QuotationItem {
   lead?: QuotationLead;
+  contactPerson?: QuotationContactPerson;
+  organization?: QuotationOrganization;
   createdBy?: QuotationCreatedBy;
   lineItems?: LineItem[];
   sendLogs?: SendLog[];

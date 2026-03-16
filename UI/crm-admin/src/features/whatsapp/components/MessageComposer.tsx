@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { Button, Icon } from '@/components/ui';
+import { Button, Icon, TextareaInput } from '@/components/ui';
 import { useSendTextMessage, useSendTemplateMessage } from '../hooks/useWaConversations';
 import { QuickReplyPicker } from './QuickReplyPicker';
 import { TemplatePicker } from './TemplatePicker';
@@ -92,25 +92,16 @@ export function MessageComposer({ conversationId, windowExpired }: MessageCompos
           <Icon name="file-text" size={18} color="#64748b" />
         </button>
 
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={windowExpired ? 'Use template messages only...' : 'Type a message...'}
-          disabled={windowExpired}
-          style={{
-            flex: 1,
-            minHeight: 40,
-            maxHeight: 120,
-            padding: '8px 12px',
-            border: '1px solid #e5e7eb',
-            borderRadius: 8,
-            fontSize: 14,
-            fontFamily: 'inherit',
-            resize: 'none',
-            outline: 'none',
-          }}
-        />
+        <div style={{ flex: 1 }}>
+          <TextareaInput
+            label="Message"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={windowExpired}
+            rows={2}
+          />
+        </div>
 
         <Button
           variant="primary"

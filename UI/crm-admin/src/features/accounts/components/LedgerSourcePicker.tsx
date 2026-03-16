@@ -120,16 +120,20 @@ export function LedgerSourcePicker({ selected, onSelect }: LedgerSourcePickerPro
 
   const isLoading = loadingContacts || loadingOrgs;
 
-  // Merge and annotate results
+  // Merge and annotate results — only show verified entities
   const merged: MergedResult[] = [
-    ...((contactData as any)?.results ?? []).map((c: any) => ({
-      entity: normalizeContact(c),
-      raw: c,
-    })),
-    ...((orgData as any)?.results ?? []).map((o: any) => ({
-      entity: normalizeOrg(o),
-      raw: o,
-    })),
+    ...((contactData as any)?.results ?? [])
+      .filter((c: any) => c.entityVerificationStatus === "VERIFIED")
+      .map((c: any) => ({
+        entity: normalizeContact(c),
+        raw: c,
+      })),
+    ...((orgData as any)?.results ?? [])
+      .filter((o: any) => o.entityVerificationStatus === "VERIFIED")
+      .map((o: any) => ({
+        entity: normalizeOrg(o),
+        raw: o,
+      })),
   ];
 
   // Reset highlight when results change

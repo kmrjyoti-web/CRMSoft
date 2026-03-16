@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
-import { Button, Input, Modal, Badge } from "@/components/ui";
+import { Button, Input, Modal, Badge, TextareaInput } from "@/components/ui";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
 import { StatusBadge } from "@/components/common/StatusBadge";
@@ -401,12 +401,11 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
 
             {/* Add Comment form */}
             <div className="mt-4 space-y-2">
-              <textarea
+              <TextareaInput
+                label="Add Comment"
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                className="w-full rounded-md border border-gray-300 p-2 text-sm"
                 rows={3}
-                placeholder="Add a comment..."
               />
               <Button
                 variant="primary"
@@ -579,17 +578,12 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
         }
       >
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Resolution *
-            </label>
-            <textarea
-              value={resolution}
-              onChange={(e) => setResolution(e.target.value)}
-              className="w-full rounded-md border border-gray-300 p-2 text-sm"
-              rows={4}
-            />
-          </div>
+          <TextareaInput
+            label="Resolution *"
+            value={resolution}
+            onChange={(e) => setResolution(e.target.value)}
+            rows={4}
+          />
         </div>
       </Modal>
     </div>

@@ -27,7 +27,10 @@ export interface PanelConfig {
   newTabUrl?: string;
   headerButtons?: ActionButton[];
   footerButtons?: ActionButton[];
+  footerLeft?: ReactNode;
   onClose?: () => void;
+  /** Return false to block close (e.g. unsaved changes guard). */
+  onBeforeClose?: () => boolean;
 }
 
 export interface PanelInstance {
@@ -89,6 +92,7 @@ export const useSidePanelStore = create<SidePanelStore>()((set, get) => ({
   closePanel: (id) => {
     const panel = get().panels[id];
     if (!panel) return;
+    if (panel.config.onBeforeClose && panel.config.onBeforeClose() === false) return;
     panel.config.onClose?.();
     set((s) => {
       const rest = { ...s.panels };

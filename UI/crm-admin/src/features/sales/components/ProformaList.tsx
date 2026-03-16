@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { TableFull, Badge } from '@/components/ui';
+import { TableSkeleton } from '@/components/common/TableSkeleton';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/services/api-client';
 
@@ -72,8 +73,10 @@ const fmt = (n: number) => `₹${n.toLocaleString('en-IN', { maximumFractionDigi
 // ── Component ─────────────────────────────────────────────────────────
 
 export function ProformaList() {
-  const { data } = useProformaList();
+  const { data, isLoading } = useProformaList();
   const deleteMut = useDeleteProforma();
+
+  if (isLoading) return <TableSkeleton columns={6} rows={8} title="Proforma Invoices" />;
 
   const items: ProformaInvoice[] = useMemo(() => {
     const raw = (data as any)?.data ?? data ?? [];

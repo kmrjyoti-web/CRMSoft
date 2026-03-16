@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 import toast from "react-hot-toast";
 
-import { Button, Icon, Badge, Modal } from "@/components/ui";
+import { Button, Icon, Badge, Modal, TextareaInput } from "@/components/ui";
 
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -310,18 +310,12 @@ export function ActivityDetail({ activityId }: ActivityDetailProps) {
           </div>
         }
       >
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Outcome
-          </label>
-          <textarea
-            className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-            rows={4}
-            placeholder="Describe the outcome of this activity..."
-            value={outcome}
-            onChange={(e) => setOutcome(e.target.value)}
-          />
-        </div>
+        <TextareaInput
+          label="Outcome"
+          rows={4}
+          value={outcome}
+          onChange={(e) => setOutcome(e.target.value)}
+        />
       </Modal>
     </div>
   );

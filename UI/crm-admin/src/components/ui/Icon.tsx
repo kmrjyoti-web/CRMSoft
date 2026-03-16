@@ -261,6 +261,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   'file-x': FileX2,
   move: Move,
   music: Music,
+  'table': Table2,
   'table-icon': Table2,
   'table2': Table2,
   'align-left': AlignLeft,

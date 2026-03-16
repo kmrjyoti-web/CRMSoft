@@ -9,7 +9,7 @@ import { useForm, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
 
-import { Button, Icon, Input, MobileInput, Fieldset } from "@/components/ui";
+import { Button, Icon, Input, MobileInput, Fieldset, TextareaInput } from "@/components/ui";
 
 import { LookupSelect } from "@/components/common/LookupSelect";
 
@@ -370,18 +370,12 @@ export function RawContactForm({ rawContactId, mode = "page", panelId, onSuccess
           name="notes"
           control={control}
           render={({ field }) => (
-            <div>
-              <label className="mb-1 flex items-center gap-1 text-sm font-medium text-gray-700">
-                <Icon name="file-text" size={14} className="text-gray-400" /> Notes
-              </label>
-              <textarea
-                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                rows={3}
-                placeholder="Notes"
-                value={field.value ?? ""}
-                onChange={(e) => field.onChange(e.target.value)}
-              />
-            </div>
+            <TextareaInput
+              label="Notes"
+              rows={3}
+              value={field.value ?? ""}
+              onChange={(e) => field.onChange(e.target.value)}
+            />
           )}
         />
 

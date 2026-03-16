@@ -14,6 +14,7 @@ import {
   DatePicker,
   NumberInput,
   Fieldset,
+  TextareaInput,
 } from "@/components/ui";
 
 import { FormErrors } from "@/components/common/FormErrors";
@@ -415,13 +416,9 @@ export function TrainingForm({ trainingId, mode = "page", panelId, onSuccess, on
             control={control}
             render={({ field }) => (
               <div className="mt-4">
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Description
-                </label>
-                <textarea
-                  className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
+                <TextareaInput
+                  label="Description"
                   rows={3}
-                  placeholder="Training description"
                   value={field.value ?? ""}
                   onChange={(e) => field.onChange(e.target.value)}
                 />
@@ -433,13 +430,9 @@ export function TrainingForm({ trainingId, mode = "page", panelId, onSuccess, on
             control={control}
             render={({ field }) => (
               <div className="mt-4">
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Topics
-                </label>
-                <textarea
-                  className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
+                <TextareaInput
+                  label="Topics"
                   rows={3}
-                  placeholder="Topics to be covered"
                   value={field.value ?? ""}
                   onChange={(e) => field.onChange(e.target.value)}
                 />
@@ -540,18 +533,12 @@ export function TrainingForm({ trainingId, mode = "page", panelId, onSuccess, on
             name="notes"
             control={control}
             render={({ field }) => (
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Notes
-                </label>
-                <textarea
-                  className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                  rows={3}
-                  placeholder="General notes"
-                  value={field.value ?? ""}
-                  onChange={(e) => field.onChange(e.target.value)}
-                />
-              </div>
+              <TextareaInput
+                label="Notes"
+                rows={3}
+                value={field.value ?? ""}
+                onChange={(e) => field.onChange(e.target.value)}
+              />
             )}
           />
           <Controller
@@ -559,13 +546,9 @@ export function TrainingForm({ trainingId, mode = "page", panelId, onSuccess, on
             control={control}
             render={({ field }) => (
               <div className="mt-4">
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Internal Notes
-                </label>
-                <textarea
-                  className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
+                <TextareaInput
+                  label="Internal Notes"
                   rows={3}
-                  placeholder="Internal notes (not visible to client)"
                   value={field.value ?? ""}
                   onChange={(e) => field.onChange(e.target.value)}
                 />

@@ -30,6 +30,9 @@ export const entityVerificationService = {
   resend: (recordId: string) =>
     api.post<unknown>(`${BASE}/resend/${recordId}`).then((r) => unwrap<InitiateResult>(r)),
 
+  resetVerification: (entityType: string, entityId: string) =>
+    api.post<unknown>(`${BASE}/reset/${entityType}/${entityId}`).then((r) => unwrap<unknown>(r)),
+
   getHistory: (entityType: string, entityId: string) =>
     api.get<unknown>(`${BASE}/history/${entityType}/${entityId}`).then((r) => unwrap<VerificationRecord[]>(r)),
 

@@ -152,23 +152,39 @@ export const AICCurrencyInput = React.forwardRef<
     CurrencyOption | undefined
   >(currencies?.[0]);
 
+  // Keep onChange stable so dispatch never changes identity due to prop identity changes
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  // Pending notification — set inside setInternalState, flushed after via useEffect
+  const pendingNotifyRef = useRef<{ value: number | null } | null>(null);
+
+  useEffect(() => {
+    if (pendingNotifyRef.current !== null) {
+      const v = pendingNotifyRef.current.value;
+      pendingNotifyRef.current = null;
+      onChangeRef.current?.(v);
+    }
+  });
+
   const dispatch = useCallback(
     (action: CurrencyInputAction) => {
       setInternalState((prev) => {
         const next = currencyInputReducer(prev, action, reducerConfig);
-        // Notify parent on value changes
+        // Queue notification for user-driven changes (not external sync)
         if (
           next.value !== prev.value &&
           action.type !== "FOCUS" &&
-          action.type !== "BLUR"
+          action.type !== "BLUR" &&
+          action.type !== "SET_VALUE"
         ) {
-          onChange?.(next.value);
+          pendingNotifyRef.current = { value: next.value };
         }
         return next;
       });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [locale, decimals, min, max, onChange],
+    [locale, decimals, min, max],
   );
 
   // Sync controlled value

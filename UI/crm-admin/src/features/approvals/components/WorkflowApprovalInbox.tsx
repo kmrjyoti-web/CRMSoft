@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 
-import { Modal, Button, Icon, Badge } from "@/components/ui";
+import { Modal, Button, Icon, Badge, TextareaInput } from "@/components/ui";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
 import {
@@ -447,20 +447,11 @@ export function WorkflowApprovalInbox() {
               ? "Add an optional comment for this approval:"
               : "Add a comment for this rejection:"}
           </p>
-          <textarea
+          <TextareaInput
+            label="Comment"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={3}
-            placeholder="Enter your comment..."
-            style={{
-              width: "100%",
-              borderRadius: 8,
-              border: "1px solid #d1d5db",
-              padding: "8px 12px",
-              fontSize: 14,
-              resize: "vertical",
-              outline: "none",
-            }}
           />
         </div>
       </Modal>

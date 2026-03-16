@@ -45,6 +45,10 @@ import { ContactListDevHelp } from "../help/ContactListDevHelp";
 
 import { CONTACT_FILTER_CONFIG, CONTACT_LOOKUP_MAPPINGS } from "../utils/contact-filters";
 
+import { useSidePanelStore } from "@/stores/side-panel.store";
+import { LedgerForm } from "@/features/accounts/components/LedgerForm";
+import type { SourceEntity } from "@/features/accounts/components/LedgerSourcePicker";
+
 import type {
   ContactListItem,
   ContactListParams,
@@ -231,6 +235,67 @@ export function ContactList() {
     [confirm, softDeleteMutation],
   );
 
+  // ── Convert to Ledger (opens LedgerForm in drawer) ───────
+
+  const openPanel = useSidePanelStore((s) => s.openPanel);
+
+  const handleConvertToLedger = useCallback(
+    (row: Record<string, unknown>) => {
+      const idx = row._contactIdx as number;
+      const contact = contacts[idx];
+      if (!contact) return;
+
+      const evs = (contact as any).entityVerificationStatus ?? "UNVERIFIED";
+      if (evs !== "VERIFIED") {
+        toast.error("Contact must be verified before converting to ledger");
+        return;
+      }
+
+      const name = `${contact.firstName} ${contact.lastName}`.trim();
+      const email = contact.communications?.find((c) => c.type === "EMAIL")?.value;
+      const phone = contact.communications?.find((c) => c.type === "MOBILE" || c.type === "PHONE")?.value;
+      const org = contact.contactOrganizations?.[0]?.organization as any;
+
+      const sourceEntity: SourceEntity = {
+        type: "contact",
+        id: contact.id,
+        name,
+        mobile: phone ?? "",
+        email: email ?? "",
+        gstin: org?.gstNumber ?? org?.gstin ?? "",
+        address: "",
+        city: org?.city ?? "",
+        state: "",
+        pincode: "",
+        country: "India",
+        panNo: "",
+        phoneOffice: "",
+        contactPerson: "",
+        _raw: contact,
+      };
+
+      const panelId = `ledger-convert-${contact.id}`;
+      openPanel({
+        id: panelId,
+        title: `New Ledger — ${name}`,
+        width: 720,
+        content: (
+          <LedgerForm
+            mode="panel"
+            panelId={panelId}
+            initialSourceEntity={sourceEntity}
+            onSuccess={() => {
+              toast.success(`Ledger created for "${name}"`);
+              useSidePanelStore.getState().closePanel(panelId);
+            }}
+            onCancel={() => useSidePanelStore.getState().closePanel(panelId)}
+          />
+        ),
+      });
+    },
+    [contacts, openPanel],
+  );
+
   const tableData = useMemo(() => {
     const flat = flattenContacts(contacts);
     return flat.map((row, idx) => ({
@@ -287,6 +352,7 @@ export function ContactList() {
           />
         </div>
       ),
+      _contactIdx: idx,
       rowActions: (
         <div onClick={(e) => e.stopPropagation()}>
           <ActionsMenu items={[
@@ -299,12 +365,17 @@ export function ContactList() {
                 setVerifyOpen(true);
               },
             },
+            {
+              label: "Convert to Ledger",
+              icon: "book-open",
+              onClick: () => handleConvertToLedger({ ...row, _contactIdx: idx }),
+            },
             { label: "Delete", icon: "trash-2", onClick: () => handleRowArchive(row), variant: "danger" as const },
           ]} />
         </div>
       ),
     }));
-  }, [contacts, handleToggleActive, togglingId, handleRowView, openDashboard, handleRowArchive]);
+  }, [contacts, handleToggleActive, togglingId, handleRowView, openDashboard, handleRowArchive, handleConvertToLedger]);
 
   // ── Bulk edit handlers ─────────────────────────────────────
 

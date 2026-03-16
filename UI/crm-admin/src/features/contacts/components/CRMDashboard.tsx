@@ -5,14 +5,15 @@ import {
   BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
-import { useQuery } from "@tanstack/react-query";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { KpiCard } from "@/features/dashboard/components/KpiCard";
 import { CHART_COLORS } from "@/features/dashboard/utils/chart-colors";
-import { Icon, Badge, Input, SelectInput, Button } from "@/components/ui";
+import { Icon, Badge, TableFull } from "@/components/ui";
+import { TableSkeleton } from "@/components/common/TableSkeleton";
 import { AICDatePicker } from "@/components/shared/AICDatePicker";
 import type { DateRange } from "@/components/shared/AICDatePicker";
 import { format, subDays } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
 import { useCRMDashboard } from "../hooks/useContacts";
 import { contactsService } from "../services/contacts.service";
 import type {
@@ -20,7 +21,7 @@ import type {
   VerificationTrend, DepartmentWiseData, ContactListItem,
 } from "../types/contacts.types";
 
-// ── Page toolbar (matches Executive Dashboard style) ──────
+// ── Page toolbar (matches TableFull header bar style) ──────
 
 function CRMToolbar({
   title,
@@ -30,19 +31,18 @@ function CRMToolbar({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between px-0 pb-5">
+    <header className="flex items-center justify-between px-4 py-2 border-b border-gray-200 bg-white shadow-sm rounded-t-lg">
       <div className="flex items-center gap-3">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-1.5 text-sm text-gray-400">
+        <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
+        <div className="h-5 w-px bg-gray-300" />
+        <div className="flex items-center gap-1.5 text-xs text-gray-400">
           <span>CRM</span>
-          <Icon name="chevron-right" size={13} />
+          <Icon name="chevron-right" size={11} />
           <span>Contact Master</span>
-          <Icon name="chevron-right" size={13} />
         </div>
-        <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
-    </div>
+    </header>
   );
 }
 
@@ -119,11 +119,12 @@ export function CRMDashboardPage() {
   if (isLoading) return <LoadingSpinner fullPage />;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="h-full flex flex-col">
       <CRMToolbar
         title="Dashboard"
         actions={<DatePickerAction dateRange={dateRange} onRangeChange={handleRangeChange} />}
       />
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -278,179 +279,110 @@ export function CRMDashboardPage() {
           </div>
         ) : <EmptyChart />}
       </div>
+      </div>
     </div>
   );
 }
 
 // ══════════════════════════════════════════════════════════
 //  PAGE 2 — ALL RECORDS  (/contacts/all-records)
+//  Uses TableFull — same style as Raw Contacts & ContactList
 // ══════════════════════════════════════════════════════════
 
-export function CRMAllRecordsPage() {
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [verifFilter, setVerifFilter] = useState("");
-  const [page, setPage] = useState(1);
-  const limit = 20;
+const ALL_RECORDS_COLUMNS = [
+  { id: "name", label: "Name", visible: true },
+  { id: "designation", label: "Designation", visible: true },
+  { id: "department", label: "Department", visible: true },
+  { id: "organization", label: "Organization", visible: true },
+  { id: "email", label: "Email", visible: true },
+  { id: "phone", label: "Phone", visible: true },
+  { id: "verification", label: "Verification", visible: true },
+  { id: "status", label: "Status", visible: true },
+  { id: "createdAt", label: "Created", visible: true },
+];
 
+function flattenAllRecords(contacts: ContactListItem[]): Record<string, unknown>[] {
+  return contacts.map((c) => {
+    const org = c.contactOrganizations?.[0]?.organization;
+    const email = c.communications?.find((cm) => cm.type === "EMAIL")?.value;
+    const phone = c.communications?.find(
+      (cm) => cm.type === "PHONE" || cm.type === "MOBILE",
+    )?.value;
+    return {
+      id: c.id,
+      name: `${c.firstName} ${c.lastName}`.trim(),
+      designation: c.designation ?? "—",
+      department: c.department ?? "—",
+      organization: org?.name ?? "—",
+      email: email ?? "—",
+      phone: phone ?? "—",
+      verification: c.entityVerificationStatus === "VERIFIED" ? "Verified" : "Not Verified",
+      status: c.isActive ? "Active" : "Inactive",
+      createdAt: c.createdAt
+        ? new Date(c.createdAt).toLocaleDateString()
+        : "—",
+      _verificationStatus: c.entityVerificationStatus,
+      _isActive: c.isActive,
+    };
+  });
+}
+
+export function CRMAllRecordsPage() {
   const queryParams = useMemo(() => ({
-    page,
-    limit,
-    search: search || undefined,
-    isActive: statusFilter === "" ? undefined : statusFilter === "active",
-    entityVerificationStatus: verifFilter || undefined,
-  }), [page, limit, search, statusFilter, verifFilter]);
+    page: 1,
+    limit: 10000,
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  }), []);
 
   const { data, isLoading } = useQuery({
     queryKey: ["contacts-all", queryParams],
     queryFn: () => contactsService.getAll(queryParams as any),
   });
 
-  const contacts: ContactListItem[] = Array.isArray((data as any)?.data?.data)
-    ? (data as any).data.data
-    : Array.isArray((data as any)?.data)
-    ? (data as any).data
-    : [];
+  const contacts: ContactListItem[] = useMemo(() => {
+    const raw = (data as any)?.data;
+    if (Array.isArray(raw?.data)) return raw.data;
+    if (Array.isArray(raw)) return raw;
+    return [];
+  }, [data]);
 
-  const meta = (data as any)?.data?.meta ?? { total: 0, page: 1, limit };
-  const totalPages = Math.ceil((meta.total || 0) / limit);
+  const tableData = useMemo(() => {
+    const flat = flattenAllRecords(contacts);
+    return flat.map((row) => ({
+      ...row,
+      verification: (
+        <Badge
+          variant={
+            (row as any)._verificationStatus === "VERIFIED"
+              ? "success"
+              : "danger"
+          }
+        >
+          {row.verification as string}
+        </Badge>
+      ),
+      status: (
+        <Badge variant={(row as any)._isActive ? "primary" : "secondary"}>
+          {row.status as string}
+        </Badge>
+      ),
+    }));
+  }, [contacts]);
 
-  const handleSearch = useCallback((v: string) => {
-    setSearch(v);
-    setPage(1);
-  }, []);
-
-  const hasFilers = search || statusFilter || verifFilter;
+  if (isLoading) return <TableSkeleton title="All Records" />;
 
   return (
-    <div className="p-6 space-y-4">
-      <CRMToolbar
-        title="All Records"
-        actions={
-          <span className="text-sm text-gray-500">
-            {meta.total > 0 ? `${meta.total} contacts` : ""}
-          </span>
-        }
-      />
-
-      {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 flex flex-wrap gap-3 items-end">
-        <div className="flex-1 min-w-[220px]">
-          <Input
-            label="Search contacts"
-            value={search}
-            onChange={handleSearch}
-            leftIcon={<Icon name="search" size={15} />}
-          />
-        </div>
-        <div className="w-40">
-          <SelectInput
-            label="Status"
-            value={statusFilter}
-            onChange={(v) => { setStatusFilter(v as string); setPage(1); }}
-            options={[
-              { value: "", label: "All Status" },
-              { value: "active", label: "Active" },
-              { value: "inactive", label: "Inactive" },
-            ]}
-          />
-        </div>
-        <div className="w-44">
-          <SelectInput
-            label="Verification"
-            value={verifFilter}
-            onChange={(v) => { setVerifFilter(v as string); setPage(1); }}
-            options={[
-              { value: "", label: "All" },
-              { value: "VERIFIED", label: "Verified" },
-              { value: "NOT_VERIFIED", label: "Not Verified" },
-            ]}
-          />
-        </div>
-        {hasFilers && (
-          <Button variant="outline" onClick={() => { setSearch(""); setStatusFilter(""); setVerifFilter(""); setPage(1); }}>
-            Clear
-          </Button>
-        )}
-      </div>
-
-      {/* Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-16"><LoadingSpinner /></div>
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50 text-left text-gray-500">
-                    <th className="px-4 py-3 font-medium">Name</th>
-                    <th className="px-4 py-3 font-medium">Designation</th>
-                    <th className="px-4 py-3 font-medium">Department</th>
-                    <th className="px-4 py-3 font-medium">Organization</th>
-                    <th className="px-4 py-3 font-medium">Email / Phone</th>
-                    <th className="px-4 py-3 font-medium">Verification</th>
-                    <th className="px-4 py-3 font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {contacts.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="py-14 text-center text-gray-400 text-sm">
-                        <Icon name="inbox" size={32} />
-                        <p className="mt-2">No contacts found</p>
-                      </td>
-                    </tr>
-                  ) : contacts.map((c) => {
-                    const org = c.contactOrganizations?.[0]?.organization;
-                    const email = c.communications?.find((cm) => cm.type === "EMAIL")?.value;
-                    const phone = c.communications?.find((cm) => cm.type === "PHONE" || cm.type === "MOBILE")?.value;
-                    return (
-                      <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                        <td className="px-4 py-3 font-medium text-gray-800">{c.firstName} {c.lastName}</td>
-                        <td className="px-4 py-3 text-gray-600">{c.designation ?? "-"}</td>
-                        <td className="px-4 py-3 text-gray-600">{c.department ?? "-"}</td>
-                        <td className="px-4 py-3 text-gray-600">{org?.name ?? "-"}</td>
-                        <td className="px-4 py-3 text-gray-500 text-xs">
-                          {email && <div>{email}</div>}
-                          {phone && <div>{phone}</div>}
-                          {!email && !phone && "-"}
-                        </td>
-                        <td className="px-4 py-3">
-                          <Badge variant={c.entityVerificationStatus === "VERIFIED" ? "success" : "danger"}>
-                            {c.entityVerificationStatus === "VERIFIED" ? "Verified" : "Not Verified"}
-                          </Badge>
-                        </td>
-                        <td className="px-4 py-3">
-                          <Badge variant={c.isActive ? "primary" : "secondary"}>
-                            {c.isActive ? "Active" : "Inactive"}
-                          </Badge>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50">
-                <p className="text-xs text-gray-500">
-                  Showing {((page - 1) * limit) + 1}–{Math.min(page * limit, meta.total)} of {meta.total} contacts
-                </p>
-                <div className="flex gap-1 items-center">
-                  <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-40">
-                    <Icon name="chevron-left" size={16} />
-                  </button>
-                  <span className="px-3 py-1 text-xs text-gray-700">Page {page} of {totalPages}</span>
-                  <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)} className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-40">
-                    <Icon name="chevron-right" size={16} />
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        )}
+    <div className="h-full flex flex-col">
+      <div className="flex-1 min-h-0">
+        <TableFull
+          data={tableData}
+          title="All Records"
+          tableKey="crm-all-records"
+          columns={ALL_RECORDS_COLUMNS}
+          defaultViewMode="table"
+          defaultDensity="compact"
+        />
       </div>
     </div>
   );
@@ -497,11 +429,12 @@ export function CRMStatisticsPage() {
   if (isLoading) return <LoadingSpinner fullPage />;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="h-full flex flex-col">
       <CRMToolbar
         title="Statistics"
         actions={<DatePickerAction dateRange={dateRange} onRangeChange={handleRangeChange} />}
       />
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
       {/* Summary stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -605,6 +538,7 @@ export function CRMStatisticsPage() {
           </ResponsiveContainer>
         ) : <EmptyChart />}
       </ChartCard>
+      </div>
     </div>
   );
 }

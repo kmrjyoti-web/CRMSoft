@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { Button, Badge, Icon, Input, SelectInput, Switch } from "@/components/ui";
+import { Button, Badge, Icon, Input, SelectInput, Switch, TextareaInput } from "@/components/ui";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useCreateArticle, useUpdateArticle } from "../hooks/useHelpSystem";
 import type { HelpArticle } from "../types/help-system.types";
@@ -40,19 +40,6 @@ const fieldGroupStyle: React.CSSProperties = {
 
 const fullWidthFieldStyle: React.CSSProperties = {
   marginBottom: 16,
-};
-
-const textareaStyle: React.CSSProperties = {
-  width: "100%",
-  minHeight: 180,
-  padding: "10px 14px",
-  border: "1px solid #d1d5db",
-  borderRadius: 6,
-  fontSize: 14,
-  fontFamily: "inherit",
-  resize: "vertical",
-  outline: "none",
-  boxSizing: "border-box",
 };
 
 const switchRowStyle: React.CSSProperties = {
@@ -216,14 +203,11 @@ export function HelpArticleForm({ article, onSave, onCancel }: HelpArticleFormPr
       {/* Content */}
       <p style={sectionHeaderStyle}>Content</p>
       <div style={fullWidthFieldStyle}>
-        <label style={{ fontSize: 13, color: "#374151", fontWeight: 500, display: "block", marginBottom: 6 }}>
-          Article Content *
-        </label>
-        <textarea
-          style={textareaStyle}
+        <TextareaInput
+          label="Article Content *"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Write the help article content here. HTML is supported."
+          rows={8}
         />
       </div>
 

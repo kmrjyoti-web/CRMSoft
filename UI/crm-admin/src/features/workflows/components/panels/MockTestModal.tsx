@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react';
 
-import { Icon, Button, Badge } from '@/components/ui';
+import { Icon, Button, Badge, SelectInput } from '@/components/ui';
 
 import type { WorkflowExecutionResult } from '../../types/visual-workflow.types';
 import { generateSampleDataForEntity } from '../../utils/sample-data-generator';
@@ -310,15 +310,17 @@ export function MockTestModal({
                   <Icon name="timer" size={14} color="#6b7280" />
                   Execution Speed
                 </div>
-                <select
-                  value={speed}
-                  onChange={(e) => setSpeed(e.target.value as MockExecutionOptions['speed'])}
-                  style={SELECT_STYLE}
-                >
-                  <option value="instant">Instant</option>
-                  <option value="normal">Normal (1s per node)</option>
-                  <option value="slow">Slow (2s per node)</option>
-                </select>
+                <div style={{ minWidth: 200 }}>
+                  <SelectInput
+                    value={speed}
+                    onChange={(v) => setSpeed((v as MockExecutionOptions['speed']) ?? 'normal')}
+                    options={[
+                      { value: 'instant', label: 'Instant' },
+                      { value: 'normal', label: 'Normal (1s per node)' },
+                      { value: 'slow', label: 'Slow (2s per node)' },
+                    ]}
+                  />
+                </div>
               </div>
 
               {/* Show Animation */}

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { Button, Icon, Badge, Card, Modal, DatePicker } from '@/components/ui';
+import { Button, Icon, Badge, Card, Modal, DatePicker, TextareaInput } from '@/components/ui';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { formatDate } from '@/lib/format-date';
 
@@ -322,20 +322,11 @@ export function EventDetail({ eventId, onClose }: EventDetailProps) {
             />
           </div>
           <div style={{ marginBottom: 12 }}>
-            <textarea
-              placeholder="Reason for rescheduling (optional)"
+            <TextareaInput
+              label="Reason"
               value={rescheduleReason}
               onChange={(e) => setRescheduleReason(e.target.value)}
               rows={2}
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                borderRadius: 6,
-                border: '1px solid #d1d5db',
-                fontSize: 14,
-                resize: 'vertical',
-                fontFamily: 'inherit',
-              }}
             />
           </div>
           <div style={{ display: 'flex', gap: 8 }}>

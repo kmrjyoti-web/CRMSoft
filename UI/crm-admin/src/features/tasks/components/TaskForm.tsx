@@ -16,6 +16,7 @@ import {
   Fieldset,
   Icon,
   TagsInput,
+  TextareaInput,
 } from "@/components/ui";
 import { useSidePanelStore } from "@/stores/side-panel.store";
 import { FormErrors } from "@/components/common/FormErrors";
@@ -304,10 +305,9 @@ export function TaskForm({ taskId, mode = "page", panelId, onSuccess, onCancel }
               name="description"
               control={control}
               render={({ field }) => (
-                <textarea
-                  className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
+                <TextareaInput
+                  label="Description"
                   rows={3}
-                  placeholder="Task description"
                   value={field.value ?? ""}
                   onChange={(e) => field.onChange(e.target.value)}
                 />

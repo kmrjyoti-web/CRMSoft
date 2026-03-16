@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Button, Badge } from "@/components/ui";
+import { Card, Button, Badge, DatePicker } from "@/components/ui";
 import { Icon } from "@/components/ui";
 import { useCashFlow } from "../hooks/useAccounts";
 
@@ -21,14 +21,10 @@ export function CashFlowReport() {
       <Card className="p-4">
         <div className="flex items-end gap-4">
           <div>
-            <label className="text-sm text-gray-500">From</label>
-            <input type="date" value={from} onChange={(e) => setFrom(e.target.value)}
-              className="block border rounded px-3 py-2" />
+            <DatePicker label="From" value={from} onChange={(v) => setFrom(String(v ?? ""))} />
           </div>
           <div>
-            <label className="text-sm text-gray-500">To</label>
-            <input type="date" value={to} onChange={(e) => setTo(e.target.value)}
-              className="block border rounded px-3 py-2" />
+            <DatePicker label="To" value={to} onChange={(v) => setTo(String(v ?? ""))} />
           </div>
           <Button onClick={() => setParams({ from, to })} disabled={!from || !to}>
             Generate

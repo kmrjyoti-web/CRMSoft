@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button, Input, SelectInput, Icon } from '@/components/ui';
+import { Button, Input, SelectInput, Icon, TextareaInput } from '@/components/ui';
 import { PageHeader } from '@/components/common/PageHeader';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import {
@@ -205,19 +205,11 @@ export function WaTemplateForm({ templateId }: WaTemplateFormProps) {
               Body
             </h3>
             <div>
-              <textarea
-                {...register('body')}
-                placeholder="Enter message body. Use {{1}}, {{2}} for variables..."
-                style={{
-                  width: '100%',
-                  minHeight: 120,
-                  padding: 12,
-                  border: '1px solid #e5e7eb',
-                  borderRadius: 8,
-                  fontSize: 14,
-                  fontFamily: 'inherit',
-                  resize: 'vertical',
-                }}
+              <TextareaInput
+                label="Body"
+                value={watch('body')}
+                onChange={(e) => setValue('body', e.target.value)}
+                rows={5}
               />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
                 {errors.body && (

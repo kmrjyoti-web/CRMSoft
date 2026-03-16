@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 
-import { TableFull } from "@/components/ui";
+import { TableFull, Icon } from "@/components/ui";
+import toast from "react-hot-toast";
 
 import { useEntityPanel } from "@/hooks/useEntityPanel";
 import { useTableFilters } from "@/hooks/useTableFilters";
@@ -71,7 +73,8 @@ function flattenQuotations(
 // -- Component ---------------------------------------------------------------
 
 export function QuotationList() {
-  const { handleRowEdit, handleCreate } = useEntityPanel({
+  const router = useRouter();
+  const { handleCreate } = useEntityPanel({
     entityKey: "quotation",
     entityLabel: "Quotation",
     FormComponent: QuotationForm,
@@ -81,6 +84,11 @@ export function QuotationList() {
     displayField: "quotationNo",
     panelWidth: 860,
   });
+
+  // Row click → navigate to detail page
+  const handleRowClick = useCallback((row: Record<string, unknown>) => {
+    router.push(`/quotations/${row.id}`);
+  }, [router]);
 
   const { activeFilters, filterParams, handleFilterChange, clearFilters } =
     useTableFilters(QUOTATION_FILTER_CONFIG);
@@ -121,8 +129,29 @@ export function QuotationList() {
         activeFilters={activeFilters}
         onFilterChange={handleFilterChange}
         onFilterClear={clearFilters}
-        onRowEdit={handleRowEdit}
+        onRowEdit={handleRowClick}
         onCreate={handleCreate}
+        customMenuActions={[
+          {
+            id: "detail",
+            label: "View Detail",
+            icon: <Icon name="file-text" size={14} />,
+            onClick: (row: Record<string, unknown>) => router.push(`/quotations/${row.id}`),
+          },
+          {
+            id: "log",
+            label: "View Log",
+            icon: <Icon name="history" size={14} />,
+            onClick: (row: Record<string, unknown>) => router.push(`/quotations/${row.id}#timeline`),
+          },
+          {
+            id: "send",
+            label: "Send Email",
+            icon: <Icon name="mail" size={14} />,
+            onClick: (row: Record<string, unknown>) => toast("Send email — coming soon"),
+            dividerBefore: true,
+          },
+        ]}
         headerActions={
           <HelpButton
             panelId="quotations-list-help"

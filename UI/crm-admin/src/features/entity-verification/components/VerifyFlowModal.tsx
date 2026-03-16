@@ -8,6 +8,7 @@ import {
   useVerifyOtp,
   useResendVerification,
   useVerificationHistory,
+  useResetVerification,
 } from "../hooks/useEntityVerification";
 import type {
   EntityVerificationChannel,
@@ -48,6 +49,8 @@ export interface VerifyFlowModalProps {
   currentStatus?: string;
   onClose: () => void;
   onVerified?: () => void;
+  /** Called before sending verification — saves updated email/phone to DB first */
+  onSaveBeforeVerify?: (data: { email?: string; phone?: string }) => Promise<void>;
 }
 
 // ── OTP Input (6 boxes) ─────────────────────────────────
@@ -55,9 +58,11 @@ export interface VerifyFlowModalProps {
 function OtpInput({
   value,
   onChange,
+  devOtp,
 }: {
   value: string;
   onChange: (v: string) => void;
+  devOtp?: string;
 }) {
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
   const digits = value.padEnd(6, "").split("").slice(0, 6);
@@ -84,41 +89,62 @@ function OtpInput({
     }
   };
 
+  // Dev mode: use actual OTP from API response
+  const devHint = devOtp || null;
+
   return (
-    <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-      {digits.map((d, i) => (
-        <input
-          key={i}
-          ref={(el) => {
-            inputs.current[i] = el;
-          }}
-          type="text"
-          inputMode="numeric"
-          maxLength={1}
-          value={d}
-          onChange={(e) => handleChange(i, e.target.value)}
-          onKeyDown={(e) => handleKeyDown(i, e)}
-          onPaste={handlePaste}
-          style={{
-            width: 44,
-            height: 52,
-            textAlign: "center",
-            fontSize: 22,
-            fontWeight: 600,
-            border: "2px solid #e5e7eb",
-            borderRadius: 8,
-            outline: "none",
-            caretColor: "transparent",
-            background: d ? "#f0f9ff" : "#fff",
-            borderColor: d ? "#0ea5e9" : "#e5e7eb",
-            transition: "border-color 0.15s",
-          }}
-          onFocus={(e) => (e.target.style.borderColor = "#0ea5e9")}
-          onBlur={(e) =>
-            (e.target.style.borderColor = digits[i] ? "#0ea5e9" : "#e5e7eb")
-          }
-        />
-      ))}
+    <div>
+      <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 8 }}>
+        {digits.map((d, i) => (
+          <input
+            key={i}
+            ref={(el) => {
+              inputs.current[i] = el;
+            }}
+            type="text"
+            inputMode="numeric"
+            maxLength={1}
+            value={d}
+            onChange={(e) => handleChange(i, e.target.value)}
+            onKeyDown={(e) => handleKeyDown(i, e)}
+            onPaste={handlePaste}
+            placeholder="·"
+            style={{
+              width: 44,
+              height: 52,
+              textAlign: "center",
+              fontSize: 22,
+              fontWeight: 600,
+              border: "2px solid #e5e7eb",
+              borderRadius: 8,
+              outline: "none",
+              caretColor: "transparent",
+              background: d ? "#f0f9ff" : "#fff",
+              borderColor: d ? "#0ea5e9" : "#e5e7eb",
+              transition: "border-color 0.15s",
+              boxSizing: "border-box",
+            }}
+            onFocus={(e) => (e.target.style.borderColor = "#0ea5e9")}
+            onBlur={(e) =>
+              (e.target.style.borderColor = digits[i] ? "#0ea5e9" : "#e5e7eb")
+            }
+          />
+        ))}
+      </div>
+      {devHint && (
+        <div style={{ textAlign: "center", marginTop: 6 }}>
+          <button
+            type="button"
+            onClick={() => onChange(devHint)}
+            style={{
+              fontSize: 10, color: "#9ca3af", background: "none", border: "none",
+              cursor: "pointer", textDecoration: "underline",
+            }}
+          >
+            DEV: Auto-fill {devHint}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -307,6 +333,7 @@ export function VerifyFlowModal({
   currentStatus,
   onClose,
   onVerified,
+  onSaveBeforeVerify,
 }: VerifyFlowModalProps) {
   // ── Editable fields state ──────────────────────────────
   const [firstName, setFirstName] = useState(entityData.firstName ?? "");
@@ -332,6 +359,7 @@ export function VerifyFlowModal({
   const initiate = useInitiateVerification();
   const verifyOtpMut = useVerifyOtp();
   const resend = useResendVerification();
+  const resetMut = useResetVerification();
 
   // ── Derived: available methods ─────────────────────────
   const hasPhone = phone.trim().length > 0;
@@ -347,9 +375,31 @@ export function VerifyFlowModal({
   }, [hasPhone, hasEmail, method]);
 
   // ── Handlers ──────────────────────────────────────────
+  const sendingRef = useRef(false);
 
   const handleSendVerification = useCallback(async () => {
+    // Prevent double-click race condition
+    if (sendingRef.current || initiate.isPending) return;
+    sendingRef.current = true;
     setError(null);
+
+    // If email/phone was edited, save to DB first
+    if (onSaveBeforeVerify) {
+      const emailChanged = email.trim() !== (entityData.email ?? "").trim();
+      const phoneChanged = phone.trim() !== (entityData.phone ?? "").trim();
+      if (emailChanged || phoneChanged) {
+        try {
+          await onSaveBeforeVerify({
+            ...(emailChanged ? { email: email.trim() } : {}),
+            ...(phoneChanged ? { phone: phone.trim() } : {}),
+          });
+        } catch {
+          setError("Failed to save contact details. Please try again.");
+          return;
+        }
+      }
+    }
+
     try {
       if (method === "mobile-otp") {
         const result = await initiate.mutateAsync({
@@ -407,6 +457,8 @@ export function VerifyFlowModal({
     } catch (e: unknown) {
       const err = e as { response?: { data?: { message?: string } }; message?: string };
       setError(err?.response?.data?.message ?? err?.message ?? "Failed to send verification");
+    } finally {
+      sendingRef.current = false;
     }
   }, [method, initiate, entityType, entityId, hasEmail]);
 
@@ -452,6 +504,21 @@ export function VerifyFlowModal({
       setError(err?.response?.data?.message ?? err?.message ?? "Failed to resend");
     }
   }, [initiateResult, resend]);
+
+  const handleReset = useCallback(async () => {
+    setError(null);
+    try {
+      await resetMut.mutateAsync({ entityType, entityId });
+      setStep("setup");
+      setInitiateResult(null);
+      setInitiateResult2(null);
+      setOtp("");
+      setOtp2("");
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { message?: string } }; message?: string };
+      setError(err?.response?.data?.message ?? err?.message ?? "Failed to reset");
+    }
+  }, [resetMut, entityType, entityId]);
 
   // ── Render ─────────────────────────────────────────────
 
@@ -648,6 +715,27 @@ export function VerifyFlowModal({
               {/* Previous attempts */}
               <PreviousAttempts entityType={entityType} entityId={entityId} />
 
+              {/* Reset previous verifications */}
+              {(currentStatus === "PENDING" || currentStatus === "VERIFIED" || currentStatus === "REJECTED") && (
+                <div style={{ marginTop: 12, textAlign: "right" }}>
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    disabled={resetMut.isPending}
+                    style={{
+                      fontSize: 12,
+                      color: "#ef4444",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                    }}
+                  >
+                    {resetMut.isPending ? "Resetting\u2026" : "Reset all previous verification data"}
+                  </button>
+                </div>
+              )}
+
               {/* Footer */}
               <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
                 <button
@@ -739,7 +827,7 @@ export function VerifyFlowModal({
                   <Icon name="smartphone" size={14} />
                   Mobile OTP — sent to {initiateResult.sentTo}
                 </div>
-                <OtpInput value={otp} onChange={setOtp} />
+                <OtpInput value={otp} onChange={setOtp} devOtp={initiateResult.devOtp} />
                 {initiateResult.otpExpiresAt && !otpExpired && (
                   <div style={{ textAlign: "center", marginTop: 6 }}>
                     <Countdown
@@ -784,7 +872,7 @@ export function VerifyFlowModal({
                   <Icon name="mail" size={14} />
                   Email OTP — sent to {initiateResult2.sentTo}
                 </div>
-                <OtpInput value={otp2} onChange={setOtp2} />
+                <OtpInput value={otp2} onChange={setOtp2} devOtp={initiateResult2.devOtp} />
                 {initiateResult2.otpExpiresAt && !otp2Expired && (
                   <div style={{ textAlign: "center", marginTop: 6 }}>
                     <Countdown
@@ -1095,7 +1183,7 @@ function OtpEntryStep({
         )}
       </div>
 
-      <OtpInput value={otp} onChange={onOtpChange} />
+      <OtpInput value={otp} onChange={onOtpChange} devOtp={initiateResult.devOtp} />
 
       <div
         style={{

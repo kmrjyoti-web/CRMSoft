@@ -13,6 +13,7 @@ import {
   SelectInput,
   DatePicker,
   NumberInput,
+  TextareaInput,
 } from "@/components/ui";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -448,20 +449,14 @@ export function DemoDetail({ demoId }: DemoDetailProps) {
           <DatePicker
             label="New Date"
             value={rescheduleDate}
-            onChange={setRescheduleDate}
+            onChange={(v) => setRescheduleDate(String(v ?? ""))}
           />
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Reason
-            </label>
-            <textarea
-              className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-              value={rescheduleReason}
-              onChange={(e) => setRescheduleReason(e.target.value)}
-              rows={3}
-              placeholder="Reason for rescheduling"
-            />
-          </div>
+          <TextareaInput
+            label="Reason"
+            value={rescheduleReason}
+            onChange={(e) => setRescheduleReason(e.target.value)}
+            rows={3}
+          />
         </div>
       </Modal>
 
@@ -495,18 +490,12 @@ export function DemoDetail({ demoId }: DemoDetailProps) {
             value={completeResult}
             onChange={(v) => setCompleteResult(String(v ?? ""))}
           />
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Outcome
-            </label>
-            <textarea
-              className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-              value={completeOutcome}
-              onChange={(e) => setCompleteOutcome(e.target.value)}
-              rows={3}
-              placeholder="Describe the outcome"
-            />
-          </div>
+          <TextareaInput
+            label="Outcome"
+            value={completeOutcome}
+            onChange={(e) => setCompleteOutcome(e.target.value)}
+            rows={3}
+          />
           <NumberInput
             label="Duration (mins)"
             value={completeDuration}
@@ -540,20 +529,12 @@ export function DemoDetail({ demoId }: DemoDetailProps) {
           </div>
         }
       >
-        <div className="space-y-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Cancel Reason <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-              value={cancelReason}
-              onChange={(e) => setCancelReason(e.target.value)}
-              rows={3}
-              placeholder="Why is this demo being cancelled?"
-            />
-          </div>
-        </div>
+        <TextareaInput
+          label="Cancel Reason"
+          value={cancelReason}
+          onChange={(e) => setCancelReason(e.target.value)}
+          rows={3}
+        />
       </Modal>
     </div>
   );

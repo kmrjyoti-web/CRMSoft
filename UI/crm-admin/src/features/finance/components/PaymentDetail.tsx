@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
-import { Button, Modal, Badge, Typography, CurrencyInput } from "@/components/ui";
+import { Button, Modal, Badge, Typography, CurrencyInput, TextareaInput } from "@/components/ui";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
 import { StatusBadge } from "@/components/common/StatusBadge";
@@ -444,18 +444,12 @@ export function PaymentDetail({ paymentId }: PaymentDetailProps) {
             value={refundAmount}
             onChange={(v: number | null) => setRefundAmount(v)}
           />
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Reason <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-              value={refundReason}
-              onChange={(e) => setRefundReason(e.target.value)}
-              rows={3}
-              placeholder="Reason for the refund"
-            />
-          </div>
+          <TextareaInput
+            label="Reason"
+            value={refundReason}
+            onChange={(e) => setRefundReason(e.target.value)}
+            rows={3}
+          />
         </div>
       </Modal>
     </div>

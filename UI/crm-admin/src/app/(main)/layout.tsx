@@ -31,6 +31,8 @@ import { POSFormLayout } from "@/components/workspace/POSFormLayout";
 import { WorkspaceKeyboard } from "@/components/workspace/WorkspaceKeyboard";
 
 import { AiChatWidget } from "@/features/self-hosted-ai/components/AiChatWidget";
+import { ErrorDetailModal } from "@/components/common/ErrorDetailModal";
+import { useControlRoomSync } from "@/hooks/useControlRoomSync";
 import { CRMHeader } from "./_components/CRMHeader";
 import { CRMSidebar } from "./_components/CRMSidebar";
 
@@ -107,6 +109,9 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const fetchedRef = useRef(false);
+
+  // Control Room cache sync — auto-logout if rules change
+  useControlRoomSync();
 
   const user = useAuthStore((s) => s.user);
   const tenantCode = useAuthStore((s) => s.tenantCode);
@@ -264,6 +269,9 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
 
       {/* Side Panel Renderer (portals to body) */}
       <SidePanelRenderer />
+
+      {/* Global Error Detail Modal (auto-listens to API errors) */}
+      <ErrorDetailModal />
 
       {/* AI Chat Widget (floats over content) */}
       <AiChatWidget />

@@ -11,6 +11,7 @@ import {
   DatePicker,
   Button,
   Icon,
+  TextareaInput,
 } from "@/components/ui";
 import {
   useCreateWarrantyRecord,
@@ -245,17 +246,11 @@ export function WarrantyForm({
           <div style={{ fontSize: 13, fontWeight: 600, color: "#475569", marginBottom: 14, textTransform: "uppercase", letterSpacing: "0.05em" }}>
             Notes
           </div>
-          <textarea
-            placeholder="Additional notes..."
+          <TextareaInput
+            label="Notes"
             value={watch("notes") ?? ""}
             onChange={(e) => setValue("notes", e.target.value)}
             rows={3}
-            style={{
-              width: "100%", border: "1px solid #e2e8f0", borderRadius: 8,
-              padding: "10px 12px", fontSize: 14, color: "#0f172a",
-              resize: "vertical", fontFamily: "inherit", outline: "none",
-              boxSizing: "border-box",
-            }}
           />
         </div>
 

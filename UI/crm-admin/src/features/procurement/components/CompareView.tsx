@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import Link from "next/link";
 import { Badge, Button, Icon, NumberInput } from "@/components/ui";
 import { useRFQList, useCompareQuotations, useSelectWinner } from "../hooks/useProcurement";
 import type { PurchaseRFQ, QuotationScore } from "../types/procurement.types";
@@ -358,20 +359,58 @@ export function CompareView() {
   const rfqStatusVariant = (s: string): "success" | "warning" | "secondary" | "danger" =>
     s === "OPEN" ? "success" : s === "SENT" ? "warning" : s === "CLOSED" ? "secondary" : "danger";
 
+  const NAV_LINKS = [
+    { label: "Dashboard", href: "/procurement",              icon: "layout-dashboard" },
+    { label: "RFQs",      href: "/procurement/rfq",          icon: "file-question" },
+    { label: "POs",       href: "/procurement/purchase-orders", icon: "clipboard-list" },
+    { label: "GRNs",      href: "/procurement/goods-receipts",  icon: "package-check" },
+    { label: "Invoices",  href: "/procurement/invoices",        icon: "receipt" },
+  ] as const;
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
-      {/* ── Top toolbar ── */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 12, padding: "14px 20px",
-        borderBottom: "1px solid #e5e7eb", background: "#fff", flexWrap: "wrap",
-      }}>
-        <h1 style={{ fontSize: 17, fontWeight: 700, color: "#111827", margin: 0 }}>Quotation Comparison</h1>
-        <div style={{ marginLeft: "auto", display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-          <span style={{ fontSize: 12, color: "#6b7280" }}>
-            {selectedIds.length} of {rfqList.length} RFQs selected
-          </span>
+    <div className="h-full flex flex-col bg-white">
+      {/* ── Toolbar (matches TableFull header bar) ────────────── */}
+      <header className="flex items-center justify-between px-4 py-2 border-b border-gray-200 bg-white shadow-sm z-40">
+        <div className="flex items-center gap-3">
+          <h1 className="text-lg font-semibold text-gray-900">Quotation Compare</h1>
+          <div className="h-5 w-px bg-gray-300" />
+
+          {/* Inline stats */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-base font-bold text-blue-600">{selectedIds.length}</span>
+            <span className="text-xs text-gray-400">of {rfqList.length} RFQs selected</span>
+          </div>
+          {results.length > 0 && (
+            <>
+              <div className="h-5 w-px bg-gray-300" />
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-bold text-green-600">{results.length}</span>
+                <span className="text-xs text-gray-400">compared</span>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* Nav links */}
+          <div className="flex items-center bg-gray-100 rounded-md p-0.5">
+            {NAV_LINKS.map(({ label, href, icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-gray-500 hover:text-gray-700 rounded transition-colors no-underline"
+              >
+                <Icon name={icon as any} size={11} />
+                {label}
+              </Link>
+            ))}
+          </div>
+
+          <div className="h-5 w-px bg-gray-300" />
+
           <Button
             variant="primary"
+            size="sm"
             onClick={handleCompare}
             disabled={comparing || selectedIds.length === 0}
           >
@@ -381,9 +420,9 @@ export function CompareView() {
             }
           </Button>
         </div>
-      </div>
+      </header>
 
-      <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
+      <div className="flex flex-1 min-h-0 overflow-hidden">
 
         {/* ── Left: RFQ Table + Criteria ── */}
         <div style={{

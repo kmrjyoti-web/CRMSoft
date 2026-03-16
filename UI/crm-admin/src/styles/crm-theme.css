@@ -1392,5 +1392,63 @@
 .animate-slide-up {
   animation: slide-up 0.25s ease-out;
 }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   QUOTATION GRID — borderless inputs inside table cells
+   CoreUI uses `border border-[var(--color-border)]` on
+   wrapper divs, so override the CSS variable to transparent
+   and also kill outlines/shadows on every child.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.quotation-grid {
+  --color-border: transparent;
+  --color-border-focus: transparent;
+}
+
+/* Nuke borders/shadows on every control inside cells — but NOT on table/thead/tbody/tr/td */
+.quotation-grid td div,
+.quotation-grid td input,
+.quotation-grid td select,
+.quotation-grid td button,
+.quotation-grid td span,
+.quotation-grid td label,
+.quotation-grid td div *,
+.quotation-grid td input *,
+.quotation-grid td select *,
+.quotation-grid td button * {
+  border: none !important;
+  border-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+}
+
+/* Backgrounds transparent */
+.quotation-grid td input,
+.quotation-grid td select,
+.quotation-grid td button {
+  background: transparent !important;
+}
+
+/* Active cell: theme-tinted background to show focus */
+.quotation-grid td:focus-within {
+  background-color: var(--color-primary-50) !important;
+}
+
+/* DiscountInput: stretch to full cell width */
+.quotation-grid .w-\[160px\],
+.quotation-grid .min-w-\[160px\] {
+  width: 100% !important;
+  min-width: unset !important;
+}

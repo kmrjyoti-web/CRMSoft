@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
 
 import { SmartSearch } from "./SmartSearch";
 import type { SmartSearchField, SmartSearchColumn } from "./SmartSearch";
+import { ProductPickerModal } from "./ProductPickerModal";
 
 import { useProductsList } from "@/features/products/hooks/useProducts";
 import type { ProductListItem } from "@/features/products/types/products.types";
@@ -28,6 +29,7 @@ export interface ProductSelectOption {
 }
 
 export type ProductDisplayMode = "compact" | "detailed";
+export type ProductInputMode = "autocomplete" | "popup";
 
 interface ProductSelectProps {
   value?: string | null;
@@ -38,6 +40,8 @@ interface ProductSelectProps {
   filterFn?: (product: ProductSelectOption) => boolean;
   /** "compact" = single line, "detailed" = two-line with price/HSN/unit (default: "compact") */
   displayMode?: ProductDisplayMode;
+  /** "autocomplete" = SmartSearch dropdown, "popup" = full modal picker (default: "autocomplete") */
+  inputMode?: ProductInputMode;
   label?: string;
   error?: boolean;
   errorMessage?: string;
@@ -75,11 +79,13 @@ export function ProductSelect({
   onProductSelect,
   filterFn,
   displayMode = "compact",
+  inputMode = "autocomplete",
   label = "Product",
   error,
   errorMessage,
   disabled,
 }: ProductSelectProps) {
+  const [popupOpen, setPopupOpen] = useState(false);
   const { data, isLoading } = useProductsList({ status: "ACTIVE", limit: 10000 });
 
   const products = useMemo<ProductSelectOption[]>(() => {
@@ -148,6 +154,49 @@ export function ProductSelect({
       </div>
     </div>
   );
+
+  // ── Popup mode ────────────────────────────────────────
+  if (inputMode === "popup") {
+    const selectedProduct = products.find((p) => p.id === value);
+    return (
+      <>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => !disabled && setPopupOpen(true)}
+          className={[
+            "w-full flex items-center gap-1.5 rounded-md border px-2.5 py-[7px] text-sm text-left transition-colors",
+            error ? "border-red-400" : "border-gray-300 hover:border-[var(--color-primary)]",
+            disabled ? "bg-gray-50 text-gray-400 cursor-not-allowed" : "bg-white cursor-pointer",
+          ].join(" ")}
+        >
+          <Icon name="package" size={14} className="text-gray-400 flex-shrink-0" />
+          <span className={`flex-1 truncate ${selectedProduct ? "text-gray-800" : "text-gray-400"}`}>
+            {selectedProduct ? `${selectedProduct.name} (${selectedProduct.code})` : (label || "Select product…")}
+          </span>
+          {selectedProduct && !disabled && (
+            <span
+              className="text-gray-300 hover:text-red-400 flex-shrink-0"
+              onClick={(e) => { e.stopPropagation(); onChange?.(null); onProductSelect?.(null); }}
+            >
+              <Icon name="x" size={12} />
+            </span>
+          )}
+          <Icon name="search" size={13} className="text-gray-300 flex-shrink-0" />
+        </button>
+        {error && errorMessage && <span className="text-xs text-red-500 mt-0.5 block">{errorMessage}</span>}
+        <ProductPickerModal
+          open={popupOpen}
+          onClose={() => setPopupOpen(false)}
+          selectedId={value}
+          onSelect={(product) => {
+            onChange?.(product.id);
+            onProductSelect?.(product);
+          }}
+        />
+      </>
+    );
+  }
 
   return (
     <SmartSearch<ProductSelectOption>

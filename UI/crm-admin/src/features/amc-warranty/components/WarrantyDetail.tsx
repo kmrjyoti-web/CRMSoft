@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Button, Badge, Modal, Input, TableFull } from "@/components/ui";
+import { Button, Badge, Modal, Input, TableFull, TextareaInput } from "@/components/ui";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
 import { StatusBadge } from "@/components/common/StatusBadge";
@@ -402,15 +402,11 @@ export function WarrantyDetail({ warrantyId }: Props) {
         }
       >
         <div className="space-y-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Issue Description *
-          </label>
-          <textarea
+          <TextareaInput
+            label="Issue Description *"
             value={claimDescription}
             onChange={(e) => setClaimDescription(e.target.value)}
-            className="w-full rounded-md border border-gray-300 p-2 text-sm"
             rows={4}
-            placeholder="Describe the issue..."
           />
         </div>
       </Modal>

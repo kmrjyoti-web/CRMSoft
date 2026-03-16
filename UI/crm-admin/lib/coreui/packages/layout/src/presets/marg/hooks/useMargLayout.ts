@@ -31,7 +31,7 @@ export const useMargLayout = create<MargLayoutStore>((set, get) => ({
   toggleItem: (item) =>
     set((state) => ({
       menuItems: state.menuItems.map((m) =>
-        m === item || m.label === item.label
+        m.label === item.label
           ? { ...m, expanded: !m.expanded }
           : m,
       ),
@@ -40,26 +40,34 @@ export const useMargLayout = create<MargLayoutStore>((set, get) => ({
   setActiveItem: (link) =>
     set((state) => ({
       menuItems: state.menuItems.map((m) => {
+        // Check if link starts with any child's link prefix (for unmapped sub-pages)
+        const matchesLink = (menuLink?: string) =>
+          menuLink ? (link === menuLink || link.startsWith(menuLink + '/')) : false;
+
         const subItems = m.subItems?.map((s) => {
           const childItems = s.subItems?.map((c) => ({
             ...c,
-            active: c.link === link,
+            active: matchesLink(c.link),
           }));
           const hasActiveChild = childItems?.some((c) => c.active) ?? false;
           return {
             ...s,
-            active: s.link === link,
-            expanded: (s.link === link || hasActiveChild) ? true : s.expanded,
+            active: matchesLink(s.link),
+            expanded: (matchesLink(s.link) || hasActiveChild) ? true : s.expanded,
             subItems: childItems,
           };
         });
         const hasActiveSub = subItems?.some(
           (s) => s.active || s.subItems?.some((c) => c.active),
         ) ?? false;
+
+        // Also expand parent if link starts with parent's route prefix
+        const parentMatches = m.link ? link.startsWith(m.link + '/') : false;
+
         return {
           ...m,
-          active: m.link === link || hasActiveSub,
-          expanded: hasActiveSub ? true : m.expanded,
+          active: matchesLink(m.link) || hasActiveSub,
+          expanded: (hasActiveSub || parentMatches) ? true : m.expanded,
           subItems,
         };
       }),

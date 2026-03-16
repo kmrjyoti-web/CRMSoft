@@ -3,7 +3,7 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Modal, Button, Icon, Badge } from "@/components/ui";
+import { Modal, Button, Icon, Badge, TextareaInput } from "@/components/ui";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
 import {
@@ -309,34 +309,14 @@ export function ApprovalDetail({ approvalId, onClose }: ApprovalDetailProps) {
           {/* ── Decision Note Input (only for pending) ── */}
           {isPending && (
             <div>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: "#374151",
-                  marginBottom: 6,
-                }}
-              >
-                Note (required for rejection)
-              </label>
-              <textarea
+              <TextareaInput
+                label="Note (required for rejection)"
                 value={note}
                 onChange={(e) => {
                   setNote(e.target.value);
                   if (noteError) setNoteError("");
                 }}
                 rows={3}
-                placeholder="Add a note for your decision..."
-                style={{
-                  width: "100%",
-                  borderRadius: 8,
-                  border: `1px solid ${noteError ? "#ef4444" : "#d1d5db"}`,
-                  padding: "8px 12px",
-                  fontSize: 14,
-                  resize: "vertical",
-                  outline: "none",
-                }}
               />
               {noteError && (
                 <p style={{ fontSize: 12, color: "#ef4444", marginTop: 4 }}>{noteError}</p>

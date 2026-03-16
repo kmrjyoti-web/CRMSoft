@@ -266,6 +266,20 @@ export function QuotationDetail({ quotationId }: QuotationDetailProps) {
                 <dt className="text-xs text-gray-400">Title</dt>
                 <dd className="text-sm">{quotation.title || "\u2014"}</dd>
               </div>
+              <div>
+                <dt className="text-xs text-gray-400">Contact Person</dt>
+                <dd className="text-sm font-medium">
+                  {quotation.contactPerson
+                    ? `${quotation.contactPerson.firstName} ${quotation.contactPerson.lastName}`
+                    : "\u2014"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-400">Organization</dt>
+                <dd className="text-sm font-medium">
+                  {quotation.organization?.name ?? "\u2014"}
+                </dd>
+              </div>
               <div className="sm:col-span-2">
                 <dt className="text-xs text-gray-400">Summary</dt>
                 <dd className="text-sm">{quotation.summary || "\u2014"}</dd>

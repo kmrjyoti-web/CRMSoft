@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { Button, Badge, Card, Icon, Input } from '@/components/ui';
+import { Button, Badge, Card, Icon, Input, TextareaInput } from '@/components/ui';
 import { PageHeader, LoadingSpinner, QueryErrorState } from '@/components/common';
 import {
   useTicket,
@@ -325,20 +325,11 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
               }}
             >
               <div style={{ flex: 1 }}>
-                <textarea
+                <TextareaInput
+                  label="Reply"
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   rows={3}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: 6,
-                    fontSize: 14,
-                    resize: 'vertical',
-                    fontFamily: 'inherit',
-                  }}
-                  placeholder="Type your reply..."
                 />
               </div>
               <Button

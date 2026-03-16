@@ -129,6 +129,8 @@ export interface AICTableFullProps {
   onRowCopy?: (row: any) => void;
   /** Called when a row's archive action is triggered */
   onRowArchive?: (row: any) => void;
+  /** Custom 3-dot menu actions — replaces the default Edit/Copy/Archive/Delete menu */
+  customMenuActions?: { id: string; label: string; icon?: React.ReactNode; onClick: (row: any) => void; danger?: boolean; dividerBefore?: boolean }[];
   /** Called when the create button is clicked */
   onCreate?: () => void;
   /** Dynamic filter configuration for the sidebar */

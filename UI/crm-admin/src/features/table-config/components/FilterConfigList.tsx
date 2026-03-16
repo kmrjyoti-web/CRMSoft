@@ -19,7 +19,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 
-import { Icon } from "@/components/ui";
+import { Icon, Input, SelectInput } from "@/components/ui";
 
 import type { FilterLayoutSection } from "../types/table-config.types";
 
@@ -110,17 +110,13 @@ function SortableFilterRow({
         {filter.filterType}
       </span>
 
-      <select
-        value={currentSection}
-        onChange={(e) => onGroupChange(e.target.value)}
-        className="text-xs border border-gray-200 rounded px-1 py-0.5 text-gray-500 bg-white shrink-0 max-w-[100px]"
-      >
-        {sections.map((s) => (
-          <option key={s} value={s}>
-            {s}
-          </option>
-        ))}
-      </select>
+      <div className="shrink-0 max-w-[120px]">
+        <SelectInput
+          value={currentSection}
+          onChange={(v) => onGroupChange(String(v ?? currentSection))}
+          options={sections.map((s) => ({ value: s, label: s }))}
+        />
+      </div>
     </div>
   );
 }
@@ -278,15 +274,15 @@ export function FilterConfigList({
       {/* Add Group */}
       {showNewGroup ? (
         <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={newGroupName}
-            onChange={(e) => setNewGroupName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAddGroup()}
-            placeholder="Group name..."
-            className="flex-1 text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500"
-            autoFocus
-          />
+          <div className="flex-1">
+            <Input
+              label="Group name..."
+              value={newGroupName}
+              onChange={setNewGroupName}
+              onKeyDown={(e: React.KeyboardEvent) => e.key === "Enter" && handleAddGroup()}
+              autoFocus
+            />
+          </div>
           <button
             type="button"
             onClick={handleAddGroup}

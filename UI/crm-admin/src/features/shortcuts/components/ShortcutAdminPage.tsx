@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Icon } from "@/components/ui";
+import { Icon, Input, SelectInput } from "@/components/ui";
 import { ShortcutBadge } from "./ShortcutBadge";
 import { useAdminShortcuts, useAdminSeedShortcuts, useAdminToggleLock, useAdminUpdateShortcut } from "../hooks/useShortcuts";
 
@@ -54,22 +54,21 @@ export function ShortcutAdminPage() {
 
       {/* Filters */}
       <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
-        <div style={{ position: "relative", flex: 1 }}>
-          <Icon name="search" size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#9ca3af" }} />
-          <input
-            type="text" placeholder="Search shortcuts…" value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ width: "100%", padding: "8px 12px 8px 32px", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 13, outline: "none", boxSizing: "border-box" }}
+        <div style={{ flex: 1 }}>
+          <Input
+            label="Search shortcuts…"
+            leftIcon={<Icon name="search" size={14} />}
+            value={search}
+            onChange={setSearch}
           />
         </div>
-        <select
-          value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
-          style={{ padding: "8px 12px", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 13, cursor: "pointer" }}
-        >
-          {categories.map((c) => (
-            <option key={c} value={c}>{c === "ALL" ? "All Categories" : (CATEGORY_LABELS[c] ?? c)}</option>
-          ))}
-        </select>
+        <div style={{ minWidth: 180 }}>
+          <SelectInput
+            value={categoryFilter}
+            onChange={(v) => setCategoryFilter(String(v ?? "ALL"))}
+            options={categories.map((c) => ({ value: c, label: c === "ALL" ? "All Categories" : (CATEGORY_LABELS[c] ?? c) }))}
+          />
+        </div>
       </div>
 
       {/* Table */}

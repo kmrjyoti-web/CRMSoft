@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 
 import toast from "react-hot-toast";
 
-import { Icon, Button, Badge, Modal } from "@/components/ui";
+import { Icon, Button, Badge, Modal, TextareaInput } from "@/components/ui";
 
 import { useCampaignRecipients, useAddRecipients } from "../hooks/useCampaigns";
 
@@ -232,22 +232,11 @@ export function RecipientManager({ campaignId }: RecipientManagerProps) {
             </code>
           </p>
 
-          <textarea
+          <TextareaInput
+            label="Email Addresses"
             value={bulkEmails}
             onChange={(e) => setBulkEmails(e.target.value)}
             rows={10}
-            style={{
-              width: "100%",
-              padding: "10px 12px",
-              borderRadius: 8,
-              border: "1px solid #d1d5db",
-              fontSize: 14,
-              fontFamily: "monospace",
-              resize: "vertical",
-              outline: "none",
-              marginBottom: 16,
-            }}
-            placeholder={"john@example.com\nJane Doe <jane@example.com>\nbob@example.com"}
           />
 
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Button, Icon, Badge } from "@/components/ui";
+import { Button, Icon, Badge, TextareaInput } from "@/components/ui";
 
 import type { Comment } from "../types/comments.types";
 
@@ -99,19 +99,11 @@ export function CommentItem({
         {/* Content or Edit textarea */}
         {isEditing ? (
           <div style={{ marginBottom: 8 }}>
-            <textarea
+            <TextareaInput
+              label="Edit Comment"
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
               rows={3}
-              style={{
-                width: "100%",
-                padding: 8,
-                borderRadius: 8,
-                border: "1px solid #d1d5db",
-                fontSize: 14,
-                resize: "vertical",
-                fontFamily: "inherit",
-              }}
             />
             <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
               <Button
