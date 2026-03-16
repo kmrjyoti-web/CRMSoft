@@ -27,6 +27,11 @@ export class MasterSchedulerService implements OnModuleInit, OnModuleDestroy {
 
   /** On app start: load all jobs from DB, register active ones. */
   async onModuleInit(): Promise<void> {
+    // Skip cron jobs in production if DISABLE_CRON is set (saves DB connections)
+    if (process.env.DISABLE_CRON === 'true') {
+      this.logger.log('Cron jobs disabled via DISABLE_CRON env var');
+      return;
+    }
     const jobs = await this.prisma.cronJobConfig.findMany();
     let registered = 0;
 
