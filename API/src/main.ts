@@ -13,13 +13,9 @@ import { RequestIdMiddleware } from './common/request/request-id.middleware';
 async function bootstrap() {
   const isProd = process.env.NODE_ENV === 'production';
   const app = await NestFactory.create(AppModule, {
-    logger: isProd ? false : ['error', 'warn', 'log', 'debug', 'verbose'],
+    logger: isProd ? ['error', 'warn'] : ['error', 'warn', 'log', 'debug', 'verbose'],
   });
   const logger = new Logger('Bootstrap');
-  if (isProd) {
-    // Re-enable minimal logging after boot (only errors/warnings)
-    app.useLogger(['error', 'warn']);
-  }
 
   app.use(helmet({
     contentSecurityPolicy: {
@@ -90,8 +86,9 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  logger.log(`Server:  http://localhost:${port}`);
-  logger.log(`Swagger: http://localhost:${port}/docs`);
-  logger.log(`Scalar:  http://localhost:${port}/scalar`);
+  console.log(`Server running on port ${port}`);
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('FATAL: App failed to start', err);
+  process.exit(1);
+});
