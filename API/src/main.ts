@@ -11,7 +11,10 @@ import { ResponseMapperInterceptor } from './common/response/response-mapper.int
 import { RequestIdMiddleware } from './common/request/request-id.middleware';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const isProd = process.env.NODE_ENV === 'production';
+  const app = await NestFactory.create(AppModule, {
+    logger: isProd ? ['error', 'warn', 'log'] : ['error', 'warn', 'log', 'debug', 'verbose'],
+  });
   const logger = new Logger('Bootstrap');
 
   app.use(helmet({
