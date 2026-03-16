@@ -13,9 +13,13 @@ import { RequestIdMiddleware } from './common/request/request-id.middleware';
 async function bootstrap() {
   const isProd = process.env.NODE_ENV === 'production';
   const app = await NestFactory.create(AppModule, {
-    logger: isProd ? ['error', 'warn', 'log'] : ['error', 'warn', 'log', 'debug', 'verbose'],
+    logger: isProd ? false : ['error', 'warn', 'log', 'debug', 'verbose'],
   });
   const logger = new Logger('Bootstrap');
+  if (isProd) {
+    // Re-enable minimal logging after boot (only errors/warnings)
+    app.useLogger(['error', 'warn']);
+  }
 
   app.use(helmet({
     contentSecurityPolicy: {
