@@ -62,8 +62,8 @@ export function DesignationForm({
   const { data: desigData, isLoading: isLoadingDesig } = useDesignationDetail(
     designationId ?? "",
   );
-  const { data: deptsData } = useDepartmentsList({ limit: 10000 });
-  const { data: desigsData } = useDesignationsList({ limit: 10000 });
+  const { data: deptsData } = useDepartmentsList({ limit: 500 });
+  const { data: desigsData } = useDesignationsList({ limit: 500 });
   const createMutation = useCreateDesignation();
   const updateMutation = useUpdateDesignation();
 

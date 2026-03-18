@@ -36,6 +36,11 @@ API/tmp/
 *.csv
 *.xlsx
 
+# Sensitive files
+password.txt
+*.pem
+*.key
+
 # Embedded repos
 CRMSoft/
 

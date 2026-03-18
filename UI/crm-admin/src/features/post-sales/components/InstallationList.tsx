@@ -77,7 +77,7 @@ export function InstallationList() {
   const params = useMemo<InstallationListParams>(
     () => ({
       page: 1,
-      limit: 10000,
+      limit: 50,
       sortBy: "createdAt",
       sortOrder: "desc" as const,
       ...filterParams,

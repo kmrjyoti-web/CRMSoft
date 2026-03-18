@@ -60,8 +60,8 @@ export function UserForm({ userId, mode = "page", panelId, onSuccess, onCancel }
 
   const { data: userData, isLoading: isLoadingUser } = useUserDetail(userId ?? "");
   const { data: rolesData } = useRolesList();
-  const { data: deptsData } = useDepartmentsList({ limit: 10000 });
-  const { data: desigsData } = useDesignationsList({ limit: 10000 });
+  const { data: deptsData } = useDepartmentsList({ limit: 500 });
+  const { data: desigsData } = useDesignationsList({ limit: 500 });
   const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();
 

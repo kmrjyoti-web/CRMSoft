@@ -105,7 +105,7 @@ export function RecycleBinList() {
   const params = useMemo(
     () => ({
       ...(activeTab ? { entityType: activeTab } : {}),
-      limit: 10000,
+      limit: 50,
     }),
     [activeTab],
   );

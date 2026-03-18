@@ -11,6 +11,7 @@ import {
   useUpdateOrderStatus,
 } from "../hooks/useMarketplace";
 import type {
+import { formatDate } from "@/lib/format-date";
   MarketplaceOrder,
   UpdateOrderStatusDto,
 } from "../types/marketplace.types";
@@ -37,9 +38,6 @@ const NEXT_STATUS_OPTIONS: Array<{
   { label: "Cancelled", value: "CANCELLED" },
 ];
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString();
-}
 
 function formatAmount(amount: number, currency: string): string {
   const symbol = currency === "INR" ? "₹" : "$";

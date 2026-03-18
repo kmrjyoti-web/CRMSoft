@@ -1,6 +1,7 @@
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { GetActivityListQuery } from './get-activity-list.query';
 import { PrismaService } from '../../../../../core/prisma/prisma.service';
+import { buildPaginationParams, buildPaginatedResult } from '../../../../../common/utils/paginated-list.helper';
 
 @QueryHandler(GetActivityListQuery)
 export class GetActivityListHandler implements IQueryHandler<GetActivityListQuery> {
@@ -26,17 +27,19 @@ export class GetActivityListHandler implements IQueryHandler<GetActivityListQuer
       if (query.toDate) where.scheduledAt.lte = new Date(query.toDate);
     }
 
+    const { page, limit, skip, orderBy } = buildPaginationParams(query);
+
     const [data, total] = await Promise.all([
       this.prisma.activity.findMany({
         where,
         include: { lead: { select: { id: true, leadNumber: true } }, contact: { select: { id: true, firstName: true, lastName: true } }, createdByUser: { select: { id: true, firstName: true, lastName: true } } },
-        orderBy: { [query.sortBy]: query.sortOrder },
-        skip: (query.page - 1) * query.limit,
-        take: query.limit,
+        orderBy,
+        skip,
+        take: limit,
       }),
       this.prisma.activity.count({ where }),
     ]);
 
-    return { data, total, page: query.page, limit: query.limit };
+    return buildPaginatedResult(data, total, page, limit);
   }
 }

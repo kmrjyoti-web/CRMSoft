@@ -95,7 +95,7 @@ interface ImportStepMappingProps {
 
 export function ImportStepMapping({ job, onMapped }: ImportStepMappingProps) {
   const fieldOptions = FIELD_MAP[job.targetEntity] || CONTACT_FIELDS;
-  const { data: suggestionsRes } = useMappingSuggestions(job.targetEntity as ImportTargetEntity);
+  const { data: suggestionsRes } = useMappingSuggestions(job.targetEntity as ImportTargetEntity, job.fileHeaders);
   const { data: profilesRes } = useImportProfiles(job.targetEntity);
   const applyMut = useApplyMapping();
   const saveProfMut = useSaveProfile();
@@ -106,27 +106,32 @@ export function ImportStepMapping({ job, onMapped }: ImportStepMappingProps) {
   const [profileName, setProfileName] = useState("");
   const [showSaveProfile, setShowSaveProfile] = useState(false);
 
-  // Auto-populate from suggestions
+  // Auto-populate from smart suggestions
   useEffect(() => {
-    const suggestions = Array.isArray(suggestionsRes?.data) ? suggestionsRes.data : [];
+    const raw = suggestionsRes?.data;
+    // Handle both response shapes: { suggestions: [...] } or direct array
+    const suggestions = Array.isArray(raw)
+      ? raw
+      : Array.isArray((raw as any)?.suggestions)
+        ? (raw as any).suggestions
+        : [];
     if (suggestions.length === 0) return;
     const auto: Record<string, string> = {};
     for (const s of suggestions) {
-      const header = job.fileHeaders.find(
-        (h) => h.toLowerCase() === s.sourceColumn.toLowerCase(),
-      );
-      if (header && s.confidence > 0.5) {
-        auto[header] = s.suggestedField;
+      if (s.sourceColumn && s.suggestedField && s.confidence >= 0.5) {
+        auto[s.sourceColumn] = s.suggestedField;
       }
     }
+    if (Object.keys(auto).length === 0) return;
     setMapping((prev) => {
       const merged = { ...auto };
+      // User's manual picks take priority
       for (const [k, v] of Object.entries(prev)) {
         if (v) merged[k] = v;
       }
       return merged;
     });
-  }, [suggestionsRes, job.fileHeaders]);
+  }, [suggestionsRes]);
 
   const profiles = Array.isArray(profilesRes?.data) ? profilesRes.data : [];
 

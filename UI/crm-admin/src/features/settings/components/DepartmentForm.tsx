@@ -62,8 +62,8 @@ export function DepartmentForm({
   const { data: deptData, isLoading: isLoadingDept } = useDepartmentDetail(
     departmentId ?? "",
   );
-  const { data: deptsData } = useDepartmentsList({ limit: 10000 });
-  const { data: usersData } = useUsersList({ limit: 10000 });
+  const { data: deptsData } = useDepartmentsList({ limit: 500 });
+  const { data: usersData } = useUsersList({ limit: 500 });
   const createMutation = useCreateDepartment();
   const updateMutation = useUpdateDepartment();
 

@@ -18,6 +18,7 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { EmptyState } from "@/components/common/EmptyState";
 
 import { useChartOfAccounts, useCreateLedger } from "../hooks/useAccounts";
+import { formatCurrency } from "@/lib/format-currency";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -56,10 +57,6 @@ const LEDGER_COLUMNS = [
 // Helpers
 // ---------------------------------------------------------------------------
 
-function formatCurrency(amount: number | string | null | undefined): string {
-  if (amount == null) return "\u2014";
-  return `\u20B9${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
-}
 
 interface Ledger {
   id: string;

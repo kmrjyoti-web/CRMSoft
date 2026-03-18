@@ -32,6 +32,7 @@ import { WorkspaceKeyboard } from "@/components/workspace/WorkspaceKeyboard";
 
 import { AiChatWidget } from "@/features/self-hosted-ai/components/AiChatWidget";
 import { ErrorDetailModal } from "@/components/common/ErrorDetailModal";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { useControlRoomSync } from "@/hooks/useControlRoomSync";
 import { CRMHeader } from "./_components/CRMHeader";
 import { CRMSidebar } from "./_components/CRMSidebar";
@@ -247,8 +248,10 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
         <TabBar />
 
         <main className="content-area">
-          {/* POS workspace canvas — shown instead of route content when a tab is active */}
-          {isPOSMode ? <POSFormLayout /> : children}
+          <ErrorBoundary>
+            {/* POS workspace canvas — shown instead of route content when a tab is active */}
+            {isPOSMode ? <POSFormLayout /> : children}
+          </ErrorBoundary>
         </main>
       </div>
 

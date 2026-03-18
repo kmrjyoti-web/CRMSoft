@@ -77,7 +77,7 @@ export function TrainingList() {
   const params = useMemo<TrainingListParams>(
     () => ({
       page: 1,
-      limit: 10000,
+      limit: 50,
       sortBy: "createdAt",
       sortOrder: "desc" as const,
       ...filterParams,

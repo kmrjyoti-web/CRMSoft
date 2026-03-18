@@ -7,6 +7,7 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
 import { usePluginLogs } from "../hooks/usePluginStore";
 import type { PluginLog } from "../types/plugin-store.types";
+import { formatDate } from "@/lib/format-date";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -16,9 +17,6 @@ function logStatusVariant(status: PluginLog["status"]): BadgeVariant {
   return status === "SUCCESS" ? "success" : "danger";
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleString();
-}
 
 function formatDuration(ms: number): string {
   if (ms < 1000) return `${ms}ms`;

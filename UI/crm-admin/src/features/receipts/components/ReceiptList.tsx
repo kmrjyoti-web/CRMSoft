@@ -7,6 +7,7 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
 import { useReceipts } from "../hooks/useReceipts";
 import type { Receipt } from "../types/receipts.types";
+import { formatCurrency } from "@/lib/format-currency";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -20,11 +21,6 @@ interface ReceiptListProps {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function formatCurrency(amount: number | null | undefined, currency?: string): string {
-  if (amount == null) return "\u2014";
-  const sym = currency === "USD" ? "$" : "\u20B9";
-  return `${sym}${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
-}
 
 // ---------------------------------------------------------------------------
 // Component

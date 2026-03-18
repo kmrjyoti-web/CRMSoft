@@ -56,8 +56,9 @@ export class ValidateRowsHandler implements ICommandHandler<ValidateRowsCommand>
       }));
     const patches = await this.patchGenerator.generatePatchesForRows(updateRows, job.targetEntity);
 
-    // Update each row status
+    // Build batch updates
     let validCount = 0, invalidCount = 0, exactDupCount = 0, fuzzyDupCount = 0, inFileDupCount = 0;
+    const batchUpdates: { id: string; data: any }[] = [];
 
     for (const row of rows) {
       const updateData: any = {};
@@ -105,7 +106,16 @@ export class ValidateRowsHandler implements ICommandHandler<ValidateRowsCommand>
         validCount++;
       }
 
-      await this.prisma.importRow.update({ where: { id: row.id }, data: updateData });
+      batchUpdates.push({ id: row.id, data: updateData });
+    }
+
+    // Batch update rows in chunks of 100 (inside a transaction)
+    const CHUNK = 100;
+    for (let i = 0; i < batchUpdates.length; i += CHUNK) {
+      const chunk = batchUpdates.slice(i, i + CHUNK);
+      await this.prisma.$transaction(
+        chunk.map((u) => this.prisma.importRow.update({ where: { id: u.id }, data: u.data })),
+      );
     }
 
     // Update job counts

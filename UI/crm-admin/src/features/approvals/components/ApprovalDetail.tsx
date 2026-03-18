@@ -14,16 +14,10 @@ import {
 import { ApprovalBadge } from "./ApprovalBadge";
 
 import type { ApprovalRequest } from "../types/approval.types";
+import { formatDate } from "@/lib/format-date";
 
 // ── Helpers ─────────────────────────────────────────────
 
-function formatDate(iso?: string): string {
-  if (!iso) return "--";
-  return new Date(iso).toLocaleString("en-IN", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-}
 
 function getExpiryText(expiresAt?: string): { text: string; isExpired: boolean } {
   if (!expiresAt) return { text: "--", isExpired: false };

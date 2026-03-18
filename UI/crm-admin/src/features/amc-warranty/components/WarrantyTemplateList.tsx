@@ -76,7 +76,7 @@ export function WarrantyTemplateList() {
     useTableFilters(WARRANTY_TEMPLATE_FILTER_CONFIG);
 
   const params = useMemo(
-    () => ({ page: 1, limit: 10000, ...filterParams }),
+    () => ({ page: 1, limit: 50, ...filterParams }),
     [filterParams],
   );
 

@@ -15,6 +15,7 @@ import {
 } from '@/components/ui';
 
 import {
+import { formatCurrency } from "@/lib/format-currency";
   useBankList,
   useBankReconciliation,
   useSubmitReconciliation,
@@ -36,10 +37,6 @@ const UNRECONCILED_COLUMNS = [
 // Helpers
 // ---------------------------------------------------------------------------
 
-function formatCurrency(amount: number | string | null | undefined): string {
-  if (amount == null) return '\u2014';
-  return `\u20B9${Number(amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
-}
 
 function flattenUnreconciledPayments(
   items: Record<string, unknown>[],

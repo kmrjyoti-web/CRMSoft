@@ -202,7 +202,7 @@ export class DuplicateDetectorService {
   ): Promise<{ entityId: string; matchValue: string }[]> {
     const results: { entityId: string; matchValue: string }[] = [];
 
-    if (targetEntity === 'CONTACT' || targetEntity === 'LEAD') {
+    if (targetEntity === 'ROW_CONTACT' || targetEntity === 'CONTACT' || targetEntity === 'LEAD') {
       if (field === 'email' || field === 'mobile' || field === 'phone') {
         const comms = await this.prisma.communication.findMany({
           where: { value: { in: values, mode: 'insensitive' } },

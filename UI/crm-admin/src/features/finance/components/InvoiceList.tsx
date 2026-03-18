@@ -15,6 +15,7 @@ import { InvoiceForm } from "./InvoiceForm";
 import { InvoiceListUserHelp } from "../help/InvoiceListUserHelp";
 import { InvoiceListDevHelp } from "../help/InvoiceListDevHelp";
 import type {
+import { formatCurrency } from "@/lib/format-currency";
   InvoiceListItem,
   InvoiceListParams,
 } from "../types/finance.types";
@@ -38,10 +39,6 @@ const INVOICE_COLUMNS = [
 // Helpers
 // ---------------------------------------------------------------------------
 
-function formatCurrency(amount: number | string | null | undefined): string {
-  if (amount == null) return "\u2014";
-  return `\u20B9${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
-}
 
 function flattenInvoices(items: InvoiceListItem[]): Record<string, unknown>[] {
   return items.map((inv) => ({
@@ -81,7 +78,7 @@ export function InvoiceList() {
     useTableFilters(INVOICE_FILTER_CONFIG);
 
   const params = useMemo<InvoiceListParams>(
-    () => ({ page: 1, limit: 10000, ...filterParams }),
+    () => ({ page: 1, limit: 50, ...filterParams }),
     [filterParams],
   );
 

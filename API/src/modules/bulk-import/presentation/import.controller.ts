@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Param, Body, Query, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Post, Get, Put, Param, Body, Query, UseGuards, UseInterceptors, UploadedFile, HttpCode } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
@@ -79,20 +79,55 @@ export class ImportController {
     return ApiResponse.success(result, 'Profile saved');
   }
 
-  /** Step 3: Validate + fuzzy dedup */
+  /** Step 3: Validate (fire-and-forget — processes in background) */
   @Post(':jobId/validate')
   @RequirePermissions('import:write')
+  @HttpCode(202)
   async validate(@Param('jobId') jobId: string) {
-    const result = await this.commandBus.execute(new ValidateRowsCommand(jobId));
-    return ApiResponse.success(result, 'Validation completed');
+    // Return immediately — validation runs in background
+    this.commandBus.execute(new ValidateRowsCommand(jobId)).catch(() => {});
+    return ApiResponse.success({ jobId, status: 'VALIDATING' }, 'Validation started');
   }
 
-  /** Step 5: Commit import */
+  /** Step 4: Poll job status (lightweight — for progress tracking) */
+  @Get(':jobId/status')
+  @RequirePermissions('import:read')
+  async getStatus(@Param('jobId') jobId: string) {
+    const job = await this.queryBus.execute(new GetJobDetailQuery(jobId));
+    return ApiResponse.success({
+      jobId: job.id,
+      status: job.status,
+      totalRows: job.totalRows,
+      validRows: job.validRows,
+      invalidRows: job.invalidRows,
+      importedCount: job.importedCount,
+      skippedRows: job.skippedRows,
+      failedCount: job.failedCount,
+      duplicateExactRows: job.duplicateExactRows,
+      duplicateInFileRows: job.duplicateInFileRows,
+    });
+  }
+
+  /** Step 5: Commit import (fire-and-forget — processes in background) */
   @Post(':jobId/commit')
   @RequirePermissions('import:write')
+  @HttpCode(202)
   async commit(@Param('jobId') jobId: string, @CurrentUser('id') userId: string) {
-    const result = await this.commandBus.execute(new CommitImportCommand(jobId, userId));
-    return ApiResponse.success(result, 'Import completed');
+    // Return immediately — import runs in background
+    this.commandBus.execute(new CommitImportCommand(jobId, userId)).catch(async (err) => {
+      // Log error and mark job as FAILED so user can see what happened
+      console.error(`[Import] Job ${jobId} failed:`, err.message);
+      try {
+        const { PrismaClient } = require('@prisma/client');
+        const prisma = new PrismaClient();
+        await prisma.importJob.update({
+          where: { id: jobId },
+          data: { status: 'FAILED' as any },
+        });
+        await prisma.$disconnect();
+      } catch { /* best-effort */ }
+    });
+    return ApiResponse.success({ jobId, status: 'IMPORTING' }, 'Import started');
   }
 
   /** Cancel import */
@@ -200,11 +235,15 @@ export class ImportController {
     return ApiResponse.success(result);
   }
 
-  /** Mapping suggestions for entity */
+  /** Mapping suggestions for entity (pass ?headers=col1,col2 for smart matching) */
   @Get('mapping-suggestions/:targetEntity')
   @RequirePermissions('import:read')
-  async mappingSuggestions(@Param('targetEntity') entity: string) {
-    const result = await this.queryBus.execute(new GetMappingSuggestionsQuery(entity));
+  async mappingSuggestions(
+    @Param('targetEntity') entity: string,
+    @Query('headers') headers?: string,
+  ) {
+    const fileHeaders = headers ? headers.split(',').map((h) => h.trim()).filter(Boolean) : undefined;
+    const result = await this.queryBus.execute(new GetMappingSuggestionsQuery(entity, fileHeaders));
     return ApiResponse.success(result);
   }
 }

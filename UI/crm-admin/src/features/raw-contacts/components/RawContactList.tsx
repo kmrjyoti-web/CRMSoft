@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, lazy, Suspense } from "react";
 
 import { useRouter } from "next/navigation";
 
 import toast from "react-hot-toast";
 
-import { TableFull, Button, Icon, Switch } from "@/components/ui";
+import { TableFull, Icon, Switch } from "@/components/ui";
 
 import { useTableFilters } from "@/hooks/useTableFilters";
 import { useBulkSelect } from "@/hooks/useBulkSelect";
@@ -15,18 +15,21 @@ import { useBulkOperations } from "@/hooks/useBulkOperations";
 import { TableSkeleton } from "@/components/common/TableSkeleton";
 import { useConfirmDialog } from "@/components/common/useConfirmDialog";
 import { BulkActionsBar } from "@/components/common/BulkActionsBar";
-import { BulkEditPanel } from "@/components/common/BulkEditPanel";
 import { useBulkDeleteDialog } from "@/components/common/BulkDeleteDialog";
 import { ActionsMenu } from "@/components/common/ActionsMenu";
 
 import { useEntityPanel } from "@/hooks/useEntityPanel";
-import { VerifyFlowModal } from "@/features/entity-verification";
 import type { VerifyFlowEntityData } from "@/features/entity-verification";
 import { useInitiateVerification } from "@/features/entity-verification/hooks/useEntityVerification";
 
 import { useRawContactsList, useUpdateRawContact, useSoftDeleteRawContact, useDeactivateRawContact, useReactivateRawContact } from "../hooks/useRawContacts";
 
 import { RawContactForm } from "./RawContactForm";
+
+// ── Lazy-loaded heavy components (only needed on user interaction) ──
+const DataImport = lazy(() => import("@/components/common/DataImport").then(m => ({ default: m.DataImport })));
+const VerifyFlowModal = lazy(() => import("@/features/entity-verification").then(m => ({ default: m.VerifyFlowModal })));
+const BulkEditPanel = lazy(() => import("@/components/common/BulkEditPanel").then(m => ({ default: m.BulkEditPanel })));
 
 import { RAW_CONTACT_FILTER_CONFIG } from "../utils/raw-contact-filters";
 
@@ -106,6 +109,7 @@ export function RawContactList() {
   });
 
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [verifyTarget, setVerifyTarget] = useState<RawContactListItem | null>(null);
   const [verifyOpen, setVerifyOpen] = useState(false);
@@ -144,7 +148,7 @@ export function RawContactList() {
   const params = useMemo<RawContactListParams>(
     () => ({
       page: 1,
-      limit: 10000,
+      limit: 100,
       sortBy: "createdAt",
       sortOrder: "desc",
       ...filterParams,
@@ -345,7 +349,18 @@ export function RawContactList() {
           onCreate={handleCreate}
           selectedIds={selectedIds}
           onSelectionChange={handleSelectionChange}
-          headerActions={<ActionsMenu items={actionsMenuItems} />}
+          headerActions={
+            <>
+              <button
+                onClick={() => setImportOpen(true)}
+                className="flex items-center px-2.5 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                title="Import"
+              >
+                <Icon name="upload" size={14} />
+              </button>
+              <ActionsMenu items={actionsMenuItems} />
+            </>
+          }
         />
       </div>
 
@@ -393,14 +408,18 @@ export function RawContactList() {
       )}
 
       {/* Bulk Edit Panel */}
-      <BulkEditPanel
-        isOpen={bulkEditOpen}
-        onClose={() => setBulkEditOpen(false)}
-        ids={selectedArray}
-        fields={BULK_EDIT_FIELDS}
-        onSubmit={handleBulkEditSubmit}
-        entityName="raw contact"
-      />
+      {bulkEditOpen && (
+        <Suspense fallback={null}>
+          <BulkEditPanel
+            isOpen={bulkEditOpen}
+            onClose={() => setBulkEditOpen(false)}
+            ids={selectedArray}
+            fields={BULK_EDIT_FIELDS}
+            onSubmit={handleBulkEditSubmit}
+            entityName="raw contact"
+          />
+        </Suspense>
+      )}
 
       {/* Bulk Verify Modal */}
       {bulkVerifyOpen && (
@@ -530,6 +549,7 @@ export function RawContactList() {
 
       {/* Per-row Verify Flow Modal */}
       {verifyOpen && verifyTarget && (
+        <Suspense fallback={null}>
         <VerifyFlowModal
           entityType="RAW_CONTACT"
           entityId={verifyTarget.id}
@@ -544,11 +564,24 @@ export function RawContactList() {
           onClose={() => { setVerifyOpen(false); setVerifyTarget(null); }}
           onVerified={() => { setVerifyOpen(false); setVerifyTarget(null); }}
         />
+        </Suspense>
       )}
 
       {/* Dialogs */}
       <ConfirmDialogPortal />
       <BulkDeleteDialogPortal />
+
+      {/* Import Modal */}
+      {importOpen && (
+        <Suspense fallback={null}>
+          <DataImport
+            entityType="ROW_CONTACT"
+            entityLabel="Raw Contacts"
+            onComplete={() => { setImportOpen(false); }}
+            onClose={() => setImportOpen(false)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

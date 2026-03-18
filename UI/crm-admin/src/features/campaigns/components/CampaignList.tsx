@@ -9,6 +9,7 @@ import { Icon, Button, Badge, SelectInput } from "@/components/ui";
 import { useCampaigns } from "../hooks/useCampaigns";
 
 import type { Campaign, CampaignStatus, CampaignFilters } from "../types/campaign.types";
+import { formatDate } from "@/lib/format-date";
 
 // ── Status badge color map ──────────────────────────────
 
@@ -33,16 +34,6 @@ const STATUS_OPTIONS = [
 
 // ── Helpers ─────────────────────────────────────────────
 
-function formatDate(dateStr?: string): string {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 // ── Component ───────────────────────────────────────────
 

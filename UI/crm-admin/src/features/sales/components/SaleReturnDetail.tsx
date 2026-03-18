@@ -13,6 +13,8 @@ import {
   useRejectReturn,
 } from '../hooks/useSales';
 import type { SaleReturnItem } from '../types/sales.types';
+import { formatCurrency } from "@/lib/format-currency";
+import { formatDate } from "@/lib/format-date";
 
 // ── Status badge mapping ────────────────────────────────────
 
@@ -32,15 +34,7 @@ const CONDITION_OPTIONS = [
 
 // ── Helpers ─────────────────────────────────────────────────
 
-function formatCurrency(amount: number | null | undefined): string {
-  if (amount == null) return '\u2014';
-  return `\u20B9${Number(amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
-}
 
-function formatDate(value: string | null | undefined): string {
-  if (!value) return '\u2014';
-  return new Date(value).toLocaleDateString('en-IN');
-}
 
 // ── Item columns ────────────────────────────────────────────
 

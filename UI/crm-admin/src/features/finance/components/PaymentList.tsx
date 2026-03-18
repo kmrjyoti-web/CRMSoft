@@ -14,6 +14,7 @@ import { PAYMENT_FILTER_CONFIG } from "../utils/payment-filters";
 import { PaymentListUserHelp } from "../help/PaymentListUserHelp";
 import { PaymentListDevHelp } from "../help/PaymentListDevHelp";
 import type {
+import { formatCurrency } from "@/lib/format-currency";
   PaymentListItem,
   PaymentListParams,
 } from "../types/finance.types";
@@ -36,10 +37,6 @@ const PAYMENT_COLUMNS = [
 // Helpers
 // ---------------------------------------------------------------------------
 
-function formatCurrency(amount: number | string | null | undefined): string {
-  if (amount == null) return "\u2014";
-  return `\u20B9${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
-}
 
 function flattenPayments(items: PaymentListItem[]): Record<string, unknown>[] {
   return items.map((payment) => ({
@@ -90,7 +87,7 @@ export function PaymentList() {
     useTableFilters(PAYMENT_FILTER_CONFIG);
 
   const params = useMemo<PaymentListParams>(
-    () => ({ page: 1, limit: 10000, ...filterParams }),
+    () => ({ page: 1, limit: 50, ...filterParams }),
     [filterParams],
   );
 

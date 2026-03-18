@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { TableFull, Badge, Card, Icon } from '@/components/ui';
 import { useErrorLogs, useErrorStats } from '../hooks/useErrorLogs';
 import type { TenantErrorLog, ErrorSeverity } from '../types/error-log.types';
+import { formatDate } from "@/lib/format-date";
 
 const SEVERITY_BADGE: Record<ErrorSeverity, "danger" | "warning" | "secondary" | "default"> = {
   CRITICAL: 'danger',
@@ -22,12 +23,6 @@ const ERROR_LOG_COLUMNS = [
   { id: 'statusCode', label: 'Status', visible: true },
 ];
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-IN', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
-  });
-}
 
 function methodColor(method: string): string {
   switch (method?.toUpperCase()) {

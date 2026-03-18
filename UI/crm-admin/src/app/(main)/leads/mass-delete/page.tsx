@@ -40,7 +40,7 @@ const CRITERIA_FIELDS: CriteriaFieldDef[] = [
 ];
 
 async function handleSearch() {
-  const result = await leadsService.getAll({ limit: 10000 });
+  const result = await leadsService.getAll({ limit: 500 });
   const raw = result.data;
   const data: LeadListItem[] = Array.isArray(raw)
     ? raw

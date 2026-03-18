@@ -58,16 +58,22 @@ export const bulkImportService = {
       .post<ApiResponse<ImportProfile>>(`${BASE_URL}/${jobId}/save-profile`, dto)
       .then((r) => r.data),
 
-  // ── Validate ───────────────────────────────────────────
+  // ── Validate (fire-and-forget — returns immediately) ────
   validate: (jobId: string) =>
     apiClient
-      .post<ApiResponse<ImportJob>>(`${BASE_URL}/${jobId}/validate`)
+      .post<ApiResponse<any>>(`${BASE_URL}/${jobId}/validate`)
       .then((r) => r.data),
 
-  // ── Commit (Execute Import) ────────────────────────────
+  // ── Commit (fire-and-forget — returns immediately) ─────
   commit: (jobId: string) =>
     apiClient
-      .post<ApiResponse<ImportJob>>(`${BASE_URL}/${jobId}/commit`)
+      .post<ApiResponse<any>>(`${BASE_URL}/${jobId}/commit`)
+      .then((r) => r.data),
+
+  // ── Poll job status (lightweight) ──────────────────────
+  getStatus: (jobId: string) =>
+    apiClient
+      .get<ApiResponse<any>>(`${BASE_URL}/${jobId}/status`)
       .then((r) => r.data),
 
   // ── Cancel ─────────────────────────────────────────────
@@ -131,9 +137,12 @@ export const bulkImportService = {
       .then((r) => r.data),
 
   // ── Mapping Suggestions ────────────────────────────────
-  getMappingSuggestions: (targetEntity: string) =>
+  getMappingSuggestions: (targetEntity: string, fileHeaders?: string[]) =>
     apiClient
-      .get<ApiResponse<MappingSuggestion[]>>(`${BASE_URL}/mapping-suggestions/${targetEntity}`)
+      .get<ApiResponse<{ targetFields: any[]; suggestions: MappingSuggestion[] }>>(
+        `${BASE_URL}/mapping-suggestions/${targetEntity}`,
+        fileHeaders?.length ? { params: { headers: fileHeaders.join(",") } } : undefined,
+      )
       .then((r) => r.data),
 
   // ── Duplicates ─────────────────────────────────────────

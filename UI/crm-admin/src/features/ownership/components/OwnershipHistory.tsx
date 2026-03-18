@@ -6,6 +6,7 @@ import { Badge, Icon } from "@/components/ui";
 
 import { useOwnershipHistory } from "../hooks/useOwnership";
 import type { EntityType, OwnershipLog } from "../types/ownership.types";
+import { formatDate } from "@/lib/format-date";
 
 // ── Date formatter ─────────────────────────────────────────
 
@@ -17,13 +18,6 @@ const dateFmt = new Intl.DateTimeFormat("en-IN", {
   minute: "2-digit",
 });
 
-function formatDate(iso: string): string {
-  try {
-    return dateFmt.format(new Date(iso));
-  } catch {
-    return iso;
-  }
-}
 
 // ── Action label map ───────────────────────────────────────
 

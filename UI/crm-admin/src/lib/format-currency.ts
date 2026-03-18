@@ -13,3 +13,14 @@ export function formatINR(amount: number): string {
   const sign = amount < 0 ? "-" : "";
   return `${sign}₹${formatted}${decPart !== "00" ? "." + decPart : ""}`;
 }
+
+// ── Null-safe currency formatter (for list views) ───────
+// formatCurrency(null) → "—"
+// formatCurrency(100000) → "₹1,00,000.00"
+
+export function formatCurrency(amount: number | string | null | undefined): string {
+  if (amount == null) return "—";
+  const num = typeof amount === "string" ? parseFloat(amount) : amount;
+  if (isNaN(num)) return "—";
+  return `₹${num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}

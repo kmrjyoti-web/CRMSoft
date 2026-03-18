@@ -14,13 +14,10 @@ import {
 } from "../hooks/usePluginStore";
 import type { InstalledPlugin } from "../types/plugin-store.types";
 import { CATEGORY_CONFIG, STATUS_BADGE } from "../types/plugin-store.types";
+import { formatDate } from "@/lib/format-date";
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
-function formatDate(dateStr: string | undefined): string {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString();
-}
 
 // ── Table styles ─────────────────────────────────────────────────────
 

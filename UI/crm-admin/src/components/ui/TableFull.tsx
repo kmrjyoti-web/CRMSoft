@@ -178,16 +178,7 @@ export function TableFull({ tableKey, columns: staticColumns, data, headerAction
   // Apply masking to data based on rules + _maskingMeta from backend
   const maskedData = useMemo(() => {
     if (!enabled || !data || !Array.isArray(data) || rules.length === 0) {
-      if (process.env.NODE_ENV === 'development' && enabled && data && Array.isArray(data)) {
-        if (rules.length === 0) {
-          console.log(`[TableFull] No masking rules for "${tableKey}" — data shown unmasked`);
-        }
-      }
       return data;
-    }
-
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[TableFull] Applying ${rules.length} masking rule(s) for "${tableKey}" to ${(data as any[]).length} records`);
     }
 
     try {

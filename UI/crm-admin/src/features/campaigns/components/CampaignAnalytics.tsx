@@ -7,6 +7,7 @@ import { Icon } from "@/components/ui";
 import { useCampaignStats, useCampaign } from "../hooks/useCampaigns";
 
 import type { CampaignStats, Campaign } from "../types/campaign.types";
+import { formatDate } from "@/lib/format-date";
 
 // ── Types ───────────────────────────────────────────────
 
@@ -16,16 +17,6 @@ interface CampaignAnalyticsProps {
 
 // ── Helpers ─────────────────────────────────────────────
 
-function formatDate(dateStr?: string): string {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 function formatPercent(value: number): string {
   return `${(value * 100).toFixed(1)}%`;

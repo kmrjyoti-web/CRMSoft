@@ -5,19 +5,10 @@ import { Button, Badge, Icon, Input, SelectInput, DatePicker } from "@/component
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useApiLogs } from "../hooks/useApiGateway";
 import type { ApiLog } from "../types/api-gateway.types";
+import { formatDate } from "@/lib/format-date";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-}
 
 const METHOD_VARIANTS: Record<
   string,

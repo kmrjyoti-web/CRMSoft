@@ -56,7 +56,7 @@ export function WarrantyClaimList() {
     useTableFilters(CLAIM_FILTER_CONFIG);
 
   const params = useMemo(
-    () => ({ page: 1, limit: 10000, ...filterParams }),
+    () => ({ page: 1, limit: 50, ...filterParams }),
     [filterParams],
   );
 

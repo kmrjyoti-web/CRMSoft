@@ -12,12 +12,10 @@ import {
 } from "../hooks/useQuotationAnalytics";
 import { ConversionFunnel } from "./ConversionFunnel";
 import type { AnalyticsFilters } from "../types/quotation-analytics.types";
+import { formatCurrency } from "@/lib/format-currency";
 
 // ── Helpers ───────────────────────────────────────────
 
-function formatCurrency(val: number): string {
-  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(val);
-}
 
 function trendBadge(value: number) {
   const isPositive = value >= 0;

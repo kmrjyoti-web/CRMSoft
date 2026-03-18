@@ -6,6 +6,7 @@ import { Button, Badge, Card, Icon, SelectInput } from '@/components/ui';
 import { PageHeader, EmptyState, LoadingSpinner, QueryErrorState } from '@/components/common';
 import { useMyTickets } from '../hooks/useSupport';
 import type { SupportTicket, TicketStatus, TicketPriority } from '../types/support.types';
+import { formatDate } from "@/lib/format-date";
 
 const STATUS_COLORS: Record<TicketStatus, string> = {
   OPEN: 'blue',
@@ -42,15 +43,6 @@ const STATUS_FILTER_OPTIONS = [
   { label: 'Closed', value: 'CLOSED' },
 ];
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
 
 export function TicketList() {
   const router = useRouter();

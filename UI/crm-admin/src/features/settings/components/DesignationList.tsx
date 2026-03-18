@@ -51,7 +51,7 @@ export function DesignationList() {
   });
 
   const params = useMemo<DesignationListParams>(
-    () => ({ page: 1, limit: 10000 }),
+    () => ({ page: 1, limit: 50 }),
     [],
   );
 

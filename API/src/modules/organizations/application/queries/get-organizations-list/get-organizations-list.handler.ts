@@ -1,5 +1,6 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { PrismaService } from '../../../../../core/prisma/prisma.service';
+import { buildPaginationParams, buildPaginatedResult } from '../../../../../common/utils/paginated-list.helper';
 import { GetOrganizationsListQuery } from './get-organizations-list.query';
 
 @QueryHandler(GetOrganizationsListQuery)
@@ -22,30 +23,34 @@ export class GetOrganizationsListHandler implements IQueryHandler<GetOrganizatio
       ];
     }
 
+    const { page, limit, skip, orderBy } = buildPaginationParams(query);
+
     const [data, total] = await Promise.all([
       this.prisma.organization.findMany({
         where,
-        skip: (query.page - 1) * query.limit,
-        take: query.limit,
-        orderBy: { [query.sortBy]: query.sortOrder },
-        include: {
-          filters: {
-            include: {
-              lookupValue: {
-                select: {
-                  id: true, value: true, label: true,
-                  lookup: { select: { category: true } },
-                },
-              },
-            },
+        skip,
+        take: limit,
+        orderBy,
+        select: {
+          id: true,
+          name: true,
+          city: true,
+          industry: true,
+          gstNumber: true,
+          website: true,
+          isActive: true,
+          entityVerificationStatus: true,
+          createdAt: true,
+          communications: {
+            select: { id: true, type: true, value: true, isPrimary: true },
+            orderBy: { isPrimary: 'desc' },
+            take: 3,
           },
-          createdByUser: { select: { id: true, firstName: true, lastName: true } },
-          _count: { select: { contacts: true, leads: true } },
         },
       }),
       this.prisma.organization.count({ where }),
     ]);
 
-    return { data, total, page: query.page, limit: query.limit };
+    return buildPaginatedResult(data, total, page, limit);
   }
 }

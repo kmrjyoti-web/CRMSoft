@@ -47,7 +47,7 @@ export class GoogleService {
     const { clientId } = await this.getClientCredentials(tenantId);
 
     const scopes = this.buildScopes(services);
-    const frontendOrigin = process.env.CORS_ORIGINS?.split(',')[0] || 'http://localhost:3005';
+    const frontendOrigin = process.env.FRONTEND_URL || process.env.CORS_ORIGINS?.split(',')[0] || 'http://localhost:3005';
     const redirectUri = `${frontendOrigin}/settings/google/oauth-callback`;
 
     const params = new URLSearchParams({
@@ -67,7 +67,7 @@ export class GoogleService {
 
   async handleCallback(tenantId: string, userId: string, code: string, services: string[]) {
     const { clientId, clientSecret } = await this.getClientCredentials(tenantId);
-    const frontendOrigin = process.env.CORS_ORIGINS?.split(',')[0] || 'http://localhost:3005';
+    const frontendOrigin = process.env.FRONTEND_URL || process.env.CORS_ORIGINS?.split(',')[0] || 'http://localhost:3005';
     const redirectUri = `${frontendOrigin}/settings/google/oauth-callback`;
 
     // Exchange code for tokens

@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { TableFull, Badge } from '@/components/ui';
-import { useSidePanelStore } from '@/stores/side-panel.store';
+import { useEntityPanel } from '@/hooks/useEntityPanel';
 import { useAgencyDiscounts, useDeleteAgencyDiscount } from '../hooks/useDiscount';
 import type { AgencyDiscount } from '../types/discount.types';
 import { AgencyDiscountForm } from './AgencyDiscountForm';
@@ -25,36 +25,16 @@ const AGENT_TYPE_COLORS: Record<string, 'primary' | 'warning' | 'secondary'> = {
 export function AgencyDiscountPage() {
   const { data } = useAgencyDiscounts();
   const deleteMut = useDeleteAgencyDiscount();
-  const { openPanel } = useSidePanelStore();
 
-  const openForm = (discount?: AgencyDiscount) => {
-    const panelId = discount ? `edit-agency-discount-${discount.id}` : 'create-agency-discount';
-    openPanel({
-      id: panelId,
-      title: discount ? 'Edit Agency Discount' : 'New Agency Discount',
-      content: <AgencyDiscountForm panelId={panelId} discount={discount} />,
-      footerButtons: [
-        {
-          id: 'cancel',
-          label: 'Cancel',
-          showAs: 'text' as const,
-          variant: 'secondary' as const,
-          onClick: () => useSidePanelStore.getState().closePanel(panelId),
-        },
-        {
-          id: 'submit',
-          label: discount ? 'Update Discount' : 'Save Discount',
-          icon: 'save',
-          showAs: 'both' as const,
-          variant: 'primary' as const,
-          onClick: () => {
-            document.getElementById(`agency-discount-form-${panelId}`)
-              ?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-          },
-        },
-      ],
-    });
-  };
+  const { handleRowEdit, handleCreate } = useEntityPanel({
+    entityKey: "agency-discount",
+    entityLabel: "Agency Discount",
+    FormComponent: AgencyDiscountForm,
+    idProp: "agencyDiscountId",
+    editRoute: "/discount-master/agency/:id/edit",
+    createRoute: "/discount-master/agency/new",
+    displayField: "agentName",
+  });
 
   const items: AgencyDiscount[] = useMemo(() => {
     const raw = (data as any)?.data ?? data ?? [];
@@ -89,9 +69,9 @@ export function AgencyDiscountPage() {
       columns={COLUMNS}
       defaultViewMode="table"
       defaultDensity="compact"
-      onRowEdit={(row: any) => openForm(row._raw)}
+      onRowEdit={handleRowEdit}
       onRowDelete={handleDelete}
-      onCreate={() => openForm()}
+      onCreate={handleCreate}
     />
   );
 }

@@ -45,14 +45,7 @@ export class ReportEmailerService {
       `[STUB] Attachment: ${params.fileName} (${(params.fileBuffer.length / 1024).toFixed(1)} KB)`,
     );
 
-    // TODO: Integrate with EmailSenderService or nodemailer
-    // Example production implementation:
-    // await this.emailService.send({
-    //   to: params.recipients,
-    //   subject: `MIS Report: ${params.reportName}`,
-    //   body: `Please find attached the ${params.reportName} report.`,
-    //   attachments: [{ filename: params.fileName, content: params.fileBuffer }],
-    // });
+    // NOTE: Report email delivery pending integration
   }
 
   /**

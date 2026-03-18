@@ -12,6 +12,7 @@ import {
   useSuspendVendor,
 } from "../hooks/useMarketplace";
 import type { MarketplaceVendor } from "../types/marketplace.types";
+import { formatDate } from "@/lib/format-date";
 
 // ── Status helpers ────────────────────────────────────────────────────────────
 
@@ -30,9 +31,6 @@ function vendorStatusVariant(status: MarketplaceVendor["status"]): BadgeVariant 
   }
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString();
-}
 
 // ── Table styles ──────────────────────────────────────────────────────────────
 

@@ -15,6 +15,7 @@ import {
 } from '@/components/ui';
 
 import { useBankList, useCreateBank } from '../hooks/useAccounts';
+import { formatCurrency } from "@/lib/format-currency";
 
 // ---------------------------------------------------------------------------
 // Column definitions
@@ -34,10 +35,6 @@ const BANK_COLUMNS = [
 // Helpers
 // ---------------------------------------------------------------------------
 
-function formatCurrency(amount: number | string | null | undefined): string {
-  if (amount == null) return '\u2014';
-  return `\u20B9${Number(amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
-}
 
 function flattenBankAccounts(
   items: Record<string, unknown>[],

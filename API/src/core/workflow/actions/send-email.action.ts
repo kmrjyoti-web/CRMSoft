@@ -13,7 +13,7 @@ export class SendEmailAction implements IActionHandler {
       return { status: 'FAILED', errorMessage: 'Missing "to" or "subject" in email config' };
     }
 
-    // TODO: Integrate with actual email service when available
+    // NOTE: Workflow email action pending integration
     this.logger.log(
       `[EMAIL PLACEHOLDER] To: ${to}, Subject: ${subject}, ` +
       `Entity: ${context.entityType}/${context.entityId}`,

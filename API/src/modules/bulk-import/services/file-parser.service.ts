@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import * as Papa from 'papaparse';
 import * as ExcelJS from 'exceljs';
+import * as XLSX from 'xlsx';
 
 export interface ParsedFile {
   headers: string[];
@@ -24,10 +25,13 @@ export class FileParserService {
     if (ext === 'csv' || ext === 'txt') {
       return this.parseCsv(buffer);
     }
-    if (ext === 'xlsx' || ext === 'xls') {
-      return this.parseExcel(buffer);
+    if (ext === 'xlsx') {
+      return this.parseExcelXlsx(buffer);
     }
-    throw new BadRequestException(`Unsupported file type: .${ext}. Use CSV or XLSX.`);
+    if (ext === 'xls') {
+      return this.parseExcelXls(buffer);
+    }
+    throw new BadRequestException(`Unsupported file type: .${ext}. Use CSV, XLS, or XLSX.`);
   }
 
   /** Parse CSV buffer using papaparse, handles BOM */
@@ -37,6 +41,8 @@ export class FileParserService {
     if (content.charCodeAt(0) === 0xfeff) {
       content = content.slice(1);
     }
+    // Strip null bytes (can come from Excel-saved CSVs)
+    content = content.replace(/\0/g, '');
 
     const result = Papa.parse(content, {
       header: true,
@@ -54,9 +60,6 @@ export class FileParserService {
     if (rows.length === 0) {
       throw new BadRequestException('File contains no data rows');
     }
-    if (rows.length > MAX_ROWS) {
-      throw new BadRequestException(`File exceeds maximum of ${MAX_ROWS} rows`);
-    }
 
     return {
       headers,
@@ -66,10 +69,15 @@ export class FileParserService {
     };
   }
 
-  /** Parse Excel buffer using exceljs */
-  private async parseExcel(buffer: Buffer): Promise<ParsedFile> {
+  /** Parse .xlsx using ExcelJS */
+  private async parseExcelXlsx(buffer: Buffer): Promise<ParsedFile> {
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(buffer as any);
+    try {
+      await workbook.xlsx.load(buffer as any);
+    } catch {
+      // Fallback to SheetJS if ExcelJS fails
+      return this.parseExcelXls(buffer);
+    }
     const sheet = workbook.worksheets[0];
 
     if (!sheet || sheet.rowCount < 2) {
@@ -101,6 +109,41 @@ export class FileParserService {
     if (rows.length === 0) {
       throw new BadRequestException('File contains no data rows');
     }
+
+    return {
+      headers,
+      rows,
+      totalRows: rows.length,
+      sampleData: rows.slice(0, 5),
+    };
+  }
+
+  /** Parse .xls (legacy binary) using SheetJS */
+  private parseExcelXls(buffer: Buffer): ParsedFile {
+    const workbook = XLSX.read(buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    if (!sheetName) {
+      throw new BadRequestException('Excel file has no sheets');
+    }
+
+    const sheet = workbook.Sheets[sheetName];
+    const jsonData: Record<string, any>[] = XLSX.utils.sheet_to_json(sheet, {
+      defval: '',
+      raw: false, // Return formatted strings
+    });
+
+    if (jsonData.length === 0) {
+      throw new BadRequestException('File contains no data rows');
+    }
+
+    const headers = Object.keys(jsonData[0]).map((h) => h.trim());
+    const rows = jsonData.slice(0, MAX_ROWS).map((row) => {
+      const clean: Record<string, string> = {};
+      for (const [k, v] of Object.entries(row)) {
+        clean[k.trim()] = v != null ? String(v).trim().replace(/\0/g, '') : '';
+      }
+      return clean;
+    });
 
     return {
       headers,

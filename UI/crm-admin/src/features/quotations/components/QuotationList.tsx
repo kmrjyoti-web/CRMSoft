@@ -22,6 +22,7 @@ import { QuotationListDevHelp } from "../help/QuotationListDevHelp";
 import { QUOTATION_FILTER_CONFIG } from "../utils/quotation-filters";
 
 import type {
+import { formatCurrency } from "@/lib/format-currency";
   QuotationListItem,
   QuotationListParams,
 } from "../types/quotations.types";
@@ -40,10 +41,6 @@ const QUOTATION_COLUMNS = [
 
 // -- Helpers -----------------------------------------------------------------
 
-function formatCurrency(amount: number | null | undefined): string {
-  if (amount == null) return "\u2014";
-  return `\u20B9${amount.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
-}
 
 function flattenQuotations(
   items: QuotationListItem[],
@@ -96,7 +93,7 @@ export function QuotationList() {
   const params = useMemo<QuotationListParams>(
     () => ({
       page: 1,
-      limit: 10000,
+      limit: 50,
       sortBy: "createdAt",
       sortOrder: "desc",
       ...filterParams,

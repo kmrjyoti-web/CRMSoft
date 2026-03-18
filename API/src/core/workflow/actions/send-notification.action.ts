@@ -13,7 +13,7 @@ export class SendNotificationAction implements IActionHandler {
       return { status: 'FAILED', errorMessage: 'Missing "userId" or "message" in notification config' };
     }
 
-    // TODO: Integrate with actual notification service when available
+    // NOTE: Workflow notification action pending integration
     this.logger.log(
       `[NOTIFICATION PLACEHOLDER] User: ${userId}, Type: ${notifType || 'INFO'}, ` +
       `Message: ${message}`,

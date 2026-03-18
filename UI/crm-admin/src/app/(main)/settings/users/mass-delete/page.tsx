@@ -34,7 +34,7 @@ const CRITERIA_FIELDS: CriteriaFieldDef[] = [
 ];
 
 async function handleSearch() {
-  const result = await usersService.getAll({ limit: 10000 });
+  const result = await usersService.getAll({ limit: 500 });
   const raw = result.data;
   const data: UserListItem[] = Array.isArray(raw)
     ? raw

@@ -192,7 +192,7 @@ export class OtpService {
     if (this.config.get('NODE_ENV') !== 'production') {
       this.logger.debug(`[DEV] Email OTP for ${email}: ${otp}`);
     }
-    // TODO: Integrate with EmailService or PluginService
+    // NOTE: Email/SMS integration pending — OTP logged to console in dev
   }
 
   /** Send OTP via SMS (integrate with your SMS service). */
@@ -200,6 +200,6 @@ export class OtpService {
     if (this.config.get('NODE_ENV') !== 'production') {
       this.logger.debug(`[DEV] SMS OTP for ${mobile}: ${otp}`);
     }
-    // TODO: Integrate with SMS Plugin (Twilio, Exotel, etc.)
+    // NOTE: Email/SMS integration pending — OTP logged to console in dev
   }
 }

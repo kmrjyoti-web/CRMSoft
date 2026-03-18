@@ -1,3 +1,6 @@
 export class GetMappingSuggestionsQuery {
-  constructor(public readonly targetEntity: string) {}
+  constructor(
+    public readonly targetEntity: string,
+    public readonly fileHeaders?: string[],
+  ) {}
 }

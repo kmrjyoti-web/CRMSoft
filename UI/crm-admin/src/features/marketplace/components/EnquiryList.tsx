@@ -11,6 +11,7 @@ import {
   useReplyEnquiry,
 } from "../hooks/useMarketplace";
 import type { MarketplaceEnquiry } from "../types/marketplace.types";
+import { formatDate } from "@/lib/format-date";
 
 // ── Status helpers ────────────────────────────────────────────────────────────
 
@@ -35,9 +36,6 @@ function truncate(text: string, maxLen = 80): string {
   return text.length > maxLen ? text.slice(0, maxLen) + "…" : text;
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString();
-}
 
 // ── Table styles ──────────────────────────────────────────────────────────────
 

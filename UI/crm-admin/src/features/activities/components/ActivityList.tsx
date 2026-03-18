@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, lazy, Suspense } from "react";
 
 import { useEntityPanel } from "@/hooks/useEntityPanel";
 
@@ -16,7 +16,7 @@ import { useBulkOperations } from "@/hooks/useBulkOperations";
 
 import { TableSkeleton } from "@/components/common/TableSkeleton";
 import { BulkActionsBar } from "@/components/common/BulkActionsBar";
-import { BulkEditPanel } from "@/components/common/BulkEditPanel";
+const BulkEditPanel = lazy(() => import("@/components/common/BulkEditPanel").then(m => ({ default: m.BulkEditPanel })));
 import { useBulkDeleteDialog } from "@/components/common/BulkDeleteDialog";
 import { useConfirmDialog } from "@/components/common/useConfirmDialog";
 import { ActionsMenu } from "@/components/common/ActionsMenu";
@@ -139,7 +139,7 @@ export function ActivityList() {
   const params = useMemo<ActivityListParams>(
     () => ({
       page: 1,
-      limit: 10000,
+      limit: 50,
       sortBy: "createdAt",
       sortOrder: "desc",
       ...filterParams,
@@ -295,14 +295,18 @@ export function ActivityList() {
       />
 
       {/* Bulk Edit Panel */}
-      <BulkEditPanel
-        isOpen={bulkEditOpen}
-        onClose={() => setBulkEditOpen(false)}
-        ids={selectedArray}
-        fields={BULK_EDIT_FIELDS}
-        onSubmit={handleBulkEditSubmit}
-        entityName="activity"
-      />
+      {bulkEditOpen && (
+        <Suspense fallback={null}>
+          <BulkEditPanel
+            isOpen={bulkEditOpen}
+            onClose={() => setBulkEditOpen(false)}
+            ids={selectedArray}
+            fields={BULK_EDIT_FIELDS}
+            onSubmit={handleBulkEditSubmit}
+            entityName="activity"
+          />
+        </Suspense>
+      )}
 
       <ConfirmDialogPortal />
       <BulkDeleteDialogPortal />

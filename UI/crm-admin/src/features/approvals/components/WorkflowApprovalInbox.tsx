@@ -15,6 +15,7 @@ import {
 import { ApprovalBadge } from "./ApprovalBadge";
 
 import type { WorkflowApproval } from "../types/approval.types";
+import { formatDate } from "@/lib/format-date";
 
 // ── Constants ───────────────────────────────────────────
 
@@ -31,12 +32,6 @@ const cardStyle: React.CSSProperties = {
 
 // ── Helpers ─────────────────────────────────────────────
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString("en-IN", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-}
 
 function getExpiryInfo(expiresAt?: string): { text: string; isExpired: boolean } {
   if (!expiresAt) return { text: "--", isExpired: false };

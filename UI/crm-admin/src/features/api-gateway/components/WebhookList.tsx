@@ -14,19 +14,10 @@ import {
   useWebhookDeliveries,
 } from "../hooks/useApiGateway";
 import type { Webhook, WebhookEvent, WebhookDelivery } from "../types/api-gateway.types";
+import { formatDate } from "@/lib/format-date";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatDate(dateStr?: string) {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 function truncateUrl(url: string, max = 50) {
   return url.length > max ? url.slice(0, max) + "..." : url;

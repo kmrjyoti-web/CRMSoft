@@ -8,6 +8,8 @@ import { Icon } from '@/components/ui';
 
 import { useSaleReturnList } from '../hooks/useSales';
 import type { SaleReturn } from '../types/sales.types';
+import { formatCurrency } from "@/lib/format-currency";
+import { formatDate } from "@/lib/format-date";
 
 // ── Column definitions ──────────────────────────────────────
 
@@ -33,15 +35,7 @@ const STATUS_VARIANT: Record<string, 'default' | 'warning' | 'primary' | 'succes
 
 // ── Helpers ─────────────────────────────────────────────────
 
-function formatCurrency(amount: number | null | undefined): string {
-  if (amount == null) return '\u2014';
-  return `\u20B9${Number(amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
-}
 
-function formatDate(value: string | null | undefined): string {
-  if (!value) return '\u2014';
-  return new Date(value).toLocaleDateString('en-IN');
-}
 
 function flattenReturns(items: SaleReturn[]): Record<string, unknown>[] {
   return items.map((sr) => ({

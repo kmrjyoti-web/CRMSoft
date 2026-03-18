@@ -31,7 +31,7 @@ const UPDATE_FIELDS: BulkEditField[] = [
 ];
 
 async function handleSearch() {
-  const result = await organizationsService.getAll({ limit: 10000 });
+  const result = await organizationsService.getAll({ limit: 500 });
   const raw = result.data;
   const data: OrganizationListItem[] = Array.isArray(raw)
     ? raw

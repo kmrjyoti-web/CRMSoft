@@ -4,9 +4,10 @@ import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/stores/auth.store";
 import { useNotificationStore } from "@/stores/notification.store";
+import { API_BASE_URL } from "@/config/constants";
 import type { Notification } from "../types/notifications.types";
 
-const SSE_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1"}/notifications/sse/stream`;
+const SSE_URL = `${API_BASE_URL}/notifications/sse/stream`;
 
 export function useNotificationSSE() {
   const eventSourceRef = useRef<EventSource | null>(null);

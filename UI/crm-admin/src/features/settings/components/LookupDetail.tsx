@@ -13,6 +13,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { useConfirmDialog } from "@/components/common/useConfirmDialog";
 
 import { useSidePanelStore } from "@/stores/side-panel.store";
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 
 import {
   useLookupDetail,
@@ -73,6 +74,7 @@ interface LookupDetailProps {
 
 export function LookupDetail({ lookupId }: LookupDetailProps) {
   const router = useRouter();
+  // NOTE: openPanel/closePanel retained for LookupValueForm panels (custom onSubmit callback pattern, not standard CRUD)
   const openPanel = useSidePanelStore((s) => s.openPanel);
   const closePanel = useSidePanelStore((s) => s.closePanel);
   const { confirm, ConfirmDialogPortal } = useConfirmDialog();
@@ -115,46 +117,23 @@ export function LookupDetail({ lookupId }: LookupDetailProps) {
     }
   }, [lookup, lookupId, deactivateMutation, router]);
 
-  // ── Edit Lookup metadata (side panel) ──────────────────
+  // ── Edit Lookup metadata (side panel via useEntityPanel) ──
+  const { handleRowEdit: handleEditLookupPanel } = useEntityPanel({
+    entityKey: "lookup",
+    entityLabel: "Lookup",
+    FormComponent: LookupForm,
+    idProp: "lookupId",
+    editRoute: "/settings/lookups/:id",
+    createRoute: "/settings/lookups/new",
+    displayField: "displayName",
+  });
+
   const handleEditLookup = useCallback(() => {
     if (!lookup) return;
-    const panelId = `lookup-edit-${lookupId}`;
-    const formId = `sp-form-lookup-${lookupId}`;
-    openPanel({
-      id: panelId,
-      title: `Edit: ${lookup.displayName}`,
-      footerButtons: [
-        {
-          id: "cancel",
-          label: "Cancel",
-          showAs: "text",
-          variant: "secondary",
-          onClick: () => closePanel(panelId),
-        },
-        {
-          id: "save",
-          label: "Save Changes",
-          icon: "check",
-          showAs: "both",
-          variant: "primary",
-          onClick: () => {
-            const form = document.getElementById(formId) as HTMLFormElement | null;
-            form?.requestSubmit();
-          },
-        },
-      ],
-      content: (
-        <LookupForm
-          lookupId={lookupId}
-          mode="panel"
-          panelId={panelId}
-          onSuccess={() => closePanel(panelId)}
-          onCancel={() => closePanel(panelId)}
-        />
-      ),
-    });
-  }, [lookup, lookupId, openPanel, closePanel]);
+    handleEditLookupPanel({ id: lookupId, displayName: lookup.displayName });
+  }, [lookup, lookupId, handleEditLookupPanel]);
 
+  // NOTE: Custom panel — LookupValueForm uses onSubmit callback pattern, not standard CRUD
   // ── Add Value (side panel) ─────────────────────────────
   const handleCreateValue = useCallback(() => {
     if (!lookup) return;
@@ -198,6 +177,7 @@ export function LookupDetail({ lookupId }: LookupDetailProps) {
     });
   }, [lookup, lookupId, openPanel, closePanel, addValueMutation]);
 
+  // NOTE: Custom panel — LookupValueForm uses onSubmit callback pattern, not standard CRUD
   // ── Edit Value (side panel) ────────────────────────────
   const handleRowEdit = useCallback(
     (row: Record<string, unknown>) => {

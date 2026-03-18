@@ -2,6 +2,7 @@
 
 import { Badge, Icon } from "@/components/ui";
 import type { ConversionFunnel as ConversionFunnelType } from "../types/quotation-analytics.types";
+import { formatCurrency } from "@/lib/format-currency";
 
 // ── Types ─────────────────────────────────────────────
 
@@ -11,9 +12,6 @@ interface ConversionFunnelProps {
 
 // ── Helpers ───────────────────────────────────────────
 
-function formatCurrency(val: number): string {
-  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(val);
-}
 
 /** Blue-to-green gradient based on stage index */
 function stageColor(index: number, total: number): string {

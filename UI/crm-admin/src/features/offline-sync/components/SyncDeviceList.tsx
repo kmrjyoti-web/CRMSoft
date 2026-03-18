@@ -6,19 +6,10 @@ import { Button, Badge, Icon } from "@/components/ui";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useSyncDevices, useBlockDevice } from "../hooks/useOfflineSync";
 import type { SyncDevice } from "../types/offline-sync.types";
+import { formatDate } from "@/lib/format-date";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatDate(dateStr?: string) {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 const STATUS_CONFIG: Record<
   string,

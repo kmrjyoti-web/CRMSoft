@@ -59,18 +59,10 @@ export function useDataMasking(tableKey: string | undefined) {
     enabled,
   });
 
-  if (error && process.env.NODE_ENV === "development") {
-    console.warn(`[useDataMasking] Failed to fetch rules for "${tableKey}":`, error);
-  }
-
   const rules = useMemo(() => {
     if (!enabled) return EMPTY_RULES;
-    const extracted = extractRules(data);
-    if (process.env.NODE_ENV === "development" && extracted.length > 0) {
-      console.log(`[useDataMasking] Rules for "${tableKey}":`, extracted);
-    }
-    return extracted;
-  }, [enabled, data, tableKey]);
+    return extractRules(data);
+  }, [enabled, data]);
 
   const isMasked = useCallback(
     (columnId: string) => rules.some((r) => r.columnId === columnId),

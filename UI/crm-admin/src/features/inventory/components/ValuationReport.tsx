@@ -4,13 +4,13 @@ import { useRouter } from "next/navigation";
 import { Icon, Badge, Button, Card } from "@/components/ui";
 import { useValuationReport } from "../hooks/useInventory";
 import type { ValuationReport as ValuationReportType } from "../types/inventory.types";
+import { formatCurrency } from "@/lib/format-currency";
 
 export function ValuationReport() {
   const router = useRouter();
   const { data, isLoading } = useValuationReport();
   const report = data?.data as ValuationReportType | undefined;
 
-  const formatCurrency = (val: number) => `₹${val.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
 
   return (
     <div className="p-6">

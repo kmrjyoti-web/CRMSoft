@@ -13,6 +13,7 @@ import {
   useEffectivePrice,
 } from "../hooks/useProductPricing";
 import type { PriceType, EffectivePrice } from "../types/product-pricing.types";
+import { formatCurrency } from "@/lib/format-currency";
 
 // ── Constants ─────────────────────────────────────────────────────────
 
@@ -78,9 +79,6 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function formatCurrency(v: number) {
-  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(v);
-}
 
 // ── Base Prices Tab ───────────────────────────────────────────────────
 

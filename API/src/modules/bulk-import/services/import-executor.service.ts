@@ -52,6 +52,7 @@ export class ImportExecutorService {
     const data = row.mappedData;
 
     switch (targetEntity) {
+      case 'ROW_CONTACT':
       case 'CONTACT': {
         const contact = await this.createContact(data, createdById);
         return { rowNumber: row.rowNumber, success: true, action: 'CREATED', entityId: contact.id };
@@ -59,6 +60,18 @@ export class ImportExecutorService {
       case 'ORGANIZATION': {
         const org = await this.createOrganization(data, createdById);
         return { rowNumber: row.rowNumber, success: true, action: 'CREATED', entityId: org.id };
+      }
+      case 'LEAD': {
+        const lead = await this.createLead(data, createdById);
+        return { rowNumber: row.rowNumber, success: true, action: 'CREATED', entityId: lead.id };
+      }
+      case 'PRODUCT': {
+        const product = await this.createProduct(data, createdById);
+        return { rowNumber: row.rowNumber, success: true, action: 'CREATED', entityId: product.id };
+      }
+      case 'LEDGER': {
+        const ledger = await this.createLedger(data);
+        return { rowNumber: row.rowNumber, success: true, action: 'CREATED', entityId: ledger.id };
       }
       default:
         return { rowNumber: row.rowNumber, success: false, action: 'FAILED', error: `Unsupported entity: ${targetEntity}` };
@@ -75,8 +88,9 @@ export class ImportExecutorService {
 
     try {
       switch (targetEntity) {
+        case 'ROW_CONTACT':
         case 'CONTACT':
-          await this.prisma.contact.update({
+          await this.prisma.rawContact.update({
             where: { id: entityId },
             data: { firstName: data.firstName, lastName: data.lastName, designation: data.designation, notes: data.notes },
           });
@@ -144,6 +158,66 @@ export class ImportExecutorService {
         pincode: data.pincode || null,
         createdById,
       },
+    });
+  }
+
+  /** Create Lead from mapped data */
+  private async createLead(data: Record<string, any>, createdById: string) {
+    // Generate lead number
+    const count = await this.prisma.lead.count();
+    const leadNumber = `LD-${String(count + 1).padStart(5, '0')}`;
+
+    return this.prisma.lead.create({
+      data: {
+        leadNumber,
+        status: 'NEW' as any,
+        priority: (data.priority as any) || 'MEDIUM',
+        expectedValue: data.expectedValue ? Number(data.expectedValue) : null,
+        notes: data.notes || null,
+        createdById,
+        contactId: data.contactId || createdById, // placeholder
+      },
+    });
+  }
+
+  /** Create Product from mapped data */
+  private async createProduct(data: Record<string, any>, createdById: string) {
+    return this.prisma.product.create({
+      data: {
+        name: data.name || 'Unknown Product',
+        code: data.code || null,
+        description: data.description || null,
+        hsnCode: data.hsnCode || null,
+        mrp: data.mrp ? Number(data.mrp) : null,
+        sellingPrice: data.sellingPrice ? Number(data.sellingPrice) : null,
+        purchasePrice: data.purchasePrice ? Number(data.purchasePrice) : null,
+        taxRate: data.taxRate ? Number(data.taxRate) : null,
+        unit: data.unit || 'PCS',
+        barcode: data.barcode || null,
+      } as any,
+    });
+  }
+
+  /** Create Ledger from mapped data */
+  private async createLedger(data: Record<string, any>) {
+    return this.prisma.ledgerMaster.create({
+      data: {
+        name: data.name || 'Unknown Ledger',
+        code: data.code || `LDG${Date.now().toString().slice(-6)}`,
+        groupType: data.groupType || 'ASSET',
+        openingBalance: data.openingBalance ? Number(data.openingBalance) : 0,
+        openingBalanceType: data.balanceType || 'Dr',
+        currentBalance: data.openingBalance ? Number(data.openingBalance) : 0,
+        gstin: data.gstin || null,
+        panNo: data.pan || null,
+        mobile1: data.mobile || null,
+        email: data.email || null,
+        address: data.address || null,
+        city: data.city || null,
+        state: data.state || null,
+        creditLimit: data.creditLimit ? Number(data.creditLimit) : null,
+        creditDays: data.creditDays ? Number(data.creditDays) : null,
+      } as any,
     });
   }
 

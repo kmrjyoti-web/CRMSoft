@@ -160,10 +160,10 @@ export function useImportResult(jobId: string) {
 
 // ── Mapping Suggestions ──────────────────────────────────
 
-export function useMappingSuggestions(targetEntity: ImportTargetEntity) {
+export function useMappingSuggestions(targetEntity: ImportTargetEntity, fileHeaders?: string[]) {
   return useQuery({
-    queryKey: [KEY, "suggestions", targetEntity],
-    queryFn: () => bulkImportService.getMappingSuggestions(targetEntity),
+    queryKey: [KEY, "suggestions", targetEntity, fileHeaders],
+    queryFn: () => bulkImportService.getMappingSuggestions(targetEntity, fileHeaders),
     enabled: !!targetEntity,
   });
 }

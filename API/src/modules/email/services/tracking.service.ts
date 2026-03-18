@@ -7,7 +7,7 @@ export class TrackingService {
   private readonly baseUrl: string;
 
   constructor(private readonly prisma: PrismaService) {
-    this.baseUrl = process.env.EMAIL_TRACKING_BASE_URL || 'http://localhost:3000/api';
+    this.baseUrl = process.env.EMAIL_TRACKING_BASE_URL || `${process.env.API_URL || 'http://localhost:3000'}/api`;
   }
 
   generateTrackingPixelId(): string {

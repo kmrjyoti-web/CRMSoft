@@ -26,7 +26,7 @@ const CRITERIA_FIELDS: CriteriaFieldDef[] = [
 ];
 
 async function handleSearch() {
-  const result = await activitiesService.getAll({ limit: 10000 });
+  const result = await activitiesService.getAll({ limit: 500 });
   const raw = result.data;
   const data: ActivityListItem[] = Array.isArray(raw)
     ? raw

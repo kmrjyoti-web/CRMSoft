@@ -19,6 +19,7 @@ import type { Campaign, CampaignStatus } from "../types/campaign.types";
 
 import { RecipientManager } from "./RecipientManager";
 import { CampaignAnalytics } from "./CampaignAnalytics";
+import { formatDate } from "@/lib/format-date";
 
 // ── Types ───────────────────────────────────────────────
 
@@ -41,16 +42,6 @@ const STATUS_BADGE_VARIANT: Record<CampaignStatus, string> = {
 
 // ── Helpers ─────────────────────────────────────────────
 
-function formatDate(dateStr?: string): string {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 // ── Tab definitions ─────────────────────────────────────
 

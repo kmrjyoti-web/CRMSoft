@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 
 import { TableFull } from "@/components/ui";
-import { useSidePanelStore } from "@/stores/side-panel.store";
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 
 import { useLedgerList } from "../hooks/useAccounts";
 import { LedgerForm } from "./LedgerForm";
@@ -27,16 +27,26 @@ const GROUP_TYPE_COLOR: Record<string, string> = {
 };
 
 function formatINR(val: any) {
-  if (val == null) return "—";
+  if (val == null) return "\u2014";
   const n = Number(val);
   const abs = Math.abs(n);
-  const formatted = `₹${abs.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
+  const formatted = `\u20B9${abs.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
   return n < 0 ? `(${formatted})` : formatted;
 }
 
 export function LedgerList() {
   const { data } = useLedgerList();
-  const { openPanel, closePanel } = useSidePanelStore();
+
+  const { handleRowEdit, handleCreate } = useEntityPanel({
+    entityKey: "ledger",
+    entityLabel: "Ledger",
+    FormComponent: LedgerForm,
+    idProp: "ledgerId",
+    editRoute: "/accounts/ledgers/:id/edit",
+    createRoute: "/accounts/ledgers/new",
+    displayField: "name",
+    panelWidth: 720,
+  });
 
   const rows = useMemo(() => {
     const list = (data as any)?.data?.data ?? (data as any)?.data ?? [];
@@ -47,7 +57,7 @@ export function LedgerList() {
         id:          l.id,
         code:        l.code,
         name:        l.name,
-        accountGroup:l.accountGroup?.name ?? l.subGroup ?? "—",
+        accountGroup:l.accountGroup?.name ?? l.subGroup ?? "\u2014",
         groupType: (
           <span style={{
             padding: "2px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700,
@@ -56,73 +66,12 @@ export function LedgerList() {
             {gt}
           </span>
         ),
-        station:     l.station ?? "—",
+        station:     l.station ?? "\u2014",
         balance:     formatINR(l.currentBalance),
-        gstin:       l.gstin ?? "—",
+        gstin:       l.gstin ?? "\u2014",
       };
     });
   }, [data]);
-
-  function openCreatePanel() {
-    const panelId = "create-ledger";
-    openPanel({
-      id:    panelId,
-      title: "New Ledger",
-      icon:  "book-open",
-      width: 720,
-      content: (
-        <LedgerForm
-          mode="panel"
-          panelId={panelId}
-          onSuccess={() => closePanel(panelId)}
-        />
-      ),
-      footerButtons: [
-        {
-          id: "cancel", label: "Cancel", showAs: "text" as const, variant: "secondary" as const,
-          onClick: () => useSidePanelStore.getState().closePanel(panelId),
-        },
-        {
-          id: "save", label: "Create Ledger", icon: "check", showAs: "both" as const, variant: "primary" as const,
-          onClick: () => {
-            const f = document.getElementById("sp-form-ledger-new") as HTMLFormElement | null;
-            f?.requestSubmit();
-          },
-        },
-      ],
-    });
-  }
-
-  function openEditPanel(row: any) {
-    const panelId = `edit-ledger-${row.id}`;
-    openPanel({
-      id:    panelId,
-      title: `Edit Ledger — ${row.name}`,
-      icon:  "book-open",
-      width: 720,
-      content: (
-        <LedgerForm
-          mode="panel"
-          panelId={panelId}
-          ledgerId={row.id}
-          onSuccess={() => closePanel(panelId)}
-        />
-      ),
-      footerButtons: [
-        {
-          id: "cancel", label: "Cancel", showAs: "text" as const, variant: "secondary" as const,
-          onClick: () => useSidePanelStore.getState().closePanel(panelId),
-        },
-        {
-          id: "save", label: "Save Changes", icon: "check", showAs: "both" as const, variant: "primary" as const,
-          onClick: () => {
-            const f = document.getElementById(`sp-form-ledger-${row.id}`) as HTMLFormElement | null;
-            f?.requestSubmit();
-          },
-        },
-      ],
-    });
-  }
 
   return (
     <TableFull
@@ -132,8 +81,8 @@ export function LedgerList() {
       columns={LEDGER_COLUMNS}
       defaultViewMode="table"
       defaultDensity="compact"
-      onRowEdit={openEditPanel}
-      onCreate={openCreatePanel}
+      onRowEdit={handleRowEdit}
+      onCreate={handleCreate}
     />
   );
 }

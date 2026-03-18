@@ -184,7 +184,7 @@ export class EntityVerificationService {
   private async sendLink(tenantId: string, userId: string, userName: string, entity: any, dto: any) {
     const token = crypto.randomUUID();
     const linkExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    const baseUrl = process.env.APP_URL ?? 'http://localhost:3005';
+    const baseUrl = process.env.FRONTEND_URL || process.env.APP_URL || 'http://localhost:3005';
     const linkUrl = `${baseUrl}/verify/${token}`;
 
     const record = await this.prisma.entityVerificationRecord.create({

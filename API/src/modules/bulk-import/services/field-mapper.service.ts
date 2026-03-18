@@ -36,7 +36,7 @@ export class FieldMapperService {
     for (const fm of fieldMapping) {
       if (!fm.targetField || fm.transform === 'SKIP') continue;
 
-      const header = fm.matchedHeader || fm.sourceHeader;
+      const header = fm.sourceColumn || fm.matchedHeader || fm.sourceHeader;
       let value = rowData[header] || '';
       value = this.applyTransform(value, fm.transform);
 

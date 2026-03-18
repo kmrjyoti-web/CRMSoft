@@ -14,7 +14,7 @@ const isDev = process.env.NODE_ENV === "development";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  timeout: 30_000,
+  timeout: isDev ? 60_000 : 30_000,
   headers: { "Content-Type": "application/json" },
 });
 

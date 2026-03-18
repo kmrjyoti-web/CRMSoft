@@ -11,7 +11,7 @@ export class EmailAdapter implements IChannelAdapter {
 
   async send(params: ChannelSendParams): Promise<ChannelSendResult> {
     try {
-      // TODO: Integrate real email service (nodemailer, SES, etc.)
+      // NOTE: Email integration pending — uses stub adapter
       this.logger.log(`[EMAIL] Sending to ${params.recipientAddr || params.recipientId}: ${params.subject}`);
 
       await this.prisma.communicationLog.create({

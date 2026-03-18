@@ -12,6 +12,7 @@ import {
   useRateTicket,
 } from '../hooks/useSupport';
 import type {
+import { formatDate } from "@/lib/format-date";
   TicketStatus,
   TicketPriority,
   TicketMessage,
@@ -42,15 +43,6 @@ const STATUS_LABELS: Record<TicketStatus, string> = {
   CLOSED: 'Closed',
 };
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
 
 interface TicketDetailProps {
   ticketId: string;

@@ -2,6 +2,7 @@
 
 import { Card, Badge, Icon } from "@/components/ui";
 import type { QuotationTrend } from "../types/quotation-analytics.types";
+import { formatCurrency } from "@/lib/format-currency";
 
 // ── Types ─────────────────────────────────────────────
 
@@ -11,9 +12,6 @@ interface QuotationTrendsProps {
 
 // ── Helpers ───────────────────────────────────────────
 
-function formatCurrency(val: number): string {
-  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(val);
-}
 
 const BAR_COLORS: Record<string, string> = {
   created: "#3b82f6",

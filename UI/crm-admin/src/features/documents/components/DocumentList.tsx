@@ -64,7 +64,7 @@ export function DocumentList() {
   const params = useMemo<DocumentListParams>(
     () => ({
       page: 1,
-      limit: 10000,
+      limit: 50,
       folderId: selectedFolderId ?? undefined,
       ...filterParams,
     }),

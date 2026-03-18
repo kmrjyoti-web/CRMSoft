@@ -69,7 +69,7 @@ export function DemoList() {
   const params = useMemo<DemoListParams>(
     () => ({
       page: 1,
-      limit: 10000,
+      limit: 50,
       sortBy: "scheduledAt",
       sortOrder: "desc" as const,
       ...filterParams,

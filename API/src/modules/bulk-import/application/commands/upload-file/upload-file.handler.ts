@@ -16,6 +16,21 @@ export class UploadFileHandler implements ICommandHandler<UploadFileCommand> {
     // Parse file
     const parsed = await this.fileParser.parse(cmd.buffer, cmd.fileName, cmd.fileSize);
 
+    // Sanitize: strip null bytes from all string values (PostgreSQL rejects \0)
+    const sanitize = (obj: any): any => {
+      if (typeof obj === 'string') return obj.replace(/\0/g, '');
+      if (Array.isArray(obj)) return obj.map(sanitize);
+      if (obj && typeof obj === 'object') {
+        const clean: any = {};
+        for (const [k, v] of Object.entries(obj)) clean[k] = sanitize(v);
+        return clean;
+      }
+      return obj;
+    };
+    parsed.rows = sanitize(parsed.rows);
+    parsed.sampleData = sanitize(parsed.sampleData);
+    parsed.headers = parsed.headers.map((h: string) => h.replace(/\0/g, ''));
+
     // Create import job
     const job = await this.prisma.importJob.create({
       data: {

@@ -12,6 +12,7 @@ import {
   useUninstallModule,
 } from "../hooks/useMarketplace";
 import type { InstalledModule } from "../types/marketplace.types";
+import { formatDate } from "@/lib/format-date";
 
 // ── Status helpers ────────────────────────────────────────────────────────────
 
@@ -32,10 +33,6 @@ function statusVariant(status: InstalledModule["status"]): StatusVariant {
   }
 }
 
-function formatDate(dateStr: string | undefined): string {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString();
-}
 
 // ── Table styles ──────────────────────────────────────────────────────────────
 

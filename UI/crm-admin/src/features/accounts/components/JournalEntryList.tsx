@@ -2,13 +2,13 @@
 
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { TableFull, Badge, Button, Icon, Input, SelectInput, NumberInput, DatePicker } from "@/components/ui";
+import { TableFull, Badge, Icon, Input, SelectInput, NumberInput, DatePicker } from "@/components/ui";
 import type { TableFilterConfig } from "@/components/ui";
-import { useSidePanelStore } from "@/stores/side-panel.store";
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 import { useJournalEntries, useChartOfAccounts, useCreateJournalEntry } from "../hooks/useAccounts";
 import type { CreateJournalEntryPayload } from "../types/accounts.types";
 
-// ── Columns ───────────────────────────────────────────────────────────
+// -- Columns -----------------------------------------------------------------
 
 const COLUMNS = [
   { id: "entryNumber",  label: "Entry #",      visible: true },
@@ -49,14 +49,21 @@ const FILTER_CONFIG: TableFilterConfig = {
   ],
 };
 
-const fmt = (n: number) => `₹${Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
+const fmt = (n: number) => `\u20B9${Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
 
-// ── Create Form (inside side panel) ──────────────────────────────────
+// -- Create Form (adapted for useEntityPanel) --------------------------------
 
-interface JournalEntryFormProps { panelId: string; }
-
-function JournalEntryCreateForm({ panelId }: JournalEntryFormProps) {
-  const { closePanel } = useSidePanelStore();
+function JournalEntryForm({
+  journalEntryId,
+  onSuccess,
+  panelId,
+  mode,
+}: {
+  journalEntryId?: string;
+  onSuccess?: () => void;
+  panelId?: string;
+  mode?: string;
+}) {
   const { data: chartData } = useChartOfAccounts();
   const createMut = useCreateJournalEntry();
 
@@ -77,11 +84,12 @@ function JournalEntryCreateForm({ panelId }: JournalEntryFormProps) {
   const ledgerOptions = useMemo(() => {
     const arr: any[] = (chartData as any)?.data ?? chartData ?? [];
     return Array.isArray(arr)
-      ? arr.map((l: any) => ({ label: `${l.code} – ${l.name}`, value: l.id }))
+      ? arr.map((l: any) => ({ label: `${l.code} \u2013 ${l.name}`, value: l.id }))
       : [];
   }, [chartData]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!form.transactionDate)               { toast.error("Transaction date is required"); return; }
     if (!form.debitLedgerId)                 { toast.error("Debit ledger is required"); return; }
     if (!form.creditLedgerId)                { toast.error("Credit ledger is required"); return; }
@@ -97,14 +105,18 @@ function JournalEntryCreateForm({ panelId }: JournalEntryFormProps) {
         narration:       form.narration || undefined,
       } as CreateJournalEntryPayload);
       toast.success("Journal entry created");
-      closePanel(panelId);
+      onSuccess?.();
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? "Failed to create journal entry");
     }
   };
 
   return (
-    <div className="p-5 space-y-4">
+    <form
+      id={`sp-form-journal-entry-${journalEntryId ?? "new"}`}
+      onSubmit={handleSubmit}
+      className="p-5 space-y-4"
+    >
       {/* Double entry visual */}
       <div style={{
         display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 12,
@@ -114,17 +126,17 @@ function JournalEntryCreateForm({ panelId }: JournalEntryFormProps) {
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: "#dc2626", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Dr (Debit)</div>
           <div style={{ fontSize: 12, fontWeight: 600, color: "#111827" }}>
-            {ledgerOptions.find((o) => o.value === form.debitLedgerId)?.label ?? "—"}
+            {ledgerOptions.find((o) => o.value === form.debitLedgerId)?.label ?? "\u2014"}
           </div>
         </div>
         <div style={{ textAlign: "center", fontSize: 11, color: "#6b7280" }}>
           <Icon name="arrow-right" size={18} />
-          <div style={{ fontWeight: 700, color: "#2563eb" }}>{form.amount ? fmt(form.amount) : "₹0.00"}</div>
+          <div style={{ fontWeight: 700, color: "#2563eb" }}>{form.amount ? fmt(form.amount) : "\u20B90.00"}</div>
         </div>
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: "#16a34a", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Cr (Credit)</div>
           <div style={{ fontSize: 12, fontWeight: 600, color: "#111827" }}>
-            {ledgerOptions.find((o) => o.value === form.creditLedgerId)?.label ?? "—"}
+            {ledgerOptions.find((o) => o.value === form.creditLedgerId)?.label ?? "\u2014"}
           </div>
         </div>
       </div>
@@ -136,7 +148,7 @@ function JournalEntryCreateForm({ panelId }: JournalEntryFormProps) {
       />
 
       <NumberInput
-        label="Amount (₹)"
+        label="Amount (\u20B9)"
         value={form.amount}
         onChange={(v) => setForm((p) => ({ ...p, amount: v }))}
         min={0}
@@ -165,23 +177,24 @@ function JournalEntryCreateForm({ panelId }: JournalEntryFormProps) {
         value={form.narration}
         onChange={(v) => setForm((p) => ({ ...p, narration: v }))}
       />
-
-      {/* Hidden submit trigger for drawer footer button */}
-      <button
-        id="journal-entry-submit-btn"
-        type="button"
-        onClick={handleSubmit}
-        style={{ display: "none" }}
-      />
-    </div>
+    </form>
   );
 }
 
-// ── List Page ─────────────────────────────────────────────────────────
+// -- List Page ---------------------------------------------------------------
 
 export function JournalEntryList() {
   const { data, isLoading } = useJournalEntries();
-  const { openPanel, updatePanelConfig } = useSidePanelStore();
+
+  const { handleCreate, handleRowEdit } = useEntityPanel({
+    entityKey: "journal-entry",
+    entityLabel: "Journal Entry",
+    FormComponent: JournalEntryForm,
+    idProp: "journalEntryId",
+    editRoute: "/accounts/journal-entries/:id/edit",
+    createRoute: "/accounts/journal-entries/new",
+    displayField: "entryNumber",
+  });
 
   const items: any[] = useMemo(() => {
     const raw = (data as any)?.data ?? data ?? [];
@@ -192,37 +205,15 @@ export function JournalEntryList() {
     id:          e.id,
     _raw:        e,
     entryNumber: <span style={{ fontWeight: 600, color: "#2563eb" }}>{e.entryNumber ?? e.id?.slice(0, 8)}</span>,
-    date:        e.transactionDate ? new Date(e.transactionDate).toLocaleDateString("en-IN") : "—",
-    debit:       e.debitLedger?.name ?? e.debitLedgerId ?? "—",
-    credit:      e.creditLedger?.name ?? e.creditLedgerId ?? "—",
+    date:        e.transactionDate ? new Date(e.transactionDate).toLocaleDateString("en-IN") : "\u2014",
+    debit:       e.debitLedger?.name ?? e.debitLedgerId ?? "\u2014",
+    credit:      e.creditLedger?.name ?? e.creditLedgerId ?? "\u2014",
     amount:      <span style={{ fontWeight: 700, color: "#111827" }}>{fmt(e.amount ?? 0)}</span>,
-    narration:   <span style={{ fontSize: 12, color: "#6b7280" }}>{e.narration ?? "—"}</span>,
+    narration:   <span style={{ fontSize: 12, color: "#6b7280" }}>{e.narration ?? "\u2014"}</span>,
     status:      <Badge variant={e.status === "POSTED" ? "success" : e.status === "VOIDED" ? "danger" : "secondary"}>
                    {e.status ?? "POSTED"}
                  </Badge>,
   })), [items]);
-
-  const openCreatePanel = () => {
-    const panelId = "create-journal-entry";
-    openPanel({
-      id: panelId,
-      title: "New Journal Entry",
-      icon: "book-open",
-      content: <JournalEntryCreateForm panelId={panelId} />,
-      footerButtons: [
-        {
-          id: "cancel", label: "Cancel", showAs: "text" as const, variant: "secondary" as const,
-          onClick: () => useSidePanelStore.getState().closePanel(panelId),
-        },
-        {
-          id: "submit", label: "Save Journal Entry", icon: "save", showAs: "both" as const, variant: "primary" as const,
-          onClick: () => {
-            document.getElementById("journal-entry-submit-btn")?.click();
-          },
-        },
-      ],
-    });
-  };
 
   return (
     <TableFull
@@ -233,8 +224,8 @@ export function JournalEntryList() {
       defaultViewMode="table"
       defaultDensity="compact"
       filterConfig={FILTER_CONFIG}
-      onCreate={openCreatePanel}
-      onRowEdit={() => { toast("View — coming soon"); }}
+      onCreate={handleCreate}
+      onRowEdit={handleRowEdit}
     />
   );
 }

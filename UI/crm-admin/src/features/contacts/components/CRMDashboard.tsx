@@ -330,7 +330,7 @@ function flattenAllRecords(contacts: ContactListItem[]): Record<string, unknown>
 export function CRMAllRecordsPage() {
   const queryParams = useMemo(() => ({
     page: 1,
-    limit: 10000,
+    limit: 50,
     sortBy: "createdAt",
     sortOrder: "desc",
   }), []);

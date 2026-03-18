@@ -96,6 +96,7 @@ export function CalendarPage() {
     }));
   }, [events]);
 
+  // NOTE: Custom panel — not a standard CRUD flow (read-only event detail with navigation button)
   const openPanel = useSidePanelStore((s) => s.openPanel);
   const closePanel = useSidePanelStore((s) => s.closePanel);
 

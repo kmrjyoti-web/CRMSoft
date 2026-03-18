@@ -12,6 +12,7 @@ import { OrganizationSelect } from "@/components/common/OrganizationSelect";
 import { useEffectivePrice } from "../hooks/useProductPricing";
 
 import type { EffectivePrice } from "../types/product-pricing.types";
+import { formatCurrency } from "@/lib/format-currency";
 
 // ── Props ────────────────────────────────────────────────
 
@@ -58,11 +59,6 @@ export function PriceCalculator({ productId }: PriceCalculatorProps) {
     border: "1px solid #e5e7eb",
   };
 
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-    }).format(value);
 
   return (
     <div style={cardStyle}>

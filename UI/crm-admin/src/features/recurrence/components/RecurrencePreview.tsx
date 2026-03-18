@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { Card, Icon } from "@/components/ui";
 
 import type { RecurrenceRule } from "../types/recurrence.types";
+import { formatDate } from "@/lib/format-date";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -25,14 +26,6 @@ function getDayName(date: Date): string {
   return DAY_NAMES[date.getDay()];
 }
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("en-IN", {
-    weekday: "short",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
 
 // ---------------------------------------------------------------------------
 // Day code to JS day index mapping

@@ -24,8 +24,12 @@ const fmtPrice = (n?: number) =>
 // ── Component ────────────────────────────────────────────
 
 export function ProductPickerModal({ open, onClose, onSelect, selectedId }: ProductPickerModalProps) {
-  const { data, isLoading } = useProductsList({ status: "ACTIVE", limit: 10000 });
   const [search, setSearch] = useState("");
+  const { data, isLoading } = useProductsList({
+    status: "ACTIVE",
+    limit: 50,
+    search: search.length >= 1 ? search : undefined,
+  });
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [hoveredId, setHoveredId] = useState<string | null>(null);

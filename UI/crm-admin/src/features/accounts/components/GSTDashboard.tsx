@@ -12,6 +12,7 @@ import {
 } from '@/components/ui';
 
 import {
+import { formatCurrency } from "@/lib/format-currency";
   useGSTList,
   useGenerateGSTR1,
   useGenerateGSTR3B,
@@ -37,10 +38,6 @@ const GST_RETURN_COLUMNS = [
 // Helpers
 // ---------------------------------------------------------------------------
 
-function formatCurrency(amount: number | string | null | undefined): string {
-  if (amount == null) return '\u2014';
-  return `\u20B9${Number(amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
-}
 
 function statusVariant(
   status: string,

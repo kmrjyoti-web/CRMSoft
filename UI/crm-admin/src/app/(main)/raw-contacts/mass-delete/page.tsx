@@ -36,7 +36,7 @@ const CRITERIA_FIELDS: CriteriaFieldDef[] = [
 ];
 
 async function handleSearch() {
-  const result = await rawContactsService.getAll({ limit: 10000 });
+  const result = await rawContactsService.getAll({ limit: 500 });
   const raw = result.data;
   const data: RawContactListItem[] = Array.isArray(raw)
     ? raw

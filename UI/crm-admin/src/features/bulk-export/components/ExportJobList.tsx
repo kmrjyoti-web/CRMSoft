@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { useExportJobs, useDownloadExport } from "../hooks/useBulkExport";
 
 import type { ExportJob, ExportStatus } from "../types/bulk-export.types";
+import { formatDate } from "@/lib/format-date";
 
 // ── Helpers ─────────────────────────────────────────────
 
@@ -20,15 +21,6 @@ const STATUS_BADGE: Record<ExportStatus, "warning" | "primary" | "success" | "da
   FAILED: "danger",
 };
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 function formatFileSize(bytes?: number): string {
   if (!bytes) return "\u2014";

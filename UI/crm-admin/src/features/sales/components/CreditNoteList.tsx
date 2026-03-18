@@ -11,6 +11,8 @@ import {
   useAdjustCreditNote,
 } from '../hooks/useSales';
 import type { SalesCreditNote } from '../types/sales.types';
+import { formatCurrency } from "@/lib/format-currency";
+import { formatDate } from "@/lib/format-date";
 
 // ── Column definitions ──────────────────────────────────────
 
@@ -35,15 +37,7 @@ const STATUS_VARIANT: Record<string, 'default' | 'warning' | 'primary' | 'succes
 
 // ── Helpers ─────────────────────────────────────────────────
 
-function formatCurrency(amount: number | null | undefined): string {
-  if (amount == null) return '\u2014';
-  return `\u20B9${Number(amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
-}
 
-function formatDate(value: string | null | undefined): string {
-  if (!value) return '\u2014';
-  return new Date(value).toLocaleDateString('en-IN');
-}
 
 function flattenCreditNotes(items: SalesCreditNote[]): Record<string, unknown>[] {
   return items.map((cn) => ({

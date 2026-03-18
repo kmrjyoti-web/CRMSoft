@@ -1,3 +1,4 @@
+export { formatCurrency } from "@/lib/format-currency";
 import type { LimitType } from '../types/subscription.types';
 
 export const RESOURCE_LABELS: Record<string, string> = {
@@ -96,10 +97,3 @@ export function getUsageBarColor(percent: number): string {
   return 'bg-blue-500';
 }
 
-export function formatCurrency(amount: number, currency = 'INR'): string {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}

@@ -2,6 +2,7 @@
 
 import { Icon, Card, Badge } from "@/components/ui";
 import { useInventoryDashboard } from "../hooks/useInventory";
+import { formatCurrency } from "@/lib/format-currency";
 
 function KPICard({ icon, label, value, color }: { icon: string; label: string; value: string | number; color: string }) {
   return (
@@ -39,12 +40,6 @@ export function InventoryDashboard() {
     );
   }
 
-  const formatCurrency = (val: number) => {
-    if (val >= 10000000) return `₹${(val / 10000000).toFixed(1)}Cr`;
-    if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
-    if (val >= 1000) return `₹${(val / 1000).toFixed(1)}K`;
-    return `₹${val.toFixed(0)}`;
-  };
 
   return (
     <div className="p-6">

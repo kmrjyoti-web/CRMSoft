@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, Badge, Button } from "@/components/ui";
 import { Icon } from "@/components/ui";
 import {
+import { formatDate } from "@/lib/format-date";
   usePaymentDetail,
   useApprovePayment,
   useCancelPayment,
@@ -19,14 +20,6 @@ function formatINR(value: number | string | null | undefined): string {
   return `\u20B9${Number(value).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
 }
 
-function formatDate(value: string | null | undefined): string {
-  if (!value) return "\u2014";
-  return new Date(value).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
 
 const STATUS_VARIANT: Record<string, "success" | "warning" | "danger" | "default"> = {
   APPROVED: "success",

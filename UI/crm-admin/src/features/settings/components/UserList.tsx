@@ -104,7 +104,7 @@ export function UserList() {
   const params = useMemo<UserListParams>(
     () => ({
       page: 1,
-      limit: 10000,
+      limit: 50,
       sortBy: "createdAt",
       sortOrder: "desc" as const,
       ...filterParams,

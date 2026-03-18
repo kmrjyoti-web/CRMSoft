@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, lazy, Suspense } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -16,13 +16,15 @@ import { useBulkOperations } from "@/hooks/useBulkOperations";
 import { TableSkeleton } from "@/components/common/TableSkeleton";
 import { useConfirmDialog } from "@/components/common/useConfirmDialog";
 import { BulkActionsBar } from "@/components/common/BulkActionsBar";
-import { BulkEditPanel } from "@/components/common/BulkEditPanel";
 import { useBulkDeleteDialog } from "@/components/common/BulkDeleteDialog";
 import { ActionsMenu } from "@/components/common/ActionsMenu";
 import { HelpButton } from "@/components/common/HelpButton";
 
 import { useEntityPanel } from "@/hooks/useEntityPanel";
-import { VerifyFlowModal } from "@/features/entity-verification";
+
+const BulkEditPanel = lazy(() => import("@/components/common/BulkEditPanel").then(m => ({ default: m.BulkEditPanel })));
+const DataImport = lazy(() => import("@/components/common/DataImport").then(m => ({ default: m.DataImport })));
+const VerifyFlowModal = lazy(() => import("@/features/entity-verification").then(m => ({ default: m.VerifyFlowModal })));
 import type { VerifyFlowEntityData } from "@/features/entity-verification";
 import { useInitiateVerification } from "@/features/entity-verification/hooks/useEntityVerification";
 
@@ -126,6 +128,7 @@ export function ContactList() {
 
   const openDashboard = useOpenDashboard();
 
+  const [importOpen, setImportOpen] = useState(false);
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [verifyTarget, setVerifyTarget] = useState<ContactListItem | null>(null);
@@ -167,7 +170,7 @@ export function ContactList() {
   const params = useMemo<ContactListParams>(
     () => ({
       page: 1,
-      limit: 10000,
+      limit: 50,
       sortBy: "createdAt",
       sortOrder: "desc",
       ...filterParams,
@@ -235,6 +238,7 @@ export function ContactList() {
     [confirm, softDeleteMutation],
   );
 
+  // NOTE: Cross-entity action (convert to ledger) — useContentPanel pattern, not CRUD
   // ── Convert to Ledger (opens LedgerForm in drawer) ───────
 
   const openPanel = useSidePanelStore((s) => s.openPanel);
@@ -458,6 +462,7 @@ export function ContactList() {
           onSelectionChange={handleSelectionChange}
           headerActions={
             <>
+              <button onClick={() => setImportOpen(true)} className="flex items-center px-2.5 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50" title="Import"><Icon name="upload" size={14} /></button>
               <HelpButton
                 panelId="contacts-list-help"
                 title="Contacts — Help"
@@ -514,14 +519,18 @@ export function ContactList() {
       )}
 
       {/* Bulk Edit Panel */}
-      <BulkEditPanel
-        isOpen={bulkEditOpen}
-        onClose={() => setBulkEditOpen(false)}
-        ids={selectedArray}
-        fields={BULK_EDIT_FIELDS}
-        onSubmit={handleBulkEditSubmit}
-        entityName="contact"
-      />
+      {bulkEditOpen && (
+        <Suspense fallback={null}>
+          <BulkEditPanel
+            isOpen={bulkEditOpen}
+            onClose={() => setBulkEditOpen(false)}
+            ids={selectedArray}
+            fields={BULK_EDIT_FIELDS}
+            onSubmit={handleBulkEditSubmit}
+            entityName="contact"
+          />
+        </Suspense>
+      )}
 
       {/* Bulk Verify Modal */}
       {bulkVerifyOpen && (
@@ -651,25 +660,39 @@ export function ContactList() {
 
       {/* Per-row Verify Flow Modal */}
       {verifyOpen && verifyTarget && (
-        <VerifyFlowModal
-          entityType="CONTACT"
-          entityId={verifyTarget.id}
-          entityName={`${verifyTarget.firstName} ${verifyTarget.lastName}`}
-          entityData={{
-            firstName: verifyTarget.firstName,
-            lastName: verifyTarget.lastName,
-            email: verifyTarget.communications?.find((c) => c.type === "EMAIL")?.value,
-            phone: verifyTarget.communications?.find((c) => c.type === "PHONE" || c.type === "MOBILE")?.value,
-          } satisfies VerifyFlowEntityData}
-          currentStatus={(verifyTarget as any).entityVerificationStatus ?? "UNVERIFIED"}
-          onClose={() => { setVerifyOpen(false); setVerifyTarget(null); }}
-          onVerified={() => { setVerifyOpen(false); setVerifyTarget(null); }}
-        />
+        <Suspense fallback={null}>
+          <VerifyFlowModal
+            entityType="CONTACT"
+            entityId={verifyTarget.id}
+            entityName={`${verifyTarget.firstName} ${verifyTarget.lastName}`}
+            entityData={{
+              firstName: verifyTarget.firstName,
+              lastName: verifyTarget.lastName,
+              email: verifyTarget.communications?.find((c) => c.type === "EMAIL")?.value,
+              phone: verifyTarget.communications?.find((c) => c.type === "PHONE" || c.type === "MOBILE")?.value,
+            } satisfies VerifyFlowEntityData}
+            currentStatus={(verifyTarget as any).entityVerificationStatus ?? "UNVERIFIED"}
+            onClose={() => { setVerifyOpen(false); setVerifyTarget(null); }}
+            onVerified={() => { setVerifyOpen(false); setVerifyTarget(null); }}
+          />
+        </Suspense>
       )}
 
       {/* Dialogs */}
       <ConfirmDialogPortal />
       <BulkDeleteDialogPortal />
+
+      {/* Data Import Modal */}
+      {importOpen && (
+        <Suspense fallback={null}>
+          <DataImport
+            entityType="CONTACT"
+            entityLabel="Contacts"
+            onComplete={() => setImportOpen(false)}
+            onClose={() => setImportOpen(false)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

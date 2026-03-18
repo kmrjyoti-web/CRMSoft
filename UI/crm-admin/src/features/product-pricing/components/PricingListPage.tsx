@@ -3,6 +3,7 @@
 import { useMemo, useCallback } from "react";
 import { TableFull, Badge, Button, Icon } from "@/components/ui";
 import { HelpButton } from "@/components/common/HelpButton";
+// NOTE: Custom panel — PriceDrawerForm uses product-specific props (tabs, defaults), not standard CRUD
 import { useSidePanelStore } from "@/stores/side-panel.store";
 import { useProductsList } from "@/features/products/hooks/useProducts";
 import { PriceDrawerForm } from "./PriceDrawerForm";

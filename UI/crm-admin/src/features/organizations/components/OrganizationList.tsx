@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, lazy, Suspense } from "react";
 
 import { useRouter } from "next/navigation";
 
 import toast from "react-hot-toast";
 
 import { useEntityPanel } from "@/hooks/useEntityPanel";
-import { VerifyFlowModal } from "@/features/entity-verification";
+const VerifyFlowModal = lazy(() => import("@/features/entity-verification").then(m => ({ default: m.VerifyFlowModal })));
 import type { VerifyFlowEntityData } from "@/features/entity-verification";
 import { useInitiateVerification } from "@/features/entity-verification/hooks/useEntityVerification";
 
@@ -24,10 +24,12 @@ import { useBulkOperations } from "@/hooks/useBulkOperations";
 import { TableSkeleton } from "@/components/common/TableSkeleton";
 import { useConfirmDialog } from "@/components/common/useConfirmDialog";
 import { BulkActionsBar } from "@/components/common/BulkActionsBar";
-import { BulkEditPanel } from "@/components/common/BulkEditPanel";
 import { useBulkDeleteDialog } from "@/components/common/BulkDeleteDialog";
 import { ActionsMenu } from "@/components/common/ActionsMenu";
 import { HelpButton } from "@/components/common/HelpButton";
+
+const BulkEditPanel = lazy(() => import("@/components/common/BulkEditPanel").then(m => ({ default: m.BulkEditPanel })));
+const DataImport = lazy(() => import("@/components/common/DataImport").then(m => ({ default: m.DataImport })));
 
 import {
   useOrganizationsList,
@@ -108,6 +110,7 @@ export function OrganizationList() {
     displayField: "_rawName",
   });
 
+  const [importOpen, setImportOpen] = useState(false);
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [verifyTarget, setVerifyTarget] = useState<OrganizationListItem | null>(null);
@@ -149,7 +152,7 @@ export function OrganizationList() {
   const params = useMemo<OrganizationListParams>(
     () => ({
       page: 1,
-      limit: 10000,
+      limit: 50,
       sortBy: "createdAt",
       sortOrder: "desc",
       ...filterParams,
@@ -219,6 +222,7 @@ export function OrganizationList() {
     [confirm, softDeleteMutation],
   );
 
+  // NOTE: Cross-entity action (convert to ledger) — useContentPanel pattern, not CRUD
   // ── Convert to Ledger (opens LedgerForm in drawer) ───────
 
   const openPanel = useSidePanelStore((s) => s.openPanel);
@@ -431,6 +435,7 @@ export function OrganizationList() {
           onSelectionChange={handleSelectionChange}
           headerActions={
             <>
+              <button onClick={() => setImportOpen(true)} className="flex items-center px-2.5 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50" title="Import"><Icon name="upload" size={14} /></button>
               <HelpButton
                 panelId="organizations-list-help"
                 title="Organizations — Help"
@@ -487,14 +492,18 @@ export function OrganizationList() {
       )}
 
       {/* Bulk Edit Panel */}
-      <BulkEditPanel
-        isOpen={bulkEditOpen}
-        onClose={() => setBulkEditOpen(false)}
-        ids={selectedArray}
-        fields={BULK_EDIT_FIELDS}
-        onSubmit={handleBulkEditSubmit}
-        entityName="organization"
-      />
+      {bulkEditOpen && (
+        <Suspense fallback={null}>
+          <BulkEditPanel
+            isOpen={bulkEditOpen}
+            onClose={() => setBulkEditOpen(false)}
+            ids={selectedArray}
+            fields={BULK_EDIT_FIELDS}
+            onSubmit={handleBulkEditSubmit}
+            entityName="organization"
+          />
+        </Suspense>
+      )}
 
       {/* Bulk Verify Modal */}
       {bulkVerifyOpen && (
@@ -624,27 +633,41 @@ export function OrganizationList() {
 
       {/* Per-row Verify Flow Modal */}
       {verifyOpen && verifyTarget && (
-        <VerifyFlowModal
-          entityType="ORGANIZATION"
-          entityId={verifyTarget.id}
-          entityName={verifyTarget.name}
-          entityData={{
-            name: verifyTarget.name,
-            email: verifyTarget.email,
-            phone: verifyTarget.phone,
-          } satisfies VerifyFlowEntityData}
-          currentStatus={(verifyTarget as any).entityVerificationStatus ?? "UNVERIFIED"}
-          onClose={() => { setVerifyOpen(false); setVerifyTarget(null); }}
-          onVerified={() => { setVerifyOpen(false); setVerifyTarget(null); }}
-          onSaveBeforeVerify={async (data) => {
-            await updateMutation.mutateAsync({ id: verifyTarget.id, data });
-          }}
-        />
+        <Suspense fallback={null}>
+          <VerifyFlowModal
+            entityType="ORGANIZATION"
+            entityId={verifyTarget.id}
+            entityName={verifyTarget.name}
+            entityData={{
+              name: verifyTarget.name,
+              email: verifyTarget.email,
+              phone: verifyTarget.phone,
+            } satisfies VerifyFlowEntityData}
+            currentStatus={(verifyTarget as any).entityVerificationStatus ?? "UNVERIFIED"}
+            onClose={() => { setVerifyOpen(false); setVerifyTarget(null); }}
+            onVerified={() => { setVerifyOpen(false); setVerifyTarget(null); }}
+            onSaveBeforeVerify={async (data) => {
+              await updateMutation.mutateAsync({ id: verifyTarget.id, data });
+            }}
+          />
+        </Suspense>
       )}
 
       {/* Dialogs */}
       <ConfirmDialogPortal />
       <BulkDeleteDialogPortal />
+
+      {/* Data Import Modal */}
+      {importOpen && (
+        <Suspense fallback={null}>
+          <DataImport
+            entityType="ORGANIZATION"
+            entityLabel="Organizations"
+            onComplete={() => setImportOpen(false)}
+            onClose={() => setImportOpen(false)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

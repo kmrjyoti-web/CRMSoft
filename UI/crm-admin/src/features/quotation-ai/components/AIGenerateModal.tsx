@@ -5,6 +5,7 @@ import { Button, Modal, Input, SelectInput, Icon } from "@/components/ui";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useAIQuestions, useGenerateQuotation } from "../hooks/useQuotationAI";
 import type { AIGeneratedQuotation } from "../types/quotation-ai.types";
+import { formatCurrency } from "@/lib/format-currency";
 
 // ── Types ─────────────────────────────────────────────
 
@@ -16,9 +17,6 @@ interface AIGenerateModalProps {
 
 // ── Helpers ───────────────────────────────────────────
 
-function formatCurrency(val: number): string {
-  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(val);
-}
 
 // ── Component ─────────────────────────────────────────
 

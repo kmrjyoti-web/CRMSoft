@@ -1,5 +1,6 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { PrismaService } from '../../../../../core/prisma/prisma.service';
+import { buildPaginationParams, buildPaginatedResult } from '../../../../../common/utils/paginated-list.helper';
 import { GetLeadsListQuery } from './get-leads-list.query';
 
 @QueryHandler(GetLeadsListQuery)
@@ -42,16 +43,25 @@ export class GetLeadsListHandler implements IQueryHandler<GetLeadsListQuery> {
       ];
     }
 
+    const { page, limit, skip, orderBy } = buildPaginationParams(query);
+
     const [data, total] = await Promise.all([
       this.prisma.lead.findMany({
         where,
-        skip: (query.page - 1) * query.limit,
-        take: query.limit,
-        orderBy: { [query.sortBy]: query.sortOrder },
-        include: {
+        skip,
+        take: limit,
+        orderBy,
+        select: {
+          id: true,
+          leadNumber: true,
+          status: true,
+          priority: true,
+          expectedValue: true,
+          isActive: true,
+          createdAt: true,
           contact: {
             select: {
-              id: true, firstName: true, lastName: true, designation: true,
+              id: true, firstName: true, lastName: true,
               communications: {
                 where: { isPrimary: true },
                 select: { type: true, value: true },
@@ -60,27 +70,16 @@ export class GetLeadsListHandler implements IQueryHandler<GetLeadsListQuery> {
             },
           },
           organization: {
-            select: { id: true, name: true, city: true },
+            select: { id: true, name: true },
           },
           allocatedTo: {
             select: { id: true, firstName: true, lastName: true },
           },
-          filters: {
-            include: {
-              lookupValue: {
-                select: {
-                  id: true, value: true, label: true,
-                  lookup: { select: { category: true } },
-                },
-              },
-            },
-          },
-          _count: { select: { activities: true, demos: true, quotations: true } },
         },
       }),
       this.prisma.lead.count({ where }),
     ]);
 
-    return { data, total, page: query.page, limit: query.limit };
+    return buildPaginatedResult(data, total, page, limit);
   }
 }

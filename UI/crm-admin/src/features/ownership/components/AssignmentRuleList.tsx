@@ -11,6 +11,7 @@ import {
 } from "../hooks/useOwnership";
 import { testAssignmentRule } from "../services/ownership.service";
 import type { AssignmentRule, AssignmentRuleStatus } from "../types/ownership.types";
+import { formatDate } from "@/lib/format-date";
 
 // ── Status badge mapping ───────────────────────────────────
 
@@ -57,14 +58,6 @@ const dateFmt = new Intl.DateTimeFormat("en-IN", {
   year: "numeric",
 });
 
-function formatDate(iso?: string): string {
-  if (!iso) return "—";
-  try {
-    return dateFmt.format(new Date(iso));
-  } catch {
-    return iso;
-  }
-}
 
 // ── Rule row ───────────────────────────────────────────────
 
@@ -190,9 +183,8 @@ export function AssignmentRuleList() {
   const handleTest = async (id: string) => {
     setTestingId(id);
     try {
-      const result = await testAssignmentRule(id);
+      await testAssignmentRule(id);
       toast.success(`Test completed successfully`);
-      console.log("Test result:", result);
     } catch {
       toast.error("Rule test failed");
     } finally {

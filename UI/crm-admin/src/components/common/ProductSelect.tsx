@@ -86,7 +86,7 @@ export function ProductSelect({
   disabled,
 }: ProductSelectProps) {
   const [popupOpen, setPopupOpen] = useState(false);
-  const { data, isLoading } = useProductsList({ status: "ACTIVE", limit: 10000 });
+  const { data, isLoading } = useProductsList({ status: "ACTIVE", limit: 500 });
 
   const products = useMemo<ProductSelectOption[]>(() => {
     const raw = data?.data;

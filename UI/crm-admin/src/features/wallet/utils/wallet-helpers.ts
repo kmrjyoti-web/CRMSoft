@@ -1,3 +1,4 @@
+export { formatCurrency } from "@/lib/format-currency";
 import type { WalletTxnType } from '../types/wallet.types';
 
 export function formatTokens(tokens: number): string {
@@ -13,13 +14,6 @@ export function tokensToAmount(tokens: number, tokenRate = 100): string {
   }).format(amount);
 }
 
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
 
 export const TXN_TYPE_COLORS: Record<WalletTxnType, string> = {
   CREDIT: 'text-green-600 bg-green-50',

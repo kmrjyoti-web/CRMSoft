@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 
 import { SelectInput, Icon } from "@/components/ui";
 
@@ -44,7 +44,12 @@ export function LeadSelect({
   disabled,
   required,
 }: LeadSelectProps) {
-  const { data, isLoading } = useLeadsList({ limit: 10000 });
+  const [search, setSearch] = useState("");
+
+  const { data, isLoading } = useLeadsList({
+    limit: 30,
+    search: search.length >= 2 ? search : undefined,
+  });
 
   const leads = useMemo<LeadSelectOption[]>(() => {
     const raw = data?.data;
@@ -64,7 +69,7 @@ export function LeadSelect({
   const options = useMemo(
     () =>
       leads.map((l) => ({
-        label: `${l.leadNumber} \u2013 ${l.contactFirstName} ${l.contactLastName}`,
+        label: `${l.leadNumber} – ${l.contactFirstName} ${l.contactLastName}`,
         value: l.id,
       })),
     [leads],
@@ -82,12 +87,16 @@ export function LeadSelect({
     }
   };
 
+  const handleSearch = useCallback((term: string) => {
+    setSearch(term);
+  }, []);
+
   return (
     <SelectInput
       options={options}
       value={value}
       onChange={handleChange}
-      placeholder="Select lead..."
+      placeholder="Type 2+ chars to search leads..."
       label={label}
       loading={isLoading}
       error={error}
@@ -97,6 +106,7 @@ export function LeadSelect({
       leftIcon={<Icon name="target" size={16} />}
       searchable
       clearable
+      onSearch={handleSearch}
     />
   );
 }

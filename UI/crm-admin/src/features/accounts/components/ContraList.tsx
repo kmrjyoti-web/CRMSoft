@@ -4,10 +4,10 @@ import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { TableFull, Badge, Icon, Input, NumberInput, SelectInput, DatePicker } from "@/components/ui";
 import type { TableFilterConfig } from "@/components/ui";
-import { useSidePanelStore } from "@/stores/side-panel.store";
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 import { useContraEntries, useCreateContraEntry, useChartOfAccounts } from "../hooks/useAccounts";
 
-// ── Columns ───────────────────────────────────────────────────────────
+// -- Columns -----------------------------------------------------------------
 
 const COLUMNS = [
   { id: "entryNumber",  label: "Contra #",      visible: true },
@@ -71,14 +71,14 @@ const FILTER_CONFIG: TableFilterConfig = {
 };
 
 const fmt = (n: number) =>
-  `₹${Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
+  `\u20B9${Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
 
 const MODE_VARIANT: Record<string, "primary" | "success" | "warning" | "secondary"> = {
   CASH: "warning", BANK: "primary", NEFT: "primary",
   RTGS: "success", IMPS: "success", UPI: "success", CHEQUE: "secondary",
 };
 
-// ── Create Form ───────────────────────────────────────────────────────
+// -- Create Form (adapted for useEntityPanel) --------------------------------
 
 const TRANSFER_MODES = [
   { value: "CASH",   label: "Cash" },
@@ -90,8 +90,17 @@ const TRANSFER_MODES = [
   { value: "CHEQUE", label: "Cheque" },
 ];
 
-function ContraCreateForm({ panelId }: { panelId: string }) {
-  const { closePanel } = useSidePanelStore();
+function ContraForm({
+  contraId,
+  onSuccess,
+  panelId,
+  mode,
+}: {
+  contraId?: string;
+  onSuccess?: () => void;
+  panelId?: string;
+  mode?: string;
+}) {
   const { data: chartData } = useChartOfAccounts();
   const createMut = useCreateContraEntry();
 
@@ -112,25 +121,26 @@ function ContraCreateForm({ panelId }: { panelId: string }) {
     const list = Array.isArray(arr) ? arr : [];
     return list
       .filter((l: any) => ["BANK", "CASH", "BANK_ACCOUNT", "CASH_IN_HAND"].includes(l.accountType ?? l.type ?? ""))
-      .map((l: any) => ({ label: `${l.code ?? ""} – ${l.name}`, value: l.id }));
+      .map((l: any) => ({ label: `${l.code ?? ""} \u2013 ${l.name}`, value: l.id }));
   }, [chartData]);
 
   // Fallback: if no filtered ledgers, show all
   const allLedgerOptions = useMemo(() => {
     const arr: any[] = (chartData as any)?.data ?? chartData ?? [];
     const list = Array.isArray(arr) ? arr : [];
-    return list.map((l: any) => ({ label: `${l.code ?? ""} – ${l.name}`, value: l.id }));
+    return list.map((l: any) => ({ label: `${l.code ?? ""} \u2013 ${l.name}`, value: l.id }));
   }, [chartData]);
 
   const options = accountOptions.length > 0 ? accountOptions : allLedgerOptions;
 
-  const fromName = options.find((o) => o.value === form.fromLedgerId)?.label ?? "—";
-  const toName   = options.find((o) => o.value === form.toLedgerId)?.label   ?? "—";
+  const fromName = options.find((o) => o.value === form.fromLedgerId)?.label ?? "\u2014";
+  const toName   = options.find((o) => o.value === form.toLedgerId)?.label   ?? "\u2014";
 
   const showChequeRef  = form.transferMode === "CHEQUE";
   const showTxnRef     = ["NEFT", "RTGS", "IMPS", "UPI", "BANK"].includes(form.transferMode);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!form.transactionDate)               { toast.error("Date is required"); return; }
     if (!form.fromLedgerId)                  { toast.error("From account is required"); return; }
     if (!form.toLedgerId)                    { toast.error("To account is required"); return; }
@@ -149,14 +159,18 @@ function ContraCreateForm({ panelId }: { panelId: string }) {
         narration:       form.narration      || undefined,
       });
       toast.success("Contra entry created");
-      closePanel(panelId);
+      onSuccess?.();
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? "Failed to create contra entry");
     }
   };
 
   return (
-    <div className="p-5 space-y-4">
+    <form
+      id={`sp-form-contra-${contraId ?? "new"}`}
+      onSubmit={handleSubmit}
+      className="p-5 space-y-4"
+    >
       {/* Transfer preview */}
       <div style={{
         display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 10,
@@ -170,7 +184,7 @@ function ContraCreateForm({ panelId }: { panelId: string }) {
         <div style={{ textAlign: "center" }}>
           <div style={{ marginBottom: 2 }}><Icon name="arrow-right" size={20} /></div>
           <div style={{ fontWeight: 700, color: "#2563eb", fontSize: 13 }}>
-            {form.amount ? fmt(form.amount) : "₹0.00"}
+            {form.amount ? fmt(form.amount) : "\u20B90.00"}
           </div>
           <div style={{ fontSize: 10, color: "#6b7280", marginTop: 2 }}>{form.transferMode}</div>
         </div>
@@ -187,7 +201,7 @@ function ContraCreateForm({ panelId }: { panelId: string }) {
           onChange={(v) => setForm((p) => ({ ...p, transactionDate: v ? String(v) : "" }))}
         />
         <NumberInput
-          label="Amount (₹)"
+          label="Amount (\u20B9)"
           value={form.amount}
           onChange={(v) => setForm((p) => ({ ...p, amount: v }))}
           min={0}
@@ -243,18 +257,24 @@ function ContraCreateForm({ panelId }: { panelId: string }) {
         value={form.narration}
         onChange={(v) => setForm((p) => ({ ...p, narration: v }))}
       />
-
-      {/* Hidden trigger for drawer footer button */}
-      <button id="contra-submit-btn" type="button" onClick={handleSubmit} style={{ display: "none" }} />
-    </div>
+    </form>
   );
 }
 
-// ── List Component ────────────────────────────────────────────────────
+// -- List Component ----------------------------------------------------------
 
 export function ContraList() {
-  const { data }      = useContraEntries();
-  const { openPanel } = useSidePanelStore();
+  const { data } = useContraEntries();
+
+  const { handleCreate, handleRowEdit } = useEntityPanel({
+    entityKey: "contra",
+    entityLabel: "Contra Entry",
+    FormComponent: ContraForm,
+    idProp: "contraId",
+    editRoute: "/accounts/contra/:id/edit",
+    createRoute: "/accounts/contra/new",
+    displayField: "entryNumber",
+  });
 
   const items: any[] = useMemo(() => {
     const raw = (data as any)?.data ?? data ?? [];
@@ -265,36 +285,16 @@ export function ContraList() {
     id:           e.id,
     _raw:         e,
     entryNumber:  <span style={{ fontWeight: 600, color: "#2563eb" }}>{e.entryNumber ?? e.id?.slice(0, 8)}</span>,
-    date:         e.transactionDate ? new Date(e.transactionDate).toLocaleDateString("en-IN") : "—",
-    fromAccount:  e.fromLedger?.name ?? e.fromLedgerId ?? "—",
-    toAccount:    e.toLedger?.name   ?? e.toLedgerId   ?? "—",
-    transferMode: <Badge variant={MODE_VARIANT[e.transferMode] ?? "secondary"}>{e.transferMode ?? "—"}</Badge>,
+    date:         e.transactionDate ? new Date(e.transactionDate).toLocaleDateString("en-IN") : "\u2014",
+    fromAccount:  e.fromLedger?.name ?? e.fromLedgerId ?? "\u2014",
+    toAccount:    e.toLedger?.name   ?? e.toLedgerId   ?? "\u2014",
+    transferMode: <Badge variant={MODE_VARIANT[e.transferMode] ?? "secondary"}>{e.transferMode ?? "\u2014"}</Badge>,
     amount:       <span style={{ fontWeight: 700, color: "#111827" }}>{fmt(e.amount ?? 0)}</span>,
-    narration:    <span style={{ fontSize: 12, color: "#6b7280" }}>{e.narration ?? "—"}</span>,
+    narration:    <span style={{ fontSize: 12, color: "#6b7280" }}>{e.narration ?? "\u2014"}</span>,
     status:       <Badge variant={e.status === "POSTED" ? "success" : e.status === "VOIDED" ? "danger" : "secondary"}>
                     {e.status ?? "POSTED"}
                   </Badge>,
   })), [items]);
-
-  const openCreatePanel = () => {
-    const panelId = "create-contra-entry";
-    openPanel({
-      id:    panelId,
-      title: "New Contra Entry",
-      icon:  "repeat",
-      content: <ContraCreateForm panelId={panelId} />,
-      footerButtons: [
-        {
-          id: "cancel", label: "Cancel", showAs: "text" as const, variant: "secondary" as const,
-          onClick: () => useSidePanelStore.getState().closePanel(panelId),
-        },
-        {
-          id: "submit", label: "Save Contra Entry", icon: "save", showAs: "both" as const, variant: "primary" as const,
-          onClick: () => document.getElementById("contra-submit-btn")?.click(),
-        },
-      ],
-    });
-  };
 
   return (
     <TableFull
@@ -305,8 +305,8 @@ export function ContraList() {
       defaultViewMode="table"
       defaultDensity="compact"
       filterConfig={FILTER_CONFIG}
-      onCreate={openCreatePanel}
-      onRowEdit={() => { toast("View — coming soon"); }}
+      onCreate={handleCreate}
+      onRowEdit={handleRowEdit}
     />
   );
 }

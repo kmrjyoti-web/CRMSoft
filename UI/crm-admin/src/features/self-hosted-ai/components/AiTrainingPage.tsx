@@ -12,6 +12,7 @@ import {
   useAiModels,
 } from '../hooks/useSelfHostedAi';
 import type { AiDataset, AiTrainingJob, AiModel } from '../types/self-hosted-ai.types';
+import { formatDate } from "@/lib/format-date";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   DRAFT: { bg: '#F3F4F6', text: '#6B7280' },
@@ -39,12 +40,6 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function formatDate(d: string) {
-  if (!d) return '—';
-  const dt = new Date(d);
-  return dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) +
-    ' ' + dt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-}
 
 // ── Tab button style helper ──
 

@@ -14,7 +14,7 @@ export type ImportJobStatus =
   | "FAILED"
   | "CANCELLED";
 
-export type ImportTargetEntity = "CONTACT" | "ORGANIZATION" | "LEAD" | "PRODUCT";
+export type ImportTargetEntity = "ROW_CONTACT" | "CONTACT" | "ORGANIZATION" | "LEAD" | "PRODUCT" | "LEDGER";
 
 export type ImportRowStatus =
   | "PENDING"

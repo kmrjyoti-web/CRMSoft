@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, lazy, Suspense } from "react";
 
 import { useEntityPanel } from "@/hooks/useEntityPanel";
 
@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 
 import toast from "react-hot-toast";
 
-import { TableFull, Switch } from "@/components/ui";
+import { TableFull, Switch, Icon } from "@/components/ui";
 
 import { useTableFilters } from "@/hooks/useTableFilters";
 import { useBulkSelect } from "@/hooks/useBulkSelect";
@@ -17,10 +17,12 @@ import { useBulkOperations } from "@/hooks/useBulkOperations";
 import { TableSkeleton } from "@/components/common/TableSkeleton";
 import { useConfirmDialog } from "@/components/common/useConfirmDialog";
 import { BulkActionsBar } from "@/components/common/BulkActionsBar";
-import { BulkEditPanel } from "@/components/common/BulkEditPanel";
 import { useBulkDeleteDialog } from "@/components/common/BulkDeleteDialog";
 import { ActionsMenu } from "@/components/common/ActionsMenu";
 import { HelpButton } from "@/components/common/HelpButton";
+
+const BulkEditPanel = lazy(() => import("@/components/common/BulkEditPanel").then(m => ({ default: m.BulkEditPanel })));
+const DataImport = lazy(() => import("@/components/common/DataImport").then(m => ({ default: m.DataImport })));
 
 import { useOpenDashboard } from "@/hooks/useOpenDashboard";
 
@@ -111,6 +113,7 @@ export function LeadList() {
 
   const openDashboard = useOpenDashboard();
 
+  const [importOpen, setImportOpen] = useState(false);
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
@@ -144,7 +147,7 @@ export function LeadList() {
   const params = useMemo<LeadListParams>(
     () => ({
       page: 1,
-      limit: 10000,
+      limit: 50,
       sortBy: "createdAt",
       sortOrder: "desc",
       ...filterParams,
@@ -342,6 +345,7 @@ export function LeadList() {
           kanbanCategoryOptions={kanbanCategoryOptions}
           headerActions={
             <>
+              <button onClick={() => setImportOpen(true)} className="flex items-center px-2.5 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50" title="Import"><Icon name="upload" size={14} /></button>
               <HelpButton
                 panelId="leads-list-help"
                 title="Leads — Help"
@@ -363,18 +367,34 @@ export function LeadList() {
       />
 
       {/* Bulk Edit Panel */}
-      <BulkEditPanel
-        isOpen={bulkEditOpen}
-        onClose={() => setBulkEditOpen(false)}
-        ids={selectedArray}
-        fields={BULK_EDIT_FIELDS}
-        onSubmit={handleBulkEditSubmit}
-        entityName="lead"
-      />
+      {bulkEditOpen && (
+        <Suspense fallback={null}>
+          <BulkEditPanel
+            isOpen={bulkEditOpen}
+            onClose={() => setBulkEditOpen(false)}
+            ids={selectedArray}
+            fields={BULK_EDIT_FIELDS}
+            onSubmit={handleBulkEditSubmit}
+            entityName="lead"
+          />
+        </Suspense>
+      )}
 
       {/* Dialogs */}
       <ConfirmDialogPortal />
       <BulkDeleteDialogPortal />
+
+      {/* Data Import Modal */}
+      {importOpen && (
+        <Suspense fallback={null}>
+          <DataImport
+            entityType="LEAD"
+            entityLabel="Leads"
+            onComplete={() => setImportOpen(false)}
+            onClose={() => setImportOpen(false)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

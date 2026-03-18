@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import toast from "react-hot-toast";
 
 import { TableFull, Input, SelectInput, NumberInput, Icon, Badge } from "@/components/ui";
-import { useSidePanelStore } from "@/stores/side-panel.store";
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 
 import {
   useSaleMasterList,
@@ -12,7 +12,7 @@ import {
   useUpdateSaleMaster,
 } from "../hooks/useAccounts";
 
-// ── Constants ─────────────────────────────────────────────────────────────
+// -- Constants ---------------------------------------------------------------
 
 const TAXABILITY_OPTIONS = [
   { value: "TAXABLE",    label: "Taxable" },
@@ -52,17 +52,43 @@ const INITIAL_FORM = {
   centralLedgerId: "",
 };
 
-// ── Inner Form (rendered inside panel) ────────────────────────────────────
+// -- Inner Form (adapted for useEntityPanel) ---------------------------------
 
 function SaleMasterForm({
-  initialData,
-  editId,
+  saleMasterId,
   onSuccess,
+  panelId,
+  mode,
 }: {
-  initialData: typeof INITIAL_FORM;
-  editId: string | null;
-  onSuccess: () => void;
+  saleMasterId?: string;
+  onSuccess?: () => void;
+  panelId?: string;
+  mode?: string;
 }) {
+  const { data } = useSaleMasterList();
+  const isEdit = !!saleMasterId;
+
+  // Load initial data from list for edit mode
+  const initialData = useMemo(() => {
+    if (!isEdit) return INITIAL_FORM;
+    const list: any[] = (data as any)?.data ?? [];
+    const sm = list.find((s: any) => s.id === saleMasterId);
+    if (!sm) return INITIAL_FORM;
+    return {
+      name:                sm.name,
+      code:                sm.code,
+      igstRate:            Number(sm.igstRate),
+      cgstRate:            Number(sm.cgstRate),
+      sgstRate:            Number(sm.sgstRate),
+      cessRate:            Number(sm.cessRate),
+      taxability:          sm.taxability,
+      natureOfTransaction: sm.natureOfTransaction ?? "SALES",
+      isDefault:           sm.isDefault,
+      localLedgerId:       sm.localLedgerId ?? "",
+      centralLedgerId:     sm.centralLedgerId ?? "",
+    };
+  }, [data, saleMasterId, isEdit]);
+
   const [form, setForm] = useState(initialData);
   const [saving, setSaving] = useState(false);
   const createMutation = useCreateSaleMaster();
@@ -76,14 +102,14 @@ function SaleMasterForm({
     }
     setSaving(true);
     try {
-      if (editId) {
-        await updateMutation.mutateAsync({ id: editId, data: form });
+      if (isEdit) {
+        await updateMutation.mutateAsync({ id: saleMasterId!, data: form });
         toast.success("Sale master updated");
       } else {
         await createMutation.mutateAsync(form);
         toast.success("Sale master created");
       }
-      onSuccess();
+      onSuccess?.();
     } catch {
       toast.error("Failed to save");
     } finally {
@@ -91,10 +117,9 @@ function SaleMasterForm({
     }
   }
 
-  // Expose save trigger via form element so panel footer button can submit
   return (
     <form
-      id="sp-form-sale-master"
+      id={`sp-form-sale-master-${saleMasterId ?? "new"}`}
       onSubmit={(e) => { e.preventDefault(); handleSave(); }}
       style={{ display: "flex", flexDirection: "column", gap: 16 }}
     >
@@ -150,11 +175,21 @@ function SaleMasterForm({
   );
 }
 
-// ── List Component ─────────────────────────────────────────────────────────
+// -- List Component ----------------------------------------------------------
 
 export function SaleMasterList() {
   const { data } = useSaleMasterList();
-  const { openPanel, closePanel, updatePanelConfig } = useSidePanelStore();
+
+  const { handleRowEdit, handleCreate } = useEntityPanel({
+    entityKey: "sale-master",
+    entityLabel: "Sale Master",
+    FormComponent: SaleMasterForm,
+    idProp: "saleMasterId",
+    editRoute: "/accounts/sale-masters/:id/edit",
+    createRoute: "/accounts/sale-masters/new",
+    displayField: "name",
+    panelWidth: 600,
+  });
 
   const rows = useMemo(() => {
     const list: any[] = (data as any)?.data ?? [];
@@ -166,85 +201,9 @@ export function SaleMasterList() {
       sgstRate:    Number(sm.sgstRate ?? 0).toFixed(2),
       cessRate:    Number(sm.cessRate ?? 0).toFixed(2),
       taxability:  sm.taxability,
-      isDefault:   sm.isDefault ? <Badge variant="success">Default</Badge> : "—",
+      isDefault:   sm.isDefault ? <Badge variant="success">Default</Badge> : "\u2014",
     }));
   }, [data]);
-
-  function openCreatePanel() {
-    const panelId = "create-sale-master";
-    openPanel({
-      id:    panelId,
-      title: "New Sale Master",
-      icon:  "tag",
-      width: 600,
-      content: (
-        <SaleMasterForm
-          initialData={INITIAL_FORM}
-          editId={null}
-          onSuccess={() => closePanel(panelId)}
-        />
-      ),
-      footerButtons: [
-        {
-          id: "cancel", label: "Cancel", showAs: "text" as const, variant: "secondary" as const,
-          onClick: () => useSidePanelStore.getState().closePanel(panelId),
-        },
-        {
-          id: "save", label: "Create", icon: "check", showAs: "both" as const, variant: "primary" as const,
-          onClick: () => {
-            const f = document.getElementById("sp-form-sale-master") as HTMLFormElement | null;
-            f?.requestSubmit();
-          },
-        },
-      ],
-    });
-  }
-
-  function openEditPanel(row: any) {
-    const list: any[] = (data as any)?.data ?? [];
-    const sm = list.find((s: any) => s.id === row.id);
-    if (!sm) return;
-    const panelId = `edit-sale-master-${sm.id}`;
-    const initialData = {
-      name:                sm.name,
-      code:                sm.code,
-      igstRate:            Number(sm.igstRate),
-      cgstRate:            Number(sm.cgstRate),
-      sgstRate:            Number(sm.sgstRate),
-      cessRate:            Number(sm.cessRate),
-      taxability:          sm.taxability,
-      natureOfTransaction: sm.natureOfTransaction ?? "SALES",
-      isDefault:           sm.isDefault,
-      localLedgerId:       sm.localLedgerId ?? "",
-      centralLedgerId:     sm.centralLedgerId ?? "",
-    };
-    openPanel({
-      id:    panelId,
-      title: `Edit — ${sm.name}`,
-      icon:  "tag",
-      width: 600,
-      content: (
-        <SaleMasterForm
-          initialData={initialData}
-          editId={sm.id}
-          onSuccess={() => closePanel(panelId)}
-        />
-      ),
-      footerButtons: [
-        {
-          id: "cancel", label: "Cancel", showAs: "text" as const, variant: "secondary" as const,
-          onClick: () => useSidePanelStore.getState().closePanel(panelId),
-        },
-        {
-          id: "save", label: "Save Changes", icon: "check", showAs: "both" as const, variant: "primary" as const,
-          onClick: () => {
-            const f = document.getElementById("sp-form-sale-master") as HTMLFormElement | null;
-            f?.requestSubmit();
-          },
-        },
-      ],
-    });
-  }
 
   return (
     <TableFull
@@ -254,8 +213,8 @@ export function SaleMasterList() {
       columns={COLUMNS}
       defaultViewMode="table"
       defaultDensity="compact"
-      onRowEdit={openEditPanel}
-      onCreate={openCreatePanel}
+      onRowEdit={handleRowEdit}
+      onCreate={handleCreate}
     />
   );
 }

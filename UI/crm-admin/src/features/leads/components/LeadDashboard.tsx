@@ -20,7 +20,7 @@ import { LeadPipeline } from "./LeadPipeline";
 import { useQuotationsList } from "@/features/quotations/hooks/useQuotations";
 import { useInvoicesList, usePaymentsList } from "@/features/finance/hooks/useFinance";
 import { useProformaList } from "@/features/finance/hooks/useProforma";
-import { useSidePanelStore } from "@/stores/side-panel.store";
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 import { QuotationForm } from "@/features/quotations/components/QuotationForm";
 import { InvoiceForm } from "@/features/finance/components/InvoiceForm";
 import { ProformaForm } from "@/features/finance/components/ProformaForm";
@@ -146,8 +146,32 @@ export function LeadDashboard({
   const { data: invoicesData } = useInvoicesList({ leadId: entityId, limit: 100 });
   const { data: paymentsData } = usePaymentsList({ leadId: entityId, limit: 100 });
 
-  const openPanel = useSidePanelStore((s) => s.openPanel);
-  const closePanel = useSidePanelStore((s) => s.closePanel);
+  const { handleCreate: handleNewQuotation } = useEntityPanel({
+    entityKey: "quotation",
+    entityLabel: "Quotation",
+    FormComponent: QuotationForm,
+    idProp: "quotationId",
+    editRoute: "/quotations/:id/edit",
+    createRoute: "/quotations/new",
+  });
+
+  const { handleCreate: handleNewInvoice } = useEntityPanel({
+    entityKey: "invoice",
+    entityLabel: "Invoice",
+    FormComponent: InvoiceForm,
+    idProp: "invoiceId",
+    editRoute: "/invoices/:id/edit",
+    createRoute: "/invoices/new",
+  });
+
+  const { handleCreate: handleNewProforma } = useEntityPanel({
+    entityKey: "proforma",
+    entityLabel: "Proforma Invoice",
+    FormComponent: ProformaForm,
+    idProp: "proformaId",
+    editRoute: "/finance/proforma-invoices/:id/edit",
+    createRoute: "/finance/proforma-invoices/new",
+  });
 
   const lead = data?.data;
   const quotations = quotationsData?.data ?? [];
@@ -180,108 +204,6 @@ export function LeadDashboard({
       toast.error("Failed to add activity");
     }
   }, [actType, actSubject, actDescription, actScheduledAt, entityId, createActivity, refetch]);
-
-  // Open new quotation in side panel (pre-filled with leadId)
-  const handleNewQuotation = useCallback(() => {
-    const panelId = `quotation-new-${entityId}`;
-    const formId = `sp-form-quotation-new`;
-    openPanel({
-      id: panelId,
-      title: "New Quotation",
-      newTabUrl: "/quotations/new",
-      footerButtons: [
-        { id: "cancel", label: "Cancel", showAs: "text", variant: "secondary", onClick: () => closePanel(panelId) },
-        {
-          id: "save",
-          label: "Save",
-          icon: "check",
-          showAs: "both",
-          variant: "primary",
-          onClick: () => {
-            const form = document.getElementById(formId) as HTMLFormElement | null;
-            form?.requestSubmit();
-          },
-        },
-      ],
-      content: (
-        <QuotationForm
-          leadId={entityId}
-          mode="panel"
-          panelId={panelId}
-          onSuccess={() => closePanel(panelId)}
-          onCancel={() => closePanel(panelId)}
-        />
-      ),
-    });
-  }, [entityId, openPanel, closePanel]);
-
-  // Open new invoice in side panel
-  const handleNewInvoice = useCallback(() => {
-    const panelId = `invoice-new-${entityId}`;
-    const formId = `sp-form-invoice-new`;
-    openPanel({
-      id: panelId,
-      title: "New Invoice",
-      newTabUrl: "/invoices/new",
-      footerButtons: [
-        { id: "cancel", label: "Cancel", showAs: "text", variant: "secondary", onClick: () => closePanel(panelId) },
-        {
-          id: "save",
-          label: "Save",
-          icon: "check",
-          showAs: "both",
-          variant: "primary",
-          onClick: () => {
-            const form = document.getElementById(formId) as HTMLFormElement | null;
-            form?.requestSubmit();
-          },
-        },
-      ],
-      content: (
-        <InvoiceForm
-          leadId={entityId}
-          mode="panel"
-          panelId={panelId}
-          onSuccess={() => closePanel(panelId)}
-          onCancel={() => closePanel(panelId)}
-        />
-      ),
-    });
-  }, [entityId, openPanel, closePanel]);
-
-  // Open new proforma in side panel
-  const handleNewProforma = useCallback(() => {
-    const panelId = `proforma-new-${entityId}`;
-    const formId = `sp-form-proforma-new`;
-    openPanel({
-      id: panelId,
-      title: "New Proforma Invoice",
-      newTabUrl: "/finance/proforma-invoices/new",
-      footerButtons: [
-        { id: "cancel", label: "Cancel", showAs: "text", variant: "secondary", onClick: () => closePanel(panelId) },
-        {
-          id: "save",
-          label: "Save",
-          icon: "check",
-          showAs: "both",
-          variant: "primary",
-          onClick: () => {
-            const form = document.getElementById(formId) as HTMLFormElement | null;
-            form?.requestSubmit();
-          },
-        },
-      ],
-      content: (
-        <ProformaForm
-          leadId={entityId}
-          mode="panel"
-          panelId={panelId}
-          onSuccess={() => closePanel(panelId)}
-          onCancel={() => closePanel(panelId)}
-        />
-      ),
-    });
-  }, [entityId, openPanel, closePanel]);
 
   // ── Profile Card ─────────────────────────────────────
 

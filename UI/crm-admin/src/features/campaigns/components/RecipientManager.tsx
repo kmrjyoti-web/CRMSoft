@@ -9,6 +9,7 @@ import { Icon, Button, Badge, Modal, TextareaInput } from "@/components/ui";
 import { useCampaignRecipients, useAddRecipients } from "../hooks/useCampaigns";
 
 import type { CampaignRecipient } from "../types/campaign.types";
+import { formatDate } from "@/lib/format-date";
 
 // ── Types ───────────────────────────────────────────────
 
@@ -30,15 +31,6 @@ const RECIPIENT_STATUS_VARIANT: Record<CampaignRecipient["status"], string> = {
 
 // ── Helpers ─────────────────────────────────────────────
 
-function formatDate(dateStr?: string): string {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 // ── Component ───────────────────────────────────────────
 

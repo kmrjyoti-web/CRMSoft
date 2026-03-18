@@ -4,15 +4,14 @@ import { useState, useMemo } from "react";
 import toast from "react-hot-toast";
 
 import { TableFull, Input, SelectInput, Icon, Badge } from "@/components/ui";
-import { useSidePanelStore } from "@/stores/side-panel.store";
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 
 import {
-  useGroupTree,
   useGroupFlat,
   useCreateGroup,
 } from "../hooks/useAccounts";
 
-// ── Constants ─────────────────────────────────────────────────────────────
+// -- Constants ---------------------------------------------------------------
 
 const PRIMARY_GROUP_OPTIONS = [
   { value: "CAPITAL",             label: "Capital Account" },
@@ -44,19 +43,32 @@ const INITIAL_FORM = {
   isProhibited: false,
 };
 
-// ── Inner Form ─────────────────────────────────────────────────────────────
+// -- Inner Form (adapted for useEntityPanel) ---------------------------------
 
 function AccountGroupForm({
   onSuccess,
-  parentOptions,
+  panelId,
+  mode,
+  accountGroupId,
 }: {
-  onSuccess: () => void;
-  parentOptions: { value: string; label: string }[];
+  onSuccess?: () => void;
+  panelId?: string;
+  mode?: string;
+  accountGroupId?: string;
 }) {
   const [form, setForm] = useState(INITIAL_FORM);
   const [saving, setSaving] = useState(false);
   const createGroup = useCreateGroup();
+  const { data: flatData } = useGroupFlat();
   const set = (f: string, v: any) => setForm((p) => ({ ...p, [f]: v }));
+
+  const parentOptions = useMemo(
+    () => {
+      const flat: any[] = (flatData as any)?.data ?? [];
+      return flat.map((g: any) => ({ value: g.id, label: `${g.name} (${g.code})` }));
+    },
+    [flatData],
+  );
 
   async function handleSave() {
     if (!form.name || !form.code || !form.primaryGroup) {
@@ -70,7 +82,7 @@ function AccountGroupForm({
         parentId: form.parentId || undefined,
       });
       toast.success("Group created");
-      onSuccess();
+      onSuccess?.();
     } catch {
       toast.error("Failed to create group");
     } finally {
@@ -80,7 +92,7 @@ function AccountGroupForm({
 
   return (
     <form
-      id="sp-form-account-group"
+      id={`sp-form-account-group-${accountGroupId ?? "new"}`}
       onSubmit={(e) => { e.preventDefault(); handleSave(); }}
       style={{ display: "flex", flexDirection: "column", gap: 16 }}
     >
@@ -107,7 +119,7 @@ function AccountGroupForm({
         <SelectInput
           label="Under Group (Parent)"
           value={form.parentId}
-          options={[{ value: "", label: "— Root —" }, ...parentOptions]}
+          options={[{ value: "", label: "\u2014 Root \u2014" }, ...parentOptions]}
           onChange={(v) => set("parentId", String(v ?? ""))}
           leftIcon={<Icon name="git-branch" size={16} />}
         />
@@ -116,20 +128,25 @@ function AccountGroupForm({
   );
 }
 
-// ── AccountGroupList ───────────────────────────────────────────────────────
+// -- AccountGroupList --------------------------------------------------------
 
 export function AccountGroupList() {
   const { data: flatData } = useGroupFlat();
-  const { openPanel, closePanel } = useSidePanelStore();
+
+  const { handleCreate } = useEntityPanel({
+    entityKey: "account-group",
+    entityLabel: "Account Group",
+    FormComponent: AccountGroupForm,
+    idProp: "accountGroupId",
+    editRoute: "/accounts/groups/:id/edit",
+    createRoute: "/accounts/groups/new",
+    displayField: "name",
+    panelWidth: 600,
+  });
 
   const flat: any[] = useMemo(
     () => (flatData as any)?.data ?? [],
     [flatData],
-  );
-
-  const parentOptions = useMemo(
-    () => flat.map((g: any) => ({ value: g.id, label: `${g.name} (${g.code})` })),
-    [flat],
   );
 
   const rows = useMemo(() =>
@@ -140,7 +157,7 @@ export function AccountGroupList() {
       primaryGroup: g.primaryGroup,
       nature: (
         <Badge variant={g.nature === "CREDIT" ? "success" : "primary"}>
-          {g.nature ?? "—"}
+          {g.nature ?? "\u2014"}
         </Badge>
       ),
       isSystem: g.isSystem
@@ -150,35 +167,6 @@ export function AccountGroupList() {
     [flat],
   );
 
-  function openCreatePanel() {
-    const panelId = "create-account-group";
-    openPanel({
-      id:    panelId,
-      title: "New Account Group",
-      icon:  "folder",
-      width: 600,
-      content: (
-        <AccountGroupForm
-          onSuccess={() => closePanel(panelId)}
-          parentOptions={parentOptions}
-        />
-      ),
-      footerButtons: [
-        {
-          id: "cancel", label: "Cancel", showAs: "text" as const, variant: "secondary" as const,
-          onClick: () => useSidePanelStore.getState().closePanel(panelId),
-        },
-        {
-          id: "save", label: "Create Group", icon: "check", showAs: "both" as const, variant: "primary" as const,
-          onClick: () => {
-            const f = document.getElementById("sp-form-account-group") as HTMLFormElement | null;
-            f?.requestSubmit();
-          },
-        },
-      ],
-    });
-  }
-
   return (
     <TableFull
       data={rows}
@@ -187,7 +175,7 @@ export function AccountGroupList() {
       columns={COLUMNS}
       defaultViewMode="table"
       defaultDensity="compact"
-      onCreate={openCreatePanel}
+      onCreate={handleCreate}
     />
   );
 }

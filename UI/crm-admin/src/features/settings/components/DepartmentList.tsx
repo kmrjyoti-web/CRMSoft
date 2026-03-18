@@ -51,7 +51,7 @@ export function DepartmentList() {
   });
 
   const params = useMemo<DepartmentListParams>(
-    () => ({ page: 1, limit: 10000 }),
+    () => ({ page: 1, limit: 50 }),
     [],
   );
 

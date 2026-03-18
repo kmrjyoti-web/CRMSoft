@@ -1,6 +1,7 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { PrismaService } from '../../../../../core/prisma/prisma.service';
 import { PrismaFilterBuilder } from '../../../../../common/utils/filter-builder';
+import { buildPaginationParams, buildPaginatedResult } from '../../../../../common/utils/paginated-list.helper';
 import { GetRawContactsListQuery } from './get-raw-contacts-list.query';
 
 @QueryHandler(GetRawContactsListQuery)
@@ -39,32 +40,37 @@ export class GetRawContactsListHandler implements IQueryHandler<GetRawContactsLi
       ])
       .build();
 
+    const { page, limit, skip, orderBy } = buildPaginationParams(query);
+
     const [data, total] = await Promise.all([
       this.prisma.rawContact.findMany({
         where,
-        skip: (query.page - 1) * query.limit,
-        take: query.limit,
-        orderBy: { [query.sortBy]: query.sortOrder },
-        include: {
+        skip,
+        take: limit,
+        orderBy,
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          companyName: true,
+          designation: true,
+          department: true,
+          source: true,
+          status: true,
+          isActive: true,
+          entityVerificationStatus: true,
+          createdAt: true,
           communications: {
             orderBy: { createdAt: 'asc' },
             select: {
-              id: true, type: true, value: true, priorityType: true,
-              isPrimary: true, label: true,
+              id: true, type: true, value: true, isPrimary: true,
             },
           },
-          filters: {
-            include: {
-              lookupValue: { select: { id: true, value: true, label: true } },
-            },
-          },
-          createdByUser: { select: { id: true, firstName: true, lastName: true } },
-          _count: { select: { communications: true } },
         },
       }),
       this.prisma.rawContact.count({ where }),
     ]);
 
-    return { data, total, page: query.page, limit: query.limit };
+    return buildPaginatedResult(data, total, page, limit);
   }
 }

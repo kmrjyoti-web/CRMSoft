@@ -2991,10 +2991,12 @@ enum ImportJobStatus {
 }
 
 enum ImportTargetEntity {
+  ROW_CONTACT
   CONTACT
   ORGANIZATION
   LEAD
   PRODUCT
+  LEDGER
 }
 
 enum ImportRowStatus {
@@ -9843,6 +9845,8 @@ model StockSummary {
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
 
   @@unique([tenantId, productId, locationId])
+  
+  @@index([tenantId])
   @@map("stock_summaries")
 }
 
@@ -9863,6 +9867,9 @@ model StockAdjustment {
   createdById String   @map("created_by_id")
   createdAt   DateTime @default(now())
 
+  
+  @@index([tenantId])
+  @@index([tenantId, status])
   @@map("stock_adjustments")
 }
 
@@ -10063,6 +10070,8 @@ model UnitMaster {
   createdAt    DateTime     @default(now())
 
   @@unique([tenantId, symbol])
+  
+  @@index([tenantId])
   @@map("unit_masters")
 }
 
@@ -10076,6 +10085,8 @@ model UnitConversion {
   isActive         Boolean @default(true) @map("is_active")
 
   @@unique([tenantId, fromUnitId, toUnitId, productId])
+  
+  @@index([tenantId])
   @@map("unit_conversions")
 }
 
@@ -10105,6 +10116,8 @@ model PurchaseRFQ {
 
   @@unique([tenantId, rfqNumber])
   @@map("purchase_rfqs")
+  @@index([tenantId])
+  @@index([tenantId, status])
 }
 
 model PurchaseRFQItem {
@@ -10119,6 +10132,8 @@ model PurchaseRFQItem {
   rfq            PurchaseRFQ @relation(fields: [rfqId], references: [id], onDelete: Cascade)
 
   @@map("purchase_rfq_items")
+
+  @@index([rfqId])
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -10150,6 +10165,9 @@ model PurchaseQuotation {
   items PurchaseQuotationItem[]
 
   @@unique([tenantId, quotationNumber])
+  
+  @@index([tenantId])
+  @@index([tenantId, status])
   @@map("purchase_quotations")
 }
 
@@ -10169,6 +10187,8 @@ model PurchaseQuotationItem {
   quotation    PurchaseQuotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
 
   @@map("purchase_quotation_items")
+
+  @@index([quotationId])
 }
 
 model QuotationComparison {
@@ -10221,6 +10241,9 @@ model PurchaseOrder {
   purchaseInvoices PurchaseInvoice[]
 
   @@unique([tenantId, poNumber])
+  
+  @@index([tenantId])
+  @@index([tenantId, status])
   @@map("purchase_orders")
 }
 
@@ -10243,6 +10266,8 @@ model PurchaseOrderItem {
   po          PurchaseOrder @relation(fields: [poId], references: [id], onDelete: Cascade)
 
   @@map("purchase_order_items")
+
+  @@index([poId])
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -10274,6 +10299,9 @@ model GoodsReceipt {
   po    PurchaseOrder?     @relation(fields: [poId], references: [id])
 
   @@unique([tenantId, receiptNumber])
+  
+  @@index([tenantId])
+  @@index([tenantId, status])
   @@map("goods_receipts")
 }
 
@@ -10296,6 +10324,8 @@ model GoodsReceiptItem {
   receipt         GoodsReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
 
   @@map("goods_receipt_items")
+
+  @@index([receiptId])
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -10341,6 +10371,9 @@ model PurchaseInvoice {
   po    PurchaseOrder?        @relation(fields: [poId], references: [id])
 
   @@unique([tenantId, ourReference])
+  
+  @@index([tenantId])
+  @@index([tenantId, status])
   @@map("purchase_invoices")
 }
 
@@ -10365,6 +10398,8 @@ model PurchaseInvoiceItem {
   invoice       PurchaseInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@map("purchase_invoice_items")
+
+  @@index([invoiceId])
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -10417,6 +10452,8 @@ model LedgerMaster {
   mappings           LedgerMapping[]
 
   @@unique([tenantId, code])
+  
+  @@index([tenantId])
   @@map("ledger_masters")
 }
 
@@ -10518,6 +10555,8 @@ model BankAccount {
   updatedAt      DateTime @updatedAt
 
   @@unique([tenantId, accountNumber])
+  
+  @@index([tenantId])
   @@map("bank_accounts")
 }
 
@@ -10536,6 +10575,9 @@ model BankReconciliation {
   completedAt        DateTime? @map("completed_at")
   createdAt          DateTime  @default(now())
 
+  
+  @@index([tenantId])
+  @@index([tenantId, status])
   @@map("bank_reconciliations")
 }
 
@@ -10566,6 +10608,9 @@ model GSTReturn {
   updatedAt         DateTime  @updatedAt
 
   @@unique([tenantId, returnType, period])
+  
+  @@index([tenantId])
+  @@index([tenantId, status])
   @@map("gst_returns")
 }
 
@@ -10737,6 +10782,9 @@ model SaleReturn {
   items SaleReturnItem[]
 
   @@unique([tenantId, returnNumber])
+  
+  @@index([tenantId])
+  @@index([tenantId, status])
   @@map("sale_returns")
 }
 
@@ -10761,6 +10809,8 @@ model SaleReturnItem {
   saleReturn SaleReturn @relation(fields: [returnId], references: [id], onDelete: Cascade)
 
   @@map("sale_return_items")
+
+  @@index([returnId])
 }
 
 model DebitNote {
@@ -10789,6 +10839,9 @@ model DebitNote {
   items DebitNoteItem[]
 
   @@unique([tenantId, debitNoteNumber])
+  
+  @@index([tenantId])
+  @@index([tenantId, status])
   @@map("debit_notes")
 }
 
@@ -10809,6 +10862,8 @@ model DebitNoteItem {
   debitNote DebitNote @relation(fields: [debitNoteId], references: [id], onDelete: Cascade)
 
   @@map("debit_note_items")
+
+  @@index([debitNoteId])
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -10833,6 +10888,8 @@ model AccountGroup {
   ledgers      LedgerMaster[]
 
   @@unique([tenantId, code])
+  
+  @@index([tenantId])
   @@map("account_groups")
 }
 
@@ -10860,6 +10917,8 @@ model SaleMaster {
   updatedAt           DateTime @updatedAt
 
   @@unique([tenantId, code])
+  
+  @@index([tenantId])
   @@map("sale_masters")
 }
 
@@ -10887,6 +10946,8 @@ model PurchaseMaster {
   updatedAt           DateTime @updatedAt
 
   @@unique([tenantId, code])
+  
+  @@index([tenantId])
   @@map("purchase_masters")
 }
 
@@ -11099,6 +11160,9 @@ model WarrantyClaim {
   updatedAt             DateTime  @updatedAt
   warrantyRecord        WarrantyRecord @relation(fields: [warrantyRecordId], references: [id])
   @@unique([tenantId, claimNumber])
+  
+  @@index([tenantId])
+  @@index([tenantId, status])
   @@map("warranty_claims")
 }
 

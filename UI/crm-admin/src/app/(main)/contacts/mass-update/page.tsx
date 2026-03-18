@@ -29,7 +29,7 @@ const UPDATE_FIELDS: BulkEditField[] = [
 ];
 
 async function handleSearch() {
-  const result = await contactsService.getAll({ limit: 10000 });
+  const result = await contactsService.getAll({ limit: 500 });
   const raw = result.data;
   const data: ContactListItem[] = Array.isArray(raw)
     ? raw

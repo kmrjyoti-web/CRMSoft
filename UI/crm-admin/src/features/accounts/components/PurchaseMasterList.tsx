@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import toast from "react-hot-toast";
 
 import { TableFull, Input, SelectInput, NumberInput, Icon, Badge } from "@/components/ui";
-import { useSidePanelStore } from "@/stores/side-panel.store";
+import { useEntityPanel } from "@/hooks/useEntityPanel";
 
 import {
   usePurchaseMasterList,
@@ -12,7 +12,7 @@ import {
   useUpdatePurchaseMaster,
 } from "../hooks/useAccounts";
 
-// ── Constants ─────────────────────────────────────────────────────────────
+// -- Constants ---------------------------------------------------------------
 
 const TAXABILITY_OPTIONS = [
   { value: "TAXABLE",    label: "Taxable" },
@@ -52,17 +52,42 @@ const INITIAL_FORM = {
   centralLedgerId: "",
 };
 
-// ── Inner Form (rendered inside panel) ────────────────────────────────────
+// -- Inner Form (adapted for useEntityPanel) ---------------------------------
 
 function PurchaseMasterForm({
-  initialData,
-  editId,
+  purchaseMasterId,
   onSuccess,
+  panelId,
+  mode,
 }: {
-  initialData: typeof INITIAL_FORM;
-  editId: string | null;
-  onSuccess: () => void;
+  purchaseMasterId?: string;
+  onSuccess?: () => void;
+  panelId?: string;
+  mode?: string;
 }) {
+  const { data } = usePurchaseMasterList();
+  const isEdit = !!purchaseMasterId;
+
+  const initialData = useMemo(() => {
+    if (!isEdit) return INITIAL_FORM;
+    const list: any[] = (data as any)?.data ?? [];
+    const pm = list.find((p: any) => p.id === purchaseMasterId);
+    if (!pm) return INITIAL_FORM;
+    return {
+      name:                pm.name,
+      code:                pm.code,
+      igstRate:            Number(pm.igstRate),
+      cgstRate:            Number(pm.cgstRate),
+      sgstRate:            Number(pm.sgstRate),
+      cessRate:            Number(pm.cessRate),
+      taxability:          pm.taxability,
+      natureOfTransaction: pm.natureOfTransaction ?? "PURCHASE",
+      isDefault:           pm.isDefault,
+      localLedgerId:       pm.localLedgerId ?? "",
+      centralLedgerId:     pm.centralLedgerId ?? "",
+    };
+  }, [data, purchaseMasterId, isEdit]);
+
   const [form, setForm] = useState(initialData);
   const createMutation = useCreatePurchaseMaster();
   const updateMutation = useUpdatePurchaseMaster();
@@ -74,14 +99,14 @@ function PurchaseMasterForm({
       return;
     }
     try {
-      if (editId) {
-        await updateMutation.mutateAsync({ id: editId, data: form });
+      if (isEdit) {
+        await updateMutation.mutateAsync({ id: purchaseMasterId!, data: form });
         toast.success("Purchase master updated");
       } else {
         await createMutation.mutateAsync(form);
         toast.success("Purchase master created");
       }
-      onSuccess();
+      onSuccess?.();
     } catch {
       toast.error("Failed to save");
     }
@@ -89,7 +114,7 @@ function PurchaseMasterForm({
 
   return (
     <form
-      id="sp-form-purchase-master"
+      id={`sp-form-purchase-master-${purchaseMasterId ?? "new"}`}
       onSubmit={(e) => { e.preventDefault(); handleSave(); }}
       style={{ display: "flex", flexDirection: "column", gap: 16 }}
     >
@@ -145,11 +170,21 @@ function PurchaseMasterForm({
   );
 }
 
-// ── List Component ─────────────────────────────────────────────────────────
+// -- List Component ----------------------------------------------------------
 
 export function PurchaseMasterList() {
   const { data } = usePurchaseMasterList();
-  const { openPanel, closePanel } = useSidePanelStore();
+
+  const { handleRowEdit, handleCreate } = useEntityPanel({
+    entityKey: "purchase-master",
+    entityLabel: "Purchase Master",
+    FormComponent: PurchaseMasterForm,
+    idProp: "purchaseMasterId",
+    editRoute: "/accounts/purchase-masters/:id/edit",
+    createRoute: "/accounts/purchase-masters/new",
+    displayField: "name",
+    panelWidth: 600,
+  });
 
   const rows = useMemo(() => {
     const list: any[] = (data as any)?.data ?? [];
@@ -161,85 +196,9 @@ export function PurchaseMasterList() {
       sgstRate:   Number(pm.sgstRate ?? 0).toFixed(2),
       cessRate:   Number(pm.cessRate ?? 0).toFixed(2),
       taxability: pm.taxability,
-      isDefault:  pm.isDefault ? <Badge variant="success">Default</Badge> : "—",
+      isDefault:  pm.isDefault ? <Badge variant="success">Default</Badge> : "\u2014",
     }));
   }, [data]);
-
-  function openCreatePanel() {
-    const panelId = "create-purchase-master";
-    openPanel({
-      id:    panelId,
-      title: "New Purchase Master",
-      icon:  "tag",
-      width: 600,
-      content: (
-        <PurchaseMasterForm
-          initialData={INITIAL_FORM}
-          editId={null}
-          onSuccess={() => closePanel(panelId)}
-        />
-      ),
-      footerButtons: [
-        {
-          id: "cancel", label: "Cancel", showAs: "text" as const, variant: "secondary" as const,
-          onClick: () => useSidePanelStore.getState().closePanel(panelId),
-        },
-        {
-          id: "save", label: "Create", icon: "check", showAs: "both" as const, variant: "primary" as const,
-          onClick: () => {
-            const f = document.getElementById("sp-form-purchase-master") as HTMLFormElement | null;
-            f?.requestSubmit();
-          },
-        },
-      ],
-    });
-  }
-
-  function openEditPanel(row: any) {
-    const list: any[] = (data as any)?.data ?? [];
-    const pm = list.find((p: any) => p.id === row.id);
-    if (!pm) return;
-    const panelId = `edit-purchase-master-${pm.id}`;
-    const initialData = {
-      name:                pm.name,
-      code:                pm.code,
-      igstRate:            Number(pm.igstRate),
-      cgstRate:            Number(pm.cgstRate),
-      sgstRate:            Number(pm.sgstRate),
-      cessRate:            Number(pm.cessRate),
-      taxability:          pm.taxability,
-      natureOfTransaction: pm.natureOfTransaction ?? "PURCHASE",
-      isDefault:           pm.isDefault,
-      localLedgerId:       pm.localLedgerId ?? "",
-      centralLedgerId:     pm.centralLedgerId ?? "",
-    };
-    openPanel({
-      id:    panelId,
-      title: `Edit — ${pm.name}`,
-      icon:  "tag",
-      width: 600,
-      content: (
-        <PurchaseMasterForm
-          initialData={initialData}
-          editId={pm.id}
-          onSuccess={() => closePanel(panelId)}
-        />
-      ),
-      footerButtons: [
-        {
-          id: "cancel", label: "Cancel", showAs: "text" as const, variant: "secondary" as const,
-          onClick: () => useSidePanelStore.getState().closePanel(panelId),
-        },
-        {
-          id: "save", label: "Save Changes", icon: "check", showAs: "both" as const, variant: "primary" as const,
-          onClick: () => {
-            const f = document.getElementById("sp-form-purchase-master") as HTMLFormElement | null;
-            f?.requestSubmit();
-          },
-        },
-      ],
-    });
-  }
 
   return (
     <TableFull
@@ -249,8 +208,8 @@ export function PurchaseMasterList() {
       columns={COLUMNS}
       defaultViewMode="table"
       defaultDensity="compact"
-      onRowEdit={openEditPanel}
-      onCreate={openCreatePanel}
+      onRowEdit={handleRowEdit}
+      onCreate={handleCreate}
     />
   );
 }

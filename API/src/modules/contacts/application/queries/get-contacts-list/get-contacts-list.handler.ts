@@ -1,5 +1,6 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { PrismaService } from '../../../../../core/prisma/prisma.service';
+import { buildPaginationParams, buildPaginatedResult } from '../../../../../common/utils/paginated-list.helper';
 import { GetContactsListQuery } from './get-contacts-list.query';
 
 @QueryHandler(GetContactsListQuery)
@@ -52,39 +53,43 @@ export class GetContactsListHandler implements IQueryHandler<GetContactsListQuer
       ];
     }
 
+    const { page, limit, skip, orderBy } = buildPaginationParams(query);
+
     const [data, total] = await Promise.all([
       this.prisma.contact.findMany({
         where,
-        skip: (query.page - 1) * query.limit,
-        take: query.limit,
-        orderBy: { [query.sortBy]: query.sortOrder },
-        include: {
+        skip,
+        take: limit,
+        orderBy,
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          designation: true,
+          department: true,
+          dataStatus: true,
+          isActive: true,
+          entityVerificationStatus: true,
+          createdAt: true,
           communications: {
-            select: { id: true, type: true, value: true, isPrimary: true, priorityType: true },
+            select: { id: true, type: true, value: true, isPrimary: true },
             orderBy: { isPrimary: 'desc' },
-            take: 5,
+            take: 3,
           },
           contactOrganizations: {
             where: { isActive: true },
-            include: {
+            select: {
               organization: {
-                select: { id: true, name: true, city: true },
+                select: { id: true, name: true },
               },
             },
-            take: 2,
+            take: 1,
           },
-          filters: {
-            include: {
-              lookupValue: { select: { id: true, value: true, label: true } },
-            },
-          },
-          createdByUser: { select: { id: true, firstName: true, lastName: true } },
-          _count: { select: { leads: true, communications: true } },
         },
       }),
       this.prisma.contact.count({ where }),
     ]);
 
-    return { data, total, page: query.page, limit: query.limit };
+    return buildPaginatedResult(data, total, page, limit);
   }
 }
