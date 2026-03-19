@@ -29,6 +29,7 @@ describe('GetEffectivePriceHandler', () => {
         findMany: jest.fn().mockResolvedValue([]),
       },
     };
+(prisma as any).working = prisma;
     handler = new GetEffectivePriceHandler(prisma);
   });
 

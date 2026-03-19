@@ -17,14 +17,14 @@ export class TDSService {
     if (filters?.quarter) where.quarter = filters.quarter;
     if (filters?.status) where.status = filters.status;
 
-    return this.prisma.tDSRecord.findMany({ where, orderBy: { deductionDate: 'desc' } });
+    return this.prisma.working.tDSRecord.findMany({ where, orderBy: { deductionDate: 'desc' } });
   }
 
   async markDeposited(tenantId: string, id: string, depositDate: string, challanNumber?: string) {
-    const record = await this.prisma.tDSRecord.findFirst({ where: { id, tenantId } });
+    const record = await this.prisma.working.tDSRecord.findFirst({ where: { id, tenantId } });
     if (!record) throw new NotFoundException('TDS record not found');
 
-    return this.prisma.tDSRecord.update({
+    return this.prisma.working.tDSRecord.update({
       where: { id },
       data: {
         status: 'DEPOSITED',
@@ -36,7 +36,7 @@ export class TDSService {
 
   async getSummary(tenantId: string, financialYear?: string) {
     const fy = financialYear || this.getCurrentFY();
-    const records = await this.prisma.tDSRecord.findMany({
+    const records = await this.prisma.working.tDSRecord.findMany({
       where: { tenantId, financialYear: fy },
     });
 

@@ -7,14 +7,15 @@ const mockPrisma = {
     update: jest.fn(),
     deleteMany: jest.fn(),
   },
-} as any;
+};
+(mockPrisma as any).working = mockPrisma;
 
 describe('PaymentReminderService', () => {
   let service: PaymentReminderService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new PaymentReminderService(mockPrisma);
+    service = new PaymentReminderService(mockPrisma as any);
   });
 
   it('should schedule 4 reminders (GENTLE, FIRM, URGENT, FINAL)', async () => {

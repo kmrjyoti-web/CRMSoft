@@ -28,12 +28,12 @@ export class BOMFormulaService {
     const code = data.formulaCode || await this.generateCode(tenantId);
 
     // Check for duplicate code
-    const existing = await this.prisma.bOMFormula.findFirst({
+    const existing = await this.prisma.working.bOMFormula.findFirst({
       where: { tenantId, formulaCode: code },
     });
     if (existing) throw new BadRequestException(`Formula code "${code}" already exists`);
 
-    const formula = await this.prisma.bOMFormula.create({
+    const formula = await this.prisma.working.bOMFormula.create({
       data: {
         tenantId,
         formulaName: data.formulaName,
@@ -67,14 +67,14 @@ export class BOMFormulaService {
     });
 
     // Mark finished product
-    await this.prisma.inventoryItem.updateMany({
+    await this.prisma.working.inventoryItem.updateMany({
       where: { id: data.finishedProductId, tenantId },
       data: { isFinishedProduct: true },
     });
 
     // Mark raw materials
     const rawMaterialIds = data.items.map((i) => i.rawMaterialId);
-    await this.prisma.inventoryItem.updateMany({
+    await this.prisma.working.inventoryItem.updateMany({
       where: { id: { in: rawMaterialIds }, tenantId },
       data: { isRawMaterial: true },
     });
@@ -99,7 +99,7 @@ export class BOMFormulaService {
       ];
     }
 
-    return this.prisma.bOMFormula.findMany({
+    return this.prisma.working.bOMFormula.findMany({
       where,
       include: {
         items: { orderBy: { sortOrder: 'asc' } },
@@ -110,7 +110,7 @@ export class BOMFormulaService {
   }
 
   async findById(tenantId: string, id: string) {
-    const formula = await this.prisma.bOMFormula.findFirst({
+    const formula = await this.prisma.working.bOMFormula.findFirst({
       where: { id, tenantId },
       include: {
         items: {
@@ -125,7 +125,7 @@ export class BOMFormulaService {
     // Enrich items with current stock
     const enrichedItems = await Promise.all(
       formula.items.map(async (item) => {
-        const summaries = await this.prisma.stockSummary.findMany({
+        const summaries = await this.prisma.working.stockSummary.findMany({
           where: { tenantId, inventoryItemId: item.rawMaterialId },
         });
         const totalStock = summaries.reduce((sum, s) => sum + s.currentStock, 0);
@@ -157,14 +157,14 @@ export class BOMFormulaService {
       sortOrder?: number;
     }>;
   }) {
-    const existing = await this.prisma.bOMFormula.findFirst({
+    const existing = await this.prisma.working.bOMFormula.findFirst({
       where: { id, tenantId },
     });
     if (!existing) throw new NotFoundException('Recipe not found');
 
     // Version: deactivate old, create new version
     if (data.items) {
-      await this.prisma.bOMFormula.update({
+      await this.prisma.working.bOMFormula.update({
         where: { id },
         data: { isActive: false },
       });
@@ -196,7 +196,7 @@ export class BOMFormulaService {
     if (data.instructions !== undefined) updateData.instructions = data.instructions;
     if (data.industryCode) updateData.industryCode = data.industryCode;
 
-    return this.prisma.bOMFormula.update({
+    return this.prisma.working.bOMFormula.update({
       where: { id },
       data: updateData,
       include: { items: { orderBy: { sortOrder: 'asc' } }, finishedProduct: true },
@@ -204,7 +204,7 @@ export class BOMFormulaService {
   }
 
   async duplicate(tenantId: string, id: string, newName: string) {
-    const original = await this.prisma.bOMFormula.findFirst({
+    const original = await this.prisma.working.bOMFormula.findFirst({
       where: { id, tenantId },
       include: { items: true },
     });
@@ -232,17 +232,17 @@ export class BOMFormulaService {
   }
 
   async deactivate(tenantId: string, id: string) {
-    const formula = await this.prisma.bOMFormula.findFirst({ where: { id, tenantId } });
+    const formula = await this.prisma.working.bOMFormula.findFirst({ where: { id, tenantId } });
     if (!formula) throw new NotFoundException('Recipe not found');
 
-    return this.prisma.bOMFormula.update({
+    return this.prisma.working.bOMFormula.update({
       where: { id },
       data: { isActive: false },
     });
   }
 
   private async generateCode(tenantId: string): Promise<string> {
-    const count = await this.prisma.bOMFormula.count({ where: { tenantId } });
+    const count = await this.prisma.working.bOMFormula.count({ where: { tenantId } });
     return `BOM-${String(count + 1).padStart(4, '0')}`;
   }
 }

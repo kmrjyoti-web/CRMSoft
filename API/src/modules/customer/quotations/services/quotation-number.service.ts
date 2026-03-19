@@ -15,7 +15,7 @@ export class QuotationNumberService {
     const where: any = { quotationNo: { startsWith: prefix } };
     if (tenantId) where.tenantId = tenantId;
 
-    const last = await this.prisma.quotation.findFirst({
+    const last = await this.prisma.working.quotation.findFirst({
       where,
       orderBy: { quotationNo: 'desc' },
       select: { quotationNo: true },

@@ -8,7 +8,7 @@ export class SendQuotationHandler implements ICommandHandler<SendQuotationComman
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: SendQuotationCommand) {
-    const quotation = await this.prisma.quotation.findUnique({
+    const quotation = await this.prisma.working.quotation.findUnique({
       where: { id: cmd.id },
       include: { lead: { include: { organization: true, contact: true } } },
     });
@@ -18,7 +18,7 @@ export class SendQuotationHandler implements ICommandHandler<SendQuotationComman
     }
 
     // Update status to SENT
-    await this.prisma.quotation.update({
+    await this.prisma.working.quotation.update({
       where: { id: cmd.id },
       data: { status: 'SENT' },
     });
@@ -31,7 +31,7 @@ export class SendQuotationHandler implements ICommandHandler<SendQuotationComman
     let orgId: string | null = null;
 
     if (cmd.receiverContactId) {
-      const contact = await this.prisma.contact.findUnique({
+      const contact = await this.prisma.working.contact.findUnique({
         where: { id: cmd.receiverContactId },
         select: { firstName: true, lastName: true },
       });
@@ -43,7 +43,7 @@ export class SendQuotationHandler implements ICommandHandler<SendQuotationComman
     }
 
     // Create send log with snapshot
-    const sendLog = await this.prisma.quotationSendLog.create({
+    const sendLog = await this.prisma.working.quotationSendLog.create({
       data: {
         quotationId: cmd.id,
         sentAt: new Date(),
@@ -62,7 +62,7 @@ export class SendQuotationHandler implements ICommandHandler<SendQuotationComman
       },
     });
 
-    await this.prisma.quotationActivity.create({
+    await this.prisma.working.quotationActivity.create({
       data: {
         quotationId: cmd.id, action: 'SENT',
         description: `Quotation sent via ${cmd.channel} to ${receiverName || 'customer'}`,

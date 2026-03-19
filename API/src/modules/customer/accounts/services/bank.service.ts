@@ -18,7 +18,7 @@ export class BankService {
     // Auto-create ledger if not provided
     let ledgerId = data.ledgerId;
     if (!ledgerId) {
-      const ledger = await this.prisma.ledgerMaster.create({
+      const ledger = await this.prisma.working.ledgerMaster.create({
         data: {
           tenantId,
           code: `BANK_${data.accountNumber.slice(-4)}`,
@@ -32,7 +32,7 @@ export class BankService {
       ledgerId = ledger.id;
     }
 
-    return this.prisma.bankAccount.create({
+    return this.prisma.working.bankAccount.create({
       data: {
         tenantId,
         bankName: data.bankName,
@@ -49,18 +49,18 @@ export class BankService {
   }
 
   async listBankAccounts(tenantId: string) {
-    return this.prisma.bankAccount.findMany({
+    return this.prisma.working.bankAccount.findMany({
       where: { tenantId, isActive: true },
       orderBy: { bankName: 'asc' },
     });
   }
 
   async getReconciliation(tenantId: string, bankAccountId: string) {
-    const bank = await this.prisma.bankAccount.findFirst({ where: { id: bankAccountId, tenantId } });
+    const bank = await this.prisma.working.bankAccount.findFirst({ where: { id: bankAccountId, tenantId } });
     if (!bank) throw new NotFoundException('Bank account not found');
 
     // Get unreconciled payments (APPROVED but not RECONCILED)
-    const unreconciled = await this.prisma.paymentRecord.findMany({
+    const unreconciled = await this.prisma.working.paymentRecord.findMany({
       where: {
         tenantId,
         bankAccountId,
@@ -82,13 +82,13 @@ export class BankService {
     reconciliationDate: string;
     statementBalance: number;
   }) {
-    const bank = await this.prisma.bankAccount.findFirst({ where: { id: data.bankAccountId, tenantId } });
+    const bank = await this.prisma.working.bankAccount.findFirst({ where: { id: data.bankAccountId, tenantId } });
     if (!bank) throw new NotFoundException('Bank account not found');
 
     const bookBalance = Number(bank.currentBalance);
     const difference = Math.round((data.statementBalance - bookBalance) * 100) / 100;
 
-    const recon = await this.prisma.bankReconciliation.create({
+    const recon = await this.prisma.working.bankReconciliation.create({
       data: {
         tenantId,
         bankAccountId: data.bankAccountId,
@@ -104,7 +104,7 @@ export class BankService {
 
     // If balanced, mark all approved payments as reconciled
     if (difference === 0) {
-      await this.prisma.paymentRecord.updateMany({
+      await this.prisma.working.paymentRecord.updateMany({
         where: { tenantId, bankAccountId: data.bankAccountId, status: 'APPROVED' },
         data: { status: 'RECONCILED' },
       });

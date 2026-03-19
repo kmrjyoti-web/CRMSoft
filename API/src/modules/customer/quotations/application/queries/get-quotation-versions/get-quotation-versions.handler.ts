@@ -8,7 +8,7 @@ export class GetQuotationVersionsHandler implements IQueryHandler<GetQuotationVe
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetQuotationVersionsQuery) {
-    const quotation = await this.prisma.quotation.findUnique({
+    const quotation = await this.prisma.working.quotation.findUnique({
       where: { id: query.quotationId },
       select: { id: true, parentQuotationId: true },
     });
@@ -18,7 +18,7 @@ export class GetQuotationVersionsHandler implements IQueryHandler<GetQuotationVe
     let rootId = quotation.id;
     let current = quotation;
     while (current.parentQuotationId) {
-      const parent = await this.prisma.quotation.findUnique({
+      const parent = await this.prisma.working.quotation.findUnique({
         where: { id: current.parentQuotationId },
         select: { id: true, parentQuotationId: true },
       });
@@ -33,7 +33,7 @@ export class GetQuotationVersionsHandler implements IQueryHandler<GetQuotationVe
   }
 
   private async collectVersions(id: string): Promise<any[]> {
-    const q = await this.prisma.quotation.findUnique({
+    const q = await this.prisma.working.quotation.findUnique({
       where: { id },
       select: {
         id: true, quotationNo: true, version: true, status: true,

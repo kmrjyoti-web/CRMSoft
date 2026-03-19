@@ -14,12 +14,12 @@ export class CreateFromTemplateHandler implements ICommandHandler<CreateFromTemp
   ) {}
 
   async execute(cmd: CreateFromTemplateCommand) {
-    const template = await this.prisma.quotationTemplate.findUnique({
+    const template = await this.prisma.working.quotationTemplate.findUnique({
       where: { id: cmd.templateId },
     });
     if (!template) throw new NotFoundException('Template not found');
 
-    const lead = await this.prisma.lead.findUnique({
+    const lead = await this.prisma.working.lead.findUnique({
       where: { id: cmd.leadId },
       include: { organization: { select: { state: true } } },
     });
@@ -40,7 +40,7 @@ export class CreateFromTemplateHandler implements ICommandHandler<CreateFromTemp
       let unitPrice = item.unitPrice || 0;
 
       if (item.productId) {
-        const product = await this.prisma.product.findUnique({
+        const product = await this.prisma.working.product.findUnique({
           where: { id: item.productId },
           select: { name: true, code: true, hsnCode: true, gstRate: true, salePrice: true },
         });
@@ -70,7 +70,7 @@ export class CreateFromTemplateHandler implements ICommandHandler<CreateFromTemp
       });
     }
 
-    const quotation = await this.prisma.quotation.create({
+    const quotation = await this.prisma.working.quotation.create({
       data: {
         quotationNo, status: 'DRAFT',
         coverNote: template.coverNote,
@@ -87,12 +87,12 @@ export class CreateFromTemplateHandler implements ICommandHandler<CreateFromTemp
     await this.calculator.recalculate(quotation.id, customerState);
 
     // Increment template usage
-    await this.prisma.quotationTemplate.update({
+    await this.prisma.working.quotationTemplate.update({
       where: { id: cmd.templateId },
       data: { usageCount: { increment: 1 } },
     });
 
-    await this.prisma.quotationActivity.create({
+    await this.prisma.working.quotationActivity.create({
       data: {
         quotationId: quotation.id, action: 'CREATED',
         description: `Created from template "${template.name}"`,
@@ -101,7 +101,7 @@ export class CreateFromTemplateHandler implements ICommandHandler<CreateFromTemp
       },
     });
 
-    return this.prisma.quotation.findUnique({
+    return this.prisma.working.quotation.findUnique({
       where: { id: quotation.id },
       include: { lineItems: true, lead: true },
     });

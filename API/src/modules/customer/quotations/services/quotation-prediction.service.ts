@@ -25,7 +25,7 @@ export class QuotationPredictionService {
 
   /** Rule-based prediction matrix for a lead. */
   async predict(leadId: string): Promise<PredictionResult> {
-    const lead = await this.prisma.lead.findUnique({
+    const lead = await this.prisma.working.lead.findUnique({
       where: { id: leadId },
       include: {
         contact: { select: { designation: true, department: true } },
@@ -42,7 +42,7 @@ export class QuotationPredictionService {
     const valueLow = expectedValue * 0.7;
     const valueHigh = expectedValue * 1.3;
 
-    const similarLeads = await this.prisma.lead.findMany({
+    const similarLeads = await this.prisma.working.lead.findMany({
       where: {
         id: { not: leadId },
         status: { in: ['WON', 'LOST'] },
@@ -167,7 +167,7 @@ export class QuotationPredictionService {
 
   /** Smart questions based on lead data gaps. */
   async getQuestions(leadId: string) {
-    const lead = await this.prisma.lead.findUnique({
+    const lead = await this.prisma.working.lead.findUnique({
       where: { id: leadId },
       include: { organization: true, contact: true },
     });

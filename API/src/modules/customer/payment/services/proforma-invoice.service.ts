@@ -28,7 +28,7 @@ export class ProformaInvoiceService {
 
   /** Generate proforma invoice from an accepted quotation */
   async generateFromQuotation(tenantId: string, dto: GenerateProformaFromQuotationDto, userId: string) {
-    const quotation = await this.prisma.quotation.findFirst({
+    const quotation = await this.prisma.working.quotation.findFirst({
       where: { id: dto.quotationId, tenantId },
       include: { lineItems: true },
     });
@@ -37,10 +37,10 @@ export class ProformaInvoiceService {
 
     const [contact, org] = await Promise.all([
       quotation.contactPersonId
-        ? this.prisma.contact.findUnique({ where: { id: quotation.contactPersonId } })
+        ? this.prisma.working.contact.findUnique({ where: { id: quotation.contactPersonId } })
         : null,
       quotation.organizationId
-        ? this.prisma.organization.findUnique({ where: { id: quotation.organizationId } })
+        ? this.prisma.working.organization.findUnique({ where: { id: quotation.organizationId } })
         : null,
     ]);
 
@@ -68,7 +68,7 @@ export class ProformaInvoiceService {
     const proformaNo = await this.autoNumber.next(tenantId, 'ProformaInvoice');
     const amountWords = this.amountInWords.convert(gst.totalAmount);
 
-    const proforma = await this.prisma.proformaInvoice.create({
+    const proforma = await this.prisma.working.proformaInvoice.create({
       data: {
         tenantId,
         proformaNo,
@@ -161,7 +161,7 @@ export class ProformaInvoiceService {
     const proformaNo = await this.autoNumber.next(tenantId, 'ProformaInvoice');
     const amountWords = this.amountInWords.convert(gst.totalAmount);
 
-    const proforma = await this.prisma.proformaInvoice.create({
+    const proforma = await this.prisma.working.proformaInvoice.create({
       data: {
         tenantId,
         proformaNo,
@@ -239,7 +239,7 @@ export class ProformaInvoiceService {
 
   /** Get single proforma invoice with relations */
   async getById(tenantId: string, id: string) {
-    const proforma = await this.prisma.proformaInvoice.findFirst({
+    const proforma = await this.prisma.working.proformaInvoice.findFirst({
       where: { id, tenantId },
       include: { lineItems: true },
     });
@@ -265,14 +265,14 @@ export class ProformaInvoiceService {
     const limit = query.limit || 20;
 
     const [data, total] = await Promise.all([
-      this.prisma.proformaInvoice.findMany({
+      this.prisma.working.proformaInvoice.findMany({
         where,
         include: { lineItems: true },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.proformaInvoice.count({ where }),
+      this.prisma.working.proformaInvoice.count({ where }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
@@ -280,7 +280,7 @@ export class ProformaInvoiceService {
 
   /** Update draft proforma invoice */
   async update(tenantId: string, id: string, dto: UpdateProformaInvoiceDto) {
-    const proforma = await this.prisma.proformaInvoice.findFirst({
+    const proforma = await this.prisma.working.proformaInvoice.findFirst({
       where: { id, tenantId },
     });
     if (!proforma) throw AppError.from('PROFORMA_NOT_FOUND');
@@ -288,7 +288,7 @@ export class ProformaInvoiceService {
       throw AppError.from('PROFORMA_NOT_DRAFT');
     }
 
-    return this.prisma.proformaInvoice.update({
+    return this.prisma.working.proformaInvoice.update({
       where: { id },
       data: dto as any,
       include: { lineItems: true },
@@ -297,12 +297,12 @@ export class ProformaInvoiceService {
 
   /** Send proforma invoice — change status from PI_DRAFT to PI_SENT */
   async send(tenantId: string, id: string) {
-    const proforma = await this.prisma.proformaInvoice.findFirst({
+    const proforma = await this.prisma.working.proformaInvoice.findFirst({
       where: { id, tenantId },
     });
     if (!proforma) throw AppError.from('PROFORMA_NOT_FOUND');
 
-    return this.prisma.proformaInvoice.update({
+    return this.prisma.working.proformaInvoice.update({
       where: { id },
       data: { status: 'PI_SENT' },
     });
@@ -310,7 +310,7 @@ export class ProformaInvoiceService {
 
   /** Convert proforma invoice to final invoice */
   async convertToInvoice(tenantId: string, id: string, userId: string) {
-    const proforma = await this.prisma.proformaInvoice.findFirst({
+    const proforma = await this.prisma.working.proformaInvoice.findFirst({
       where: { id, tenantId },
       include: { lineItems: true },
     });
@@ -327,7 +327,7 @@ export class ProformaInvoiceService {
     const invoiceNo = await this.autoNumber.next(tenantId, 'Invoice');
     const amountWords = this.amountInWords.convert(Number(proforma.totalAmount));
 
-    const invoice = await this.prisma.invoice.create({
+    const invoice = await this.prisma.working.invoice.create({
       data: {
         tenantId,
         invoiceNo,
@@ -407,7 +407,7 @@ export class ProformaInvoiceService {
     });
 
     // Link proforma to invoice and mark as converted
-    await this.prisma.proformaInvoice.update({
+    await this.prisma.working.proformaInvoice.update({
       where: { id },
       data: {
         status: 'PI_CONVERTED',
@@ -421,7 +421,7 @@ export class ProformaInvoiceService {
 
   /** Cancel proforma invoice */
   async cancel(tenantId: string, id: string, reason: string, userId: string) {
-    const proforma = await this.prisma.proformaInvoice.findFirst({
+    const proforma = await this.prisma.working.proformaInvoice.findFirst({
       where: { id, tenantId },
     });
     if (!proforma) throw AppError.from('PROFORMA_NOT_FOUND');
@@ -429,7 +429,7 @@ export class ProformaInvoiceService {
       throw AppError.from('PROFORMA_ALREADY_CONVERTED');
     }
 
-    return this.prisma.proformaInvoice.update({
+    return this.prisma.working.proformaInvoice.update({
       where: { id },
       data: {
         status: 'PI_CANCELLED',

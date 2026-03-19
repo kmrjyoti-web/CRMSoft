@@ -6,7 +6,7 @@ export class AccountGroupService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getTree(tenantId: string) {
-    const groups = await this.prisma.accountGroup.findMany({
+    const groups = await this.prisma.working.accountGroup.findMany({
       where: { tenantId, isActive: true },
       orderBy: { name: 'asc' },
     });
@@ -26,14 +26,14 @@ export class AccountGroupService {
   }
 
   async getAll(tenantId: string) {
-    return this.prisma.accountGroup.findMany({
+    return this.prisma.working.accountGroup.findMany({
       where: { tenantId, isActive: true },
       orderBy: [{ primaryGroup: 'asc' }, { name: 'asc' }],
     });
   }
 
   async getById(tenantId: string, id: string) {
-    const group = await this.prisma.accountGroup.findFirst({
+    const group = await this.prisma.working.accountGroup.findFirst({
       where: { tenantId, id },
       include: {
         children: { where: { isActive: true } },
@@ -48,27 +48,27 @@ export class AccountGroupService {
     name: string; code: string; parentId?: string; primaryGroup: string;
     nature?: string; isProhibited?: boolean;
   }) {
-    const existing = await this.prisma.accountGroup.findFirst({ where: { tenantId, code: data.code } });
+    const existing = await this.prisma.working.accountGroup.findFirst({ where: { tenantId, code: data.code } });
     if (existing) throw new BadRequestException(`Group code "${data.code}" already exists`);
 
     if (data.parentId) {
-      const parent = await this.prisma.accountGroup.findFirst({ where: { tenantId, id: data.parentId } });
+      const parent = await this.prisma.working.accountGroup.findFirst({ where: { tenantId, id: data.parentId } });
       if (!parent) throw new BadRequestException('Parent group not found');
     }
 
-    return this.prisma.accountGroup.create({
+    return this.prisma.working.accountGroup.create({
       data: { tenantId, ...data },
     });
   }
 
   async update(tenantId: string, id: string, data: Partial<{ name: string; parentId: string; isProhibited: boolean; isActive: boolean }>) {
-    const group = await this.prisma.accountGroup.findFirst({ where: { tenantId, id } });
+    const group = await this.prisma.working.accountGroup.findFirst({ where: { tenantId, id } });
     if (!group) throw new NotFoundException('Account group not found');
-    return this.prisma.accountGroup.update({ where: { id }, data });
+    return this.prisma.working.accountGroup.update({ where: { id }, data });
   }
 
   async delete(tenantId: string, id: string) {
-    const group = await this.prisma.accountGroup.findFirst({
+    const group = await this.prisma.working.accountGroup.findFirst({
       where: { tenantId, id },
       include: { children: true, ledgers: { where: { isActive: true } } },
     });
@@ -76,6 +76,6 @@ export class AccountGroupService {
     if (group.isSystem) throw new BadRequestException('Cannot delete system groups');
     if (group.children.length > 0) throw new BadRequestException('Cannot delete group with sub-groups');
     if (group.ledgers.length > 0) throw new BadRequestException('Cannot delete group with ledgers');
-    return this.prisma.accountGroup.update({ where: { id }, data: { isActive: false } });
+    return this.prisma.working.accountGroup.update({ where: { id }, data: { isActive: false } });
   }
 }

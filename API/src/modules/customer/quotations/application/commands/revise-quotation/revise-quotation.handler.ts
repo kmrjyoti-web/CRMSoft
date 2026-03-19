@@ -12,7 +12,7 @@ export class ReviseQuotationHandler implements ICommandHandler<ReviseQuotationCo
   ) {}
 
   async execute(cmd: ReviseQuotationCommand) {
-    const old = await this.prisma.quotation.findUnique({
+    const old = await this.prisma.working.quotation.findUnique({
       where: { id: cmd.id },
       include: { lineItems: true },
     });
@@ -27,7 +27,7 @@ export class ReviseQuotationHandler implements ICommandHandler<ReviseQuotationCo
     const newNo = this.numberService.generateRevisionNumber(old.quotationNo, newVersion);
 
     // Clone as new quotation
-    const revised = await this.prisma.quotation.create({
+    const revised = await this.prisma.working.quotation.create({
       data: {
         quotationNo: newNo, status: 'DRAFT', version: newVersion,
         title: old.title, summary: old.summary, coverNote: old.coverNote,
@@ -67,13 +67,13 @@ export class ReviseQuotationHandler implements ICommandHandler<ReviseQuotationCo
     });
 
     // Mark old as REVISED
-    await this.prisma.quotation.update({
+    await this.prisma.working.quotation.update({
       where: { id: old.id },
       data: { status: 'REVISED' },
     });
 
     // Activity on old
-    await this.prisma.quotationActivity.create({
+    await this.prisma.working.quotationActivity.create({
       data: {
         quotationId: old.id, action: 'REVISED',
         description: `Revised — new version ${newNo} created`,
@@ -83,7 +83,7 @@ export class ReviseQuotationHandler implements ICommandHandler<ReviseQuotationCo
     });
 
     // Activity on new
-    await this.prisma.quotationActivity.create({
+    await this.prisma.working.quotationActivity.create({
       data: {
         quotationId: revised.id, action: 'CREATED',
         description: `Created as revision of ${old.quotationNo}`,

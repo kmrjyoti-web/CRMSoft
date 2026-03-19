@@ -8,7 +8,7 @@ export class RejectQuotationHandler implements ICommandHandler<RejectQuotationCo
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: RejectQuotationCommand) {
-    const quotation = await this.prisma.quotation.findUnique({ where: { id: cmd.id } });
+    const quotation = await this.prisma.working.quotation.findUnique({ where: { id: cmd.id } });
     if (!quotation) throw new NotFoundException('Quotation not found');
 
     const allowed = ['SENT', 'VIEWED', 'NEGOTIATION'];
@@ -16,7 +16,7 @@ export class RejectQuotationHandler implements ICommandHandler<RejectQuotationCo
       throw new BadRequestException(`Cannot reject quotation with status ${quotation.status}`);
     }
 
-    const updated = await this.prisma.quotation.update({
+    const updated = await this.prisma.working.quotation.update({
       where: { id: cmd.id },
       data: {
         status: 'REJECTED',
@@ -26,7 +26,7 @@ export class RejectQuotationHandler implements ICommandHandler<RejectQuotationCo
       include: { lineItems: true, lead: true },
     });
 
-    await this.prisma.quotationActivity.create({
+    await this.prisma.working.quotationActivity.create({
       data: {
         quotationId: cmd.id, action: 'REJECTED',
         description: `Quotation rejected${cmd.reason ? ': ' + cmd.reason : ''}`,

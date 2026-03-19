@@ -9,7 +9,7 @@ export class GetQuotationByIdHandler implements IQueryHandler<GetQuotationByIdQu
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetQuotationByIdQuery) {
-    const quotation = await this.prisma.quotation.findUnique({
+    const quotation = await this.prisma.working.quotation.findUnique({
       where: { id: query.id },
       include: {
         lineItems: { orderBy: { sortOrder: 'asc' } },

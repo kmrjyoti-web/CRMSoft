@@ -19,7 +19,7 @@ export class GoodsReceiptService {
     if (filters?.status) where.status = filters.status;
 
     const [data, total] = await Promise.all([
-      this.prisma.goodsReceipt.findMany({
+      this.prisma.working.goodsReceipt.findMany({
         where,
         include: {
           po: { select: { id: true, poNumber: true, vendorId: true } },
@@ -29,14 +29,14 @@ export class GoodsReceiptService {
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.goodsReceipt.count({ where }),
+      this.prisma.working.goodsReceipt.count({ where }),
     ]);
 
     return { data, total, page, limit };
   }
 
   async getById(tenantId: string, id: string) {
-    const grn = await this.prisma.goodsReceipt.findFirst({
+    const grn = await this.prisma.working.goodsReceipt.findFirst({
       where: { id, tenantId },
       include: {
         po: { select: { id: true, poNumber: true, vendorId: true } },
@@ -57,7 +57,7 @@ export class GoodsReceiptService {
       locationId?: string; batchNo?: string; expiryDate?: string;
     }>;
   }) {
-    const po = await this.prisma.purchaseOrder.findFirst({
+    const po = await this.prisma.working.purchaseOrder.findFirst({
       where: { id: dto.purchaseOrderId, tenantId },
     });
     if (!po) throw new NotFoundException('Purchase order not found');
@@ -65,7 +65,7 @@ export class GoodsReceiptService {
       throw new BadRequestException('PO must be approved before receiving goods');
     }
 
-    return this.prisma.goodsReceipt.create({
+    return this.prisma.working.goodsReceipt.create({
       data: {
         tenantId,
         receiptType: 'GRN',
@@ -98,7 +98,7 @@ export class GoodsReceiptService {
   }
 
   async accept(tenantId: string, id: string, userId: string) {
-    const grn = await this.prisma.goodsReceipt.findFirst({
+    const grn = await this.prisma.working.goodsReceipt.findFirst({
       where: { id, tenantId },
       include: { items: true },
     });
@@ -107,7 +107,7 @@ export class GoodsReceiptService {
       throw new BadRequestException('GRN cannot be accepted in current status');
     }
 
-    await this.prisma.goodsReceipt.update({
+    await this.prisma.working.goodsReceipt.update({
       where: { id },
       data: { status: 'ACCEPTED', inspectedById: userId, inventoryUpdated: true },
     });
@@ -131,11 +131,11 @@ export class GoodsReceiptService {
       // Move rejected to scrap store
       const rejectedQty = item.rejectedQty?.toNumber() ?? 0;
       if (rejectedQty > 0 && item.locationId) {
-        const location = await this.prisma.stockLocation.findFirst({
+        const location = await this.prisma.working.stockLocation.findFirst({
           where: { id: item.locationId, tenantId },
         });
         if (location) {
-          const scrapStore = await this.prisma.stockLocation.findFirst({
+          const scrapStore = await this.prisma.working.stockLocation.findFirst({
             where: { tenantId, code: `${location.code}-S` },
           });
           if (scrapStore) {
@@ -155,7 +155,7 @@ export class GoodsReceiptService {
 
       // Update PO item received quantity
       if (item.poItemId) {
-        await this.prisma.purchaseOrderItem.update({
+        await this.prisma.working.purchaseOrderItem.update({
           where: { id: item.poItemId },
           data: { receivedQty: { increment: acceptedQty } },
         });
@@ -164,12 +164,12 @@ export class GoodsReceiptService {
 
     // Check if PO fully received
     if (grn.poId) {
-      const poItems = await this.prisma.purchaseOrderItem.findMany({
+      const poItems = await this.prisma.working.purchaseOrderItem.findMany({
         where: { poId: grn.poId },
       });
       const allReceived = poItems.every((pi) => pi.receivedQty.toNumber() >= pi.orderedQty.toNumber());
 
-      await this.prisma.purchaseOrder.update({
+      await this.prisma.working.purchaseOrder.update({
         where: { id: grn.poId },
         data: { status: allReceived ? 'COMPLETED' : 'PARTIALLY_RECEIVED' },
       });
@@ -179,10 +179,10 @@ export class GoodsReceiptService {
   }
 
   async reject(tenantId: string, id: string, userId: string, remarks?: string) {
-    const grn = await this.prisma.goodsReceipt.findFirst({ where: { id, tenantId } });
+    const grn = await this.prisma.working.goodsReceipt.findFirst({ where: { id, tenantId } });
     if (!grn) throw new NotFoundException('Goods receipt not found');
 
-    return this.prisma.goodsReceipt.update({
+    return this.prisma.working.goodsReceipt.update({
       where: { id },
       data: {
         status: 'REJECTED',
@@ -193,7 +193,7 @@ export class GoodsReceiptService {
   }
 
   async generateNumber(tenantId: string): Promise<string> {
-    const count = await this.prisma.goodsReceipt.count({ where: { tenantId } });
+    const count = await this.prisma.working.goodsReceipt.count({ where: { tenantId } });
     return `GRN-${String(count + 1).padStart(5, '0')}`;
   }
 }

@@ -16,7 +16,7 @@ export class GetTemplatesHandler implements IQueryHandler<GetTemplatesQuery> {
       ];
     }
 
-    return this.prisma.quotationTemplate.findMany({
+    return this.prisma.working.quotationTemplate.findMany({
       where,
       orderBy: { usageCount: 'desc' },
     });

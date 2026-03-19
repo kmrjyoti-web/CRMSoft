@@ -12,7 +12,7 @@ export class AddLineItemHandler implements ICommandHandler<AddLineItemCommand> {
   ) {}
 
   async execute(cmd: AddLineItemCommand) {
-    const quotation = await this.prisma.quotation.findUnique({
+    const quotation = await this.prisma.working.quotation.findUnique({
       where: { id: cmd.quotationId },
       include: {
         lineItems: { select: { id: true } },
@@ -31,7 +31,7 @@ export class AddLineItemHandler implements ICommandHandler<AddLineItemCommand> {
     let mrp = cmd.mrp;
 
     if (cmd.productId) {
-      const product = await this.prisma.product.findUnique({
+      const product = await this.prisma.working.product.findUnique({
         where: { id: cmd.productId },
         select: { name: true, code: true, hsnCode: true, gstRate: true, mrp: true, salePrice: true },
       });
@@ -52,7 +52,7 @@ export class AddLineItemHandler implements ICommandHandler<AddLineItemCommand> {
       gstRate, cessRate: cmd.cessRate,
     }, interState);
 
-    const item = await this.prisma.quotationLineItem.create({
+    const item = await this.prisma.working.quotationLineItem.create({
       data: {
         quotationId: cmd.quotationId,
         productId: cmd.productId, productCode, productName,
@@ -72,7 +72,7 @@ export class AddLineItemHandler implements ICommandHandler<AddLineItemCommand> {
 
     await this.calculator.recalculate(cmd.quotationId, customerState);
 
-    await this.prisma.quotationActivity.create({
+    await this.prisma.working.quotationActivity.create({
       data: {
         quotationId: cmd.quotationId, action: 'ITEM_ADDED',
         description: `Item "${productName}" added`,

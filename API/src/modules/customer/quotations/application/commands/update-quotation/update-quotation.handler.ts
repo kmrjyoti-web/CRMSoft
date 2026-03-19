@@ -12,7 +12,7 @@ export class UpdateQuotationHandler implements ICommandHandler<UpdateQuotationCo
   ) {}
 
   async execute(cmd: UpdateQuotationCommand) {
-    const quotation = await this.prisma.quotation.findUnique({
+    const quotation = await this.prisma.working.quotation.findUnique({
       where: { id: cmd.id },
       include: { lead: { include: { organization: { select: { state: true } } } } },
     });
@@ -40,7 +40,7 @@ export class UpdateQuotationHandler implements ICommandHandler<UpdateQuotationCo
     if (cmd.tags !== undefined) data.tags = cmd.tags;
     if (cmd.internalNotes !== undefined) data.internalNotes = cmd.internalNotes;
 
-    await this.prisma.quotation.update({ where: { id: cmd.id }, data });
+    await this.prisma.working.quotation.update({ where: { id: cmd.id }, data });
 
     // Recalculate if discount changed
     if (cmd.discountType !== undefined || cmd.discountValue !== undefined) {
@@ -48,7 +48,7 @@ export class UpdateQuotationHandler implements ICommandHandler<UpdateQuotationCo
       await this.calculator.recalculate(cmd.id, customerState);
     }
 
-    await this.prisma.quotationActivity.create({
+    await this.prisma.working.quotationActivity.create({
       data: {
         quotationId: cmd.id, action: 'UPDATED',
         description: `Quotation ${quotation.quotationNo} updated`,
@@ -56,7 +56,7 @@ export class UpdateQuotationHandler implements ICommandHandler<UpdateQuotationCo
       },
     });
 
-    return this.prisma.quotation.findUnique({
+    return this.prisma.working.quotation.findUnique({
       where: { id: cmd.id },
       include: { lineItems: true, lead: true },
     });

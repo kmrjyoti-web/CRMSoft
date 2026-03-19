@@ -24,7 +24,7 @@ export class BOMReportService {
       if (filters?.endDate) where.productionDate.lte = new Date(filters.endDate);
     }
 
-    const productions = await this.prisma.bOMProduction.findMany({
+    const productions = await this.prisma.working.bOMProduction.findMany({
       where,
       include: { formula: { include: { finishedProduct: true } } },
       orderBy: { productionDate: 'desc' },
@@ -64,7 +64,7 @@ export class BOMReportService {
       if (filters?.endDate) where.transactionDate.lte = new Date(filters.endDate);
     }
 
-    const transactions = await this.prisma.stockTransaction.findMany({
+    const transactions = await this.prisma.working.stockTransaction.findMany({
       where,
       include: { inventoryItem: true },
       orderBy: { transactionDate: 'desc' },
@@ -101,7 +101,7 @@ export class BOMReportService {
       if (filters?.endDate) where.productionDate.lte = new Date(filters.endDate);
     }
 
-    const productions = await this.prisma.bOMProduction.findMany({
+    const productions = await this.prisma.working.bOMProduction.findMany({
       where,
       include: { formula: true },
       orderBy: { productionDate: 'desc' },

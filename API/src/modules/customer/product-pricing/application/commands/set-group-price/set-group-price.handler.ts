@@ -14,7 +14,7 @@ export class SetGroupPriceHandler
   async execute(command: SetGroupPriceCommand) {
     const { productId, priceGroupId, priceType, amount } = command;
 
-    const product = await this.prisma.product.findUnique({
+    const product = await this.prisma.working.product.findUnique({
       where: { id: productId },
       select: { id: true },
     });
@@ -22,7 +22,7 @@ export class SetGroupPriceHandler
       throw new NotFoundException(`Product "${productId}" not found`);
     }
 
-    const group = await this.prisma.customerPriceGroup.findUnique({
+    const group = await this.prisma.working.customerPriceGroup.findUnique({
       where: { id: priceGroupId },
       select: { id: true, name: true },
     });
@@ -32,7 +32,7 @@ export class SetGroupPriceHandler
       );
     }
 
-    const existing = await this.prisma.productPrice.findFirst({
+    const existing = await this.prisma.working.productPrice.findFirst({
       where: {
         productId,
         priceType: priceType as any,
@@ -43,12 +43,12 @@ export class SetGroupPriceHandler
 
     let price;
     if (existing) {
-      price = await this.prisma.productPrice.update({
+      price = await this.prisma.working.productPrice.update({
         where: { id: existing.id },
         data: { amount, isActive: true },
       });
     } else {
-      price = await this.prisma.productPrice.create({
+      price = await this.prisma.working.productPrice.create({
         data: {
           productId,
           priceType: priceType as any,

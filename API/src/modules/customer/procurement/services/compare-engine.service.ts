@@ -26,7 +26,7 @@ export class CompareEngineService {
     w.creditWeight = (w.creditWeight / totalWeight) * 100;
     w.qualityWeight = (w.qualityWeight / totalWeight) * 100;
 
-    const quotations = await this.prisma.purchaseQuotation.findMany({
+    const quotations = await this.prisma.working.purchaseQuotation.findMany({
       where: { tenantId, rfqId, status: { in: ['RECEIVED', 'UNDER_REVIEW'] } },
       include: { items: true },
     });
@@ -86,7 +86,7 @@ export class CompareEngineService {
 
     scores.sort((a, b) => b.totalScore - a.totalScore);
 
-    const comparison = await this.prisma.quotationComparison.create({
+    const comparison = await this.prisma.working.quotationComparison.create({
       data: {
         tenantId,
         rfqId,
@@ -103,7 +103,7 @@ export class CompareEngineService {
   }
 
   async getComparison(tenantId: string, id: string) {
-    const comparison = await this.prisma.quotationComparison.findFirst({
+    const comparison = await this.prisma.working.quotationComparison.findFirst({
       where: { id, tenantId },
     });
     if (!comparison) throw new NotFoundException('Comparison not found');
@@ -111,29 +111,29 @@ export class CompareEngineService {
   }
 
   async listByRfq(tenantId: string, rfqId: string) {
-    return this.prisma.quotationComparison.findMany({
+    return this.prisma.working.quotationComparison.findMany({
       where: { tenantId, rfqId },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async selectWinner(tenantId: string, comparisonId: string, quotationId: string, remarks?: string) {
-    const comparison = await this.prisma.quotationComparison.findFirst({
+    const comparison = await this.prisma.working.quotationComparison.findFirst({
       where: { id: comparisonId, tenantId },
     });
     if (!comparison) throw new NotFoundException('Comparison not found');
 
-    await this.prisma.quotationComparison.update({
+    await this.prisma.working.quotationComparison.update({
       where: { id: comparisonId },
       data: { selectedQuotationId: quotationId },
     });
 
-    await this.prisma.purchaseQuotation.update({
+    await this.prisma.working.purchaseQuotation.update({
       where: { id: quotationId },
       data: { status: 'ACCEPTED' },
     });
 
-    await this.prisma.purchaseQuotation.updateMany({
+    await this.prisma.working.purchaseQuotation.updateMany({
       where: {
         tenantId,
         rfqId: comparison.rfqId,

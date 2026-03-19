@@ -10,7 +10,7 @@ export class GetPriceListHandler
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetPriceListQuery) {
-    const product = await this.prisma.product.findUnique({
+    const product = await this.prisma.working.product.findUnique({
       where: { id: query.productId },
       select: { id: true, name: true, code: true, mrp: true, salePrice: true },
     });
@@ -20,7 +20,7 @@ export class GetPriceListHandler
       );
     }
 
-    const prices = await this.prisma.productPrice.findMany({
+    const prices = await this.prisma.working.productPrice.findMany({
       where: { productId: query.productId },
       include: {
         priceGroup: {

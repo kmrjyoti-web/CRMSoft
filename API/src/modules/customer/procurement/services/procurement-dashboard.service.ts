@@ -34,24 +34,24 @@ export class ProcurementDashboardService {
 
   private async getRFQCounts(tenantId: string) {
     const [total, draft, sent, closed] = await Promise.all([
-      this.prisma.purchaseRFQ.count({ where: { tenantId } }),
-      this.prisma.purchaseRFQ.count({ where: { tenantId, status: 'DRAFT' } }),
-      this.prisma.purchaseRFQ.count({ where: { tenantId, status: 'SENT' } }),
-      this.prisma.purchaseRFQ.count({ where: { tenantId, status: 'CLOSED' } }),
+      this.prisma.working.purchaseRFQ.count({ where: { tenantId } }),
+      this.prisma.working.purchaseRFQ.count({ where: { tenantId, status: 'DRAFT' } }),
+      this.prisma.working.purchaseRFQ.count({ where: { tenantId, status: 'SENT' } }),
+      this.prisma.working.purchaseRFQ.count({ where: { tenantId, status: 'CLOSED' } }),
     ]);
     return { total, draft, sent, closed };
   }
 
   private async getPOCounts(tenantId: string) {
     const [total, draft, pendingApproval, approved, completed] = await Promise.all([
-      this.prisma.purchaseOrder.count({ where: { tenantId } }),
-      this.prisma.purchaseOrder.count({ where: { tenantId, status: 'DRAFT' } }),
-      this.prisma.purchaseOrder.count({ where: { tenantId, status: 'PENDING_APPROVAL' } }),
-      this.prisma.purchaseOrder.count({ where: { tenantId, status: 'APPROVED' } }),
-      this.prisma.purchaseOrder.count({ where: { tenantId, status: 'COMPLETED' } }),
+      this.prisma.working.purchaseOrder.count({ where: { tenantId } }),
+      this.prisma.working.purchaseOrder.count({ where: { tenantId, status: 'DRAFT' } }),
+      this.prisma.working.purchaseOrder.count({ where: { tenantId, status: 'PENDING_APPROVAL' } }),
+      this.prisma.working.purchaseOrder.count({ where: { tenantId, status: 'APPROVED' } }),
+      this.prisma.working.purchaseOrder.count({ where: { tenantId, status: 'COMPLETED' } }),
     ]);
 
-    const totalValue = await this.prisma.purchaseOrder.aggregate({
+    const totalValue = await this.prisma.working.purchaseOrder.aggregate({
       where: { tenantId, status: { in: ['APPROVED', 'PARTIALLY_RECEIVED', 'COMPLETED'] } },
       _sum: { grandTotal: true },
     });
@@ -64,24 +64,24 @@ export class ProcurementDashboardService {
 
   private async getGRNCounts(tenantId: string) {
     const [total, draft, accepted, rejected] = await Promise.all([
-      this.prisma.goodsReceipt.count({ where: { tenantId } }),
-      this.prisma.goodsReceipt.count({ where: { tenantId, status: 'DRAFT' } }),
-      this.prisma.goodsReceipt.count({ where: { tenantId, status: 'ACCEPTED' } }),
-      this.prisma.goodsReceipt.count({ where: { tenantId, status: 'REJECTED' } }),
+      this.prisma.working.goodsReceipt.count({ where: { tenantId } }),
+      this.prisma.working.goodsReceipt.count({ where: { tenantId, status: 'DRAFT' } }),
+      this.prisma.working.goodsReceipt.count({ where: { tenantId, status: 'ACCEPTED' } }),
+      this.prisma.working.goodsReceipt.count({ where: { tenantId, status: 'REJECTED' } }),
     ]);
     return { total, draft, accepted, rejected };
   }
 
   private async getInvoiceCounts(tenantId: string) {
     const [total, draft, pending, approved, paid] = await Promise.all([
-      this.prisma.purchaseInvoice.count({ where: { tenantId } }),
-      this.prisma.purchaseInvoice.count({ where: { tenantId, status: 'DRAFT' } }),
-      this.prisma.purchaseInvoice.count({ where: { tenantId, status: 'PENDING_APPROVAL' } }),
-      this.prisma.purchaseInvoice.count({ where: { tenantId, status: 'APPROVED' } }),
-      this.prisma.purchaseInvoice.count({ where: { tenantId, status: 'PAID' } }),
+      this.prisma.working.purchaseInvoice.count({ where: { tenantId } }),
+      this.prisma.working.purchaseInvoice.count({ where: { tenantId, status: 'DRAFT' } }),
+      this.prisma.working.purchaseInvoice.count({ where: { tenantId, status: 'PENDING_APPROVAL' } }),
+      this.prisma.working.purchaseInvoice.count({ where: { tenantId, status: 'APPROVED' } }),
+      this.prisma.working.purchaseInvoice.count({ where: { tenantId, status: 'PAID' } }),
     ]);
 
-    const totalPayable = await this.prisma.purchaseInvoice.aggregate({
+    const totalPayable = await this.prisma.working.purchaseInvoice.aggregate({
       where: { tenantId, status: 'APPROVED' },
       _sum: { grandTotal: true },
     });
@@ -93,7 +93,7 @@ export class ProcurementDashboardService {
   }
 
   private async getRecentPOs(tenantId: string) {
-    return this.prisma.purchaseOrder.findMany({
+    return this.prisma.working.purchaseOrder.findMany({
       where: { tenantId },
       select: {
         id: true, poNumber: true, status: true, grandTotal: true, createdAt: true,
@@ -105,7 +105,7 @@ export class ProcurementDashboardService {
 
   private async getPendingApprovals(tenantId: string) {
     const [pos, invoices] = await Promise.all([
-      this.prisma.purchaseOrder.findMany({
+      this.prisma.working.purchaseOrder.findMany({
         where: { tenantId, status: 'PENDING_APPROVAL' },
         select: {
           id: true, poNumber: true, grandTotal: true, createdAt: true,
@@ -113,7 +113,7 @@ export class ProcurementDashboardService {
         orderBy: { createdAt: 'asc' },
         take: 10,
       }),
-      this.prisma.purchaseInvoice.findMany({
+      this.prisma.working.purchaseInvoice.findMany({
         where: { tenantId, status: 'PENDING_APPROVAL' },
         select: {
           id: true, ourReference: true, grandTotal: true, createdAt: true,

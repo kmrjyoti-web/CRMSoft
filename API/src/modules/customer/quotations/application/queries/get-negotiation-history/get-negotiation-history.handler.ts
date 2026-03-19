@@ -7,7 +7,7 @@ export class GetNegotiationHistoryHandler implements IQueryHandler<GetNegotiatio
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetNegotiationHistoryQuery) {
-    return this.prisma.quotationNegotiationLog.findMany({
+    return this.prisma.working.quotationNegotiationLog.findMany({
       where: { quotationId: query.quotationId },
       orderBy: { loggedAt: 'desc' },
     });

@@ -21,7 +21,7 @@ export class InvoiceService {
 
   /** Generate invoice from an accepted quotation */
   async generateFromQuotation(tenantId: string, dto: GenerateInvoiceDto, userId: string) {
-    const quotation = await this.prisma.quotation.findFirst({
+    const quotation = await this.prisma.working.quotation.findFirst({
       where: { id: dto.quotationId, tenantId },
       include: { lineItems: true },
     });
@@ -31,10 +31,10 @@ export class InvoiceService {
     // Fetch contact and org separately (Quotation stores only IDs)
     const [contact, org] = await Promise.all([
       quotation.contactPersonId
-        ? this.prisma.contact.findUnique({ where: { id: quotation.contactPersonId } })
+        ? this.prisma.working.contact.findUnique({ where: { id: quotation.contactPersonId } })
         : null,
       quotation.organizationId
-        ? this.prisma.organization.findUnique({ where: { id: quotation.organizationId } })
+        ? this.prisma.working.organization.findUnique({ where: { id: quotation.organizationId } })
         : null,
     ]);
 
@@ -62,7 +62,7 @@ export class InvoiceService {
     const invoiceNo = await this.autoNumber.next(tenantId, 'Invoice');
     const amountWords = this.amountInWords.convert(gst.totalAmount);
 
-    const invoice = await this.prisma.invoice.create({
+    const invoice = await this.prisma.working.invoice.create({
       data: {
         tenantId,
         invoiceNo,
@@ -161,7 +161,7 @@ export class InvoiceService {
     const invoiceNo = await this.autoNumber.next(tenantId, 'Invoice');
     const amountWords = this.amountInWords.convert(gst.totalAmount);
 
-    const invoice = await this.prisma.invoice.create({
+    const invoice = await this.prisma.working.invoice.create({
       data: {
         tenantId,
         invoiceNo,
@@ -251,7 +251,7 @@ export class InvoiceService {
 
   /** Get single invoice with relations */
   async getById(tenantId: string, invoiceId: string) {
-    const invoice = await this.prisma.invoice.findFirst({
+    const invoice = await this.prisma.working.invoice.findFirst({
       where: { id: invoiceId, tenantId },
       include: { lineItems: true, payments: true, creditNotes: true, reminders: true },
     });
@@ -275,14 +275,14 @@ export class InvoiceService {
     const limit = query.limit || 20;
 
     const [data, total] = await Promise.all([
-      this.prisma.invoice.findMany({
+      this.prisma.working.invoice.findMany({
         where,
         include: { lineItems: true },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.invoice.count({ where }),
+      this.prisma.working.invoice.count({ where }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
@@ -290,7 +290,7 @@ export class InvoiceService {
 
   /** Update draft invoice */
   async update(tenantId: string, invoiceId: string, dto: UpdateInvoiceDto) {
-    const invoice = await this.prisma.invoice.findFirst({
+    const invoice = await this.prisma.working.invoice.findFirst({
       where: { id: invoiceId, tenantId },
     });
     if (!invoice) throw AppError.from('INVOICE_NOT_FOUND');
@@ -298,7 +298,7 @@ export class InvoiceService {
       throw AppError.from('INVOICE_CANCELLED');
     }
 
-    return this.prisma.invoice.update({
+    return this.prisma.working.invoice.update({
       where: { id: invoiceId },
       data: dto as any,
       include: { lineItems: true },
@@ -307,12 +307,12 @@ export class InvoiceService {
 
   /** Send invoice — change status from DRAFT to SENT */
   async send(tenantId: string, invoiceId: string) {
-    const invoice = await this.prisma.invoice.findFirst({
+    const invoice = await this.prisma.working.invoice.findFirst({
       where: { id: invoiceId, tenantId },
     });
     if (!invoice) throw AppError.from('INVOICE_NOT_FOUND');
 
-    return this.prisma.invoice.update({
+    return this.prisma.working.invoice.update({
       where: { id: invoiceId },
       data: { status: 'SENT' },
     });
@@ -320,13 +320,13 @@ export class InvoiceService {
 
   /** Cancel invoice */
   async cancel(tenantId: string, invoiceId: string, reason: string, userId: string) {
-    const invoice = await this.prisma.invoice.findFirst({
+    const invoice = await this.prisma.working.invoice.findFirst({
       where: { id: invoiceId, tenantId },
     });
     if (!invoice) throw AppError.from('INVOICE_NOT_FOUND');
     if (invoice.status === 'PAID') throw AppError.from('INVOICE_ALREADY_PAID');
 
-    return this.prisma.invoice.update({
+    return this.prisma.working.invoice.update({
       where: { id: invoiceId },
       data: {
         status: 'CANCELLED',
@@ -340,7 +340,7 @@ export class InvoiceService {
   /** Mark overdue invoices — called by CRON */
   async markOverdue(tenantId: string) {
     const now = new Date();
-    const result = await this.prisma.invoice.updateMany({
+    const result = await this.prisma.working.invoice.updateMany({
       where: {
         tenantId,
         status: { in: ['SENT', 'PARTIALLY_PAID'] },
@@ -354,11 +354,11 @@ export class InvoiceService {
 
   /** Update payment amounts on invoice after payment/refund */
   async recalculateBalance(invoiceId: string) {
-    const payments = await this.prisma.payment.findMany({
+    const payments = await this.prisma.working.payment.findMany({
       where: { invoiceId, status: { in: ['CAPTURED', 'PAID'] } },
     });
 
-    const refunds = await this.prisma.refund.findMany({
+    const refunds = await this.prisma.working.refund.findMany({
       where: {
         payment: { invoiceId },
         status: 'REFUND_PROCESSED',
@@ -368,14 +368,14 @@ export class InvoiceService {
     const totalPaid = payments.reduce((sum, p) => sum + Number(p.amount), 0);
     const totalRefunded = refunds.reduce((sum, r) => sum + Number(r.amount), 0);
 
-    const creditNotes = await this.prisma.creditNote.findMany({
+    const creditNotes = await this.prisma.working.creditNote.findMany({
       where: { invoiceId, status: 'CN_APPLIED' },
     });
     const totalCredits = creditNotes.reduce((sum, cn) => sum + Number(cn.appliedAmount || 0), 0);
 
     const netPaid = totalPaid - totalRefunded + totalCredits;
 
-    const invoice = await this.prisma.invoice.findUnique({ where: { id: invoiceId } });
+    const invoice = await this.prisma.working.invoice.findUnique({ where: { id: invoiceId } });
     if (!invoice) return;
 
     const total = Number(invoice.totalAmount);
@@ -388,7 +388,7 @@ export class InvoiceService {
       status = 'PARTIALLY_PAID';
     }
 
-    await this.prisma.invoice.update({
+    await this.prisma.working.invoice.update({
       where: { id: invoiceId },
       data: {
         paidAmount: netPaid,
@@ -401,20 +401,20 @@ export class InvoiceService {
   /** Get invoice analytics for dashboard */
   async getAnalytics(tenantId: string) {
     const [totalInvoices, statusCounts, totalRevenue] = await Promise.all([
-      this.prisma.invoice.count({ where: { tenantId } }),
-      this.prisma.invoice.groupBy({
+      this.prisma.working.invoice.count({ where: { tenantId } }),
+      this.prisma.working.invoice.groupBy({
         by: ['status'],
         where: { tenantId },
         _count: true,
         _sum: { totalAmount: true, balanceAmount: true },
       }),
-      this.prisma.invoice.aggregate({
+      this.prisma.working.invoice.aggregate({
         where: { tenantId, status: 'PAID' },
         _sum: { totalAmount: true },
       }),
     ]);
 
-    const overdueAmount = await this.prisma.invoice.aggregate({
+    const overdueAmount = await this.prisma.working.invoice.aggregate({
       where: { tenantId, status: 'OVERDUE' },
       _sum: { balanceAmount: true },
     });

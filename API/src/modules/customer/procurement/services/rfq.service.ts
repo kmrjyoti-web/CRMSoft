@@ -14,7 +14,7 @@ export class RFQService {
     if (filters?.status) where.status = filters.status;
 
     const [data, total] = await Promise.all([
-      this.prisma.purchaseRFQ.findMany({
+      this.prisma.working.purchaseRFQ.findMany({
         where,
         include: {
           items: true,
@@ -24,14 +24,14 @@ export class RFQService {
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.purchaseRFQ.count({ where }),
+      this.prisma.working.purchaseRFQ.count({ where }),
     ]);
 
     return { data, total, page, limit };
   }
 
   async getById(tenantId: string, id: string) {
-    const rfq = await this.prisma.purchaseRFQ.findFirst({
+    const rfq = await this.prisma.working.purchaseRFQ.findFirst({
       where: { id, tenantId },
       include: {
         items: true,
@@ -47,7 +47,7 @@ export class RFQService {
     items: Array<{ productId: string; quantity: number; unitId?: string; specifications?: string }>;
     vendorIds?: string[];
   }) {
-    return this.prisma.purchaseRFQ.create({
+    return this.prisma.working.purchaseRFQ.create({
       data: {
         tenantId,
         rfqNumber: dto.rfqNumber,
@@ -72,7 +72,7 @@ export class RFQService {
   }
 
   async update(tenantId: string, id: string, dto: { dueDate?: string; notes?: string; status?: string }) {
-    const rfq = await this.prisma.purchaseRFQ.findFirst({ where: { id, tenantId } });
+    const rfq = await this.prisma.working.purchaseRFQ.findFirst({ where: { id, tenantId } });
     if (!rfq) throw new NotFoundException('RFQ not found');
 
     const data: any = {};
@@ -80,14 +80,14 @@ export class RFQService {
     if (dto.notes !== undefined) data.remarks = dto.notes;
     if (dto.status !== undefined) data.status = dto.status;
 
-    return this.prisma.purchaseRFQ.update({ where: { id }, data });
+    return this.prisma.working.purchaseRFQ.update({ where: { id }, data });
   }
 
   async sendToVendors(tenantId: string, id: string, vendorIds: string[]) {
-    const rfq = await this.prisma.purchaseRFQ.findFirst({ where: { id, tenantId } });
+    const rfq = await this.prisma.working.purchaseRFQ.findFirst({ where: { id, tenantId } });
     if (!rfq) throw new NotFoundException('RFQ not found');
 
-    return this.prisma.purchaseRFQ.update({
+    return this.prisma.working.purchaseRFQ.update({
       where: { id },
       data: {
         status: 'SENT',
@@ -97,16 +97,16 @@ export class RFQService {
   }
 
   async close(tenantId: string, id: string) {
-    const rfq = await this.prisma.purchaseRFQ.findFirst({ where: { id, tenantId } });
+    const rfq = await this.prisma.working.purchaseRFQ.findFirst({ where: { id, tenantId } });
     if (!rfq) throw new NotFoundException('RFQ not found');
-    return this.prisma.purchaseRFQ.update({
+    return this.prisma.working.purchaseRFQ.update({
       where: { id },
       data: { status: 'CLOSED' },
     });
   }
 
   async generateNumber(tenantId: string): Promise<string> {
-    const count = await this.prisma.purchaseRFQ.count({ where: { tenantId } });
+    const count = await this.prisma.working.purchaseRFQ.count({ where: { tenantId } });
     return `RFQ-${String(count + 1).padStart(5, '0')}`;
   }
 }

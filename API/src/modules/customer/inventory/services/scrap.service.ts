@@ -21,7 +21,7 @@ export class ScrapService {
   }) {
     const totalLoss = data.unitCost ? data.unitCost * data.quantity : undefined;
 
-    const scrap = await this.prisma.scrapRecord.create({
+    const scrap = await this.prisma.working.scrapRecord.create({
       data: {
         tenantId,
         productId: data.productId,
@@ -43,7 +43,7 @@ export class ScrapService {
 
     // Auto-transfer to scrap store if location has one
     if (data.locationId) {
-      const scrapStore = await this.prisma.stockLocation.findFirst({
+      const scrapStore = await this.prisma.working.stockLocation.findFirst({
         where: {
           tenantId,
           type: 'SCRAP_STORE',
@@ -54,7 +54,7 @@ export class ScrapService {
 
       if (scrapStore) {
         // Record scrap transaction — just track the scrap, don't double-deduct
-        await this.prisma.stockTransaction.create({
+        await this.prisma.working.stockTransaction.create({
           data: {
             tenantId,
             inventoryItemId: data.productId,
@@ -98,7 +98,7 @@ export class ScrapService {
       if (filters?.endDate) where.createdAt.lte = new Date(filters.endDate);
     }
 
-    return this.prisma.scrapRecord.findMany({
+    return this.prisma.working.scrapRecord.findMany({
       where,
       orderBy: { createdAt: 'desc' },
     });
@@ -112,7 +112,7 @@ export class ScrapService {
       if (endDate) where.createdAt.lte = new Date(endDate);
     }
 
-    const records = await this.prisma.scrapRecord.findMany({ where });
+    const records = await this.prisma.working.scrapRecord.findMany({ where });
 
     const totalScrapValue = records.reduce((sum, r) => sum + Number(r.totalLoss ?? 0), 0);
 
@@ -147,10 +147,10 @@ export class ScrapService {
   }
 
   async writeOff(tenantId: string, id: string, disposalMethod?: string) {
-    const scrap = await this.prisma.scrapRecord.findFirst({ where: { id, tenantId } });
+    const scrap = await this.prisma.working.scrapRecord.findFirst({ where: { id, tenantId } });
     if (!scrap) throw new NotFoundException('Scrap record not found');
 
-    return this.prisma.scrapRecord.update({
+    return this.prisma.working.scrapRecord.update({
       where: { id },
       data: { disposalMethod: disposalMethod || 'WRITTEN_OFF' },
     });

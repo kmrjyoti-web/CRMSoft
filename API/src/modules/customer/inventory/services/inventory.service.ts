@@ -9,11 +9,11 @@ export class InventoryService {
   // ─── INVENTORY ITEMS ───
 
   async getOrCreateItem(tenantId: string, productId: string, inventoryType: string = 'SIMPLE') {
-    let item = await this.prisma.inventoryItem.findUnique({
+    let item = await this.prisma.working.inventoryItem.findUnique({
       where: { tenantId_productId: { tenantId, productId } },
     });
     if (!item) {
-      item = await this.prisma.inventoryItem.create({
+      item = await this.prisma.working.inventoryItem.create({
         data: { tenantId, productId, inventoryType: inventoryType as any },
       });
     }
@@ -27,7 +27,7 @@ export class InventoryService {
     if (filters.productId) where.productId = filters.productId;
     if (filters.locationId) where.locationId = filters.locationId;
 
-    const summaries = await this.prisma.stockSummary.findMany({
+    const summaries = await this.prisma.working.stockSummary.findMany({
       where,
       include: { inventoryItem: true },
       orderBy: { lastUpdatedAt: 'desc' },
@@ -36,7 +36,7 @@ export class InventoryService {
   }
 
   async getOpeningBalance(tenantId: string, productId: string, date: Date) {
-    const transactions = await this.prisma.stockTransaction.findMany({
+    const transactions = await this.prisma.working.stockTransaction.findMany({
       where: {
         tenantId,
         productId,
@@ -53,7 +53,7 @@ export class InventoryService {
   }
 
   async recalculateStock(tenantId: string, productId: string) {
-    const transactions = await this.prisma.stockTransaction.findMany({
+    const transactions = await this.prisma.working.stockTransaction.findMany({
       where: { tenantId, productId },
       orderBy: { transactionDate: 'asc' },
     });
@@ -78,7 +78,7 @@ export class InventoryService {
       const currentStock = totals.totalIn - totals.totalOut;
       totalStock += currentStock;
 
-      await this.prisma.stockSummary.upsert({
+      await this.prisma.working.stockSummary.upsert({
         where: { tenantId_productId_locationId: { tenantId, productId, locationId } },
         create: {
           tenantId,
@@ -99,7 +99,7 @@ export class InventoryService {
       });
     }
 
-    await this.prisma.inventoryItem.update({
+    await this.prisma.working.inventoryItem.update({
       where: { id: item.id },
       data: { currentStock: totalStock },
     });
@@ -111,20 +111,20 @@ export class InventoryService {
 
   async getDashboard(tenantId: string) {
     const [totalItems, totalSerials, lowStockItems, expiringSerials] = await Promise.all([
-      this.prisma.inventoryItem.aggregate({
+      this.prisma.working.inventoryItem.aggregate({
         where: { tenantId, isActive: true },
         _sum: { currentStock: true },
         _count: true,
       }),
-      this.prisma.serialMaster.count({ where: { tenantId } }),
-      this.prisma.inventoryItem.findMany({
+      this.prisma.working.serialMaster.count({ where: { tenantId } }),
+      this.prisma.working.inventoryItem.findMany({
         where: {
           tenantId,
           isActive: true,
           reorderLevel: { not: null },
         },
       }),
-      this.prisma.serialMaster.count({
+      this.prisma.working.serialMaster.count({
         where: {
           tenantId,
           status: 'AVAILABLE',
@@ -141,7 +141,7 @@ export class InventoryService {
     ).length;
 
     // Stock valuation
-    const items = await this.prisma.inventoryItem.findMany({
+    const items = await this.prisma.working.inventoryItem.findMany({
       where: { tenantId, isActive: true },
     });
     const totalValue = items.reduce((sum, i) => {

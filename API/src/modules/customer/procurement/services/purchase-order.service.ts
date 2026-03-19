@@ -15,7 +15,7 @@ export class PurchaseOrderService {
     if (filters?.status) where.status = filters.status;
 
     const [data, total] = await Promise.all([
-      this.prisma.purchaseOrder.findMany({
+      this.prisma.working.purchaseOrder.findMany({
         where,
         include: {
           items: true,
@@ -25,14 +25,14 @@ export class PurchaseOrderService {
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.purchaseOrder.count({ where }),
+      this.prisma.working.purchaseOrder.count({ where }),
     ]);
 
     return { data, total, page, limit };
   }
 
   async getById(tenantId: string, id: string) {
-    const po = await this.prisma.purchaseOrder.findFirst({
+    const po = await this.prisma.working.purchaseOrder.findFirst({
       where: { id, tenantId },
       include: {
         items: true,
@@ -84,7 +84,7 @@ export class PurchaseOrderService {
       };
     });
 
-    return this.prisma.purchaseOrder.create({
+    return this.prisma.working.purchaseOrder.create({
       data: {
         tenantId,
         poNumber: dto.poNumber,
@@ -108,7 +108,7 @@ export class PurchaseOrderService {
   async update(tenantId: string, id: string, dto: {
     expectedDate?: string; deliveryAddress?: string; notes?: string; status?: string;
   }) {
-    const po = await this.prisma.purchaseOrder.findFirst({ where: { id, tenantId } });
+    const po = await this.prisma.working.purchaseOrder.findFirst({ where: { id, tenantId } });
     if (!po) throw new NotFoundException('Purchase order not found');
 
     const data: any = {};
@@ -116,55 +116,55 @@ export class PurchaseOrderService {
     if (dto.notes !== undefined) data.remarks = dto.notes;
     if (dto.status !== undefined) data.status = dto.status;
 
-    return this.prisma.purchaseOrder.update({ where: { id }, data });
+    return this.prisma.working.purchaseOrder.update({ where: { id }, data });
   }
 
   async submitForApproval(tenantId: string, id: string) {
-    const po = await this.prisma.purchaseOrder.findFirst({ where: { id, tenantId } });
+    const po = await this.prisma.working.purchaseOrder.findFirst({ where: { id, tenantId } });
     if (!po) throw new NotFoundException('Purchase order not found');
     if (po.status !== 'DRAFT') throw new BadRequestException('Only draft POs can be submitted');
 
-    return this.prisma.purchaseOrder.update({
+    return this.prisma.working.purchaseOrder.update({
       where: { id },
       data: { status: 'PENDING_APPROVAL' },
     });
   }
 
   async approve(tenantId: string, id: string, userId: string) {
-    const po = await this.prisma.purchaseOrder.findFirst({ where: { id, tenantId } });
+    const po = await this.prisma.working.purchaseOrder.findFirst({ where: { id, tenantId } });
     if (!po) throw new NotFoundException('Purchase order not found');
     if (po.status !== 'PENDING_APPROVAL') throw new BadRequestException('PO not pending approval');
 
-    return this.prisma.purchaseOrder.update({
+    return this.prisma.working.purchaseOrder.update({
       where: { id },
       data: { status: 'APPROVED', approvedById: userId, approvedAt: new Date() },
     });
   }
 
   async reject(tenantId: string, id: string, userId: string, remarks?: string) {
-    const po = await this.prisma.purchaseOrder.findFirst({ where: { id, tenantId } });
+    const po = await this.prisma.working.purchaseOrder.findFirst({ where: { id, tenantId } });
     if (!po) throw new NotFoundException('Purchase order not found');
 
-    return this.prisma.purchaseOrder.update({
+    return this.prisma.working.purchaseOrder.update({
       where: { id },
       data: { status: 'REJECTED', remarks: remarks ? `${po.remarks ?? ''}\nRejected: ${remarks}` : po.remarks },
     });
   }
 
   async cancel(tenantId: string, id: string) {
-    const po = await this.prisma.purchaseOrder.findFirst({ where: { id, tenantId } });
+    const po = await this.prisma.working.purchaseOrder.findFirst({ where: { id, tenantId } });
     if (!po) throw new NotFoundException('Purchase order not found');
     if (['COMPLETED', 'CANCELLED'].includes(po.status)) {
       throw new BadRequestException('Cannot cancel completed/cancelled PO');
     }
-    return this.prisma.purchaseOrder.update({
+    return this.prisma.working.purchaseOrder.update({
       where: { id },
       data: { status: 'CANCELLED' },
     });
   }
 
   async generateNumber(tenantId: string): Promise<string> {
-    const count = await this.prisma.purchaseOrder.count({ where: { tenantId } });
+    const count = await this.prisma.working.purchaseOrder.count({ where: { tenantId } });
     return `PO-${String(count + 1).padStart(5, '0')}`;
   }
 }

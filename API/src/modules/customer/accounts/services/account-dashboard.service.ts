@@ -7,39 +7,39 @@ export class AccountDashboardService {
 
   async getDashboard(tenantId: string) {
     // Receivables (unpaid sale invoices)
-    const receivables = await this.prisma.invoice.findMany({
+    const receivables = await this.prisma.working.invoice.findMany({
       where: { tenantId, status: { in: ['SENT', 'PARTIALLY_PAID', 'OVERDUE'] } },
     });
     const totalReceivable = receivables.reduce((s, i) => s + Number(i.balanceAmount), 0);
 
     // Payables (unpaid purchase invoices)
-    const payables = await this.prisma.purchaseInvoice.findMany({
+    const payables = await this.prisma.working.purchaseInvoice.findMany({
       where: { tenantId, paymentStatus: { in: ['UNPAID', 'PARTIAL'] } },
     });
     const totalPayable = payables.reduce((s, i) => s + Number(i.balanceAmount), 0);
 
     // Cash + Bank
-    const cashLedger = await this.prisma.ledgerMaster.findFirst({ where: { tenantId, code: 'CASH' } });
-    const bankAccounts = await this.prisma.bankAccount.findMany({ where: { tenantId, isActive: true } });
+    const cashLedger = await this.prisma.working.ledgerMaster.findFirst({ where: { tenantId, code: 'CASH' } });
+    const bankAccounts = await this.prisma.working.bankAccount.findMany({ where: { tenantId, isActive: true } });
     const cashBalance = Number(cashLedger?.currentBalance ?? 0);
     const bankBalance = bankAccounts.reduce((s, b) => s + Number(b.currentBalance), 0);
 
     // GST Due (latest GSTR-3B)
-    const latestGST = await this.prisma.gSTReturn.findFirst({
+    const latestGST = await this.prisma.working.gSTReturn.findFirst({
       where: { tenantId, returnType: 'GSTR_3B', status: { not: 'FILED' } },
       orderBy: { period: 'desc' },
     });
     const gstDue = latestGST ? Number(latestGST.netTaxPayable ?? 0) : 0;
 
     // Recent payments
-    const recentPayments = await this.prisma.paymentRecord.findMany({
+    const recentPayments = await this.prisma.working.paymentRecord.findMany({
       where: { tenantId },
       orderBy: { paymentDate: 'desc' },
       take: 5,
     });
 
     // Pending approvals
-    const pendingApprovals = await this.prisma.paymentRecord.count({
+    const pendingApprovals = await this.prisma.working.paymentRecord.count({
       where: { tenantId, status: { in: ['DRAFT', 'PENDING_APPROVAL'] } },
     });
 
@@ -51,10 +51,10 @@ export class AccountDashboardService {
       const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59);
       const label = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
 
-      const sales = await this.prisma.invoice.findMany({
+      const sales = await this.prisma.working.invoice.findMany({
         where: { tenantId, status: { notIn: ['DRAFT', 'CANCELLED', 'VOID'] }, invoiceDate: { gte: date, lte: monthEnd } },
       });
-      const purchases = await this.prisma.purchaseInvoice.findMany({
+      const purchases = await this.prisma.working.purchaseInvoice.findMany({
         where: { tenantId, status: { notIn: ['DRAFT', 'CANCELLED'] }, invoiceDate: { gte: date, lte: monthEnd } },
       });
 

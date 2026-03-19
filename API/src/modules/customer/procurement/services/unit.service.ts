@@ -8,14 +8,14 @@ export class UnitService {
   async list(tenantId: string, category?: string) {
     const where: any = { tenantId };
     if (category) where.unitCategory = category;
-    return this.prisma.unitMaster.findMany({
+    return this.prisma.working.unitMaster.findMany({
       where,
       orderBy: [{ unitCategory: 'asc' }, { name: 'asc' }],
     });
   }
 
   async getById(tenantId: string, id: string) {
-    const unit = await this.prisma.unitMaster.findFirst({ where: { id, tenantId } });
+    const unit = await this.prisma.working.unitMaster.findFirst({ where: { id, tenantId } });
     if (!unit) throw new NotFoundException('Unit not found');
     return unit;
   }
@@ -24,12 +24,12 @@ export class UnitService {
     name: string; symbol: string; category: string;
     baseMultiplier?: number; isBaseUnit?: boolean;
   }) {
-    const existing = await this.prisma.unitMaster.findUnique({
+    const existing = await this.prisma.working.unitMaster.findUnique({
       where: { tenantId_symbol: { tenantId, symbol: dto.symbol } },
     });
     if (existing) throw new BadRequestException(`Unit "${dto.symbol}" already exists`);
 
-    return this.prisma.unitMaster.create({
+    return this.prisma.working.unitMaster.create({
       data: {
         tenantId,
         name: dto.name,
@@ -41,16 +41,16 @@ export class UnitService {
   }
 
   async update(tenantId: string, id: string, dto: { name?: string; symbol?: string }) {
-    const unit = await this.prisma.unitMaster.findFirst({ where: { id, tenantId } });
+    const unit = await this.prisma.working.unitMaster.findFirst({ where: { id, tenantId } });
     if (!unit) throw new NotFoundException('Unit not found');
-    return this.prisma.unitMaster.update({ where: { id }, data: dto });
+    return this.prisma.working.unitMaster.update({ where: { id }, data: dto });
   }
 
   async delete(tenantId: string, id: string) {
-    const unit = await this.prisma.unitMaster.findFirst({ where: { id, tenantId } });
+    const unit = await this.prisma.working.unitMaster.findFirst({ where: { id, tenantId } });
     if (!unit) throw new NotFoundException('Unit not found');
     if (unit.isSystem) throw new BadRequestException('Cannot delete system unit');
-    await this.prisma.unitMaster.delete({ where: { id } });
+    await this.prisma.working.unitMaster.delete({ where: { id } });
     return { deleted: true };
   }
 
@@ -60,13 +60,13 @@ export class UnitService {
     const where: any = { tenantId };
     if (productId) where.productId = productId;
     else where.productId = null;
-    return this.prisma.unitConversion.findMany({ where });
+    return this.prisma.working.unitConversion.findMany({ where });
   }
 
   async createConversion(tenantId: string, dto: {
     fromUnitId: string; toUnitId: string; factor: number; productId?: string;
   }) {
-    return this.prisma.unitConversion.create({
+    return this.prisma.working.unitConversion.create({
       data: {
         tenantId,
         fromUnitId: dto.fromUnitId,
@@ -78,9 +78,9 @@ export class UnitService {
   }
 
   async deleteConversion(tenantId: string, id: string) {
-    const conv = await this.prisma.unitConversion.findFirst({ where: { id, tenantId } });
+    const conv = await this.prisma.working.unitConversion.findFirst({ where: { id, tenantId } });
     if (!conv) throw new NotFoundException('Conversion not found');
-    await this.prisma.unitConversion.delete({ where: { id } });
+    await this.prisma.working.unitConversion.delete({ where: { id } });
     return { deleted: true };
   }
 
@@ -93,20 +93,20 @@ export class UnitService {
 
     // Try product-specific, then global
     let conversion = dto.productId
-      ? await this.prisma.unitConversion.findFirst({
+      ? await this.prisma.working.unitConversion.findFirst({
           where: { tenantId, fromUnitId: dto.fromUnitId, toUnitId: dto.toUnitId, productId: dto.productId },
         })
       : null;
 
     if (!conversion) {
-      conversion = await this.prisma.unitConversion.findFirst({
+      conversion = await this.prisma.working.unitConversion.findFirst({
         where: { tenantId, fromUnitId: dto.fromUnitId, toUnitId: dto.toUnitId, productId: null },
       });
     }
 
     // Try reverse
     if (!conversion) {
-      const reverse = await this.prisma.unitConversion.findFirst({
+      const reverse = await this.prisma.working.unitConversion.findFirst({
         where: { tenantId, fromUnitId: dto.toUnitId, toUnitId: dto.fromUnitId },
       });
       if (reverse) {

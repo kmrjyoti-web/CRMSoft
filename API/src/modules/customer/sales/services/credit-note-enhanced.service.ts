@@ -8,7 +8,7 @@ export class CreditNoteEnhancedService {
 
   private async generateNumber(tenantId: string): Promise<string> {
     const year = new Date().getFullYear();
-    const count = await this.prisma.creditNote.count({
+    const count = await this.prisma.working.creditNote.count({
       where: { tenantId, creditNoteNo: { startsWith: `CN-${year}-` } },
     });
     return `CN-${year}-${String(count + 1).padStart(4, '0')}`;
@@ -37,7 +37,7 @@ export class CreditNoteEnhancedService {
 
     const creditNoteNo = await this.generateNumber(tenantId);
 
-    return this.prisma.creditNote.create({
+    return this.prisma.working.creditNote.create({
       data: {
         tenantId,
         creditNoteNo,
@@ -65,7 +65,7 @@ export class CreditNoteEnhancedService {
       totalAmount += itemTotal;
     }
 
-    return this.prisma.creditNote.create({
+    return this.prisma.working.creditNote.create({
       data: {
         tenantId,
         creditNoteNo,
@@ -85,21 +85,21 @@ export class CreditNoteEnhancedService {
     if (filters?.status) where.status = filters.status;
 
     const [data, total] = await Promise.all([
-      this.prisma.creditNote.findMany({
+      this.prisma.working.creditNote.findMany({
         where,
         include: { invoice: { select: { id: true, invoiceNo: true } } },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.creditNote.count({ where }),
+      this.prisma.working.creditNote.count({ where }),
     ]);
 
     return { data, total, page, limit };
   }
 
   async findById(tenantId: string, id: string) {
-    const note = await this.prisma.creditNote.findFirst({
+    const note = await this.prisma.working.creditNote.findFirst({
       where: { id, tenantId },
       include: { invoice: true },
     });
@@ -112,12 +112,12 @@ export class CreditNoteEnhancedService {
    * Debit "Sales Return" ledger, Credit "Customer" ledger.
    */
   async issue(tenantId: string, id: string, userId: string) {
-    const note = await this.prisma.creditNote.findFirst({ where: { id, tenantId } });
+    const note = await this.prisma.working.creditNote.findFirst({ where: { id, tenantId } });
     if (!note) throw new NotFoundException('Credit note not found');
     if (note.status !== 'CN_DRAFT') throw new BadRequestException('Only DRAFT credit notes can be issued');
 
     // Create accounting transaction
-    await this.prisma.accountTransaction.create({
+    await this.prisma.working.accountTransaction.create({
       data: {
         tenantId,
         transactionDate: new Date(),
@@ -133,7 +133,7 @@ export class CreditNoteEnhancedService {
       },
     });
 
-    return this.prisma.creditNote.update({
+    return this.prisma.working.creditNote.update({
       where: { id },
       data: { status: 'CN_ISSUED', issuedAt: new Date(), issuedById: userId },
     });
@@ -143,13 +143,13 @@ export class CreditNoteEnhancedService {
    * Adjust a credit note: apply against an invoice or issue a refund.
    */
   async adjust(tenantId: string, id: string, dto: AdjustNoteDto) {
-    const note = await this.prisma.creditNote.findFirst({ where: { id, tenantId } });
+    const note = await this.prisma.working.creditNote.findFirst({ where: { id, tenantId } });
     if (!note) throw new NotFoundException('Credit note not found');
     if (note.status !== 'CN_ISSUED') throw new BadRequestException('Only ISSUED credit notes can be adjusted');
 
     if (dto.invoiceId) {
       // Apply against invoice — reduce invoice balance
-      const invoice = await this.prisma.invoice.findFirst({
+      const invoice = await this.prisma.working.invoice.findFirst({
         where: { id: dto.invoiceId, tenantId },
       });
       if (!invoice) throw new NotFoundException('Invoice not found');
@@ -158,12 +158,12 @@ export class CreditNoteEnhancedService {
       const creditAmount = Number(note.amount);
       const newBalance = Math.max(0, currentBalance - creditAmount);
 
-      await this.prisma.invoice.update({
+      await this.prisma.working.invoice.update({
         where: { id: dto.invoiceId },
         data: { balanceAmount: newBalance },
       });
 
-      return this.prisma.creditNote.update({
+      return this.prisma.working.creditNote.update({
         where: { id },
         data: {
           status: 'CN_APPLIED',
@@ -176,7 +176,7 @@ export class CreditNoteEnhancedService {
 
     if (dto.issueRefund) {
       // Mark as applied (refund issued out-of-band)
-      return this.prisma.creditNote.update({
+      return this.prisma.working.creditNote.update({
         where: { id },
         data: {
           status: 'CN_APPLIED',

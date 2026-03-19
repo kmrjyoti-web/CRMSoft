@@ -33,7 +33,7 @@ export class PaymentRecordService {
       tdsAmount = Math.round(data.amount * data.tdsRate / 100 * 100) / 100;
     }
 
-    const payment = await this.prisma.paymentRecord.create({
+    const payment = await this.prisma.working.paymentRecord.create({
       data: {
         tenantId,
         paymentNumber: number,
@@ -65,7 +65,7 @@ export class PaymentRecordService {
   }
 
   async approve(tenantId: string, userId: string, id: string) {
-    const payment = await this.prisma.paymentRecord.findFirst({ where: { id, tenantId } });
+    const payment = await this.prisma.working.paymentRecord.findFirst({ where: { id, tenantId } });
     if (!payment) throw new NotFoundException('Payment not found');
     if (payment.status !== 'DRAFT' && payment.status !== 'PENDING_APPROVAL') {
       throw new BadRequestException(`Cannot approve payment in ${payment.status} status`);
@@ -78,7 +78,7 @@ export class PaymentRecordService {
 
     let accountTxnId: string | undefined;
     if (debitLedger && creditLedger) {
-      const txn = await this.prisma.accountTransaction.create({
+      const txn = await this.prisma.working.accountTransaction.create({
         data: {
           tenantId,
           transactionDate: payment.paymentDate,
@@ -96,11 +96,11 @@ export class PaymentRecordService {
       accountTxnId = txn.id;
 
       // Update ledger balances
-      await this.prisma.ledgerMaster.update({
+      await this.prisma.working.ledgerMaster.update({
         where: { id: debitLedger.id },
         data: { currentBalance: { increment: Number(payment.amount) } },
       });
-      await this.prisma.ledgerMaster.update({
+      await this.prisma.working.ledgerMaster.update({
         where: { id: creditLedger.id },
         data: { currentBalance: { decrement: Number(payment.amount) } },
       });
@@ -109,7 +109,7 @@ export class PaymentRecordService {
     // Update bank account balance
     if (payment.bankAccountId) {
       const balanceChange = isPaymentOut ? -Number(payment.amount) : Number(payment.amount);
-      await this.prisma.bankAccount.update({
+      await this.prisma.working.bankAccount.update({
         where: { id: payment.bankAccountId },
         data: { currentBalance: { increment: balanceChange } },
       });
@@ -117,7 +117,7 @@ export class PaymentRecordService {
 
     // Create TDS record if applicable
     if (payment.tdsApplicable && payment.tdsAmount) {
-      await this.prisma.tDSRecord.create({
+      await this.prisma.working.tDSRecord.create({
         data: {
           tenantId,
           section: payment.tdsSection || '194C',
@@ -138,7 +138,7 @@ export class PaymentRecordService {
     }
 
     // Update payment status
-    return this.prisma.paymentRecord.update({
+    return this.prisma.working.paymentRecord.update({
       where: { id },
       data: {
         status: 'APPROVED',
@@ -149,11 +149,11 @@ export class PaymentRecordService {
   }
 
   async cancel(tenantId: string, id: string) {
-    const payment = await this.prisma.paymentRecord.findFirst({ where: { id, tenantId } });
+    const payment = await this.prisma.working.paymentRecord.findFirst({ where: { id, tenantId } });
     if (!payment) throw new NotFoundException('Payment not found');
     if (payment.status === 'RECONCILED') throw new BadRequestException('Cannot cancel reconciled payment');
 
-    return this.prisma.paymentRecord.update({
+    return this.prisma.working.paymentRecord.update({
       where: { id },
       data: { status: 'CANCELLED' },
     });
@@ -178,20 +178,20 @@ export class PaymentRecordService {
       if (filters?.endDate) where.paymentDate.lte = new Date(filters.endDate);
     }
 
-    return this.prisma.paymentRecord.findMany({
+    return this.prisma.working.paymentRecord.findMany({
       where,
       orderBy: { paymentDate: 'desc' },
     });
   }
 
   async findById(tenantId: string, id: string) {
-    const payment = await this.prisma.paymentRecord.findFirst({ where: { id, tenantId } });
+    const payment = await this.prisma.working.paymentRecord.findFirst({ where: { id, tenantId } });
     if (!payment) throw new NotFoundException('Payment not found');
     return payment;
   }
 
   async getPending(tenantId: string) {
-    return this.prisma.paymentRecord.findMany({
+    return this.prisma.working.paymentRecord.findMany({
       where: { tenantId, status: { in: ['DRAFT', 'PENDING_APPROVAL'] } },
       orderBy: { paymentDate: 'asc' },
     });
@@ -199,7 +199,7 @@ export class PaymentRecordService {
 
   async getOverdue(tenantId: string) {
     // Overdue purchase invoices (past due date, unpaid)
-    return this.prisma.purchaseInvoice.findMany({
+    return this.prisma.working.purchaseInvoice.findMany({
       where: {
         tenantId,
         paymentStatus: { in: ['UNPAID', 'PARTIAL'] },
@@ -210,13 +210,13 @@ export class PaymentRecordService {
   }
 
   private async getLedger(tenantId: string, code: string) {
-    return this.prisma.ledgerMaster.findFirst({ where: { tenantId, code } });
+    return this.prisma.working.ledgerMaster.findFirst({ where: { tenantId, code } });
   }
 
   private async generateNumber(tenantId: string, type: string): Promise<string> {
     const prefix = type === 'PAYMENT_OUT' ? 'PAY' : 'REC';
     const year = new Date().getFullYear();
-    const count = await this.prisma.paymentRecord.count({
+    const count = await this.prisma.working.paymentRecord.count({
       where: { tenantId, paymentType: type },
     });
     return `${prefix}-${year}-${String(count + 1).padStart(4, '0')}`;

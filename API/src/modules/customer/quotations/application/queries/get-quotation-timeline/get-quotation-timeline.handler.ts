@@ -7,7 +7,7 @@ export class GetQuotationTimelineHandler implements IQueryHandler<GetQuotationTi
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetQuotationTimelineQuery) {
-    return this.prisma.quotationActivity.findMany({
+    return this.prisma.working.quotationActivity.findMany({
       where: { quotationId: query.quotationId },
       orderBy: { createdAt: 'desc' },
     });

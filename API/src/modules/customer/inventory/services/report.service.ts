@@ -20,7 +20,7 @@ export class InventoryReportService {
       if (filters.endDate) where.transactionDate.lte = new Date(filters.endDate);
     }
 
-    const transactions = await this.prisma.stockTransaction.findMany({
+    const transactions = await this.prisma.working.stockTransaction.findMany({
       where,
       orderBy: { transactionDate: 'asc' },
       include: { inventoryItem: true },
@@ -48,7 +48,7 @@ export class InventoryReportService {
   async expiryReport(tenantId: string, days: number = 30) {
     const futureDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 
-    const serials = await this.prisma.serialMaster.findMany({
+    const serials = await this.prisma.working.serialMaster.findMany({
       where: {
         tenantId,
         expiryDate: { not: null, lte: futureDate },
@@ -79,12 +79,12 @@ export class InventoryReportService {
   async valuation(tenantId: string, filters?: { locationId?: string }) {
     const where: any = { tenantId, isActive: true };
 
-    const items = await this.prisma.inventoryItem.findMany({ where });
+    const items = await this.prisma.working.inventoryItem.findMany({ where });
 
     // Per-location if requested
     let summaries: any[] = [];
     if (filters?.locationId) {
-      summaries = await this.prisma.stockSummary.findMany({
+      summaries = await this.prisma.working.stockSummary.findMany({
         where: { tenantId, locationId: filters.locationId },
         include: { inventoryItem: true },
       });
@@ -124,7 +124,7 @@ export class InventoryReportService {
     if (filters?.productId) where.productId = filters.productId;
     if (filters?.status) where.status = filters.status;
 
-    const serials = await this.prisma.serialMaster.findMany({
+    const serials = await this.prisma.working.serialMaster.findMany({
       where,
       orderBy: { createdAt: 'desc' },
       take: 200,
@@ -133,7 +133,7 @@ export class InventoryReportService {
     // Get transactions for these serials
     const serialIds = serials.map((s) => s.id);
     const transactions = serialIds.length > 0
-      ? await this.prisma.stockTransaction.findMany({
+      ? await this.prisma.working.stockTransaction.findMany({
           where: { tenantId, serialMasterId: { in: serialIds } },
           orderBy: { transactionDate: 'asc' },
         })

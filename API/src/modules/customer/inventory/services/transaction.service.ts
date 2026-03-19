@@ -33,7 +33,7 @@ export class TransactionService {
 
     const totalAmount = dto.unitPrice ? dto.unitPrice * Math.abs(dto.quantity) : undefined;
 
-    const txn = await this.prisma.stockTransaction.create({
+    const txn = await this.prisma.working.stockTransaction.create({
       data: {
         tenantId,
         inventoryItemId: item.id,
@@ -54,7 +54,7 @@ export class TransactionService {
     });
 
     // Update inventory item stock
-    await this.prisma.inventoryItem.update({
+    await this.prisma.working.inventoryItem.update({
       where: { id: item.id },
       data: { currentStock: { increment: signedQty } },
     });
@@ -88,14 +88,14 @@ export class TransactionService {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.stockTransaction.findMany({
+      this.prisma.working.stockTransaction.findMany({
         where,
         orderBy: { transactionDate: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
         include: { inventoryItem: true },
       }),
-      this.prisma.stockTransaction.count({ where }),
+      this.prisma.working.stockTransaction.count({ where }),
     ]);
 
     return { data, total, page, limit };
@@ -114,7 +114,7 @@ export class TransactionService {
       if (filters?.endDate) where.transactionDate.lte = new Date(filters.endDate);
     }
 
-    const transactions = await this.prisma.stockTransaction.findMany({
+    const transactions = await this.prisma.working.stockTransaction.findMany({
       where,
       orderBy: { transactionDate: 'asc' },
     });
@@ -133,7 +133,7 @@ export class TransactionService {
   }
 
   async getBySerial(tenantId: string, serialId: string) {
-    return this.prisma.stockTransaction.findMany({
+    return this.prisma.working.stockTransaction.findMany({
       where: { tenantId, serialMasterId: serialId },
       orderBy: { transactionDate: 'asc' },
     });
@@ -151,7 +151,7 @@ export class TransactionService {
     const item = await this.inventoryService.getOrCreateItem(tenantId, dto.productId);
 
     // Outbound transaction
-    const outTxn = await this.prisma.stockTransaction.create({
+    const outTxn = await this.prisma.working.stockTransaction.create({
       data: {
         tenantId,
         inventoryItemId: item.id,
@@ -167,7 +167,7 @@ export class TransactionService {
     });
 
     // Inbound transaction
-    const inTxn = await this.prisma.stockTransaction.create({
+    const inTxn = await this.prisma.working.stockTransaction.create({
       data: {
         tenantId,
         inventoryItemId: item.id,
@@ -190,7 +190,7 @@ export class TransactionService {
   }
 
   private async updateSummary(tenantId: string, productId: string, locationId: string, inventoryItemId: string, quantityChange: number) {
-    const existing = await this.prisma.stockSummary.findUnique({
+    const existing = await this.prisma.working.stockSummary.findUnique({
       where: { tenantId_productId_locationId: { tenantId, productId, locationId } },
     });
 
@@ -203,9 +203,9 @@ export class TransactionService {
         update.totalOut = { increment: Math.abs(quantityChange) };
         update.currentStock = { increment: quantityChange };
       }
-      await this.prisma.stockSummary.update({ where: { id: existing.id }, data: update });
+      await this.prisma.working.stockSummary.update({ where: { id: existing.id }, data: update });
     } else {
-      await this.prisma.stockSummary.create({
+      await this.prisma.working.stockSummary.create({
         data: {
           tenantId,
           productId,

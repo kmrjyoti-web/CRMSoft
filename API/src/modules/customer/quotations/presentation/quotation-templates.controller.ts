@@ -20,7 +20,7 @@ export class QuotationTemplatesController {
   @Post()
   @RequirePermissions('quotations:create')
   async create(@Body() dto: any, @CurrentUser() user: any) {
-    const template = await this.prisma.quotationTemplate.create({
+    const template = await this.prisma.working.quotationTemplate.create({
       data: {
         name: dto.name, description: dto.description, industry: dto.industry,
         defaultItems: dto.defaultItems, defaultTerms: dto.defaultTerms,
@@ -42,7 +42,7 @@ export class QuotationTemplatesController {
   @Put(':id')
   @RequirePermissions('quotations:update')
   async update(@Param('id') id: string, @Body() dto: any) {
-    const template = await this.prisma.quotationTemplate.update({
+    const template = await this.prisma.working.quotationTemplate.update({
       where: { id },
       data: {
         name: dto.name, description: dto.description, industry: dto.industry,

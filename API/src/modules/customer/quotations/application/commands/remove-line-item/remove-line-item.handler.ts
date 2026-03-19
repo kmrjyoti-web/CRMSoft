@@ -12,7 +12,7 @@ export class RemoveLineItemHandler implements ICommandHandler<RemoveLineItemComm
   ) {}
 
   async execute(cmd: RemoveLineItemCommand) {
-    const quotation = await this.prisma.quotation.findUnique({
+    const quotation = await this.prisma.working.quotation.findUnique({
       where: { id: cmd.quotationId },
       include: { lead: { include: { organization: { select: { state: true } } } } },
     });
@@ -21,17 +21,17 @@ export class RemoveLineItemHandler implements ICommandHandler<RemoveLineItemComm
       throw new BadRequestException('Cannot remove items from non-draft quotation');
     }
 
-    const item = await this.prisma.quotationLineItem.findUnique({ where: { id: cmd.itemId } });
+    const item = await this.prisma.working.quotationLineItem.findUnique({ where: { id: cmd.itemId } });
     if (!item || item.quotationId !== cmd.quotationId) {
       throw new NotFoundException('Line item not found');
     }
 
-    await this.prisma.quotationLineItem.delete({ where: { id: cmd.itemId } });
+    await this.prisma.working.quotationLineItem.delete({ where: { id: cmd.itemId } });
 
     const customerState = quotation.lead?.organization?.state || undefined;
     await this.calculator.recalculate(cmd.quotationId, customerState);
 
-    await this.prisma.quotationActivity.create({
+    await this.prisma.working.quotationActivity.create({
       data: {
         quotationId: cmd.quotationId, action: 'ITEM_REMOVED',
         description: `Item "${item.productName}" removed`,

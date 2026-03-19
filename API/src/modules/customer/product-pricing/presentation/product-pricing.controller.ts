@@ -134,11 +134,11 @@ export class ProductPricingController {
   @RequirePermissions('product_pricing:read')
   async comparePrices(@Query('productIds') productIds: string) {
     const ids = productIds.split(',').map((s) => s.trim()).filter(Boolean);
-    const products = await this.prisma.product.findMany({
+    const products = await this.prisma.working.product.findMany({
       where: { id: { in: ids } },
       select: { id: true, name: true, code: true, mrp: true, salePrice: true },
     });
-    const prices = await this.prisma.productPrice.findMany({
+    const prices = await this.prisma.working.productPrice.findMany({
       where: {
         productId: { in: ids }, isActive: true,
         priceGroupId: null,
@@ -166,7 +166,7 @@ export class ProductPricingController {
   @ApiOperation({ summary: 'Remove a specific price entry' })
   @RequirePermissions('product_pricing:update')
   async removePrice(@Param('priceId', ParseUUIDPipe) priceId: string) {
-    await this.prisma.productPrice.update({
+    await this.prisma.working.productPrice.update({
       where: { id: priceId },
       data: { isActive: false },
     });

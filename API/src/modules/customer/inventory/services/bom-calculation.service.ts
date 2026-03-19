@@ -6,7 +6,7 @@ export class BOMCalculationService {
   constructor(private readonly prisma: PrismaService) {}
 
   async checkStock(tenantId: string, formulaId: string, quantity: number, locationId: string) {
-    const formula = await this.prisma.bOMFormula.findFirst({
+    const formula = await this.prisma.working.bOMFormula.findFirst({
       where: { id: formulaId, tenantId },
       include: {
         items: { include: { rawMaterial: true }, orderBy: { sortOrder: 'asc' } },
@@ -35,7 +35,7 @@ export class BOMCalculationService {
       const required = effectiveQty * quantity;
 
       // Get current stock at this location
-      const summary = await this.prisma.stockSummary.findFirst({
+      const summary = await this.prisma.working.stockSummary.findFirst({
         where: { tenantId, inventoryItemId: item.rawMaterialId, locationId },
       });
       const available = summary?.currentStock ?? 0;
@@ -79,7 +79,7 @@ export class BOMCalculationService {
   }
 
   async calculateCost(tenantId: string, formulaId: string, quantity: number) {
-    const formula = await this.prisma.bOMFormula.findFirst({
+    const formula = await this.prisma.working.bOMFormula.findFirst({
       where: { id: formulaId, tenantId },
       include: { items: { include: { rawMaterial: true } } },
     });

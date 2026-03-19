@@ -39,6 +39,7 @@ describe('ReviseQuotationHandler', () => {
       },
       quotationActivity: { create: jest.fn().mockResolvedValue({}) },
     };
+(prisma as any).working = prisma;
     numberService = { generateRevisionNumber: jest.fn().mockReturnValue('QTN-2026-00001-R1') };
     handler = new ReviseQuotationHandler(prisma, numberService);
   });

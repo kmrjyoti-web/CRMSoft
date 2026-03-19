@@ -8,11 +8,11 @@ export class MarkViewedHandler implements ICommandHandler<MarkViewedCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: MarkViewedCommand) {
-    const quotation = await this.prisma.quotation.findUnique({ where: { id: cmd.id } });
+    const quotation = await this.prisma.working.quotation.findUnique({ where: { id: cmd.id } });
     if (!quotation) throw new NotFoundException('Quotation not found');
 
     if (quotation.status === 'SENT') {
-      await this.prisma.quotation.update({
+      await this.prisma.working.quotation.update({
         where: { id: cmd.id },
         data: { status: 'VIEWED' },
       });
@@ -20,7 +20,7 @@ export class MarkViewedHandler implements ICommandHandler<MarkViewedCommand> {
 
     // Update send log view count
     if (cmd.sendLogId) {
-      await this.prisma.quotationSendLog.update({
+      await this.prisma.working.quotationSendLog.update({
         where: { id: cmd.sendLogId },
         data: {
           viewedAt: new Date(),
@@ -29,19 +29,19 @@ export class MarkViewedHandler implements ICommandHandler<MarkViewedCommand> {
       });
     } else {
       // Update latest send log
-      const latestLog = await this.prisma.quotationSendLog.findFirst({
+      const latestLog = await this.prisma.working.quotationSendLog.findFirst({
         where: { quotationId: cmd.id },
         orderBy: { sentAt: 'desc' },
       });
       if (latestLog) {
-        await this.prisma.quotationSendLog.update({
+        await this.prisma.working.quotationSendLog.update({
           where: { id: latestLog.id },
           data: { viewedAt: new Date(), viewCount: { increment: 1 } },
         });
       }
     }
 
-    await this.prisma.quotationActivity.create({
+    await this.prisma.working.quotationActivity.create({
       data: {
         quotationId: cmd.id, action: 'VIEWED',
         description: 'Quotation viewed by recipient',

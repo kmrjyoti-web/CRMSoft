@@ -21,7 +21,7 @@ export class PurchaseInvoiceService {
     if (filters?.purchaseOrderId) where.poId = filters.purchaseOrderId;
 
     const [data, total] = await Promise.all([
-      this.prisma.purchaseInvoice.findMany({
+      this.prisma.working.purchaseInvoice.findMany({
         where,
         include: {
           po: { select: { id: true, poNumber: true } },
@@ -31,14 +31,14 @@ export class PurchaseInvoiceService {
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.purchaseInvoice.count({ where }),
+      this.prisma.working.purchaseInvoice.count({ where }),
     ]);
 
     return { data, total, page, limit };
   }
 
   async getById(tenantId: string, id: string) {
-    const invoice = await this.prisma.purchaseInvoice.findFirst({
+    const invoice = await this.prisma.working.purchaseInvoice.findFirst({
       where: { id, tenantId },
       include: {
         po: { select: { id: true, poNumber: true } },
@@ -85,7 +85,7 @@ export class PurchaseInvoiceService {
       };
     });
 
-    return this.prisma.purchaseInvoice.create({
+    return this.prisma.working.purchaseInvoice.create({
       data: {
         tenantId,
         ourReference: dto.invoiceNumber,
@@ -109,7 +109,7 @@ export class PurchaseInvoiceService {
   }
 
   async approve(tenantId: string, id: string, userId: string) {
-    const invoice = await this.prisma.purchaseInvoice.findFirst({
+    const invoice = await this.prisma.working.purchaseInvoice.findFirst({
       where: { id, tenantId },
       include: { items: true },
     });
@@ -123,7 +123,7 @@ export class PurchaseInvoiceService {
 
     if (!hasChallan) {
       // No GRN — also update inventory
-      const defaultLoc = await this.prisma.stockLocation.findFirst({
+      const defaultLoc = await this.prisma.working.stockLocation.findFirst({
         where: { tenantId, isDefault: true },
       });
       const locationId = defaultLoc?.id ?? '';
@@ -148,7 +148,7 @@ export class PurchaseInvoiceService {
     // Create accounting entries
     await this.createAccountingEntries(tenantId, invoice, userId);
 
-    return this.prisma.purchaseInvoice.update({
+    return this.prisma.working.purchaseInvoice.update({
       where: { id },
       data: {
         status: 'APPROVED',
@@ -160,55 +160,55 @@ export class PurchaseInvoiceService {
   }
 
   async submitForApproval(tenantId: string, id: string) {
-    const invoice = await this.prisma.purchaseInvoice.findFirst({ where: { id, tenantId } });
+    const invoice = await this.prisma.working.purchaseInvoice.findFirst({ where: { id, tenantId } });
     if (!invoice) throw new NotFoundException('Purchase invoice not found');
     if (invoice.status !== 'DRAFT') throw new BadRequestException('Only draft invoices can be submitted');
 
-    return this.prisma.purchaseInvoice.update({
+    return this.prisma.working.purchaseInvoice.update({
       where: { id },
       data: { status: 'PENDING_APPROVAL' },
     });
   }
 
   async reject(tenantId: string, id: string, userId: string, remarks?: string) {
-    const invoice = await this.prisma.purchaseInvoice.findFirst({ where: { id, tenantId } });
+    const invoice = await this.prisma.working.purchaseInvoice.findFirst({ where: { id, tenantId } });
     if (!invoice) throw new NotFoundException('Purchase invoice not found');
 
-    return this.prisma.purchaseInvoice.update({
+    return this.prisma.working.purchaseInvoice.update({
       where: { id },
       data: { status: 'REJECTED' },
     });
   }
 
   async cancel(tenantId: string, id: string) {
-    const invoice = await this.prisma.purchaseInvoice.findFirst({ where: { id, tenantId } });
+    const invoice = await this.prisma.working.purchaseInvoice.findFirst({ where: { id, tenantId } });
     if (!invoice) throw new NotFoundException('Purchase invoice not found');
     if (['PAID', 'CANCELLED'].includes(invoice.status)) {
       throw new BadRequestException('Cannot cancel paid/cancelled invoice');
     }
-    return this.prisma.purchaseInvoice.update({
+    return this.prisma.working.purchaseInvoice.update({
       where: { id },
       data: { status: 'CANCELLED' },
     });
   }
 
   async generateNumber(tenantId: string): Promise<string> {
-    const count = await this.prisma.purchaseInvoice.count({ where: { tenantId } });
+    const count = await this.prisma.working.purchaseInvoice.count({ where: { tenantId } });
     return `PINV-${String(count + 1).padStart(5, '0')}`;
   }
 
   private async createAccountingEntries(tenantId: string, invoice: any, userId: string) {
-    const purchaseLedger = await this.prisma.ledgerMaster.findFirst({
+    const purchaseLedger = await this.prisma.working.ledgerMaster.findFirst({
       where: { tenantId, code: 'PURCHASE' },
     });
-    const payableLedger = await this.prisma.ledgerMaster.findFirst({
+    const payableLedger = await this.prisma.working.ledgerMaster.findFirst({
       where: { tenantId, code: 'ACCOUNTS_PAYABLE' },
     });
 
     const grandTotal = invoice.grandTotal?.toNumber?.() ?? invoice.grandTotal ?? 0;
 
     if (purchaseLedger && payableLedger) {
-      await this.prisma.accountTransaction.create({
+      await this.prisma.working.accountTransaction.create({
         data: {
           tenantId,
           transactionDate: new Date(),
@@ -226,7 +226,7 @@ export class PurchaseInvoiceService {
     }
 
     // Tax entry
-    const taxLedger = await this.prisma.ledgerMaster.findFirst({
+    const taxLedger = await this.prisma.working.ledgerMaster.findFirst({
       where: { tenantId, code: 'INPUT_GST' },
     });
     const taxTotal = invoice.cgstAmount?.toNumber?.() ?? 0 +
@@ -234,7 +234,7 @@ export class PurchaseInvoiceService {
                      (invoice.igstAmount?.toNumber?.() ?? 0);
 
     if (taxLedger && payableLedger && taxTotal > 0) {
-      await this.prisma.accountTransaction.create({
+      await this.prisma.working.accountTransaction.create({
         data: {
           tenantId,
           transactionDate: new Date(),

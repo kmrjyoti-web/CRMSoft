@@ -8,7 +8,7 @@ export class CancelQuotationHandler implements ICommandHandler<CancelQuotationCo
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CancelQuotationCommand) {
-    const quotation = await this.prisma.quotation.findUnique({ where: { id: cmd.id } });
+    const quotation = await this.prisma.working.quotation.findUnique({ where: { id: cmd.id } });
     if (!quotation) throw new NotFoundException('Quotation not found');
 
     const terminal = ['ACCEPTED', 'REJECTED', 'EXPIRED', 'CANCELLED'];
@@ -16,12 +16,12 @@ export class CancelQuotationHandler implements ICommandHandler<CancelQuotationCo
       throw new BadRequestException(`Cannot cancel quotation with status ${quotation.status}`);
     }
 
-    await this.prisma.quotation.update({
+    await this.prisma.working.quotation.update({
       where: { id: cmd.id },
       data: { status: 'CANCELLED' },
     });
 
-    await this.prisma.quotationActivity.create({
+    await this.prisma.working.quotationActivity.create({
       data: {
         quotationId: cmd.id, action: 'CANCELLED',
         description: `Quotation cancelled${cmd.reason ? ': ' + cmd.reason : ''}`,

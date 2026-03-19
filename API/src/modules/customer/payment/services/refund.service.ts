@@ -20,7 +20,7 @@ export class RefundService {
 
   /** Initiate a refund */
   async create(tenantId: string, dto: CreateRefundDto, userId: string) {
-    const payment = await this.prisma.payment.findFirst({
+    const payment = await this.prisma.working.payment.findFirst({
       where: { id: dto.paymentId, tenantId },
       include: { refunds: true },
     });
@@ -62,7 +62,7 @@ export class RefundService {
       status = 'REFUND_PROCESSED';
     }
 
-    const refund = await this.prisma.refund.create({
+    const refund = await this.prisma.working.refund.create({
       data: {
         tenantId,
         refundNo,
@@ -80,12 +80,12 @@ export class RefundService {
 
     // Update payment status
     if (totalRefunded + dto.amount >= Number(payment.amount)) {
-      await this.prisma.payment.update({
+      await this.prisma.working.payment.update({
         where: { id: payment.id },
         data: { status: 'REFUNDED' },
       });
     } else {
-      await this.prisma.payment.update({
+      await this.prisma.working.payment.update({
         where: { id: payment.id },
         data: { status: 'PARTIALLY_REFUNDED' },
       });
@@ -99,7 +99,7 @@ export class RefundService {
 
   /** Get refund by ID */
   async getById(tenantId: string, refundId: string) {
-    const refund = await this.prisma.refund.findFirst({
+    const refund = await this.prisma.working.refund.findFirst({
       where: { id: refundId, tenantId },
       include: { payment: { include: { invoice: true } } },
     });
@@ -122,14 +122,14 @@ export class RefundService {
     const limit = query.limit || 20;
 
     const [data, total] = await Promise.all([
-      this.prisma.refund.findMany({
+      this.prisma.working.refund.findMany({
         where,
         include: { payment: { select: { paymentNo: true, invoice: { select: { invoiceNo: true } } } } },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.refund.count({ where }),
+      this.prisma.working.refund.count({ where }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };

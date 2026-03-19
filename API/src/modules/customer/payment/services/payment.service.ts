@@ -19,7 +19,7 @@ export class PaymentService {
 
   /** Record an offline/manual payment */
   async recordPayment(tenantId: string, dto: RecordPaymentDto, userId: string) {
-    const invoice = await this.prisma.invoice.findFirst({
+    const invoice = await this.prisma.working.invoice.findFirst({
       where: { id: dto.invoiceId, tenantId },
     });
     if (!invoice) throw AppError.from('INVOICE_NOT_FOUND');
@@ -31,7 +31,7 @@ export class PaymentService {
 
     const paymentNo = await this.autoNumber.next(tenantId, 'Payment');
 
-    const payment = await this.prisma.payment.create({
+    const payment = await this.prisma.working.payment.create({
       data: {
         tenantId,
         paymentNo,
@@ -59,7 +59,7 @@ export class PaymentService {
 
   /** Create a gateway order for online payment */
   async createGatewayOrder(tenantId: string, dto: CreateGatewayOrderDto, userId: string) {
-    const invoice = await this.prisma.invoice.findFirst({
+    const invoice = await this.prisma.working.invoice.findFirst({
       where: { id: dto.invoiceId, tenantId },
     });
     if (!invoice) throw AppError.from('INVOICE_NOT_FOUND');
@@ -79,7 +79,7 @@ export class PaymentService {
       { invoiceId: dto.invoiceId, tenantId },
     );
 
-    const payment = await this.prisma.payment.create({
+    const payment = await this.prisma.working.payment.create({
       data: {
         tenantId,
         paymentNo,
@@ -101,7 +101,7 @@ export class PaymentService {
 
   /** Verify and capture gateway payment */
   async verifyGatewayPayment(tenantId: string, dto: VerifyGatewayPaymentDto) {
-    const payment = await this.prisma.payment.findFirst({
+    const payment = await this.prisma.working.payment.findFirst({
       where: { gatewayOrderId: dto.gatewayOrderId, tenantId },
     });
     if (!payment) throw AppError.from('PAYMENT_NOT_FOUND');
@@ -116,7 +116,7 @@ export class PaymentService {
     );
 
     if (!result.verified) {
-      await this.prisma.payment.update({
+      await this.prisma.working.payment.update({
         where: { id: payment.id },
         data: {
           status: 'FAILED',
@@ -127,7 +127,7 @@ export class PaymentService {
       throw AppError.from('PAYMENT_SIGNATURE_INVALID');
     }
 
-    const updated = await this.prisma.payment.update({
+    const updated = await this.prisma.working.payment.update({
       where: { id: payment.id },
       data: {
         status: 'CAPTURED',
@@ -145,7 +145,7 @@ export class PaymentService {
 
   /** Get payment by ID */
   async getById(tenantId: string, paymentId: string) {
-    const payment = await this.prisma.payment.findFirst({
+    const payment = await this.prisma.working.payment.findFirst({
       where: { id: paymentId, tenantId },
       include: { invoice: true, receipt: true, refunds: true },
     });
@@ -168,14 +168,14 @@ export class PaymentService {
     const limit = query.limit || 20;
 
     const [data, total] = await Promise.all([
-      this.prisma.payment.findMany({
+      this.prisma.working.payment.findMany({
         where,
         include: { invoice: { select: { invoiceNo: true, billingName: true } } },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.payment.count({ where }),
+      this.prisma.working.payment.count({ where }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
@@ -197,11 +197,11 @@ export class PaymentService {
       const rpOrderId = payload.payment?.entity?.order_id;
 
       if (rpOrderId) {
-        const payment = await this.prisma.payment.findFirst({
+        const payment = await this.prisma.working.payment.findFirst({
           where: { gatewayOrderId: rpOrderId, tenantId },
         });
         if (payment && payment.status === 'PENDING') {
-          await this.prisma.payment.update({
+          await this.prisma.working.payment.update({
             where: { id: payment.id },
             data: {
               status: 'CAPTURED',
@@ -218,7 +218,7 @@ export class PaymentService {
     if (event === 'refund.processed') {
       const rpRefundId = payload.refund?.entity?.id;
       if (rpRefundId) {
-        await this.prisma.refund.updateMany({
+        await this.prisma.working.refund.updateMany({
           where: { gatewayRefundId: rpRefundId },
           data: { status: 'REFUND_PROCESSED', processedAt: new Date(), gatewayResponse: payload },
         });
@@ -230,11 +230,11 @@ export class PaymentService {
     if (event === 'payment_intent.succeeded') {
       const intentId = payload.data?.object?.id;
       if (intentId) {
-        const payment = await this.prisma.payment.findFirst({
+        const payment = await this.prisma.working.payment.findFirst({
           where: { gatewayOrderId: intentId, tenantId },
         });
         if (payment && payment.status === 'PENDING') {
-          await this.prisma.payment.update({
+          await this.prisma.working.payment.update({
             where: { id: payment.id },
             data: {
               status: 'CAPTURED',
@@ -253,7 +253,7 @@ export class PaymentService {
       if (chargeId) {
         const refund = payload.data?.object?.refunds?.data?.[0];
         if (refund) {
-          await this.prisma.refund.updateMany({
+          await this.prisma.working.refund.updateMany({
             where: { gatewayRefundId: refund.id },
             data: { status: 'REFUND_PROCESSED', processedAt: new Date(), gatewayResponse: payload },
           });

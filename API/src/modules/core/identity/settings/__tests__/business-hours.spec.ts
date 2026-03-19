@@ -8,6 +8,7 @@ const mockPrisma = {
 } as any;
 (mockPrisma as any).identity = mockPrisma;
 (mockPrisma as any).platform = mockPrisma;
+(mockPrisma as any).working = mockPrisma;
 
 describe('BusinessHoursService', () => {
   let service: BusinessHoursService;

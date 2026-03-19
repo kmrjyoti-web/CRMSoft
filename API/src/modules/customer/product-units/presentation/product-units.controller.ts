@@ -43,7 +43,7 @@ export class ProductUnitsController {
     const results: any[] = [];
 
     for (const c of dto.conversions) {
-      const existing = await this.prisma.productUnitConversion.findFirst({
+      const existing = await this.prisma.working.productUnitConversion.findFirst({
         where: {
           productId,
           fromUnit: c.fromUnit as any,
@@ -52,7 +52,7 @@ export class ProductUnitsController {
       });
       let record;
       if (existing) {
-        record = await this.prisma.productUnitConversion.update({
+        record = await this.prisma.working.productUnitConversion.update({
           where: { id: existing.id },
           data: {
             conversionRate: c.conversionRate,
@@ -60,7 +60,7 @@ export class ProductUnitsController {
           },
         });
       } else {
-        record = await this.prisma.productUnitConversion.create({
+        record = await this.prisma.working.productUnitConversion.create({
           data: {
             productId,
             fromUnit: c.fromUnit as any,
@@ -82,7 +82,7 @@ export class ProductUnitsController {
   async getConversions(
     @Param('productId', ParseUUIDPipe) productId: string,
   ) {
-    const conversions = await this.prisma.productUnitConversion.findMany({
+    const conversions = await this.prisma.working.productUnitConversion.findMany({
       where: { productId },
       orderBy: { fromUnit: 'asc' },
     });
@@ -120,7 +120,7 @@ export class ProductUnitsController {
   async removeConversion(
     @Param('conversionId', ParseUUIDPipe) conversionId: string,
   ) {
-    await this.prisma.productUnitConversion.delete({
+    await this.prisma.working.productUnitConversion.delete({
       where: { id: conversionId },
     });
     return ApiResponse.success(null, 'Conversion removed');

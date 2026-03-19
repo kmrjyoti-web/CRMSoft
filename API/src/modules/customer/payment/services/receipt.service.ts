@@ -14,7 +14,7 @@ export class ReceiptService {
 
   /** Auto-generate receipt after payment capture */
   async generateForPayment(tenantId: string, paymentId: string, userId: string) {
-    const payment = await this.prisma.payment.findFirst({
+    const payment = await this.prisma.working.payment.findFirst({
       where: { id: paymentId, tenantId },
       include: { invoice: true, receipt: true },
     });
@@ -24,7 +24,7 @@ export class ReceiptService {
     const receiptNo = await this.autoNumber.next(tenantId, 'Receipt');
     const words = this.amountInWords.convert(Number(payment.amount));
 
-    const receipt = await this.prisma.paymentReceipt.create({
+    const receipt = await this.prisma.working.paymentReceipt.create({
       data: {
         tenantId,
         receiptNo,
@@ -45,7 +45,7 @@ export class ReceiptService {
 
   /** Get receipt by ID */
   async getById(tenantId: string, receiptId: string) {
-    const receipt = await this.prisma.paymentReceipt.findFirst({
+    const receipt = await this.prisma.working.paymentReceipt.findFirst({
       where: { id: receiptId, tenantId },
       include: { payment: { include: { invoice: true } } },
     });
@@ -55,7 +55,7 @@ export class ReceiptService {
 
   /** Get receipt by payment ID */
   async getByPaymentId(tenantId: string, paymentId: string) {
-    const receipt = await this.prisma.paymentReceipt.findFirst({
+    const receipt = await this.prisma.working.paymentReceipt.findFirst({
       where: { paymentId, tenantId },
       include: { payment: { include: { invoice: true } } },
     });
@@ -66,14 +66,14 @@ export class ReceiptService {
   /** List receipts for a tenant */
   async list(tenantId: string, page = 1, limit = 20) {
     const [data, total] = await Promise.all([
-      this.prisma.paymentReceipt.findMany({
+      this.prisma.working.paymentReceipt.findMany({
         where: { tenantId },
         include: { payment: { select: { paymentNo: true, invoice: { select: { invoiceNo: true } } } } },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.paymentReceipt.count({ where: { tenantId } }),
+      this.prisma.working.paymentReceipt.count({ where: { tenantId } }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };

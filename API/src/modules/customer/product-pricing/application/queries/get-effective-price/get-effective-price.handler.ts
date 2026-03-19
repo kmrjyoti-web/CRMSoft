@@ -15,7 +15,7 @@ export class GetEffectivePriceHandler
       query;
 
     // 1. Load product
-    const product = await this.prisma.product.findUnique({
+    const product = await this.prisma.working.product.findUnique({
       where: { id: productId },
       select: {
         id: true, name: true, gstRate: true, cessRate: true,
@@ -33,7 +33,7 @@ export class GetEffectivePriceHandler
 
     // 4. Load active prices
     const now = new Date();
-    const allPrices = await this.prisma.productPrice.findMany({
+    const allPrices = await this.prisma.working.productPrice.findMany({
       where: { productId, isActive: true },
       include: {
         priceGroup: { select: { id: true, name: true, priority: true } },
@@ -85,7 +85,7 @@ export class GetEffectivePriceHandler
     organizationId?: string,
   ): Promise<string | null> {
     if (contactId) {
-      const mapping = await this.prisma.customerGroupMapping.findFirst({
+      const mapping = await this.prisma.working.customerGroupMapping.findFirst({
         where: { contactId, isActive: true },
         include: {
           priceGroup: { select: { id: true, priority: true } },
@@ -96,7 +96,7 @@ export class GetEffectivePriceHandler
     }
 
     if (organizationId) {
-      const mapping = await this.prisma.customerGroupMapping.findFirst({
+      const mapping = await this.prisma.working.customerGroupMapping.findFirst({
         where: { organizationId, isActive: true },
         include: {
           priceGroup: { select: { id: true, priority: true } },

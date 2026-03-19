@@ -14,7 +14,7 @@ export class CreateQuotationHandler implements ICommandHandler<CreateQuotationCo
   ) {}
 
   async execute(cmd: CreateQuotationCommand) {
-    const lead = await this.prisma.lead.findFirst({
+    const lead = await this.prisma.working.lead.findFirst({
       where: { id: cmd.leadId, tenantId: cmd.tenantId },
       include: { organization: { select: { id: true, state: true } } },
     });
@@ -32,7 +32,7 @@ export class CreateQuotationHandler implements ICommandHandler<CreateQuotationCo
       let mrp = item.mrp;
 
       if (item.productId) {
-        const product = await this.prisma.product.findFirst({
+        const product = await this.prisma.working.product.findFirst({
           where: { id: item.productId, tenantId: cmd.tenantId },
           select: { code: true, hsnCode: true, gstRate: true, mrp: true },
         });
@@ -67,7 +67,7 @@ export class CreateQuotationHandler implements ICommandHandler<CreateQuotationCo
       });
     }
 
-    const quotation = await this.prisma.quotation.create({
+    const quotation = await this.prisma.working.quotation.create({
       data: {
         tenantId: cmd.tenantId,
         quotationNo, status: 'DRAFT', title: cmd.title, summary: cmd.summary,
@@ -92,7 +92,7 @@ export class CreateQuotationHandler implements ICommandHandler<CreateQuotationCo
     await this.calculator.recalculate(quotation.id, customerState, cmd.tenantId);
 
     // Log activity
-    await this.prisma.quotationActivity.create({
+    await this.prisma.working.quotationActivity.create({
       data: {
         tenantId: cmd.tenantId,
         quotationId: quotation.id, action: 'CREATED',
@@ -102,7 +102,7 @@ export class CreateQuotationHandler implements ICommandHandler<CreateQuotationCo
       },
     });
 
-    return this.prisma.quotation.findFirst({
+    return this.prisma.working.quotation.findFirst({
       where: { id: quotation.id, tenantId: cmd.tenantId },
       include: { lineItems: true, lead: true },
     });

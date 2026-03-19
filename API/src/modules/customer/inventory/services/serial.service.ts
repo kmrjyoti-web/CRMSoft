@@ -25,21 +25,21 @@ export class SerialService {
     if (filters.locationId) where.locationId = filters.locationId;
 
     const [data, total] = await Promise.all([
-      this.prisma.serialMaster.findMany({
+      this.prisma.working.serialMaster.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
         include: { inventoryItem: true },
       }),
-      this.prisma.serialMaster.count({ where }),
+      this.prisma.working.serialMaster.count({ where }),
     ]);
 
     return { data, total, page, limit };
   }
 
   async getById(tenantId: string, id: string) {
-    const serial = await this.prisma.serialMaster.findFirst({
+    const serial = await this.prisma.working.serialMaster.findFirst({
       where: { id, tenantId },
       include: { inventoryItem: true },
     });
@@ -71,12 +71,12 @@ export class SerialService {
     const item = await this.inventoryService.getOrCreateItem(tenantId, dto.productId, 'SERIAL');
 
     // Check duplicate serial
-    const existing = await this.prisma.serialMaster.findUnique({
+    const existing = await this.prisma.working.serialMaster.findUnique({
       where: { tenantId_serialNo: { tenantId, serialNo: dto.serialNo } },
     });
     if (existing) throw new BadRequestException(`Serial number "${dto.serialNo}" already exists`);
 
-    const serial = await this.prisma.serialMaster.create({
+    const serial = await this.prisma.working.serialMaster.create({
       data: {
         tenantId,
         productId: dto.productId,
@@ -102,7 +102,7 @@ export class SerialService {
     });
 
     // Update stock count
-    await this.prisma.inventoryItem.update({
+    await this.prisma.working.inventoryItem.update({
       where: { id: item.id },
       data: { currentStock: { increment: 1 } },
     });
@@ -141,7 +141,7 @@ export class SerialService {
     for (let idx = 0; idx < items.length; idx++) {
       const dto = items[idx];
       try {
-        const existing = await this.prisma.serialMaster.findUnique({
+        const existing = await this.prisma.working.serialMaster.findUnique({
           where: { tenantId_serialNo: { tenantId, serialNo: dto.serialNo } },
         });
         if (existing) {
@@ -149,7 +149,7 @@ export class SerialService {
           continue;
         }
 
-        const serial = await this.prisma.serialMaster.create({
+        const serial = await this.prisma.working.serialMaster.create({
           data: {
             tenantId,
             productId: dto.productId,
@@ -179,7 +179,7 @@ export class SerialService {
     for (const productId of productIds) {
       const count = results.filter((r) => r.productId === productId).length;
       if (count > 0) {
-        await this.prisma.inventoryItem.update({
+        await this.prisma.working.inventoryItem.update({
           where: { id: itemMap[productId] },
           data: { currentStock: { increment: count } },
         });
@@ -209,7 +209,7 @@ export class SerialService {
   }) {
     const serial = await this.getById(tenantId, id);
 
-    return this.prisma.serialMaster.update({
+    return this.prisma.working.serialMaster.update({
       where: { id: serial.id },
       data: {
         code1: dto.code1,
@@ -245,7 +245,7 @@ export class SerialService {
       updateData.activationDate = new Date();
     }
 
-    return this.prisma.serialMaster.update({
+    return this.prisma.working.serialMaster.update({
       where: { id: serial.id },
       data: updateData,
     });
@@ -255,7 +255,7 @@ export class SerialService {
     const q = query.trim();
     if (!q) return [];
 
-    return this.prisma.serialMaster.findMany({
+    return this.prisma.working.serialMaster.findMany({
       where: {
         tenantId,
         OR: [
@@ -273,7 +273,7 @@ export class SerialService {
   async getExpiring(tenantId: string, days: number = 30) {
     const futureDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 
-    return this.prisma.serialMaster.findMany({
+    return this.prisma.working.serialMaster.findMany({
       where: {
         tenantId,
         status: 'AVAILABLE',

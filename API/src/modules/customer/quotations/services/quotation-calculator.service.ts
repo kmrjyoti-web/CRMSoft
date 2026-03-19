@@ -93,7 +93,7 @@ export class QuotationCalculatorService {
   async recalculate(quotationId: string, customerState?: string, tenantId?: string): Promise<QuotationTotals> {
     const where: any = { id: quotationId };
     if (tenantId) where.tenantId = tenantId;
-    const quotation = await this.prisma.quotation.findFirst({
+    const quotation = await this.prisma.working.quotation.findFirst({
       where,
       include: { lineItems: true },
     });
@@ -114,7 +114,7 @@ export class QuotationCalculatorService {
         isOptional: item.isOptional,
       }, interState);
 
-      await this.prisma.quotationLineItem.updateMany({
+      await this.prisma.working.quotationLineItem.updateMany({
         where: { id: item.id, ...(tenantId ? { tenantId } : {}) },
         data: {
           discountAmount: calc.discountAmount,
@@ -159,7 +159,7 @@ export class QuotationCalculatorService {
       roundOff: Math.round(roundOff * 100) / 100, totalAmount,
     };
 
-    await this.prisma.quotation.updateMany({
+    await this.prisma.working.quotation.updateMany({
       where: { id: quotationId, ...(tenantId ? { tenantId } : {}) },
       data: {
         subtotal: totals.subtotal,

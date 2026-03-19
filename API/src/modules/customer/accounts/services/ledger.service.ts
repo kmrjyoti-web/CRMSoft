@@ -6,7 +6,7 @@ export class AccountLedgerService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getChartOfAccounts(tenantId: string) {
-    const ledgers = await this.prisma.ledgerMaster.findMany({
+    const ledgers = await this.prisma.working.ledgerMaster.findMany({
       where: { tenantId, isActive: true },
       orderBy: [{ groupType: 'asc' }, { name: 'asc' }],
     });
@@ -34,19 +34,19 @@ export class AccountLedgerService {
     const page = params?.page ?? 1;
     const limit = params?.limit ?? 50;
     const [data, total] = await Promise.all([
-      this.prisma.ledgerMaster.findMany({
+      this.prisma.working.ledgerMaster.findMany({
         where, skip: (page - 1) * limit, take: limit,
         orderBy: [{ groupType: 'asc' }, { name: 'asc' }],
         include: { accountGroup: { select: { name: true } } },
       }),
-      this.prisma.ledgerMaster.count({ where }),
+      this.prisma.working.ledgerMaster.count({ where }),
     ]);
 
     return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
   }
 
   async getLedgerById(tenantId: string, id: string) {
-    const ledger = await this.prisma.ledgerMaster.findFirst({
+    const ledger = await this.prisma.working.ledgerMaster.findFirst({
       where: { tenantId, id },
       include: {
         accountGroup: true,
@@ -55,7 +55,7 @@ export class AccountLedgerService {
     });
     if (!ledger) throw new NotFoundException('Ledger not found');
 
-    const transactions = await this.prisma.accountTransaction.findMany({
+    const transactions = await this.prisma.working.accountTransaction.findMany({
       where: { tenantId, OR: [{ debitLedgerId: id }, { creditLedgerId: id }] },
       orderBy: { transactionDate: 'desc' },
       take: 20,
@@ -65,16 +65,16 @@ export class AccountLedgerService {
   }
 
   async getLedgerEntities(tenantId: string, ledgerId: string) {
-    return this.prisma.ledgerMapping.findMany({
+    return this.prisma.working.ledgerMapping.findMany({
       where: { tenantId, ledgerId, isActive: true },
     });
   }
 
   async getLedgerStatement(ledgerId: string, tenantId: string, from: string, to: string) {
-    const ledger = await this.prisma.ledgerMaster.findFirst({ where: { tenantId, id: ledgerId } });
+    const ledger = await this.prisma.working.ledgerMaster.findFirst({ where: { tenantId, id: ledgerId } });
     if (!ledger) throw new NotFoundException('Ledger not found');
 
-    const txns = await this.prisma.accountTransaction.findMany({
+    const txns = await this.prisma.working.accountTransaction.findMany({
       where: {
         tenantId,
         OR: [{ debitLedgerId: ledgerId }, { creditLedgerId: ledgerId }],
@@ -96,11 +96,11 @@ export class AccountLedgerService {
 
   private async generateLedgerCode(tenantId: string, name: string): Promise<string> {
     const prefix = name.replace(/[^a-zA-Z]/g, '').slice(0, 3).toUpperCase() || 'LDG';
-    const count = await this.prisma.ledgerMaster.count({
+    const count = await this.prisma.working.ledgerMaster.count({
       where: { tenantId, code: { startsWith: prefix } },
     });
     let candidate = `${prefix}${String(count + 1).padStart(3, '0')}`;
-    while (await this.prisma.ledgerMaster.findFirst({ where: { tenantId, code: candidate } })) {
+    while (await this.prisma.working.ledgerMaster.findFirst({ where: { tenantId, code: candidate } })) {
       const num = parseInt(candidate.slice(prefix.length), 10) + 1;
       candidate = `${prefix}${String(num).padStart(3, '0')}`;
     }
@@ -140,13 +140,13 @@ export class AccountLedgerService {
       ? data.code.trim()
       : await this.generateLedgerCode(tenantId, data.name);
 
-    const existing = await this.prisma.ledgerMaster.findFirst({ where: { tenantId, code } });
+    const existing = await this.prisma.working.ledgerMaster.findFirst({ where: { tenantId, code } });
     if (existing) throw new BadRequestException(`Ledger code "${code}" already exists`);
 
     // Resolve groupType: always derive from accountGroupId.primaryGroup (authoritative)
     let resolvedGroupType = data.groupType ?? 'ASSET';
     if (data.accountGroupId) {
-      const grp = await this.prisma.accountGroup.findFirst({
+      const grp = await this.prisma.working.accountGroup.findFirst({
         where: { id: data.accountGroupId },
         select: { primaryGroup: true },
       });
@@ -155,7 +155,7 @@ export class AccountLedgerService {
       }
     }
 
-    return this.prisma.ledgerMaster.create({
+    return this.prisma.working.ledgerMaster.create({
       data: {
         tenantId,
         code,
@@ -198,7 +198,7 @@ export class AccountLedgerService {
   }
 
   async updateLedger(tenantId: string, id: string, data: any) {
-    const ledger = await this.prisma.ledgerMaster.findFirst({ where: { tenantId, id } });
+    const ledger = await this.prisma.working.ledgerMaster.findFirst({ where: { tenantId, id } });
     if (!ledger) throw new NotFoundException('Ledger not found');
 
     // Resolve groupType on update too (handles Tally-style values)
@@ -206,7 +206,7 @@ export class AccountLedgerService {
       data = { ...data, groupType: this.resolveGroupType(data.groupType) };
     }
     if (data.accountGroupId && !data.groupType) {
-      const grp = await this.prisma.accountGroup.findFirst({
+      const grp = await this.prisma.working.accountGroup.findFirst({
         where: { id: data.accountGroupId },
         select: { primaryGroup: true },
       });
@@ -214,7 +214,7 @@ export class AccountLedgerService {
         data = { ...data, groupType: this.resolveGroupType(grp.primaryGroup) };
       }
     }
-    return this.prisma.ledgerMaster.update({ where: { id }, data });
+    return this.prisma.working.ledgerMaster.update({ where: { id }, data });
   }
 
   /**
@@ -267,7 +267,7 @@ export class AccountLedgerService {
     };
 
     // Load all account groups for this tenant once
-    const groups = await this.prisma.accountGroup.findMany({
+    const groups = await this.prisma.working.accountGroup.findMany({
       where: { tenantId },
       select: { id: true, code: true, primaryGroup: true },
     });
@@ -280,7 +280,7 @@ export class AccountLedgerService {
 
       // Check duplicate
       const existingCode = await this.generateLedgerCode(tenantId, tl.NAME);
-      const dup = await this.prisma.ledgerMaster.findFirst({ where: { tenantId, name: tl.NAME } });
+      const dup = await this.prisma.working.ledgerMaster.findFirst({ where: { tenantId, name: tl.NAME } });
       if (dup) { results.push({ name: tl.NAME, status: 'skipped' }); continue; }
 
       // Resolve group
@@ -297,7 +297,7 @@ export class AccountLedgerService {
         openingBalanceType = parts[1]?.toLowerCase() === 'cr' ? 'Cr' : 'Dr';
       }
 
-      const created = await this.prisma.ledgerMaster.create({
+      const created = await this.prisma.working.ledgerMaster.create({
         data: {
           tenantId,
           code: existingCode,
@@ -328,15 +328,15 @@ export class AccountLedgerService {
   }
 
   async deactivateLedger(tenantId: string, id: string) {
-    const ledger = await this.prisma.ledgerMaster.findFirst({ where: { tenantId, id } });
+    const ledger = await this.prisma.working.ledgerMaster.findFirst({ where: { tenantId, id } });
     if (!ledger) throw new NotFoundException('Ledger not found');
     if (ledger.isSystem) throw new BadRequestException('Cannot deactivate system ledgers');
     if (Number(ledger.currentBalance) !== 0) throw new BadRequestException('Cannot deactivate ledger with non-zero balance');
-    return this.prisma.ledgerMaster.update({ where: { id }, data: { isActive: false } });
+    return this.prisma.working.ledgerMaster.update({ where: { id }, data: { isActive: false } });
   }
 
   async getLedgerMappings(tenantId: string) {
-    return this.prisma.ledgerMapping.findMany({
+    return this.prisma.working.ledgerMapping.findMany({
       where: { tenantId, isActive: true },
       include: { ledger: { select: { id: true, name: true, code: true, groupType: true } } },
     });
@@ -346,17 +346,17 @@ export class AccountLedgerService {
     entityType: string; entityId: string; entityName?: string;
     ledgerId: string; mappingType: string; creditLimit?: number; creditDays?: number; gstin?: string; pan?: string;
   }) {
-    const existing = await this.prisma.ledgerMapping.findFirst({
+    const existing = await this.prisma.working.ledgerMapping.findFirst({
       where: { tenantId, entityType: data.entityType, entityId: data.entityId },
     });
     if (existing) {
-      return this.prisma.ledgerMapping.update({ where: { id: existing.id }, data: { ...data, isActive: true } });
+      return this.prisma.working.ledgerMapping.update({ where: { id: existing.id }, data: { ...data, isActive: true } });
     }
-    return this.prisma.ledgerMapping.create({ data: { tenantId, ...data } });
+    return this.prisma.working.ledgerMapping.create({ data: { tenantId, ...data } });
   }
 
   async getUnmappedEntities(tenantId: string) {
-    const mappedIds = await this.prisma.ledgerMapping.findMany({
+    const mappedIds = await this.prisma.working.ledgerMapping.findMany({
       where: { tenantId, isActive: true },
       select: { entityId: true, entityType: true },
     });
@@ -364,12 +364,12 @@ export class AccountLedgerService {
     const mappedContactIds = mappedIds.filter((m) => m.entityType === 'CONTACT').map((m) => m.entityId);
 
     const [orgs, contacts] = await Promise.all([
-      this.prisma.organization.findMany({
+      this.prisma.working.organization.findMany({
         where: { tenantId, id: { notIn: mappedOrgIds }, isActive: true },
         select: { id: true, name: true, gstNumber: true },
         take: 50,
       }).catch(() => []),
-      this.prisma.contact.findMany({
+      this.prisma.working.contact.findMany({
         where: { tenantId, id: { notIn: mappedContactIds }, isActive: true },
         select: { id: true, firstName: true, lastName: true },
         take: 50,
@@ -393,10 +393,10 @@ export class AccountLedgerService {
     transactionDate: string; debitLedgerId: string; creditLedgerId: string;
     amount: number; narration?: string; referenceType?: string; referenceId?: string;
   }) {
-    const count = await this.prisma.accountTransaction.count({ where: { tenantId, voucherType: 'JOURNAL' } });
+    const count = await this.prisma.working.accountTransaction.count({ where: { tenantId, voucherType: 'JOURNAL' } });
     const voucherNumber = `JV-${new Date().getFullYear()}-${String(count + 1).padStart(4, '0')}`;
 
-    const txn = await this.prisma.accountTransaction.create({
+    const txn = await this.prisma.working.accountTransaction.create({
       data: {
         tenantId,
         transactionDate: new Date(data.transactionDate),
@@ -412,8 +412,8 @@ export class AccountLedgerService {
       },
     });
 
-    await this.prisma.ledgerMaster.update({ where: { id: data.debitLedgerId }, data: { currentBalance: { increment: data.amount } } });
-    await this.prisma.ledgerMaster.update({ where: { id: data.creditLedgerId }, data: { currentBalance: { decrement: data.amount } } });
+    await this.prisma.working.ledgerMaster.update({ where: { id: data.debitLedgerId }, data: { currentBalance: { increment: data.amount } } });
+    await this.prisma.working.ledgerMaster.update({ where: { id: data.creditLedgerId }, data: { currentBalance: { decrement: data.amount } } });
     return txn;
   }
 }

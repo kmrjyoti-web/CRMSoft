@@ -8,7 +8,8 @@ const mockPrisma = {
     findMany: jest.fn(),
     count: jest.fn(),
   },
-} as any;
+};
+(mockPrisma as any).working = mockPrisma;
 
 const mockAutoNumber = { next: jest.fn() } as any;
 const mockAmountInWords = { convert: jest.fn() } as any;
@@ -18,7 +19,7 @@ describe('ReceiptService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new ReceiptService(mockPrisma, mockAutoNumber, mockAmountInWords);
+    service = new ReceiptService(mockPrisma as any, mockAutoNumber, mockAmountInWords);
   });
 
   it('should generate receipt for a payment', async () => {

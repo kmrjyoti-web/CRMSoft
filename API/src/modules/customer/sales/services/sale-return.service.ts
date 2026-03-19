@@ -12,7 +12,7 @@ export class SaleReturnService {
 
   async generateNumber(tenantId: string): Promise<string> {
     const year = new Date().getFullYear();
-    const count = await this.prisma.saleReturn.count({
+    const count = await this.prisma.working.saleReturn.count({
       where: { tenantId, returnNumber: { startsWith: `SR-${year}-` } },
     });
     return `SR-${year}-${String(count + 1).padStart(4, '0')}`;
@@ -55,7 +55,7 @@ export class SaleReturnService {
 
     const grandTotal = subtotal + taxAmount;
 
-    return this.prisma.saleReturn.create({
+    return this.prisma.working.saleReturn.create({
       data: {
         tenantId,
         returnNumber,
@@ -85,21 +85,21 @@ export class SaleReturnService {
     if (filters?.customerId) where.customerId = filters.customerId;
 
     const [data, total] = await Promise.all([
-      this.prisma.saleReturn.findMany({
+      this.prisma.working.saleReturn.findMany({
         where,
         include: { items: true },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.saleReturn.count({ where }),
+      this.prisma.working.saleReturn.count({ where }),
     ]);
 
     return { data, total, page, limit };
   }
 
   async findById(tenantId: string, id: string) {
-    const saleReturn = await this.prisma.saleReturn.findFirst({
+    const saleReturn = await this.prisma.working.saleReturn.findFirst({
       where: { id, tenantId },
       include: { items: true },
     });
@@ -108,7 +108,7 @@ export class SaleReturnService {
   }
 
   async inspect(tenantId: string, id: string, dto: InspectReturnDto) {
-    const saleReturn = await this.prisma.saleReturn.findFirst({
+    const saleReturn = await this.prisma.working.saleReturn.findFirst({
       where: { id, tenantId },
       include: { items: true },
     });
@@ -119,7 +119,7 @@ export class SaleReturnService {
       const item = saleReturn.items.find((i) => i.id === inspection.itemId);
       if (!item) throw new BadRequestException(`Return item ${inspection.itemId} not found`);
 
-      await this.prisma.saleReturnItem.update({
+      await this.prisma.working.saleReturnItem.update({
         where: { id: inspection.itemId },
         data: {
           acceptedQty: inspection.acceptedQty,
@@ -129,7 +129,7 @@ export class SaleReturnService {
       });
     }
 
-    return this.prisma.saleReturn.update({
+    return this.prisma.working.saleReturn.update({
       where: { id },
       data: { status: 'INSPECTED' },
       include: { items: true },
@@ -137,7 +137,7 @@ export class SaleReturnService {
   }
 
   async accept(tenantId: string, id: string, userId: string) {
-    const saleReturn = await this.prisma.saleReturn.findFirst({
+    const saleReturn = await this.prisma.working.saleReturn.findFirst({
       where: { id, tenantId },
       include: { items: true },
     });
@@ -154,12 +154,12 @@ export class SaleReturnService {
       const locationId = saleReturn.receiveLocationId;
 
       // Find inventory item
-      const inventoryItem = await this.prisma.inventoryItem.findFirst({
+      const inventoryItem = await this.prisma.working.inventoryItem.findFirst({
         where: { tenantId, productId: item.productId },
       });
 
       if (inventoryItem && locationId) {
-        await this.prisma.stockTransaction.create({
+        await this.prisma.working.stockTransaction.create({
           data: {
             tenantId,
             inventoryItemId: inventoryItem.id,
@@ -175,13 +175,13 @@ export class SaleReturnService {
         });
 
         // Update inventory item stock
-        await this.prisma.inventoryItem.updateMany({
+        await this.prisma.working.inventoryItem.updateMany({
           where: { tenantId, productId: item.productId },
           data: { currentStock: { increment: acceptedQty } },
         });
 
         // Update stock summary
-        await this.prisma.stockSummary.updateMany({
+        await this.prisma.working.stockSummary.updateMany({
           where: { tenantId, productId: item.productId, locationId },
           data: {
             totalIn: { increment: acceptedQty },
@@ -193,11 +193,11 @@ export class SaleReturnService {
       // If saleOrderId linked: update SaleOrderItem.returnedQty
       if (saleReturn.saleOrderId) {
         // Find the matching sale order item by productId
-        const soItem = await this.prisma.saleOrderItem.findFirst({
+        const soItem = await this.prisma.working.saleOrderItem.findFirst({
           where: { saleOrder: { id: saleReturn.saleOrderId }, productId: item.productId },
         });
         if (soItem) {
-          await this.prisma.saleOrderItem.update({
+          await this.prisma.working.saleOrderItem.update({
             where: { id: soItem.id },
             data: { returnedQty: { increment: acceptedQty } },
           });
@@ -206,7 +206,7 @@ export class SaleReturnService {
     }
 
     // Update sale return status
-    const updated = await this.prisma.saleReturn.update({
+    const updated = await this.prisma.working.saleReturn.update({
       where: { id },
       data: { status: 'ACCEPTED', inventoryUpdated: true },
       include: { items: true },
@@ -216,7 +216,7 @@ export class SaleReturnService {
     try {
       const creditNote = await this.creditNoteService.createFromReturn(tenantId, userId, updated);
       if (creditNote) {
-        await this.prisma.saleReturn.update({
+        await this.prisma.working.saleReturn.update({
           where: { id },
           data: { creditNoteId: creditNote.id },
         });
@@ -229,10 +229,10 @@ export class SaleReturnService {
   }
 
   async reject(tenantId: string, id: string) {
-    const saleReturn = await this.prisma.saleReturn.findFirst({ where: { id, tenantId } });
+    const saleReturn = await this.prisma.working.saleReturn.findFirst({ where: { id, tenantId } });
     if (!saleReturn) throw new NotFoundException('Sale return not found');
 
-    return this.prisma.saleReturn.update({
+    return this.prisma.working.saleReturn.update({
       where: { id },
       data: { status: 'REJECTED' },
     });

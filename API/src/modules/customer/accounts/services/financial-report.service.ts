@@ -9,11 +9,11 @@ export class FinancialReportService {
     const from = new Date(fromDate);
     const to = new Date(toDate);
 
-    const transactions = await this.prisma.accountTransaction.findMany({
+    const transactions = await this.prisma.working.accountTransaction.findMany({
       where: { tenantId, transactionDate: { gte: from, lte: to } },
     });
 
-    const ledgers = await this.prisma.ledgerMaster.findMany({ where: { tenantId } });
+    const ledgers = await this.prisma.working.ledgerMaster.findMany({ where: { tenantId } });
     const ledgerMap = new Map(ledgers.map((l) => [l.id, l]));
 
     // Calculate income (Credit side of INCOME ledgers)
@@ -63,9 +63,9 @@ export class FinancialReportService {
 
   async getBalanceSheet(tenantId: string, asOfDate: string) {
     const date = new Date(asOfDate);
-    const ledgers = await this.prisma.ledgerMaster.findMany({ where: { tenantId } });
+    const ledgers = await this.prisma.working.ledgerMaster.findMany({ where: { tenantId } });
 
-    const transactions = await this.prisma.accountTransaction.findMany({
+    const transactions = await this.prisma.working.accountTransaction.findMany({
       where: { tenantId, transactionDate: { lte: date } },
     });
 
@@ -113,9 +113,9 @@ export class FinancialReportService {
   async getTrialBalance(tenantId: string, fromDate: string, toDate: string) {
     const from = new Date(fromDate);
     const to = new Date(toDate);
-    const ledgers = await this.prisma.ledgerMaster.findMany({ where: { tenantId, isActive: true } });
+    const ledgers = await this.prisma.working.ledgerMaster.findMany({ where: { tenantId, isActive: true } });
 
-    const transactions = await this.prisma.accountTransaction.findMany({
+    const transactions = await this.prisma.working.accountTransaction.findMany({
       where: { tenantId, transactionDate: { gte: from, lte: to } },
     });
 
@@ -152,10 +152,10 @@ export class FinancialReportService {
     const from = new Date(fromDate);
     const to = new Date(toDate);
 
-    const ledger = await this.prisma.ledgerMaster.findFirst({ where: { id: ledgerId, tenantId } });
+    const ledger = await this.prisma.working.ledgerMaster.findFirst({ where: { id: ledgerId, tenantId } });
     if (!ledger) return null;
 
-    const transactions = await this.prisma.accountTransaction.findMany({
+    const transactions = await this.prisma.working.accountTransaction.findMany({
       where: {
         tenantId,
         transactionDate: { gte: from, lte: to },
@@ -191,7 +191,7 @@ export class FinancialReportService {
 
   async getPayableAging(tenantId: string) {
     const now = new Date();
-    const invoices = await this.prisma.purchaseInvoice.findMany({
+    const invoices = await this.prisma.working.purchaseInvoice.findMany({
       where: { tenantId, paymentStatus: { in: ['UNPAID', 'PARTIAL'] } },
     });
 
@@ -228,7 +228,7 @@ export class FinancialReportService {
 
   async getReceivableAging(tenantId: string) {
     const now = new Date();
-    const invoices = await this.prisma.invoice.findMany({
+    const invoices = await this.prisma.working.invoice.findMany({
       where: { tenantId, status: { in: ['SENT', 'PARTIALLY_PAID', 'OVERDUE'] } },
     });
 
@@ -266,11 +266,11 @@ export class FinancialReportService {
     const from = new Date(fromDate);
     const to = new Date(toDate);
 
-    const transactions = await this.prisma.accountTransaction.findMany({
+    const transactions = await this.prisma.working.accountTransaction.findMany({
       where: { tenantId, transactionDate: { gte: from, lte: to } },
     });
 
-    const ledgers = await this.prisma.ledgerMaster.findMany({ where: { tenantId } });
+    const ledgers = await this.prisma.working.ledgerMaster.findMany({ where: { tenantId } });
     const ledgerMap = new Map(ledgers.map((l) => [l.id, l]));
 
     let operating = 0;
@@ -306,7 +306,7 @@ export class FinancialReportService {
     const end = new Date(date);
     end.setHours(23, 59, 59);
 
-    return this.prisma.accountTransaction.findMany({
+    return this.prisma.working.accountTransaction.findMany({
       where: { tenantId, transactionDate: { gte: start, lte: end } },
       orderBy: { createdAt: 'asc' },
     });

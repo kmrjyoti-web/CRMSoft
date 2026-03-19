@@ -9,7 +9,8 @@ const mockPrisma = {
     update: jest.fn(),
     count: jest.fn(),
   },
-} as any;
+};
+(mockPrisma as any).working = mockPrisma;
 
 const mockAutoNumber = { next: jest.fn() } as any;
 const mockInvoiceService = { recalculateBalance: jest.fn() } as any;
@@ -19,7 +20,7 @@ describe('CreditNoteService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new CreditNoteService(mockPrisma, mockAutoNumber, mockInvoiceService);
+    service = new CreditNoteService(mockPrisma as any, mockAutoNumber, mockInvoiceService);
   });
 
   it('should create credit note', async () => {

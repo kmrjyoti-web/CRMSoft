@@ -12,7 +12,7 @@ export class UpdateLineItemHandler implements ICommandHandler<UpdateLineItemComm
   ) {}
 
   async execute(cmd: UpdateLineItemCommand) {
-    const quotation = await this.prisma.quotation.findUnique({
+    const quotation = await this.prisma.working.quotation.findUnique({
       where: { id: cmd.quotationId },
       include: { lead: { include: { organization: { select: { state: true } } } } },
     });
@@ -21,7 +21,7 @@ export class UpdateLineItemHandler implements ICommandHandler<UpdateLineItemComm
       throw new BadRequestException('Cannot update items on non-draft quotation');
     }
 
-    const item = await this.prisma.quotationLineItem.findUnique({ where: { id: cmd.itemId } });
+    const item = await this.prisma.working.quotationLineItem.findUnique({ where: { id: cmd.itemId } });
     if (!item || item.quotationId !== cmd.quotationId) {
       throw new NotFoundException('Line item not found');
     }
@@ -56,13 +56,13 @@ export class UpdateLineItemHandler implements ICommandHandler<UpdateLineItemComm
       cessAmount: calc.cessAmount, taxAmount: calc.taxAmount, totalWithTax: calc.totalWithTax,
     });
 
-    const updated = await this.prisma.quotationLineItem.update({
+    const updated = await this.prisma.working.quotationLineItem.update({
       where: { id: cmd.itemId }, data,
     });
 
     await this.calculator.recalculate(cmd.quotationId, customerState);
 
-    await this.prisma.quotationActivity.create({
+    await this.prisma.working.quotationActivity.create({
       data: {
         quotationId: cmd.quotationId, action: 'ITEM_UPDATED',
         description: `Item "${updated.productName}" updated`,

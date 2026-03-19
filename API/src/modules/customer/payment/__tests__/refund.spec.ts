@@ -1,6 +1,6 @@
 import { RefundService } from '../services/refund.service';
 
-const mockPrisma = {
+const mockPrisma: any = {
   payment: {
     findFirst: jest.fn(),
     update: jest.fn(),
@@ -11,7 +11,8 @@ const mockPrisma = {
     findMany: jest.fn(),
     count: jest.fn(),
   },
-} as any;
+};
+(mockPrisma as any).working = mockPrisma;
 
 const mockAutoNumber = { next: jest.fn() } as any;
 const mockGatewayFactory = { initiateRefund: jest.fn() } as any;

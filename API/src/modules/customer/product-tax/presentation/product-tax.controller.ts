@@ -26,9 +26,9 @@ export class ProductTaxController {
     @Param('productId', ParseUUIDPipe) productId: string,
     @Body() dto: SetTaxDetailsDto,
   ) {
-    await this.prisma.productTaxDetail.deleteMany({ where: { productId } });
+    await this.prisma.working.productTaxDetail.deleteMany({ where: { productId } });
 
-    const details = await this.prisma.productTaxDetail.createMany({
+    const details = await this.prisma.working.productTaxDetail.createMany({
       data: dto.taxes.map((t) => ({
         productId,
         taxName: t.taxName,
@@ -37,7 +37,7 @@ export class ProductTaxController {
       })),
     });
 
-    const created = await this.prisma.productTaxDetail.findMany({
+    const created = await this.prisma.working.productTaxDetail.findMany({
       where: { productId },
       orderBy: { taxName: 'asc' },
     });
@@ -51,7 +51,7 @@ export class ProductTaxController {
   async getTaxDetails(
     @Param('productId', ParseUUIDPipe) productId: string,
   ) {
-    const details = await this.prisma.productTaxDetail.findMany({
+    const details = await this.prisma.working.productTaxDetail.findMany({
       where: { productId },
       orderBy: { taxName: 'asc' },
     });

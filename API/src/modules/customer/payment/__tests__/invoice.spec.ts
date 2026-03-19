@@ -2,7 +2,7 @@ import { InvoiceService } from '../services/invoice.service';
 import { GstCalculatorService } from '../services/gst-calculator.service';
 import { AmountInWordsService } from '../services/amount-in-words.service';
 
-const mockPrisma = {
+const mockPrisma: any = {
   invoice: {
     create: jest.fn(),
     findFirst: jest.fn(),
@@ -20,7 +20,8 @@ const mockPrisma = {
   payment: { findMany: jest.fn() },
   refund: { findMany: jest.fn() },
   creditNote: { findMany: jest.fn() },
-} as any;
+};
+(mockPrisma as any).working = mockPrisma;
 
 const mockAutoNumber = { next: jest.fn() } as any;
 const mockCompanyProfile = { getPublic: jest.fn() } as any;

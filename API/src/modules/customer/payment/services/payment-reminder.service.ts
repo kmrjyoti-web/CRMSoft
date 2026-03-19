@@ -39,7 +39,7 @@ export class PaymentReminderService {
       };
     });
 
-    await this.prisma.paymentReminder.createMany({ data: reminders });
+    await this.prisma.working.paymentReminder.createMany({ data: reminders });
     this.logger.log(`Scheduled ${reminders.length} reminders for invoice ${invoiceId}`);
   }
 
@@ -47,7 +47,7 @@ export class PaymentReminderService {
   async processDueReminders(tenantId: string) {
     const now = new Date();
 
-    const dueReminders = await this.prisma.paymentReminder.findMany({
+    const dueReminders = await this.prisma.working.paymentReminder.findMany({
       where: {
         tenantId,
         isSent: false,
@@ -70,7 +70,7 @@ export class PaymentReminderService {
         `for ${reminder.invoice.billingName}, balance: ${reminder.invoice.balanceAmount}`,
       );
 
-      await this.prisma.paymentReminder.update({
+      await this.prisma.working.paymentReminder.update({
         where: { id: reminder.id },
         data: { isSent: true, sentAt: new Date() },
       });
@@ -88,7 +88,7 @@ export class PaymentReminderService {
 
   /** Cancel all pending reminders for an invoice (e.g. when paid) */
   async cancelReminders(tenantId: string, invoiceId: string) {
-    const result = await this.prisma.paymentReminder.deleteMany({
+    const result = await this.prisma.working.paymentReminder.deleteMany({
       where: { tenantId, invoiceId, isSent: false },
     });
     return result.count;
@@ -96,7 +96,7 @@ export class PaymentReminderService {
 
   /** Get reminders for an invoice */
   async getForInvoice(tenantId: string, invoiceId: string) {
-    return this.prisma.paymentReminder.findMany({
+    return this.prisma.working.paymentReminder.findMany({
       where: { tenantId, invoiceId },
       orderBy: { scheduledAt: 'asc' },
     });

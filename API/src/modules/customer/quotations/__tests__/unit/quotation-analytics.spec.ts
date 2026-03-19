@@ -17,6 +17,7 @@ describe('QuotationAnalyticsService', () => {
         findMany: jest.fn().mockResolvedValue(mockQuotations),
       },
     };
+(prisma as any).working = prisma;
     service = new QuotationAnalyticsService(prisma);
   });
 

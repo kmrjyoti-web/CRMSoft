@@ -15,18 +15,18 @@ export class PaymentAnalyticsService {
     }
 
     const [totalCollected, byMethod, byGateway] = await Promise.all([
-      this.prisma.payment.aggregate({
+      this.prisma.working.payment.aggregate({
         where,
         _sum: { amount: true },
         _count: true,
       }),
-      this.prisma.payment.groupBy({
+      this.prisma.working.payment.groupBy({
         by: ['method'],
         where,
         _sum: { amount: true },
         _count: true,
       }),
-      this.prisma.payment.groupBy({
+      this.prisma.working.payment.groupBy({
         by: ['gateway'],
         where,
         _sum: { amount: true },
@@ -53,17 +53,17 @@ export class PaymentAnalyticsService {
   /** Get outstanding invoices summary */
   async getOutstandingSummary(tenantId: string) {
     const [overdue, partiallyPaid, sent] = await Promise.all([
-      this.prisma.invoice.aggregate({
+      this.prisma.working.invoice.aggregate({
         where: { tenantId, status: 'OVERDUE' },
         _sum: { balanceAmount: true },
         _count: true,
       }),
-      this.prisma.invoice.aggregate({
+      this.prisma.working.invoice.aggregate({
         where: { tenantId, status: 'PARTIALLY_PAID' },
         _sum: { balanceAmount: true },
         _count: true,
       }),
-      this.prisma.invoice.aggregate({
+      this.prisma.working.invoice.aggregate({
         where: { tenantId, status: 'SENT' },
         _sum: { balanceAmount: true },
         _count: true,
@@ -84,12 +84,12 @@ export class PaymentAnalyticsService {
   /** Get refund summary */
   async getRefundSummary(tenantId: string) {
     const [total, byStatus] = await Promise.all([
-      this.prisma.refund.aggregate({
+      this.prisma.working.refund.aggregate({
         where: { tenantId },
         _sum: { amount: true },
         _count: true,
       }),
-      this.prisma.refund.groupBy({
+      this.prisma.working.refund.groupBy({
         by: ['status'],
         where: { tenantId },
         _sum: { amount: true },

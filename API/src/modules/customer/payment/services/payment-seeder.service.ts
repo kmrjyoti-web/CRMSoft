@@ -31,7 +31,7 @@ export class PaymentSeederService {
     ];
 
     for (const seq of sequences) {
-      await this.prisma.autoNumberSequence.upsert({
+      await this.prisma.working.autoNumberSequence.upsert({
         where: { tenantId_entityName: { tenantId, entityName: seq.entityName } },
         update: {},
         create: {
@@ -146,7 +146,7 @@ export class PaymentSeederService {
     ];
 
     for (const job of cronJobs) {
-      await this.prisma.cronJobConfig.upsert({
+      await this.prisma.working.cronJobConfig.upsert({
         where: { jobCode: job.jobCode },
         update: {},
         create: job,

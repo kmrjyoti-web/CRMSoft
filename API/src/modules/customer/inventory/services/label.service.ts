@@ -6,13 +6,13 @@ export class InventoryLabelService {
   constructor(private readonly prisma: PrismaService) {}
 
   async list() {
-    return this.prisma.inventoryLabel.findMany({
+    return this.prisma.working.inventoryLabel.findMany({
       orderBy: { industryCode: 'asc' },
     });
   }
 
   async getByIndustry(industryCode: string) {
-    return this.prisma.inventoryLabel.findUnique({
+    return this.prisma.working.inventoryLabel.findUnique({
       where: { industryCode },
     });
   }
@@ -27,7 +27,7 @@ export class InventoryLabelService {
     stockOutLabel?: string;
     locationLabel?: string;
   }) {
-    return this.prisma.inventoryLabel.upsert({
+    return this.prisma.working.inventoryLabel.upsert({
       where: { industryCode: dto.industryCode },
       create: dto,
       update: {

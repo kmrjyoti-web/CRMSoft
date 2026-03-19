@@ -29,7 +29,7 @@ export class ListQuotationsHandler implements IQueryHandler<ListQuotationsQuery>
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.quotation.findMany({
+      this.prisma.working.quotation.findMany({
         where, skip, take: limit,
         orderBy: { [query.sortBy || 'createdAt']: query.sortOrder || 'desc' },
         include: {
@@ -38,7 +38,7 @@ export class ListQuotationsHandler implements IQueryHandler<ListQuotationsQuery>
           createdByUser: { select: { id: true, firstName: true, lastName: true } },
         },
       }),
-      this.prisma.quotation.count({ where }),
+      this.prisma.working.quotation.count({ where }),
     ]);
 
     return { data, total, page, limit };

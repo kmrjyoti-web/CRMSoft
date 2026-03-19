@@ -18,7 +18,7 @@ export class SetSlabPriceHandler
   async execute(command: SetSlabPriceCommand) {
     const { productId, priceType, slabs } = command;
 
-    const product = await this.prisma.product.findUnique({
+    const product = await this.prisma.working.product.findUnique({
       where: { id: productId },
       select: { id: true },
     });
@@ -29,7 +29,7 @@ export class SetSlabPriceHandler
     this.validateSlabsNoOverlap(slabs);
 
     // Delete existing slabs for this priceType (ones with minQty set)
-    await this.prisma.productPrice.deleteMany({
+    await this.prisma.working.productPrice.deleteMany({
       where: {
         productId,
         priceType: priceType as any,
@@ -39,7 +39,7 @@ export class SetSlabPriceHandler
     });
 
     // Create new slabs
-    const created = await this.prisma.productPrice.createMany({
+    const created = await this.prisma.working.productPrice.createMany({
       data: slabs.map((slab) => ({
         productId,
         priceType: priceType as any,

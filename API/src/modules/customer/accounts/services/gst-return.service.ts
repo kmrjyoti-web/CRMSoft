@@ -10,7 +10,7 @@ export class GSTReturnService {
     const { start, end } = this.getPeriodDates(period);
 
     // Get all sale invoices for period
-    const invoices = await this.prisma.invoice.findMany({
+    const invoices = await this.prisma.working.invoice.findMany({
       where: {
         tenantId,
         status: { notIn: ['DRAFT', 'CANCELLED', 'VOID'] },
@@ -84,7 +84,7 @@ export class GSTReturnService {
     const totalCess = invoices.reduce((s, i) => s + Number(i.cessAmount), 0);
 
     // Upsert return
-    const gstReturn = await this.prisma.gSTReturn.upsert({
+    const gstReturn = await this.prisma.working.gSTReturn.upsert({
       where: { tenantId_returnType_period: { tenantId, returnType: 'GSTR_1', period } },
       create: {
         tenantId,
@@ -124,7 +124,7 @@ export class GSTReturnService {
     const { start, end } = this.getPeriodDates(period);
 
     // Output GST (from sales)
-    const saleInvoices = await this.prisma.invoice.findMany({
+    const saleInvoices = await this.prisma.working.invoice.findMany({
       where: { tenantId, status: { notIn: ['DRAFT', 'CANCELLED', 'VOID'] }, invoiceDate: { gte: start, lte: end } },
     });
 
@@ -134,7 +134,7 @@ export class GSTReturnService {
     const outputCess = saleInvoices.reduce((s, i) => s + Number(i.cessAmount), 0);
 
     // Input Tax Credit (from purchases)
-    const purchaseInvoices = await this.prisma.purchaseInvoice.findMany({
+    const purchaseInvoices = await this.prisma.working.purchaseInvoice.findMany({
       where: { tenantId, status: { notIn: ['DRAFT', 'CANCELLED'] }, invoiceDate: { gte: start, lte: end } },
     });
 
@@ -151,7 +151,7 @@ export class GSTReturnService {
 
     const itc = { cgst: inputCgst, sgst: inputSgst, igst: inputIgst, cess: inputCess, total: totalInputGst };
 
-    const gstReturn = await this.prisma.gSTReturn.upsert({
+    const gstReturn = await this.prisma.working.gSTReturn.upsert({
       where: { tenantId_returnType_period: { tenantId, returnType: 'GSTR_3B', period } },
       create: {
         tenantId,
@@ -184,7 +184,7 @@ export class GSTReturnService {
 
   async getInputTaxCredit(tenantId: string, period: string) {
     const { start, end } = this.getPeriodDates(period);
-    const purchases = await this.prisma.purchaseInvoice.findMany({
+    const purchases = await this.prisma.working.purchaseInvoice.findMany({
       where: { tenantId, status: { notIn: ['DRAFT', 'CANCELLED'] }, invoiceDate: { gte: start, lte: end } },
     });
 
@@ -199,17 +199,17 @@ export class GSTReturnService {
   }
 
   async findAll(tenantId: string) {
-    return this.prisma.gSTReturn.findMany({ where: { tenantId }, orderBy: { period: 'desc' } });
+    return this.prisma.working.gSTReturn.findMany({ where: { tenantId }, orderBy: { period: 'desc' } });
   }
 
   async findById(tenantId: string, id: string) {
-    const ret = await this.prisma.gSTReturn.findFirst({ where: { id, tenantId } });
+    const ret = await this.prisma.working.gSTReturn.findFirst({ where: { id, tenantId } });
     if (!ret) throw new NotFoundException('GST Return not found');
     return ret;
   }
 
   async markFiled(tenantId: string, id: string, userId: string, acknowledgementNo?: string) {
-    return this.prisma.gSTReturn.update({
+    return this.prisma.working.gSTReturn.update({
       where: { id },
       data: { status: 'FILED', filedAt: new Date(), filedById: userId, acknowledgementNo },
     });

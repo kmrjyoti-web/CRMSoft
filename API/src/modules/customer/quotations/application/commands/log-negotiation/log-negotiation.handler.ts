@@ -8,18 +8,18 @@ export class LogNegotiationHandler implements ICommandHandler<LogNegotiationComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: LogNegotiationCommand) {
-    const quotation = await this.prisma.quotation.findUnique({ where: { id: cmd.quotationId } });
+    const quotation = await this.prisma.working.quotation.findUnique({ where: { id: cmd.quotationId } });
     if (!quotation) throw new NotFoundException('Quotation not found');
 
     // Move to NEGOTIATION status if not already
     if (['SENT', 'VIEWED'].includes(quotation.status)) {
-      await this.prisma.quotation.update({
+      await this.prisma.working.quotation.update({
         where: { id: cmd.quotationId },
         data: { status: 'NEGOTIATION' },
       });
     }
 
-    const log = await this.prisma.quotationNegotiationLog.create({
+    const log = await this.prisma.working.quotationNegotiationLog.create({
       data: {
         quotationId: cmd.quotationId,
         negotiationType: cmd.negotiationType as any,
@@ -43,7 +43,7 @@ export class LogNegotiationHandler implements ICommandHandler<LogNegotiationComm
       },
     });
 
-    await this.prisma.quotationActivity.create({
+    await this.prisma.working.quotationActivity.create({
       data: {
         quotationId: cmd.quotationId, action: 'NEGOTIATION',
         description: `Negotiation: ${cmd.negotiationType}${cmd.note ? ' — ' + cmd.note : ''}`,

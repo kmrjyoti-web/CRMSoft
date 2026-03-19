@@ -25,6 +25,7 @@ describe('SendQuotationHandler', () => {
       },
       quotationActivity: { create: jest.fn().mockResolvedValue({}) },
     };
+(prisma as any).working = prisma;
     handler = new SendQuotationHandler(prisma);
   });
 

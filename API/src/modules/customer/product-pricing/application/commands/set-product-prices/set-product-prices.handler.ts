@@ -14,7 +14,7 @@ export class SetProductPricesHandler
   async execute(command: SetProductPricesCommand) {
     const { productId, prices } = command;
 
-    const product = await this.prisma.product.findUnique({
+    const product = await this.prisma.working.product.findUnique({
       where: { id: productId },
       select: { id: true },
     });
@@ -25,7 +25,7 @@ export class SetProductPricesHandler
     const upserted: any[] = [];
 
     for (const p of prices) {
-      const existing = await this.prisma.productPrice.findFirst({
+      const existing = await this.prisma.working.productPrice.findFirst({
         where: {
           productId,
           priceType: p.priceType as any,
@@ -35,7 +35,7 @@ export class SetProductPricesHandler
       });
 
       const record = existing
-        ? await this.prisma.productPrice.update({
+        ? await this.prisma.working.productPrice.update({
             where: { id: existing.id },
             data: {
               amount: p.amount,
@@ -45,7 +45,7 @@ export class SetProductPricesHandler
               isActive: true,
             },
           })
-        : await this.prisma.productPrice.create({
+        : await this.prisma.working.productPrice.create({
             data: {
               productId,
               priceType: p.priceType as any,

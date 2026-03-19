@@ -12,7 +12,7 @@ export class DeliveryChallanService {
 
   async generateNumber(tenantId: string): Promise<string> {
     const year = new Date().getFullYear();
-    const count = await this.prisma.deliveryChallan.count({
+    const count = await this.prisma.working.deliveryChallan.count({
       where: { tenantId, challanNumber: { startsWith: `DC-${year}-` } },
     });
     return `DC-${year}-${String(count + 1).padStart(4, '0')}`;
@@ -23,7 +23,7 @@ export class DeliveryChallanService {
 
     // Validate against sale order pending quantities if linked
     if (dto.saleOrderId) {
-      const saleOrder = await this.prisma.saleOrder.findFirst({
+      const saleOrder = await this.prisma.working.saleOrder.findFirst({
         where: { id: dto.saleOrderId, tenantId },
         include: { items: true },
       });
@@ -53,7 +53,7 @@ export class DeliveryChallanService {
       }
     }
 
-    return this.prisma.deliveryChallan.create({
+    return this.prisma.working.deliveryChallan.create({
       data: {
         tenantId,
         challanNumber,
@@ -97,21 +97,21 @@ export class DeliveryChallanService {
     if (filters?.saleOrderId) where.saleOrderId = filters.saleOrderId;
 
     const [data, total] = await Promise.all([
-      this.prisma.deliveryChallan.findMany({
+      this.prisma.working.deliveryChallan.findMany({
         where,
         include: { items: true },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.deliveryChallan.count({ where }),
+      this.prisma.working.deliveryChallan.count({ where }),
     ]);
 
     return { data, total, page, limit };
   }
 
   async findById(tenantId: string, id: string) {
-    const challan = await this.prisma.deliveryChallan.findFirst({
+    const challan = await this.prisma.working.deliveryChallan.findFirst({
       where: { id, tenantId },
       include: { items: true, saleOrder: { select: { id: true, orderNumber: true, status: true } } },
     });
@@ -120,7 +120,7 @@ export class DeliveryChallanService {
   }
 
   async dispatch(tenantId: string, id: string, userId: string) {
-    const challan = await this.prisma.deliveryChallan.findFirst({
+    const challan = await this.prisma.working.deliveryChallan.findFirst({
       where: { id, tenantId },
       include: { items: true },
     });
@@ -132,12 +132,12 @@ export class DeliveryChallanService {
       const locationId = item.fromLocationId || challan.fromLocationId;
 
       // Find the inventory item to get inventoryItemId
-      const inventoryItem = await this.prisma.inventoryItem.findFirst({
+      const inventoryItem = await this.prisma.working.inventoryItem.findFirst({
         where: { tenantId, productId: item.productId },
       });
 
       if (inventoryItem) {
-        await this.prisma.stockTransaction.create({
+        await this.prisma.working.stockTransaction.create({
           data: {
             tenantId,
             inventoryItemId: inventoryItem.id,
@@ -153,13 +153,13 @@ export class DeliveryChallanService {
         });
 
         // Update inventory item stock
-        await this.prisma.inventoryItem.updateMany({
+        await this.prisma.working.inventoryItem.updateMany({
           where: { tenantId, productId: item.productId },
           data: { currentStock: { decrement: Number(item.quantity) } },
         });
 
         // Update stock summary if exists
-        await this.prisma.stockSummary.updateMany({
+        await this.prisma.working.stockSummary.updateMany({
           where: { tenantId, productId: item.productId, locationId },
           data: {
             totalOut: { increment: Number(item.quantity) },
@@ -170,7 +170,7 @@ export class DeliveryChallanService {
 
       // If sale order linked, update SaleOrderItem.deliveredQty
       if (challan.saleOrderId && item.saleOrderItemId) {
-        await this.prisma.saleOrderItem.update({
+        await this.prisma.working.saleOrderItem.update({
           where: { id: item.saleOrderItemId },
           data: {
             deliveredQty: { increment: Number(item.quantity) },
@@ -181,7 +181,7 @@ export class DeliveryChallanService {
     }
 
     // Update challan status
-    const updated = await this.prisma.deliveryChallan.update({
+    const updated = await this.prisma.working.deliveryChallan.update({
       where: { id },
       data: {
         status: 'DISPATCHED',
@@ -200,24 +200,24 @@ export class DeliveryChallanService {
   }
 
   async deliver(tenantId: string, id: string) {
-    const challan = await this.prisma.deliveryChallan.findFirst({ where: { id, tenantId } });
+    const challan = await this.prisma.working.deliveryChallan.findFirst({ where: { id, tenantId } });
     if (!challan) throw new NotFoundException('Delivery challan not found');
     if (challan.status !== 'DISPATCHED') throw new BadRequestException('Only DISPATCHED challans can be marked as delivered');
 
-    return this.prisma.deliveryChallan.update({
+    return this.prisma.working.deliveryChallan.update({
       where: { id },
       data: { status: 'DELIVERED', deliveryDate: new Date() },
     });
   }
 
   async cancel(tenantId: string, id: string) {
-    const challan = await this.prisma.deliveryChallan.findFirst({ where: { id, tenantId } });
+    const challan = await this.prisma.working.deliveryChallan.findFirst({ where: { id, tenantId } });
     if (!challan) throw new NotFoundException('Delivery challan not found');
     if (['DISPATCHED', 'DELIVERED', 'CANCELLED'].includes(challan.status)) {
       throw new BadRequestException('Cannot cancel dispatched/delivered/cancelled challans');
     }
 
-    return this.prisma.deliveryChallan.update({
+    return this.prisma.working.deliveryChallan.update({
       where: { id },
       data: { status: 'CANCELLED' },
     });

@@ -33,7 +33,7 @@ export class BOMProductionService {
 
     const produceQty = check.canProduce ? data.quantity : check.maxProducible;
 
-    const production = await this.prisma.bOMProduction.create({
+    const production = await this.prisma.working.bOMProduction.create({
       data: {
         tenantId,
         formulaId: data.formulaId,
@@ -58,7 +58,7 @@ export class BOMProductionService {
     scrapQuantity?: number;
     scrapReason?: string;
   }) {
-    const production = await this.prisma.bOMProduction.findFirst({
+    const production = await this.prisma.working.bOMProduction.findFirst({
       where: { id: productionId, tenantId },
       include: {
         formula: {
@@ -136,7 +136,7 @@ export class BOMProductionService {
     }
 
     // 4. Update production record
-    const updated = await this.prisma.bOMProduction.update({
+    const updated = await this.prisma.working.bOMProduction.update({
       where: { id: productionId },
       data: {
         quantityProduced: quantity,
@@ -169,7 +169,7 @@ export class BOMProductionService {
       if (filters?.endDate) where.productionDate.lte = new Date(filters.endDate);
     }
 
-    return this.prisma.bOMProduction.findMany({
+    return this.prisma.working.bOMProduction.findMany({
       where,
       include: { formula: { include: { finishedProduct: true } } },
       orderBy: { productionDate: 'desc' },
@@ -177,7 +177,7 @@ export class BOMProductionService {
   }
 
   async findById(tenantId: string, id: string) {
-    const production = await this.prisma.bOMProduction.findFirst({
+    const production = await this.prisma.working.bOMProduction.findFirst({
       where: { id, tenantId },
       include: {
         formula: {
@@ -191,12 +191,12 @@ export class BOMProductionService {
     if (!production) throw new NotFoundException('Production run not found');
 
     // Get related scrap records
-    const scrapRecords = await this.prisma.scrapRecord.findMany({
+    const scrapRecords = await this.prisma.working.scrapRecord.findMany({
       where: { tenantId, bomProductionId: id },
     });
 
     // Get related transactions
-    const transactions = await this.prisma.stockTransaction.findMany({
+    const transactions = await this.prisma.working.stockTransaction.findMany({
       where: { tenantId, bomProductionId: id },
       orderBy: { transactionDate: 'asc' },
     });
@@ -205,13 +205,13 @@ export class BOMProductionService {
   }
 
   async cancel(tenantId: string, id: string, reason: string) {
-    const production = await this.prisma.bOMProduction.findFirst({
+    const production = await this.prisma.working.bOMProduction.findFirst({
       where: { id, tenantId },
     });
     if (!production) throw new NotFoundException('Production run not found');
     if (production.status === 'COMPLETED') throw new BadRequestException('Cannot cancel completed production');
 
-    return this.prisma.bOMProduction.update({
+    return this.prisma.working.bOMProduction.update({
       where: { id },
       data: { status: 'CANCELLED', scrapReason: reason },
     });

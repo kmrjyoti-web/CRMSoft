@@ -44,6 +44,7 @@ describe('QuotationPredictionService', () => {
         ]),
       },
     };
+    (prisma as any).working = prisma;
     service = new QuotationPredictionService(prisma);
   });
 

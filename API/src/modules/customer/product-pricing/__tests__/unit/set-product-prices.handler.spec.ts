@@ -23,6 +23,7 @@ describe('SetProductPricesHandler', () => {
         })),
       },
     };
+(prisma as any).working = prisma;
     handler = new SetProductPricesHandler(prisma);
   });
 

@@ -16,7 +16,7 @@ export class PurchaseQuotationService {
     if (filters?.status) where.status = filters.status;
 
     const [data, total] = await Promise.all([
-      this.prisma.purchaseQuotation.findMany({
+      this.prisma.working.purchaseQuotation.findMany({
         where,
         include: {
           rfq: { select: { id: true, rfqNumber: true } },
@@ -26,14 +26,14 @@ export class PurchaseQuotationService {
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.purchaseQuotation.count({ where }),
+      this.prisma.working.purchaseQuotation.count({ where }),
     ]);
 
     return { data, total, page, limit };
   }
 
   async getById(tenantId: string, id: string) {
-    const quotation = await this.prisma.purchaseQuotation.findFirst({
+    const quotation = await this.prisma.working.purchaseQuotation.findFirst({
       where: { id, tenantId },
       include: {
         rfq: { select: { id: true, rfqNumber: true } },
@@ -79,7 +79,7 @@ export class PurchaseQuotationService {
       };
     });
 
-    return this.prisma.purchaseQuotation.create({
+    return this.prisma.working.purchaseQuotation.create({
       data: {
         tenantId,
         rfqId: dto.rfqId,
@@ -100,13 +100,13 @@ export class PurchaseQuotationService {
   }
 
   async updateStatus(tenantId: string, id: string, status: string) {
-    const quotation = await this.prisma.purchaseQuotation.findFirst({ where: { id, tenantId } });
+    const quotation = await this.prisma.working.purchaseQuotation.findFirst({ where: { id, tenantId } });
     if (!quotation) throw new NotFoundException('Quotation not found');
-    return this.prisma.purchaseQuotation.update({ where: { id }, data: { status } });
+    return this.prisma.working.purchaseQuotation.update({ where: { id }, data: { status } });
   }
 
   async generateNumber(tenantId: string): Promise<string> {
-    const count = await this.prisma.purchaseQuotation.count({ where: { tenantId } });
+    const count = await this.prisma.working.purchaseQuotation.count({ where: { tenantId } });
     return `PQ-${String(count + 1).padStart(5, '0')}`;
   }
 }

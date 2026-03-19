@@ -16,7 +16,7 @@ export class AiGenerateQuotationHandler implements ICommandHandler<AiGenerateQuo
   ) {}
 
   async execute(cmd: AiGenerateQuotationCommand) {
-    const lead = await this.prisma.lead.findUnique({
+    const lead = await this.prisma.working.lead.findUnique({
       where: { id: cmd.leadId },
       include: { organization: { select: { id: true, state: true, name: true } }, contact: true },
     });
@@ -33,7 +33,7 @@ export class AiGenerateQuotationHandler implements ICommandHandler<AiGenerateQuo
     // Build line items from suggested products
     const lineItemData: any[] = [];
     for (const sp of recs.suggestedProducts) {
-      const product = await this.prisma.product.findUnique({
+      const product = await this.prisma.working.product.findUnique({
         where: { id: sp.productId },
         select: { name: true, code: true, hsnCode: true, gstRate: true, salePrice: true, mrp: true },
       });
@@ -70,7 +70,7 @@ export class AiGenerateQuotationHandler implements ICommandHandler<AiGenerateQuo
     const productNames = lineItemData.map((i) => i.productName).join(', ');
     const coverNote = `Dear ${contactName},\n\nThank you for your interest. Based on your requirements, we are pleased to offer ${productNames || 'our products'}.\n\nWe look forward to working with you.`;
 
-    const quotation = await this.prisma.quotation.create({
+    const quotation = await this.prisma.working.quotation.create({
       data: {
         quotationNo, status: 'DRAFT',
         title: `AI Generated — ${lead.organization?.name || contactName}`,
@@ -90,7 +90,7 @@ export class AiGenerateQuotationHandler implements ICommandHandler<AiGenerateQuo
 
     await this.calculator.recalculate(quotation.id, customerState);
 
-    await this.prisma.quotationActivity.create({
+    await this.prisma.working.quotationActivity.create({
       data: {
         quotationId: quotation.id, action: 'CREATED',
         description: `AI-generated quotation (score: ${predictionResult.score}%)`,
@@ -99,7 +99,7 @@ export class AiGenerateQuotationHandler implements ICommandHandler<AiGenerateQuo
       },
     });
 
-    return this.prisma.quotation.findUnique({
+    return this.prisma.working.quotation.findUnique({
       where: { id: quotation.id },
       include: { lineItems: true, lead: true },
     });

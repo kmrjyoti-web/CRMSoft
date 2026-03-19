@@ -44,6 +44,7 @@ describe('CreateQuotationHandler', () => {
       },
       quotationActivity: { create: jest.fn().mockResolvedValue({}) },
     };
+(prisma as any).working = prisma;
 
     numberService = { generateNumber: jest.fn().mockResolvedValue('QTN-2026-00001') };
     calculator = {

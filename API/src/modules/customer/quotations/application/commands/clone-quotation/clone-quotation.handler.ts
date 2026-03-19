@@ -12,7 +12,7 @@ export class CloneQuotationHandler implements ICommandHandler<CloneQuotationComm
   ) {}
 
   async execute(cmd: CloneQuotationCommand) {
-    const source = await this.prisma.quotation.findUnique({
+    const source = await this.prisma.working.quotation.findUnique({
       where: { id: cmd.id },
       include: { lineItems: true },
     });
@@ -21,7 +21,7 @@ export class CloneQuotationHandler implements ICommandHandler<CloneQuotationComm
     const quotationNo = await this.numberService.generateNumber();
     const targetLeadId = cmd.leadId || source.leadId;
 
-    const cloned = await this.prisma.quotation.create({
+    const cloned = await this.prisma.working.quotation.create({
       data: {
         quotationNo, status: 'DRAFT', version: 1,
         title: source.title ? `Copy of ${source.title}` : null,
@@ -55,7 +55,7 @@ export class CloneQuotationHandler implements ICommandHandler<CloneQuotationComm
       include: { lineItems: true, lead: true },
     });
 
-    await this.prisma.quotationActivity.create({
+    await this.prisma.working.quotationActivity.create({
       data: {
         quotationId: cloned.id, action: 'CREATED',
         description: `Cloned from ${source.quotationNo}`,

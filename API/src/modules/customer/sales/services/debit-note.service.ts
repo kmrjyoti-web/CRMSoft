@@ -8,7 +8,7 @@ export class DebitNoteService {
 
   async generateNumber(tenantId: string): Promise<string> {
     const year = new Date().getFullYear();
-    const count = await this.prisma.debitNote.count({
+    const count = await this.prisma.working.debitNote.count({
       where: { tenantId, debitNoteNumber: { startsWith: `DN-${year}-` } },
     });
     return `DN-${year}-${String(count + 1).padStart(4, '0')}`;
@@ -47,7 +47,7 @@ export class DebitNoteService {
 
     const grandTotal = subtotal + cgstAmount + sgstAmount + igstAmount;
 
-    return this.prisma.debitNote.create({
+    return this.prisma.working.debitNote.create({
       data: {
         tenantId,
         debitNoteNumber,
@@ -78,21 +78,21 @@ export class DebitNoteService {
     if (filters?.vendorId) where.vendorId = filters.vendorId;
 
     const [data, total] = await Promise.all([
-      this.prisma.debitNote.findMany({
+      this.prisma.working.debitNote.findMany({
         where,
         include: { items: true },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.debitNote.count({ where }),
+      this.prisma.working.debitNote.count({ where }),
     ]);
 
     return { data, total, page, limit };
   }
 
   async findById(tenantId: string, id: string) {
-    const note = await this.prisma.debitNote.findFirst({
+    const note = await this.prisma.working.debitNote.findFirst({
       where: { id, tenantId },
       include: { items: true },
     });
@@ -106,7 +106,7 @@ export class DebitNoteService {
    * - If accountsEffect: Create AccountTransaction (Debit Vendor, Credit Purchase Return)
    */
   async issue(tenantId: string, id: string, userId: string) {
-    const note = await this.prisma.debitNote.findFirst({
+    const note = await this.prisma.working.debitNote.findFirst({
       where: { id, tenantId },
       include: { items: true },
     });
@@ -116,7 +116,7 @@ export class DebitNoteService {
     // Inventory effect: Stock OUT (return goods to vendor)
     if (note.inventoryEffect) {
       for (const item of note.items) {
-        const inventoryItem = await this.prisma.inventoryItem.findFirst({
+        const inventoryItem = await this.prisma.working.inventoryItem.findFirst({
           where: { tenantId, productId: item.productId },
         });
 
@@ -124,7 +124,7 @@ export class DebitNoteService {
           // Find default location
           const locationId = inventoryItem.defaultLocationId ?? 'DEFAULT';
 
-          await this.prisma.stockTransaction.create({
+          await this.prisma.working.stockTransaction.create({
             data: {
               tenantId,
               inventoryItemId: inventoryItem.id,
@@ -139,7 +139,7 @@ export class DebitNoteService {
             },
           });
 
-          await this.prisma.inventoryItem.updateMany({
+          await this.prisma.working.inventoryItem.updateMany({
             where: { tenantId, productId: item.productId },
             data: { currentStock: { decrement: Number(item.quantity) } },
           });
@@ -149,7 +149,7 @@ export class DebitNoteService {
 
     // Accounts effect: Create accounting entry
     if (note.accountsEffect) {
-      await this.prisma.accountTransaction.create({
+      await this.prisma.working.accountTransaction.create({
         data: {
           tenantId,
           transactionDate: new Date(),
@@ -166,7 +166,7 @@ export class DebitNoteService {
       });
     }
 
-    return this.prisma.debitNote.update({
+    return this.prisma.working.debitNote.update({
       where: { id },
       data: {
         status: 'ISSUED',
@@ -180,7 +180,7 @@ export class DebitNoteService {
    * Adjust a debit note against a purchase invoice balance.
    */
   async adjust(tenantId: string, id: string, dto: AdjustNoteDto) {
-    const note = await this.prisma.debitNote.findFirst({ where: { id, tenantId } });
+    const note = await this.prisma.working.debitNote.findFirst({ where: { id, tenantId } });
     if (!note) throw new NotFoundException('Debit note not found');
     if (note.status !== 'ISSUED') throw new BadRequestException('Only ISSUED debit notes can be adjusted');
 
@@ -189,7 +189,7 @@ export class DebitNoteService {
     }
 
     // Find purchase invoice and reduce balance
-    const purchaseInvoice = await this.prisma.purchaseInvoice.findFirst({
+    const purchaseInvoice = await this.prisma.working.purchaseInvoice.findFirst({
       where: { id: dto.invoiceId, tenantId },
     });
     if (!purchaseInvoice) throw new NotFoundException('Purchase invoice not found');
@@ -198,12 +198,12 @@ export class DebitNoteService {
     const debitAmount = Number(note.grandTotal);
     const newBalance = Math.max(0, currentBalance - debitAmount);
 
-    await this.prisma.purchaseInvoice.update({
+    await this.prisma.working.purchaseInvoice.update({
       where: { id: dto.invoiceId },
       data: { balanceAmount: newBalance },
     });
 
-    return this.prisma.debitNote.update({
+    return this.prisma.working.debitNote.update({
       where: { id },
       data: { status: 'ADJUSTED', purchaseInvoiceId: dto.invoiceId },
     });

@@ -16,7 +16,7 @@ export class QuotationAnalyticsService {
   async getOverview(params: DateFilter) {
     const where = this.buildDateWhere(params);
 
-    const all = await this.prisma.quotation.findMany({
+    const all = await this.prisma.working.quotation.findMany({
       where,
       select: { id: true, status: true, totalAmount: true, createdAt: true, acceptedAt: true },
     });
@@ -71,7 +71,7 @@ export class QuotationAnalyticsService {
   /** Conversion funnel analysis. */
   async getConversionFunnel(params: DateFilter) {
     const where = this.buildDateWhere(params);
-    const all = await this.prisma.quotation.findMany({
+    const all = await this.prisma.working.quotation.findMany({
       where,
       select: { id: true, status: true, totalAmount: true },
     });
@@ -95,7 +95,7 @@ export class QuotationAnalyticsService {
   /** Industry-wise quotation analysis. */
   async getIndustryAnalysis(params: DateFilter) {
     const where = this.buildDateWhere(params);
-    const quotations = await this.prisma.quotation.findMany({
+    const quotations = await this.prisma.working.quotation.findMany({
       where,
       select: {
         id: true, status: true, totalAmount: true, discountValue: true,
@@ -131,7 +131,7 @@ export class QuotationAnalyticsService {
   /** Product-wise quotation analysis. */
   async getProductAnalysis(params: DateFilter) {
     const where = this.buildDateWhere(params);
-    const quotations = await this.prisma.quotation.findMany({
+    const quotations = await this.prisma.working.quotation.findMany({
       where,
       select: {
         id: true, status: true,
@@ -169,7 +169,7 @@ export class QuotationAnalyticsService {
 
   /** Best performing accepted quotations. */
   async getBestQuotations(params: { limit?: number }) {
-    return this.prisma.quotation.findMany({
+    return this.prisma.working.quotation.findMany({
       where: { status: 'ACCEPTED' },
       orderBy: { totalAmount: 'desc' },
       take: params.limit || 10,
@@ -183,7 +183,7 @@ export class QuotationAnalyticsService {
 
   /** Compare 2+ quotations side by side. */
   async compareQuotations(ids: string[]) {
-    const quotations = await this.prisma.quotation.findMany({
+    const quotations = await this.prisma.working.quotation.findMany({
       where: { id: { in: ids } },
       include: { lineItems: { orderBy: { sortOrder: 'asc' } } },
     });

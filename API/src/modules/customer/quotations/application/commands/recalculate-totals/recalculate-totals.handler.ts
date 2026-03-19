@@ -12,7 +12,7 @@ export class RecalculateTotalsHandler implements ICommandHandler<RecalculateTota
   ) {}
 
   async execute(cmd: RecalculateTotalsCommand) {
-    const quotation = await this.prisma.quotation.findUnique({
+    const quotation = await this.prisma.working.quotation.findUnique({
       where: { id: cmd.quotationId },
       include: { lead: { include: { organization: { select: { state: true } } } } },
     });
@@ -21,7 +21,7 @@ export class RecalculateTotalsHandler implements ICommandHandler<RecalculateTota
     const customerState = quotation.lead?.organization?.state || undefined;
     const totals = await this.calculator.recalculate(cmd.quotationId, customerState);
 
-    await this.prisma.quotationActivity.create({
+    await this.prisma.working.quotationActivity.create({
       data: {
         quotationId: cmd.quotationId, action: 'RECALCULATED',
         description: `Totals recalculated: ₹${totals.totalAmount}`,

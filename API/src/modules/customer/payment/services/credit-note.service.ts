@@ -17,7 +17,7 @@ export class CreditNoteService {
 
   /** Create a credit note against an invoice */
   async create(tenantId: string, dto: CreateCreditNoteDto, userId: string) {
-    const invoice = await this.prisma.invoice.findFirst({
+    const invoice = await this.prisma.working.invoice.findFirst({
       where: { id: dto.invoiceId, tenantId },
     });
     if (!invoice) throw AppError.from('INVOICE_NOT_FOUND');
@@ -28,7 +28,7 @@ export class CreditNoteService {
 
     const creditNoteNo = await this.autoNumber.next(tenantId, 'CreditNote');
 
-    const creditNote = await this.prisma.creditNote.create({
+    const creditNote = await this.prisma.working.creditNote.create({
       data: {
         tenantId,
         creditNoteNo,
@@ -46,12 +46,12 @@ export class CreditNoteService {
 
   /** Issue credit note — changes status from DRAFT to ISSUED */
   async issue(tenantId: string, creditNoteId: string, userId: string) {
-    const cn = await this.prisma.creditNote.findFirst({
+    const cn = await this.prisma.working.creditNote.findFirst({
       where: { id: creditNoteId, tenantId },
     });
     if (!cn) throw AppError.from('CREDIT_NOTE_NOT_FOUND');
 
-    return this.prisma.creditNote.update({
+    return this.prisma.working.creditNote.update({
       where: { id: creditNoteId },
       data: {
         status: 'CN_ISSUED',
@@ -63,13 +63,13 @@ export class CreditNoteService {
 
   /** Apply credit note to an invoice */
   async apply(tenantId: string, creditNoteId: string, dto: ApplyCreditNoteDto) {
-    const cn = await this.prisma.creditNote.findFirst({
+    const cn = await this.prisma.working.creditNote.findFirst({
       where: { id: creditNoteId, tenantId },
     });
     if (!cn) throw AppError.from('CREDIT_NOTE_NOT_FOUND');
     if (cn.status === 'CN_APPLIED') throw AppError.from('CREDIT_NOTE_ALREADY_APPLIED');
 
-    const targetInvoice = await this.prisma.invoice.findFirst({
+    const targetInvoice = await this.prisma.working.invoice.findFirst({
       where: { id: dto.applyToInvoiceId, tenantId },
     });
     if (!targetInvoice) throw AppError.from('INVOICE_NOT_FOUND');
@@ -79,7 +79,7 @@ export class CreditNoteService {
       throw AppError.from('CREDIT_NOTE_EXCEEDS_INVOICE');
     }
 
-    const updated = await this.prisma.creditNote.update({
+    const updated = await this.prisma.working.creditNote.update({
       where: { id: creditNoteId },
       data: {
         status: 'CN_APPLIED',
@@ -97,13 +97,13 @@ export class CreditNoteService {
 
   /** Cancel credit note */
   async cancel(tenantId: string, creditNoteId: string) {
-    const cn = await this.prisma.creditNote.findFirst({
+    const cn = await this.prisma.working.creditNote.findFirst({
       where: { id: creditNoteId, tenantId },
     });
     if (!cn) throw AppError.from('CREDIT_NOTE_NOT_FOUND');
     if (cn.status === 'CN_APPLIED') throw AppError.from('CREDIT_NOTE_ALREADY_APPLIED');
 
-    return this.prisma.creditNote.update({
+    return this.prisma.working.creditNote.update({
       where: { id: creditNoteId },
       data: { status: 'CN_CANCELLED' },
     });
@@ -111,7 +111,7 @@ export class CreditNoteService {
 
   /** Get credit note by ID */
   async getById(tenantId: string, creditNoteId: string) {
-    const cn = await this.prisma.creditNote.findFirst({
+    const cn = await this.prisma.working.creditNote.findFirst({
       where: { id: creditNoteId, tenantId },
       include: { invoice: true },
     });
@@ -134,14 +134,14 @@ export class CreditNoteService {
     const limit = query.limit || 20;
 
     const [data, total] = await Promise.all([
-      this.prisma.creditNote.findMany({
+      this.prisma.working.creditNote.findMany({
         where,
         include: { invoice: { select: { invoiceNo: true, billingName: true } } },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.creditNote.count({ where }),
+      this.prisma.working.creditNote.count({ where }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };

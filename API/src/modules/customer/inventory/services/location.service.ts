@@ -6,7 +6,7 @@ export class LocationService {
   constructor(private readonly prisma: PrismaService) {}
 
   async list(tenantId: string) {
-    return this.prisma.stockLocation.findMany({
+    return this.prisma.working.stockLocation.findMany({
       where: { tenantId },
       orderBy: { name: 'asc' },
     });
@@ -24,19 +24,19 @@ export class LocationService {
     phone?: string;
     isDefault?: boolean;
   }) {
-    const existing = await this.prisma.stockLocation.findUnique({
+    const existing = await this.prisma.working.stockLocation.findUnique({
       where: { tenantId_code: { tenantId, code: dto.code } },
     });
     if (existing) throw new BadRequestException(`Location code "${dto.code}" already exists`);
 
     if (dto.isDefault) {
-      await this.prisma.stockLocation.updateMany({
+      await this.prisma.working.stockLocation.updateMany({
         where: { tenantId, isDefault: true },
         data: { isDefault: false },
       });
     }
 
-    const mainLocation = await this.prisma.stockLocation.create({
+    const mainLocation = await this.prisma.working.stockLocation.create({
       data: { tenantId, ...dto },
     });
 
@@ -48,11 +48,11 @@ export class LocationService {
 
     for (const sub of subStores) {
       const subCode = `${dto.code}${sub.suffix}`;
-      const existing = await this.prisma.stockLocation.findUnique({
+      const existing = await this.prisma.working.stockLocation.findUnique({
         where: { tenantId_code: { tenantId, code: subCode } },
       });
       if (!existing) {
-        await this.prisma.stockLocation.create({
+        await this.prisma.working.stockLocation.create({
           data: {
             tenantId,
             name: sub.name,
@@ -83,17 +83,17 @@ export class LocationService {
     isDefault?: boolean;
     isActive?: boolean;
   }) {
-    const loc = await this.prisma.stockLocation.findFirst({ where: { id, tenantId } });
+    const loc = await this.prisma.working.stockLocation.findFirst({ where: { id, tenantId } });
     if (!loc) throw new NotFoundException('Location not found');
 
     if (dto.isDefault) {
-      await this.prisma.stockLocation.updateMany({
+      await this.prisma.working.stockLocation.updateMany({
         where: { tenantId, isDefault: true },
         data: { isDefault: false },
       });
     }
 
-    return this.prisma.stockLocation.update({
+    return this.prisma.working.stockLocation.update({
       where: { id },
       data: dto,
     });

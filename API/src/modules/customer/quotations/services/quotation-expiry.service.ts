@@ -15,7 +15,7 @@ export class QuotationExpiryService {
   async checkExpiry(): Promise<void> {
     const now = new Date();
 
-    const expiredQuotations = await this.prisma.quotation.findMany({
+    const expiredQuotations = await this.prisma.working.quotation.findMany({
       where: {
         status: { in: ['SENT', 'VIEWED', 'NEGOTIATION'] },
         validUntil: { lt: now },
@@ -26,12 +26,12 @@ export class QuotationExpiryService {
     if (expiredQuotations.length === 0) return;
 
     for (const q of expiredQuotations) {
-      await this.prisma.quotation.update({
+      await this.prisma.working.quotation.update({
         where: { id: q.id },
         data: { status: 'EXPIRED' },
       });
 
-      await this.prisma.quotationActivity.create({
+      await this.prisma.working.quotationActivity.create({
         data: {
           quotationId: q.id,
           action: 'EXPIRED',

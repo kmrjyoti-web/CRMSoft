@@ -17,7 +17,7 @@ export class AdjustmentService {
     reason: string;
     createdById: string;
   }) {
-    return this.prisma.stockAdjustment.create({
+    return this.prisma.working.stockAdjustment.create({
       data: {
         tenantId,
         productId: dto.productId,
@@ -31,7 +31,7 @@ export class AdjustmentService {
   }
 
   async approve(tenantId: string, id: string, approvedById: string, action: 'approve' | 'reject') {
-    const adjustment = await this.prisma.stockAdjustment.findFirst({
+    const adjustment = await this.prisma.working.stockAdjustment.findFirst({
       where: { id, tenantId },
     });
     if (!adjustment) throw new NotFoundException('Adjustment not found');
@@ -41,7 +41,7 @@ export class AdjustmentService {
 
     const status = action === 'approve' ? 'ADJ_APPROVED' : 'ADJ_REJECTED';
 
-    const updated = await this.prisma.stockAdjustment.update({
+    const updated = await this.prisma.working.stockAdjustment.update({
       where: { id },
       data: {
         status: status as any,
@@ -84,13 +84,13 @@ export class AdjustmentService {
     if (filters?.status) where.status = filters.status;
 
     const [data, total] = await Promise.all([
-      this.prisma.stockAdjustment.findMany({
+      this.prisma.working.stockAdjustment.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.stockAdjustment.count({ where }),
+      this.prisma.working.stockAdjustment.count({ where }),
     ]);
 
     return { data, total, page, limit };
