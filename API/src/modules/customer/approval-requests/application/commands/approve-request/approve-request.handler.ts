@@ -3,7 +3,9 @@ import { ForbiddenException } from '@nestjs/common';
 import { ApproveRequestCommand } from './approve-request.command';
 import { MakerCheckerEngine } from '../../../../../../core/permissions/engines/maker-checker.engine';
 import { PrismaService } from '../../../../../../core/prisma/prisma.service';
+import { CrossService } from '../../../../../../common/decorators/cross-service.decorator';
 
+@CrossService('identity', 'Uses MakerCheckerEngine from core/permissions to validate and record the checker approval decision')
 @CommandHandler(ApproveRequestCommand)
 export class ApproveRequestHandler implements ICommandHandler<ApproveRequestCommand> {
   constructor(

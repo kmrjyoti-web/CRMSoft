@@ -2,8 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { AppError } from '../../../../common/errors/app-error';
 import { AutoNumberService } from '../../../core/identity/settings/services/auto-number.service';
+import { CrossService } from '../../../../common/decorators/cross-service.decorator';
 import { AmountInWordsService } from './amount-in-words.service';
 
+@CrossService('identity', 'Uses AutoNumberService from identity settings to generate receipt numbers')
 @Injectable()
 export class ReceiptService {
   constructor(

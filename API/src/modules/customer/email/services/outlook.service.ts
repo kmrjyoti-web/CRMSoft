@@ -2,7 +2,9 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { CredentialService } from '../../../softwarevendor/tenant-config/services/credential.service';
 import { IEmailProviderService, SendEmailParams, SendResult, FetchOptions, FetchResult } from './email-provider.interface';
+import { CrossService } from '../../../../common/decorators/cross-service.decorator';
 
+@CrossService('vendor', 'Uses CredentialService from tenant-config to retrieve tenant OAuth tokens for Microsoft Graph API access')
 @Injectable()
 export class OutlookService implements IEmailProviderService {
   constructor(

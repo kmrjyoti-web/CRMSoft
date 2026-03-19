@@ -43,6 +43,72 @@ module.exports = {
       from: {},
       to: { circular: true },
     },
+
+    // ─── SERVICE BOUNDARY RULES ───────────────────────────────────────────────
+    // Severity: 'warn' in monolith mode.
+    // When extracting a service, change the relevant rule to 'error' and
+    // replace each @CrossService-annotated import with an API call or event.
+
+    {
+      name: 'vendor-no-direct-work',
+      comment:
+        'Vendor service must not directly import Work service modules. ' +
+        'Each violation is annotated with @CrossService. ' +
+        'When extracting, replace with message queue or HTTP call.',
+      severity: 'warn',
+      from: {
+        path: '^src/modules/(softwarevendor|plugins|marketplace)|^src/modules/core/platform',
+      },
+      to: {
+        path: '^src/modules/customer|^src/core/workflow|^src/modules/core/work',
+      },
+    },
+    {
+      name: 'work-no-direct-vendor',
+      comment:
+        'Work service must not directly import Vendor service modules (table-config, tenant-config, control-room). ' +
+        'Each violation is annotated with @CrossService. ' +
+        'When extracting, replace with shared-lib or HTTP call.',
+      severity: 'warn',
+      from: {
+        path: '^src/modules/customer|^src/core/workflow|^src/modules/core/work',
+      },
+      to: {
+        path: '^src/modules/(softwarevendor|plugins|marketplace)|^src/modules/core/platform',
+      },
+    },
+    {
+      name: 'work-no-direct-identity-business',
+      comment:
+        'Work service must not import business-logic services from Identity (AutoNumberService, CompanyProfileService, MakerCheckerEngine). ' +
+        'Shared infrastructure (RequirePermissions decorator, guards) is exempt. ' +
+        'Each violation is annotated with @CrossService. ' +
+        'When extracting, replace with HTTP call or event.',
+      severity: 'warn',
+      from: {
+        path: '^src/modules/customer|^src/core/workflow|^src/modules/core/work',
+      },
+      to: {
+        // Business-logic identity services (excludes shared decorators/guards)
+        path:
+          '^src/modules/core/identity/settings|' +
+          '^src/core/permissions/engines',
+      },
+    },
+    {
+      name: 'identity-no-direct-vendor',
+      comment:
+        'Identity service must not directly import Vendor business-logic. ' +
+        'Static seed-data imports are annotated with @CrossService and acceptable in monolith. ' +
+        'When extracting, move seed data to shared constants package.',
+      severity: 'warn',
+      from: {
+        path: '^src/core/auth|^src/core/permissions|^src/modules/core/identity',
+      },
+      to: {
+        path: '^src/modules/(softwarevendor|plugins|marketplace)|^src/modules/core/platform',
+      },
+    },
   ],
   options: {
     doNotFollow: {

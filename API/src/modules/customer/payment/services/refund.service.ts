@@ -2,11 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { AppError } from '../../../../common/errors/app-error';
 import { AutoNumberService } from '../../../core/identity/settings/services/auto-number.service';
+import { CrossService } from '../../../../common/decorators/cross-service.decorator';
 import { PaymentGatewayFactoryService } from './payment-gateway-factory.service';
 import { InvoiceService } from './invoice.service';
 import { CreateRefundDto, RefundQueryDto } from '../presentation/dto/refund.dto';
 import { getErrorMessage } from '@/common/utils/error.utils';
 
+@CrossService('identity', 'Uses AutoNumberService from identity settings to generate refund reference numbers')
 @Injectable()
 export class RefundService {
   private readonly logger = new Logger(RefundService.name);

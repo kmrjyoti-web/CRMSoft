@@ -5,6 +5,7 @@ import { GstCalculatorService, GstLineInput } from './gst-calculator.service';
 import { AmountInWordsService } from './amount-in-words.service';
 import { AutoNumberService } from '../../../core/identity/settings/services/auto-number.service';
 import { CompanyProfileService } from '../../../core/identity/settings/services/company-profile.service';
+import { CrossService } from '../../../../common/decorators/cross-service.decorator';
 import { InvoiceService } from './invoice.service';
 import {
   CreateProformaInvoiceDto,
@@ -13,6 +14,7 @@ import {
   GenerateProformaFromQuotationDto,
 } from '../presentation/dto/proforma-invoice.dto';
 
+@CrossService('identity', 'Uses AutoNumberService (pro-forma numbering) and CompanyProfileService (seller details on PDF) from identity settings')
 @Injectable()
 export class ProformaInvoiceService {
   private readonly logger = new Logger(ProformaInvoiceService.name);

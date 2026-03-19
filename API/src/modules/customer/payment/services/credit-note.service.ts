@@ -2,9 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { AppError } from '../../../../common/errors/app-error';
 import { AutoNumberService } from '../../../core/identity/settings/services/auto-number.service';
+import { CrossService } from '../../../../common/decorators/cross-service.decorator';
 import { InvoiceService } from './invoice.service';
 import { CreateCreditNoteDto, ApplyCreditNoteDto, CreditNoteQueryDto } from '../presentation/dto/credit-note.dto';
 
+@CrossService('identity', 'Uses AutoNumberService from identity settings to generate credit note numbers')
 @Injectable()
 export class CreditNoteService {
   private readonly logger = new Logger(CreditNoteService.name);

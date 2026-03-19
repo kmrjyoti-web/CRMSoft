@@ -4,6 +4,7 @@ import { RawContactVerifiedEvent } from '../../domain/events/raw-contact-verifie
 import { PrismaService } from '../../../../../core/prisma/prisma.service';
 import { AccountLedgerService } from '../../../../customer/accounts/services/ledger.service';
 import { RuleResolverService } from '../../../../softwarevendor/control-room/services/rule-resolver.service';
+import { CrossService } from '../../../../../common/decorators/cross-service.decorator';
 import { getErrorMessage } from '@/common/utils/error.utils';
 
 /**
@@ -14,6 +15,7 @@ import { getErrorMessage } from '@/common/utils/error.utils';
  * - Notifications (future)
  * - Audit logging (future)
  */
+@CrossService('vendor', 'Reads MST_AUTO_CREATE_LEDGER rule from vendor ControlRoom to decide whether to auto-create an accounting ledger on contact verification')
 @EventsHandler(RawContactVerifiedEvent)
 export class OnRawContactVerifiedHandler implements IEventHandler<RawContactVerifiedEvent> {
   private readonly logger = new Logger(OnRawContactVerifiedHandler.name);

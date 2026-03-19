@@ -7,6 +7,7 @@ import {
   NotificationDispatchService,
   DispatchEvent,
 } from '../../../core/work/notifications/services/notification-dispatch.service';
+import { CrossService } from '../../../../common/decorators/cross-service.decorator';
 
 // ─── 1. Process Event Reminders ─────────────────────────────────
 
@@ -14,6 +15,7 @@ import {
  * Find ScheduledEvents approaching their start time within the
  * configured reminder window and dispatch reminder notifications.
  */
+@CrossService('work', 'Uses NotificationDispatchService from core/work to dispatch event reminder notifications to users')
 @Injectable()
 export class ProcessEventRemindersHandler implements ICronJobHandler {
   readonly jobCode = 'PROCESS_EVENT_REMINDERS';

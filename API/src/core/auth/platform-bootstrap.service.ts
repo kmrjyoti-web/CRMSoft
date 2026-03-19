@@ -4,7 +4,9 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { MENU_SEED_DATA } from '../../modules/core/identity/menus/presentation/menu-seed-data';
 import { BUSINESS_TYPE_SEED_DATA } from '../../modules/softwarevendor/business-type/services/business-type-seed-data';
+import { CrossService } from '../../common/decorators/cross-service.decorator';
 
+@CrossService('vendor', 'Imports BUSINESS_TYPE_SEED_DATA from softwarevendor to seed platform business types on first boot — extract to shared constants package when splitting services')
 @Injectable()
 export class PlatformBootstrapService implements OnModuleInit {
   private readonly logger = new Logger(PlatformBootstrapService.name);

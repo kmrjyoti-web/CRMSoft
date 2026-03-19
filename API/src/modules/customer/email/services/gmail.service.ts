@@ -1,8 +1,10 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { CredentialService } from '../../../softwarevendor/tenant-config/services/credential.service';
+import { CrossService } from '../../../../common/decorators/cross-service.decorator';
 import { IEmailProviderService, SendEmailParams, SendResult, FetchOptions, FetchResult } from './email-provider.interface';
 
+@CrossService('vendor', 'Uses CredentialService from tenant-config to retrieve tenant OAuth tokens for Gmail API access')
 @Injectable()
 export class GmailService implements IEmailProviderService {
   constructor(

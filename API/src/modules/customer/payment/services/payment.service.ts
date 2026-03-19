@@ -2,10 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { AppError } from '../../../../common/errors/app-error';
 import { AutoNumberService } from '../../../core/identity/settings/services/auto-number.service';
+import { CrossService } from '../../../../common/decorators/cross-service.decorator';
 import { PaymentGatewayFactoryService } from './payment-gateway-factory.service';
 import { InvoiceService } from './invoice.service';
 import { RecordPaymentDto, CreateGatewayOrderDto, VerifyGatewayPaymentDto, PaymentQueryDto } from '../presentation/dto/payment.dto';
 
+@CrossService('identity', 'Uses AutoNumberService from identity settings to generate payment receipt numbers')
 @Injectable()
 export class PaymentService {
   private readonly logger = new Logger(PaymentService.name);

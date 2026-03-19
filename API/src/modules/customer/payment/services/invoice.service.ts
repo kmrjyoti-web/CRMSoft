@@ -5,8 +5,10 @@ import { GstCalculatorService, GstLineInput } from './gst-calculator.service';
 import { AmountInWordsService } from './amount-in-words.service';
 import { AutoNumberService } from '../../../core/identity/settings/services/auto-number.service';
 import { CompanyProfileService } from '../../../core/identity/settings/services/company-profile.service';
+import { CrossService } from '../../../../common/decorators/cross-service.decorator';
 import { CreateInvoiceDto, UpdateInvoiceDto, InvoiceQueryDto, GenerateInvoiceDto } from '../presentation/dto/invoice.dto';
 
+@CrossService('identity', 'Uses AutoNumberService (invoice numbering sequences) and CompanyProfileService (seller details on PDF) from identity settings')
 @Injectable()
 export class InvoiceService {
   private readonly logger = new Logger(InvoiceService.name);

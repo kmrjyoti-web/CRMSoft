@@ -25,6 +25,8 @@
     "test:int": "jest --testPathPattern=integration",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:security": "jest --testPathPattern=security",
+    "report:cross-service": "ts-node --project tsconfig.json scripts/audit/cross-service-report.ts",
+    "report:cross-service:save": "ts-node --project tsconfig.json scripts/audit/cross-service-report.ts --save",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "ts-node prisma/seed.ts",

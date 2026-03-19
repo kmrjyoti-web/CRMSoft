@@ -1,7 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { WorkflowEngineService } from '../../../../../../core/workflow/workflow-engine.service';
 import { InitializeWorkflowCommand } from './initialize-workflow.command';
+import { CrossService } from '../../../../../../common/decorators/cross-service.decorator';
 
+@CrossService('work', 'Uses WorkflowEngineService from core/workflow (Work service) to execute tenant workflow state transitions')
 @CommandHandler(InitializeWorkflowCommand)
 export class InitializeWorkflowHandler implements ICommandHandler<InitializeWorkflowCommand> {
   constructor(private readonly engine: WorkflowEngineService) {}
