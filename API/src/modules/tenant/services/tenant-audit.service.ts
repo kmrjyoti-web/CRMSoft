@@ -8,7 +8,7 @@ export class TenantAuditService {
   private activeAudits = new Map<string, { id: string; tenantId: string }>();
 
   constructor(private readonly prisma: PrismaService) {
-    this.loadActiveAudits();
+    void this.loadActiveAudits();
   }
 
   /* ------------------------------------------------------------------ */

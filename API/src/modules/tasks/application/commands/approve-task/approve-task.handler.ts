@@ -3,6 +3,7 @@ import { Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { ApproveTaskCommand } from './approve-task.command';
 import { PrismaService } from '../../../../../core/prisma/prisma.service';
 import { CALENDAR_COLORS } from '../../../../../common/utils/calendar-colors';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @CommandHandler(ApproveTaskCommand)
 export class ApproveTaskHandler implements ICommandHandler<ApproveTaskCommand> {
@@ -78,7 +79,7 @@ export class ApproveTaskHandler implements ICommandHandler<ApproveTaskCommand> {
 
       this.logger.log(`Auto-created activity on approval for task ${task.taskNumber}`);
     } catch (error) {
-      this.logger.warn(`Failed to auto-create activity on approval for task ${task.taskNumber}: ${error.message}`);
+      this.logger.warn(`Failed to auto-create activity on approval for task ${task.taskNumber}: ${getErrorMessage(error)}`);
     }
   }
 
@@ -112,7 +113,7 @@ export class ApproveTaskHandler implements ICommandHandler<ApproveTaskCommand> {
         });
       }
     } catch (error) {
-      this.logger.warn(`Failed to sync calendar on approval for task ${task.taskNumber}: ${error.message}`);
+      this.logger.warn(`Failed to sync calendar on approval for task ${task.taskNumber}: ${getErrorMessage(error)}`);
     }
   }
 }

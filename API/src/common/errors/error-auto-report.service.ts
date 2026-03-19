@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 /**
  * Manages auto-report rules and triggers notifications for error logs
@@ -57,7 +58,7 @@ export class ErrorAutoReportService {
         });
       }
     } catch (err) {
-      this.logger.error(`Auto-report check failed: ${err.message}`);
+      this.logger.error(`Auto-report check failed: ${getErrorMessage(err)}`);
     }
   }
 

@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 const SENSITIVE_FIELDS = ['password', 'secret', 'token', 'apiKey', 'creditCard', 'keyHash', 'keySecret'];
 
@@ -63,7 +64,7 @@ export class ApiLoggerService {
         },
       });
     } catch (err) {
-      this.logger.error(`Failed to log API request: ${err.message}`);
+      this.logger.error(`Failed to log API request: ${getErrorMessage(err)}`);
     }
   }
 

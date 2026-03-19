@@ -6,6 +6,7 @@ import { PaymentService } from '../services/payment.service';
 import { RazorpayGatewayService } from '../services/razorpay-gateway.service';
 import { StripeGatewayService } from '../services/stripe-gateway.service';
 import { PaymentGatewayFactoryService } from '../services/payment-gateway-factory.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @ApiTags('Payment Webhooks')
 @Controller('webhooks/payment')
@@ -42,8 +43,8 @@ export class PaymentWebhookController {
       await this.paymentService.handleWebhook(tenantId, 'RAZORPAY', body.event, body.payload);
       return { status: 'ok' };
     } catch (err) {
-      this.logger.error(`Razorpay webhook error: ${err.message}`);
-      return { status: 'error', message: err.message };
+      this.logger.error(`Razorpay webhook error: ${getErrorMessage(err)}`);
+      return { status: 'error', message: getErrorMessage(err) };
     }
   }
 
@@ -70,8 +71,8 @@ export class PaymentWebhookController {
       await this.paymentService.handleWebhook(tenantId, 'STRIPE', body.type, body);
       return { status: 'ok' };
     } catch (err) {
-      this.logger.error(`Stripe webhook error: ${err.message}`);
-      return { status: 'error', message: err.message };
+      this.logger.error(`Stripe webhook error: ${getErrorMessage(err)}`);
+      return { status: 'error', message: getErrorMessage(err) };
     }
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { IChannelAdapter, ChannelSendParams, ChannelSendResult } from './channel-adapter.interface';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()
 export class EmailAdapter implements IChannelAdapter {
@@ -28,7 +29,7 @@ export class EmailAdapter implements IChannelAdapter {
 
       return { success: true, messageId: `email-${Date.now()}` };
     } catch (error) {
-      this.logger.error(`Email send failed: ${error.message}`);
+      this.logger.error(`Email send failed: ${getErrorMessage(error)}`);
 
       await this.prisma.communicationLog.create({
         data: {
@@ -38,11 +39,11 @@ export class EmailAdapter implements IChannelAdapter {
           subject: params.subject,
           body: params.body,
           status: 'FAILED',
-          errorMessage: error.message,
+          errorMessage: getErrorMessage(error),
         },
       });
 
-      return { success: false, error: error.message };
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 }

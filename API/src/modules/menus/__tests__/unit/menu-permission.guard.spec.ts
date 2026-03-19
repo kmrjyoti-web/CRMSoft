@@ -25,7 +25,7 @@ describe('MenuPermissionGuard', () => {
     } as unknown as ExecutionContext;
 
     reflector = new Reflector();
-    jest.spyOn(reflector, 'getAllAndOverride').mockImplementation((key: string) => {
+    jest.spyOn(reflector, 'getAllAndOverride').mockImplementation((key: unknown) => {
       if (key === 'isPublic') return isPublic;
       if (key === 'menuPermission') return meta;
       return undefined;

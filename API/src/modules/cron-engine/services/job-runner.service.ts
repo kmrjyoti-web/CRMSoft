@@ -5,6 +5,7 @@ import { JobRegistryService } from './job-registry.service';
 import { CronParserService } from './cron-parser.service';
 import { CronAlertService } from './cron-alert.service';
 import { Decimal } from 'decimal.js';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 /**
  * Executes a cron job with full lifecycle:
@@ -127,7 +128,7 @@ export class JobRunnerService {
         failed += r.recordsFailed ?? 0;
       } catch (err) {
         failed++;
-        this.logger.error(`${handler.jobCode} failed for tenant ${tenant.id}: ${err.message}`);
+        this.logger.error(`${handler.jobCode} failed for tenant ${tenant.id}: ${getErrorMessage(err)}`);
       }
     }
     return { recordsProcessed: processed, recordsSucceeded: succeeded, recordsFailed: failed };
@@ -146,7 +147,7 @@ export class JobRunnerService {
     triggeredBy: string,
     retryAttempt: number,
   ): Promise<CronJobRunLog> {
-    const isTimeout = err.message?.startsWith('TIMEOUT:');
+    const isTimeout = getErrorMessage(err)?.startsWith('TIMEOUT:');
     const status: CronRunStatus = isTimeout ? 'TIMEOUT' : 'FAILED';
     const finishedAt = new Date();
     const durationMs = finishedAt.getTime() - runLog.startedAt.getTime();
@@ -157,7 +158,7 @@ export class JobRunnerService {
         status,
         finishedAt,
         durationMs,
-        errorMessage: err.message,
+        errorMessage: getErrorMessage(err),
         errorStack: err.stack?.slice(0, 2000),
       },
     });
@@ -169,7 +170,7 @@ export class JobRunnerService {
         lastRunAt: runLog.startedAt,
         lastRunStatus: status,
         lastRunDurationMs: durationMs,
-        lastRunError: err.message,
+        lastRunError: getErrorMessage(err),
         totalFailCount: { increment: 1 },
         totalRunCount: { increment: 1 },
         consecutiveFailures: newConsec,
@@ -182,7 +183,7 @@ export class JobRunnerService {
     // Alert check
     if (newConsec >= job.alertAfterConsecutiveFailures) {
       if ((status === 'FAILED' && job.alertOnFailure) || (status === 'TIMEOUT' && job.alertOnTimeout)) {
-        this.alert.sendAlert(job, err.message, updated).catch(() => {});
+        this.alert.sendAlert(job, getErrorMessage(err), updated).catch(() => {});
       }
     }
 

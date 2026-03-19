@@ -180,8 +180,8 @@ export class VersionControlService {
 
     return {
       total,
-      byStatus: byStatus.map((g) => ({ status: g.status, count: g._count })),
-      byReleaseType: byReleaseType.map((g) => ({ releaseType: g.releaseType, count: g._count })),
+      byStatus: byStatus.map((g: { status: unknown; _count: unknown }) => ({ status: g.status, count: g._count })),
+      byReleaseType: byReleaseType.map((g: { releaseType: unknown; _count: unknown }) => ({ releaseType: g.releaseType, count: g._count })),
       recentDeployments,
     };
   }

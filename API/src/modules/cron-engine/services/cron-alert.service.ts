@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { CronJobConfig, CronJobRunLog } from '@prisma/client';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 /**
  * Sends failure/timeout alerts to configured recipients.
@@ -78,7 +79,7 @@ export class CronAlertService {
         })),
       });
     } catch (err) {
-      this.logger.error(`Failed to create in-app alert: ${err.message}`);
+      this.logger.error(`Failed to create in-app alert: ${getErrorMessage(err)}`);
     }
   }
 }

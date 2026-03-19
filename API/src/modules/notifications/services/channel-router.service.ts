@@ -3,6 +3,7 @@ import { PrismaService } from '../../../core/prisma/prisma.service';
 import { NotificationCoreService } from './notification-core.service';
 import { NotificationTemplateService } from './template.service';
 import { RealtimeService } from './realtime.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()
 export class ChannelRouterService {
@@ -76,7 +77,7 @@ export class ChannelRouterService {
           results.push({ channel: 'WHATSAPP', success: true });
         }
       } catch (error) {
-        this.logger.error(`Failed to send via ${channel}: ${error.message}`);
+        this.logger.error(`Failed to send via ${channel}: ${getErrorMessage(error)}`);
         results.push({ channel, success: false });
       }
     }

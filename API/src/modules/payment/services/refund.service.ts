@@ -5,6 +5,7 @@ import { AutoNumberService } from '../../settings/services/auto-number.service';
 import { PaymentGatewayFactoryService } from './payment-gateway-factory.service';
 import { InvoiceService } from './invoice.service';
 import { CreateRefundDto, RefundQueryDto } from '../presentation/dto/refund.dto';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()
 export class RefundService {
@@ -53,7 +54,7 @@ export class RefundService {
           status = 'REFUND_PROCESSED';
         }
       } catch (err) {
-        this.logger.error(`Gateway refund failed: ${err.message}`);
+        this.logger.error(`Gateway refund failed: ${getErrorMessage(err)}`);
         // Still create the refund record as pending
       }
     } else {

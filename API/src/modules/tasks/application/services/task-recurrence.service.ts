@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { TaskRecurrence } from '@prisma/client';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()
 export class TaskRecurrenceService {
@@ -81,7 +82,7 @@ export class TaskRecurrenceService {
 
         created++;
       } catch (error) {
-        this.logger.error(`Failed to create recurrence for task ${task.id}: ${error.message}`);
+        this.logger.error(`Failed to create recurrence for task ${task.id}: ${getErrorMessage(error)}`);
       }
     }
 

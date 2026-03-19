@@ -52,7 +52,7 @@ export class MasterSchedulerService implements OnModuleInit, OnModuleDestroy {
   /** On app shutdown: cancel all tasks. */
   onModuleDestroy(): void {
     for (const [code, task] of this.scheduledTasks) {
-      task.stop();
+      void task.stop();
       this.logger.log(`Stopped job: ${code}`);
     }
     this.scheduledTasks.clear();
@@ -85,7 +85,7 @@ export class MasterSchedulerService implements OnModuleInit, OnModuleDestroy {
 
   /** Reload all jobs (after bulk config change). */
   async reloadAll(): Promise<void> {
-    for (const task of this.scheduledTasks.values()) task.stop();
+    for (const task of this.scheduledTasks.values()) void task.stop();
     this.scheduledTasks.clear();
     await this.onModuleInit();
   }
@@ -128,7 +128,7 @@ export class MasterSchedulerService implements OnModuleInit, OnModuleDestroy {
   private cancelJobSync(jobCode: string): void {
     const existing = this.scheduledTasks.get(jobCode);
     if (existing) {
-      existing.stop();
+      void existing.stop();
       this.scheduledTasks.delete(jobCode);
     }
   }

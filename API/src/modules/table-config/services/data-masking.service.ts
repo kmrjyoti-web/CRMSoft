@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 export interface MaskingRule {
   columnId: string;
@@ -212,7 +213,7 @@ export class DataMaskingService {
       });
       return record?.[columnId] ?? null;
     } catch (err) {
-      this.logger.warn(`Failed to unmask ${tableKey}.${columnId}: ${err.message}`);
+      this.logger.warn(`Failed to unmask ${tableKey}.${columnId}: ${getErrorMessage(err)}`);
       return null;
     }
   }

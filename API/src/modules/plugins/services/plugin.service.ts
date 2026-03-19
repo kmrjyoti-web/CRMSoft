@@ -4,6 +4,7 @@ import { EncryptionService } from '../../tenant-config/services/encryption.servi
 import { PluginCategory } from '@prisma/client';
 import { PluginMenuService } from './plugin-menu.service';
 import { industryFilter } from '../../../common/utils/industry-filter.util';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 interface PluginCredentials {
   [key: string]: string | number | boolean;
@@ -137,7 +138,7 @@ export class PluginService {
     try {
       await this.menuService.enableMenusForPlugin(tenantId, pluginCode);
     } catch (err) {
-      this.logger.warn(`Failed to auto-enable menus for plugin "${pluginCode}": ${err.message}`);
+      this.logger.warn(`Failed to auto-enable menus for plugin "${pluginCode}": ${getErrorMessage(err)}`);
     }
 
     return {
@@ -171,7 +172,7 @@ export class PluginService {
     try {
       await this.menuService.disableMenusForPlugin(tenantId, pluginCode);
     } catch (err) {
-      this.logger.warn(`Failed to auto-disable menus for plugin "${pluginCode}": ${err.message}`);
+      this.logger.warn(`Failed to auto-disable menus for plugin "${pluginCode}": ${getErrorMessage(err)}`);
     }
 
     return tenantPlugin;

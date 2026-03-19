@@ -5,6 +5,7 @@ import { PrismaService } from '../../../../../core/prisma/prisma.service';
 import { ChannelRouterService } from '../../../../notifications/services/channel-router.service';
 import { createAutoReminder } from '../../../../../common/utils/reminder.utils';
 import { CALENDAR_COLORS } from '../../../../../common/utils/calendar-colors';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @CommandHandler(CreateActivityCommand)
 export class CreateActivityHandler implements ICommandHandler<CreateActivityCommand> {
@@ -174,7 +175,7 @@ export class CreateActivityHandler implements ICommandHandler<CreateActivityComm
           entityId: activity.id,
         });
       } catch (error) {
-        this.logger.warn(`Failed to send ACTIVITY_TAGGED notification to ${taggedUserId}: ${error.message}`);
+        this.logger.warn(`Failed to send ACTIVITY_TAGGED notification to ${taggedUserId}: ${getErrorMessage(error)}`);
       }
     }
   }

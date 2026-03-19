@@ -38,5 +38,6 @@ export class ProcessTrackingEventHandler implements ICommandHandler<ProcessTrack
         }
         break;
     }
+    return undefined;
   }
 }

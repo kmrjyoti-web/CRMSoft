@@ -28,7 +28,7 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
       return;
     }
     this.realtimeService.registerConnection(userId, client.id);
-    client.join(`user:${userId}`);
+    void client.join(`user:${userId}`);
     this.logger.log(`Client connected: ${client.id} (user: ${userId})`);
   }
 
@@ -42,7 +42,7 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
 
   @SubscribeMessage('subscribe')
   handleSubscribe(@ConnectedSocket() client: Socket, @MessageBody() data: { userId: string }) {
-    client.join(`user:${data.userId}`);
+    void client.join(`user:${data.userId}`);
     return { event: 'subscribed', data: { userId: data.userId } };
   }
 

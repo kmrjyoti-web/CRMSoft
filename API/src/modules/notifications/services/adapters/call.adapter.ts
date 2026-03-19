@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { IChannelAdapter, ChannelSendParams, ChannelSendResult } from './channel-adapter.interface';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()
 export class CallAdapter implements IChannelAdapter {
@@ -27,8 +28,8 @@ export class CallAdapter implements IChannelAdapter {
 
       return { success: true, messageId: `call-${Date.now()}` };
     } catch (error) {
-      this.logger.error(`Call initiation failed: ${error.message}`);
-      return { success: false, error: error.message };
+      this.logger.error(`Call initiation failed: ${getErrorMessage(error)}`);
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 }

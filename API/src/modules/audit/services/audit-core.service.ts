@@ -4,6 +4,7 @@ import { AuditDiffService, FieldChange } from './audit-diff.service';
 import { AuditSnapshotService } from './audit-snapshot.service';
 import { AuditSummaryGeneratorService } from './audit-summary-generator.service';
 import { AuditSanitizerService } from './audit-sanitizer.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()
 export class AuditCoreService {
@@ -112,7 +113,7 @@ export class AuditCoreService {
 
       return auditLog;
     } catch (error) {
-      this.logger.error(`Audit log failed: ${error.message}`, error.stack);
+      this.logger.error(`Audit log failed: ${getErrorMessage(error)}`, (error as Error).stack);
       return null;
     }
   }
@@ -165,7 +166,7 @@ export class AuditCoreService {
 
       return auditLog;
     } catch (error) {
-      this.logger.error(`Audit logAction failed: ${error.message}`);
+      this.logger.error(`Audit logAction failed: ${getErrorMessage(error)}`);
       return null;
     }
   }

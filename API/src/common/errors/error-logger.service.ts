@@ -1,5 +1,6 @@
 import { Injectable, Logger, Optional, Inject } from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 export interface ErrorLogEntry {
   requestId: string;
@@ -56,7 +57,7 @@ export class ErrorLoggerService {
     }
 
     // Async DB persist (fire-and-forget) — persist ALL errors
-    this.persistAsync(entry);
+    void this.persistAsync(entry);
   }
 
   /** Get a single error log by ID. */
@@ -296,7 +297,7 @@ export class ErrorLoggerService {
         this.autoReportService.checkAndReport(created);
       }
     } catch (err) {
-      this.logger.error(`Failed to persist error log: ${err.message}`);
+      this.logger.error(`Failed to persist error log: ${getErrorMessage(err)}`);
     }
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { ChannelRouterService } from './channel-router.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()
 export class EscalationService {
@@ -43,7 +44,7 @@ export class EscalationService {
           await this.executeAction(rule, task);
           escalated++;
         } catch (error) {
-          this.logger.error(`Escalation failed for task ${task.id}: ${error.message}`);
+          this.logger.error(`Escalation failed for task ${task.id}: ${getErrorMessage(error)}`);
         }
       }
     }

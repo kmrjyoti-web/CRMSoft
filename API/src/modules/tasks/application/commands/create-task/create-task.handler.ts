@@ -6,6 +6,7 @@ import { TaskAssignmentService } from '../../services/task-assignment.service';
 import { TaskRecurrenceService } from '../../services/task-recurrence.service';
 import { TaskRecurrence } from '@prisma/client';
 import { CALENDAR_COLORS } from '../../../../../common/utils/calendar-colors';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @CommandHandler(CreateTaskCommand)
 export class CreateTaskHandler implements ICommandHandler<CreateTaskCommand> {
@@ -139,7 +140,7 @@ export class CreateTaskHandler implements ICommandHandler<CreateTaskCommand> {
 
       this.logger.log(`Auto-created activity ${activity.id} for task ${task.taskNumber}`);
     } catch (error) {
-      this.logger.warn(`Failed to auto-create activity for task ${task.taskNumber}: ${error.message}`);
+      this.logger.warn(`Failed to auto-create activity for task ${task.taskNumber}: ${getErrorMessage(error)}`);
     }
   }
 
@@ -174,7 +175,7 @@ export class CreateTaskHandler implements ICommandHandler<CreateTaskCommand> {
 
       this.logger.log(`Auto-created reminder for task ${taskId}, ${cmd.reminderMinutesBefore} min before due`);
     } catch (error) {
-      this.logger.warn(`Failed to create reminder for task ${taskId}: ${error.message}`);
+      this.logger.warn(`Failed to create reminder for task ${taskId}: ${getErrorMessage(error)}`);
     }
   }
 
@@ -194,7 +195,7 @@ export class CreateTaskHandler implements ICommandHandler<CreateTaskCommand> {
 
       this.logger.log(`Auto-created calendar event for task ${task.taskNumber}`);
     } catch (error) {
-      this.logger.warn(`Failed to sync calendar for task ${task.taskNumber}: ${error.message}`);
+      this.logger.warn(`Failed to sync calendar for task ${task.taskNumber}: ${getErrorMessage(error)}`);
     }
   }
 }

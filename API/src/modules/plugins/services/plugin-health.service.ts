@@ -2,6 +2,7 @@ import { Injectable, Logger, NotFoundException, BadRequestException } from '@nes
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { EncryptionService } from '../../tenant-config/services/encryption.service';
 import { PluginHandlerRegistry, HealthCheckResult } from '../handlers/handler-registry';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()
 export class PluginHealthService {
@@ -31,10 +32,10 @@ export class PluginHealthService {
     try {
       return await handler.testConnection(credentials);
     } catch (error) {
-      this.logger.error(`Health check failed for ${pluginCode}: ${error.message}`);
+      this.logger.error(`Health check failed for ${pluginCode}: ${getErrorMessage(error)}`);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Connection test failed',
+        message: error instanceof Error ? getErrorMessage(error) : 'Connection test failed',
       };
     }
   }
@@ -89,10 +90,10 @@ export class PluginHealthService {
 
       return result;
     } catch (error) {
-      this.logger.error(`Health check failed for installed ${pluginCode}: ${error.message}`);
+      this.logger.error(`Health check failed for installed ${pluginCode}: ${getErrorMessage(error)}`);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Connection test failed',
+        message: error instanceof Error ? getErrorMessage(error) : 'Connection test failed',
       };
     }
   }

@@ -22,7 +22,7 @@ export class PlatformBootstrapService implements OnModuleInit {
   }
 
   private runBackgroundTasks() {
-    Promise.all([
+    void Promise.all([
       this.ensureMissingPermissions().catch((e) =>
         this.logger.error('ensureMissingPermissions failed', e),
       ),

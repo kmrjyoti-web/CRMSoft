@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { IChannelAdapter, ChannelSendParams, ChannelSendResult } from './channel-adapter.interface';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()
 export class WhatsAppAdapter implements IChannelAdapter {
@@ -26,8 +27,8 @@ export class WhatsAppAdapter implements IChannelAdapter {
 
       return { success: true, messageId: `wa-${Date.now()}` };
     } catch (error) {
-      this.logger.error(`WhatsApp send failed: ${error.message}`);
-      return { success: false, error: error.message };
+      this.logger.error(`WhatsApp send failed: ${getErrorMessage(error)}`);
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 }

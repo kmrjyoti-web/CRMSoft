@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { IChannelAdapter, ChannelSendParams, ChannelSendResult } from './channel-adapter.interface';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()
 export class PushAdapter implements IChannelAdapter {
@@ -26,8 +27,8 @@ export class PushAdapter implements IChannelAdapter {
 
       return { success: true, messageId: `push-${Date.now()}` };
     } catch (error) {
-      this.logger.error(`Push send failed: ${error.message}`);
-      return { success: false, error: error.message };
+      this.logger.error(`Push send failed: ${getErrorMessage(error)}`);
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 }

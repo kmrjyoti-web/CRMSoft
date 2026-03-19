@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()
 export class TargetCalculatorService {
@@ -28,7 +29,7 @@ export class TargetCalculatorService {
         });
         updated++;
       } catch (error) {
-        this.logger.error(`Failed to recalculate target ${target.id}: ${error.message}`);
+        this.logger.error(`Failed to recalculate target ${target.id}: ${getErrorMessage(error)}`);
       }
     }
 

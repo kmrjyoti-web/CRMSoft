@@ -3,6 +3,7 @@ import { PrismaService } from '../../../core/prisma/prisma.service';
 import { NotificationConfigService } from './notification-config.service';
 import { ChannelRouterService } from './channel-router.service';
 import { QuietHourService } from './quiet-hour.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 export interface DispatchEvent {
   tenantId: string;
@@ -97,7 +98,7 @@ export class NotificationDispatchService {
         dispatched++;
       } catch (error) {
         this.logger.error(
-          `Failed to dispatch notification to ${recipientId} for ${eventType}: ${error.message}`,
+          `Failed to dispatch notification to ${recipientId} for ${eventType}: ${getErrorMessage(error)}`,
         );
         skipped++;
       }

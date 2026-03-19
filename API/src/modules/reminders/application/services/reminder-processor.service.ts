@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()
 export class ReminderProcessorService {
@@ -54,7 +55,7 @@ export class ReminderProcessorService {
           data: { isSent: true, sentAt: now, status: 'TRIGGERED', triggeredAt: now },
         });
       } catch (error) {
-        this.logger.error(`Failed to process reminder ${reminder.id}: ${error.message}`);
+        this.logger.error(`Failed to process reminder ${reminder.id}: ${getErrorMessage(error)}`);
       }
     }
 

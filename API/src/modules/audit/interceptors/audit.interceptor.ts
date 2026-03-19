@@ -9,6 +9,7 @@ import { TenantContextService } from '../../../modules/tenant/infrastructure/ten
 import { AUDIT_SKIP_KEY } from '../decorators/audit-skip.decorator';
 import { AUDIT_META_KEY } from '../decorators/auditable.decorator';
 import { AUDIT_ENTITY_KEY } from '../decorators/audit-entity.decorator';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
@@ -142,7 +143,7 @@ export class AuditInterceptor implements NestInterceptor {
             });
           } catch (error) {
             // NEVER let audit logging break the application
-            this.logger.error(`[AUDIT] Audit log error: ${error.message}`, error.stack);
+            this.logger.error(`[AUDIT] Audit log error: ${getErrorMessage(error)}`, (error as Error).stack);
           }
         });
       }),

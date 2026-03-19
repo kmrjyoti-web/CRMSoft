@@ -68,7 +68,7 @@ describe('CampaignExecutorService', () => {
     };
 
     templateRenderer = {
-      render: jest.fn().mockImplementation((tpl, data) => tpl.replace(/\{\{(\w+)\}\}/g, (_, k) => data[k] || '')),
+      render: jest.fn().mockImplementation((tpl: string, data: Record<string, string>) => tpl.replace(/\{\{(\w+)\}\}/g, (_: string, k: string) => data[k] || '')),
     };
 
     trackingService = {

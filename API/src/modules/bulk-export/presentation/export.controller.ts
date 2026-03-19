@@ -59,7 +59,7 @@ export class ExportController {
     const filePath = path.join(process.cwd(), 'uploads', job.fileUrl);
     if (!fs.existsSync(filePath)) return res.status(404).json(ApiResponse.error('File not found'));
 
-    res.download(filePath);
+    return res.download(filePath);
   }
 
   /** Download blank template */

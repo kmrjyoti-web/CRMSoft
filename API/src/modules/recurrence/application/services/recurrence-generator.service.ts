@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()
 export class RecurrenceGeneratorService {
@@ -42,7 +43,7 @@ export class RecurrenceGeneratorService {
 
         this.logger.log(`Generated occurrence for recurring event ${event.id}, next: ${nextDate.toISOString()}`);
       } catch (error) {
-        this.logger.error(`Failed to generate occurrence for ${event.id}: ${error.message}`);
+        this.logger.error(`Failed to generate occurrence for ${event.id}: ${getErrorMessage(error)}`);
       }
     }
 

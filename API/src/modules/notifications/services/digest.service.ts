@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()
 export class DigestService {
@@ -64,7 +65,7 @@ export class DigestService {
 
         // In production: send digest email/push summarizing notifications
       } catch (error) {
-        this.logger.error(`Digest failed for user ${pref.userId}: ${error.message}`);
+        this.logger.error(`Digest failed for user ${pref.userId}: ${getErrorMessage(error)}`);
       }
     }
   }

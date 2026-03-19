@@ -3,6 +3,7 @@ import { PrismaService } from '../../../core/prisma/prisma.service';
 import { WaApiService } from '../../whatsapp/services/wa-api.service';
 import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()
 export class EntityVerificationService {
@@ -166,7 +167,7 @@ export class EntityVerificationService {
       }
       // MOBILE_SMS: placeholder — integrate SMS gateway when available
     } catch (err) {
-      this.logger.error(`Failed to send OTP via ${dto.channel}: ${err.message}`);
+      this.logger.error(`Failed to send OTP via ${dto.channel}: ${getErrorMessage(err)}`);
     }
 
     const isDev = process.env.NODE_ENV !== 'production';
@@ -216,7 +217,7 @@ export class EntityVerificationService {
         sentVia.push('EMAIL');
       }
     } catch (err) {
-      this.logger.error(`Failed to send verification link via EMAIL: ${err.message}`);
+      this.logger.error(`Failed to send verification link via EMAIL: ${getErrorMessage(err)}`);
     }
     try {
       if (entity.phone) {
@@ -224,7 +225,7 @@ export class EntityVerificationService {
         sentVia.push('WHATSAPP');
       }
     } catch (err) {
-      this.logger.error(`Failed to send verification link via WHATSAPP: ${err.message}`);
+      this.logger.error(`Failed to send verification link via WHATSAPP: ${getErrorMessage(err)}`);
     }
 
     return {
@@ -534,7 +535,7 @@ export class EntityVerificationService {
       this.logger.log(`OTP WhatsApp message sent to ${phone}`);
     } catch (err) {
       // If 24h window closed, log and skip — template message could be used if approved
-      this.logger.warn(`WhatsApp OTP failed (may need template): ${err.message}`);
+      this.logger.warn(`WhatsApp OTP failed (may need template): ${getErrorMessage(err)}`);
     }
   }
 
@@ -554,7 +555,7 @@ export class EntityVerificationService {
       );
       this.logger.log(`Verification link WhatsApp message sent to ${phone}`);
     } catch (err) {
-      this.logger.warn(`WhatsApp link send failed: ${err.message}`);
+      this.logger.warn(`WhatsApp link send failed: ${getErrorMessage(err)}`);
     }
   }
 

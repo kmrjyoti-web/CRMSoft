@@ -9,6 +9,7 @@ import { Reflector } from '@nestjs/core';
 import { Observable, from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { DataMaskingService } from './services/data-masking.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 export const MASK_TABLE_KEY = 'mask_table_key';
 
@@ -102,7 +103,7 @@ export class DataMaskingInterceptor implements NestInterceptor {
             } catch (err) {
               // Never let masking errors break list endpoints
               this.logger.warn(
-                `Data masking failed for ${tableKey}: ${err.message}`,
+                `Data masking failed for ${tableKey}: ${getErrorMessage(err)}`,
               );
               return response;
             }

@@ -148,6 +148,6 @@ export class MisReportsController {
     };
     res.setHeader('Content-Type', contentTypes[ext] || 'application/octet-stream');
     res.setHeader('Content-Disposition', `attachment; filename="${path.basename(filePath)}"`);
-    fs.createReadStream(filePath).pipe(res);
+    return fs.createReadStream(filePath).pipe(res);
   }
 }

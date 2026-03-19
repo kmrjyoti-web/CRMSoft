@@ -4,6 +4,7 @@ import { RawContactVerifiedEvent } from '../../domain/events/raw-contact-verifie
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { AccountLedgerService } from '../../../accounts/services/ledger.service';
 import { RuleResolverService } from '../../../control-room/services/rule-resolver.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 /**
  * Reacts to RawContactVerifiedEvent.
@@ -33,7 +34,7 @@ export class OnRawContactVerifiedHandler implements IEventHandler<RawContactVeri
     try {
       await this.autoCreateLedger(event);
     } catch (err) {
-      this.logger.error(`Failed to auto-create ledger for Contact ${event.contactId}: ${err.message}`);
+      this.logger.error(`Failed to auto-create ledger for Contact ${event.contactId}: ${getErrorMessage(err)}`);
     }
   }
 

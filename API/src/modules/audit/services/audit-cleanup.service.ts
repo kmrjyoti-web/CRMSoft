@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 const DEFAULT_RETENTION_DAYS = 730; // 2 years
 
@@ -42,7 +43,7 @@ export class AuditCleanupService {
           this.logger.log(`Cleaned ${result.count} audit logs for ${policy.entityType} (older than ${cutoff.toISOString().split('T')[0]})`);
         }
       } catch (error) {
-        this.logger.error(`Cleanup failed for ${policy.entityType}: ${error.message}`);
+        this.logger.error(`Cleanup failed for ${policy.entityType}: ${getErrorMessage(error)}`);
       }
     }
 

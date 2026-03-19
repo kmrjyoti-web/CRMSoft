@@ -93,7 +93,7 @@ export class AuditExportService {
       data.forEach((row, rowIdx) => {
         const excelRow = sheet.getRow(rowIdx + 4);
         columns.forEach((col, colIdx) => {
-          excelRow.getCell(colIdx + 1).value = row[col.key];
+          excelRow.getCell(colIdx + 1).value = String((row as Record<string, unknown>)[col.key] ?? '');
         });
         if (rowIdx % 2 === 1) {
           excelRow.eachCell(c => {
@@ -113,7 +113,7 @@ export class AuditExportService {
           ? `"${str.replace(/"/g, '""')}"` : str;
       };
       const header = columns.map(c => escape(c.header)).join(',');
-      const rows = data.map(row => columns.map(c => escape(row[c.key])).join(','));
+      const rows = data.map(row => columns.map(c => escape((row as Record<string, unknown>)[c.key])).join(','));
       fs.writeFileSync(filePath, [header, ...rows].join('\n'));
     }
 

@@ -1,5 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 export interface CatalogEntry {
   code: string;
@@ -89,7 +90,7 @@ export class ErrorCatalogService implements OnModuleInit {
       this.logger.log(`Cache refreshed: ${this.cache.size} entries`);
       return this.cache.size;
     } catch (err) {
-      this.logger.warn(`Cache refresh failed: ${err.message}`);
+      this.logger.warn(`Cache refresh failed: ${getErrorMessage(err)}`);
       return this.cache.size;
     }
   }
