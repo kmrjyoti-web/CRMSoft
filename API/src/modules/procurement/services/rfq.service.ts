@@ -59,6 +59,7 @@ export class RFQService {
         sentToVendorIds: dto.vendorIds ?? [],
         items: {
           create: dto.items.map((item) => ({
+            tenantId,
             productId: item.productId,
             quantity: item.quantity,
             unitId: item.unitId ?? '',

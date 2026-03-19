@@ -112,6 +112,7 @@ export class SaleOrderService {
         createdById: userId,
         items: {
           create: computed.map((item) => ({
+            tenantId,
             productId: item.productId,
             orderedQty: item.orderedQty,
             pendingQty: item.orderedQty,

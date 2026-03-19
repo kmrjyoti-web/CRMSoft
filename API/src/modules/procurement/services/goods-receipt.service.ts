@@ -79,6 +79,7 @@ export class GoodsReceiptService {
         remarks: dto.notes,
         items: {
           create: dto.items.map((item) => ({
+            tenantId,
             productId: item.productId,
             poItemId: item.poItemId,
             receivedQty: item.receivedQty,

@@ -72,6 +72,7 @@ export class DeliveryChallanService {
         createdById: userId,
         items: {
           create: dto.items.map((item) => ({
+            tenantId,
             productId: item.productId,
             saleOrderItemId: item.saleOrderItemId,
             quantity: item.quantity,

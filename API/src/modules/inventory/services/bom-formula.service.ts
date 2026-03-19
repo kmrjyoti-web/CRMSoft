@@ -50,6 +50,7 @@ export class BOMFormulaService {
             const wastage = item.wastagePercent ?? 0;
             const effectiveQty = item.quantity * (1 + wastage / 100);
             return {
+              tenantId,
               rawMaterialId: item.rawMaterialId,
               quantity: item.quantity,
               unit: item.unit,

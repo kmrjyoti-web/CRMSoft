@@ -67,6 +67,7 @@ export class PurchaseQuotationService {
       taxTotal += tax;
 
       return {
+        tenantId,
         productId: item.productId,
         quantity: item.quantity,
         unitId: item.unitId ?? '',

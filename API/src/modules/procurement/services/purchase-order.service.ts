@@ -71,6 +71,7 @@ export class PurchaseOrderService {
       discountTotal += discAmount;
 
       return {
+        tenantId,
         productId: item.productId,
         orderedQty: item.quantity,
         pendingQty: item.quantity,

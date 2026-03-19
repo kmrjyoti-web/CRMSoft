@@ -37,6 +37,7 @@ export class SaleReturnService {
       taxAmount += calc.taxAmount;
 
       return {
+        tenantId,
         productId: item.productId,
         returnedQty: item.returnedQty,
         unitId: item.unitId,

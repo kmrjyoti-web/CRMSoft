@@ -31,6 +31,7 @@ export class DebitNoteService {
       const totalAmount = item.taxableAmount + (item.cgstAmount ?? 0) + (item.sgstAmount ?? 0) + (item.igstAmount ?? 0);
 
       return {
+        tenantId,
         productId: item.productId,
         quantity: item.quantity,
         unitId: item.unitId,

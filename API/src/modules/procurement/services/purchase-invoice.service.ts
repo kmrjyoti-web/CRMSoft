@@ -73,6 +73,7 @@ export class PurchaseInvoiceService {
       taxTotal += tax;
 
       return {
+        tenantId,
         productId: item.productId,
         quantity: item.quantity,
         unitId: '',
