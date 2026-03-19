@@ -14,10 +14,11 @@ import { PAYMENT_FILTER_CONFIG } from "../utils/payment-filters";
 import { PaymentListUserHelp } from "../help/PaymentListUserHelp";
 import { PaymentListDevHelp } from "../help/PaymentListDevHelp";
 import type {
-import { formatCurrency } from "@/lib/format-currency";
   PaymentListItem,
   PaymentListParams,
 } from "../types/finance.types";
+
+import { formatCurrency } from "@/lib/format-currency";
 
 // ---------------------------------------------------------------------------
 // Column definitions

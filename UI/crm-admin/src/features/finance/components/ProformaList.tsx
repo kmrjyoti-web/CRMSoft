@@ -11,10 +11,11 @@ import { useProformaList } from "../hooks/useProforma";
 import { PROFORMA_FILTER_CONFIG } from "../utils/proforma-filters";
 import { ProformaForm } from "./ProformaForm";
 import type {
-import { formatCurrency } from "@/lib/format-currency";
   ProformaListItem,
   ProformaListParams,
 } from "../types/proforma.types";
+
+import { formatCurrency } from "@/lib/format-currency";
 
 // ---------------------------------------------------------------------------
 // Column definitions

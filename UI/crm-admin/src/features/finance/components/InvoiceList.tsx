@@ -15,10 +15,11 @@ import { InvoiceForm } from "./InvoiceForm";
 import { InvoiceListUserHelp } from "../help/InvoiceListUserHelp";
 import { InvoiceListDevHelp } from "../help/InvoiceListDevHelp";
 import type {
-import { formatCurrency } from "@/lib/format-currency";
   InvoiceListItem,
   InvoiceListParams,
 } from "../types/finance.types";
+
+import { formatCurrency } from "@/lib/format-currency";
 
 // ---------------------------------------------------------------------------
 // Column definitions

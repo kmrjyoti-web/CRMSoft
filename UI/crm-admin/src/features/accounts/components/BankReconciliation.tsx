@@ -15,11 +15,12 @@ import {
 } from '@/components/ui';
 
 import {
-import { formatCurrency } from "@/lib/format-currency";
   useBankList,
   useBankReconciliation,
   useSubmitReconciliation,
 } from '../hooks/useAccounts';
+
+import { formatCurrency } from "@/lib/format-currency";
 
 // ---------------------------------------------------------------------------
 // Column definitions for unreconciled payments

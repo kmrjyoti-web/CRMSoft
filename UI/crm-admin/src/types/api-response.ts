@@ -1,24 +1,15 @@
-// ── Pagination ──────────────────────────────────────────
-
-export interface PaginationMeta {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
-}
-
-// ── Generic API Response ────────────────────────────────
-// Matches the NestJS ResponseMapperInterceptor wrapper
-
-export interface ApiResponse<T> {
-  success: boolean;
-  statusCode: number;
-  message: string;
-  data: T;
-  meta?: PaginationMeta;
-  timestamp: string;
-  path: string;
-  requestId: string;
-}
+/**
+ * Re-export canonical types from shared-types.
+ * The source of truth for these shapes is:
+ *   UI/shared-types/src/common/api-response.ts
+ *   → mirrors API/src/common/response/response-mapper.interceptor.ts
+ */
+export type {
+  PaginationMeta,
+  ApiResponse,
+  ApiErrorBody,
+  ApiErrorResponse,
+  Paginated,
+  ResultType,
+} from '@shared-types';
+export { isApiSuccess, isApiError, isOk, isErr } from '@shared-types';

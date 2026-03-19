@@ -22,10 +22,11 @@ import { QuotationListDevHelp } from "../help/QuotationListDevHelp";
 import { QUOTATION_FILTER_CONFIG } from "../utils/quotation-filters";
 
 import type {
-import { formatCurrency } from "@/lib/format-currency";
   QuotationListItem,
   QuotationListParams,
 } from "../types/quotations.types";
+
+import { formatCurrency } from "@/lib/format-currency";
 
 // -- Column definitions ------------------------------------------------------
 

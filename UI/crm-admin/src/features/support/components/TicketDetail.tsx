@@ -12,11 +12,12 @@ import {
   useRateTicket,
 } from '../hooks/useSupport';
 import type {
-import { formatDate } from "@/lib/format-date";
   TicketStatus,
   TicketPriority,
   TicketMessage,
 } from '../types/support.types';
+
+import { formatDate } from "@/lib/format-date";
 
 const STATUS_COLORS: Record<TicketStatus, string> = {
   OPEN: 'blue',
