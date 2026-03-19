@@ -5,7 +5,7 @@ import { AddressFields } from '@/components/common/AddressFields';
 // ── LocationFields ──────────────────────────────────────────────────────────
 interface Props {
   profile: any;
-  onUpdate: (data: Record<string, any>) => void;
+  onUpdate: (data: Record<string, unknown>) => void;
 }
 
 export function LocationFields({ profile, onUpdate }: Props) {
@@ -17,7 +17,7 @@ export function LocationFields({ profile, onUpdate }: Props) {
       pincode={profile?.pincode || ''}
       columns={2}
       onChange={(patch) => {
-        const update: Record<string, any> = {};
+        const update: Record<string, unknown> = {};
         if (patch.countryCode !== undefined) update.countryCode = patch.countryCode;
         if (patch.country !== undefined) update.country = patch.country;
         if (patch.stateCode !== undefined) update.stateCode = patch.stateCode;

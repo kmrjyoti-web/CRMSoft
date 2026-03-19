@@ -332,7 +332,7 @@ export function AMCContractDetail({ contractId }: Props) {
               )
             </h3>
             <TableFull
-              data={schedulesTableData as Record<string, any>[]}
+              data={schedulesTableData as Record<string, unknown>[]}
               title=""
               columns={SCHEDULE_COLUMNS}
               defaultViewMode="table"

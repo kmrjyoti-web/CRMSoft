@@ -33,7 +33,7 @@ export function useInventoryDashboard() {
 }
 
 // ─── Serials ───
-export function useSerialList(params?: Record<string, any>) {
+export function useSerialList(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.serials, params],
     queryFn: () => inventoryService.listSerials(params),
@@ -111,7 +111,7 @@ export function useExpiringSerials(days?: number) {
 }
 
 // ─── Transactions ───
-export function useTransactionList(params?: Record<string, any>) {
+export function useTransactionList(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.transactions, params],
     queryFn: () => inventoryService.listTransactions(params),
@@ -142,7 +142,7 @@ export function useStockTransfer() {
 }
 
 // ─── Stock ───
-export function useStockSummary(params?: Record<string, any>) {
+export function useStockSummary(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.stock, params],
     queryFn: () => inventoryService.getStock(params),
@@ -175,7 +175,7 @@ export function useUpdateLocation() {
 }
 
 // ─── Adjustments ───
-export function useAdjustmentList(params?: Record<string, any>) {
+export function useAdjustmentList(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.adjustments, params],
     queryFn: () => inventoryService.listTransactions(params),
@@ -207,7 +207,7 @@ export function useApproveAdjustment() {
 }
 
 // ─── Reports ───
-export function useLedgerReport(params?: Record<string, any>) {
+export function useLedgerReport(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.ledgerReport, params],
     queryFn: () => inventoryService.stockLedgerReport(params),
@@ -221,14 +221,14 @@ export function useExpiryReport(days?: number) {
   });
 }
 
-export function useValuationReport(params?: Record<string, any>) {
+export function useValuationReport(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.valuationReport, params],
     queryFn: () => inventoryService.valuationReport(params),
   });
 }
 
-export function useSerialTrackingReport(params?: Record<string, any>) {
+export function useSerialTrackingReport(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.serialTracking, params],
     queryFn: () => inventoryService.serialTrackingReport(params),

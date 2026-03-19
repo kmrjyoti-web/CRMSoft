@@ -10,7 +10,7 @@ export interface MockExecutionOptions {
   speed: 'instant' | 'normal' | 'slow';
   showAnimation: boolean;
   stopOnError: boolean;
-  sampleData: Record<string, any>;
+  sampleData: Record<string, unknown>;
 }
 
 // ── Speed delays ───────────────────────────────────────
@@ -32,7 +32,7 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function generateMockOutput(nodeSubType: string, sampleData: Record<string, any>): any {
+function generateMockOutput(nodeSubType: string, sampleData: Record<string, unknown>): any {
   switch (nodeSubType) {
     case 'trigger_event':
     case 'trigger_schedule':

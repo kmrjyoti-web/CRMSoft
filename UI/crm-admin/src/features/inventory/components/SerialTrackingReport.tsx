@@ -7,7 +7,7 @@ import { useSerialTrackingReport } from "../hooks/useInventory";
 import type { SerialTrackingItem } from "../types/inventory.types";
 
 function getStatusVariant(status: string): "primary" | "success" | "warning" | "secondary" | "danger" {
-  const map: Record<string, any> = {
+  const map: Record<string, "primary" | "success" | "warning" | "secondary" | "danger"> = {
     AVAILABLE: "success", SOLD: "primary", RESERVED: "warning",
     EXPIRED: "danger", DAMAGED: "danger", RETURNED: "secondary",
     ACTIVATED: "success", DEACTIVATED: "secondary",
@@ -19,7 +19,7 @@ export function SerialTrackingReport() {
   const router = useRouter();
   const [serialNo, setSerialNo] = useState("");
 
-  const params: Record<string, any> = {};
+  const params: Record<string, string> = {};
   if (serialNo) params.serialNo = serialNo;
 
   const { data, isLoading } = useSerialTrackingReport(Object.keys(params).length > 0 ? params : undefined);

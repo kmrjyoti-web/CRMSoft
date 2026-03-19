@@ -20,7 +20,8 @@ export function ChatbotNodeEditor({
   onAddConnection,
   onClose,
 }: ChatbotNodeEditorProps) {
-  const data = node.data ?? {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = (node.data ?? {}) as Record<string, any>;
 
   const updateField = (key: string, value: any) => {
     onUpdate(node.id, { ...data, [key]: value });

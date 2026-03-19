@@ -70,13 +70,13 @@ export function DesignationForm({
   // Build dropdown options
   const departmentOptions = useMemo(() => {
     const list = deptsData?.data ?? [];
-    const items = Array.isArray(list) ? list : (list as any)?.data ?? [];
+    const items = Array.isArray(list) ? list : list?.data ?? [];
     return items.map((d: any) => ({ label: d.displayName || d.name, value: d.id }));
   }, [deptsData]);
 
   const parentOptions = useMemo(() => {
     const list = desigsData?.data ?? [];
-    const items = Array.isArray(list) ? list : (list as any)?.data ?? [];
+    const items = Array.isArray(list) ? list : list?.data ?? [];
     return items
       .filter((d: any) => d.id !== designationId)
       .map((d: any) => ({ label: d.name, value: d.id }));

@@ -117,7 +117,7 @@ function ContraForm({
 
   // Build account options: bank ledgers + cash ledgers from chart of accounts
   const accountOptions = useMemo(() => {
-    const arr: any[] = (chartData as any)?.data ?? chartData ?? [];
+    const arr: any[] = chartData?.data ?? chartData ?? [];
     const list = Array.isArray(arr) ? arr : [];
     return list
       .filter((l: any) => ["BANK", "CASH", "BANK_ACCOUNT", "CASH_IN_HAND"].includes(l.accountType ?? l.type ?? ""))
@@ -126,7 +126,7 @@ function ContraForm({
 
   // Fallback: if no filtered ledgers, show all
   const allLedgerOptions = useMemo(() => {
-    const arr: any[] = (chartData as any)?.data ?? chartData ?? [];
+    const arr: any[] = chartData?.data ?? chartData ?? [];
     const list = Array.isArray(arr) ? arr : [];
     return list.map((l: any) => ({ label: `${l.code ?? ""} \u2013 ${l.name}`, value: l.id }));
   }, [chartData]);
@@ -277,7 +277,7 @@ export function ContraList() {
   });
 
   const items: any[] = useMemo(() => {
-    const raw = (data as any)?.data ?? data ?? [];
+    const raw = data?.data ?? data ?? [];
     return Array.isArray(raw) ? raw : [];
   }, [data]);
 

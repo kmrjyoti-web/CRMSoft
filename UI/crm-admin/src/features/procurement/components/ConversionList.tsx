@@ -12,7 +12,7 @@ const COLUMNS = [
   { id: "scope", label: "Scope", visible: true },
 ];
 
-function flattenConversions(conversions: UnitConversion[]): Record<string, any>[] {
+function flattenConversions(conversions: UnitConversion[]): Record<string, unknown>[] {
   return conversions.map((c) => ({
     id: c.id,
     fromUnitId: c.fromUnitId.slice(0, 8) + "...",

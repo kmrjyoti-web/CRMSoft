@@ -23,7 +23,7 @@ const COLUMNS = [
   { id: "yieldRate", label: "Yield %", visible: true },
 ];
 
-function flatten(productions: BOMProduction[]): Record<string, any>[] {
+function flatten(productions: BOMProduction[]): Record<string, unknown>[] {
   return productions.map((p) => {
     const yieldRate = p.quantityOrdered > 0
       ? Math.round((p.quantityProduced / p.quantityOrdered) * 100)

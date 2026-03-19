@@ -21,7 +21,7 @@ const LEDGER_COLUMNS = [
 
 // ── Helpers ─────────────────────────────────────────────
 
-function flattenLedger(entries: LedgerEntry[]): Record<string, any>[] {
+function flattenLedger(entries: LedgerEntry[]): Record<string, unknown>[] {
   return entries.map((e) => ({
     id: e.id,
     date: new Date(e.date).toLocaleDateString(),
@@ -51,7 +51,7 @@ export function LedgerReport() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const params: Record<string, any> = {};
+  const params: Record<string, unknown> = {};
   if (productId) params.productId = productId;
   if (startDate) params.startDate = startDate;
   if (endDate) params.endDate = endDate;

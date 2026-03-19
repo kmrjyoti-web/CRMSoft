@@ -13,7 +13,7 @@ export interface BaseNodeData {
   nodeSubType: string;
   icon: string;
   color: string;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   isConfigured: boolean;
   executionStatus?: 'idle' | 'running' | 'success' | 'error' | 'skipped';
   executionTime?: number;

@@ -2,12 +2,27 @@
 
 import { useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { Input, SelectInput, NumberInput, Button, Icon } from '@/components/ui';
 import { TagsInput } from '@/components/ui';
 import { useReportDefinitions, useCreateSchedule } from '../hooks/useReports';
 import { FREQUENCY_OPTIONS, DAY_OF_WEEK_OPTIONS, FORMAT_OPTIONS } from '../utils/report-helpers';
 import type { CreateSchedulePayload } from '../types/report.types';
+
+// ── Zod schema ────────────────────────────────────────────────────────
+
+const scheduleSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  reportCode: z.string().min(1, 'Report is required'),
+  frequency: z.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'QUARTERLY', 'YEARLY']),
+  format: z.string().min(1),
+  recipientEmails: z.array(z.string().email('Invalid email')).min(1, 'At least one email is required'),
+  dayOfWeek: z.number().optional(),
+  dayOfMonth: z.number().optional(),
+  timeOfDay: z.string().optional(),
+});
 
 interface ReportScheduleFormProps {
   onClose: () => void;
@@ -25,6 +40,7 @@ export function ReportScheduleForm({ onClose, defaultReportCode }: ReportSchedul
   }));
 
   const { control, handleSubmit, watch, formState: { errors } } = useForm<CreateSchedulePayload>({
+    resolver: zodResolver(scheduleSchema) as any,
     defaultValues: {
       name: '',
       reportCode: defaultReportCode ?? '',
@@ -56,17 +72,17 @@ export function ReportScheduleForm({ onClose, defaultReportCode }: ReportSchedul
         </Button>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit) as any} className="space-y-4">
+      <form onSubmit={(e) => { void handleSubmit(onSubmit)(e); }} className="space-y-4">
         <Controller
           name="name"
           control={control}
-          rules={{ required: 'Name is required' }}
           render={({ field }) => (
             <Input
               label="Schedule Name"
               value={field.value}
               onChange={field.onChange}
               leftIcon={<Icon name="file-text" size={16} />}
+              error={!!errors.name}
             />
           )}
         />
@@ -74,7 +90,6 @@ export function ReportScheduleForm({ onClose, defaultReportCode }: ReportSchedul
         <Controller
           name="reportCode"
           control={control}
-          rules={{ required: 'Report is required' }}
           render={({ field }) => (
             <SelectInput
               label="Report"
@@ -158,7 +173,6 @@ export function ReportScheduleForm({ onClose, defaultReportCode }: ReportSchedul
         <Controller
           name="recipientEmails"
           control={control}
-          rules={{ required: 'At least one email is required' }}
           render={({ field }) => (
             <TagsInput
               label="Recipient Emails"
@@ -167,6 +181,11 @@ export function ReportScheduleForm({ onClose, defaultReportCode }: ReportSchedul
             />
           )}
         />
+        {errors.recipientEmails && (
+          <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '-8px' }}>
+            {errors.recipientEmails.message ?? errors.recipientEmails.root?.message}
+          </p>
+        )}
 
         <div className="flex justify-end gap-3 pt-2">
           <Button variant="outline" onClick={onClose}>Cancel</Button>

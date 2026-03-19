@@ -230,7 +230,7 @@ export function RecycleBinList() {
 
       <div className="flex-1 min-h-0">
         <TableFull
-          data={tableData as Record<string, any>[]}
+          data={tableData as Record<string, unknown>[]}
           title="Recycle Bin"
           columns={RECYCLE_BIN_COLUMNS}
           defaultViewMode="table"

@@ -18,11 +18,11 @@ const COLUMNS = [
 ];
 
 function getStatusVariant(status: string): "primary" | "success" | "warning" | "secondary" | "danger" {
-  const map: Record<string, any> = { DRAFT: "secondary", SENT: "primary", CLOSED: "success", CANCELLED: "danger" };
+  const map: Record<string, "primary" | "success" | "warning" | "secondary" | "danger"> = { DRAFT: "secondary", SENT: "primary", CLOSED: "success", CANCELLED: "danger" };
   return map[status] ?? "secondary";
 }
 
-function flattenRFQs(rfqs: PurchaseRFQ[]): Record<string, any>[] {
+function flattenRFQs(rfqs: PurchaseRFQ[]): Record<string, unknown>[] {
   return rfqs.map((rfq) => ({
     id: rfq.id,
     rfqNumber: <span style={{ fontWeight: 600 }}>{rfq.rfqNumber}</span>,

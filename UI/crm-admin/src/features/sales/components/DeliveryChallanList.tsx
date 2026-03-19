@@ -70,7 +70,7 @@ export function DeliveryChallanList() {
 
   const tableData = useMemo(() => flattenChallans(items), [items]);
 
-  function handleRowEdit(row: Record<string, any>) {
+  function handleRowEdit(row: Record<string, unknown>) {
     router.push(`/sales/delivery-challans/${row.id}`);
   }
 
@@ -89,7 +89,7 @@ export function DeliveryChallanList() {
   return (
     <div className="h-full flex flex-col">
       <TableFull
-        data={tableData as Record<string, any>[]}
+        data={tableData as Record<string, unknown>[]}
         title="Delivery Challans"
         columns={CHALLAN_COLUMNS}
         tableKey="delivery-challans"

@@ -15,7 +15,7 @@ const BRAND_COLUMNS = [
   { id: "status", label: "Status", visible: true },
 ];
 
-function flattenBrands(brands: Brand[]): Record<string, any>[] {
+function flattenBrands(brands: Brand[]): Record<string, unknown>[] {
   return brands.map((b) => ({
     id: b.id,
     name: <span style={{ fontWeight: 600 }}>{b.name}</span>,

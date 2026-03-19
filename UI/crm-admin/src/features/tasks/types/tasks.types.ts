@@ -39,9 +39,9 @@ export interface TaskDetail extends TaskListItem {
   customTaskType?: string;
   assignmentScope?: string;
   recurrence?: string;
-  recurrenceConfig?: any;
-  attachments?: any[];
-  customFields?: any;
+  recurrenceConfig?: Record<string, unknown>;
+  attachments?: Record<string, unknown>[];
+  customFields?: Record<string, unknown>;
   completionNotes?: string;
   approvedById?: string;
   approvedAt?: string;

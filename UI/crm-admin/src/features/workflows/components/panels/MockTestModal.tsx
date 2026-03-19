@@ -199,7 +199,7 @@ export function MockTestModal({
 
   // Run mock test
   const handleRunTest = useCallback(async () => {
-    let parsedData: Record<string, any>;
+    let parsedData: Record<string, unknown>;
     try {
       parsedData = JSON.parse(sampleData);
     } catch {

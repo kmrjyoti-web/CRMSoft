@@ -22,7 +22,7 @@ const CATEGORIES = [
   { value: "AREA", label: "Area" },
 ];
 
-function flattenUnits(units: UnitMaster[], onDelete: (id: string) => void): Record<string, any>[] {
+function flattenUnits(units: UnitMaster[], onDelete: (id: string) => void): Record<string, unknown>[] {
   return units.map((unit) => ({
     id: unit.id,
     name: <span style={{ fontWeight: 600 }}>{unit.name}</span>,

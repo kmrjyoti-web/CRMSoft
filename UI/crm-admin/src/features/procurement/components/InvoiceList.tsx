@@ -20,7 +20,7 @@ const COLUMNS = [
 ];
 
 function getStatusVariant(status: string): "primary" | "success" | "warning" | "secondary" | "danger" {
-  const map: Record<string, any> = {
+  const map: Record<string, "primary" | "success" | "warning" | "secondary" | "danger"> = {
     DRAFT: "secondary", PENDING_APPROVAL: "warning", APPROVED: "primary",
     PAID: "success", REJECTED: "danger", CANCELLED: "danger",
   };
@@ -28,13 +28,13 @@ function getStatusVariant(status: string): "primary" | "success" | "warning" | "
 }
 
 function getPaymentVariant(status: string): "success" | "warning" | "danger" | "secondary" {
-  const map: Record<string, any> = {
+  const map: Record<string, "success" | "warning" | "danger" | "secondary"> = {
     PAID: "success", PARTIAL: "warning", UNPAID: "danger",
   };
   return map[status] ?? "secondary";
 }
 
-function flattenInvoices(invoices: PurchaseInvoice[]): Record<string, any>[] {
+function flattenInvoices(invoices: PurchaseInvoice[]): Record<string, unknown>[] {
   return invoices.map((inv) => ({
     id: inv.id,
     ourReference: <span style={{ fontWeight: 600 }}>{inv.ourReference}</span>,

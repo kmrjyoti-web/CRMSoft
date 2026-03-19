@@ -24,7 +24,7 @@ const SERIAL_COLUMNS = [
 // ── Helpers ─────────────────────────────────────────────
 
 function getStatusVariant(status: string): "primary" | "success" | "warning" | "secondary" | "danger" {
-  const map: Record<string, any> = {
+  const map: Record<string, "primary" | "success" | "warning" | "secondary" | "danger"> = {
     AVAILABLE: "success", SOLD: "primary", RESERVED: "warning",
     EXPIRED: "danger", DAMAGED: "danger", RETURNED: "secondary",
     ACTIVATED: "success", DEACTIVATED: "secondary",
@@ -72,7 +72,7 @@ export function SerialList() {
 
   return (
     <TableFull
-      data={rows as Record<string, any>[]}
+      data={rows as Record<string, unknown>[]}
       title="Serial Numbers"
       tableKey="inventory-serials"
       columns={SERIAL_COLUMNS}

@@ -43,7 +43,7 @@ function formatINR(value: number | string | null | undefined): string {
   return `\u20B9${Number(value).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
 }
 
-function flattenPayments(items: any[]): Record<string, any>[] {
+function flattenPayments(items: any[]): Record<string, unknown>[] {
   return items.map((p) => ({
     id: p.id,
     paymentNumber: p.paymentNumber || "\u2014",

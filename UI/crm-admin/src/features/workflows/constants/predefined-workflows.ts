@@ -63,7 +63,7 @@ function node(
   icon: string,
   color: string,
   position: { x: number; y: number },
-  config: Record<string, any> = {},
+  config: Record<string, unknown> = {},
   description = '',
 ): any {
   return {

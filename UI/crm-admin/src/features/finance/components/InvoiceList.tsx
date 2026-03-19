@@ -99,7 +99,7 @@ export function InvoiceList() {
   return (
     <div className="h-full flex flex-col">
       <TableFull
-        data={tableData as Record<string, any>[]}
+        data={tableData as Record<string, unknown>[]}
         title="Invoices"
         columns={INVOICE_COLUMNS}
         defaultViewMode="table"

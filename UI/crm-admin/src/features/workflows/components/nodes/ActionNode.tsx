@@ -6,7 +6,7 @@ import { BaseNode, type BaseNodeData } from './BaseNode';
 
 // ── Helpers ──────────────────────────────────────────────
 
-function buildActionSummary(config: Record<string, any>): string {
+function buildActionSummary(config: Record<string, unknown>): string {
   const actionType = config?.actionType as string | undefined;
   const target = config?.target as string | undefined;
 

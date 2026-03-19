@@ -23,7 +23,7 @@ const CATEGORY_BADGE_VARIANT: Record<TemplateCategory, "primary" | "success" | "
   OTHER: "default",
 };
 
-function flattenTemplates(templates: any[]): Record<string, any>[] {
+function flattenTemplates(templates: any[]): Record<string, unknown>[] {
   return templates.map((t) => ({
     id: t.id,
     name: <span style={{ fontWeight: 600 }}>{t.name}</span>,

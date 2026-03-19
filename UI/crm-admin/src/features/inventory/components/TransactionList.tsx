@@ -35,7 +35,7 @@ function getTxnBadge(type: string): { variant: any; label: string } {
   return map[type] ?? { variant: "secondary", label: type };
 }
 
-function flattenTransactions(txns: StockTransaction[]): Record<string, any>[] {
+function flattenTransactions(txns: StockTransaction[]): Record<string, unknown>[] {
   return txns.map((txn) => {
     const badge = getTxnBadge(txn.transactionType);
     return {

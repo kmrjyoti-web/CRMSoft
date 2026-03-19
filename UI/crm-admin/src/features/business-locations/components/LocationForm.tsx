@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import toast from "react-hot-toast";
 
 import { Button, Card, Input, SelectInput, Icon } from "@/components/ui";
@@ -15,6 +17,26 @@ import {
   useBusinessLocations,
 } from "../hooks/useBusinessLocations";
 import type { BusinessLocation, CreateLocationDto, LocationType } from "../types/business-locations.types";
+
+// ---------------------------------------------------------------------------
+// Zod schema
+// ---------------------------------------------------------------------------
+
+const locationSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  code: z.string().min(1, "Code is required"),
+  type: z.enum(["HEAD_OFFICE", "BRANCH", "WAREHOUSE", "FACTORY", "STORE", "OTHER"]),
+  addressLine1: z.string().min(1, "Address is required"),
+  addressLine2: z.string().optional(),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  country: z.string().min(1, "Country is required"),
+  postalCode: z.string().min(1, "Postal code is required"),
+  phone: z.string().optional(),
+  email: z.string().email("Invalid email").optional().or(z.literal("")),
+  parentId: z.string().optional(),
+  gstNumber: z.string().optional(),
+});
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -61,13 +83,13 @@ export function LocationForm({ location, parentId, onClose }: LocationFormProps)
   }, [locationsData, location]);
 
   const {
-    register,
     handleSubmit,
     reset,
     watch,
     setValue,
     formState: { errors },
   } = useForm<CreateLocationDto>({
+    resolver: zodResolver(locationSchema) as any,
     defaultValues: {
       name: location?.name ?? "",
       code: location?.code ?? "",
@@ -152,7 +174,7 @@ export function LocationForm({ location, parentId, onClose }: LocationFormProps)
       </div>
 
       <Card>
-        <form onSubmit={handleSubmit(onSubmit as any)} style={{ padding: "20px" }}>
+        <form onSubmit={(e) => { void handleSubmit(onSubmit)(e); }} style={{ padding: "20px" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {/* Row: Name + Code */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
@@ -160,7 +182,9 @@ export function LocationForm({ location, parentId, onClose }: LocationFormProps)
                 <Input
                   label="Name"
                   leftIcon={<Icon name="building-2" size={16} />}
-                  {...register("name", { required: "Name is required" })}
+                  value={watch("name") ?? ""}
+                  onChange={(v) => setValue("name", v)}
+                  error={!!errors.name}
                 />
                 {errors.name && (
                   <p style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px" }}>{errors.name.message}</p>
@@ -170,7 +194,9 @@ export function LocationForm({ location, parentId, onClose }: LocationFormProps)
                 <Input
                   label="Code"
                   leftIcon={<Icon name="hash" size={16} />}
-                  {...register("code", { required: "Code is required" })}
+                  value={watch("code") ?? ""}
+                  onChange={(v) => setValue("code", v)}
+                  error={!!errors.code}
                 />
                 {errors.code && (
                   <p style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px" }}>{errors.code.message}</p>
@@ -200,7 +226,9 @@ export function LocationForm({ location, parentId, onClose }: LocationFormProps)
             <Input
               label="Address Line 1"
               leftIcon={<Icon name="map-pin" size={16} />}
-              {...register("addressLine1", { required: "Address is required" })}
+              value={watch("addressLine1") ?? ""}
+              onChange={(v) => setValue("addressLine1", v)}
+              error={!!errors.addressLine1}
             />
             {errors.addressLine1 && (
               <p style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px" }}>{errors.addressLine1.message}</p>
@@ -209,7 +237,8 @@ export function LocationForm({ location, parentId, onClose }: LocationFormProps)
             <Input
               label="Address Line 2"
               leftIcon={<Icon name="map" size={16} />}
-              {...register("addressLine2")}
+              value={watch("addressLine2") ?? ""}
+              onChange={(v) => setValue("addressLine2", v)}
             />
 
             {/* City / State / Country / Postal */}
@@ -234,12 +263,15 @@ export function LocationForm({ location, parentId, onClose }: LocationFormProps)
               <Input
                 label="Phone"
                 leftIcon={<Icon name="phone" size={16} />}
-                {...register("phone")}
+                value={watch("phone") ?? ""}
+                onChange={(v) => setValue("phone", v || undefined)}
               />
               <Input
                 label="Email"
                 leftIcon={<Icon name="at-sign" size={16} />}
-                {...register("email")}
+                value={watch("email") ?? ""}
+                onChange={(v) => setValue("email", v || undefined)}
+                error={!!errors.email}
               />
             </div>
 
@@ -247,7 +279,8 @@ export function LocationForm({ location, parentId, onClose }: LocationFormProps)
             <Input
               label="GST Number"
               leftIcon={<Icon name="receipt" size={16} />}
-              {...register("gstNumber")}
+              value={watch("gstNumber") ?? ""}
+              onChange={(v) => setValue("gstNumber", v || undefined)}
             />
           </div>
 

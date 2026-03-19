@@ -101,7 +101,7 @@ export function BankAccountList() {
   return (
     <div className="h-full flex flex-col gap-6">
       <TableFull
-        data={tableData as Record<string, any>[]}
+        data={tableData as Record<string, unknown>[]}
         title="Bank Accounts"
         columns={BANK_COLUMNS}
         tableKey="bank-accounts"

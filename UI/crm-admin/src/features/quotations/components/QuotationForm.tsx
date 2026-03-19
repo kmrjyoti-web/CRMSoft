@@ -430,7 +430,7 @@ export function QuotationForm({ quotationId, leadId: defaultLeadId, mode = "page
   };
 
   // Called when form validation fails — show toast + populate error modal
-  const onInvalid = (fieldErrors: Record<string, any>) => {
+  const onInvalid = (fieldErrors: Record<string, unknown>) => {
     const details: { field: string; message: string }[] = [];
 
     for (const [key, err] of Object.entries(fieldErrors)) {
@@ -438,7 +438,7 @@ export function QuotationForm({ quotationId, leadId: defaultLeadId, mode = "page
 
       if (key === "items" && Array.isArray(err)) {
         // Line-item level errors — e.g. items[0].quantity
-        err.forEach((itemErr: Record<string, any> | undefined, idx: number) => {
+        err.forEach((itemErr: Record<string, unknown> | undefined, idx: number) => {
           if (!itemErr) return;
           for (const [field, fieldErr] of Object.entries(itemErr)) {
             const fieldLabel = FIELD_LABELS[field] || field;

@@ -24,7 +24,7 @@ const COLUMNS = [
   { id: "disposal", label: "Disposal", visible: true },
 ];
 
-function flatten(records: ScrapRecord[]): Record<string, any>[] {
+function flatten(records: ScrapRecord[]): Record<string, unknown>[] {
   return records.map((r) => ({
     id: r.id,
     date: new Date(r.createdAt).toLocaleDateString(),

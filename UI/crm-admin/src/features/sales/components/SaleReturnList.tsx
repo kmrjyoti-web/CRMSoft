@@ -68,7 +68,7 @@ export function SaleReturnList() {
 
   const tableData = useMemo(() => flattenReturns(items), [items]);
 
-  function handleRowEdit(row: Record<string, any>) {
+  function handleRowEdit(row: Record<string, unknown>) {
     router.push(`/sales/returns/${row.id}`);
   }
 
@@ -87,7 +87,7 @@ export function SaleReturnList() {
   return (
     <div className="h-full flex flex-col">
       <TableFull
-        data={tableData as Record<string, any>[]}
+        data={tableData as Record<string, unknown>[]}
         title="Sale Returns"
         columns={RETURN_COLUMNS}
         tableKey="sale-returns"

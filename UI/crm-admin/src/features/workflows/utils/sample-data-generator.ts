@@ -2,19 +2,19 @@
 // Generates realistic Indian CRM sample data for workflow mock testing.
 
 export interface MockSampleData {
-  lead: Record<string, any>;
-  contact: Record<string, any>;
-  organization: Record<string, any>;
-  invoice: Record<string, any>;
-  quotation: Record<string, any>;
-  task: Record<string, any>;
-  activity: Record<string, any>;
-  payment: Record<string, any>;
+  lead: Record<string, unknown>;
+  contact: Record<string, unknown>;
+  organization: Record<string, unknown>;
+  invoice: Record<string, unknown>;
+  quotation: Record<string, unknown>;
+  task: Record<string, unknown>;
+  activity: Record<string, unknown>;
+  payment: Record<string, unknown>;
 }
 
 // ── Lead Variations ────────────────────────────────────
 
-const LEAD_VARIATIONS: Record<string, any>[] = [
+const LEAD_VARIATIONS: Record<string, unknown>[] = [
   {
     id: 'lead_1',
     name: 'Rajesh Kumar',
@@ -79,7 +79,7 @@ const LEAD_VARIATIONS: Record<string, any>[] = [
 
 // ── Contact Variations ─────────────────────────────────
 
-const CONTACT_VARIATIONS: Record<string, any>[] = [
+const CONTACT_VARIATIONS: Record<string, unknown>[] = [
   {
     id: 'contact_1',
     firstName: 'Priya',
@@ -129,7 +129,7 @@ const CONTACT_VARIATIONS: Record<string, any>[] = [
 
 // ── Organization Variations ────────────────────────────
 
-const ORGANIZATION_VARIATIONS: Record<string, any>[] = [
+const ORGANIZATION_VARIATIONS: Record<string, unknown>[] = [
   {
     id: 'org_1',
     name: 'Reliance Industries',
@@ -179,7 +179,7 @@ const ORGANIZATION_VARIATIONS: Record<string, any>[] = [
 
 // ── Invoice Variations ─────────────────────────────────
 
-const INVOICE_VARIATIONS: Record<string, any>[] = [
+const INVOICE_VARIATIONS: Record<string, unknown>[] = [
   {
     id: 'inv_1',
     invoiceNumber: 'INV-2024-0042',
@@ -239,7 +239,7 @@ const INVOICE_VARIATIONS: Record<string, any>[] = [
 
 // ── Quotation Variations ───────────────────────────────
 
-const QUOTATION_VARIATIONS: Record<string, any>[] = [
+const QUOTATION_VARIATIONS: Record<string, unknown>[] = [
   {
     id: 'qt_1',
     quotationNumber: 'QT-2024-0015',
@@ -299,7 +299,7 @@ const QUOTATION_VARIATIONS: Record<string, any>[] = [
 
 // ── Task Variations ────────────────────────────────────
 
-const TASK_VARIATIONS: Record<string, any>[] = [
+const TASK_VARIATIONS: Record<string, unknown>[] = [
   {
     id: 'task_1',
     title: 'Follow up with Rajesh',
@@ -349,7 +349,7 @@ const TASK_VARIATIONS: Record<string, any>[] = [
 
 // ── Activity Variations ────────────────────────────────
 
-const ACTIVITY_VARIATIONS: Record<string, any>[] = [
+const ACTIVITY_VARIATIONS: Record<string, unknown>[] = [
   {
     id: 'activity_1',
     type: 'call',
@@ -394,7 +394,7 @@ const ACTIVITY_VARIATIONS: Record<string, any>[] = [
 
 // ── Payment Variations ─────────────────────────────────
 
-const PAYMENT_VARIATIONS: Record<string, any>[] = [
+const PAYMENT_VARIATIONS: Record<string, unknown>[] = [
   {
     id: 'pay_1',
     amount: 177000,
@@ -444,7 +444,7 @@ const PAYMENT_VARIATIONS: Record<string, any>[] = [
 
 // ── Variation Map ──────────────────────────────────────
 
-const VARIATION_MAP: Record<string, Record<string, any>[]> = {
+const VARIATION_MAP: Record<string, Record<string, unknown>[]> = {
   lead: LEAD_VARIATIONS,
   contact: CONTACT_VARIATIONS,
   organization: ORGANIZATION_VARIATIONS,
@@ -476,7 +476,7 @@ export function generateSampleData(): MockSampleData {
 /**
  * Generate sample data for a specific entity type.
  */
-export function generateSampleDataForEntity(entity: string): Record<string, any> {
+export function generateSampleDataForEntity(entity: string): Record<string, unknown> {
   const key = entity.toLowerCase();
   const variations = VARIATION_MAP[key];
   if (!variations || variations.length === 0) {
@@ -489,14 +489,14 @@ export function generateSampleDataForEntity(entity: string): Record<string, any>
 /**
  * Get a random variation for the given entity.
  */
-export function getRandomVariation(entity: string): Record<string, any> {
+export function getRandomVariation(entity: string): Record<string, unknown> {
   return generateSampleDataForEntity(entity);
 }
 
 /**
  * Get all variations for a given entity (for preview / selection).
  */
-export function getAllVariations(entity: string): Record<string, any>[] {
+export function getAllVariations(entity: string): Record<string, unknown>[] {
   const key = entity.toLowerCase();
   return VARIATION_MAP[key]?.map((v) => ({ ...v })) ?? [];
 }

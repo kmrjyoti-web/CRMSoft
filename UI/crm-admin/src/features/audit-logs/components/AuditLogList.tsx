@@ -207,7 +207,7 @@ export function AuditLogList() {
 
       <div className="flex-1 min-h-0">
         <TableFull
-          data={tableData as Record<string, any>[]}
+          data={tableData as Record<string, unknown>[]}
           title="Audit Logs"
           columns={AUDIT_COLUMNS}
           defaultViewMode="table"

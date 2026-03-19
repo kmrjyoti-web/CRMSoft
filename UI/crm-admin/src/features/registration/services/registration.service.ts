@@ -20,7 +20,7 @@ export const registrationService = {
       .get<ApiResponse<{ available: boolean }>>(`/api/v1/auth/tenant/check-slug/${slug}`)
       .then((r) => {
         const outer = r.data.data as { available: boolean } & { data?: { available: boolean } };
-        return (outer as any).data ?? outer;
+        return outer.data ?? outer;
       }),
 
   getPlans: () =>
@@ -28,14 +28,14 @@ export const registrationService = {
       .get<ApiResponse<PlanOption[]>>("/api/v1/tenant/subscription/plans")
       .then((r) => {
         const outer = r.data.data as PlanOption[] & { data?: PlanOption[] };
-        return (outer as any).data ?? outer;
+        return (outer as { data?: PlanOption[] }).data ?? outer;
       }),
 
   getBusinessTypes: () =>
     api
-      .get<ApiResponse<any[]>>("/api/v1/business-types/public/list")
+      .get<ApiResponse<Record<string, unknown>[]>>("/api/v1/business-types/public/list")
       .then((r) => {
-        const outer = r.data.data as any[] & { data?: any[] };
-        return (outer as any).data ?? outer;
+        const outer = r.data.data as Record<string, unknown>[] & { data?: Record<string, unknown>[] };
+        return (outer as { data?: Record<string, unknown>[] }).data ?? outer;
       }),
 };

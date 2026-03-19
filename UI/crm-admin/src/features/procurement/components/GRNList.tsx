@@ -18,13 +18,13 @@ const COLUMNS = [
 ];
 
 function getStatusVariant(status: string): "primary" | "success" | "warning" | "secondary" | "danger" {
-  const map: Record<string, any> = {
+  const map: Record<string, "primary" | "success" | "warning" | "secondary" | "danger"> = {
     DRAFT: "secondary", INSPECTED: "warning", ACCEPTED: "success", REJECTED: "danger",
   };
   return map[status] ?? "secondary";
 }
 
-function flattenGRNs(grns: GoodsReceipt[]): Record<string, any>[] {
+function flattenGRNs(grns: GoodsReceipt[]): Record<string, unknown>[] {
   return grns.map((grn) => ({
     id: grn.id,
     receiptNumber: <span style={{ fontWeight: 600 }}>{grn.receiptNumber}</span>,

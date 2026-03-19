@@ -185,7 +185,7 @@ export function RenewalsPage() {
           </div>
         ) : (
           <TableFull
-            data={warrantyTableData as Record<string, any>[]}
+            data={warrantyTableData as Record<string, unknown>[]}
             title="Expiring Warranties"
             columns={WARRANTY_COLUMNS}
             defaultViewMode="table"
@@ -207,7 +207,7 @@ export function RenewalsPage() {
           </div>
         ) : (
           <TableFull
-            data={contractTableData as Record<string, any>[]}
+            data={contractTableData as Record<string, unknown>[]}
             title="Expiring AMC Contracts"
             columns={CONTRACT_COLUMNS}
             defaultViewMode="table"

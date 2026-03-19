@@ -442,7 +442,7 @@ export function NotionSettings() {
           </div>
           <div style={{ height: 400 }}>
             <TableFull
-              data={tableData as Record<string, any>[]}
+              data={tableData as Record<string, unknown>[]}
               title="Sessions"
               columns={ENTRY_COLUMNS}
               defaultViewMode="table"

@@ -71,7 +71,7 @@ function EmailSection() {
   const sendOtp = useSendEmailOtp();
   const verifyOtp = useVerifyEmailOtp();
 
-  const verified = statusData?.emailVerified ?? false;
+  const verified = statusData?.data?.emailVerified ?? false;
 
   const handleSend = async () => {
     try {
@@ -164,7 +164,7 @@ function MobileSection() {
   const sendOtp = useSendMobileOtp();
   const verifyOtp = useVerifyMobileOtp();
 
-  const verified = statusData?.mobileVerified ?? false;
+  const verified = statusData?.data?.mobileVerified ?? false;
 
   const handleSend = async () => {
     try {
@@ -257,8 +257,8 @@ function GstSection() {
   const [businessName, setBusinessName] = useState("");
   const [address, setAddress] = useState("");
 
-  const gstStatus = statusData?.gstStatus;
-  const gstVerified = statusData?.gstVerified ?? false;
+  const gstStatus = statusData?.data?.gstStatus;
+  const gstVerified = statusData?.data?.gstVerified ?? false;
 
   const statusVariant = useMemo(() => {
     if (gstStatus === "APPROVED") return "success";
@@ -356,7 +356,7 @@ export function VerificationPanel() {
     );
   }
 
-  const overallStatus = statusData?.overallStatus ?? "UNVERIFIED";
+  const overallStatus = statusData?.data?.overallStatus ?? "UNVERIFIED";
 
   return (
     <div style={{ maxWidth: 640, margin: "0 auto", padding: 24 }}>

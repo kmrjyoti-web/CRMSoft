@@ -70,7 +70,7 @@ function PurchaseMasterForm({
 
   const initialData = useMemo(() => {
     if (!isEdit) return INITIAL_FORM;
-    const list: any[] = (data as any)?.data ?? [];
+    const list: any[] = data?.data ?? [];
     const pm = list.find((p: any) => p.id === purchaseMasterId);
     if (!pm) return INITIAL_FORM;
     return {
@@ -187,7 +187,7 @@ export function PurchaseMasterList() {
   });
 
   const rows = useMemo(() => {
-    const list: any[] = (data as any)?.data ?? [];
+    const list: any[] = data?.data ?? [];
     return list.map((pm: any) => ({
       id:         pm.id,
       name:       pm.name,

@@ -221,7 +221,7 @@ export function NodeConfigPanel({ node, onUpdate, onDelete, onClose }: NodeConfi
   const definition = useMemo(() => getNodeDefinition(nodeData.nodeSubType), [nodeData.nodeSubType]);
 
   // Local config state for editing
-  const [localConfig, setLocalConfig] = useState<Record<string, any>>({});
+  const [localConfig, setLocalConfig] = useState<Record<string, unknown>>({});
   const [localLabel, setLocalLabel] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
 

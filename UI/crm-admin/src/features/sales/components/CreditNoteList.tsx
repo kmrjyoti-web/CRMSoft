@@ -75,8 +75,8 @@ export function CreditNoteList() {
 
   const tableData = useMemo(() => flattenCreditNotes(items), [items]);
 
-  function handleRowEdit(row: Record<string, any>) {
-    setSelectedId((prev) => (prev === row.id ? null : row.id));
+  function handleRowEdit(row: Record<string, unknown>) {
+    setSelectedId((prev) => (prev === row.id ? null : row.id as string));
     setAdjustInvoiceId('');
     setIssueRefund(false);
   }
@@ -112,7 +112,7 @@ export function CreditNoteList() {
   return (
     <div className="h-full flex flex-col gap-4">
       <TableFull
-        data={tableData as Record<string, any>[]}
+        data={tableData as Record<string, unknown>[]}
         title="Credit Notes"
         columns={CN_COLUMNS}
         tableKey="credit-notes"

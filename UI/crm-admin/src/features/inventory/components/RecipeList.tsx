@@ -17,7 +17,7 @@ const COLUMNS = [
   { id: "industry", label: "Industry", visible: true },
 ];
 
-function flatten(recipes: BOMFormula[]): Record<string, any>[] {
+function flatten(recipes: BOMFormula[]): Record<string, unknown>[] {
   return recipes.map((r) => ({
     id: r.id,
     formulaCode: r.formulaCode,

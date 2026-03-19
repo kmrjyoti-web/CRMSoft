@@ -34,7 +34,7 @@ function methodColor(method: string): string {
   }
 }
 
-function flattenLogs(logs: TenantErrorLog[]): Record<string, any>[] {
+function flattenLogs(logs: TenantErrorLog[]): Record<string, unknown>[] {
   return logs.map((log) => ({
     id: log.id,
     timestamp: <span style={{ fontSize: 13, color: '#6b7280' }}>{formatDate(log.createdAt)}</span>,

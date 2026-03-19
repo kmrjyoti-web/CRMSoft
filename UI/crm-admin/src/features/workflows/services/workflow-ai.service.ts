@@ -9,8 +9,8 @@ interface AiGenerateRequest {
 }
 
 interface AiGenerateResponse {
-  nodes: any[];
-  edges: any[];
+  nodes: Record<string, unknown>[];
+  edges: Record<string, unknown>[];
   description: string;
   suggestedName?: string;
 }

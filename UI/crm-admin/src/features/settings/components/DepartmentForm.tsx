@@ -70,7 +70,7 @@ export function DepartmentForm({
   // Build dropdown options
   const parentOptions = useMemo(() => {
     const list = deptsData?.data ?? [];
-    const items = Array.isArray(list) ? list : (list as any)?.data ?? [];
+    const items = Array.isArray(list) ? list : list?.data ?? [];
     return items
       .filter((d: any) => d.id !== departmentId)
       .map((d: any) => ({ label: d.displayName || d.name, value: d.id }));
@@ -78,7 +78,7 @@ export function DepartmentForm({
 
   const userOptions = useMemo(() => {
     const list = usersData?.data ?? [];
-    const items = Array.isArray(list) ? list : (list as any)?.data ?? [];
+    const items = Array.isArray(list) ? list : list?.data ?? [];
     return items.map((u: any) => ({
       label: `${u.firstName} ${u.lastName}`,
       value: u.id,

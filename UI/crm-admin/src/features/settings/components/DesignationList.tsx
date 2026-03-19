@@ -71,7 +71,7 @@ export function DesignationList() {
   return (
     <div className="h-full flex flex-col">
       <TableFull
-        data={tableData as Record<string, any>[]}
+        data={tableData as Record<string, unknown>[]}
         title="Designations"
         columns={DESIG_COLUMNS}
         defaultViewMode="table"

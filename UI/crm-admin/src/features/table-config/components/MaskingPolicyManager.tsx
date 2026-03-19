@@ -222,7 +222,7 @@ export function MaskingPolicyManager() {
       {/* Table */}
       <div className="flex-1 min-h-0">
         <TableFull
-          data={tableData as Record<string, any>[]}
+          data={tableData as Record<string, unknown>[]}
           title="Data Masking Policies"
           columns={POLICY_COLUMNS}
           defaultViewMode="table"

@@ -90,7 +90,7 @@ export function CompanyProfile() {
   const { data: profile, isLoading } = useCompanyProfile();
   const mutation = useUpdateCompanyProfile();
 
-  const save = async (data: Record<string, any>) => {
+  const save = async (data: Record<string, unknown>) => {
     try {
       await mutation.mutateAsync(data);
       toast.success('Saved');

@@ -66,8 +66,7 @@ export function CampaignDetail({ campaignId }: CampaignDetailProps) {
 
   const campaign: Campaign | null = useMemo(() => {
     if (!campaignData) return null;
-    const d = (campaignData as any).data ?? campaignData;
-    return d as Campaign;
+    return campaignData.data ?? campaignData;
   }, [campaignData]);
 
   // ── Action handlers ─────────────────────────────────

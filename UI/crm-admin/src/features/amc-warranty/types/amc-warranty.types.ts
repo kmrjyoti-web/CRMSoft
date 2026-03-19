@@ -96,7 +96,7 @@ export interface WarrantyClaim {
   visitType?: string;
   visitDate?: string;
   resolvedDate?: string;
-  partsUsed?: any[];
+  partsUsed?: Record<string, unknown>[];
   laborHours?: number;
   isCovered: boolean;
   chargeAmount?: number;
@@ -222,7 +222,7 @@ export interface AMCSchedule {
   assignedToName?: string;
   completedDate?: string;
   serviceNotes?: string;
-  partsUsed?: any[];
+  partsUsed?: Record<string, unknown>[];
   customerSignature?: string;
   nextScheduleDate?: string;
   usageAtVisit?: number;
@@ -261,7 +261,7 @@ export interface ServiceVisitLog {
   visitType: string;
   issueReported?: string;
   workDone?: string;
-  partsUsed?: any[];
+  partsUsed?: Record<string, unknown>[];
   isBillable: boolean;
   chargeAmount?: number;
   status: VisitStatus;

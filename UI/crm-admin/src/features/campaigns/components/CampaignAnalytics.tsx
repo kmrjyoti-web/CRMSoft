@@ -30,14 +30,12 @@ export function CampaignAnalytics({ campaignId }: CampaignAnalyticsProps) {
 
   const stats: CampaignStats | null = useMemo(() => {
     if (!statsData) return null;
-    const d = (statsData as any).data ?? statsData;
-    return d as CampaignStats;
+    return statsData.data ?? statsData;
   }, [statsData]);
 
   const campaign: Campaign | null = useMemo(() => {
     if (!campaignData) return null;
-    const d = (campaignData as any).data ?? campaignData;
-    return d as Campaign;
+    return campaignData.data ?? campaignData;
   }, [campaignData]);
 
   if (isLoadingStats || isLoadingCampaign) {

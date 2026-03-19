@@ -12,7 +12,7 @@ export interface BaseNodeData extends Record<string, unknown> {
   nodeSubType: string; // e.g., 'trigger_event', 'action_send_email'
   icon: string;
   color: string;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   isConfigured: boolean;
   executionStatus?: 'idle' | 'running' | 'success' | 'error' | 'skipped';
   executionTime?: number;
@@ -36,10 +36,10 @@ export interface VisualWorkflowDefinition {
   name: string;
   description?: string;
   isActive: boolean;
-  nodes: any[]; // React Flow Node<BaseNodeData>[]
-  edges: any[]; // React Flow Edge<VisualEdgeData>[]
+  nodes: Record<string, unknown>[]; // React Flow Node<BaseNodeData>[]
+  edges: Record<string, unknown>[]; // React Flow Edge<VisualEdgeData>[]
   viewport: { x: number; y: number; zoom: number };
-  variables?: Record<string, any>;
+  variables?: Record<string, unknown>;
 }
 
 // ── Execution ────────────────────────────────────────────
@@ -50,7 +50,7 @@ export interface WorkflowExecutionLog {
   status: 'success' | 'error' | 'skipped';
   startTime: number;
   endTime: number;
-  output?: any;
+  output?: unknown;
   error?: string;
 }
 
@@ -73,7 +73,7 @@ export interface NodeDefinition {
   description: string;
   category: 'trigger' | 'condition' | 'action' | 'flow' | 'utility';
   color: string;
-  defaultConfig: Record<string, any>;
+  defaultConfig: Record<string, unknown>;
   configFields?: ConfigField[];
   handles?: {
     inputs: number;
@@ -96,7 +96,7 @@ export interface ConfigField {
   options?: { label: string; value: string }[];
   required?: boolean;
   placeholder?: string;
-  defaultValue?: any;
+  defaultValue?: unknown;
 }
 
 export interface NodeCategory {

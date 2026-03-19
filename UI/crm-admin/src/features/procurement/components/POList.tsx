@@ -19,14 +19,14 @@ const COLUMNS = [
 ];
 
 function getStatusVariant(status: string): "primary" | "success" | "warning" | "secondary" | "danger" {
-  const map: Record<string, any> = {
+  const map: Record<string, "primary" | "success" | "warning" | "secondary" | "danger"> = {
     DRAFT: "secondary", PENDING_APPROVAL: "warning", APPROVED: "primary",
     PARTIALLY_RECEIVED: "primary", COMPLETED: "success", REJECTED: "danger", CANCELLED: "danger",
   };
   return map[status] ?? "secondary";
 }
 
-function flattenPOs(pos: PurchaseOrder[]): Record<string, any>[] {
+function flattenPOs(pos: PurchaseOrder[]): Record<string, unknown>[] {
   return pos.map((po) => ({
     id: po.id,
     poNumber: <span style={{ fontWeight: 600 }}>{po.poNumber}</span>,

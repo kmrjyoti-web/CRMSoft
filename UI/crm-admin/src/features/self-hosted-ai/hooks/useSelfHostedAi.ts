@@ -27,8 +27,8 @@ export function useAiModels() {
     queryKey: KEYS.models,
     queryFn: api.listModels,
     refetchInterval: (query) => {
-      const data = (query.state.data as any)?.data;
-      const hasDownloading = Array.isArray(data) && data.some((m: any) => m.status === 'DOWNLOADING');
+      const data = query.state.data?.data;
+      const hasDownloading = Array.isArray(data) && data.some((m: { status: string }) => m.status === 'DOWNLOADING');
       return hasDownloading ? 3000 : false;
     },
   });
@@ -167,7 +167,7 @@ export function useTrainingJob(id: string) {
     queryFn: () => api.getTrainingJob(id),
     enabled: !!id,
     refetchInterval: (query) => {
-      const data = query.state.data as any;
+      const data = query.state.data;
       const status = data?.data?.status;
       return status === 'RUNNING' || status === 'QUEUED' ? 3000 : false;
     },
@@ -252,7 +252,7 @@ export function useCreatePrompt() {
 export function useUpdatePrompt() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { id: string } & Record<string, any>) => {
+    mutationFn: (data: { id: string } & Record<string, unknown>) => {
       const { id, ...rest } = data;
       return api.updateSystemPrompt(id, rest);
     },

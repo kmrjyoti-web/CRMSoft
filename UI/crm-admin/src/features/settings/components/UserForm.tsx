@@ -68,19 +68,19 @@ export function UserForm({ userId, mode = "page", panelId, onSuccess, onCancel }
   // Build dropdown options
   const roleOptions = useMemo(() => {
     const raw = rolesData?.data;
-    const roles = Array.isArray(raw) ? raw : (raw as any)?.data ?? [];
+    const roles = Array.isArray(raw) ? raw : raw?.data ?? [];
     return roles.map((r: any) => ({ label: r.displayName, value: r.id }));
   }, [rolesData]);
 
   const departmentOptions = useMemo(() => {
     const list = deptsData?.data ?? [];
-    const items = Array.isArray(list) ? list : (list as any)?.data ?? [];
+    const items = Array.isArray(list) ? list : list?.data ?? [];
     return items.map((d: any) => ({ label: d.displayName || d.name, value: d.id }));
   }, [deptsData]);
 
   const designationOptions = useMemo(() => {
     const list = desigsData?.data ?? [];
-    const items = Array.isArray(list) ? list : (list as any)?.data ?? [];
+    const items = Array.isArray(list) ? list : list?.data ?? [];
     return items.map((d: any) => ({ label: d.name, value: d.id }));
   }, [desigsData]);
 
@@ -109,7 +109,7 @@ export function UserForm({ userId, mode = "page", panelId, onSuccess, onCancel }
   useEffect(() => {
     if (!isEdit || !userData?.data) return;
     const raw = userData.data;
-    const u = (raw as any)?.email ? raw : (raw as any)?.data ?? raw;
+    const u = raw?.email ? raw : raw?.data ?? raw;
     reset({
       email: u.email,
       password: undefined,

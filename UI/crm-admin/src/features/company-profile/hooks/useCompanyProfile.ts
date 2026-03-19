@@ -10,7 +10,7 @@ export function useCompanyProfile() {
 export function useUpdateCompanyProfile() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Record<string, any>) => companyProfileService.update(data),
+    mutationFn: (data: Record<string, unknown>) => companyProfileService.update(data),
     onMutate: async (data) => {
       await qc.cancelQueries({ queryKey: QK });
       const prev = qc.getQueryData(QK);

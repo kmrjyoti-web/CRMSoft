@@ -71,7 +71,7 @@ export function DepartmentList() {
   return (
     <div className="h-full flex flex-col">
       <TableFull
-        data={tableData as Record<string, any>[]}
+        data={tableData as Record<string, unknown>[]}
         title="Departments"
         columns={DEPT_COLUMNS}
         defaultViewMode="table"

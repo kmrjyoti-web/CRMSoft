@@ -6,6 +6,7 @@ import { TableFull, Badge } from '@/components/ui';
 import { TableSkeleton } from '@/components/common/TableSkeleton';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/services/api-client';
+import type { ApiResponse } from '@/types/api-response';
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -34,7 +35,7 @@ interface ProformaInvoice {
 // ── Service ───────────────────────────────────────────────────────────
 
 const proformaService = {
-  list: () => apiClient.get<any>('/api/v1/sales/proforma').then((r) => r.data),
+  list: () => apiClient.get<ApiResponse<ProformaInvoice[]>>('/api/v1/sales/proforma').then((r) => r.data),
   remove: (id: string) => apiClient.delete(`/api/v1/sales/proforma/${id}`).then((r) => r.data),
 };
 
@@ -49,6 +50,7 @@ function useDeleteProforma() {
   return useMutation({
     mutationFn: proformaService.remove,
     onSuccess: () => qc.invalidateQueries({ queryKey: ['proforma-invoices'] }),
+    onError: () => toast.error('Failed to delete proforma invoice'),
   });
 }
 
@@ -73,13 +75,18 @@ const fmt = (n: number) => `₹${n.toLocaleString('en-IN', { maximumFractionDigi
 // ── Component ─────────────────────────────────────────────────────────
 
 export function ProformaList() {
-  const { data, isLoading } = useProformaList();
+  const { data, isLoading, isError } = useProformaList();
   const deleteMut = useDeleteProforma();
 
   if (isLoading) return <TableSkeleton columns={6} rows={8} title="Proforma Invoices" />;
+  if (isError) return (
+    <div style={{ padding: 24, color: '#ef4444', textAlign: 'center' }}>
+      Failed to load proforma invoices. Please try again.
+    </div>
+  );
 
   const items: ProformaInvoice[] = useMemo(() => {
-    const raw = (data as any)?.data ?? data ?? [];
+    const raw = data?.data ?? [];
     return Array.isArray(raw) ? raw : [];
   }, [data]);
 

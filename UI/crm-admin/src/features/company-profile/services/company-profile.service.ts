@@ -7,7 +7,7 @@ export const companyProfileService = {
       return d?.data ?? d;
     }),
 
-  update: (data: Record<string, any>) =>
+  update: (data: Record<string, unknown>) =>
     apiClient.put('/api/v1/settings/company', data).then((r) => {
       const d = r.data as any;
       return d?.data ?? d;

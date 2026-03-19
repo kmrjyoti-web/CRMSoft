@@ -14,7 +14,7 @@ const COLUMNS = [
   { id: "pan",        label: "PAN",         visible: false },
 ];
 
-const ENTITY_VARIANT: Record<string, any> = {
+const ENTITY_VARIANT: Record<string, "primary" | "success" | "warning" | "secondary" | "danger"> = {
   CONTACT:      "primary",
   ORGANIZATION: "success",
 };

@@ -19,14 +19,14 @@ const COLUMNS = [
 ];
 
 function getStatusVariant(status: string): "primary" | "success" | "warning" | "secondary" | "danger" {
-  const map: Record<string, any> = {
+  const map: Record<string, "primary" | "success" | "warning" | "secondary" | "danger"> = {
     RECEIVED: "primary", UNDER_REVIEW: "warning", ACCEPTED: "success",
     REJECTED: "danger", EXPIRED: "secondary",
   };
   return map[status] ?? "secondary";
 }
 
-function flattenQuotations(quotations: PurchaseQuotation[]): Record<string, any>[] {
+function flattenQuotations(quotations: PurchaseQuotation[]): Record<string, unknown>[] {
   return quotations.map((q) => ({
     id: q.id,
     quotationNumber: <span style={{ fontWeight: 600 }}>{q.quotationNumber}</span>,

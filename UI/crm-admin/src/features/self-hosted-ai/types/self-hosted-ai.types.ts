@@ -79,7 +79,7 @@ export interface AiTrainingJob {
   errorMessage?: string;
   startedAt?: string;
   completedAt?: string;
-  resultJson?: any;
+  resultJson?: Record<string, unknown>;
   createdAt: string;
   dataset?: { name: string };
 }
@@ -124,7 +124,7 @@ export interface AiSystemPrompt {
   category: string;
   isDefault: boolean;
   isSystem: boolean;
-  variables: any[];
+  variables: string[];
   createdAt: string;
 }
 

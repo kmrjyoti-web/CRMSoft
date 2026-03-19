@@ -82,7 +82,7 @@ function JournalEntryForm({
   });
 
   const ledgerOptions = useMemo(() => {
-    const arr: any[] = (chartData as any)?.data ?? chartData ?? [];
+    const arr: any[] = chartData?.data ?? chartData ?? [];
     return Array.isArray(arr)
       ? arr.map((l: any) => ({ label: `${l.code} \u2013 ${l.name}`, value: l.id }))
       : [];
@@ -197,7 +197,7 @@ export function JournalEntryList() {
   });
 
   const items: any[] = useMemo(() => {
-    const raw = (data as any)?.data ?? data ?? [];
+    const raw = data?.data ?? data ?? [];
     return Array.isArray(raw) ? raw : [];
   }, [data]);
 

@@ -95,7 +95,7 @@ export function CRMDashboardPage() {
 
   const { data: dashData, isLoading } = useCRMDashboard(params);
 
-  const raw = dashData?.data as any;
+  const raw = dashData?.data;
   const stats: CRMDashboardStats = raw?.stats ?? {
     totalContacts: 0, activeContacts: 0, inactiveContacts: 0,
     verifiedContacts: 0, notVerifiedContacts: 0,
@@ -341,10 +341,8 @@ export function CRMAllRecordsPage() {
   });
 
   const contacts: ContactListItem[] = useMemo(() => {
-    const raw = (data as any)?.data;
-    if (Array.isArray(raw?.data)) return raw.data;
-    if (Array.isArray(raw)) return raw;
-    return [];
+    const raw = (data as any)?.data ?? data ?? [];
+    return Array.isArray(raw) ? raw : [];
   }, [data]);
 
   const tableData = useMemo(() => {
@@ -402,7 +400,7 @@ export function CRMStatisticsPage() {
 
   const { data: dashData, isLoading } = useCRMDashboard(params);
 
-  const raw = dashData?.data as any;
+  const raw = dashData?.data;
   const stats: CRMDashboardStats = raw?.stats ?? {
     totalContacts: 0, activeContacts: 0, inactiveContacts: 0,
     verifiedContacts: 0, notVerifiedContacts: 0,

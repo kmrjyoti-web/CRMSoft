@@ -71,7 +71,7 @@ function SaleMasterForm({
   // Load initial data from list for edit mode
   const initialData = useMemo(() => {
     if (!isEdit) return INITIAL_FORM;
-    const list: any[] = (data as any)?.data ?? [];
+    const list: any[] = data?.data ?? [];
     const sm = list.find((s: any) => s.id === saleMasterId);
     if (!sm) return INITIAL_FORM;
     return {
@@ -192,7 +192,7 @@ export function SaleMasterList() {
   });
 
   const rows = useMemo(() => {
-    const list: any[] = (data as any)?.data ?? [];
+    const list: any[] = data?.data ?? [];
     return list.map((sm: any) => ({
       id:          sm.id,
       name:        sm.name,

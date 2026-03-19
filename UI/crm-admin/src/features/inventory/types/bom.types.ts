@@ -100,7 +100,7 @@ export interface BOMProduction {
   formula?: BOMFormula;
   stockCheck?: StockCheckResult;
   scrapRecords?: ScrapRecord[];
-  transactions?: any[];
+  transactions?: Record<string, unknown>[];
 }
 
 export interface ScrapRecord {

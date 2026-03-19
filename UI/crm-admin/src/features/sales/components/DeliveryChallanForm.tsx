@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { type FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
@@ -78,13 +78,13 @@ export function DeliveryChallanForm() {
     setItems((prev) => prev.filter((_, i) => i !== index));
   }
 
-  function updateItem(index: number, field: keyof ChallanItemRow, value: any) {
+  function updateItem(index: number, field: keyof ChallanItemRow, value: string | number | null) {
     setItems((prev) =>
       prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
     );
   }
 
-  const onSubmit = handleSubmit(async (formData) => {
+  const onSubmit = (e: FormEvent) => { void handleSubmit(async (formData) => {
     const payload: CreateDeliveryChallanPayload = {
       saleOrderId: formData.saleOrderId || undefined,
       customerId: formData.customerId,
@@ -110,7 +110,7 @@ export function DeliveryChallanForm() {
 
     await createMutation.mutateAsync(payload);
     router.push('/sales/delivery-challans');
-  }) as any;
+  })(e); };
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
@@ -124,13 +124,13 @@ export function DeliveryChallanForm() {
               label="Sale Order ID (optional)"
               leftIcon={<Icon name="file-text" size={16} />}
               value={watch('saleOrderId') ?? ''}
-              onChange={(v: any) => setValue('saleOrderId', typeof v === 'string' ? v : v?.target?.value ?? '')}
+              onChange={(v) => setValue('saleOrderId', v)}
             />
             <Input
               label="Customer ID"
               leftIcon={<Icon name="user" size={16} />}
               value={watch('customerId') ?? ''}
-              onChange={(v: any) => setValue('customerId', typeof v === 'string' ? v : v?.target?.value ?? '')}
+              onChange={(v) => setValue('customerId', v)}
             />
             <SelectInput
               label="Customer Type"
@@ -143,7 +143,7 @@ export function DeliveryChallanForm() {
               label="From Location"
               leftIcon={<Icon name="map-pin" size={16} />}
               value={watch('fromLocationId') ?? ''}
-              onChange={(v: any) => setValue('fromLocationId', typeof v === 'string' ? v : v?.target?.value ?? '')}
+              onChange={(v) => setValue('fromLocationId', v)}
             />
           </div>
         </Card>
@@ -157,25 +157,25 @@ export function DeliveryChallanForm() {
                 label="Transporter Name"
                 leftIcon={<Icon name="truck" size={16} />}
                 value={watch('transporterName') ?? ''}
-                onChange={(v: any) => setValue('transporterName', typeof v === 'string' ? v : v?.target?.value ?? '')}
+                onChange={(v) => setValue('transporterName', v)}
               />
               <Input
                 label="Vehicle Number"
                 leftIcon={<Icon name="car" size={16} />}
                 value={watch('vehicleNumber') ?? ''}
-                onChange={(v: any) => setValue('vehicleNumber', typeof v === 'string' ? v : v?.target?.value ?? '')}
+                onChange={(v) => setValue('vehicleNumber', v)}
               />
               <Input
                 label="LR Number"
                 leftIcon={<Icon name="hash" size={16} />}
                 value={watch('lrNumber') ?? ''}
-                onChange={(v: any) => setValue('lrNumber', typeof v === 'string' ? v : v?.target?.value ?? '')}
+                onChange={(v) => setValue('lrNumber', v)}
               />
               <Input
                 label="E-Way Bill Number"
                 leftIcon={<Icon name="file-check" size={16} />}
                 value={watch('ewayBillNumber') ?? ''}
-                onChange={(v: any) => setValue('ewayBillNumber', typeof v === 'string' ? v : v?.target?.value ?? '')}
+                onChange={(v) => setValue('ewayBillNumber', v)}
               />
               <SmartDateInput
                 label="E-Way Bill Date"
@@ -186,7 +186,7 @@ export function DeliveryChallanForm() {
                 label="Remarks"
                 leftIcon={<Icon name="message-square" size={16} />}
                 value={watch('remarks') ?? ''}
-                onChange={(v: any) => setValue('remarks', typeof v === 'string' ? v : v?.target?.value ?? '')}
+                onChange={(v) => setValue('remarks', v)}
               />
             </div>
           </div>
@@ -211,7 +211,7 @@ export function DeliveryChallanForm() {
                   label="Product ID"
                   leftIcon={<Icon name="package" size={16} />}
                   value={item.productId}
-                  onChange={(v: any) => updateItem(idx, 'productId', typeof v === 'string' ? v : v?.target?.value ?? '')}
+                  onChange={(v) => updateItem(idx, 'productId', v)}
                 />
                 <NumberInput
                   label="Quantity"
@@ -221,7 +221,7 @@ export function DeliveryChallanForm() {
                 <Input
                   label="Unit ID"
                   value={item.unitId}
-                  onChange={(v: any) => updateItem(idx, 'unitId', typeof v === 'string' ? v : v?.target?.value ?? '')}
+                  onChange={(v) => updateItem(idx, 'unitId', v)}
                 />
                 <NumberInput
                   label="Unit Price"
@@ -231,13 +231,13 @@ export function DeliveryChallanForm() {
                 <Input
                   label="Batch No"
                   value={item.batchNo}
-                  onChange={(v: any) => updateItem(idx, 'batchNo', typeof v === 'string' ? v : v?.target?.value ?? '')}
+                  onChange={(v) => updateItem(idx, 'batchNo', v)}
                 />
                 <div className="flex items-center gap-2">
                   <Input
                     label="Location"
                     value={item.fromLocationId}
-                    onChange={(v: any) => updateItem(idx, 'fromLocationId', typeof v === 'string' ? v : v?.target?.value ?? '')}
+                    onChange={(v) => updateItem(idx, 'fromLocationId', v)}
                   />
                   {items.length > 1 && (
                     <Button variant="danger" type="button" onClick={() => removeItem(idx)}>

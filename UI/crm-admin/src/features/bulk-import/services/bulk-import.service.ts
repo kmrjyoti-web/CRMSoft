@@ -139,7 +139,7 @@ export const bulkImportService = {
   // ── Mapping Suggestions ────────────────────────────────
   getMappingSuggestions: (targetEntity: string, fileHeaders?: string[]) =>
     apiClient
-      .get<ApiResponse<{ targetFields: any[]; suggestions: MappingSuggestion[] }>>(
+      .get<ApiResponse<{ targetFields: { key: string; label: string; fieldType?: string; required?: boolean }[]; suggestions: MappingSuggestion[] }>>(
         `${BASE_URL}/mapping-suggestions/${targetEntity}`,
         fileHeaders?.length ? { params: { headers: fileHeaders.join(",") } } : undefined,
       )

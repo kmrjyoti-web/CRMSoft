@@ -20,7 +20,7 @@ const COLUMNS = [
 ];
 
 function getStatusVariant(status: string): "primary" | "success" | "warning" | "secondary" | "danger" {
-  const map: Record<string, any> = {
+  const map: Record<string, "primary" | "success" | "warning" | "secondary" | "danger"> = {
     DRAFT: "secondary", PENDING_APPROVAL: "warning", CONFIRMED: "primary",
     PARTIALLY_DELIVERED: "primary", FULLY_DELIVERED: "success", INVOICED: "success",
     REJECTED: "danger", CANCELLED: "danger",
@@ -28,7 +28,7 @@ function getStatusVariant(status: string): "primary" | "success" | "warning" | "
   return map[status] ?? "secondary";
 }
 
-function flattenOrders(orders: SaleOrder[]): Record<string, any>[] {
+function flattenOrders(orders: SaleOrder[]): Record<string, unknown>[] {
   return orders.map((o) => ({
     id: o.id,
     orderNumber: <span style={{ fontWeight: 600 }}>{o.orderNumber}</span>,

@@ -16,7 +16,7 @@ const WORKFLOW_COLUMNS = [
   { id: "isDefault", label: "Default", visible: true },
 ];
 
-function flattenWorkflows(workflows: WorkflowListItem[]): Record<string, any>[] {
+function flattenWorkflows(workflows: WorkflowListItem[]): Record<string, unknown>[] {
   return workflows.map((w) => ({
     id: w.id,
     name: <span style={{ fontWeight: 600 }}>{w.name}</span>,

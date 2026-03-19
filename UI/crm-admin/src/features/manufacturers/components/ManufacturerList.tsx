@@ -16,7 +16,7 @@ const MANUFACTURER_COLUMNS = [
   { id: "status", label: "Status", visible: true },
 ];
 
-function flattenManufacturers(manufacturers: Manufacturer[]): Record<string, any>[] {
+function flattenManufacturers(manufacturers: Manufacturer[]): Record<string, unknown>[] {
   return manufacturers.map((m) => ({
     id: m.id,
     name: <span style={{ fontWeight: 600 }}>{m.name}</span>,

@@ -157,7 +157,7 @@ export function LookupList() {
 
       <div className="flex-1 min-h-0">
         <TableFull
-          data={tableData as Record<string, any>[]}
+          data={tableData as Record<string, unknown>[]}
           title="Lookup Master"
           tableKey="lookups"
           columns={LOOKUP_COLUMNS}

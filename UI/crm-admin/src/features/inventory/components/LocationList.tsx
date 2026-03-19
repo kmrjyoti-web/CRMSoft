@@ -22,7 +22,7 @@ const LOCATION_COLUMNS = [
 
 // ── Helpers ─────────────────────────────────────────────
 
-function flattenLocations(locations: StockLocation[]): Record<string, any>[] {
+function flattenLocations(locations: StockLocation[]): Record<string, unknown>[] {
   return locations.map((loc) => ({
     id: loc.id,
     name: (

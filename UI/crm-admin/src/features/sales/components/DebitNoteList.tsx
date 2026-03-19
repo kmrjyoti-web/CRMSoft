@@ -105,7 +105,7 @@ export function DebitNoteList() {
 
   const tableData = useMemo(() => flattenDebitNotes(items), [items]);
 
-  function handleRowEdit(row: Record<string, any>) {
+  function handleRowEdit(row: Record<string, unknown>) {
     const note = items.find((dn) => dn.id === row.id);
     if (note && note.status === 'DRAFT') {
       handleIssue(note.id);
@@ -181,7 +181,7 @@ export function DebitNoteList() {
   return (
     <div className="h-full flex flex-col gap-4">
       <TableFull
-        data={tableData as Record<string, any>[]}
+        data={tableData as Record<string, unknown>[]}
         title="Debit Notes"
         columns={DN_COLUMNS}
         tableKey="debit-notes"

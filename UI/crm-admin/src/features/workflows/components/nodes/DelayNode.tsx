@@ -6,7 +6,7 @@ import { BaseNode, type BaseNodeData } from './BaseNode';
 
 // ── Helpers ──────────────────────────────────────────────
 
-function formatDelay(config: Record<string, any>): string {
+function formatDelay(config: Record<string, unknown>): string {
   const duration = config?.duration as number | undefined;
   const unit = config?.unit as string | undefined;
 

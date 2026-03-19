@@ -118,7 +118,7 @@ export function QuotationList() {
   return (
     <div className="h-full flex flex-col">
       <TableFull
-        data={tableData as Record<string, any>[]}
+        data={tableData as Record<string, unknown>[]}
         title="Quotations"
         columns={QUOTATION_COLUMNS}
         defaultViewMode="table"

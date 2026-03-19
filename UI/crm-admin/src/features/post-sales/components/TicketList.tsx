@@ -101,7 +101,7 @@ export function TicketList() {
   return (
     <div className="h-full flex flex-col">
       <TableFull
-        data={tableData as Record<string, any>[]}
+        data={tableData as Record<string, unknown>[]}
         title="Tickets"
         columns={TICKET_COLUMNS}
         defaultViewMode="table"

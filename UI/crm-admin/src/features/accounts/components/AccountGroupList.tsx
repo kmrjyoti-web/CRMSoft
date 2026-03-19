@@ -64,7 +64,7 @@ function AccountGroupForm({
 
   const parentOptions = useMemo(
     () => {
-      const flat: any[] = (flatData as any)?.data ?? [];
+      const flat: any[] = flatData?.data ?? [];
       return flat.map((g: any) => ({ value: g.id, label: `${g.name} (${g.code})` }));
     },
     [flatData],
@@ -145,7 +145,7 @@ export function AccountGroupList() {
   });
 
   const flat: any[] = useMemo(
-    () => (flatData as any)?.data ?? [],
+    () => flatData?.data ?? [],
     [flatData],
   );
 

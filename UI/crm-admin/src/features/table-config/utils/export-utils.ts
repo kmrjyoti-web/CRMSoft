@@ -8,7 +8,7 @@ export interface ExportColumn {
 }
 
 export interface ExportOptions {
-  data: Record<string, any>[];
+  data: Record<string, unknown>[];
   columns: ExportColumn[];
   fileName: string;
 }
@@ -29,7 +29,7 @@ function buildFileName(base: string, ext: string): string {
 }
 
 /** Build rows as string[][] from data + columns */
-function buildRows(data: Record<string, any>[], columns: ExportColumn[]): string[][] {
+function buildRows(data: Record<string, unknown>[], columns: ExportColumn[]): string[][] {
   return data.map((row) => columns.map((col) => cellToString(row[col.id])));
 }
 

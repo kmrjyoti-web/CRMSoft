@@ -16,7 +16,7 @@ const PRICE_GROUP_COLUMNS = [
   { id: "status", label: "Status", visible: true },
 ];
 
-function flattenGroups(groups: CustomerPriceGroup[]): Record<string, any>[] {
+function flattenGroups(groups: CustomerPriceGroup[]): Record<string, unknown>[] {
   return groups.map((g) => ({
     id: g.id,
     name: <span style={{ fontWeight: 600 }}>{g.name}</span>,

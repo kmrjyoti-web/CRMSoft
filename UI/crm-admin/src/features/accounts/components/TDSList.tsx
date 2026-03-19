@@ -109,7 +109,7 @@ function statusVariant(s: string): 'success' | 'warning' | 'primary' | 'secondar
   return s === 'DEPOSITED' ? 'success' : s === 'DEDUCTED' ? 'warning' : s === 'RETURN_FILED' ? 'primary' : 'secondary';
 }
 
-function flattenTDS(items: any[]): Record<string, any>[] {
+function flattenTDS(items: any[]): Record<string, unknown>[] {
   return items.map((r) => ({
     id:            r.id,
     _raw:          r,
@@ -158,13 +158,13 @@ export function TDSList() {
   const depositMut      = useDepositTDS();
 
   const items: any[] = useMemo(() => {
-    const r = (data as any)?.data ?? data ?? [];
-    return Array.isArray(r) ? r : (r as any)?.data ?? [];
+    const r = data?.data ?? data ?? [];
+    return Array.isArray(r) ? r : r?.data ?? [];
   }, [data]);
 
   const tableData = useMemo(() => flattenTDS(items), [items]);
 
-  const summary = ((sumData as any)?.data ?? {}) as Record<string, any>;
+  const summary = (sumData?.data ?? {}) as Record<string, unknown>;
   const totalDeducted  = summary.totalDeducted  as number | undefined;
   const totalDeposited = summary.totalDeposited as number | undefined;
   const totalPending   = summary.totalPending   as number | undefined;
@@ -208,7 +208,7 @@ export function TDSList() {
   return (
     <>
       <TableFull
-        data={tableData as Record<string, any>[]}
+        data={tableData as Record<string, unknown>[]}
         title="TDS Records"
         columns={TDS_COLUMNS}
         tableKey="tds-records"

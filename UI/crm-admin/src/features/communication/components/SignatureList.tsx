@@ -13,7 +13,7 @@ const SIGNATURE_COLUMNS = [
   { id: "status", label: "Status", visible: true },
 ];
 
-function flattenSignatures(signatures: EmailSignatureItem[]): Record<string, any>[] {
+function flattenSignatures(signatures: EmailSignatureItem[]): Record<string, unknown>[] {
   return signatures.map((s) => ({
     id: s.id,
     name: <span style={{ fontWeight: 600 }}>{s.name}</span>,

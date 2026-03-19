@@ -27,7 +27,7 @@ const DAYS_OPTIONS = [
 
 // ── Helpers ─────────────────────────────────────────────
 
-function flattenExpiry(items: ExpiryReportItem[]): Record<string, any>[] {
+function flattenExpiry(items: ExpiryReportItem[]): Record<string, unknown>[] {
   return items.map((item) => ({
     id: item.id,
     serialNo: <span style={{ fontWeight: 600 }}>{item.serialNo}</span>,

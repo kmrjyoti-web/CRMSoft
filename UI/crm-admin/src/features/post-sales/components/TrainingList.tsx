@@ -101,7 +101,7 @@ export function TrainingList() {
   return (
     <div className="h-full flex flex-col">
       <TableFull
-        data={tableData as Record<string, any>[]}
+        data={tableData as Record<string, unknown>[]}
         title="Trainings"
         columns={TRAINING_COLUMNS}
         defaultViewMode="table"

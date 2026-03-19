@@ -158,7 +158,7 @@ export function DocumentList() {
       <div className="flex-1 min-w-0 flex flex-col">
         <div className="flex-1 min-h-0">
           <TableFull
-            data={tableData as Record<string, any>[]}
+            data={tableData as Record<string, unknown>[]}
             title="Documents"
             tableKey="documents"
             columns={DOCUMENT_COLUMNS}

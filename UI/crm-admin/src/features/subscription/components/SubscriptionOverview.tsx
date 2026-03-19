@@ -61,9 +61,9 @@ export function SubscriptionOverview() {
   const { data: invoicesRes } = useTenantInvoices();
 
   // API responses are wrapped: { success, data: actualPayload }
-  const subscription = (subRes as any)?.data ?? subRes;
-  const limitsData = (limitsRes as any)?.data ?? limitsRes;
-  const rawInvoices = (invoicesRes as any)?.data ?? invoicesRes;
+  const subscription = subRes?.data ?? subRes;
+  const limitsData = limitsRes?.data ?? limitsRes;
+  const rawInvoices = invoicesRes?.data ?? invoicesRes;
   const invoices: any[] = Array.isArray(rawInvoices) ? rawInvoices : [];
 
   if (subLoading || limitsLoading) {

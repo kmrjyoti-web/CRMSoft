@@ -37,7 +37,7 @@ export function useUnits(category?: string) {
 export function useCreateUnit() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Record<string, any>) => procurementService.createUnit(data),
+    mutationFn: (data: Record<string, unknown>) => procurementService.createUnit(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEYS.units] }),
   });
 }
@@ -61,13 +61,13 @@ export function useConversions(productId?: string) {
 export function useCreateConversion() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Record<string, any>) => procurementService.createConversion(data),
+    mutationFn: (data: Record<string, unknown>) => procurementService.createConversion(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEYS.conversions] }),
   });
 }
 
 // ─── RFQ ───
-export function useRFQList(params?: Record<string, any>) {
+export function useRFQList(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.rfq, params],
     queryFn: () => procurementService.listRFQ(params),
@@ -85,7 +85,7 @@ export function useRFQDetail(id: string) {
 export function useCreateRFQ() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Record<string, any>) => procurementService.createRFQ(data),
+    mutationFn: (data: Record<string, unknown>) => procurementService.createRFQ(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEYS.rfq] }),
   });
 }
@@ -93,7 +93,7 @@ export function useCreateRFQ() {
 export function useUpdateRFQ() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Record<string, any> }) =>
+    mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) =>
       procurementService.updateRFQ(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [KEYS.rfq] });
@@ -117,7 +117,7 @@ export function useSendRFQ() {
 export function useUpdateQuotation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Record<string, any> }) =>
+    mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) =>
       procurementService.updateQuotation(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [KEYS.quotations] });
@@ -127,7 +127,7 @@ export function useUpdateQuotation() {
 }
 
 // ─── Quotations ───
-export function useQuotationList(params?: Record<string, any>) {
+export function useQuotationList(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.quotations, params],
     queryFn: () => procurementService.listQuotations(params),
@@ -145,7 +145,7 @@ export function useQuotationDetail(id: string) {
 export function useCreateQuotation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Record<string, any>) => procurementService.createQuotation(data),
+    mutationFn: (data: Record<string, unknown>) => procurementService.createQuotation(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEYS.quotations] }),
   });
 }
@@ -153,7 +153,7 @@ export function useCreateQuotation() {
 // ─── Compare ───
 export function useCompareQuotations() {
   return useMutation({
-    mutationFn: (data: Record<string, any>) => procurementService.compareQuotations(data),
+    mutationFn: (data: Record<string, unknown>) => procurementService.compareQuotations(data),
   });
 }
 
@@ -170,7 +170,7 @@ export function useSelectWinner() {
 }
 
 // ─── Purchase Orders ───
-export function usePOList(params?: Record<string, any>) {
+export function usePOList(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.pos, params],
     queryFn: () => procurementService.listPOs(params),
@@ -188,7 +188,7 @@ export function usePODetail(id: string) {
 export function useCreatePO() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Record<string, any>) => procurementService.createPO(data),
+    mutationFn: (data: Record<string, unknown>) => procurementService.createPO(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEYS.pos] }),
   });
 }
@@ -196,7 +196,7 @@ export function useCreatePO() {
 export function useUpdatePO() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Record<string, any> }) =>
+    mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) =>
       procurementService.updatePO(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [KEYS.pos] });
@@ -219,7 +219,7 @@ export function usePOWorkflow() {
 }
 
 // ─── Goods Receipts ───
-export function useGRNList(params?: Record<string, any>) {
+export function useGRNList(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.grns, params],
     queryFn: () => procurementService.listGRN(params),
@@ -237,7 +237,7 @@ export function useGRNDetail(id: string) {
 export function useCreateGRN() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Record<string, any>) => procurementService.createGRN(data),
+    mutationFn: (data: Record<string, unknown>) => procurementService.createGRN(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEYS.grns] }),
   });
 }
@@ -245,7 +245,7 @@ export function useCreateGRN() {
 export function useUpdateGRN() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Record<string, any> }) =>
+    mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) =>
       procurementService.updateGRN(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [KEYS.grns] });
@@ -268,7 +268,7 @@ export function useGRNWorkflow() {
 }
 
 // ─── Purchase Invoices ───
-export function useInvoiceList(params?: Record<string, any>) {
+export function useInvoiceList(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.invoices, params],
     queryFn: () => procurementService.listInvoices(params),
@@ -286,7 +286,7 @@ export function useInvoiceDetail(id: string) {
 export function useCreateInvoice() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Record<string, any>) => procurementService.createInvoice(data),
+    mutationFn: (data: Record<string, unknown>) => procurementService.createInvoice(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEYS.invoices] }),
   });
 }
@@ -294,7 +294,7 @@ export function useCreateInvoice() {
 export function useUpdateInvoice() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Record<string, any> }) =>
+    mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) =>
       procurementService.updateInvoice(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [KEYS.invoices] });

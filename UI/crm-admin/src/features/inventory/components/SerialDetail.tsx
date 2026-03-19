@@ -17,7 +17,7 @@ const STATUS_OPTIONS = [
 ];
 
 function getStatusVariant(status: string): "primary" | "success" | "warning" | "secondary" | "danger" {
-  const map: Record<string, any> = {
+  const map: Record<string, "primary" | "success" | "warning" | "secondary" | "danger"> = {
     AVAILABLE: "success", SOLD: "primary", RESERVED: "warning",
     EXPIRED: "danger", DAMAGED: "danger", RETURNED: "secondary",
     ACTIVATED: "success", DEACTIVATED: "secondary",

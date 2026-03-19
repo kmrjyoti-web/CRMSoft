@@ -307,7 +307,7 @@ export function LookupDetail({ lookupId }: LookupDetailProps) {
       {/* Values Table — fills remaining height */}
       <div className="flex-1 min-h-0">
         <TableFull
-          data={tableData as Record<string, any>[]}
+          data={tableData as Record<string, unknown>[]}
           title={`Values (${lookup.values?.length ?? 0})`}
           tableKey={`lookup-values-${lookupId}`}
           columns={VALUE_COLUMNS}

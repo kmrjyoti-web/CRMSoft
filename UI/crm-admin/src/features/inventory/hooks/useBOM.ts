@@ -22,7 +22,7 @@ const KEYS = {
 
 // ─── Recipes ───
 
-export function useRecipeList(params?: Record<string, any>) {
+export function useRecipeList(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.recipes, params],
     queryFn: () => bomService.listRecipes(params),
@@ -83,7 +83,7 @@ export function useCheckStock() {
 
 // ─── Production ───
 
-export function useProductionList(params?: Record<string, any>) {
+export function useProductionList(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.productions, params],
     queryFn: () => bomService.listProduction(params),
@@ -129,7 +129,7 @@ export function useCancelProduction() {
 
 // ─── Scrap ───
 
-export function useScrapList(params?: Record<string, any>) {
+export function useScrapList(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.scrapList, params],
     queryFn: () => bomService.listScrap(params),
@@ -155,14 +155,14 @@ export function useWriteOffScrap() {
 
 // ─── Reports ───
 
-export function useProductionReport(params?: Record<string, any>) {
+export function useProductionReport(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.productionReport, params],
     queryFn: () => bomService.productionReport(params),
   });
 }
 
-export function useConsumptionReport(params?: Record<string, any>) {
+export function useConsumptionReport(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.consumptionReport, params],
     queryFn: () => bomService.consumptionReport(params),
@@ -177,7 +177,7 @@ export function useCostingReport(formulaId: string) {
   });
 }
 
-export function useYieldReport(params?: Record<string, any>) {
+export function useYieldReport(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: [KEYS.yieldReport, params],
     queryFn: () => bomService.yieldReport(params),

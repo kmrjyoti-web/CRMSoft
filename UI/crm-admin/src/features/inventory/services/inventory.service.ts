@@ -27,7 +27,7 @@ export const inventoryService = {
     api.get<ApiResponse<InventoryDashboard>>(`${BASE}/dashboard`).then((r) => r.data),
 
   // ─── Serials ───
-  listSerials: (params?: Record<string, any>) =>
+  listSerials: (params?: Record<string, unknown>) =>
     api.get<ApiResponse<SerialMaster[]>>(`${BASE}/serials`, { params }).then((r) => r.data),
 
   getSerial: (id: string) =>
@@ -55,10 +55,10 @@ export const inventoryService = {
   recordTransaction: (payload: RecordTransactionPayload) =>
     api.post<ApiResponse<StockTransaction>>(`${BASE}/transactions`, payload).then((r) => r.data),
 
-  listTransactions: (params?: Record<string, any>) =>
+  listTransactions: (params?: Record<string, unknown>) =>
     api.get<ApiResponse<StockTransaction[]>>(`${BASE}/transactions`, { params }).then((r) => r.data),
 
-  getLedger: (productId: string, params?: Record<string, any>) =>
+  getLedger: (productId: string, params?: Record<string, unknown>) =>
     api.get<ApiResponse<StockTransaction[]>>(`${BASE}/transactions/ledger/${productId}`, { params }).then((r) => r.data),
 
   getTransactionsBySerial: (serialId: string) =>
@@ -68,7 +68,7 @@ export const inventoryService = {
     api.post<ApiResponse<any>>(`${BASE}/transactions/transfer`, payload).then((r) => r.data),
 
   // ─── Stock ───
-  getStock: (params?: Record<string, any>) =>
+  getStock: (params?: Record<string, unknown>) =>
     api.get<ApiResponse<StockSummary[]>>(`${BASE}/stock`, { params }).then((r) => r.data),
 
   getOpeningBalance: (productId: string, date: string) =>
@@ -88,16 +88,16 @@ export const inventoryService = {
     api.patch<ApiResponse<StockLocation>>(`${BASE}/locations/${id}`, payload).then((r) => r.data),
 
   // ─── Reports ───
-  stockLedgerReport: (params?: Record<string, any>) =>
+  stockLedgerReport: (params?: Record<string, unknown>) =>
     api.get<ApiResponse<LedgerEntry[]>>(`${BASE}/reports/stock-ledger`, { params }).then((r) => r.data),
 
   expiryReport: (days?: number) =>
     api.get<ApiResponse<ExpiryReportItem[]>>(`${BASE}/reports/expiry`, { params: { days } }).then((r) => r.data),
 
-  valuationReport: (params?: Record<string, any>) =>
+  valuationReport: (params?: Record<string, unknown>) =>
     api.get<ApiResponse<ValuationReport>>(`${BASE}/reports/valuation`, { params }).then((r) => r.data),
 
-  serialTrackingReport: (params?: Record<string, any>) =>
+  serialTrackingReport: (params?: Record<string, unknown>) =>
     api.get<ApiResponse<SerialTrackingItem[]>>(`${BASE}/reports/serial-tracking`, { params }).then((r) => r.data),
 
   // ─── Adjustments ───

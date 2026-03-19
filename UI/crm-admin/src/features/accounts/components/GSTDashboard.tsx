@@ -158,7 +158,7 @@ export function GSTDashboard() {
 
       {/* GST Returns Table */}
       <TableFull
-        data={tableData as Record<string, any>[]}
+        data={tableData as Record<string, unknown>[]}
         title="GST Returns"
         columns={GST_RETURN_COLUMNS}
         tableKey="gst-returns"

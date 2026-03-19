@@ -80,7 +80,7 @@ export const accountsService = {
     api.post<any>(`${BASE}/journal-entries`, data).then((r) => r.data),
   listContraEntries: (params?: Record<string, string>) =>
     api.get<any>(`${BASE}/contra-entries`, { params }).then((r) => r.data),
-  createContraEntry: (data: any) =>
+  createContraEntry: (data: Record<string, unknown>) =>
     api.post<any>(`${BASE}/contra-entries`, data).then((r) => r.data),
 
   // Reports
@@ -106,9 +106,9 @@ export const accountsService = {
     api.get<any>(`${BASE}/ledgers`, { params }).then((r) => r.data),
   getLedgerById: (id: string) =>
     api.get<any>(`${BASE}/ledgers/${id}`).then((r) => r.data),
-  createRichLedger: (data: any) =>
+  createRichLedger: (data: Record<string, unknown>) =>
     api.post<any>(`${BASE}/ledgers`, data).then((r) => r.data),
-  updateLedger: (id: string, data: any) =>
+  updateLedger: (id: string, data: Record<string, unknown>) =>
     api.patch<any>(`${BASE}/ledgers/${id}`, data).then((r) => r.data),
   deactivateLedger: (id: string) =>
     api.post<any>(`${BASE}/ledgers/${id}/deactivate`, {}).then((r) => r.data),
@@ -122,9 +122,9 @@ export const accountsService = {
     api.get<any>(`${BASE}/groups`).then((r) => r.data),
   getGroupFlat: () =>
     api.get<any>(`${BASE}/groups/flat`).then((r) => r.data),
-  createGroup: (data: any) =>
+  createGroup: (data: Record<string, unknown>) =>
     api.post<any>(`${BASE}/groups`, data).then((r) => r.data),
-  updateGroup: (id: string, data: any) =>
+  updateGroup: (id: string, data: Record<string, unknown>) =>
     api.patch<any>(`${BASE}/groups/${id}`, data).then((r) => r.data),
   deleteGroup: (id: string) =>
     api.delete<any>(`${BASE}/groups/${id}`).then((r) => r.data),
@@ -132,9 +132,9 @@ export const accountsService = {
   // ─── Sale Master ───
   listSaleMasters: () =>
     api.get<any>(`${BASE}/sale-master`).then((r) => r.data),
-  createSaleMaster: (data: any) =>
+  createSaleMaster: (data: Record<string, unknown>) =>
     api.post<any>(`${BASE}/sale-master`, data).then((r) => r.data),
-  updateSaleMaster: (id: string, data: any) =>
+  updateSaleMaster: (id: string, data: Record<string, unknown>) =>
     api.patch<any>(`${BASE}/sale-master/${id}`, data).then((r) => r.data),
   deleteSaleMaster: (id: string) =>
     api.delete<any>(`${BASE}/sale-master/${id}`).then((r) => r.data),
@@ -142,24 +142,24 @@ export const accountsService = {
   // ─── Purchase Master ───
   listPurchaseMasters: () =>
     api.get<any>(`${BASE}/purchase-master`).then((r) => r.data),
-  createPurchaseMaster: (data: any) =>
+  createPurchaseMaster: (data: Record<string, unknown>) =>
     api.post<any>(`${BASE}/purchase-master`, data).then((r) => r.data),
-  updatePurchaseMaster: (id: string, data: any) =>
+  updatePurchaseMaster: (id: string, data: Record<string, unknown>) =>
     api.patch<any>(`${BASE}/purchase-master/${id}`, data).then((r) => r.data),
   deletePurchaseMaster: (id: string) =>
     api.delete<any>(`${BASE}/purchase-master/${id}`).then((r) => r.data),
 
   // ─── Tally Import ───
-  tallyImportLedgers: (ledgers: any[]) =>
+  tallyImportLedgers: (ledgers: Record<string, unknown>[]) =>
     api.post<any>(`${BASE}/ledgers/tally-import`, { ledgers }).then((r) => r.data),
 
   // ─── Ledger Mappings ───
   listLedgerMappings: () =>
     api.get<any>(`${BASE}/ledger-mappings`).then((r) => r.data),
-  createLedgerMapping: (data: any) =>
+  createLedgerMapping: (data: Record<string, unknown>) =>
     api.post<any>(`${BASE}/ledger-mappings`, data).then((r) => r.data),
   getUnmappedEntities: () =>
     api.get<any>(`${BASE}/ledgers/mappings/unmapped`).then((r) => r.data),
-  bulkCreateMappings: (mappings: any[]) =>
+  bulkCreateMappings: (mappings: Record<string, unknown>[]) =>
     api.post<any>(`${BASE}/ledger-mappings/bulk`, { mappings }).then((r) => r.data),
 };

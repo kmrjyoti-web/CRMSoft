@@ -385,7 +385,7 @@ export function OrganizationList() {
     <div className="h-full flex flex-col">
       <div className="flex-1 min-h-0">
         <TableFull
-          data={tableData as Record<string, any>[]}
+          data={tableData as Record<string, unknown>[]}
           title="Organizations"
           tableKey="organizations"
           columns={ORGANIZATION_COLUMNS}

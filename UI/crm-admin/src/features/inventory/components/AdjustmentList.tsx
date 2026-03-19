@@ -20,7 +20,7 @@ const ADJUSTMENT_COLUMNS = [
 // ── Helpers ─────────────────────────────────────────────
 
 function getStatusVariant(status: string): "primary" | "success" | "warning" | "secondary" | "danger" {
-  const map: Record<string, any> = {
+  const map: Record<string, "primary" | "success" | "warning" | "secondary" | "danger"> = {
     ADJ_PENDING: "warning",
     ADJ_APPROVED: "success",
     ADJ_REJECTED: "danger",
@@ -137,7 +137,7 @@ export function AdjustmentList() {
       )}
 
       <TableFull
-        data={rows as Record<string, any>[]}
+        data={rows as Record<string, unknown>[]}
         title="Stock Adjustments"
         tableKey="inventory-adjustments"
         columns={ADJUSTMENT_COLUMNS}

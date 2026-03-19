@@ -6,7 +6,7 @@ import { BaseNode, type BaseNodeData } from './BaseNode';
 
 // ── Helpers ──────────────────────────────────────────────
 
-function buildConditionSummary(config: Record<string, any>): string {
+function buildConditionSummary(config: Record<string, unknown>): string {
   const field = config?.field as string | undefined;
   const operator = config?.operator as string | undefined;
   const value = config?.value;

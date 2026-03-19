@@ -181,7 +181,7 @@ export function BankReconciliation() {
 
           {/* Unreconciled Payments Table */}
           <TableFull
-            data={flatPayments as Record<string, any>[]}
+            data={flatPayments as Record<string, unknown>[]}
             title="Unreconciled Payments"
             columns={UNRECONCILED_COLUMNS}
             tableKey="bank-reconciliation-payments"

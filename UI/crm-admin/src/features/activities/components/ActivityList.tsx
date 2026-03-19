@@ -256,7 +256,7 @@ export function ActivityList() {
     <div className="h-full flex flex-col">
       <div className="flex-1 min-h-0">
         <TableFull
-          data={tableData as Record<string, any>[]}
+          data={tableData as Record<string, unknown>[]}
           title="Activities"
           tableKey="activities"
           columns={ACTIVITY_COLUMNS}

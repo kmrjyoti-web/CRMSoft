@@ -13,7 +13,7 @@ const BASE = "/api/v1/inventory";
 
 export const bomService = {
   // ─── Recipes ───
-  listRecipes: (params?: Record<string, any>) =>
+  listRecipes: (params?: Record<string, unknown>) =>
     api.get<ApiResponse<BOMFormula[]>>(`${BASE}/recipes`, { params }).then((r) => r.data),
 
   getRecipe: (id: string) =>
@@ -35,7 +35,7 @@ export const bomService = {
     api.post<ApiResponse<StockCheckResult>>(`${BASE}/recipes/${id}/check-stock`, { quantity, locationId }).then((r) => r.data),
 
   // ─── Production ───
-  listProduction: (params?: Record<string, any>) =>
+  listProduction: (params?: Record<string, unknown>) =>
     api.get<ApiResponse<BOMProduction[]>>(`${BASE}/production`, { params }).then((r) => r.data),
 
   getProduction: (id: string) =>
@@ -51,7 +51,7 @@ export const bomService = {
     api.post<ApiResponse<BOMProduction>>(`${BASE}/production/${id}/cancel`, { reason }).then((r) => r.data),
 
   // ─── Scrap ───
-  listScrap: (params?: Record<string, any>) =>
+  listScrap: (params?: Record<string, unknown>) =>
     api.get<ApiResponse<ScrapRecord[]>>(`${BASE}/scrap`, { params }).then((r) => r.data),
 
   recordScrap: (payload: RecordScrapPayload) =>
@@ -61,18 +61,18 @@ export const bomService = {
     api.post<ApiResponse<ScrapRecord>>(`${BASE}/scrap/${id}/write-off`, { disposalMethod }).then((r) => r.data),
 
   // ─── Reports ───
-  productionReport: (params?: Record<string, any>) =>
+  productionReport: (params?: Record<string, unknown>) =>
     api.get<ApiResponse<ProductionReport>>(`${BASE}/reports/production`, { params }).then((r) => r.data),
 
-  consumptionReport: (params?: Record<string, any>) =>
+  consumptionReport: (params?: Record<string, unknown>) =>
     api.get<ApiResponse<any>>(`${BASE}/reports/consumption`, { params }).then((r) => r.data),
 
   costingReport: (formulaId: string) =>
     api.get<ApiResponse<CostBreakdown>>(`${BASE}/reports/bom-costing`, { params: { formulaId } }).then((r) => r.data),
 
-  yieldReport: (params?: Record<string, any>) =>
+  yieldReport: (params?: Record<string, unknown>) =>
     api.get<ApiResponse<YieldReport>>(`${BASE}/reports/yield`, { params }).then((r) => r.data),
 
-  scrapReport: (params?: Record<string, any>) =>
+  scrapReport: (params?: Record<string, unknown>) =>
     api.get<ApiResponse<ScrapReport>>(`${BASE}/reports/scrap`, { params }).then((r) => r.data),
 };

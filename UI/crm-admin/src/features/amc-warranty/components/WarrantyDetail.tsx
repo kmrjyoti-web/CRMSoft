@@ -307,7 +307,7 @@ export function WarrantyDetail({ warrantyId }: Props) {
               Claims ({warranty._count?.claims ?? warranty.claims?.length ?? 0})
             </h3>
             <TableFull
-              data={claimsTableData as Record<string, any>[]}
+              data={claimsTableData as Record<string, unknown>[]}
               title=""
               columns={CLAIM_COLUMNS}
               defaultViewMode="table"
