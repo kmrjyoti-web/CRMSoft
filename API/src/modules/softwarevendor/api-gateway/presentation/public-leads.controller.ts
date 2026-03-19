@@ -28,7 +28,7 @@ export class PublicLeadsController {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.lead.findMany({
+      this.prisma.working.lead.findMany({
         where,
         orderBy: { [query.sortBy || 'createdAt']: query.sortOrder || 'desc' },
         skip: (page - 1) * limit,
@@ -42,7 +42,7 @@ export class PublicLeadsController {
           allocatedTo: { select: { id: true, firstName: true, lastName: true } },
         },
       }),
-      this.prisma.lead.count({ where }),
+      this.prisma.working.lead.count({ where }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
@@ -51,7 +51,7 @@ export class PublicLeadsController {
   @Get(':id')
   @ApiScopes('leads:read')
   async getById(@Req() req: any, @Param('id') id: string) {
-    const lead = await this.prisma.lead.findFirst({
+    const lead = await this.prisma.working.lead.findFirst({
       where: { id, tenantId: req.tenantId },
       include: {
         contact: { select: { id: true, firstName: true, lastName: true, designation: true } },
@@ -66,7 +66,7 @@ export class PublicLeadsController {
   @Post()
   @ApiScopes('leads:write')
   async create(@Req() req: any, @Body() body: any) {
-    return this.prisma.lead.create({
+    return this.prisma.working.lead.create({
       data: {
         tenantId: req.tenantId,
         leadNumber: body.leadNumber,
@@ -86,7 +86,7 @@ export class PublicLeadsController {
   @Put(':id')
   @ApiScopes('leads:write')
   async update(@Req() req: any, @Param('id') id: string, @Body() body: any) {
-    await this.prisma.lead.findFirstOrThrow({
+    await this.prisma.working.lead.findFirstOrThrow({
       where: { id, tenantId: req.tenantId },
     });
     const updateData: any = {};
@@ -98,6 +98,6 @@ export class PublicLeadsController {
     if (body.allocatedToId !== undefined) updateData.allocatedToId = body.allocatedToId;
     if (body.organizationId !== undefined) updateData.organizationId = body.organizationId;
 
-    return this.prisma.lead.update({ where: { id }, data: updateData });
+    return this.prisma.working.lead.update({ where: { id }, data: updateData });
   }
 }

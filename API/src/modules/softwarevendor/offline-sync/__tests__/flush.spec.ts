@@ -1,7 +1,7 @@
 import { FlushService } from '../services/flush.service';
 
 function makeMockPrisma() {
-  return {
+  const obj: any = {
     syncFlushCommand: {
       create: jest.fn().mockResolvedValue({ id: 'flush-1', flushType: 'FULL', status: 'PENDING' }),
       findUnique: jest.fn(),
@@ -22,7 +22,9 @@ function makeMockPrisma() {
     syncAuditLog: {
       create: jest.fn(),
     },
-  } as any;
+  };
+  obj.working = obj;
+  return obj;
 }
 
 describe('FlushService', () => {

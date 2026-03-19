@@ -38,7 +38,7 @@ export class CampaignReport implements IReport {
     };
     if (params.filters?.channel) where.channel = params.filters.channel;
 
-    const sendLogs = await this.prisma.quotationSendLog.findMany({
+    const sendLogs = await this.prisma.working.quotationSendLog.findMany({
       where,
       include: {
         quotation: { select: { id: true, totalAmount: true } },

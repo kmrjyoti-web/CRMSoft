@@ -26,7 +26,7 @@ export class PublicContactsController {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.contact.findMany({
+      this.prisma.working.contact.findMany({
         where,
         orderBy: { [query.sortBy || 'createdAt']: query.sortOrder || 'desc' },
         skip: (page - 1) * limit,
@@ -38,7 +38,7 @@ export class PublicContactsController {
           organization: { select: { id: true, name: true } },
         },
       }),
-      this.prisma.contact.count({ where }),
+      this.prisma.working.contact.count({ where }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
@@ -47,7 +47,7 @@ export class PublicContactsController {
   @Get(':id')
   @ApiScopes('contacts:read')
   async getById(@Req() req: any, @Param('id') id: string) {
-    const contact = await this.prisma.contact.findFirst({
+    const contact = await this.prisma.working.contact.findFirst({
       where: { id, tenantId: req.tenantId, isActive: true },
       include: {
         organization: { select: { id: true, name: true } },
@@ -60,7 +60,7 @@ export class PublicContactsController {
   @Post()
   @ApiScopes('contacts:write')
   async create(@Req() req: any, @Body() body: any) {
-    return this.prisma.contact.create({
+    return this.prisma.working.contact.create({
       data: {
         tenantId: req.tenantId,
         firstName: body.firstName,
@@ -77,7 +77,7 @@ export class PublicContactsController {
   @Put(':id')
   @ApiScopes('contacts:write')
   async update(@Req() req: any, @Param('id') id: string, @Body() body: any) {
-    await this.prisma.contact.findFirstOrThrow({
+    await this.prisma.working.contact.findFirstOrThrow({
       where: { id, tenantId: req.tenantId, isActive: true },
     });
     const updateData: any = {};
@@ -88,6 +88,6 @@ export class PublicContactsController {
     if (body.notes !== undefined) updateData.notes = body.notes;
     if (body.organizationId !== undefined) updateData.organizationId = body.organizationId;
 
-    return this.prisma.contact.update({ where: { id }, data: updateData });
+    return this.prisma.working.contact.update({ where: { id }, data: updateData });
   }
 }

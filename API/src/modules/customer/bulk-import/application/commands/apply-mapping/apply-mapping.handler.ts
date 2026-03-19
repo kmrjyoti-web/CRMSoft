@@ -11,7 +11,7 @@ export class ApplyMappingHandler implements ICommandHandler<ApplyMappingCommand>
   ) {}
 
   async execute(cmd: ApplyMappingCommand) {
-    const rows = await this.prisma.importRow.findMany({
+    const rows = await this.prisma.working.importRow.findMany({
       where: { importJobId: cmd.jobId },
       orderBy: { rowNumber: 'asc' },
     });
@@ -21,14 +21,14 @@ export class ApplyMappingHandler implements ICommandHandler<ApplyMappingCommand>
 
     // Update rows with mapped data
     for (let i = 0; i < rows.length; i++) {
-      await this.prisma.importRow.update({
+      await this.prisma.working.importRow.update({
         where: { id: rows[i].id },
         data: { mappedData: mappedRows[i] },
       });
     }
 
     // Update job
-    await this.prisma.importJob.update({
+    await this.prisma.working.importJob.update({
       where: { id: cmd.jobId },
       data: {
         fieldMapping: cmd.fieldMapping,

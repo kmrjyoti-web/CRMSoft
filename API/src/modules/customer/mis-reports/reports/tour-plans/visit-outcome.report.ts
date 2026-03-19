@@ -37,7 +37,7 @@ export class VisitOutcomeReport implements IReport {
     if (params.userId) where.tourPlan = { salesPersonId: params.userId };
     if (params.filters?.outcome) where.outcome = { contains: params.filters.outcome, mode: 'insensitive' };
 
-    const visits = await this.prisma.tourPlanVisit.findMany({
+    const visits = await this.prisma.working.tourPlanVisit.findMany({
       where,
       select: {
         id: true, outcome: true, notes: true, actualArrival: true, actualDeparture: true, createdAt: true,
@@ -139,7 +139,7 @@ export class VisitOutcomeReport implements IReport {
 
     const skip = (params.page - 1) * params.limit;
     const [records, total] = await Promise.all([
-      this.prisma.tourPlanVisit.findMany({
+      this.prisma.working.tourPlanVisit.findMany({
         where,
         include: {
           tourPlan: { select: { salesPerson: { select: { firstName: true, lastName: true } } } },
@@ -149,7 +149,7 @@ export class VisitOutcomeReport implements IReport {
         skip,
         take: params.limit,
       }),
-      this.prisma.tourPlanVisit.count({ where }),
+      this.prisma.working.tourPlanVisit.count({ where }),
     ]);
 
     const columns: ColumnDef[] = [

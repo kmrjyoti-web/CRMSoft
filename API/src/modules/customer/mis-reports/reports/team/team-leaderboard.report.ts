@@ -51,19 +51,19 @@ export class TeamLeaderboardReport implements IReport {
     const userIds = users.map(u => u.id);
 
     const [leads, prevLeads, activities, prevActivities] = await Promise.all([
-      this.prisma.lead.findMany({
+      this.prisma.working.lead.findMany({
         where: { tenantId, allocatedToId: { in: userIds }, createdAt: dateFilter },
         select: { allocatedToId: true, status: true, expectedValue: true },
       }),
-      this.prisma.lead.findMany({
+      this.prisma.working.lead.findMany({
         where: { tenantId, allocatedToId: { in: userIds }, createdAt: prevDateFilter },
         select: { allocatedToId: true, status: true, expectedValue: true },
       }),
-      this.prisma.activity.findMany({
+      this.prisma.working.activity.findMany({
         where: { tenantId, createdById: { in: userIds }, createdAt: dateFilter },
         select: { createdById: true },
       }),
-      this.prisma.activity.findMany({
+      this.prisma.working.activity.findMany({
         where: { tenantId, createdById: { in: userIds }, createdAt: prevDateFilter },
         select: { createdById: true },
       }),

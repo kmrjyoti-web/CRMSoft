@@ -49,7 +49,7 @@ export class WebhookService {
   }, userId: string, userName: string) {
     const secret = randomBytes(32).toString('hex');
 
-    const endpoint = await this.prisma.webhookEndpoint.create({
+    const endpoint = await this.prisma.working.webhookEndpoint.create({
       data: {
         tenantId,
         url: dto.url,
@@ -74,7 +74,7 @@ export class WebhookService {
   }
 
   async listByTenant(tenantId: string) {
-    return this.prisma.webhookEndpoint.findMany({
+    return this.prisma.working.webhookEndpoint.findMany({
       where: { tenantId },
       select: {
         id: true, url: true, description: true, events: true, status: true,
@@ -86,7 +86,7 @@ export class WebhookService {
   }
 
   async getById(tenantId: string, endpointId: string) {
-    const ep = await this.prisma.webhookEndpoint.findFirst({
+    const ep = await this.prisma.working.webhookEndpoint.findFirst({
       where: { id: endpointId, tenantId },
     });
     if (!ep) throw AppError.from('WEBHOOK_NOT_FOUND');
@@ -102,28 +102,28 @@ export class WebhookService {
     maxRetries?: number;
     customHeaders?: Record<string, string>;
   }) {
-    const ep = await this.prisma.webhookEndpoint.findFirst({
+    const ep = await this.prisma.working.webhookEndpoint.findFirst({
       where: { id: endpointId, tenantId },
     });
     if (!ep) throw AppError.from('WEBHOOK_NOT_FOUND');
 
-    return this.prisma.webhookEndpoint.update({
+    return this.prisma.working.webhookEndpoint.update({
       where: { id: endpointId },
       data: dto as any,
     });
   }
 
   async delete(tenantId: string, endpointId: string) {
-    const ep = await this.prisma.webhookEndpoint.findFirst({
+    const ep = await this.prisma.working.webhookEndpoint.findFirst({
       where: { id: endpointId, tenantId },
     });
     if (!ep) throw AppError.from('WEBHOOK_NOT_FOUND');
 
-    await this.prisma.webhookEndpoint.delete({ where: { id: endpointId } });
+    await this.prisma.working.webhookEndpoint.delete({ where: { id: endpointId } });
   }
 
   async getActiveEndpointsForEvent(tenantId: string, eventType: string) {
-    const endpoints = await this.prisma.webhookEndpoint.findMany({
+    const endpoints = await this.prisma.working.webhookEndpoint.findMany({
       where: { tenantId, status: 'WH_ACTIVE' },
     });
     return endpoints.filter(ep => ep.events.includes(eventType));

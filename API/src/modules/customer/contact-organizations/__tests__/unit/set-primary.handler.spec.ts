@@ -11,6 +11,7 @@ describe('SetPrimaryContactHandler', () => {
   beforeEach(() => {
     repo = { findById: jest.fn() };
     prisma = { contactOrganization: { updateMany: jest.fn(), update: jest.fn() } };
+(prisma as any).working = prisma;
     handler = new SetPrimaryContactHandler(repo, prisma);
   });
 

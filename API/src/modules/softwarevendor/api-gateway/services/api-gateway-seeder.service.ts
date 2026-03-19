@@ -67,7 +67,7 @@ export class ApiGatewaySeederService {
     ];
 
     for (const job of jobs) {
-      await this.prisma.cronJobConfig.upsert({
+      await this.prisma.working.cronJobConfig.upsert({
         where: { jobCode: job.jobCode },
         update: {},
         create: {

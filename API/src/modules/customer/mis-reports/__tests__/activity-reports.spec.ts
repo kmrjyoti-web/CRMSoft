@@ -17,6 +17,7 @@ describe('ActivitySummaryReport', () => {
     mockPrisma = {
       activity: { findMany: jest.fn(), count: jest.fn() },
     } as any;
+(mockPrisma as any).working = mockPrisma;
     mockDrillDown = { getActivities: jest.fn() } as any;
     report = new ActivitySummaryReport(mockPrisma, mockDrillDown);
   });
@@ -75,6 +76,7 @@ describe('ActivityHeatmapReport', () => {
     mockPrisma = {
       activity: { findMany: jest.fn(), count: jest.fn() },
     } as any;
+(mockPrisma as any).working = mockPrisma;
     report = new ActivityHeatmapReport(mockPrisma);
   });
 

@@ -35,7 +35,7 @@ export class RecycleBinController {
 
     // ── Contacts ──
     if (shouldInclude('contact')) {
-      const contacts = await this.prisma.contact.findMany({
+      const contacts = await this.prisma.working.contact.findMany({
         where: { isDeleted: true },
         take,
         orderBy: { deletedAt: 'desc' },
@@ -55,7 +55,7 @@ export class RecycleBinController {
 
     // ── Organizations ──
     if (shouldInclude('organization')) {
-      const orgs = await this.prisma.organization.findMany({
+      const orgs = await this.prisma.working.organization.findMany({
         where: { isDeleted: true },
         take,
         orderBy: { deletedAt: 'desc' },
@@ -75,7 +75,7 @@ export class RecycleBinController {
 
     // ── Leads ──
     if (shouldInclude('lead')) {
-      const leads = await this.prisma.lead.findMany({
+      const leads = await this.prisma.working.lead.findMany({
         where: { isDeleted: true },
         take,
         orderBy: { deletedAt: 'desc' },
@@ -98,7 +98,7 @@ export class RecycleBinController {
 
     // ── Activities ──
     if (shouldInclude('activity')) {
-      const activities = await this.prisma.activity.findMany({
+      const activities = await this.prisma.working.activity.findMany({
         where: { isDeleted: true },
         take,
         orderBy: { deletedAt: 'desc' },
@@ -118,7 +118,7 @@ export class RecycleBinController {
 
     // ── Raw Contacts ──
     if (shouldInclude('raw_contact')) {
-      const rcs = await this.prisma.rawContact.findMany({
+      const rcs = await this.prisma.working.rawContact.findMany({
         where: { isDeleted: true },
         take,
         orderBy: { deletedAt: 'desc' },

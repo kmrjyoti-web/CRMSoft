@@ -32,7 +32,7 @@ export class UploadFileHandler implements ICommandHandler<UploadFileCommand> {
     parsed.headers = parsed.headers.map((h: string) => h.replace(/\0/g, ''));
 
     // Create import job
-    const job = await this.prisma.importJob.create({
+    const job = await this.prisma.working.importJob.create({
       data: {
         fileName: cmd.fileName,
         fileType: cmd.fileType,
@@ -60,7 +60,7 @@ export class UploadFileHandler implements ICommandHandler<UploadFileCommand> {
     // Batch insert rows (chunked for large files)
     const chunkSize = 500;
     for (let i = 0; i < rowData.length; i += chunkSize) {
-      await this.prisma.importRow.createMany({ data: rowData.slice(i, i + chunkSize) });
+      await this.prisma.working.importRow.createMany({ data: rowData.slice(i, i + chunkSize) });
     }
 
     // Suggest profiles for these headers

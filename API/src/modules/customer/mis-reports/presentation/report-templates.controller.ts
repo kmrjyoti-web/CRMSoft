@@ -24,13 +24,13 @@ export class ReportTemplatesController {
   ) {
     let reportDefId: string | undefined;
     if (dto.reportCode) {
-      const def = await this.prisma.reportDefinition.findFirst({
+      const def = await this.prisma.working.reportDefinition.findFirst({
         where: { code: dto.reportCode, tenantId },
       });
       if (def) reportDefId = def.id;
     }
 
-    const template = await this.prisma.reportTemplate.create({
+    const template = await this.prisma.working.reportTemplate.create({
       data: {
         tenantId,
         name: dto.name,
@@ -53,7 +53,7 @@ export class ReportTemplatesController {
     @CurrentUser('id') userId: string,
     @CurrentUser('tenantId') tenantId: string,
   ) {
-    const templates = await this.prisma.reportTemplate.findMany({
+    const templates = await this.prisma.working.reportTemplate.findMany({
       where: {
         tenantId,
         OR: [{ createdById: userId }, { isPublic: true }],
@@ -68,7 +68,7 @@ export class ReportTemplatesController {
   @Get(':id')
   @RequirePermissions('reports:read')
   async getById(@Param('id') id: string, @CurrentUser('tenantId') tenantId: string) {
-    const template = await this.prisma.reportTemplate.findFirst({
+    const template = await this.prisma.working.reportTemplate.findFirst({
       where: { id, tenantId },
       include: { reportDef: true },
     });
@@ -83,12 +83,12 @@ export class ReportTemplatesController {
     @Body() dto: UpdateTemplateDto,
     @CurrentUser('id') userId: string,
   ) {
-    const existing = await this.prisma.reportTemplate.findFirst({
+    const existing = await this.prisma.working.reportTemplate.findFirst({
       where: { id, createdById: userId },
     });
     if (!existing) throw new NotFoundException('Report template not found');
 
-    const updated = await this.prisma.reportTemplate.update({
+    const updated = await this.prisma.working.reportTemplate.update({
       where: { id },
       data: {
         ...(dto.name !== undefined && { name: dto.name }),
@@ -109,7 +109,7 @@ export class ReportTemplatesController {
     @Param('id') id: string,
     @CurrentUser('id') userId: string,
   ) {
-    const result = await this.prisma.reportTemplate.deleteMany({
+    const result = await this.prisma.working.reportTemplate.deleteMany({
       where: { id, createdById: userId },
     });
     if (result.count === 0) throw new NotFoundException('Report template not found');

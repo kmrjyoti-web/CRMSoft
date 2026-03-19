@@ -13,13 +13,13 @@ export class CommitImportHandler implements ICommandHandler<CommitImportCommand>
   ) {}
 
   async execute(cmd: CommitImportCommand) {
-    const job = await this.prisma.importJob.findUniqueOrThrow({ where: { id: cmd.jobId } });
-    await this.prisma.importJob.update({
+    const job = await this.prisma.working.importJob.findUniqueOrThrow({ where: { id: cmd.jobId } });
+    await this.prisma.working.importJob.update({
       where: { id: cmd.jobId },
       data: { status: 'IMPORTING', startedAt: new Date() },
     });
 
-    const rows = await this.prisma.importRow.findMany({
+    const rows = await this.prisma.working.importRow.findMany({
       where: { importJobId: cmd.jobId },
       orderBy: { rowNumber: 'asc' },
     });
@@ -35,7 +35,7 @@ export class CommitImportHandler implements ICommandHandler<CommitImportCommand>
 
       // Handle user actions
       if (row.userAction === 'SKIP' || row.rowStatus === 'INVALID') {
-        await this.prisma.importRow.update({
+        await this.prisma.working.importRow.update({
           where: { id: row.id },
           data: { rowStatus: 'SKIPPED', importAction: 'SKIPPED' },
         });
@@ -49,7 +49,7 @@ export class CommitImportHandler implements ICommandHandler<CommitImportCommand>
         row.userAction === 'FORCE_CREATE';
 
       if (!shouldImport) {
-        await this.prisma.importRow.update({
+        await this.prisma.working.importRow.update({
           where: { id: row.id },
           data: { rowStatus: 'SKIPPED', importAction: 'SKIPPED' },
         });
@@ -74,7 +74,7 @@ export class CommitImportHandler implements ICommandHandler<CommitImportCommand>
         else if (result.action === 'UPDATED') updated++;
         else if (result.action === 'SKIPPED') skipped++;
 
-        await this.prisma.importRow.update({
+        await this.prisma.working.importRow.update({
           where: { id: row.id },
           data: {
             rowStatus: 'IMPORTED',
@@ -85,7 +85,7 @@ export class CommitImportHandler implements ICommandHandler<CommitImportCommand>
         });
       } else {
         failed++;
-        await this.prisma.importRow.update({
+        await this.prisma.working.importRow.update({
           where: { id: row.id },
           data: { rowStatus: 'FAILED', importAction: 'FAILED', importError: result.error },
         });
@@ -93,7 +93,7 @@ export class CommitImportHandler implements ICommandHandler<CommitImportCommand>
     }
 
     // Update job final stats
-    await this.prisma.importJob.update({
+    await this.prisma.working.importJob.update({
       where: { id: cmd.jobId },
       data: {
         status: 'COMPLETED',
@@ -107,7 +107,7 @@ export class CommitImportHandler implements ICommandHandler<CommitImportCommand>
 
     // Update profile stats if linked
     if (job.profileId) {
-      await this.prisma.importProfile.update({
+      await this.prisma.working.importProfile.update({
         where: { id: job.profileId },
         data: {
           usageCount: { increment: 1 },

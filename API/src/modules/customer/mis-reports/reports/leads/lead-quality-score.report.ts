@@ -43,7 +43,7 @@ export class LeadQualityScoreReport implements IReport {
     const skip = (page - 1) * limit;
 
     const [leads, totalCount] = await Promise.all([
-      this.prisma.lead.findMany({
+      this.prisma.working.lead.findMany({
         where,
         include: {
           contact: { select: { firstName: true, lastName: true } },
@@ -56,7 +56,7 @@ export class LeadQualityScoreReport implements IReport {
         skip,
         take: limit,
       }),
-      this.prisma.lead.count({ where }),
+      this.prisma.working.lead.count({ where }),
     ]);
 
     const scored = leads.map(lead => {

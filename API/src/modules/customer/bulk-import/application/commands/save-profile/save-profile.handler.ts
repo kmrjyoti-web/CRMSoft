@@ -7,9 +7,9 @@ export class SaveProfileHandler implements ICommandHandler<SaveProfileCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: SaveProfileCommand) {
-    const job = await this.prisma.importJob.findUniqueOrThrow({ where: { id: cmd.jobId } });
+    const job = await this.prisma.working.importJob.findUniqueOrThrow({ where: { id: cmd.jobId } });
 
-    const profile = await this.prisma.importProfile.create({
+    const profile = await this.prisma.working.importProfile.create({
       data: {
         name: cmd.name,
         description: cmd.description,
@@ -30,7 +30,7 @@ export class SaveProfileHandler implements ICommandHandler<SaveProfileCommand> {
     });
 
     // Link the job to the new profile
-    await this.prisma.importJob.update({
+    await this.prisma.working.importJob.update({
       where: { id: cmd.jobId },
       data: { profileId: profile.id },
     });

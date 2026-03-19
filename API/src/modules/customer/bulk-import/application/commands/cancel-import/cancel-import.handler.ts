@@ -7,7 +7,7 @@ export class CancelImportHandler implements ICommandHandler<CancelImportCommand>
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CancelImportCommand) {
-    return this.prisma.importJob.update({
+    return this.prisma.working.importJob.update({
       where: { id: cmd.jobId },
       data: { status: 'CANCELLED' },
     });

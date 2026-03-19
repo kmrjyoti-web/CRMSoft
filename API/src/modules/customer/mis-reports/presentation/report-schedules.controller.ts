@@ -24,7 +24,7 @@ export class ReportSchedulesController {
   @Post()
   @RequirePermissions('reports:create')
   async create(@Body() dto: CreateScheduleDto, @CurrentUser('id') userId: string) {
-    const reportDef = await this.prisma.reportDefinition.findFirst({
+    const reportDef = await this.prisma.working.reportDefinition.findFirst({
       where: { code: dto.reportCode },
     });
     if (!reportDef) {
@@ -35,7 +35,7 @@ export class ReportSchedulesController {
       dto.frequency, dto.dayOfWeek, dto.dayOfMonth, dto.timeOfDay || '08:00',
     );
 
-    const schedule = await this.prisma.scheduledReport.create({
+    const schedule = await this.prisma.working.scheduledReport.create({
       data: {
         reportDefId: reportDef.id,
         name: dto.name,
@@ -59,7 +59,7 @@ export class ReportSchedulesController {
   @Get()
   @RequirePermissions('reports:read')
   async list(@CurrentUser('id') userId: string) {
-    const schedules = await this.prisma.scheduledReport.findMany({
+    const schedules = await this.prisma.working.scheduledReport.findMany({
       where: { createdById: userId },
       include: { reportDef: true },
       orderBy: { createdAt: 'desc' },
@@ -71,7 +71,7 @@ export class ReportSchedulesController {
   @Get(':id')
   @RequirePermissions('reports:read')
   async getById(@Param('id') id: string) {
-    const schedule = await this.prisma.scheduledReport.findFirst({
+    const schedule = await this.prisma.working.scheduledReport.findFirst({
       where: { id }, include: { reportDef: true },
     });
     if (!schedule) throw new NotFoundException('Scheduled report not found');
@@ -82,7 +82,7 @@ export class ReportSchedulesController {
   @Patch(':id')
   @RequirePermissions('reports:update')
   async update(@Param('id') id: string, @Body() dto: UpdateScheduleDto) {
-    const existing = await this.prisma.scheduledReport.findFirst({ where: { id } });
+    const existing = await this.prisma.working.scheduledReport.findFirst({ where: { id } });
     if (!existing) throw new NotFoundException('Scheduled report not found');
 
     const data: any = { ...dto };
@@ -101,7 +101,7 @@ export class ReportSchedulesController {
       );
     }
 
-    const updated = await this.prisma.scheduledReport.update({
+    const updated = await this.prisma.working.scheduledReport.update({
       where: { id }, data, include: { reportDef: true },
     });
     return ApiResponse.success(updated, 'Scheduled report updated');
@@ -111,10 +111,10 @@ export class ReportSchedulesController {
   @Delete(':id')
   @RequirePermissions('reports:delete')
   async remove(@Param('id') id: string) {
-    const existing = await this.prisma.scheduledReport.findFirst({ where: { id } });
+    const existing = await this.prisma.working.scheduledReport.findFirst({ where: { id } });
     if (!existing) throw new NotFoundException('Scheduled report not found');
 
-    const cancelled = await this.prisma.scheduledReport.update({
+    const cancelled = await this.prisma.working.scheduledReport.update({
       where: { id }, data: { status: 'CANCELLED' },
     });
     return ApiResponse.success(cancelled, 'Scheduled report cancelled');

@@ -7,7 +7,7 @@ export class GetRowDetailHandler implements IQueryHandler<GetRowDetailQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetRowDetailQuery) {
-    return this.prisma.importRow.findUniqueOrThrow({
+    return this.prisma.working.importRow.findUniqueOrThrow({
       where: { id: query.rowId },
     });
   }

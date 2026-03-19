@@ -10,7 +10,7 @@ export class GetOrgsByContactHandler implements IQueryHandler<GetOrgsByContactQu
     const where: any = { contactId: query.contactId };
     if (query.activeOnly !== false) where.isActive = true;
 
-    return this.prisma.contactOrganization.findMany({
+    return this.prisma.working.contactOrganization.findMany({
       where,
       orderBy: [{ isPrimary: 'desc' }, { createdAt: 'asc' }],
       include: {

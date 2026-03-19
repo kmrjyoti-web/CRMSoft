@@ -7,7 +7,7 @@ export class RowActionHandler implements ICommandHandler<RowActionCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: RowActionCommand) {
-    return this.prisma.importRow.update({
+    return this.prisma.working.importRow.update({
       where: { id: cmd.rowId },
       data: { userAction: cmd.action },
     });

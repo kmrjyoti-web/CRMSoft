@@ -26,7 +26,7 @@ export class PublicProductsController {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.product.findMany({
+      this.prisma.working.product.findMany({
         where,
         orderBy: { [query.sortBy || 'createdAt']: query.sortOrder || 'desc' },
         skip: (page - 1) * limit,
@@ -37,7 +37,7 @@ export class PublicProductsController {
           isActive: true, createdAt: true, updatedAt: true,
         },
       }),
-      this.prisma.product.count({ where }),
+      this.prisma.working.product.count({ where }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
@@ -46,7 +46,7 @@ export class PublicProductsController {
   @Get(':id')
   @ApiScopes('products:read')
   async getById(@Req() req: any, @Param('id') id: string) {
-    const product = await this.prisma.product.findFirst({
+    const product = await this.prisma.working.product.findFirst({
       where: { id, tenantId: req.tenantId },
     });
     if (!product) throw new Error('Product not found');

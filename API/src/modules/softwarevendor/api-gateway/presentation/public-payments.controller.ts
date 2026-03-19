@@ -18,7 +18,7 @@ export class PublicPaymentsController {
     const limit = query.limit || 20;
 
     const [data, total] = await Promise.all([
-      this.prisma.payment.findMany({
+      this.prisma.working.payment.findMany({
         where: { tenantId: req.tenantId },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
@@ -30,7 +30,7 @@ export class PublicPaymentsController {
           invoice: { select: { id: true, invoiceNo: true, billingName: true } },
         },
       }),
-      this.prisma.payment.count({ where: { tenantId: req.tenantId } }),
+      this.prisma.working.payment.count({ where: { tenantId: req.tenantId } }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
@@ -39,7 +39,7 @@ export class PublicPaymentsController {
   @Get(':id')
   @ApiScopes('payments:read')
   async getById(@Req() req: any, @Param('id') id: string) {
-    const payment = await this.prisma.payment.findFirst({
+    const payment = await this.prisma.working.payment.findFirst({
       where: { id, tenantId: req.tenantId },
       include: {
         invoice: { select: { id: true, invoiceNo: true, billingName: true } },

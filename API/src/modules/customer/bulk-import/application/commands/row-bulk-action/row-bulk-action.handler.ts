@@ -25,7 +25,7 @@ export class RowBulkActionHandler implements ICommandHandler<RowBulkActionComman
     }
 
     const action = cmd.action.startsWith('SKIP') ? 'SKIP' : 'ACCEPT';
-    const result = await this.prisma.importRow.updateMany({
+    const result = await this.prisma.working.importRow.updateMany({
       where,
       data: { userAction: action },
     });

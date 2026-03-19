@@ -35,7 +35,7 @@ export class DuplicateContactsReport implements IReport {
     };
     if (params.filters?.isActive !== undefined) where.isActive = params.filters.isActive;
 
-    const contacts = await this.prisma.contact.findMany({
+    const contacts = await this.prisma.working.contact.findMany({
       where,
       select: {
         id: true, firstName: true, lastName: true, createdAt: true,

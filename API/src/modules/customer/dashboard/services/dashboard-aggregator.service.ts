@@ -25,14 +25,14 @@ export class DashboardAggregatorService {
     // Current period
     const [totalLeads, leadsWon, leadsLost, revenue, pipelineValue,
            totalActivities, quotationsSent, wonLeadsForAvg] = await Promise.all([
-      this.prisma.lead.count({ where: { createdAt: { gte: dateFrom, lte: dateTo }, ...userFilter } }),
-      this.prisma.lead.count({ where: { status: 'WON', updatedAt: { gte: dateFrom, lte: dateTo }, ...userFilter } }),
-      this.prisma.lead.count({ where: { status: 'LOST', updatedAt: { gte: dateFrom, lte: dateTo }, ...userFilter } }),
-      this.prisma.lead.aggregate({ where: { status: 'WON', updatedAt: { gte: dateFrom, lte: dateTo }, ...userFilter }, _sum: { expectedValue: true } }),
-      this.prisma.lead.aggregate({ where: { status: { notIn: ['WON', 'LOST', 'ON_HOLD'] }, ...userFilter }, _sum: { expectedValue: true } }),
-      this.prisma.activity.count({ where: { createdAt: { gte: dateFrom, lte: dateTo }, ...activityUserFilter } }),
-      this.prisma.quotation.count({ where: { status: { not: 'DRAFT' }, createdAt: { gte: dateFrom, lte: dateTo } } }),
-      this.prisma.lead.findMany({ where: { status: 'WON', updatedAt: { gte: dateFrom, lte: dateTo }, ...userFilter }, select: { createdAt: true, updatedAt: true } }),
+      this.prisma.working.lead.count({ where: { createdAt: { gte: dateFrom, lte: dateTo }, ...userFilter } }),
+      this.prisma.working.lead.count({ where: { status: 'WON', updatedAt: { gte: dateFrom, lte: dateTo }, ...userFilter } }),
+      this.prisma.working.lead.count({ where: { status: 'LOST', updatedAt: { gte: dateFrom, lte: dateTo }, ...userFilter } }),
+      this.prisma.working.lead.aggregate({ where: { status: 'WON', updatedAt: { gte: dateFrom, lte: dateTo }, ...userFilter }, _sum: { expectedValue: true } }),
+      this.prisma.working.lead.aggregate({ where: { status: { notIn: ['WON', 'LOST', 'ON_HOLD'] }, ...userFilter }, _sum: { expectedValue: true } }),
+      this.prisma.working.activity.count({ where: { createdAt: { gte: dateFrom, lte: dateTo }, ...activityUserFilter } }),
+      this.prisma.working.quotation.count({ where: { status: { not: 'DRAFT' }, createdAt: { gte: dateFrom, lte: dateTo } } }),
+      this.prisma.working.lead.findMany({ where: { status: 'WON', updatedAt: { gte: dateFrom, lte: dateTo }, ...userFilter }, select: { createdAt: true, updatedAt: true } }),
     ]);
 
     const revenueVal = Number(revenue._sum.expectedValue || 0);
@@ -44,14 +44,14 @@ export class DashboardAggregatorService {
 
     // Previous period
     const [prevLeads, prevWon, prevLost, prevRevenue, prevPipeline, prevActivities, prevQuotations, prevWonLeads] = await Promise.all([
-      this.prisma.lead.count({ where: { createdAt: { gte: prevFrom, lte: prevTo }, ...userFilter } }),
-      this.prisma.lead.count({ where: { status: 'WON', updatedAt: { gte: prevFrom, lte: prevTo }, ...userFilter } }),
-      this.prisma.lead.count({ where: { status: 'LOST', updatedAt: { gte: prevFrom, lte: prevTo }, ...userFilter } }),
-      this.prisma.lead.aggregate({ where: { status: 'WON', updatedAt: { gte: prevFrom, lte: prevTo }, ...userFilter }, _sum: { expectedValue: true } }),
-      this.prisma.lead.aggregate({ where: { status: { notIn: ['WON', 'LOST', 'ON_HOLD'] }, ...userFilter }, _sum: { expectedValue: true } }),
-      this.prisma.activity.count({ where: { createdAt: { gte: prevFrom, lte: prevTo }, ...activityUserFilter } }),
-      this.prisma.quotation.count({ where: { status: { not: 'DRAFT' }, createdAt: { gte: prevFrom, lte: prevTo } } }),
-      this.prisma.lead.findMany({ where: { status: 'WON', updatedAt: { gte: prevFrom, lte: prevTo }, ...userFilter }, select: { createdAt: true, updatedAt: true } }),
+      this.prisma.working.lead.count({ where: { createdAt: { gte: prevFrom, lte: prevTo }, ...userFilter } }),
+      this.prisma.working.lead.count({ where: { status: 'WON', updatedAt: { gte: prevFrom, lte: prevTo }, ...userFilter } }),
+      this.prisma.working.lead.count({ where: { status: 'LOST', updatedAt: { gte: prevFrom, lte: prevTo }, ...userFilter } }),
+      this.prisma.working.lead.aggregate({ where: { status: 'WON', updatedAt: { gte: prevFrom, lte: prevTo }, ...userFilter }, _sum: { expectedValue: true } }),
+      this.prisma.working.lead.aggregate({ where: { status: { notIn: ['WON', 'LOST', 'ON_HOLD'] }, ...userFilter }, _sum: { expectedValue: true } }),
+      this.prisma.working.activity.count({ where: { createdAt: { gte: prevFrom, lte: prevTo }, ...activityUserFilter } }),
+      this.prisma.working.quotation.count({ where: { status: { not: 'DRAFT' }, createdAt: { gte: prevFrom, lte: prevTo } } }),
+      this.prisma.working.lead.findMany({ where: { status: 'WON', updatedAt: { gte: prevFrom, lte: prevTo }, ...userFilter }, select: { createdAt: true, updatedAt: true } }),
     ]);
 
     const prevRevenueVal = Number(prevRevenue._sum.expectedValue || 0);
@@ -80,10 +80,10 @@ export class DashboardAggregatorService {
 
     // Quick stats
     const [overdueFollowUps, upcomingDemos, expiringQuotations, unassignedLeads] = await Promise.all([
-      this.prisma.followUp.count({ where: { isOverdue: true, completedAt: null, isActive: true, ...(userId ? { assignedToId: userId } : {}) } }),
-      this.prisma.demo.count({ where: { status: 'SCHEDULED', scheduledAt: { gte: new Date() }, ...(userId ? { conductedById: userId } : {}) } }),
-      this.prisma.quotation.count({ where: { status: 'SENT', validUntil: { lte: new Date(Date.now() + 7 * 86400000) } } }),
-      this.prisma.lead.count({ where: { allocatedToId: null, status: 'NEW' } }),
+      this.prisma.working.followUp.count({ where: { isOverdue: true, completedAt: null, isActive: true, ...(userId ? { assignedToId: userId } : {}) } }),
+      this.prisma.working.demo.count({ where: { status: 'SCHEDULED', scheduledAt: { gte: new Date() }, ...(userId ? { conductedById: userId } : {}) } }),
+      this.prisma.working.quotation.count({ where: { status: 'SENT', validUntil: { lte: new Date(Date.now() + 7 * 86400000) } } }),
+      this.prisma.working.lead.count({ where: { allocatedToId: null, status: 'NEW' } }),
     ]);
 
     return {
@@ -102,20 +102,20 @@ export class DashboardAggregatorService {
 
     const [activitiesPlanned, activitiesCompleted, upcomingDemos, overdueFollowUps,
            leadsByStatus, draftQuots, sentQuots, recentActivity] = await Promise.all([
-      this.prisma.activity.count({ where: { createdById: userId, scheduledAt: { gte: today, lt: tomorrow } } }),
-      this.prisma.activity.count({ where: { createdById: userId, completedAt: { gte: today, lt: tomorrow } } }),
-      this.prisma.demo.count({ where: { conductedById: userId, status: 'SCHEDULED', scheduledAt: { gte: new Date() } } }),
-      this.prisma.followUp.count({ where: { assignedToId: userId, isOverdue: true, completedAt: null, isActive: true } }),
-      this.prisma.lead.groupBy({ by: ['status'], where: { allocatedToId: userId, status: { notIn: ['LOST'] } }, _count: true }),
-      this.prisma.quotation.count({ where: { createdById: userId, status: 'DRAFT' } }),
-      this.prisma.quotation.count({ where: { createdById: userId, status: 'SENT' } }),
-      this.prisma.activity.findMany({ where: { createdById: userId }, orderBy: { createdAt: 'desc' }, take: 5, select: { type: true, subject: true, completedAt: true, createdAt: true } }),
+      this.prisma.working.activity.count({ where: { createdById: userId, scheduledAt: { gte: today, lt: tomorrow } } }),
+      this.prisma.working.activity.count({ where: { createdById: userId, completedAt: { gte: today, lt: tomorrow } } }),
+      this.prisma.working.demo.count({ where: { conductedById: userId, status: 'SCHEDULED', scheduledAt: { gte: new Date() } } }),
+      this.prisma.working.followUp.count({ where: { assignedToId: userId, isOverdue: true, completedAt: null, isActive: true } }),
+      this.prisma.working.lead.groupBy({ by: ['status'], where: { allocatedToId: userId, status: { notIn: ['LOST'] } }, _count: true }),
+      this.prisma.working.quotation.count({ where: { createdById: userId, status: 'DRAFT' } }),
+      this.prisma.working.quotation.count({ where: { createdById: userId, status: 'SENT' } }),
+      this.prisma.working.activity.findMany({ where: { createdById: userId }, orderBy: { createdAt: 'desc' }, take: 5, select: { type: true, subject: true, completedAt: true, createdAt: true } }),
     ]);
 
     const myLeads: Record<string, number> = { total: 0 };
     for (const s of leadsByStatus) { myLeads[s.status.toLowerCase()] = s._count; myLeads.total += s._count; }
 
-    const targets = await this.prisma.salesTarget.findMany({
+    const targets = await this.prisma.working.salesTarget.findMany({
       where: { userId, isActive: true, periodEnd: { gte: new Date() } },
       select: { metric: true, targetValue: true, currentValue: true, achievedPercent: true },
     });

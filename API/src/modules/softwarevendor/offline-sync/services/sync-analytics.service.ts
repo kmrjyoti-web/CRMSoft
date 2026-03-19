@@ -31,19 +31,19 @@ export class SyncAnalyticsService {
       devices,
       conflictsByEntity,
     ] = await Promise.all([
-      this.prisma.syncDevice.count(),
-      this.prisma.syncDevice.count({ where: { status: 'ACTIVE' } }),
-      this.prisma.syncDevice.count({ where: { status: 'INACTIVE' } }),
-      this.prisma.syncDevice.count({ where: { status: 'BLOCKED' } }),
-      this.prisma.syncConflict.count(),
-      this.prisma.syncConflict.count({ where: { status: 'PENDING' } }),
-      this.prisma.syncFlushCommand.count(),
-      this.prisma.syncFlushCommand.count({ where: { status: 'PENDING' } }),
-      this.prisma.syncDevice.findMany({
+      this.prisma.working.syncDevice.count(),
+      this.prisma.working.syncDevice.count({ where: { status: 'ACTIVE' } }),
+      this.prisma.working.syncDevice.count({ where: { status: 'INACTIVE' } }),
+      this.prisma.working.syncDevice.count({ where: { status: 'BLOCKED' } }),
+      this.prisma.working.syncConflict.count(),
+      this.prisma.working.syncConflict.count({ where: { status: 'PENDING' } }),
+      this.prisma.working.syncFlushCommand.count(),
+      this.prisma.working.syncFlushCommand.count({ where: { status: 'PENDING' } }),
+      this.prisma.working.syncDevice.findMany({
         where: { status: 'ACTIVE' },
         select: { pendingUploadCount: true },
       }),
-      this.prisma.syncConflict.groupBy({
+      this.prisma.working.syncConflict.groupBy({
         by: ['entityName'],
         _count: { id: true },
         orderBy: { _count: { id: 'desc' } },
@@ -97,13 +97,13 @@ export class SyncAnalyticsService {
     const limit = filters.limit || 20;
 
     const [data, total] = await Promise.all([
-      this.prisma.syncAuditLog.findMany({
+      this.prisma.working.syncAuditLog.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.syncAuditLog.count({ where }),
+      this.prisma.working.syncAuditLog.count({ where }),
     ]);
 
     return { data, total };
@@ -118,15 +118,15 @@ export class SyncAnalyticsService {
     }
 
     const [pullLogs, pushLogs, conflicts] = await Promise.all([
-      this.prisma.syncAuditLog.findMany({
+      this.prisma.working.syncAuditLog.findMany({
         where: { ...where, action: 'PULL' },
         select: { durationMs: true, recordsPulled: true, entityName: true },
       }),
-      this.prisma.syncAuditLog.findMany({
+      this.prisma.working.syncAuditLog.findMany({
         where: { ...where, action: 'PUSH' },
         select: { durationMs: true, recordsPushed: true, conflictsDetected: true },
       }),
-      this.prisma.syncConflict.count({ where }),
+      this.prisma.working.syncConflict.count({ where }),
     ]);
 
     const avgPullDurationMs = pullLogs.length > 0

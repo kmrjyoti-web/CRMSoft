@@ -34,7 +34,7 @@ export class DataMaskingService {
       orConditions.splice(1, 0, { roleId, userId: null }); // role-specific (insert before global)
     }
 
-    const policies = await this.prisma.dataMaskingPolicy.findMany({
+    const policies = await this.prisma.working.dataMaskingPolicy.findMany({
       where: {
         tenantId,
         tableKey,
@@ -181,7 +181,7 @@ export class DataMaskingService {
     if (!model) return null;
 
     // Log the unmask action
-    await this.prisma.unmaskAuditLog.create({
+    await this.prisma.working.unmaskAuditLog.create({
       data: { tenantId, userId, tableKey, columnId, recordId },
     });
 
@@ -195,7 +195,7 @@ export class DataMaskingService {
           : tableKey === 'raw-contacts' ? 'rawContactId'
             : 'organizationId';
 
-      const comm = await this.prisma.communication.findFirst({
+      const comm = await this.prisma.working.communication.findFirst({
         where: {
           [fkField]: recordId,
           type: commType,
@@ -225,7 +225,7 @@ export class DataMaskingService {
     const where: any = { tenantId };
     if (tableKey) where.tableKey = tableKey;
 
-    return this.prisma.dataMaskingPolicy.findMany({
+    return this.prisma.working.dataMaskingPolicy.findMany({
       where,
       include: { role: { select: { id: true, displayName: true } } },
       orderBy: [{ tableKey: 'asc' }, { columnId: 'asc' }],
@@ -240,7 +240,7 @@ export class DataMaskingService {
     maskType: string;
     canUnmask?: boolean;
   }) {
-    return this.prisma.dataMaskingPolicy.create({
+    return this.prisma.working.dataMaskingPolicy.create({
       data: {
         tenantId,
         tableKey: data.tableKey,
@@ -258,14 +258,14 @@ export class DataMaskingService {
     canUnmask?: boolean;
     isActive?: boolean;
   }) {
-    return this.prisma.dataMaskingPolicy.update({
+    return this.prisma.working.dataMaskingPolicy.update({
       where: { id },
       data,
     });
   }
 
   async deletePolicy(id: string) {
-    await this.prisma.dataMaskingPolicy.delete({ where: { id } });
+    await this.prisma.working.dataMaskingPolicy.delete({ where: { id } });
     return { deleted: true };
   }
 }

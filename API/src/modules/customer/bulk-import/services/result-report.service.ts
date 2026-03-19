@@ -37,7 +37,7 @@ export class ResultReportService {
 
   /** Get result summary for a completed job */
   async getResultSummary(jobId: string): Promise<ResultSummary> {
-    const job = await this.prisma.importJob.findUniqueOrThrow({ where: { id: jobId } });
+    const job = await this.prisma.working.importJob.findUniqueOrThrow({ where: { id: jobId } });
     return {
       jobId: job.id,
       fileName: job.fileName,
@@ -59,8 +59,8 @@ export class ResultReportService {
 
   /** Generate Excel report for import job results */
   async generateReport(jobId: string): Promise<{ fullPath: string; failedPath: string }> {
-    const job = await this.prisma.importJob.findUniqueOrThrow({ where: { id: jobId } });
-    const rows = await this.prisma.importRow.findMany({
+    const job = await this.prisma.working.importJob.findUniqueOrThrow({ where: { id: jobId } });
+    const rows = await this.prisma.working.importRow.findMany({
       where: { importJobId: jobId },
       orderBy: { rowNumber: 'asc' },
     });
@@ -80,7 +80,7 @@ export class ResultReportService {
     }
 
     // Update job with report URLs
-    await this.prisma.importJob.update({
+    await this.prisma.working.importJob.update({
       where: { id: jobId },
       data: {
         resultReportUrl: `/reports/import-report-${jobId.slice(0, 8)}.xlsx`,

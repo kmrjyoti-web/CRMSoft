@@ -23,7 +23,7 @@ export class PublicOrganizationsController {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.organization.findMany({
+      this.prisma.working.organization.findMany({
         where,
         orderBy: { [query.sortBy || 'createdAt']: query.sortOrder || 'desc' },
         skip: (page - 1) * limit,
@@ -35,7 +35,7 @@ export class PublicOrganizationsController {
           isActive: true, createdAt: true, updatedAt: true,
         },
       }),
-      this.prisma.organization.count({ where }),
+      this.prisma.working.organization.count({ where }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
@@ -44,7 +44,7 @@ export class PublicOrganizationsController {
   @Get(':id')
   @ApiScopes('organizations:read')
   async getById(@Req() req: any, @Param('id') id: string) {
-    const org = await this.prisma.organization.findFirst({
+    const org = await this.prisma.working.organization.findFirst({
       where: { id, tenantId: req.tenantId, isActive: true },
     });
     if (!org) throw new Error('Organization not found');
@@ -54,7 +54,7 @@ export class PublicOrganizationsController {
   @Post()
   @ApiScopes('organizations:write')
   async create(@Req() req: any, @Body() body: any) {
-    return this.prisma.organization.create({
+    return this.prisma.working.organization.create({
       data: {
         tenantId: req.tenantId,
         name: body.name,
@@ -76,7 +76,7 @@ export class PublicOrganizationsController {
   @Put(':id')
   @ApiScopes('organizations:write')
   async update(@Req() req: any, @Param('id') id: string, @Body() body: any) {
-    await this.prisma.organization.findFirstOrThrow({
+    await this.prisma.working.organization.findFirstOrThrow({
       where: { id, tenantId: req.tenantId, isActive: true },
     });
     const updateData: any = {};
@@ -91,6 +91,6 @@ export class PublicOrganizationsController {
     if (body.pincode !== undefined) updateData.pincode = body.pincode;
     if (body.notes !== undefined) updateData.notes = body.notes;
 
-    return this.prisma.organization.update({ where: { id }, data: updateData });
+    return this.prisma.working.organization.update({ where: { id }, data: updateData });
   }
 }

@@ -26,14 +26,14 @@ export class LinkContactToOrgHandler implements ICommandHandler<LinkContactToOrg
 
   async execute(command: LinkContactToOrgCommand): Promise<string> {
     // 1. Validate contact exists
-    const contact = await this.prisma.contact.findUnique({
+    const contact = await this.prisma.working.contact.findUnique({
       where: { id: command.contactId },
       select: { id: true, isActive: true },
     });
     if (!contact) throw new NotFoundException(`Contact ${command.contactId} not found`);
 
     // 2. Validate organization exists
-    const org = await this.prisma.organization.findUnique({
+    const org = await this.prisma.working.organization.findUnique({
       where: { id: command.organizationId },
       select: { id: true, isActive: true },
     });
@@ -58,7 +58,7 @@ export class LinkContactToOrgHandler implements ICommandHandler<LinkContactToOrg
 
     // 5. If isPrimary, unset existing primary for same org
     if (command.isPrimary) {
-      await this.prisma.contactOrganization.updateMany({
+      await this.prisma.working.contactOrganization.updateMany({
         where: { organizationId: command.organizationId, isPrimary: true },
         data: { isPrimary: false },
       });

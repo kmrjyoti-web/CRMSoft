@@ -42,7 +42,7 @@ export class QuarterlyBusinessReviewReport implements IReport {
     yoyTo.setFullYear(yoyTo.getFullYear() - 1);
 
     // --- Revenue ---
-    const wonLeads = await this.prisma.lead.findMany({
+    const wonLeads = await this.prisma.working.lead.findMany({
       where: { tenantId, status: 'WON', updatedAt: { gte: dateFrom, lte: dateTo } },
       select: { id: true, expectedValue: true, leadNumber: true,
         contact: { select: { firstName: true, lastName: true } },
@@ -54,7 +54,7 @@ export class QuarterlyBusinessReviewReport implements IReport {
     const leadsWon = wonLeads.length;
 
     // YoY revenue
-    const yoyRevAgg = await this.prisma.lead.aggregate({
+    const yoyRevAgg = await this.prisma.working.lead.aggregate({
       where: { tenantId, status: 'WON', updatedAt: { gte: yoyFrom, lte: yoyTo } },
       _sum: { expectedValue: true }, _count: true,
     });
@@ -65,7 +65,7 @@ export class QuarterlyBusinessReviewReport implements IReport {
       : 0;
 
     // --- Pipeline ---
-    const pipelineLeads = await this.prisma.lead.findMany({
+    const pipelineLeads = await this.prisma.working.lead.findMany({
       where: { tenantId, status: { notIn: ['WON', 'LOST'] } },
       select: { id: true, status: true, expectedValue: true },
     });
@@ -83,17 +83,17 @@ export class QuarterlyBusinessReviewReport implements IReport {
       'QUOTATION_SENT', 'NEGOTIATION', 'WON', 'LOST', 'ON_HOLD'];
     const funnelCounts: Record<string, number> = {};
     for (const st of leadStatuses) {
-      funnelCounts[st] = await this.prisma.lead.count({
+      funnelCounts[st] = await this.prisma.working.lead.count({
         where: { tenantId, status: st as any, createdAt: { gte: dateFrom, lte: dateTo } },
       });
     }
-    const staleCount = await this.prisma.lead.count({
+    const staleCount = await this.prisma.working.lead.count({
       where: { tenantId, status: { notIn: ['WON', 'LOST'] },
         updatedAt: { lt: new Date(dateTo.getTime() - 15 * 86400000) } },
     });
 
     // --- Team ---
-    const targets = await this.prisma.salesTarget.findMany({
+    const targets = await this.prisma.working.salesTarget.findMany({
       where: { tenantId, isActive: true },
       select: { userId: true, achievedPercent: true, targetValue: true, currentValue: true },
     });
@@ -113,16 +113,16 @@ export class QuarterlyBusinessReviewReport implements IReport {
       : 0;
 
     // --- Activity ---
-    const totalActivities = await this.prisma.activity.count({
+    const totalActivities = await this.prisma.working.activity.count({
       where: { tenantId, createdAt: { gte: dateFrom, lte: dateTo } },
     });
     const avgActivitiesPerDay = Math.round((totalActivities / dayCount) * 100) / 100;
 
     // --- Quotation ---
-    const quotationsSent = await this.prisma.quotation.count({
+    const quotationsSent = await this.prisma.working.quotation.count({
       where: { tenantId, createdAt: { gte: dateFrom, lte: dateTo } },
     });
-    const quotationsAccepted = await this.prisma.quotation.count({
+    const quotationsAccepted = await this.prisma.working.quotation.count({
       where: { tenantId, status: 'ACCEPTED' as any, createdAt: { gte: dateFrom, lte: dateTo } },
     });
     const acceptanceRate = quotationsSent > 0

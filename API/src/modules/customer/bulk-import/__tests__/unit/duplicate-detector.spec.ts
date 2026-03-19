@@ -11,6 +11,7 @@ describe('DuplicateDetectorService', () => {
       organization: { findMany: jest.fn().mockResolvedValue([]) },
       contact: { findMany: jest.fn().mockResolvedValue([]) },
     };
+(prisma as any).working = prisma;
     fuzzyMatcher = {
       nameSimilarity: jest.fn().mockReturnValue(0.9),
       companySimilarity: jest.fn().mockReturnValue(0.85),

@@ -32,7 +32,7 @@ export class MasterSchedulerService implements OnModuleInit, OnModuleDestroy {
       this.logger.log('Cron jobs disabled via DISABLE_CRON env var');
       return;
     }
-    const jobs = await this.prisma.cronJobConfig.findMany();
+    const jobs = await this.prisma.working.cronJobConfig.findMany();
     let registered = 0;
 
     for (const job of jobs) {
@@ -62,7 +62,7 @@ export class MasterSchedulerService implements OnModuleInit, OnModuleDestroy {
   async registerJob(jobCode: string): Promise<void> {
     this.cancelJobSync(jobCode);
 
-    const job = await this.prisma.cronJobConfig.findUnique({
+    const job = await this.prisma.working.cronJobConfig.findUnique({
       where: { jobCode },
     });
     if (!job || job.status !== 'ACTIVE') return;
@@ -140,7 +140,7 @@ export class MasterSchedulerService implements OnModuleInit, OnModuleDestroy {
   ): Promise<void> {
     try {
       const nextRunAt = this.parser.getNextRun(expression, timezone);
-      await this.prisma.cronJobConfig.update({
+      await this.prisma.working.cronJobConfig.update({
         where: { jobCode },
         data: { nextRunAt },
       });

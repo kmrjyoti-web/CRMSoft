@@ -34,7 +34,7 @@ export class IndustryWiseAnalysisReport implements IReport {
     };
     if (params.userId) where.allocatedToId = params.userId;
 
-    const leads = await this.prisma.lead.findMany({
+    const leads = await this.prisma.working.lead.findMany({
       where,
       select: {
         status: true,

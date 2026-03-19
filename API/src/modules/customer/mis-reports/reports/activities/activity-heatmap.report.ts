@@ -38,7 +38,7 @@ export class ActivityHeatmapReport implements IReport {
     if (params.userId) where.createdById = params.userId;
     if (params.filters?.type) where.type = params.filters.type;
 
-    const activities = await this.prisma.activity.findMany({
+    const activities = await this.prisma.working.activity.findMany({
       where,
       select: { createdAt: true },
     });

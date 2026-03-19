@@ -8,6 +8,7 @@ const mockPrisma = {
     findMany: jest.fn(),
   },
 } as any;
+(mockPrisma as any).working = mockPrisma;
 
 function makeService() {
   return new CronAnalyticsService(mockPrisma);

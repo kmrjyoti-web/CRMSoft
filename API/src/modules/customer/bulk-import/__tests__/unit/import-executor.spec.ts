@@ -20,6 +20,7 @@ describe('ImportExecutorService', () => {
         update: jest.fn().mockResolvedValue({ id: 'c1' }),
       },
     };
+(prisma as any).working = prisma;
     service = new ImportExecutorService(prisma);
   });
 

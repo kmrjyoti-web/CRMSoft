@@ -116,7 +116,7 @@ export class ConflictResolverService {
     }
 
     // Create conflict record (even for auto-resolved, for audit)
-    const conflict = await this.prisma.syncConflict.create({
+    const conflict = await this.prisma.working.syncConflict.create({
       data: {
         deviceId,
         userId,
@@ -152,7 +152,7 @@ export class ConflictResolverService {
     conflictId: string,
     resolution: { resolvedData: Record<string, any>; userId: string },
   ): Promise<void> {
-    const conflict = await this.prisma.syncConflict.findUnique({
+    const conflict = await this.prisma.working.syncConflict.findUnique({
       where: { id: conflictId },
     });
     if (!conflict) {
@@ -170,7 +170,7 @@ export class ConflictResolverService {
     );
 
     // Update conflict record
-    await this.prisma.syncConflict.update({
+    await this.prisma.working.syncConflict.update({
       where: { id: conflictId },
       data: {
         status: 'MANUALLY_RESOLVED',
@@ -183,14 +183,14 @@ export class ConflictResolverService {
   }
 
   async getPendingConflicts(userId: string): Promise<any[]> {
-    return this.prisma.syncConflict.findMany({
+    return this.prisma.working.syncConflict.findMany({
       where: { userId, status: 'PENDING' },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async getConflictDetail(conflictId: string): Promise<any> {
-    const conflict = await this.prisma.syncConflict.findUnique({
+    const conflict = await this.prisma.working.syncConflict.findUnique({
       where: { id: conflictId },
     });
     if (!conflict) throw new NotFoundException(`Conflict "${conflictId}" not found`);

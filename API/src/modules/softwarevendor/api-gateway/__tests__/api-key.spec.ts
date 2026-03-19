@@ -12,6 +12,7 @@ const mockPrisma = {
     updateMany: jest.fn(),
   },
 } as any;
+(mockPrisma as any).working = mockPrisma;
 
 describe('ApiKeyService', () => {
   let service: ApiKeyService;

@@ -33,7 +33,7 @@ export class FlushService {
       throw new BadRequestException('targetDeviceId required for DEVICE flush');
     }
 
-    const command = await this.prisma.syncFlushCommand.create({
+    const command = await this.prisma.working.syncFlushCommand.create({
       data: {
         flushType: flushType as any,
         targetUserId,
@@ -49,12 +49,12 @@ export class FlushService {
 
     // Update targeted devices with pending flush
     if (targetDeviceId) {
-      await this.prisma.syncDevice.updateMany({
+      await this.prisma.working.syncDevice.updateMany({
         where: { deviceId: targetDeviceId },
         data: { pendingFlushId: command.id, status: 'FLUSH_PENDING' },
       });
     } else if (targetUserId) {
-      await this.prisma.syncDevice.updateMany({
+      await this.prisma.working.syncDevice.updateMany({
         where: { userId: targetUserId, status: 'ACTIVE' },
         data: { pendingFlushId: command.id, status: 'FLUSH_PENDING' },
       });
@@ -65,7 +65,7 @@ export class FlushService {
   }
 
   async acknowledgeFlush(flushId: string, deviceId: string): Promise<void> {
-    const command = await this.prisma.syncFlushCommand.findUnique({
+    const command = await this.prisma.working.syncFlushCommand.findUnique({
       where: { id: flushId },
     });
     if (!command) throw new NotFoundException(`Flush command "${flushId}" not found`);
@@ -73,24 +73,24 @@ export class FlushService {
       throw new BadRequestException(`Flush "${flushId}" is not in PENDING state`);
     }
 
-    await this.prisma.syncFlushCommand.update({
+    await this.prisma.working.syncFlushCommand.update({
       where: { id: flushId },
       data: { status: 'ACKNOWLEDGED', acknowledgedAt: new Date() },
     });
 
     // Update device
-    const device = await this.prisma.syncDevice.findFirst({
+    const device = await this.prisma.working.syncDevice.findFirst({
       where: { deviceId },
     });
     if (device) {
-      await this.prisma.syncDevice.update({
+      await this.prisma.working.syncDevice.update({
         where: { id: device.id },
         data: { pendingFlushId: null, status: 'ACTIVE' },
       });
     }
 
     // Log audit
-    await this.prisma.syncAuditLog.create({
+    await this.prisma.working.syncAuditLog.create({
       data: {
         userId: command.targetUserId || '',
         deviceId,
@@ -101,18 +101,18 @@ export class FlushService {
   }
 
   async executeFlush(flushId: string, deviceId: string): Promise<void> {
-    const command = await this.prisma.syncFlushCommand.findUnique({
+    const command = await this.prisma.working.syncFlushCommand.findUnique({
       where: { id: flushId },
     });
     if (!command) throw new NotFoundException(`Flush command "${flushId}" not found`);
 
-    await this.prisma.syncFlushCommand.update({
+    await this.prisma.working.syncFlushCommand.update({
       where: { id: flushId },
       data: { status: 'EXECUTED', executedAt: new Date() },
     });
 
     // Reset device entity sync state after flush
-    const device = await this.prisma.syncDevice.findFirst({
+    const device = await this.prisma.working.syncDevice.findFirst({
       where: { deviceId },
     });
     if (device) {
@@ -120,7 +120,7 @@ export class FlushService {
         ? this.clearEntityFromState(device.entitySyncState as Record<string, any>, command.targetEntity)
         : {};
 
-      await this.prisma.syncDevice.update({
+      await this.prisma.working.syncDevice.update({
         where: { id: device.id },
         data: {
           pendingFlushId: null,
@@ -134,7 +134,7 @@ export class FlushService {
   }
 
   async cancelFlush(flushId: string): Promise<void> {
-    const command = await this.prisma.syncFlushCommand.findUnique({
+    const command = await this.prisma.working.syncFlushCommand.findUnique({
       where: { id: flushId },
     });
     if (!command) throw new NotFoundException(`Flush command "${flushId}" not found`);
@@ -142,13 +142,13 @@ export class FlushService {
       throw new BadRequestException(`Cannot cancel flush in "${command.status}" state`);
     }
 
-    await this.prisma.syncFlushCommand.update({
+    await this.prisma.working.syncFlushCommand.update({
       where: { id: flushId },
       data: { status: 'FAILED' },
     });
 
     // Clear pending flush from affected devices
-    await this.prisma.syncDevice.updateMany({
+    await this.prisma.working.syncDevice.updateMany({
       where: { pendingFlushId: flushId },
       data: { pendingFlushId: null, status: 'ACTIVE' },
     });
@@ -168,13 +168,13 @@ export class FlushService {
     const limit = filters.limit || 20;
 
     const [data, total] = await Promise.all([
-      this.prisma.syncFlushCommand.findMany({
+      this.prisma.working.syncFlushCommand.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.syncFlushCommand.count({ where }),
+      this.prisma.working.syncFlushCommand.count({ where }),
     ]);
 
     return { data, total };

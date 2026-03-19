@@ -8,11 +8,11 @@ export class RateLimitTierService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getTierForPlan(planCode: string) {
-    return this.prisma.rateLimitTier.findUnique({ where: { planCode } });
+    return this.prisma.working.rateLimitTier.findUnique({ where: { planCode } });
   }
 
   async getAllTiers() {
-    return this.prisma.rateLimitTier.findMany({
+    return this.prisma.working.rateLimitTier.findMany({
       where: { isActive: true },
       orderBy: { requestsPerDay: 'asc' },
     });
@@ -28,7 +28,7 @@ export class RateLimitTierService {
     ];
 
     for (const tier of tiers) {
-      await this.prisma.rateLimitTier.upsert({
+      await this.prisma.working.rateLimitTier.upsert({
         where: { planCode: tier.planCode },
         update: {},
         create: tier,

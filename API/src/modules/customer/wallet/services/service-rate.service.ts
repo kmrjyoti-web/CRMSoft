@@ -6,7 +6,7 @@ export class ServiceRateService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getRate(serviceKey: string) {
-    const rate = await this.prisma.serviceRate.findUnique({ where: { serviceKey } });
+    const rate = await this.prisma.working.serviceRate.findUnique({ where: { serviceKey } });
     if (!rate) return null;
     return rate;
   }
@@ -38,14 +38,14 @@ export class ServiceRateService {
     const where: any = {};
     if (params?.category) where.category = params.category;
     if (params?.isActive !== undefined) where.isActive = params.isActive;
-    return this.prisma.serviceRate.findMany({
+    return this.prisma.working.serviceRate.findMany({
       where,
       orderBy: [{ category: 'asc' }, { serviceKey: 'asc' }],
     });
   }
 
   async findById(id: string) {
-    const rate = await this.prisma.serviceRate.findUnique({ where: { id } });
+    const rate = await this.prisma.working.serviceRate.findUnique({ where: { id } });
     if (!rate) throw new NotFoundException('Service rate not found');
     return rate;
   }
@@ -61,7 +61,7 @@ export class ServiceRateService {
     const marginPct = data.marginPct ?? 20;
     const finalTokens = Math.ceil(data.baseTokens * (1 + marginPct / 100));
 
-    return this.prisma.serviceRate.create({
+    return this.prisma.working.serviceRate.create({
       data: {
         serviceKey: data.serviceKey,
         displayName: data.displayName,
@@ -88,7 +88,7 @@ export class ServiceRateService {
     const marginPct = data.marginPct ?? existing.marginPct;
     const finalTokens = Math.ceil(baseTokens * (1 + marginPct / 100));
 
-    return this.prisma.serviceRate.update({
+    return this.prisma.working.serviceRate.update({
       where: { id },
       data: { ...data, finalTokens },
     });
@@ -96,6 +96,6 @@ export class ServiceRateService {
 
   async delete(id: string) {
     await this.findById(id);
-    return this.prisma.serviceRate.delete({ where: { id } });
+    return this.prisma.working.serviceRate.delete({ where: { id } });
   }
 }

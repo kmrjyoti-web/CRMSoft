@@ -32,6 +32,7 @@ describe('Executive Dashboard', () => {
         ]),
       },
     };
+(prisma as any).working = prisma;
     service = new DashboardAggregatorService(prisma);
   });
 

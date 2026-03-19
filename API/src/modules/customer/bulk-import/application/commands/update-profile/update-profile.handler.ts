@@ -24,6 +24,6 @@ export class UpdateProfileHandler implements ICommandHandler<UpdateProfileComman
     if (d.fuzzyMatchFields !== undefined) updateData.fuzzyMatchFields = d.fuzzyMatchFields;
     if (d.fuzzyThreshold !== undefined) updateData.fuzzyThreshold = d.fuzzyThreshold;
 
-    return this.prisma.importProfile.update({ where: { id: cmd.profileId }, data: updateData });
+    return this.prisma.working.importProfile.update({ where: { id: cmd.profileId }, data: updateData });
   }
 }

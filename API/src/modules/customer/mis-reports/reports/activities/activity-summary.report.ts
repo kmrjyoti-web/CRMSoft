@@ -38,7 +38,7 @@ export class ActivitySummaryReport implements IReport {
     if (params.userId) where.createdById = params.userId;
     if (params.filters?.type) where.type = { in: params.filters.type };
 
-    const activities = await this.prisma.activity.findMany({
+    const activities = await this.prisma.working.activity.findMany({
       where,
       select: {
         id: true, type: true, createdAt: true,

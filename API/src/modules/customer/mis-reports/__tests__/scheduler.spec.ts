@@ -11,12 +11,15 @@ describe('ReportSchedulerService', () => {
       findMany: jest.fn().mockResolvedValue([]),
     },
   } as any;
+(mockPrisma as any).working = mockPrisma;
   const mockEngine = {
     export: jest.fn().mockResolvedValue({ fileUrl: '/tmp/test.xlsx', fileName: 'test.xlsx' }),
   } as any;
+(mockPrisma as any).working = mockPrisma;
   const mockEmailer = {
     sendReport: jest.fn().mockResolvedValue(undefined),
   } as any;
+(mockPrisma as any).working = mockPrisma;
 
   beforeEach(() => {
     jest.clearAllMocks();

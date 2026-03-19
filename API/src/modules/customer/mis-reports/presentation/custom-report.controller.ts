@@ -52,7 +52,7 @@ export class CustomReportController {
   @Post('save')
   @RequirePermissions('reports:create')
   async save(@Body() dto: SaveCustomReportDto, @CurrentUser('id') userId: string) {
-    const reportDef = await this.prisma.reportDefinition.findFirst({
+    const reportDef = await this.prisma.working.reportDefinition.findFirst({
       where: { code: 'CUSTOM_REPORT' },
     });
 
@@ -60,7 +60,7 @@ export class CustomReportController {
       throw new NotFoundException('Custom report definition not found');
     }
 
-    const bookmark = await this.prisma.reportBookmark.create({
+    const bookmark = await this.prisma.working.reportBookmark.create({
       data: {
         reportDefId: reportDef.id,
         userId,

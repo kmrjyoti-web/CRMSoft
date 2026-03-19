@@ -44,7 +44,7 @@ export class ChannelEffectivenessReport implements IReport {
     };
     if (params.userId) actWhere.createdById = params.userId;
 
-    const activities = await this.prisma.activity.findMany({
+    const activities = await this.prisma.working.activity.findMany({
       where: actWhere,
       select: { id: true, type: true, leadId: true },
     });
@@ -60,7 +60,7 @@ export class ChannelEffectivenessReport implements IReport {
     });
 
     // Fetch WON leads in period to determine conversion per channel
-    const wonLeads = await this.prisma.lead.findMany({
+    const wonLeads = await this.prisma.working.lead.findMany({
       where: {
         tenantId: params.tenantId,
         status: 'WON',
@@ -141,7 +141,7 @@ export class ChannelEffectivenessReport implements IReport {
     const actType = reverseMap[params.value] || params.value;
 
     // Find leads touched by this activity type
-    const activities = await this.prisma.activity.findMany({
+    const activities = await this.prisma.working.activity.findMany({
       where: {
         tenantId: params.filters?.tenantId,
         type: actType as any,

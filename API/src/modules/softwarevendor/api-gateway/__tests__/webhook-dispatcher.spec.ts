@@ -12,6 +12,7 @@ const mockPrisma = {
     update: jest.fn(),
   },
 } as any;
+(mockPrisma as any).working = mockPrisma;
 
 const mockWebhookService = {
   getActiveEndpointsForEvent: jest.fn(),

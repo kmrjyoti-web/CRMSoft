@@ -7,7 +7,7 @@ export class GetValidationSummaryHandler implements IQueryHandler<GetValidationS
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetValidationSummaryQuery) {
-    const rows = await this.prisma.importRow.findMany({
+    const rows = await this.prisma.working.importRow.findMany({
       where: { importJobId: query.jobId },
       select: { rowStatus: true, validationErrors: true },
     });

@@ -38,7 +38,7 @@ export class LeadSourceAnalysisReport implements IReport {
     const where: any = { tenantId: params.tenantId, createdAt: { gte: params.dateFrom, lte: params.dateTo } };
     if (params.userId) where.allocatedToId = params.userId;
 
-    const leads = await this.prisma.lead.findMany({
+    const leads = await this.prisma.working.lead.findMany({
       where,
       select: {
         status: true, expectedValue: true, createdAt: true, updatedAt: true,
@@ -120,7 +120,7 @@ export class LeadSourceAnalysisReport implements IReport {
   }
 
   async drillDown(params: DrillDownParams): Promise<DrillDownResult> {
-    const leads = await this.prisma.lead.findMany({
+    const leads = await this.prisma.working.lead.findMany({
       where: {
         tenantId: params.filters?.tenantId,
         createdAt: { gte: params.dateFrom, lte: params.dateTo },

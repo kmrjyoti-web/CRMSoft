@@ -6,6 +6,7 @@ const mockPrisma = {
     create: jest.fn(),
   },
 } as any;
+(mockPrisma as any).working = mockPrisma;
 
 function makeService() {
   return new CronSeedService(mockPrisma);

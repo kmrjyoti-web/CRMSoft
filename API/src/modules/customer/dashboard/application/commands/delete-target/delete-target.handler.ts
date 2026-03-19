@@ -8,10 +8,10 @@ export class DeleteTargetHandler implements ICommandHandler<DeleteTargetCommand>
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: DeleteTargetCommand) {
-    const target = await this.prisma.salesTarget.findUnique({ where: { id: command.id } });
+    const target = await this.prisma.working.salesTarget.findUnique({ where: { id: command.id } });
     if (!target) throw new NotFoundException('Target not found');
 
-    await this.prisma.salesTarget.update({
+    await this.prisma.working.salesTarget.update({
       where: { id: command.id },
       data: { isActive: false },
     });

@@ -42,7 +42,7 @@ export class DemoSummaryReport implements IReport {
     if (params.filters?.status) where.status = { in: params.filters.status };
     if (params.filters?.mode) where.mode = params.filters.mode;
 
-    const demos = await this.prisma.demo.findMany({
+    const demos = await this.prisma.working.demo.findMany({
       where,
       select: {
         id: true, status: true, mode: true, duration: true,

@@ -32,22 +32,22 @@ export class ProductivityReport implements IReport {
     const tenantId = params.tenantId;
 
     // Get all users with activity in the period
-    const activities = await this.prisma.activity.findMany({
+    const activities = await this.prisma.working.activity.findMany({
       where: { tenantId, createdAt: dateFilter, ...(params.userId ? { createdById: params.userId } : {}) },
       select: { createdById: true, createdByUser: { select: { firstName: true, lastName: true } } },
     });
 
-    const leads = await this.prisma.lead.findMany({
+    const leads = await this.prisma.working.lead.findMany({
       where: { tenantId, createdAt: dateFilter, allocatedToId: { not: null } },
       select: { allocatedToId: true },
     });
 
-    const demos = await this.prisma.demo.findMany({
+    const demos = await this.prisma.working.demo.findMany({
       where: { tenantId, createdAt: dateFilter },
       select: { conductedById: true },
     });
 
-    const quotations = await this.prisma.quotation.findMany({
+    const quotations = await this.prisma.working.quotation.findMany({
       where: { tenantId, createdAt: dateFilter },
       select: { createdById: true },
     });

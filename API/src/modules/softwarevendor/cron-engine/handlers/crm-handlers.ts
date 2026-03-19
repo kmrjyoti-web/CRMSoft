@@ -11,7 +11,7 @@ export class LeadAutoExpireHandler implements ICronJobHandler {
   async execute(params: Record<string, any>): Promise<CronJobResult> {
     const expiryDays = params.expiryDays ?? 90;
     const cutoff = new Date(Date.now() - expiryDays * 86400000);
-    const result = await this.prisma.lead.updateMany({
+    const result = await this.prisma.working.lead.updateMany({
       where: {
         status: { in: ['NEW', 'VERIFIED', 'ALLOCATED', 'IN_PROGRESS'] },
         updatedAt: { lt: cutoff },
@@ -30,7 +30,7 @@ export class QuotationExpiryHandler implements ICronJobHandler {
 
   async execute(): Promise<CronJobResult> {
     const now = new Date();
-    const result = await this.prisma.quotation.updateMany({
+    const result = await this.prisma.working.quotation.updateMany({
       where: {
         status: { in: ['SENT', 'VIEWED', 'NEGOTIATION'] },
         validUntil: { lt: now },
@@ -48,11 +48,11 @@ export class RecalcSalesTargetsHandler implements ICronJobHandler {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(): Promise<CronJobResult> {
-    const targets = await this.prisma.salesTarget.findMany({
+    const targets = await this.prisma.working.salesTarget.findMany({
       where: { periodEnd: { gte: new Date() } },
     });
     for (const target of targets) {
-      const wonLeads = await this.prisma.lead.aggregate({
+      const wonLeads = await this.prisma.working.lead.aggregate({
         where: {
           allocatedToId: target.userId,
           status: 'WON',
@@ -61,7 +61,7 @@ export class RecalcSalesTargetsHandler implements ICronJobHandler {
         _sum: { expectedValue: true },
       });
       const achieved = wonLeads._sum?.expectedValue?.toNumber() ?? 0;
-      await this.prisma.salesTarget.update({
+      await this.prisma.working.salesTarget.update({
         where: { id: target.id },
         data: {
           currentValue: achieved,
@@ -82,11 +82,11 @@ export class ProcessRemindersHandler implements ICronJobHandler {
 
   async execute(): Promise<CronJobResult> {
     const now = new Date();
-    const due = await this.prisma.reminder.findMany({
+    const due = await this.prisma.working.reminder.findMany({
       where: { scheduledAt: { lte: now }, isSent: false, isActive: true },
     });
     for (const r of due) {
-      await this.prisma.reminder.update({
+      await this.prisma.working.reminder.update({
         where: { id: r.id },
         data: { isSent: true, sentAt: now },
       });
@@ -103,7 +103,7 @@ export class CheckOverdueFollowUpsHandler implements ICronJobHandler {
 
   async execute(): Promise<CronJobResult> {
     const now = new Date();
-    const result = await this.prisma.followUp.updateMany({
+    const result = await this.prisma.working.followUp.updateMany({
       where: { dueDate: { lt: now }, isOverdue: false, isActive: true, completedAt: null },
       data: { isOverdue: true },
     });
@@ -118,7 +118,7 @@ export class GenerateRecurrencesHandler implements ICronJobHandler {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(): Promise<CronJobResult> {
-    const events = await this.prisma.recurringEvent.findMany({
+    const events = await this.prisma.working.recurringEvent.findMany({
       where: { isActive: true },
     });
     return { recordsProcessed: events.length };
@@ -132,7 +132,7 @@ export class CheckSlaBreachesHandler implements ICronJobHandler {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(): Promise<CronJobResult> {
-    const instances = await this.prisma.workflowInstance.findMany({
+    const instances = await this.prisma.working.workflowInstance.findMany({
       where: { isActive: true, completedAt: null },
       include: { currentState: true },
     });
@@ -144,11 +144,11 @@ export class CheckSlaBreachesHandler implements ICronJobHandler {
       const hoursInState = (Date.now() - new Date(instance.updatedAt).getTime()) / (1000 * 60 * 60);
       if (hoursInState <= slaHours) continue;
       const escalationLevel = Math.min(Math.floor(hoursInState / slaHours), 3);
-      const exists = await this.prisma.workflowSlaEscalation.findFirst({
+      const exists = await this.prisma.working.workflowSlaEscalation.findFirst({
         where: { instanceId: instance.id, stateId: instance.currentStateId, escalationLevel, isResolved: false },
       });
       if (!exists) {
-        await this.prisma.workflowSlaEscalation.create({
+        await this.prisma.working.workflowSlaEscalation.create({
           data: { instanceId: instance.id, stateId: instance.currentStateId, slaHours, escalationLevel },
         });
         breached++;

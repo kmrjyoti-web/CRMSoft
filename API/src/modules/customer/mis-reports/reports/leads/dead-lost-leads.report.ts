@@ -34,7 +34,7 @@ export class DeadLostLeadsReport implements IReport {
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400000);
 
     const [lostLeads, staleOnHold] = await Promise.all([
-      this.prisma.lead.findMany({
+      this.prisma.working.lead.findMany({
         where: {
           tenantId: params.tenantId,
           status: 'LOST',
@@ -45,7 +45,7 @@ export class DeadLostLeadsReport implements IReport {
           organization: { select: { name: true } },
         },
       }),
-      this.prisma.lead.findMany({
+      this.prisma.working.lead.findMany({
         where: {
           tenantId: params.tenantId,
           status: 'ON_HOLD',

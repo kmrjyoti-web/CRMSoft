@@ -141,7 +141,7 @@ export class ReportEngineService {
     const generationTimeMs = Date.now() - startTime;
     const recordCount = data.tables.reduce((sum, t) => sum + t.rows.length, 0);
 
-    await this.prisma.reportExportLog.create({
+    await this.prisma.working.reportExportLog.create({
       data: {
         reportType: 'CUSTOM' as any,
         reportCode: code,

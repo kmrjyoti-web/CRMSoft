@@ -43,11 +43,11 @@ export class NewJoinerRampUpReport implements IReport {
     const combinedIds = Array.from(new Set([...allIds, ...joinerIds]));
 
     const [activities, wonLeads] = await Promise.all([
-      this.prisma.activity.findMany({
+      this.prisma.working.activity.findMany({
         where: { tenantId, createdById: { in: combinedIds }, createdAt: { gte: cutoffDate } },
         select: { createdById: true, createdAt: true },
       }),
-      this.prisma.lead.findMany({
+      this.prisma.working.lead.findMany({
         where: { tenantId, allocatedToId: { in: combinedIds }, status: 'WON', updatedAt: { gte: cutoffDate } },
         select: { allocatedToId: true, expectedValue: true, updatedAt: true },
       }),

@@ -14,7 +14,7 @@ export class SyncSchedulerService {
    */
   async expireStaleFlushCommands(): Promise<void> {
     const sevenDaysAgo = new Date(Date.now() - 7 * 86400000);
-    const result = await this.prisma.syncFlushCommand.updateMany({
+    const result = await this.prisma.working.syncFlushCommand.updateMany({
       where: {
         status: 'PENDING',
         createdAt: { lt: sevenDaysAgo },
@@ -26,7 +26,7 @@ export class SyncSchedulerService {
       this.logger.log(`Expired ${result.count} stale flush commands`);
 
       // Clear pending flush from affected devices
-      await this.prisma.syncDevice.updateMany({
+      await this.prisma.working.syncDevice.updateMany({
         where: {
           status: 'FLUSH_PENDING',
           pendingFlushId: { not: null },
@@ -42,7 +42,7 @@ export class SyncSchedulerService {
    */
   async cleanOldChangeLogs(): Promise<void> {
     const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
-    const result = await this.prisma.syncChangeLog.deleteMany({
+    const result = await this.prisma.working.syncChangeLog.deleteMany({
       where: {
         isPushed: true,
         createdAt: { lt: thirtyDaysAgo },
@@ -60,7 +60,7 @@ export class SyncSchedulerService {
    */
   async cleanOldAuditLogs(): Promise<void> {
     const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000);
-    const result = await this.prisma.syncAuditLog.deleteMany({
+    const result = await this.prisma.working.syncAuditLog.deleteMany({
       where: {
         createdAt: { lt: ninetyDaysAgo },
       },
@@ -77,7 +77,7 @@ export class SyncSchedulerService {
    */
   async deviceHealthCheck(): Promise<void> {
     const fortyEightHoursAgo = new Date(Date.now() - 48 * 3600000);
-    const result = await this.prisma.syncDevice.updateMany({
+    const result = await this.prisma.working.syncDevice.updateMany({
       where: {
         status: 'ACTIVE',
         lastHeartbeatAt: { lt: fortyEightHoursAgo },
@@ -96,7 +96,7 @@ export class SyncSchedulerService {
    */
   async autoResolveOldConflicts(): Promise<void> {
     const sevenDaysAgo = new Date(Date.now() - 7 * 86400000);
-    const oldConflicts = await this.prisma.syncConflict.findMany({
+    const oldConflicts = await this.prisma.working.syncConflict.findMany({
       where: {
         status: 'PENDING',
         createdAt: { lt: sevenDaysAgo },
@@ -106,7 +106,7 @@ export class SyncSchedulerService {
     if (oldConflicts.length === 0) return;
 
     for (const conflict of oldConflicts) {
-      await this.prisma.syncConflict.update({
+      await this.prisma.working.syncConflict.update({
         where: { id: conflict.id },
         data: {
           status: 'SERVER_APPLIED',
@@ -126,24 +126,24 @@ export class SyncSchedulerService {
    * Called by cron-engine (RECALCULATE_DEVICE_STORAGE).
    */
   async recalculateDeviceStorage(): Promise<void> {
-    const activeDevices = await this.prisma.syncDevice.findMany({
+    const activeDevices = await this.prisma.working.syncDevice.findMany({
       where: { status: { in: ['ACTIVE', 'FLUSH_PENDING'] } },
     });
 
     for (const device of activeDevices) {
-      const pendingCount = await this.prisma.syncChangeLog.count({
+      const pendingCount = await this.prisma.working.syncChangeLog.count({
         where: { userId: device.userId, deviceId: device.deviceId, isPushed: false },
       });
 
       const oldestPending = pendingCount > 0
-        ? await this.prisma.syncChangeLog.findFirst({
+        ? await this.prisma.working.syncChangeLog.findFirst({
             where: { userId: device.userId, deviceId: device.deviceId, isPushed: false },
             orderBy: { clientTimestamp: 'asc' },
             select: { clientTimestamp: true },
           })
         : null;
 
-      await this.prisma.syncDevice.update({
+      await this.prisma.working.syncDevice.update({
         where: { id: device.id },
         data: {
           pendingUploadCount: pendingCount,
@@ -168,16 +168,16 @@ export class SyncSchedulerService {
     today.setHours(0, 0, 0, 0);
 
     const [pullCount, pushCount, conflictsCreated, conflictsResolved] = await Promise.all([
-      this.prisma.syncAuditLog.count({
+      this.prisma.working.syncAuditLog.count({
         where: { action: 'PULL', createdAt: { gte: yesterday, lt: today } },
       }),
-      this.prisma.syncAuditLog.count({
+      this.prisma.working.syncAuditLog.count({
         where: { action: 'PUSH', createdAt: { gte: yesterday, lt: today } },
       }),
-      this.prisma.syncConflict.count({
+      this.prisma.working.syncConflict.count({
         where: { createdAt: { gte: yesterday, lt: today } },
       }),
-      this.prisma.syncConflict.count({
+      this.prisma.working.syncConflict.count({
         where: { resolvedAt: { gte: yesterday, lt: today } },
       }),
     ]);

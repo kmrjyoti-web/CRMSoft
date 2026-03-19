@@ -42,7 +42,7 @@ export class SalesSummaryReport implements IReport {
     if (params.filters?.status) where.status = { in: params.filters.status };
     if (params.filters?.priority) where.priority = params.filters.priority;
 
-    const leads = await this.prisma.lead.findMany({
+    const leads = await this.prisma.working.lead.findMany({
       where,
       select: { id: true, status: true, expectedValue: true, createdAt: true, updatedAt: true },
     });

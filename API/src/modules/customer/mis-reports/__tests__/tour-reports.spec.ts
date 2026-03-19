@@ -17,6 +17,7 @@ describe('Tour Plan Reports', () => {
       const mockPrisma = {
         tourPlan: { findMany: jest.fn().mockResolvedValue([]) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new TourPlanComplianceReport(mockPrisma, mockDrillDown as any);
       expect(report.code).toBe('TOUR_PLAN_COMPLIANCE');
       expect(report.category).toBe('TOUR_PLAN');
@@ -44,6 +45,7 @@ describe('Tour Plan Reports', () => {
       const mockPrisma = {
         tourPlan: { findMany: jest.fn().mockResolvedValue(mockPlans) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new TourPlanComplianceReport(mockPrisma, mockDrillDown as any);
       const result = await report.generate(baseParams);
 
@@ -74,6 +76,7 @@ describe('Tour Plan Reports', () => {
       const mockPrisma = {
         tourPlanVisit: { findMany: jest.fn().mockResolvedValue(mockVisits) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new VisitOutcomeReport(mockPrisma, mockDrillDown as any);
       const result = await report.generate(baseParams);
 
@@ -105,6 +108,7 @@ describe('Tour Plan Reports', () => {
       const mockPrisma = {
         tourPlanVisit: { findMany: jest.fn().mockResolvedValue(mockVisits) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new FieldTeamTrackerReport(mockPrisma, mockDrillDown as any);
       const result = await report.generate(baseParams);
 

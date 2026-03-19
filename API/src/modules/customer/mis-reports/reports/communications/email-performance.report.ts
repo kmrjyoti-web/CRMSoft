@@ -35,7 +35,7 @@ export class EmailPerformanceReport implements IReport {
     };
     if (params.userId) where.createdById = params.userId;
 
-    const emailActivities = await this.prisma.activity.findMany({
+    const emailActivities = await this.prisma.working.activity.findMany({
       where,
       select: {
         id: true, createdAt: true, leadId: true,
@@ -44,7 +44,7 @@ export class EmailPerformanceReport implements IReport {
     });
 
     // Quotation send logs via EMAIL channel in period
-    const sendLogs = await this.prisma.quotationSendLog.findMany({
+    const sendLogs = await this.prisma.working.quotationSendLog.findMany({
       where: {
         tenantId: params.tenantId,
         channel: 'EMAIL',
@@ -79,7 +79,7 @@ export class EmailPerformanceReport implements IReport {
     // Lead touch rate: unique leads with email activity / total leads
     const allLeadIds = new Set<string>();
     emailActivities.forEach(a => { if (a.leadId) allLeadIds.add(a.leadId); });
-    const totalLeads = await this.prisma.lead.count({
+    const totalLeads = await this.prisma.working.lead.count({
       where: { tenantId: params.tenantId, createdAt: { lte: params.dateTo } },
     });
     const emailLeadTouchRate = totalLeads > 0

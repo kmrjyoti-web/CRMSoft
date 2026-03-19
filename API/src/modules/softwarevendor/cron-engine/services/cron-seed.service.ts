@@ -83,12 +83,12 @@ export class CronSeedService implements OnModuleInit {
   async seed(): Promise<void> {
     let created = 0;
     for (const job of SEED_CRON_JOBS) {
-      const existing = await this.prisma.cronJobConfig.findUnique({
+      const existing = await this.prisma.working.cronJobConfig.findUnique({
         where: { jobCode: job.jobCode },
       });
       if (existing) continue;
 
-      await this.prisma.cronJobConfig.create({
+      await this.prisma.working.cronJobConfig.create({
         data: {
           jobCode: job.jobCode,
           jobName: job.jobName,

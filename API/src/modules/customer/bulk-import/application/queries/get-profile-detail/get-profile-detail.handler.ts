@@ -7,7 +7,7 @@ export class GetProfileDetailHandler implements IQueryHandler<GetProfileDetailQu
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetProfileDetailQuery) {
-    return this.prisma.importProfile.findUniqueOrThrow({
+    return this.prisma.working.importProfile.findUniqueOrThrow({
       where: { id: query.profileId },
       include: { importJobs: { take: 5, orderBy: { createdAt: 'desc' }, select: { id: true, fileName: true, status: true, totalRows: true, importedCount: true, createdAt: true } } },
     });

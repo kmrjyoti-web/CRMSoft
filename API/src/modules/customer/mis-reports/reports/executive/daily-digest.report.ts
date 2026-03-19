@@ -47,36 +47,36 @@ export class DailyDigestReport implements IReport {
     const actUserFilter: any = params.userId ? { createdById: params.userId } : {};
 
     // --- Yesterday's Summary ---
-    const yesterdayNewLeads = await this.prisma.lead.count({
+    const yesterdayNewLeads = await this.prisma.working.lead.count({
       where: { tenantId, createdAt: { gte: yesterdayStart, lte: yesterdayEnd }, ...userFilter },
     });
-    const yesterdayWon = await this.prisma.lead.findMany({
+    const yesterdayWon = await this.prisma.working.lead.findMany({
       where: { tenantId, status: 'WON', updatedAt: { gte: yesterdayStart, lte: yesterdayEnd }, ...userFilter },
       select: { expectedValue: true },
     });
     const yesterdayLeadsWon = yesterdayWon.length;
     const yesterdayRevenue = yesterdayWon.reduce((s, l) => s + Number(l.expectedValue || 0), 0);
-    const yesterdayLeadsLost = await this.prisma.lead.count({
+    const yesterdayLeadsLost = await this.prisma.working.lead.count({
       where: { tenantId, status: 'LOST', updatedAt: { gte: yesterdayStart, lte: yesterdayEnd }, ...userFilter },
     });
-    const yesterdayActivities = await this.prisma.activity.count({
+    const yesterdayActivities = await this.prisma.working.activity.count({
       where: { tenantId, createdAt: { gte: yesterdayStart, lte: yesterdayEnd }, ...actUserFilter },
     });
-    const yesterdayDemos = await this.prisma.demo.count({
+    const yesterdayDemos = await this.prisma.working.demo.count({
       where: { tenantId, completedAt: { gte: yesterdayStart, lte: yesterdayEnd } },
     });
-    const yesterdayQuotationsSent = await this.prisma.quotation.count({
+    const yesterdayQuotationsSent = await this.prisma.working.quotation.count({
       where: { tenantId, createdAt: { gte: yesterdayStart, lte: yesterdayEnd } },
     });
-    const followUpsOverdue = await this.prisma.activity.count({
+    const followUpsOverdue = await this.prisma.working.activity.count({
       where: { tenantId, scheduledAt: { lt: todayStart }, completedAt: null, ...actUserFilter },
     });
 
     // --- Today's Schedule ---
-    const scheduledDemos = await this.prisma.demo.count({
+    const scheduledDemos = await this.prisma.working.demo.count({
       where: { tenantId, scheduledAt: { gte: todayStart, lte: todayEnd } },
     });
-    const scheduledFollowUps = await this.prisma.activity.findMany({
+    const scheduledFollowUps = await this.prisma.working.activity.findMany({
       where: { tenantId, scheduledAt: { gte: todayStart, lte: todayEnd }, ...actUserFilter },
       select: {
         id: true, subject: true, type: true, scheduledAt: true,
@@ -84,34 +84,34 @@ export class DailyDigestReport implements IReport {
         createdByUser: { select: { firstName: true, lastName: true } },
       },
     });
-    const expiringQuotations = await this.prisma.quotation.count({
+    const expiringQuotations = await this.prisma.working.quotation.count({
       where: { tenantId, status: { notIn: ['ACCEPTED', 'REJECTED', 'CANCELLED'] as any },
         validUntil: { gte: todayStart, lte: todayEnd } },
     });
-    const hotLeads = await this.prisma.lead.count({
+    const hotLeads = await this.prisma.working.lead.count({
       where: { tenantId, priority: 'HIGH' as any, status: { notIn: ['WON', 'LOST'] }, ...userFilter },
     });
 
     // --- Week-to-Date ---
-    const wtdWon = await this.prisma.lead.findMany({
+    const wtdWon = await this.prisma.working.lead.findMany({
       where: { tenantId, status: 'WON', updatedAt: { gte: wtdStart, lte: todayEnd }, ...userFilter },
       select: { expectedValue: true },
     });
     const wtdRevenue = wtdWon.reduce((s, l) => s + Number(l.expectedValue || 0), 0);
     const wtdLeadsWon = wtdWon.length;
-    const wtdLeadsCreated = await this.prisma.lead.count({
+    const wtdLeadsCreated = await this.prisma.working.lead.count({
       where: { tenantId, createdAt: { gte: wtdStart, lte: todayEnd }, ...userFilter },
     });
 
     // --- Month-to-Date ---
-    const mtdWon = await this.prisma.lead.findMany({
+    const mtdWon = await this.prisma.working.lead.findMany({
       where: { tenantId, status: 'WON', updatedAt: { gte: mtdStart, lte: todayEnd }, ...userFilter },
       select: { expectedValue: true },
     });
     const mtdRevenue = mtdWon.reduce((s, l) => s + Number(l.expectedValue || 0), 0);
 
     // Target data for WTD/MTD
-    const activeTargets = await this.prisma.salesTarget.findMany({
+    const activeTargets = await this.prisma.working.salesTarget.findMany({
       where: { tenantId, isActive: true, metric: 'REVENUE' },
       select: { targetValue: true },
     });
@@ -123,7 +123,7 @@ export class DailyDigestReport implements IReport {
     const mtdPercent = monthTarget > 0 ? Math.round((mtdRevenue / monthTarget) * 10000) / 100 : 0;
 
     // --- Alerts ---
-    const overdueByUser = await this.prisma.activity.groupBy({
+    const overdueByUser = await this.prisma.working.activity.groupBy({
       by: ['createdById'],
       where: { tenantId, scheduledAt: { lt: todayStart }, completedAt: null },
       _count: true,

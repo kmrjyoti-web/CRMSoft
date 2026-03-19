@@ -5,7 +5,7 @@ const mockWarningEvaluator = {
 };
 
 function makeMockPrisma(policies: any[] = [], rules: any[] = []) {
-  return {
+  const obj: any = {
     syncPolicy: {
       findMany: jest.fn().mockResolvedValue(policies),
     },
@@ -21,7 +21,9 @@ function makeMockPrisma(policies: any[] = [], rules: any[] = []) {
     syncAuditLog: {
       create: jest.fn(),
     },
-  } as any;
+  };
+  obj.working = obj;
+  return obj;
 }
 
 describe('SyncEngineService - Config', () => {

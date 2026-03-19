@@ -13,6 +13,7 @@ const mockPrisma = {
     update: jest.fn(),
   },
 } as any;
+(mockPrisma as any).working = mockPrisma;
 
 const mockRunner = {
   run: jest.fn().mockResolvedValue({ id: 'log-1', status: 'SUCCESS' }),

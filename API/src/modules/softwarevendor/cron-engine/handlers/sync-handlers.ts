@@ -12,12 +12,12 @@ export class ExpireFlushCommandsHandler implements ICronJobHandler {
   async execute(params: Record<string, any>): Promise<CronJobResult> {
     const days = params.retentionDays ?? 7;
     const cutoff = new Date(Date.now() - days * 86400000);
-    const result = await this.prisma.syncFlushCommand.updateMany({
+    const result = await this.prisma.working.syncFlushCommand.updateMany({
       where: { status: 'PENDING', createdAt: { lt: cutoff } },
       data: { status: 'FAILED' },
     });
     if (result.count > 0) {
-      await this.prisma.syncDevice.updateMany({
+      await this.prisma.working.syncDevice.updateMany({
         where: { status: 'FLUSH_PENDING', pendingFlushId: { not: null } },
         data: { pendingFlushId: null, status: 'ACTIVE' },
       });
@@ -35,7 +35,7 @@ export class SyncChangelogCleanupHandler implements ICronJobHandler {
   async execute(params: Record<string, any>): Promise<CronJobResult> {
     const days = params.retentionDays ?? 30;
     const cutoff = new Date(Date.now() - days * 86400000);
-    const result = await this.prisma.syncChangeLog.deleteMany({
+    const result = await this.prisma.working.syncChangeLog.deleteMany({
       where: { isPushed: true, createdAt: { lt: cutoff } },
     });
     return { recordsProcessed: result.count };
@@ -50,7 +50,7 @@ export class SyncDeviceHealthHandler implements ICronJobHandler {
 
   async execute(): Promise<CronJobResult> {
     const cutoff = new Date(Date.now() - 48 * 3600000);
-    const result = await this.prisma.syncDevice.updateMany({
+    const result = await this.prisma.working.syncDevice.updateMany({
       where: { status: 'ACTIVE', lastHeartbeatAt: { lt: cutoff } },
       data: { status: 'INACTIVE' },
     });
@@ -66,11 +66,11 @@ export class AutoResolveConflictsHandler implements ICronJobHandler {
 
   async execute(): Promise<CronJobResult> {
     const cutoff = new Date(Date.now() - 7 * 86400000);
-    const conflicts = await this.prisma.syncConflict.findMany({
+    const conflicts = await this.prisma.working.syncConflict.findMany({
       where: { status: 'PENDING', createdAt: { lt: cutoff } },
     });
     for (const c of conflicts) {
-      await this.prisma.syncConflict.update({
+      await this.prisma.working.syncConflict.update({
         where: { id: c.id },
         data: {
           status: 'SERVER_APPLIED',

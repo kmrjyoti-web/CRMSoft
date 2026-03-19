@@ -18,6 +18,7 @@ describe('Activity Heatmap', () => {
         findMany: jest.fn().mockResolvedValue(activities),
       },
     };
+(prisma as any).working = prisma;
     service = new ActivityAnalyticsService(prisma);
   });
 

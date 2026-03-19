@@ -90,13 +90,13 @@ export class ImportExecutorService {
       switch (targetEntity) {
         case 'ROW_CONTACT':
         case 'CONTACT':
-          await this.prisma.rawContact.update({
+          await this.prisma.working.rawContact.update({
             where: { id: entityId },
             data: { firstName: data.firstName, lastName: data.lastName, designation: data.designation, notes: data.notes },
           });
           break;
         case 'ORGANIZATION':
-          await this.prisma.organization.update({
+          await this.prisma.working.organization.update({
             where: { id: entityId },
             data: { name: data['organization']?.name || data.name, city: data.city, state: data.state },
           });
@@ -111,7 +111,7 @@ export class ImportExecutorService {
   /** Create RawContact + communications from mapped data */
   private async createContact(data: Record<string, any>, createdById: string) {
     // Create raw contact first
-    const rawContact = await this.prisma.rawContact.create({
+    const rawContact = await this.prisma.working.rawContact.create({
       data: {
         firstName: data.firstName || 'Unknown',
         lastName: data.lastName || '',
@@ -131,7 +131,7 @@ export class ImportExecutorService {
     if (data.phone) comms.push({ type: 'PHONE', value: data.phone, priorityType: 'WORK' });
 
     if (comms.length > 0) {
-      await this.prisma.communication.createMany({
+      await this.prisma.working.communication.createMany({
         data: comms.map(c => ({
           type: c.type as any,
           value: c.value,
@@ -146,7 +146,7 @@ export class ImportExecutorService {
 
   /** Create Organization from mapped data */
   private async createOrganization(data: Record<string, any>, createdById: string) {
-    return this.prisma.organization.create({
+    return this.prisma.working.organization.create({
       data: {
         name: data.organization?.name || data.name || 'Unknown',
         website: data.website || null,
@@ -164,10 +164,10 @@ export class ImportExecutorService {
   /** Create Lead from mapped data */
   private async createLead(data: Record<string, any>, createdById: string) {
     // Generate lead number
-    const count = await this.prisma.lead.count();
+    const count = await this.prisma.working.lead.count();
     const leadNumber = `LD-${String(count + 1).padStart(5, '0')}`;
 
-    return this.prisma.lead.create({
+    return this.prisma.working.lead.create({
       data: {
         leadNumber,
         status: 'NEW' as any,
@@ -182,7 +182,7 @@ export class ImportExecutorService {
 
   /** Create Product from mapped data */
   private async createProduct(data: Record<string, any>, createdById: string) {
-    return this.prisma.product.create({
+    return this.prisma.working.product.create({
       data: {
         name: data.name || 'Unknown Product',
         code: data.code || null,
@@ -200,7 +200,7 @@ export class ImportExecutorService {
 
   /** Create Ledger from mapped data */
   private async createLedger(data: Record<string, any>) {
-    return this.prisma.ledgerMaster.create({
+    return this.prisma.working.ledgerMaster.create({
       data: {
         name: data.name || 'Unknown Ledger',
         code: data.code || `LDG${Date.now().toString().slice(-6)}`,

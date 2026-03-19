@@ -27,6 +27,7 @@ describe('Revenue Analytics', () => {
         aggregate: jest.fn().mockResolvedValue({ _sum: { expectedValue: 80000 } }),
       },
     };
+(prisma as any).working = prisma;
     service = new RevenueAnalyticsService(prisma);
   });
 

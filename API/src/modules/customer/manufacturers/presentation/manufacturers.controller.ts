@@ -23,7 +23,7 @@ export class ManufacturersController {
   @ApiOperation({ summary: 'Create manufacturer' })
   @RequirePermissions('manufacturers:create')
   async create(@Body() dto: CreateManufacturerDto) {
-    const mfg = await this.prisma.manufacturer.create({
+    const mfg = await this.prisma.working.manufacturer.create({
       data: { ...dto, code: dto.code.toUpperCase() },
     });
     return ApiResponse.success(mfg, 'Manufacturer created');
@@ -47,10 +47,10 @@ export class ManufacturersController {
       ];
     }
     const [data, total] = await Promise.all([
-      this.prisma.manufacturer.findMany({
+      this.prisma.working.manufacturer.findMany({
         where, skip: (p - 1) * l, take: l, orderBy: { name: 'asc' },
       }),
-      this.prisma.manufacturer.count({ where }),
+      this.prisma.working.manufacturer.count({ where }),
     ]);
     return ApiResponse.paginated(data, total, p, l);
   }
@@ -59,7 +59,7 @@ export class ManufacturersController {
   @ApiOperation({ summary: 'Get manufacturer by ID' })
   @RequirePermissions('manufacturers:read')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
-    const mfg = await this.prisma.manufacturer.findUniqueOrThrow({
+    const mfg = await this.prisma.working.manufacturer.findUniqueOrThrow({
       where: { id },
       include: {
         manufacturerOrganizations: {
@@ -82,7 +82,7 @@ export class ManufacturersController {
   ) {
     const data: any = { ...dto };
     if (dto.code) data.code = dto.code.toUpperCase();
-    const mfg = await this.prisma.manufacturer.update({ where: { id }, data });
+    const mfg = await this.prisma.working.manufacturer.update({ where: { id }, data });
     return ApiResponse.success(mfg, 'Manufacturer updated');
   }
 
@@ -90,7 +90,7 @@ export class ManufacturersController {
   @ApiOperation({ summary: 'Deactivate manufacturer' })
   @RequirePermissions('manufacturers:delete')
   async deactivate(@Param('id', ParseUUIDPipe) id: string) {
-    const mfg = await this.prisma.manufacturer.update({
+    const mfg = await this.prisma.working.manufacturer.update({
       where: { id }, data: { isActive: false },
     });
     return ApiResponse.success(mfg, 'Manufacturer deactivated');
@@ -104,17 +104,17 @@ export class ManufacturersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: LinkManufacturerOrganizationDto,
   ) {
-    const existing = await this.prisma.manufacturerOrganization.findFirst({
+    const existing = await this.prisma.working.manufacturerOrganization.findFirst({
       where: { manufacturerId: id, organizationId: dto.organizationId },
     });
     let link;
     if (existing) {
-      link = await this.prisma.manufacturerOrganization.update({
+      link = await this.prisma.working.manufacturerOrganization.update({
         where: { id: existing.id },
         data: { isPrimary: dto.isPrimary, notes: dto.notes },
       });
     } else {
-      link = await this.prisma.manufacturerOrganization.create({
+      link = await this.prisma.working.manufacturerOrganization.create({
         data: { manufacturerId: id, ...dto },
       });
     }
@@ -128,7 +128,7 @@ export class ManufacturersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Param('orgId', ParseUUIDPipe) orgId: string,
   ) {
-    await this.prisma.manufacturerOrganization.deleteMany({
+    await this.prisma.working.manufacturerOrganization.deleteMany({
       where: { manufacturerId: id, organizationId: orgId },
     });
     return ApiResponse.success(null, 'Organization unlinked');
@@ -142,17 +142,17 @@ export class ManufacturersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: LinkManufacturerContactDto,
   ) {
-    const existing = await this.prisma.manufacturerContact.findFirst({
+    const existing = await this.prisma.working.manufacturerContact.findFirst({
       where: { manufacturerId: id, contactId: dto.contactId },
     });
     let link;
     if (existing) {
-      link = await this.prisma.manufacturerContact.update({
+      link = await this.prisma.working.manufacturerContact.update({
         where: { id: existing.id },
         data: { role: dto.role, isPrimary: dto.isPrimary },
       });
     } else {
-      link = await this.prisma.manufacturerContact.create({
+      link = await this.prisma.working.manufacturerContact.create({
         data: { manufacturerId: id, ...dto },
       });
     }
@@ -166,7 +166,7 @@ export class ManufacturersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Param('contactId', ParseUUIDPipe) contactId: string,
   ) {
-    await this.prisma.manufacturerContact.deleteMany({
+    await this.prisma.working.manufacturerContact.deleteMany({
       where: { manufacturerId: id, contactId },
     });
     return ApiResponse.success(null, 'Contact unlinked');
@@ -176,7 +176,7 @@ export class ManufacturersController {
   @ApiOperation({ summary: 'Get manufacturer organizations' })
   @RequirePermissions('manufacturers:read')
   async getOrganizations(@Param('id', ParseUUIDPipe) id: string) {
-    const orgs = await this.prisma.manufacturerOrganization.findMany({
+    const orgs = await this.prisma.working.manufacturerOrganization.findMany({
       where: { manufacturerId: id },
       include: { organization: { select: { id: true, name: true, city: true } } },
     });
@@ -187,7 +187,7 @@ export class ManufacturersController {
   @ApiOperation({ summary: 'Get manufacturer contacts' })
   @RequirePermissions('manufacturers:read')
   async getContacts(@Param('id', ParseUUIDPipe) id: string) {
-    const contacts = await this.prisma.manufacturerContact.findMany({
+    const contacts = await this.prisma.working.manufacturerContact.findMany({
       where: { manufacturerId: id },
       include: { contact: { select: { id: true, firstName: true, lastName: true } } },
     });

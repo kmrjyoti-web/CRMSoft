@@ -40,7 +40,7 @@ export class ReportBookmarksController {
     @Body() dto: CreateBookmarkDto,
     @CurrentUser('id') userId: string,
   ) {
-    const reportDef = await this.prisma.reportDefinition.findFirst({
+    const reportDef = await this.prisma.working.reportDefinition.findFirst({
       where: { code: dto.reportCode },
     });
 
@@ -50,7 +50,7 @@ export class ReportBookmarksController {
       );
     }
 
-    const bookmark = await this.prisma.reportBookmark.create({
+    const bookmark = await this.prisma.working.reportBookmark.create({
       data: {
         reportDefId: reportDef.id,
         userId,
@@ -73,7 +73,7 @@ export class ReportBookmarksController {
   @Get()
   @RequirePermissions('reports:read')
   async list(@CurrentUser('id') userId: string) {
-    const bookmarks = await this.prisma.reportBookmark.findMany({
+    const bookmarks = await this.prisma.working.reportBookmark.findMany({
       where: { userId },
       include: { reportDef: true },
       orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }],
@@ -97,7 +97,7 @@ export class ReportBookmarksController {
     @Body() dto: UpdateBookmarkDto,
     @CurrentUser('id') userId: string,
   ) {
-    const existing = await this.prisma.reportBookmark.findFirst({
+    const existing = await this.prisma.working.reportBookmark.findFirst({
       where: { id, userId },
     });
 
@@ -105,7 +105,7 @@ export class ReportBookmarksController {
       throw new NotFoundException('Bookmark not found');
     }
 
-    const updated = await this.prisma.reportBookmark.update({
+    const updated = await this.prisma.working.reportBookmark.update({
       where: { id },
       data: {
         ...(dto.name !== undefined && { name: dto.name }),
@@ -131,7 +131,7 @@ export class ReportBookmarksController {
     @Param('id') id: string,
     @CurrentUser('id') userId: string,
   ) {
-    const result = await this.prisma.reportBookmark.deleteMany({
+    const result = await this.prisma.working.reportBookmark.deleteMany({
       where: { id, userId },
     });
 

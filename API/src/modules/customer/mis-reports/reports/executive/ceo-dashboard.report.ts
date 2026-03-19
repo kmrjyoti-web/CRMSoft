@@ -32,14 +32,14 @@ export class CeoDashboardReport implements IReport {
     const todayEnd = new Date(todayStart.getTime() + 86400000 - 1);
 
     // Revenue: sum of WON leads in period
-    const wonLeads = await this.prisma.lead.findMany({
+    const wonLeads = await this.prisma.working.lead.findMany({
       where: { tenantId, status: 'WON', updatedAt: { gte: params.dateFrom, lte: params.dateTo } },
       select: { id: true, expectedValue: true, updatedAt: true },
     });
     const revenue = wonLeads.reduce((s, l) => s + Number(l.expectedValue || 0), 0);
 
     // Pipeline value: active leads (not WON/LOST)
-    const activeLeads = await this.prisma.lead.findMany({
+    const activeLeads = await this.prisma.working.lead.findMany({
       where: { tenantId, status: { notIn: ['WON', 'LOST'] } },
       select: { id: true, expectedValue: true, expectedCloseDate: true, leadNumber: true,
         contact: { select: { firstName: true, lastName: true } },
@@ -51,10 +51,10 @@ export class CeoDashboardReport implements IReport {
 
     // Leads counts
     const leadsWon = wonLeads.length;
-    const totalLeadsInPeriod = await this.prisma.lead.count({
+    const totalLeadsInPeriod = await this.prisma.working.lead.count({
       where: { tenantId, createdAt: { gte: params.dateFrom, lte: params.dateTo } },
     });
-    const allLeadsInPeriod = await this.prisma.lead.count({
+    const allLeadsInPeriod = await this.prisma.working.lead.count({
       where: { tenantId, updatedAt: { gte: params.dateFrom, lte: params.dateTo } },
     });
     const conversionRate = allLeadsInPeriod > 0
@@ -62,7 +62,7 @@ export class CeoDashboardReport implements IReport {
       : 0;
 
     // Quotations sent
-    const quotationsSent = await this.prisma.quotation.count({
+    const quotationsSent = await this.prisma.working.quotation.count({
       where: { tenantId, createdAt: { gte: params.dateFrom, lte: params.dateTo } },
     });
 
@@ -72,7 +72,7 @@ export class CeoDashboardReport implements IReport {
       : 0;
 
     // Team score: avg achievedPercent from active sales targets
-    const targets = await this.prisma.salesTarget.findMany({
+    const targets = await this.prisma.working.salesTarget.findMany({
       where: { tenantId, isActive: true },
       select: { achievedPercent: true },
     });
@@ -81,12 +81,12 @@ export class CeoDashboardReport implements IReport {
       : 0;
 
     // Activities today
-    const activitiesToday = await this.prisma.activity.count({
+    const activitiesToday = await this.prisma.working.activity.count({
       where: { tenantId, createdAt: { gte: todayStart, lte: todayEnd } },
     });
 
     // Quick alerts
-    const expiringQuotations = await this.prisma.quotation.count({
+    const expiringQuotations = await this.prisma.working.quotation.count({
       where: { tenantId, status: { notIn: ['ACCEPTED', 'REJECTED', 'CANCELLED'] },
         validUntil: { gte: todayStart, lte: new Date(todayStart.getTime() + 3 * 86400000) } },
     });
@@ -108,7 +108,7 @@ export class CeoDashboardReport implements IReport {
       if (revenueByDay.has(day)) revenueByDay.set(day, revenueByDay.get(day)! + Number(l.expectedValue || 0));
     });
 
-    const recentLeads = await this.prisma.lead.findMany({
+    const recentLeads = await this.prisma.working.lead.findMany({
       where: { tenantId, createdAt: { gte: sevenDaysAgo, lte: todayEnd } },
       select: { createdAt: true },
     });

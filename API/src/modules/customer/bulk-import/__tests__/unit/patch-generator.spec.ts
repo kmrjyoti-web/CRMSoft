@@ -15,6 +15,7 @@ describe('PatchGeneratorService', () => {
       organization: { findUnique: jest.fn() },
       lead: { findUnique: jest.fn() },
     };
+(prisma as any).working = prisma;
     service = new PatchGeneratorService(prisma);
   });
 

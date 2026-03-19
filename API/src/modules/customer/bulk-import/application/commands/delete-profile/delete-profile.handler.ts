@@ -7,7 +7,7 @@ export class DeleteProfileHandler implements ICommandHandler<DeleteProfileComman
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: DeleteProfileCommand) {
-    return this.prisma.importProfile.update({
+    return this.prisma.working.importProfile.update({
       where: { id: cmd.profileId },
       data: { status: 'ARCHIVED' },
     });

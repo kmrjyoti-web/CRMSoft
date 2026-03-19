@@ -19,6 +19,7 @@ describe('LinkContactToOrgHandler', () => {
       organization: { findUnique: jest.fn().mockResolvedValue({ id: 'org-1', isActive: true }) },
       contactOrganization: { updateMany: jest.fn() },
     };
+(prisma as any).working = prisma;
     handler = new LinkContactToOrgHandler(repo, publisher, prisma);
   });
 

@@ -14,17 +14,17 @@ export class ApiAnalyticsService {
     }
 
     const [total, byStatus, byPath, byKey] = await Promise.all([
-      this.prisma.apiRequestLog.aggregate({
+      this.prisma.working.apiRequestLog.aggregate({
         where,
         _count: true,
         _avg: { responseTimeMs: true },
       }),
-      this.prisma.apiRequestLog.groupBy({
+      this.prisma.working.apiRequestLog.groupBy({
         by: ['statusCode'],
         where,
         _count: true,
       }),
-      this.prisma.apiRequestLog.groupBy({
+      this.prisma.working.apiRequestLog.groupBy({
         by: ['path', 'method'],
         where,
         _count: true,
@@ -32,7 +32,7 @@ export class ApiAnalyticsService {
         orderBy: { _count: { path: 'desc' } },
         take: 20,
       }),
-      this.prisma.apiRequestLog.groupBy({
+      this.prisma.working.apiRequestLog.groupBy({
         by: ['apiKeyId', 'apiKeyName'],
         where,
         _count: true,
@@ -71,17 +71,17 @@ export class ApiAnalyticsService {
 
   async getWebhookStats(tenantId: string) {
     const [total, byStatus, byEvent] = await Promise.all([
-      this.prisma.webhookDelivery.aggregate({
+      this.prisma.working.webhookDelivery.aggregate({
         where: { tenantId },
         _count: true,
         _avg: { responseTimeMs: true },
       }),
-      this.prisma.webhookDelivery.groupBy({
+      this.prisma.working.webhookDelivery.groupBy({
         by: ['status'],
         where: { tenantId },
         _count: true,
       }),
-      this.prisma.webhookDelivery.groupBy({
+      this.prisma.working.webhookDelivery.groupBy({
         by: ['eventType'],
         where: { tenantId },
         _count: true,

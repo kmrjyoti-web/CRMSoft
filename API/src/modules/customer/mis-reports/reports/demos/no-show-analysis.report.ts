@@ -40,8 +40,8 @@ export class NoShowAnalysisReport implements IReport {
     if (params.userId) baseWhere.conductedById = params.userId;
     if (params.filters?.mode) baseWhere.mode = params.filters.mode;
 
-    const allDemos = await this.prisma.demo.count({ where: baseWhere });
-    const noShows = await this.prisma.demo.findMany({
+    const allDemos = await this.prisma.working.demo.count({ where: baseWhere });
+    const noShows = await this.prisma.working.demo.findMany({
       where: { ...baseWhere, status: 'NO_SHOW' },
       select: {
         id: true, mode: true, scheduledAt: true, noShowReason: true,
@@ -164,7 +164,7 @@ export class NoShowAnalysisReport implements IReport {
 
     // For dayOfWeek drill-down, we need to fetch and filter in memory
     if (params.dimension === 'dayOfWeek') {
-      const allNoShows = await this.prisma.demo.findMany({
+      const allNoShows = await this.prisma.working.demo.findMany({
         where,
         select: {
           id: true, scheduledAt: true, status: true, mode: true,

@@ -21,6 +21,7 @@ describe('SalesSummaryReport', () => {
         groupBy: jest.fn(),
       },
     } as any;
+(mockPrisma as any).working = mockPrisma;
     mockDrillDown = { getLeads: jest.fn() } as any;
     report = new SalesSummaryReport(mockPrisma, mockDrillDown);
   });
@@ -97,6 +98,7 @@ describe('RevenueReport', () => {
         groupBy: jest.fn(),
       },
     } as any;
+(mockPrisma as any).working = mockPrisma;
     mockDrillDown = { getLeads: jest.fn() } as any;
     report = new RevenueReport(mockPrisma, mockDrillDown);
   });

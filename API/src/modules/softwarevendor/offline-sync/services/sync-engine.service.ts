@@ -55,12 +55,12 @@ export class SyncEngineService {
   ) {}
 
   async getConfig(userId: string): Promise<SyncConfig> {
-    const policies = await this.prisma.syncPolicy.findMany({
+    const policies = await this.prisma.working.syncPolicy.findMany({
       where: { isEnabled: true },
       orderBy: { syncPriority: 'asc' },
     });
 
-    const rules = await this.prisma.syncWarningRule.findMany({
+    const rules = await this.prisma.working.syncWarningRule.findMany({
       where: { isEnabled: true },
       include: { policy: true },
       orderBy: { priority: 'asc' },
@@ -117,7 +117,7 @@ export class SyncEngineService {
   }
 
   async getSyncStatus(userId: string, deviceId: string): Promise<SyncStatus> {
-    const device = await this.prisma.syncDevice.findFirst({
+    const device = await this.prisma.working.syncDevice.findFirst({
       where: { userId, deviceId },
     });
 
@@ -136,12 +136,12 @@ export class SyncEngineService {
       appVersion?: string;
     },
   ): Promise<any> {
-    const existing = await this.prisma.syncDevice.findFirst({
+    const existing = await this.prisma.working.syncDevice.findFirst({
       where: { userId, deviceId: deviceInfo.deviceId },
     });
 
     if (existing) {
-      return this.prisma.syncDevice.update({
+      return this.prisma.working.syncDevice.update({
         where: { id: existing.id },
         data: {
           deviceName: deviceInfo.deviceName ?? existing.deviceName,
@@ -154,7 +154,7 @@ export class SyncEngineService {
       });
     }
 
-    const device = await this.prisma.syncDevice.create({
+    const device = await this.prisma.working.syncDevice.create({
       data: {
         userId,
         deviceId: deviceInfo.deviceId,
@@ -168,7 +168,7 @@ export class SyncEngineService {
     });
 
     // Log audit
-    await this.prisma.syncAuditLog.create({
+    await this.prisma.working.syncAuditLog.create({
       data: {
         userId,
         deviceId: deviceInfo.deviceId,
@@ -181,17 +181,17 @@ export class SyncEngineService {
   }
 
   async removeDevice(userId: string, deviceId: string): Promise<void> {
-    const device = await this.prisma.syncDevice.findFirst({
+    const device = await this.prisma.working.syncDevice.findFirst({
       where: { userId, deviceId },
     });
     if (!device) throw new NotFoundException(`Device "${deviceId}" not found`);
 
-    await this.prisma.syncDevice.update({
+    await this.prisma.working.syncDevice.update({
       where: { id: device.id },
       data: { status: 'INACTIVE' },
     });
 
-    await this.prisma.syncAuditLog.create({
+    await this.prisma.working.syncAuditLog.create({
       data: {
         userId,
         deviceId,
@@ -211,7 +211,7 @@ export class SyncEngineService {
     },
     ipAddress?: string,
   ): Promise<void> {
-    const device = await this.prisma.syncDevice.findFirst({
+    const device = await this.prisma.working.syncDevice.findFirst({
       where: { userId, deviceId },
     });
     if (!device) return;
@@ -242,12 +242,12 @@ export class SyncEngineService {
       updateData.oldestPendingAt = null;
     }
 
-    await this.prisma.syncDevice.update({
+    await this.prisma.working.syncDevice.update({
       where: { id: device.id },
       data: updateData,
     });
 
-    await this.prisma.syncAuditLog.create({
+    await this.prisma.working.syncAuditLog.create({
       data: {
         userId,
         deviceId,
@@ -258,7 +258,7 @@ export class SyncEngineService {
   }
 
   async blockDevice(deviceDbId: string): Promise<void> {
-    await this.prisma.syncDevice.update({
+    await this.prisma.working.syncDevice.update({
       where: { id: deviceDbId },
       data: { status: 'BLOCKED' },
     });
@@ -269,7 +269,7 @@ export class SyncEngineService {
     if (filters.userId) where.userId = filters.userId;
     if (filters.status) where.status = filters.status;
 
-    return this.prisma.syncDevice.findMany({
+    return this.prisma.working.syncDevice.findMany({
       where,
       orderBy: { lastHeartbeatAt: 'desc' },
     });

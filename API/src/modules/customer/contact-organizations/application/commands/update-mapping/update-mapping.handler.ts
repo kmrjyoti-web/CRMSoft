@@ -28,7 +28,7 @@ export class UpdateMappingHandler implements ICommandHandler<UpdateMappingComman
       throw new Error('No fields provided to update');
     }
 
-    await this.prisma.contactOrganization.update({
+    await this.prisma.working.contactOrganization.update({
       where: { id: command.mappingId },
       data: updateData,
     });

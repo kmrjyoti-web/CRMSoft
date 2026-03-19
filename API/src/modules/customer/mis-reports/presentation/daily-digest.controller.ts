@@ -47,12 +47,12 @@ export class DailyDigestController {
     @Body() dto: DailyDigestSettingsDto,
     @CurrentUser() user: any,
   ) {
-    const digestDef = await this.prisma.reportDefinition.findFirst({
+    const digestDef = await this.prisma.working.reportDefinition.findFirst({
       where: { code: 'MIS_DAILY_DIGEST' },
     });
 
     // Upsert a ScheduledReport for the daily digest
-    const existing = await this.prisma.scheduledReport.findFirst({
+    const existing = await this.prisma.working.scheduledReport.findFirst({
       where: {
         createdById: user.id,
         reportDef: { code: 'MIS_DAILY_DIGEST' },
@@ -62,7 +62,7 @@ export class DailyDigestController {
     const nextScheduledAt = this.calculateNextDigestTime(dto.timeOfDay || '08:00');
 
     if (existing) {
-      const updated = await this.prisma.scheduledReport.update({
+      const updated = await this.prisma.working.scheduledReport.update({
         where: { id: existing.id },
         data: {
           recipientEmails: dto.recipientEmails,
@@ -79,7 +79,7 @@ export class DailyDigestController {
 
     const reportDefId = digestDef?.id || '';
 
-    const schedule = await this.prisma.scheduledReport.create({
+    const schedule = await this.prisma.working.scheduledReport.create({
       data: {
         reportDefId,
         name: 'Daily Digest',

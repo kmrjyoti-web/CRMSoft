@@ -13,14 +13,14 @@ export class SelectProfileHandler implements ICommandHandler<SelectProfileComman
   ) {}
 
   async execute(cmd: SelectProfileCommand) {
-    const job = await this.prisma.importJob.findUniqueOrThrow({ where: { id: cmd.jobId } });
-    const profile = await this.prisma.importProfile.findUniqueOrThrow({ where: { id: cmd.profileId } });
+    const job = await this.prisma.working.importJob.findUniqueOrThrow({ where: { id: cmd.jobId } });
+    const profile = await this.prisma.working.importProfile.findUniqueOrThrow({ where: { id: cmd.profileId } });
 
     // Match file headers against profile
     const match = this.profileMatcher.matchHeaders(job.fileHeaders, profile);
 
     // Update job with profile link and settings
-    await this.prisma.importJob.update({
+    await this.prisma.working.importJob.update({
       where: { id: cmd.jobId },
       data: {
         profileId: cmd.profileId,
@@ -42,7 +42,7 @@ export class SelectProfileHandler implements ICommandHandler<SelectProfileComman
     }
 
     // Store resolved mapping for manual fix
-    await this.prisma.importJob.update({
+    await this.prisma.working.importJob.update({
       where: { id: cmd.jobId },
       data: { fieldMapping: match.resolvedMapping, status: 'MAPPING' },
     });
@@ -58,7 +58,7 @@ export class SelectProfileHandler implements ICommandHandler<SelectProfileComman
 
   /** Auto-map all rows when profile is a full match */
   private async autoMapRows(jobId: string, resolvedMapping: any[], profile: any): Promise<void> {
-    const rows = await this.prisma.importRow.findMany({
+    const rows = await this.prisma.working.importRow.findMany({
       where: { importJobId: jobId },
       orderBy: { rowNumber: 'asc' },
     });
@@ -68,13 +68,13 @@ export class SelectProfileHandler implements ICommandHandler<SelectProfileComman
 
     // Batch update rows with mapped data
     for (let i = 0; i < rows.length; i++) {
-      await this.prisma.importRow.update({
+      await this.prisma.working.importRow.update({
         where: { id: rows[i].id },
         data: { mappedData: mappedRows[i] },
       });
     }
 
-    await this.prisma.importJob.update({
+    await this.prisma.working.importJob.update({
       where: { id: jobId },
       data: { fieldMapping: resolvedMapping, status: 'MAPPED', usedAutoMapping: true },
     });

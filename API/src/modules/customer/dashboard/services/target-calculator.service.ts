@@ -10,7 +10,7 @@ export class TargetCalculatorService {
 
   /** Called by cron-engine (RECALC_SALES_TARGETS). */
   async recalculateTargets() {
-    const targets = await this.prisma.salesTarget.findMany({
+    const targets = await this.prisma.working.salesTarget.findMany({
       where: { isActive: true, periodEnd: { gte: new Date() } },
     });
 
@@ -23,7 +23,7 @@ export class TargetCalculatorService {
         const targetVal = Number(target.targetValue);
         const achievedPercent = targetVal > 0 ? Math.round((currentValue / targetVal) * 10000) / 100 : 0;
 
-        await this.prisma.salesTarget.update({
+        await this.prisma.working.salesTarget.update({
           where: { id: target.id },
           data: { currentValue, achievedPercent, lastCalculatedAt: new Date() },
         });
@@ -42,17 +42,17 @@ export class TargetCalculatorService {
 
     switch (metric) {
       case 'LEADS_CREATED':
-        return this.prisma.lead.count({
+        return this.prisma.working.lead.count({
           where: { createdAt: { gte: start, lte: end }, ...userFilter },
         });
 
       case 'LEADS_WON':
-        return this.prisma.lead.count({
+        return this.prisma.working.lead.count({
           where: { status: 'WON', updatedAt: { gte: start, lte: end }, ...userFilter },
         });
 
       case 'REVENUE': {
-        const result = await this.prisma.lead.aggregate({
+        const result = await this.prisma.working.lead.aggregate({
           where: { status: 'WON', updatedAt: { gte: start, lte: end }, ...userFilter },
           _sum: { expectedValue: true },
         });
@@ -60,37 +60,37 @@ export class TargetCalculatorService {
       }
 
       case 'ACTIVITIES':
-        return this.prisma.activity.count({
+        return this.prisma.working.activity.count({
           where: { createdAt: { gte: start, lte: end }, ...activityUserFilter },
         });
 
       case 'CALLS':
-        return this.prisma.activity.count({
+        return this.prisma.working.activity.count({
           where: { type: 'CALL', createdAt: { gte: start, lte: end }, ...activityUserFilter },
         });
 
       case 'MEETINGS':
-        return this.prisma.activity.count({
+        return this.prisma.working.activity.count({
           where: { type: 'MEETING', createdAt: { gte: start, lte: end }, ...activityUserFilter },
         });
 
       case 'VISITS':
-        return this.prisma.activity.count({
+        return this.prisma.working.activity.count({
           where: { type: 'VISIT', createdAt: { gte: start, lte: end }, ...activityUserFilter },
         });
 
       case 'DEMOS':
-        return this.prisma.demo.count({
+        return this.prisma.working.demo.count({
           where: { status: 'COMPLETED', completedAt: { gte: start, lte: end }, ...(userId ? { conductedById: userId } : {}) },
         });
 
       case 'QUOTATIONS_SENT':
-        return this.prisma.quotation.count({
+        return this.prisma.working.quotation.count({
           where: { status: { not: 'DRAFT' }, createdAt: { gte: start, lte: end }, ...(userId ? { createdById: userId } : {}) },
         });
 
       case 'QUOTATIONS_ACCEPTED':
-        return this.prisma.quotation.count({
+        return this.prisma.working.quotation.count({
           where: { status: 'ACCEPTED', updatedAt: { gte: start, lte: end }, ...(userId ? { createdById: userId } : {}) },
         });
 
@@ -105,7 +105,7 @@ export class TargetCalculatorService {
     if (params.dateFrom) where.periodStart = { gte: params.dateFrom };
     if (params.dateTo) where.periodEnd = { lte: params.dateTo };
 
-    const targets = await this.prisma.salesTarget.findMany({ where, orderBy: { achievedPercent: 'desc' } });
+    const targets = await this.prisma.working.salesTarget.findMany({ where, orderBy: { achievedPercent: 'desc' } });
     const now = Date.now();
 
     const mapped = targets.map(t => {

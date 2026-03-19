@@ -12,7 +12,7 @@ export class RevenueAnalyticsService {
   async getRevenueAnalytics(params: { dateFrom: Date; dateTo: Date; groupBy?: string }) {
     const { dateFrom, dateTo } = params;
 
-    const wonLeads = await this.prisma.lead.findMany({
+    const wonLeads = await this.prisma.working.lead.findMany({
       where: { status: 'WON', updatedAt: { gte: dateFrom, lte: dateTo } },
       select: { leadNumber: true, expectedValue: true, updatedAt: true, createdAt: true,
         organization: { select: { name: true } }, contact: { select: { firstName: true, lastName: true } } },
@@ -23,7 +23,7 @@ export class RevenueAnalyticsService {
     const avgDealSize = wonLeads.length > 0 ? Math.round(wonTotal / wonLeads.length) : 0;
 
     // Pipeline by stage
-    const pipelineLeads = await this.prisma.lead.groupBy({
+    const pipelineLeads = await this.prisma.working.lead.groupBy({
       by: ['status'],
       where: { status: { in: ['IN_PROGRESS', 'DEMO_SCHEDULED', 'QUOTATION_SENT', 'NEGOTIATION'] } },
       _sum: { expectedValue: true },
@@ -73,7 +73,7 @@ export class RevenueAnalyticsService {
   }
 
   async getLeadSourceAnalysis(params: { dateFrom: Date; dateTo: Date }) {
-    const leads = await this.prisma.lead.findMany({
+    const leads = await this.prisma.working.lead.findMany({
       where: { createdAt: { gte: params.dateFrom, lte: params.dateTo } },
       include: { contact: { include: { rawContacts: { select: { source: true }, take: 1 } } } },
     });
@@ -102,7 +102,7 @@ export class RevenueAnalyticsService {
   }
 
   async getLostReasonAnalysis(params: { dateFrom: Date; dateTo: Date }) {
-    const lostLeads = await this.prisma.lead.findMany({
+    const lostLeads = await this.prisma.working.lead.findMany({
       where: { status: 'LOST', updatedAt: { gte: params.dateFrom, lte: params.dateTo } },
       select: { lostReason: true, expectedValue: true, updatedAt: true },
     });
@@ -133,7 +133,7 @@ export class RevenueAnalyticsService {
     const where: any = { status: { notIn: ['WON', 'LOST'] } };
     if (params.userId) where.allocatedToId = params.userId;
 
-    const leads = await this.prisma.lead.findMany({
+    const leads = await this.prisma.working.lead.findMany({
       where,
       select: { id: true, leadNumber: true, expectedValue: true, createdAt: true, allocatedToId: true,
         contact: { select: { firstName: true, lastName: true } } },
@@ -180,12 +180,12 @@ export class RevenueAnalyticsService {
   }
 
   async getVelocityMetrics(params: { dateFrom: Date; dateTo: Date }) {
-    const wonLeads = await this.prisma.lead.findMany({
+    const wonLeads = await this.prisma.working.lead.findMany({
       where: { status: 'WON', updatedAt: { gte: params.dateFrom, lte: params.dateTo } },
       select: { expectedValue: true, createdAt: true, updatedAt: true },
     });
 
-    const totalLeads = await this.prisma.lead.count({
+    const totalLeads = await this.prisma.working.lead.count({
       where: { createdAt: { gte: params.dateFrom, lte: params.dateTo } },
     });
 

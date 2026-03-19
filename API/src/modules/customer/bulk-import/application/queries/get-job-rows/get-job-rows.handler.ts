@@ -14,11 +14,11 @@ export class GetJobRowsHandler implements IQueryHandler<GetJobRowsQuery> {
     if (query.status) where.rowStatus = query.status;
 
     const [data, total] = await Promise.all([
-      this.prisma.importRow.findMany({
+      this.prisma.working.importRow.findMany({
         where, skip: (page - 1) * limit, take: limit,
         orderBy: { rowNumber: 'asc' },
       }),
-      this.prisma.importRow.count({ where }),
+      this.prisma.working.importRow.count({ where }),
     ]);
 
     return { data, total, page, limit };

@@ -40,23 +40,23 @@ export class IndividualScorecardReport implements IReport {
     const userIds = users.map(u => u.id);
 
     const [leads, activities, demos, quotations, targets] = await Promise.all([
-      this.prisma.lead.findMany({
+      this.prisma.working.lead.findMany({
         where: { tenantId, allocatedToId: { in: userIds }, createdAt: dateFilter },
         select: { id: true, allocatedToId: true, status: true, expectedValue: true, allocatedAt: true, createdAt: true, updatedAt: true },
       }),
-      this.prisma.activity.findMany({
+      this.prisma.working.activity.findMany({
         where: { tenantId, createdById: { in: userIds }, createdAt: dateFilter },
         select: { id: true, createdById: true, type: true, leadId: true, createdAt: true },
       }),
-      this.prisma.demo.findMany({
+      this.prisma.working.demo.findMany({
         where: { tenantId, conductedById: { in: userIds }, scheduledAt: dateFilter },
         select: { conductedById: true, status: true },
       }),
-      this.prisma.quotation.findMany({
+      this.prisma.working.quotation.findMany({
         where: { tenantId, createdById: { in: userIds }, createdAt: dateFilter },
         select: { createdById: true, status: true, totalAmount: true },
       }),
-      this.prisma.salesTarget.findMany({
+      this.prisma.working.salesTarget.findMany({
         where: { tenantId, userId: { in: userIds }, isActive: true, periodStart: { lte: params.dateTo }, periodEnd: { gte: params.dateFrom } },
         select: { userId: true, achievedPercent: true },
       }),
@@ -65,7 +65,7 @@ export class IndividualScorecardReport implements IReport {
     // First activity per lead for response time calculation
     const leadIds = leads.filter(l => l.allocatedAt).map(l => l.id);
     const firstActivities = leadIds.length > 0
-      ? await this.prisma.activity.findMany({
+      ? await this.prisma.working.activity.findMany({
           where: { leadId: { in: leadIds } },
           orderBy: { createdAt: 'asc' },
           distinct: ['leadId'],

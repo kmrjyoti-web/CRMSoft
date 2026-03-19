@@ -34,7 +34,7 @@ export class WebhookDispatcherService {
       const signature = this.signer.sign(payload, endpoint.secret);
       const payloadStr = JSON.stringify(payload);
 
-      const delivery = await this.prisma.webhookDelivery.create({
+      const delivery = await this.prisma.working.webhookDelivery.create({
         data: {
           tenantId,
           endpointId: endpoint.id,
@@ -93,7 +93,7 @@ export class WebhookDispatcherService {
       const responseBody = await response.text().catch(() => '');
 
       if (response.ok) {
-        await this.prisma.webhookDelivery.update({
+        await this.prisma.working.webhookDelivery.update({
           where: { id: deliveryId },
           data: {
             status: 'WH_DELIVERED',
@@ -103,7 +103,7 @@ export class WebhookDispatcherService {
             deliveredAt: new Date(),
           },
         });
-        await this.prisma.webhookEndpoint.update({
+        await this.prisma.working.webhookEndpoint.update({
           where: { id: endpoint.id },
           data: {
             lastDeliveredAt: new Date(),
@@ -127,7 +127,7 @@ export class WebhookDispatcherService {
     httpStatus: number | null,
     responseTimeMs: number,
   ) {
-    const delivery = await this.prisma.webhookDelivery.findUnique({ where: { id: deliveryId } });
+    const delivery = await this.prisma.working.webhookDelivery.findUnique({ where: { id: deliveryId } });
     if (!delivery) return;
 
     const nextAttempt = delivery.attempt + 1;
@@ -136,7 +136,7 @@ export class WebhookDispatcherService {
       ? new Date(Date.now() + (RETRY_DELAYS[Math.min(nextAttempt - 1, RETRY_DELAYS.length - 1)] || 7200_000))
       : null;
 
-    await this.prisma.webhookDelivery.update({
+    await this.prisma.working.webhookDelivery.update({
       where: { id: deliveryId },
       data: {
         status: canRetry ? 'WH_RETRYING' : 'WH_DELIVERY_FAILED',
@@ -148,7 +148,7 @@ export class WebhookDispatcherService {
       },
     });
 
-    const endpoint = await this.prisma.webhookEndpoint.update({
+    const endpoint = await this.prisma.working.webhookEndpoint.update({
       where: { id: endpointId },
       data: {
         lastFailedAt: new Date(),
@@ -160,7 +160,7 @@ export class WebhookDispatcherService {
 
     // Auto-disable after 10 consecutive failures
     if (endpoint.consecutiveFailures >= 10) {
-      await this.prisma.webhookEndpoint.update({
+      await this.prisma.working.webhookEndpoint.update({
         where: { id: endpointId },
         data: { status: 'WH_DISABLED' },
       });
@@ -170,7 +170,7 @@ export class WebhookDispatcherService {
 
   async retryFailedDeliveries() {
     const now = new Date();
-    const deliveries = await this.prisma.webhookDelivery.findMany({
+    const deliveries = await this.prisma.working.webhookDelivery.findMany({
       where: {
         status: { in: ['WH_DELIVERY_FAILED', 'WH_RETRYING'] },
         nextRetryAt: { lte: now },
@@ -189,7 +189,7 @@ export class WebhookDispatcherService {
 
       await this.attemptDelivery(delivery.id, delivery.endpoint, payloadStr, signature);
 
-      const updated = await this.prisma.webhookDelivery.findUnique({ where: { id: delivery.id } });
+      const updated = await this.prisma.working.webhookDelivery.findUnique({ where: { id: delivery.id } });
       if (updated?.status === 'WH_DELIVERED') succeeded++;
       else failed++;
     }
@@ -199,13 +199,13 @@ export class WebhookDispatcherService {
 
   async getDeliveries(tenantId: string, endpointId: string, page = 1, limit = 20) {
     const [data, total] = await Promise.all([
-      this.prisma.webhookDelivery.findMany({
+      this.prisma.working.webhookDelivery.findMany({
         where: { tenantId, endpointId },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.webhookDelivery.count({ where: { tenantId, endpointId } }),
+      this.prisma.working.webhookDelivery.count({ where: { tenantId, endpointId } }),
     ]);
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
   }

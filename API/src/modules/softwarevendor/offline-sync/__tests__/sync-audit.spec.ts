@@ -1,7 +1,7 @@
 import { SyncAnalyticsService } from '../services/sync-analytics.service';
 
 function makeMockPrisma(overrides: any = {}) {
-  return {
+  const obj: any = {
     syncDevice: {
       count: jest.fn().mockResolvedValue(10),
       findMany: jest.fn().mockResolvedValue([
@@ -24,7 +24,9 @@ function makeMockPrisma(overrides: any = {}) {
       count: jest.fn().mockResolvedValue(0),
     },
     ...overrides,
-  } as any;
+  };
+  obj.working = obj;
+  return obj;
 }
 
 describe('SyncAnalyticsService', () => {

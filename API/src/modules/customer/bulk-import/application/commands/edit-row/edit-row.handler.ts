@@ -7,7 +7,7 @@ export class EditRowHandler implements ICommandHandler<EditRowCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: EditRowCommand) {
-    return this.prisma.importRow.update({
+    return this.prisma.working.importRow.update({
       where: { id: cmd.rowId },
       data: { userEditedData: cmd.editedData },
     });

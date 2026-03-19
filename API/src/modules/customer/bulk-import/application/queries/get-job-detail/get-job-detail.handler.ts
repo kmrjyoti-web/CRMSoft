@@ -7,7 +7,7 @@ export class GetJobDetailHandler implements IQueryHandler<GetJobDetailQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetJobDetailQuery) {
-    return this.prisma.importJob.findUniqueOrThrow({
+    return this.prisma.working.importJob.findUniqueOrThrow({
       where: { id: query.jobId },
       include: { profile: { select: { id: true, name: true, sourceSystem: true, icon: true } } },
     });

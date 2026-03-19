@@ -5,6 +5,7 @@ const mockPrisma = {
     createMany: jest.fn().mockResolvedValue({ count: 2 }),
   },
 } as any;
+(mockPrisma as any).working = mockPrisma;
 
 function makeService() {
   return new CronAlertService(mockPrisma);

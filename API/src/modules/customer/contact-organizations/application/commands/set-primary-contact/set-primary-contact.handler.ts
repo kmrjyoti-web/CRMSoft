@@ -26,13 +26,13 @@ export class SetPrimaryContactHandler implements ICommandHandler<SetPrimaryConta
     if (mapping.isPrimary) return; // Already primary
 
     // Unset existing primary for same org
-    await this.prisma.contactOrganization.updateMany({
+    await this.prisma.working.contactOrganization.updateMany({
       where: { organizationId: mapping.organizationId, isPrimary: true },
       data: { isPrimary: false },
     });
 
     // Set this one as primary
-    await this.prisma.contactOrganization.update({
+    await this.prisma.working.contactOrganization.update({
       where: { id: command.mappingId },
       data: { isPrimary: true },
     });

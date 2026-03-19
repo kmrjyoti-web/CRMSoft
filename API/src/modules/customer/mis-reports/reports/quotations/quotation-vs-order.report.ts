@@ -32,7 +32,7 @@ export class QuotationVsOrderReport implements IReport {
     };
     if (params.userId) where.createdById = params.userId;
 
-    const quotations = await this.prisma.quotation.findMany({
+    const quotations = await this.prisma.working.quotation.findMany({
       where,
       include: {
         lead: { select: { expectedValue: true, allocatedTo: { select: { id: true, firstName: true, lastName: true } }, organization: { select: { name: true } } } },
@@ -118,11 +118,11 @@ export class QuotationVsOrderReport implements IReport {
     if (params.dimension === 'user') where.createdById = params.value;
     const skip = (params.page - 1) * params.limit;
     const [records, total] = await Promise.all([
-      this.prisma.quotation.findMany({
+      this.prisma.working.quotation.findMany({
         where, skip, take: params.limit, orderBy: { createdAt: 'desc' },
         include: { lead: { select: { expectedValue: true, organization: { select: { name: true } } } }, createdByUser: { select: { firstName: true, lastName: true } } },
       }),
-      this.prisma.quotation.count({ where }),
+      this.prisma.working.quotation.count({ where }),
     ]);
     const columns: ColumnDef[] = [
       { key: 'quotationNo', header: 'Quotation #', width: 16 }, { key: 'organization', header: 'Organization', width: 22 },

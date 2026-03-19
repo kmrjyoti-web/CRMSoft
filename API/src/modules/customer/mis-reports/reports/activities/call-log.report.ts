@@ -37,7 +37,7 @@ export class CallLogReport implements IReport {
     if (params.userId) where.createdById = params.userId;
     if (params.filters?.outcome) where.outcome = params.filters.outcome;
 
-    const calls = await this.prisma.activity.findMany({
+    const calls = await this.prisma.working.activity.findMany({
       where,
       select: {
         id: true, subject: true, outcome: true, duration: true,

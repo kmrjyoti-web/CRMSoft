@@ -34,7 +34,7 @@ export class CustomerConcentrationReport implements IReport {
       organizationId: { not: null },
     };
 
-    const wonLeads = await this.prisma.lead.findMany({
+    const wonLeads = await this.prisma.working.lead.findMany({
       where,
       select: {
         id: true, expectedValue: true,

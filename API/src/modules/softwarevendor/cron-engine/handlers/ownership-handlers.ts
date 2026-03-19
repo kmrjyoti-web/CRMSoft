@@ -33,14 +33,14 @@ export class EscalateUnattendedHandler implements ICronJobHandler {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(): Promise<CronJobResult> {
-    const rules = await this.prisma.assignmentRule.findMany({
+    const rules = await this.prisma.working.assignmentRule.findMany({
       where: { isActive: true, escalateAfterHours: { not: null } },
     });
     let processed = 0;
     for (const rule of rules) {
       if (!rule.escalateAfterHours || !rule.escalateToUserId) continue;
       const cutoff = new Date(Date.now() - rule.escalateAfterHours * 3600000);
-      const stale = await this.prisma.entityOwner.findMany({
+      const stale = await this.prisma.working.entityOwner.findMany({
         where: {
           entityType: rule.entityType, ownerType: 'PRIMARY_OWNER',
           isActive: true, createdAt: { lte: cutoff },
@@ -60,11 +60,11 @@ export class ExpireOwnershipHandler implements ICronJobHandler {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(): Promise<CronJobResult> {
-    const expired = await this.prisma.entityOwner.findMany({
+    const expired = await this.prisma.working.entityOwner.findMany({
       where: { validTo: { lte: new Date() }, isActive: true },
     });
     for (const owner of expired) {
-      await this.prisma.entityOwner.update({
+      await this.prisma.working.entityOwner.update({
         where: { id: owner.id },
         data: { isActive: false },
       });
@@ -83,10 +83,10 @@ export class RecalcCapacityHandler implements ICronJobHandler {
     const capacities = await this.prisma.userCapacity.findMany();
     for (const cap of capacities) {
       const counts = await Promise.all([
-        this.prisma.entityOwner.count({ where: { userId: cap.userId, entityType: 'LEAD', isActive: true } }),
-        this.prisma.entityOwner.count({ where: { userId: cap.userId, entityType: 'CONTACT', isActive: true } }),
-        this.prisma.entityOwner.count({ where: { userId: cap.userId, entityType: 'ORGANIZATION', isActive: true } }),
-        this.prisma.entityOwner.count({ where: { userId: cap.userId, entityType: 'QUOTATION', isActive: true } }),
+        this.prisma.working.entityOwner.count({ where: { userId: cap.userId, entityType: 'LEAD', isActive: true } }),
+        this.prisma.working.entityOwner.count({ where: { userId: cap.userId, entityType: 'CONTACT', isActive: true } }),
+        this.prisma.working.entityOwner.count({ where: { userId: cap.userId, entityType: 'ORGANIZATION', isActive: true } }),
+        this.prisma.working.entityOwner.count({ where: { userId: cap.userId, entityType: 'QUOTATION', isActive: true } }),
       ]);
       const total = counts.reduce((a, b) => a + b, 0);
       await this.prisma.userCapacity.update({

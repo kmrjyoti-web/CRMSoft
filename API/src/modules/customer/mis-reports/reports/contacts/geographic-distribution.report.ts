@@ -28,7 +28,7 @@ export class GeographicDistributionReport implements IReport {
   ) {}
 
   async generate(params: ReportParams): Promise<ReportData> {
-    const orgs = await this.prisma.organization.findMany({
+    const orgs = await this.prisma.working.organization.findMany({
       where: {
         tenantId: params.tenantId,
         isActive: true,
@@ -40,7 +40,7 @@ export class GeographicDistributionReport implements IReport {
 
     const orgIds = orgs.map(o => o.id);
 
-    const leads = await this.prisma.lead.findMany({
+    const leads = await this.prisma.working.lead.findMany({
       where: {
         tenantId: params.tenantId,
         createdAt: { gte: params.dateFrom, lte: params.dateTo },

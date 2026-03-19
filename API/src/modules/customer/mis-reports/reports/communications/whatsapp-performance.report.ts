@@ -35,7 +35,7 @@ export class WhatsAppPerformanceReport implements IReport {
     };
     if (params.userId) where.createdById = params.userId;
 
-    const waActivities = await this.prisma.activity.findMany({
+    const waActivities = await this.prisma.working.activity.findMany({
       where,
       select: {
         id: true, createdAt: true, leadId: true,
@@ -44,7 +44,7 @@ export class WhatsAppPerformanceReport implements IReport {
     });
 
     // Quotation sends via WhatsApp
-    const waSendLogs = await this.prisma.quotationSendLog.findMany({
+    const waSendLogs = await this.prisma.working.quotationSendLog.findMany({
       where: {
         tenantId: params.tenantId,
         channel: 'WHATSAPP',
@@ -95,7 +95,7 @@ export class WhatsAppPerformanceReport implements IReport {
     // Lead touch rate
     const allLeadIds = new Set<string>();
     waActivities.forEach(a => { if (a.leadId) allLeadIds.add(a.leadId); });
-    const totalLeads = await this.prisma.lead.count({
+    const totalLeads = await this.prisma.working.lead.count({
       where: { tenantId: params.tenantId, createdAt: { lte: params.dateTo } },
     });
     const leadTouchRate = totalLeads > 0

@@ -19,6 +19,7 @@ describe('Team Reports', () => {
         lead: { groupBy: jest.fn().mockResolvedValue([]), findMany: jest.fn().mockResolvedValue([]) },
         activity: { groupBy: jest.fn().mockResolvedValue([]) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new TeamLeaderboardReport(mockPrisma, mockDrillDown as any);
       expect(report.code).toBe('TEAM_LEADERBOARD');
       expect(report.category).toBe('TEAM');
@@ -44,6 +45,7 @@ describe('Team Reports', () => {
         lead: { findMany: jest.fn().mockResolvedValue(mockLeads) },
         activity: { findMany: jest.fn().mockResolvedValue(mockActivities) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new TeamLeaderboardReport(mockPrisma, mockDrillDown as any);
       const result = await report.generate(baseParams);
 
@@ -82,6 +84,7 @@ describe('Team Reports', () => {
         quotation: { findMany: jest.fn().mockResolvedValue(mockQuotations) },
         activity: { findMany: jest.fn().mockResolvedValue(mockLastActivities) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new WorkloadDistributionReport(mockPrisma, mockDrillDown as any);
       const result = await report.generate(baseParams);
 
@@ -108,6 +111,7 @@ describe('Team Reports', () => {
         lead: { findMany: jest.fn().mockResolvedValue(mockLeads) },
         activity: { findMany: jest.fn().mockResolvedValue(mockFirstActivities) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new ResponseTimeReport(mockPrisma, mockDrillDown as any);
       const result = await report.generate(baseParams);
 

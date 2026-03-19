@@ -34,7 +34,7 @@ export class SyncAdminController {
   @Get('policies')
   @ApiOperation({ summary: 'List all sync policies' })
   async listPolicies() {
-    const policies = await this.prisma.syncPolicy.findMany({
+    const policies = await this.prisma.working.syncPolicy.findMany({
       include: { warningRules: true },
       orderBy: { syncPriority: 'asc' },
     });
@@ -44,7 +44,7 @@ export class SyncAdminController {
   @Get('policies/:id')
   @ApiOperation({ summary: 'Get policy detail' })
   async getPolicy(@Param('id') id: string) {
-    const policy = await this.prisma.syncPolicy.findUnique({
+    const policy = await this.prisma.working.syncPolicy.findUnique({
       where: { id },
       include: { warningRules: true },
     });
@@ -58,7 +58,7 @@ export class SyncAdminController {
     @Body() dto: UpdatePolicyDto,
     @CurrentUser() user: any,
   ) {
-    const policy = await this.prisma.syncPolicy.update({
+    const policy = await this.prisma.working.syncPolicy.update({
       where: { id },
       data: {
         ...(dto.direction !== undefined && { direction: dto.direction as any }),
@@ -81,8 +81,8 @@ export class SyncAdminController {
   @Post('policies/:id/toggle')
   @ApiOperation({ summary: 'Enable or disable entity sync' })
   async togglePolicy(@Param('id') id: string, @CurrentUser() user: any) {
-    const existing = await this.prisma.syncPolicy.findUnique({ where: { id } });
-    const policy = await this.prisma.syncPolicy.update({
+    const existing = await this.prisma.working.syncPolicy.findUnique({ where: { id } });
+    const policy = await this.prisma.working.syncPolicy.update({
       where: { id },
       data: {
         isEnabled: !existing?.isEnabled,
@@ -98,7 +98,7 @@ export class SyncAdminController {
   @Post('warning-rules')
   @ApiOperation({ summary: 'Create a warning rule' })
   async createWarningRule(@Body() dto: CreateWarningRuleDto) {
-    const rule = await this.prisma.syncWarningRule.create({
+    const rule = await this.prisma.working.syncWarningRule.create({
       data: {
         policyId: dto.policyId,
         name: dto.name,
@@ -127,7 +127,7 @@ export class SyncAdminController {
   @Get('warning-rules')
   @ApiOperation({ summary: 'List warning rules' })
   async listWarningRules() {
-    const rules = await this.prisma.syncWarningRule.findMany({
+    const rules = await this.prisma.working.syncWarningRule.findMany({
       include: { policy: true },
       orderBy: { priority: 'asc' },
     });
@@ -161,7 +161,7 @@ export class SyncAdminController {
     if (dto.priority !== undefined) updateData.priority = dto.priority;
     if (dto.isEnabled !== undefined) updateData.isEnabled = dto.isEnabled;
 
-    const rule = await this.prisma.syncWarningRule.update({
+    const rule = await this.prisma.working.syncWarningRule.update({
       where: { id },
       data: updateData,
     });
@@ -171,7 +171,7 @@ export class SyncAdminController {
   @Delete('warning-rules/:id')
   @ApiOperation({ summary: 'Delete a warning rule' })
   async deleteWarningRule(@Param('id') id: string) {
-    await this.prisma.syncWarningRule.delete({ where: { id } });
+    await this.prisma.working.syncWarningRule.delete({ where: { id } });
     return ApiResponse.success(null, 'Warning rule deleted');
   }
 

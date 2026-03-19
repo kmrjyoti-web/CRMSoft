@@ -38,12 +38,12 @@ export class WarningEvaluatorService {
 
   async evaluateWarnings(userId: string, deviceId: string): Promise<WarningEvaluation> {
     // Load device
-    const device = await this.prisma.syncDevice.findFirst({
+    const device = await this.prisma.working.syncDevice.findFirst({
       where: { userId, deviceId },
     });
 
     // Load all enabled warning rules
-    const rules = await this.prisma.syncWarningRule.findMany({
+    const rules = await this.prisma.working.syncWarningRule.findMany({
       where: { isEnabled: true },
       include: { policy: true },
       orderBy: { priority: 'asc' },
@@ -205,7 +205,7 @@ export class WarningEvaluatorService {
   }
 
   private async getPendingFlushCommands(userId: string, deviceId: string): Promise<FlushCommandInfo[]> {
-    const commands = await this.prisma.syncFlushCommand.findMany({
+    const commands = await this.prisma.working.syncFlushCommand.findMany({
       where: {
         status: 'PENDING',
         OR: [

@@ -34,6 +34,7 @@ describe('Team Performance & Leaderboard', () => {
       },
       tourPlan: { count: jest.fn().mockResolvedValue(2) },
     };
+(prisma as any).working = prisma;
     service = new TeamPerformanceService(prisma);
   });
 

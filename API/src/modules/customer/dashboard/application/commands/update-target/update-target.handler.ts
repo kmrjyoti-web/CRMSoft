@@ -8,7 +8,7 @@ export class UpdateTargetHandler implements ICommandHandler<UpdateTargetCommand>
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: UpdateTargetCommand) {
-    const target = await this.prisma.salesTarget.findUnique({ where: { id: command.id } });
+    const target = await this.prisma.working.salesTarget.findUnique({ where: { id: command.id } });
     if (!target) throw new NotFoundException('Target not found');
 
     const data: any = {};
@@ -17,6 +17,6 @@ export class UpdateTargetHandler implements ICommandHandler<UpdateTargetCommand>
     if (command.notes !== undefined) data.notes = command.notes;
     if (command.isActive !== undefined) data.isActive = command.isActive;
 
-    return this.prisma.salesTarget.update({ where: { id: command.id }, data });
+    return this.prisma.working.salesTarget.update({ where: { id: command.id }, data });
   }
 }

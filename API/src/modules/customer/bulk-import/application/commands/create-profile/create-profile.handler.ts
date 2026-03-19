@@ -7,7 +7,7 @@ export class CreateProfileHandler implements ICommandHandler<CreateProfileComman
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CreateProfileCommand) {
-    return this.prisma.importProfile.create({
+    return this.prisma.working.importProfile.create({
       data: {
         name: cmd.name,
         description: cmd.description,

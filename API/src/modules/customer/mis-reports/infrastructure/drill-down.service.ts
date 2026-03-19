@@ -29,7 +29,7 @@ export class DrillDownService {
   ): Promise<DrillDownResult> {
     const skip = (page - 1) * limit;
     const [records, total] = await Promise.all([
-      this.prisma.lead.findMany({
+      this.prisma.working.lead.findMany({
         where,
         include: {
           contact: { select: { firstName: true, lastName: true } },
@@ -40,7 +40,7 @@ export class DrillDownService {
         skip,
         take: limit,
       }),
-      this.prisma.lead.count({ where }),
+      this.prisma.working.lead.count({ where }),
     ]);
 
     const cols: ColumnDef[] = columns || [
@@ -77,7 +77,7 @@ export class DrillDownService {
   async getActivities(where: any, page: number, limit: number): Promise<DrillDownResult> {
     const skip = (page - 1) * limit;
     const [records, total] = await Promise.all([
-      this.prisma.activity.findMany({
+      this.prisma.working.activity.findMany({
         where,
         include: {
           lead: { select: { leadNumber: true } },
@@ -87,7 +87,7 @@ export class DrillDownService {
         skip,
         take: limit,
       }),
-      this.prisma.activity.count({ where }),
+      this.prisma.working.activity.count({ where }),
     ]);
 
     const columns: ColumnDef[] = [
@@ -122,7 +122,7 @@ export class DrillDownService {
   async getDemos(where: any, page: number, limit: number): Promise<DrillDownResult> {
     const skip = (page - 1) * limit;
     const [records, total] = await Promise.all([
-      this.prisma.demo.findMany({
+      this.prisma.working.demo.findMany({
         where,
         include: {
           lead: { select: { leadNumber: true } },
@@ -132,7 +132,7 @@ export class DrillDownService {
         skip,
         take: limit,
       }),
-      this.prisma.demo.count({ where }),
+      this.prisma.working.demo.count({ where }),
     ]);
 
     const columns: ColumnDef[] = [
@@ -165,14 +165,14 @@ export class DrillDownService {
   async getContacts(where: any, page: number, limit: number): Promise<DrillDownResult> {
     const skip = (page - 1) * limit;
     const [records, total] = await Promise.all([
-      this.prisma.contact.findMany({
+      this.prisma.working.contact.findMany({
         where,
         include: { organization: { select: { name: true } } },
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
       }),
-      this.prisma.contact.count({ where }),
+      this.prisma.working.contact.count({ where }),
     ]);
 
     const columns: ColumnDef[] = [

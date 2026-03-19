@@ -20,7 +20,7 @@ export class CustomerPriceGroupsController {
   @ApiOperation({ summary: 'Create price group' })
   @RequirePermissions('products:update')
   async create(@Body() dto: CreatePriceGroupDto) {
-    const group = await this.prisma.customerPriceGroup.create({
+    const group = await this.prisma.working.customerPriceGroup.create({
       data: {
         name: dto.name,
         code: dto.code.toUpperCase(),
@@ -50,11 +50,11 @@ export class CustomerPriceGroupsController {
       ];
     }
     const [data, total] = await Promise.all([
-      this.prisma.customerPriceGroup.findMany({
+      this.prisma.working.customerPriceGroup.findMany({
         where, skip: (p - 1) * l, take: l,
         orderBy: { priority: 'desc' },
       }),
-      this.prisma.customerPriceGroup.count({ where }),
+      this.prisma.working.customerPriceGroup.count({ where }),
     ]);
     return ApiResponse.paginated(data, total, p, l);
   }
@@ -63,7 +63,7 @@ export class CustomerPriceGroupsController {
   @ApiOperation({ summary: 'Get price group with counts' })
   @RequirePermissions('products:read')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
-    const group = await this.prisma.customerPriceGroup.findUniqueOrThrow({
+    const group = await this.prisma.working.customerPriceGroup.findUniqueOrThrow({
       where: { id },
       include: {
         _count: { select: { customers: true, prices: true } },
@@ -81,7 +81,7 @@ export class CustomerPriceGroupsController {
   ) {
     const data: any = { ...dto };
     if (dto.code) data.code = dto.code.toUpperCase();
-    const group = await this.prisma.customerPriceGroup.update({
+    const group = await this.prisma.working.customerPriceGroup.update({
       where: { id }, data,
     });
     return ApiResponse.success(group, 'Price group updated');
@@ -92,7 +92,7 @@ export class CustomerPriceGroupsController {
   @ApiOperation({ summary: 'Deactivate price group' })
   @RequirePermissions('products:update')
   async deactivate(@Param('id', ParseUUIDPipe) id: string) {
-    const group = await this.prisma.customerPriceGroup.update({
+    const group = await this.prisma.working.customerPriceGroup.update({
       where: { id }, data: { isActive: false },
     });
     return ApiResponse.success(group, 'Price group deactivated');
@@ -110,7 +110,7 @@ export class CustomerPriceGroupsController {
       ? { priceGroupId_contactId: { priceGroupId: id, contactId: dto.contactId } }
       : { priceGroupId_organizationId: { priceGroupId: id, organizationId: dto.organizationId! } };
 
-    const mapping = await this.prisma.customerGroupMapping.upsert({
+    const mapping = await this.prisma.working.customerGroupMapping.upsert({
       where: uniqueWhere as any,
       create: {
         priceGroupId: id,
@@ -130,7 +130,7 @@ export class CustomerPriceGroupsController {
     @Param('id', ParseUUIDPipe) _id: string,
     @Param('mappingId', ParseUUIDPipe) mappingId: string,
   ) {
-    await this.prisma.customerGroupMapping.delete({
+    await this.prisma.working.customerGroupMapping.delete({
       where: { id: mappingId },
     });
     return ApiResponse.success(null, 'Member removed from price group');
@@ -148,11 +148,11 @@ export class CustomerPriceGroupsController {
     const l = Math.min(100, Math.max(1, +limit));
     const where = { priceGroupId: id };
     const [data, total] = await Promise.all([
-      this.prisma.customerGroupMapping.findMany({
+      this.prisma.working.customerGroupMapping.findMany({
         where, skip: (p - 1) * l, take: l,
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.customerGroupMapping.count({ where }),
+      this.prisma.working.customerGroupMapping.count({ where }),
     ]);
     return ApiResponse.paginated(data, total, p, l);
   }

@@ -40,7 +40,7 @@ export class ActivityVsOutcomeReport implements IReport {
     };
     if (params.userId) where.allocatedToId = params.userId;
 
-    const leads = await this.prisma.lead.findMany({
+    const leads = await this.prisma.working.lead.findMany({
       where,
       select: {
         id: true, status: true,
@@ -145,7 +145,7 @@ export class ActivityVsOutcomeReport implements IReport {
     }
 
     // Get leads in the activity bucket
-    const leads = await this.prisma.lead.findMany({
+    const leads = await this.prisma.working.lead.findMany({
       where: {
         tenantId: params.filters?.tenantId,
         createdAt: { gte: params.dateFrom, lte: params.dateTo },

@@ -35,13 +35,13 @@ export class ContactGrowthReport implements IReport {
     if (params.userId) where.createdById = params.userId;
     if (params.filters?.isActive !== undefined) where.isActive = params.filters.isActive;
 
-    const contacts = await this.prisma.contact.findMany({
+    const contacts = await this.prisma.working.contact.findMany({
       where,
       select: { id: true, createdAt: true },
       orderBy: { createdAt: 'asc' },
     });
 
-    const totalContacts = await this.prisma.contact.count({
+    const totalContacts = await this.prisma.working.contact.count({
       where: { tenantId: params.tenantId },
     });
 
@@ -61,7 +61,7 @@ export class ContactGrowthReport implements IReport {
       : 0;
 
     // Cumulative counts
-    const prePeriodCount = await this.prisma.contact.count({
+    const prePeriodCount = await this.prisma.working.contact.count({
       where: { tenantId: params.tenantId, createdAt: { lt: params.dateFrom } },
     });
     let running = prePeriodCount;

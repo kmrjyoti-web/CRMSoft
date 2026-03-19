@@ -18,7 +18,7 @@ export class PublicQuotationsController {
     const limit = query.limit || 20;
 
     const [data, total] = await Promise.all([
-      this.prisma.quotation.findMany({
+      this.prisma.working.quotation.findMany({
         where: { tenantId: req.tenantId },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
@@ -29,7 +29,7 @@ export class PublicQuotationsController {
           createdAt: true, updatedAt: true,
         },
       }),
-      this.prisma.quotation.count({ where: { tenantId: req.tenantId } }),
+      this.prisma.working.quotation.count({ where: { tenantId: req.tenantId } }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
@@ -38,7 +38,7 @@ export class PublicQuotationsController {
   @Get(':id')
   @ApiScopes('quotations:read')
   async getById(@Req() req: any, @Param('id') id: string) {
-    const quotation = await this.prisma.quotation.findFirst({
+    const quotation = await this.prisma.working.quotation.findFirst({
       where: { id, tenantId: req.tenantId },
       include: { lineItems: true },
     });

@@ -12,7 +12,7 @@ export class ActivityAnalyticsService {
     if (params.userId) where.createdById = params.userId;
     if (params.activityType) where.type = params.activityType;
 
-    const activities = await this.prisma.activity.findMany({
+    const activities = await this.prisma.working.activity.findMany({
       where,
       select: { createdAt: true, type: true },
     });

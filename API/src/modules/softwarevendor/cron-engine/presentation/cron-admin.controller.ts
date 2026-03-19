@@ -34,7 +34,7 @@ export class CronAdminController {
     if (query.moduleName) where.moduleName = query.moduleName;
     if (query.search) where.jobName = { contains: query.search, mode: 'insensitive' };
 
-    const jobs = await this.prisma.cronJobConfig.findMany({
+    const jobs = await this.prisma.working.cronJobConfig.findMany({
       where,
       orderBy: { jobCode: 'asc' },
     });
@@ -44,7 +44,7 @@ export class CronAdminController {
   /** Get job detail with recent run logs. */
   @Get('jobs/:jobCode')
   async getJob(@Param('jobCode') jobCode: string) {
-    const job = await this.prisma.cronJobConfig.findUnique({
+    const job = await this.prisma.working.cronJobConfig.findUnique({
       where: { jobCode },
       include: { runLogs: { take: 10, orderBy: { createdAt: 'desc' } } },
     });
@@ -68,7 +68,7 @@ export class CronAdminController {
       data.cronDescription = this.parser.describe(dto.cronExpression);
     }
 
-    const job = await this.prisma.cronJobConfig.update({
+    const job = await this.prisma.working.cronJobConfig.update({
       where: { jobCode },
       data,
     });
@@ -83,7 +83,7 @@ export class CronAdminController {
     @Body() dto: ToggleJobDto,
     @CurrentUser() user: any,
   ) {
-    const job = await this.prisma.cronJobConfig.update({
+    const job = await this.prisma.working.cronJobConfig.update({
       where: { jobCode },
       data: {
         status: dto.status as any,
@@ -124,7 +124,7 @@ export class CronAdminController {
     @Body() dto: UpdateJobParamsDto,
     @CurrentUser() user: any,
   ) {
-    const job = await this.prisma.cronJobConfig.update({
+    const job = await this.prisma.working.cronJobConfig.update({
       where: { jobCode },
       data: {
         jobParams: dto.jobParams as any,
@@ -148,13 +148,13 @@ export class CronAdminController {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
     const [data, total] = await Promise.all([
-      this.prisma.cronJobRunLog.findMany({
+      this.prisma.working.cronJobRunLog.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.cronJobRunLog.count({ where }),
+      this.prisma.working.cronJobRunLog.count({ where }),
     ]);
     return ApiResponse.paginated(data, total, page, limit);
   }
@@ -168,13 +168,13 @@ export class CronAdminController {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
     const [data, total] = await Promise.all([
-      this.prisma.cronJobRunLog.findMany({
+      this.prisma.working.cronJobRunLog.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.cronJobRunLog.count({ where }),
+      this.prisma.working.cronJobRunLog.count({ where }),
     ]);
     return ApiResponse.paginated(data, total, page, limit);
   }
@@ -182,7 +182,7 @@ export class CronAdminController {
   /** Single run detail. */
   @Get('runs/:runId')
   async getRunDetail(@Param('runId') runId: string) {
-    const run = await this.prisma.cronJobRunLog.findUnique({ where: { id: runId } });
+    const run = await this.prisma.working.cronJobRunLog.findUnique({ where: { id: runId } });
     if (!run) return ApiResponse.error('Run not found');
     return ApiResponse.success(run);
   }

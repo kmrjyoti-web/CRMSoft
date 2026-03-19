@@ -35,7 +35,7 @@ export class RevisionHistoryReport implements IReport {
     };
     if (params.userId) where.createdById = params.userId;
 
-    const originals = await this.prisma.quotation.findMany({
+    const originals = await this.prisma.working.quotation.findMany({
       where,
       include: {
         revisions: {

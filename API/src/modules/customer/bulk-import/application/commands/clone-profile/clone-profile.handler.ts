@@ -7,8 +7,8 @@ export class CloneProfileHandler implements ICommandHandler<CloneProfileCommand>
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CloneProfileCommand) {
-    const source = await this.prisma.importProfile.findUniqueOrThrow({ where: { id: cmd.profileId } });
-    return this.prisma.importProfile.create({
+    const source = await this.prisma.working.importProfile.findUniqueOrThrow({ where: { id: cmd.profileId } });
+    return this.prisma.working.importProfile.create({
       data: {
         name: cmd.newName,
         description: source.description ? `Clone of ${source.name}: ${source.description}` : `Clone of ${source.name}`,

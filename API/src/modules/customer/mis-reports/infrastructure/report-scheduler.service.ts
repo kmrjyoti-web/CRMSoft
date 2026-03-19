@@ -35,7 +35,7 @@ export class ReportSchedulerService {
    */
   async processScheduledReports(): Promise<void> {
     const now = new Date();
-    const dueReports = await this.prisma.scheduledReport.findMany({
+    const dueReports = await this.prisma.working.scheduledReport.findMany({
       where: {
         status: 'ACTIVE',
         nextScheduledAt: { lte: now },
@@ -88,7 +88,7 @@ export class ReportSchedulerService {
         schedule.frequency, schedule.dayOfWeek, schedule.dayOfMonth, schedule.timeOfDay,
       );
 
-      await this.prisma.scheduledReport.update({
+      await this.prisma.working.scheduledReport.update({
         where: { id: schedule.id },
         data: {
           lastSentAt: new Date(),
@@ -103,7 +103,7 @@ export class ReportSchedulerService {
       const errMsg = error instanceof Error ? error.message : String(error);
       this.logger.error(`Schedule ${schedule.id} failed: ${errMsg}`);
 
-      const updatedSchedule = await this.prisma.scheduledReport.update({
+      const updatedSchedule = await this.prisma.working.scheduledReport.update({
         where: { id: schedule.id },
         data: { lastError: errMsg },
       });
@@ -117,14 +117,14 @@ export class ReportSchedulerService {
    * @param schedule - Updated schedule record
    */
   private async checkAndPauseIfNeeded(schedule: any): Promise<void> {
-    const recentLogs = await this.prisma.reportExportLog.findMany({
+    const recentLogs = await this.prisma.working.reportExportLog.findMany({
       where: { scheduledReportId: schedule.id, status: 'FAILED' },
       orderBy: { createdAt: 'desc' },
       take: MAX_CONSECUTIVE_FAILURES,
     });
 
     if (recentLogs.length >= MAX_CONSECUTIVE_FAILURES) {
-      await this.prisma.scheduledReport.update({
+      await this.prisma.working.scheduledReport.update({
         where: { id: schedule.id },
         data: { status: 'PAUSED' },
       });
@@ -201,7 +201,7 @@ export class ReportSchedulerService {
    */
   async sendDailyDigest(): Promise<void> {
     this.logger.log('Running daily digest job (8 AM IST)');
-    const digestSchedules = await this.prisma.scheduledReport.findMany({
+    const digestSchedules = await this.prisma.working.scheduledReport.findMany({
       where: {
         status: 'ACTIVE',
         frequency: 'DAILY',

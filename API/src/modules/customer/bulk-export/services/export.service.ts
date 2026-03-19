@@ -58,7 +58,7 @@ export class ExportService {
     createdById: string;
     createdByName: string;
   }): Promise<any> {
-    const job = await this.prisma.exportJob.create({
+    const job = await this.prisma.working.exportJob.create({
       data: {
         targetEntity: params.targetEntity,
         format: params.format || 'xlsx',
@@ -108,7 +108,7 @@ export class ExportService {
       await workbook.xlsx.writeFile(filePath);
 
       const stat = fs.statSync(filePath);
-      await this.prisma.exportJob.update({
+      await this.prisma.working.exportJob.update({
         where: { id: jobId },
         data: {
           status: 'COMPLETED',
@@ -119,7 +119,7 @@ export class ExportService {
         },
       });
     } catch (error: any) {
-      await this.prisma.exportJob.update({
+      await this.prisma.working.exportJob.update({
         where: { id: jobId },
         data: { status: 'FAILED' },
       });
@@ -132,19 +132,19 @@ export class ExportService {
 
     switch (entity) {
       case 'CONTACT':
-        return this.prisma.contact.findMany({
+        return this.prisma.working.contact.findMany({
           where, include: { organization: { select: { name: true } } }, take: 10000,
         });
       case 'ORGANIZATION':
-        return this.prisma.organization.findMany({ where, take: 10000 });
+        return this.prisma.working.organization.findMany({ where, take: 10000 });
       case 'LEAD':
-        return this.prisma.lead.findMany({
+        return this.prisma.working.lead.findMany({
           where: filters || {},
           include: { contact: { select: { firstName: true, lastName: true } }, organization: { select: { name: true } } },
           take: 10000,
         });
       case 'PRODUCT':
-        return this.prisma.product.findMany({ where, take: 10000 });
+        return this.prisma.working.product.findMany({ where, take: 10000 });
       default:
         return [];
     }

@@ -20,7 +20,7 @@ export class PublicActivitiesController {
     const where: any = { tenantId: req.tenantId };
 
     const [data, total] = await Promise.all([
-      this.prisma.activity.findMany({
+      this.prisma.working.activity.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
@@ -33,7 +33,7 @@ export class PublicActivitiesController {
           contact: { select: { id: true, firstName: true, lastName: true } },
         },
       }),
-      this.prisma.activity.count({ where }),
+      this.prisma.working.activity.count({ where }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
@@ -42,7 +42,7 @@ export class PublicActivitiesController {
   @Get(':id')
   @ApiScopes('activities:read')
   async getById(@Req() req: any, @Param('id') id: string) {
-    const activity = await this.prisma.activity.findFirst({
+    const activity = await this.prisma.working.activity.findFirst({
       where: { id, tenantId: req.tenantId },
       include: {
         lead: { select: { id: true, leadNumber: true } },
@@ -57,7 +57,7 @@ export class PublicActivitiesController {
   @Post()
   @ApiScopes('activities:write')
   async create(@Req() req: any, @Body() body: any) {
-    return this.prisma.activity.create({
+    return this.prisma.working.activity.create({
       data: {
         tenantId: req.tenantId,
         type: body.type,

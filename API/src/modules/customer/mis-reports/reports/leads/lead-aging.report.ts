@@ -48,7 +48,7 @@ export class LeadAgingReport implements IReport {
     if (params.userId) where.allocatedToId = params.userId;
     if (params.filters?.priority) where.priority = params.filters.priority;
 
-    const leads = await this.prisma.lead.findMany({
+    const leads = await this.prisma.working.lead.findMany({
       where,
       include: {
         contact: { select: { firstName: true, lastName: true } },

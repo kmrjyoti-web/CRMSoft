@@ -35,7 +35,7 @@ export class VisitToConversionReport implements IReport {
     const visitWhere: any = { tenantId, createdAt: dateFilter };
     if (params.userId) visitWhere.tourPlan = { salesPersonId: params.userId };
 
-    const visits = await this.prisma.tourPlanVisit.findMany({
+    const visits = await this.prisma.working.tourPlanVisit.findMany({
       where: visitWhere,
       select: {
         id: true, leadId: true,
@@ -69,7 +69,7 @@ export class VisitToConversionReport implements IReport {
     const visitToWonRate = fieldLeadCount > 0 ? Math.round((withWon / fieldLeadCount) * 10000) / 100 : 0;
 
     // Non-field leads: leads created in period that do NOT have any tour plan visits
-    const nonFieldLeads = await this.prisma.lead.findMany({
+    const nonFieldLeads = await this.prisma.working.lead.findMany({
       where: {
         tenantId, createdAt: dateFilter,
         id: { notIn: [...fieldLeadIds] },

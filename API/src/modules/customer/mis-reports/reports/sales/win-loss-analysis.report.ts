@@ -43,7 +43,7 @@ export class WinLossAnalysisReport implements IReport {
     if (params.filters?.priority) where.priority = params.filters.priority;
     if (params.filters?.outcome) where.status = params.filters.outcome;
 
-    const leads = await this.prisma.lead.findMany({
+    const leads = await this.prisma.working.lead.findMany({
       where,
       include: {
         allocatedTo: { select: { id: true, firstName: true, lastName: true } },

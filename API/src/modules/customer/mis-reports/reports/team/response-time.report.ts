@@ -39,14 +39,14 @@ export class ResponseTimeReport implements IReport {
     const userIds = users.map(u => u.id);
 
     // Leads allocated in period with allocatedAt set
-    const leads = await this.prisma.lead.findMany({
+    const leads = await this.prisma.working.lead.findMany({
       where: { tenantId, allocatedToId: { in: userIds }, allocatedAt: dateFilter },
       select: { id: true, allocatedToId: true, allocatedAt: true },
     });
 
     const leadIds = leads.map(l => l.id);
     const firstActivities = leadIds.length > 0
-      ? await this.prisma.activity.findMany({
+      ? await this.prisma.working.activity.findMany({
           where: { leadId: { in: leadIds } },
           orderBy: { createdAt: 'asc' },
           distinct: ['leadId'],

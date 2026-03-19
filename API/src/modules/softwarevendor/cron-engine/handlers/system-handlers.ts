@@ -85,7 +85,7 @@ export class ExportFileCleanupHandler implements ICronJobHandler {
     const days = params.retentionDays ?? 30;
     const cutoff = new Date(Date.now() - days * 86400000);
     // Clean export records from DB
-    const result = await this.prisma.reportExportLog.deleteMany({
+    const result = await this.prisma.working.reportExportLog.deleteMany({
       where: { status: 'DONE', createdAt: { lt: cutoff } },
     });
     this.logger.log(`Cleaned ${result.count} old export records`);

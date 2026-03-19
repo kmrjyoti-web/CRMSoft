@@ -11,7 +11,7 @@ export class CheckOverdueTasksHandler implements ICronJobHandler {
 
   async execute(): Promise<CronJobResult> {
     const now = new Date();
-    const result = await this.prisma.task.updateMany({
+    const result = await this.prisma.working.task.updateMany({
       where: {
         isActive: true,
         status: { in: ['OPEN', 'IN_PROGRESS'] },
@@ -22,12 +22,12 @@ export class CheckOverdueTasksHandler implements ICronJobHandler {
 
     // Record history for each overdue task
     if (result.count > 0) {
-      const overdueTasks = await this.prisma.task.findMany({
+      const overdueTasks = await this.prisma.working.task.findMany({
         where: { isActive: true, status: 'OVERDUE', dueDate: { lt: now } },
         select: { id: true, createdById: true },
         take: result.count,
       });
-      await this.prisma.taskHistory.createMany({
+      await this.prisma.working.taskHistory.createMany({
         data: overdueTasks.map(t => ({
           taskId: t.id,
           field: 'status',
@@ -51,14 +51,14 @@ export class CheckTaskEscalationsHandler implements ICronJobHandler {
   async execute(): Promise<CronJobResult> {
     // Escalation logic is in EscalationService
     // This handler fetches rules and processes them directly via Prisma
-    const rules = await this.prisma.escalationRule.findMany({
+    const rules = await this.prisma.working.escalationRule.findMany({
       where: { isActive: true, entityType: 'task' },
     });
 
     let escalated = 0;
     for (const rule of rules) {
       const thresholdDate = new Date(Date.now() - rule.triggerAfterHours * 60 * 60 * 1000);
-      const overdueTasks = await this.prisma.task.findMany({
+      const overdueTasks = await this.prisma.working.task.findMany({
         where: {
           isActive: true,
           status: { in: ['OVERDUE'] },
@@ -74,7 +74,7 @@ export class CheckTaskEscalationsHandler implements ICronJobHandler {
         try {
           if (rule.action === 'NOTIFY_MANAGER' && task.assignedTo?.reportingToId) {
             // Create in-app notification for manager
-            await this.prisma.notification.create({
+            await this.prisma.working.notification.create({
               data: {
                 category: 'SYSTEM_ALERT',
                 title: `Escalation: Task ${task.taskNumber} overdue`,
@@ -87,7 +87,7 @@ export class CheckTaskEscalationsHandler implements ICronJobHandler {
             });
             escalated++;
           } else if (rule.action === 'AUTO_CLOSE') {
-            await this.prisma.task.update({ where: { id: task.id }, data: { status: 'CANCELLED' } });
+            await this.prisma.working.task.update({ where: { id: task.id }, data: { status: 'CANCELLED' } });
             escalated++;
           }
         } catch (error) {
@@ -107,7 +107,7 @@ export class ProcessTaskRecurrenceHandler implements ICronJobHandler {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(): Promise<CronJobResult> {
-    const completedRecurring = await this.prisma.task.findMany({
+    const completedRecurring = await this.prisma.working.task.findMany({
       where: {
         status: 'COMPLETED',
         recurrence: { not: 'NONE' },
@@ -123,10 +123,10 @@ export class ProcessTaskRecurrenceHandler implements ICronJobHandler {
         const nextDue = this.calculateNextDate(task.nextRecurrenceDate || task.dueDate || new Date(), task.recurrence);
         if (!nextDue) continue;
 
-        const count = await this.prisma.task.count({ where: { tenantId: task.tenantId } });
+        const count = await this.prisma.working.task.count({ where: { tenantId: task.tenantId } });
         const taskNumber = `TSK-${String(count + 1).padStart(4, '0')}`;
 
-        await this.prisma.task.create({
+        await this.prisma.working.task.create({
           data: {
             tenantId: task.tenantId,
             taskNumber,
@@ -144,7 +144,7 @@ export class ProcessTaskRecurrenceHandler implements ICronJobHandler {
           },
         });
 
-        await this.prisma.task.update({
+        await this.prisma.working.task.update({
           where: { id: task.id },
           data: { nextRecurrenceDate: null },
         });
@@ -178,7 +178,7 @@ export class CheckMissedRemindersHandler implements ICronJobHandler {
 
   async execute(): Promise<CronJobResult> {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    const result = await this.prisma.reminder.updateMany({
+    const result = await this.prisma.working.reminder.updateMany({
       where: {
         isActive: true,
         status: 'PENDING',

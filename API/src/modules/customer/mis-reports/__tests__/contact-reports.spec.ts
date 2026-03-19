@@ -18,6 +18,7 @@ describe('OrgWiseRevenueReport', () => {
       organization: { findMany: jest.fn() },
       lead: { findMany: jest.fn() },
     } as any;
+(mockPrisma as any).working = mockPrisma;
     mockDrillDown = { getLeads: jest.fn() } as any;
     report = new OrgWiseRevenueReport(mockPrisma, mockDrillDown);
   });
@@ -105,6 +106,7 @@ describe('IndustryWiseAnalysisReport', () => {
     mockPrisma = {
       lead: { findMany: jest.fn(), count: jest.fn(), groupBy: jest.fn() },
     } as any;
+(mockPrisma as any).working = mockPrisma;
     mockDrillDown = { getLeads: jest.fn() } as any;
     report = new IndustryWiseAnalysisReport(mockPrisma, mockDrillDown);
   });

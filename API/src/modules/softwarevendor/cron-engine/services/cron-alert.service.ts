@@ -66,7 +66,7 @@ export class CronAlertService {
   ): Promise<void> {
     if (!job.alertRecipientUserIds?.length) return;
     try {
-      await this.prisma.notification.createMany({
+      await this.prisma.working.notification.createMany({
         data: job.alertRecipientUserIds.map((userId) => ({
           recipientId: userId,
           tenantId: '',

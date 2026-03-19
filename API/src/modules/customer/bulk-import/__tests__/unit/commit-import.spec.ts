@@ -27,6 +27,7 @@ describe('CommitImportHandler', () => {
         update: jest.fn().mockResolvedValue({}),
       },
     };
+(prisma as any).working = prisma;
     executor = {
       executeRow: jest.fn().mockResolvedValue({ rowNumber: 1, success: true, action: 'CREATED', entityId: 'e1' }),
     };

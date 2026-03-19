@@ -38,7 +38,7 @@ export class DemoConversionReport implements IReport {
     if (params.userId) where.conductedById = params.userId;
     if (params.filters?.mode) where.mode = params.filters.mode;
 
-    const demos = await this.prisma.demo.findMany({
+    const demos = await this.prisma.working.demo.findMany({
       where,
       select: {
         id: true, scheduledAt: true, completedAt: true,

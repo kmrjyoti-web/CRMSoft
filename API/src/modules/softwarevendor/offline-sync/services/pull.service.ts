@@ -45,7 +45,7 @@ export class PullService {
     const serverTimestamp = new Date();
 
     // 1. Load policy
-    const policy = await this.prisma.syncPolicy.findFirst({
+    const policy = await this.prisma.working.syncPolicy.findFirst({
       where: { entityName, isEnabled: true },
     });
     if (!policy) {
@@ -105,7 +105,7 @@ export class PullService {
 
     // 9. Log to audit
     const durationMs = Date.now() - startTime;
-    await this.prisma.syncAuditLog.create({
+    await this.prisma.working.syncAuditLog.create({
       data: {
         userId,
         deviceId,
@@ -131,7 +131,7 @@ export class PullService {
 
   async fullSync(userId: string, deviceId: string): Promise<FullSyncResult> {
     const startTime = Date.now();
-    const policies = await this.prisma.syncPolicy.findMany({
+    const policies = await this.prisma.working.syncPolicy.findMany({
       where: {
         isEnabled: true,
         direction: { not: 'UPLOAD_ONLY' },
@@ -227,7 +227,7 @@ export class PullService {
     timestamp: Date,
     rowCount: number,
   ): Promise<void> {
-    const device = await this.prisma.syncDevice.findFirst({
+    const device = await this.prisma.working.syncDevice.findFirst({
       where: { userId, deviceId },
     });
     if (!device) return;
@@ -239,7 +239,7 @@ export class PullService {
       rowCount,
     };
 
-    await this.prisma.syncDevice.update({
+    await this.prisma.working.syncDevice.update({
       where: { id: device.id },
       data: {
         entitySyncState,

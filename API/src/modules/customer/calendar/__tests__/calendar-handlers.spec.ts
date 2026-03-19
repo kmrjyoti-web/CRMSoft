@@ -75,6 +75,7 @@ describe('Calendar Cron Handlers', () => {
           findMany: jest.fn().mockResolvedValue([]),
         },
       };
+      (prisma as any).working = prisma;
 
       calendarSyncService = {
         triggerSync: jest.fn().mockResolvedValue({ inbound: 2, outbound: 1 }),
@@ -118,6 +119,7 @@ describe('Calendar Cron Handlers', () => {
           findMany: jest.fn().mockResolvedValue([]),
         },
       };
+      (prisma as any).working = prisma;
 
       handler = new RenewCalendarWebhooksHandler(prisma);
     });
@@ -160,6 +162,7 @@ describe('Calendar Cron Handlers', () => {
           updateMany: jest.fn().mockResolvedValue({ count: 0 }),
         },
       };
+      (prisma as any).working = prisma;
 
       handler = new AutoCompletePastEventsHandler(prisma);
     });
@@ -199,6 +202,7 @@ describe('Calendar Cron Handlers', () => {
           count: jest.fn().mockResolvedValue(10),
         },
       };
+      (prisma as any).working = prisma;
 
       handler = new GenerateRecurringEventsHandler(prisma);
     });

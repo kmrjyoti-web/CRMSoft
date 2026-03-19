@@ -7,7 +7,7 @@ export class CreateTargetHandler implements ICommandHandler<CreateTargetCommand>
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: CreateTargetCommand) {
-    return this.prisma.salesTarget.create({
+    return this.prisma.working.salesTarget.create({
       data: {
         metric: command.metric as any,
         targetValue: command.targetValue,

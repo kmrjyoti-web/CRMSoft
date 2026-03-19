@@ -42,7 +42,7 @@ export class DealVelocityReport implements IReport {
     if (params.filters?.priority) baseWhere.priority = params.filters.priority;
 
     // All leads in the period
-    const allLeads = await this.prisma.lead.findMany({
+    const allLeads = await this.prisma.working.lead.findMany({
       where: baseWhere,
       select: {
         id: true, status: true, expectedValue: true,

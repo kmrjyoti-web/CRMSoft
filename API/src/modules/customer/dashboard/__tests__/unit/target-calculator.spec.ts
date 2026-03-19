@@ -33,6 +33,7 @@ describe('Target Calculator Service', () => {
       demo: { count: jest.fn().mockResolvedValue(10) },
       quotation: { count: jest.fn().mockResolvedValue(15) },
     };
+(prisma as any).working = prisma;
     service = new TargetCalculatorService(prisma);
   });
 

@@ -28,7 +28,7 @@ export class JobRunnerService {
     triggeredBy = 'SCHEDULER',
     retryAttempt = 0,
   ): Promise<CronJobRunLog | null> {
-    const job = await this.prisma.cronJobConfig.findUnique({
+    const job = await this.prisma.working.cronJobConfig.findUnique({
       where: { jobCode },
     });
     if (!job) {
@@ -42,13 +42,13 @@ export class JobRunnerService {
     }
 
     // Acquire lock
-    await this.prisma.cronJobConfig.update({
+    await this.prisma.working.cronJobConfig.update({
       where: { id: job.id },
       data: { isRunning: true },
     });
 
     const startedAt = new Date();
-    const runLog = await this.prisma.cronJobRunLog.create({
+    const runLog = await this.prisma.working.cronJobRunLog.create({
       data: {
         jobId: job.id,
         jobCode,
@@ -64,7 +64,7 @@ export class JobRunnerService {
       const finishedAt = new Date();
       const durationMs = finishedAt.getTime() - startedAt.getTime();
 
-      const updated = await this.prisma.cronJobRunLog.update({
+      const updated = await this.prisma.working.cronJobRunLog.update({
         where: { id: runLog.id },
         data: {
           status: 'SUCCESS',
@@ -82,7 +82,7 @@ export class JobRunnerService {
     } catch (err) {
       return this.handleFailure(job, runLog, err, triggeredBy, retryAttempt);
     } finally {
-      await this.prisma.cronJobConfig.update({
+      await this.prisma.working.cronJobConfig.update({
         where: { id: job.id },
         data: { isRunning: false },
       });
@@ -152,7 +152,7 @@ export class JobRunnerService {
     const finishedAt = new Date();
     const durationMs = finishedAt.getTime() - runLog.startedAt.getTime();
 
-    const updated = await this.prisma.cronJobRunLog.update({
+    const updated = await this.prisma.working.cronJobRunLog.update({
       where: { id: runLog.id },
       data: {
         status,
@@ -164,7 +164,7 @@ export class JobRunnerService {
     });
 
     const newConsec = job.consecutiveFailures + 1;
-    await this.prisma.cronJobConfig.update({
+    await this.prisma.working.cronJobConfig.update({
       where: { id: job.id },
       data: {
         lastRunAt: runLog.startedAt,
@@ -198,7 +198,7 @@ export class JobRunnerService {
 
   private async logSkipped(job: CronJobConfig, triggeredBy: string): Promise<CronJobRunLog> {
     this.logger.warn(`Skipping ${job.jobCode} — already running`);
-    return this.prisma.cronJobRunLog.create({
+    return this.prisma.working.cronJobRunLog.create({
       data: {
         jobId: job.id,
         jobCode: job.jobCode,
@@ -217,7 +217,7 @@ export class JobRunnerService {
       ? Math.round((job.avgDurationMs * job.totalRunCount + durationMs) / newTotal)
       : durationMs;
 
-    await this.prisma.cronJobConfig.update({
+    await this.prisma.working.cronJobConfig.update({
       where: { id: job.id },
       data: {
         lastRunAt: new Date(),

@@ -17,6 +17,7 @@ describe('Quotation Reports', () => {
       const mockPrisma = {
         quotation: { findMany: jest.fn().mockResolvedValue([]), count: jest.fn().mockResolvedValue(0) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new QuotationSummaryReport(mockPrisma, mockDrillDown as any);
       expect(report.code).toBe('QUOTATION_SUMMARY');
       expect(report.category).toBe('QUOTATION');
@@ -46,6 +47,7 @@ describe('Quotation Reports', () => {
       const mockPrisma = {
         quotation: { findMany: jest.fn().mockResolvedValue(mockQuotations), count: jest.fn().mockResolvedValue(3) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new QuotationSummaryReport(mockPrisma, mockDrillDown as any);
       const result = await report.generate(baseParams);
 
@@ -92,6 +94,7 @@ describe('Quotation Reports', () => {
       const mockPrisma = {
         quotation: { findMany: jest.fn().mockResolvedValue(mockQuotations) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new QuotationAgingReport(mockPrisma, mockDrillDown as any);
       const result = await report.generate(baseParams);
 
@@ -113,6 +116,7 @@ describe('Quotation Reports', () => {
       const mockPrisma = {
         quotationLineItem: { findMany: jest.fn().mockResolvedValue(mockLineItems) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new ProductWiseQuotationReport(mockPrisma, mockDrillDown as any);
       const result = await report.generate(baseParams);
 

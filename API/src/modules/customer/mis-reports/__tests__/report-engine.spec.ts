@@ -30,6 +30,7 @@ import { IReport } from '../interfaces/report-class.interface';
 import { ReportParams, ReportData } from '../interfaces/report.interface';
 
 const mockPrisma = { reportExportLog: { create: jest.fn() } } as any;
+(mockPrisma as any).working = mockPrisma;
 
 const mockComparator = {
   getComparisonPeriod: jest.fn().mockReturnValue({

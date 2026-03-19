@@ -4,7 +4,7 @@ const hoursAgo = (h: number) => new Date(Date.now() - h * 3600000);
 const daysAgo = (d: number) => new Date(Date.now() - d * 86400000);
 
 function makeMockPrisma(device: any, rules: any[], flushCommands: any[] = []) {
-  return {
+  const obj: any = {
     syncDevice: {
       findFirst: jest.fn().mockResolvedValue(device),
     },
@@ -14,7 +14,9 @@ function makeMockPrisma(device: any, rules: any[], flushCommands: any[] = []) {
     syncFlushCommand: {
       findMany: jest.fn().mockResolvedValue(flushCommands),
     },
-  } as any;
+  };
+  obj.working = obj;
+  return obj;
 }
 
 function makeRule(overrides: any = {}) {

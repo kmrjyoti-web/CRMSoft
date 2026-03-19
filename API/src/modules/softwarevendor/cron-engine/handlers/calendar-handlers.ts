@@ -29,7 +29,7 @@ export class ProcessEventRemindersHandler implements ICronJobHandler {
     let processed = 0;
 
     // Find events with reminders that haven't been sent yet
-    const events = await this.prisma.scheduledEvent.findMany({
+    const events = await this.prisma.working.scheduledEvent.findMany({
       where: {
         isActive: true,
         status: { notIn: ['CANCELLED', 'COMPLETED'] },
@@ -100,7 +100,7 @@ export class SyncExternalCalendarsHandler implements ICronJobHandler {
   ) {}
 
   async execute(): Promise<CronJobResult> {
-    const syncs = await this.prisma.userCalendarSync.findMany({
+    const syncs = await this.prisma.working.userCalendarSync.findMany({
       where: {
         isActive: true,
         status: 'ACTIVE',
@@ -148,7 +148,7 @@ export class RenewCalendarWebhooksHandler implements ICronJobHandler {
   async execute(): Promise<CronJobResult> {
     const twentyFourHoursFromNow = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    const expiring = await this.prisma.userCalendarSync.findMany({
+    const expiring = await this.prisma.working.userCalendarSync.findMany({
       where: {
         isActive: true,
         status: 'ACTIVE',
@@ -187,7 +187,7 @@ export class AutoCompletePastEventsHandler implements ICronJobHandler {
   async execute(): Promise<CronJobResult> {
     const now = new Date();
 
-    const result = await this.prisma.scheduledEvent.updateMany({
+    const result = await this.prisma.working.scheduledEvent.updateMany({
       where: {
         isActive: true,
         endTime: { lt: now },
@@ -220,7 +220,7 @@ export class GenerateRecurringEventsHandler implements ICronJobHandler {
   async execute(): Promise<CronJobResult> {
     const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
-    const recurringEvents = await this.prisma.scheduledEvent.findMany({
+    const recurringEvents = await this.prisma.working.scheduledEvent.findMany({
       where: {
         isActive: true,
         recurrencePattern: { not: 'NONE' },
@@ -234,7 +234,7 @@ export class GenerateRecurringEventsHandler implements ICronJobHandler {
     for (const event of recurringEvents) {
       try {
         // Find the latest child event to determine the next occurrence date
-        const latestChild = await this.prisma.scheduledEvent.findFirst({
+        const latestChild = await this.prisma.working.scheduledEvent.findFirst({
           where: { parentEventId: event.id, isActive: true },
           orderBy: { startTime: 'desc' },
         });
@@ -248,7 +248,7 @@ export class GenerateRecurringEventsHandler implements ICronJobHandler {
         // Generate events until we pass 30 days from now
         while (nextStart <= thirtyDaysFromNow) {
           // Check if this occurrence already exists
-          const exists = await this.prisma.scheduledEvent.findFirst({
+          const exists = await this.prisma.working.scheduledEvent.findFirst({
             where: {
               parentEventId: event.id,
               startTime: nextStart,
@@ -257,12 +257,12 @@ export class GenerateRecurringEventsHandler implements ICronJobHandler {
           });
 
           if (!exists) {
-            const count = await this.prisma.scheduledEvent.count({
+            const count = await this.prisma.working.scheduledEvent.count({
               where: { tenantId: event.tenantId },
             });
             const eventNumber = `EVT-${String(count + 1).padStart(5, '0')}`;
 
-            await this.prisma.scheduledEvent.create({
+            await this.prisma.working.scheduledEvent.create({
               data: {
                 tenantId: event.tenantId,
                 eventNumber,

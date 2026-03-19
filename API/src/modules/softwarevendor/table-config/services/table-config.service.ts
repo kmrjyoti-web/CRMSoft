@@ -13,13 +13,13 @@ export class TableConfigService {
    */
   async getConfig(tableKey: string, userId: string, tenantId: string) {
     // 1. Try user-specific config
-    const userConfig = await this.prisma.tableConfig.findFirst({
+    const userConfig = await this.prisma.working.tableConfig.findFirst({
       where: { tenantId, tableKey, userId },
     });
     if (userConfig) return userConfig;
 
     // 2. Fall back to tenant-wide default
-    const tenantDefault = await this.prisma.tableConfig.findFirst({
+    const tenantDefault = await this.prisma.working.tableConfig.findFirst({
       where: { tenantId, tableKey, userId: null, isDefault: true },
     });
     return tenantDefault;
@@ -34,7 +34,7 @@ export class TableConfigService {
     tenantId: string,
     config: Record<string, any>,
   ) {
-    return this.prisma.tableConfig.upsert({
+    return this.prisma.working.tableConfig.upsert({
       where: {
         tenantId_tableKey_userId: { tenantId, tableKey, userId },
       },
@@ -58,18 +58,18 @@ export class TableConfigService {
     config: Record<string, any>,
   ) {
     // Use a special composite key with null userId
-    const existing = await this.prisma.tableConfig.findFirst({
+    const existing = await this.prisma.working.tableConfig.findFirst({
       where: { tenantId, tableKey, userId: null, isDefault: true },
     });
 
     if (existing) {
-      return this.prisma.tableConfig.update({
+      return this.prisma.working.tableConfig.update({
         where: { id: existing.id },
         data: { config },
       });
     }
 
-    return this.prisma.tableConfig.create({
+    return this.prisma.working.tableConfig.create({
       data: {
         tenantId,
         tableKey,
@@ -84,12 +84,12 @@ export class TableConfigService {
    * Delete user's config (reset to default).
    */
   async deleteUserConfig(tableKey: string, userId: string, tenantId: string) {
-    const existing = await this.prisma.tableConfig.findFirst({
+    const existing = await this.prisma.working.tableConfig.findFirst({
       where: { tenantId, tableKey, userId },
     });
     if (!existing) return { deleted: false };
 
-    await this.prisma.tableConfig.delete({ where: { id: existing.id } });
+    await this.prisma.working.tableConfig.delete({ where: { id: existing.id } });
     return { deleted: true };
   }
 }

@@ -43,7 +43,7 @@ export class TargetVsAchievementReport implements IReport {
     if (params.userId) where.userId = params.userId;
     if (params.filters?.metric) where.metric = params.filters.metric;
 
-    const targets = await this.prisma.salesTarget.findMany({ where });
+    const targets = await this.prisma.working.salesTarget.findMany({ where });
 
     // Fetch user names for targets that have userId
     const userIds = [...new Set(targets.filter(t => t.userId).map(t => t.userId!))];

@@ -43,8 +43,8 @@ export class ExportController {
     const page = +q.page || 1;
     const limit = +q.limit || 20;
     const [data, total] = await Promise.all([
-      this.prisma.exportJob.findMany({ skip: (page - 1) * limit, take: limit, orderBy: { createdAt: 'desc' } }),
-      this.prisma.exportJob.count(),
+      this.prisma.working.exportJob.findMany({ skip: (page - 1) * limit, take: limit, orderBy: { createdAt: 'desc' } }),
+      this.prisma.working.exportJob.count(),
     ]);
     return ApiResponse.paginated(data, total, page, limit);
   }
@@ -53,7 +53,7 @@ export class ExportController {
   @Get(':jobId/download')
   @RequirePermissions('export:read')
   async download(@Param('jobId') jobId: string, @Res() res: Response) {
-    const job = await this.prisma.exportJob.findUniqueOrThrow({ where: { id: jobId } });
+    const job = await this.prisma.working.exportJob.findUniqueOrThrow({ where: { id: jobId } });
     if (!job.fileUrl) return res.status(404).json(ApiResponse.error('File not ready'));
 
     const filePath = path.join(process.cwd(), 'uploads', job.fileUrl);

@@ -16,6 +16,7 @@ const mockPrisma = {
     findMany: jest.fn(),
   },
 } as any;
+(mockPrisma as any).working = mockPrisma;
 
 function createService() {
   return new ConflictResolverService(mockPrisma, mockEntityResolver as any);

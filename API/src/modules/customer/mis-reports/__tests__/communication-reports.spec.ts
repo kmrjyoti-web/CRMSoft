@@ -19,6 +19,7 @@ describe('Communication Reports', () => {
         quotationSendLog: { findMany: jest.fn().mockResolvedValue([]) },
         lead: { count: jest.fn().mockResolvedValue(0) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new EmailPerformanceReport(mockPrisma, mockDrillDown as any);
       expect(report.code).toBe('EMAIL_PERFORMANCE');
       expect(report.category).toBe('COMMUNICATION');
@@ -35,6 +36,7 @@ describe('Communication Reports', () => {
         quotationSendLog: { findMany: jest.fn().mockResolvedValue([]) },
         lead: { count: jest.fn().mockResolvedValue(10) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new EmailPerformanceReport(mockPrisma, mockDrillDown as any);
       const result = await report.generate(baseParams);
 
@@ -60,6 +62,7 @@ describe('Communication Reports', () => {
         activity: { findMany: jest.fn().mockResolvedValue(mockActivities) },
         lead: { findMany: jest.fn().mockResolvedValue(mockLeads) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new ChannelEffectivenessReport(mockPrisma, mockDrillDown as any);
       const result = await report.generate(baseParams);
 
@@ -78,6 +81,7 @@ describe('Communication Reports', () => {
       const mockPrisma = {
         quotationSendLog: { findMany: jest.fn().mockResolvedValue(mockSendLogs) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new CampaignReport(mockPrisma, mockDrillDown as any);
       const result = await report.generate(baseParams);
 

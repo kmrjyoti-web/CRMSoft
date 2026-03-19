@@ -23,6 +23,7 @@ describe('Executive Reports', () => {
         salesTarget: { findMany: jest.fn().mockResolvedValue([]) },
         user: { count: jest.fn().mockResolvedValue(0) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new CeoDashboardReport(mockPrisma, mockDrillDown as any);
       expect(report.code).toBe('CEO_DASHBOARD');
       expect(report.category).toBe('EXECUTIVE');
@@ -67,6 +68,7 @@ describe('Executive Reports', () => {
         lead: { findMany: jest.fn().mockResolvedValue(mockLeads) },
         activity: { findMany: jest.fn().mockResolvedValue(mockActivities) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new PipelineHealthReport(mockPrisma, mockDrillDown as any);
       const result = await report.generate(baseParams);
 
@@ -87,6 +89,7 @@ describe('Executive Reports', () => {
       const mockPrisma = {
         lead: { findMany: jest.fn().mockResolvedValue(mockLeads) },
       } as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new CustomerConcentrationReport(mockPrisma, mockDrillDown as any);
       const result = await report.generate(baseParams);
 
@@ -98,6 +101,7 @@ describe('Executive Reports', () => {
   describe('CustomReportReport', () => {
     it('returns correct report code and supports dynamic queries', () => {
       const mockPrisma = {} as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new CustomReportReport(mockPrisma, mockDrillDown as any);
       expect(report.code).toBe('CUSTOM_REPORT');
       expect(report.category).toBe('CUSTOM');
@@ -106,6 +110,7 @@ describe('Executive Reports', () => {
 
     it('handles unknown entity gracefully', async () => {
       const mockPrisma = {} as any;
+(mockPrisma as any).working = mockPrisma;
       const report = new CustomReportReport(mockPrisma, mockDrillDown as any);
       const result = await report.generate({
         ...baseParams,

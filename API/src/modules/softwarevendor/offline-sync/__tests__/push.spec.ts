@@ -34,6 +34,7 @@ const mockPrisma = {
     create: jest.fn(),
   },
 } as any;
+(mockPrisma as any).working = mockPrisma;
 
 function createService() {
   return new PushService(mockPrisma, mockEntityResolver as any, mockConflictResolver as any);

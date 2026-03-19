@@ -15,10 +15,10 @@ export class ValidateRowsHandler implements ICommandHandler<ValidateRowsCommand>
   ) {}
 
   async execute(cmd: ValidateRowsCommand) {
-    await this.prisma.importJob.update({ where: { id: cmd.jobId }, data: { status: 'VALIDATING' } });
+    await this.prisma.working.importJob.update({ where: { id: cmd.jobId }, data: { status: 'VALIDATING' } });
 
-    const job = await this.prisma.importJob.findUniqueOrThrow({ where: { id: cmd.jobId } });
-    const rows = await this.prisma.importRow.findMany({
+    const job = await this.prisma.working.importJob.findUniqueOrThrow({ where: { id: cmd.jobId } });
+    const rows = await this.prisma.working.importRow.findMany({
       where: { importJobId: cmd.jobId },
       orderBy: { rowNumber: 'asc' },
     });
@@ -114,12 +114,12 @@ export class ValidateRowsHandler implements ICommandHandler<ValidateRowsCommand>
     for (let i = 0; i < batchUpdates.length; i += CHUNK) {
       const chunk = batchUpdates.slice(i, i + CHUNK);
       await this.prisma.$transaction(
-        chunk.map((u) => this.prisma.importRow.update({ where: { id: u.id }, data: u.data })),
+        chunk.map((u) => this.prisma.working.importRow.update({ where: { id: u.id }, data: u.data })),
       );
     }
 
     // Update job counts
-    await this.prisma.importJob.update({
+    await this.prisma.working.importJob.update({
       where: { id: cmd.jobId },
       data: {
         status: 'VALIDATED',

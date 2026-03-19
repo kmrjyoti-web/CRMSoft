@@ -9,12 +9,12 @@ export class ContactOrgRepository implements IContactOrgRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<ContactOrganizationEntity | null> {
-    const record = await this.prisma.contactOrganization.findUnique({ where: { id } });
+    const record = await this.prisma.working.contactOrganization.findUnique({ where: { id } });
     return record ? ContactOrgMapper.toDomain(record) : null;
   }
 
   async findByContactAndOrg(contactId: string, organizationId: string): Promise<ContactOrganizationEntity | null> {
-    const record = await this.prisma.contactOrganization.findFirst({
+    const record = await this.prisma.working.contactOrganization.findFirst({
       where: { contactId, organizationId },
     });
     return record ? ContactOrgMapper.toDomain(record) : null;
@@ -22,7 +22,7 @@ export class ContactOrgRepository implements IContactOrgRepository {
 
   async save(entity: ContactOrganizationEntity): Promise<void> {
     const data = ContactOrgMapper.toPersistence(entity);
-    await this.prisma.contactOrganization.upsert({
+    await this.prisma.working.contactOrganization.upsert({
       where: { id: entity.id },
       create: data,
       update: data,
@@ -30,6 +30,6 @@ export class ContactOrgRepository implements IContactOrgRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.prisma.contactOrganization.delete({ where: { id } });
+    await this.prisma.working.contactOrganization.delete({ where: { id } });
   }
 }

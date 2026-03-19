@@ -35,7 +35,7 @@ export class ProductWiseQuotationReport implements IReport {
     if (params.userId) where.quotation.createdById = params.userId;
     if (params.filters?.productName) where.productName = { contains: params.filters.productName, mode: 'insensitive' };
 
-    const lineItems = await this.prisma.quotationLineItem.findMany({
+    const lineItems = await this.prisma.working.quotationLineItem.findMany({
       where,
       include: {
         quotation: { select: { status: true } },
@@ -138,14 +138,14 @@ export class ProductWiseQuotationReport implements IReport {
 
     const skip = (params.page - 1) * params.limit;
     const [records, total] = await Promise.all([
-      this.prisma.quotation.findMany({
+      this.prisma.working.quotation.findMany({
         where, skip, take: params.limit, orderBy: { createdAt: 'desc' },
         include: {
           lineItems: { where: { productName: params.value }, select: { quantity: true, unitPrice: true, lineTotal: true } },
           createdByUser: { select: { firstName: true, lastName: true } },
         },
       }),
-      this.prisma.quotation.count({ where }),
+      this.prisma.working.quotation.count({ where }),
     ]);
 
     const columns: ColumnDef[] = [

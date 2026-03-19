@@ -20,6 +20,7 @@ describe('ResultReportService', () => {
         findMany: jest.fn().mockResolvedValue([]),
       },
     };
+(prisma as any).working = prisma;
     service = new ResultReportService(prisma);
   });
 

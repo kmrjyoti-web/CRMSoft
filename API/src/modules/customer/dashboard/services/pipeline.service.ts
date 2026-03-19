@@ -23,7 +23,7 @@ export class PipelineService {
     const where: any = {};
     if (params.userId) where.allocatedToId = params.userId;
 
-    const leadsGrouped = await this.prisma.lead.groupBy({
+    const leadsGrouped = await this.prisma.working.lead.groupBy({
       by: ['status'],
       where,
       _count: true,
@@ -78,33 +78,33 @@ export class PipelineService {
     const where: any = { createdAt: { gte: dateFrom, lte: dateTo } };
     if (userId) where.allocatedToId = userId;
 
-    const totalLeads = await this.prisma.lead.count({ where });
+    const totalLeads = await this.prisma.working.lead.count({ where });
 
     // Leads with at least one activity
-    const contacted = await this.prisma.lead.count({
+    const contacted = await this.prisma.working.lead.count({
       where: { ...where, activities: { some: {} } },
     });
 
     // Leads with status >= VERIFIED
-    const qualified = await this.prisma.lead.count({
+    const qualified = await this.prisma.working.lead.count({
       where: { ...where, status: { in: ['VERIFIED', 'ALLOCATED', 'IN_PROGRESS', 'DEMO_SCHEDULED', 'QUOTATION_SENT', 'NEGOTIATION', 'WON'] } },
     });
 
     // Leads with at least one completed demo
-    const demoGiven = await this.prisma.lead.count({
+    const demoGiven = await this.prisma.working.lead.count({
       where: { ...where, demos: { some: { status: 'COMPLETED' } } },
     });
 
     // Leads with at least one non-draft quotation
-    const quotationSent = await this.prisma.lead.count({
+    const quotationSent = await this.prisma.working.lead.count({
       where: { ...where, quotations: { some: { status: { not: 'DRAFT' } } } },
     });
 
-    const negotiation = await this.prisma.lead.count({
+    const negotiation = await this.prisma.working.lead.count({
       where: { ...where, status: { in: ['NEGOTIATION', 'WON'] } },
     });
 
-    const won = await this.prisma.lead.count({
+    const won = await this.prisma.working.lead.count({
       where: { ...where, status: 'WON' },
     });
 

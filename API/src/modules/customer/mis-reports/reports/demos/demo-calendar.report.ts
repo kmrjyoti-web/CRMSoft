@@ -33,7 +33,7 @@ export class DemoCalendarReport implements IReport {
     if (params.userId) where.conductedById = params.userId;
     if (params.filters?.mode) where.mode = params.filters.mode;
 
-    const demos = await this.prisma.demo.findMany({
+    const demos = await this.prisma.working.demo.findMany({
       where,
       select: {
         id: true, status: true, mode: true, scheduledAt: true,

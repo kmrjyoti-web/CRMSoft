@@ -94,11 +94,11 @@ export class PatchGeneratorService {
     try {
       switch (targetEntity) {
         case 'CONTACT':
-          return this.prisma.contact.findUnique({ where: { id: entityId } });
+          return this.prisma.working.contact.findUnique({ where: { id: entityId } });
         case 'ORGANIZATION':
-          return this.prisma.organization.findUnique({ where: { id: entityId } });
+          return this.prisma.working.organization.findUnique({ where: { id: entityId } });
         case 'LEAD':
-          return this.prisma.lead.findUnique({ where: { id: entityId } });
+          return this.prisma.working.lead.findUnique({ where: { id: entityId } });
         default:
           return null;
       }

@@ -204,7 +204,7 @@ export class DuplicateDetectorService {
 
     if (targetEntity === 'ROW_CONTACT' || targetEntity === 'CONTACT' || targetEntity === 'LEAD') {
       if (field === 'email' || field === 'mobile' || field === 'phone') {
-        const comms = await this.prisma.communication.findMany({
+        const comms = await this.prisma.working.communication.findMany({
           where: { value: { in: values, mode: 'insensitive' } },
           select: { value: true, contactId: true, rawContactId: true },
         });
@@ -219,7 +219,7 @@ export class DuplicateDetectorService {
 
     if (targetEntity === 'ORGANIZATION') {
       if (field === 'name' || field === 'organization.name') {
-        const orgs = await this.prisma.organization.findMany({
+        const orgs = await this.prisma.working.organization.findMany({
           where: { name: { in: values, mode: 'insensitive' }, isActive: true },
           select: { id: true, name: true },
         });
@@ -233,7 +233,7 @@ export class DuplicateDetectorService {
   /** Load fuzzy match candidates from DB */
   private async loadFuzzyCandidates(targetEntity: string, limit: number): Promise<any[]> {
     if (targetEntity === 'CONTACT') {
-      return this.prisma.contact.findMany({
+      return this.prisma.working.contact.findMany({
         where: { isActive: true },
         select: { id: true, firstName: true, lastName: true, organization: { select: { name: true } } },
         take: limit,
@@ -241,7 +241,7 @@ export class DuplicateDetectorService {
       });
     }
     if (targetEntity === 'ORGANIZATION') {
-      return this.prisma.organization.findMany({
+      return this.prisma.working.organization.findMany({
         where: { isActive: true },
         select: { id: true, name: true, city: true },
         take: limit,

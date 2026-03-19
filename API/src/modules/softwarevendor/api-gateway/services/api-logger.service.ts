@@ -40,7 +40,7 @@ export class ApiLoggerService {
       if (params.statusCode >= 500) level = 'API_ERROR';
       else if (params.statusCode >= 400) level = 'API_WARN';
 
-      await this.prisma.apiRequestLog.create({
+      await this.prisma.working.apiRequestLog.create({
         data: {
           tenantId: params.tenantId,
           apiKeyId: params.apiKeyId,
@@ -91,13 +91,13 @@ export class ApiLoggerService {
     const limit = query.limit || 50;
 
     const [data, total] = await Promise.all([
-      this.prisma.apiRequestLog.findMany({
+      this.prisma.working.apiRequestLog.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.apiRequestLog.count({ where }),
+      this.prisma.working.apiRequestLog.count({ where }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
@@ -107,7 +107,7 @@ export class ApiLoggerService {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - retentionDays);
 
-    const result = await this.prisma.apiRequestLog.deleteMany({
+    const result = await this.prisma.working.apiRequestLog.deleteMany({
       where: { createdAt: { lt: cutoff } },
     });
 

@@ -114,11 +114,11 @@ export class MisReportsController {
     const page = dto.page || 1;
     const limit = dto.limit || 20;
     const [data, total] = await Promise.all([
-      this.prisma.reportExportLog.findMany({
+      this.prisma.working.reportExportLog.findMany({
         where, skip: (page - 1) * limit, take: limit,
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.reportExportLog.count({ where }),
+      this.prisma.working.reportExportLog.count({ where }),
     ]);
     return ApiResponse.paginated(data, total, page, limit);
   }
@@ -127,7 +127,7 @@ export class MisReportsController {
   @Get('exports/:id/download')
   @RequirePermissions('reports:read')
   async download(@Param('id') id: string, @Res() res: Response) {
-    const exportLog = await this.prisma.reportExportLog.findFirst({ where: { id } });
+    const exportLog = await this.prisma.working.reportExportLog.findFirst({ where: { id } });
     if (!exportLog || !exportLog.fileUrl) {
       return res.status(404).json(ApiResponse.error('Export file not found'));
     }

@@ -11,10 +11,10 @@ export class NotificationCleanupHandler implements ICronJobHandler {
   async execute(params: Record<string, any>): Promise<CronJobResult> {
     const days = params.retentionDays ?? 90;
     const cutoff = new Date(Date.now() - days * 86400000);
-    const archived = await this.prisma.notification.deleteMany({
+    const archived = await this.prisma.working.notification.deleteMany({
       where: { status: 'READ', createdAt: { lt: cutoff } },
     });
-    const expired = await this.prisma.notification.deleteMany({
+    const expired = await this.prisma.working.notification.deleteMany({
       where: { createdAt: { lt: new Date(Date.now() - 180 * 86400000) } },
     });
     return { recordsProcessed: archived.count + expired.count };
@@ -28,7 +28,7 @@ export class DigestHourlyHandler implements ICronJobHandler {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(): Promise<CronJobResult> {
-    const prefs = await this.prisma.notificationPreference.findMany({
+    const prefs = await this.prisma.working.notificationPreference.findMany({
       where: { digestFrequency: 'HOURLY' },
     });
     return { recordsProcessed: prefs.length };
@@ -42,7 +42,7 @@ export class DigestDailyHandler implements ICronJobHandler {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(): Promise<CronJobResult> {
-    const prefs = await this.prisma.notificationPreference.findMany({
+    const prefs = await this.prisma.working.notificationPreference.findMany({
       where: { digestFrequency: 'DAILY' },
     });
     return { recordsProcessed: prefs.length };
@@ -56,7 +56,7 @@ export class DigestWeeklyHandler implements ICronJobHandler {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(): Promise<CronJobResult> {
-    const prefs = await this.prisma.notificationPreference.findMany({
+    const prefs = await this.prisma.working.notificationPreference.findMany({
       where: { digestFrequency: 'WEEKLY' },
     });
     return { recordsProcessed: prefs.length };
@@ -71,7 +71,7 @@ export class RegroupNotificationsHandler implements ICronJobHandler {
 
   async execute(): Promise<CronJobResult> {
     const cutoff = new Date(Date.now() - 30 * 60 * 1000);
-    const ungrouped = await this.prisma.notification.findMany({
+    const ungrouped = await this.prisma.working.notification.findMany({
       where: { groupKey: null, createdAt: { gte: cutoff } },
     });
     return { recordsProcessed: ungrouped.length };
@@ -86,7 +86,7 @@ export class CleanupPushSubscriptionsHandler implements ICronJobHandler {
 
   async execute(): Promise<CronJobResult> {
     const cutoff = new Date(Date.now() - 60 * 86400000);
-    const result = await this.prisma.pushSubscription.deleteMany({
+    const result = await this.prisma.working.pushSubscription.deleteMany({
       where: { isActive: false, updatedAt: { lt: cutoff } },
     });
     return { recordsProcessed: result.count };

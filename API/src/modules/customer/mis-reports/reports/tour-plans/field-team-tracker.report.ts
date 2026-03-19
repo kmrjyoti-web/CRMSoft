@@ -34,7 +34,7 @@ export class FieldTeamTrackerReport implements IReport {
     };
     if (params.userId) where.tourPlan = { salesPersonId: params.userId };
 
-    const visits = await this.prisma.tourPlanVisit.findMany({
+    const visits = await this.prisma.working.tourPlanVisit.findMany({
       where,
       select: {
         id: true, createdAt: true,
@@ -144,7 +144,7 @@ export class FieldTeamTrackerReport implements IReport {
 
     const skip = (params.page - 1) * params.limit;
     const [records, total] = await Promise.all([
-      this.prisma.tourPlanVisit.findMany({
+      this.prisma.working.tourPlanVisit.findMany({
         where,
         include: {
           tourPlan: { select: { planDate: true, salesPerson: { select: { firstName: true, lastName: true } } } },
@@ -154,7 +154,7 @@ export class FieldTeamTrackerReport implements IReport {
         skip,
         take: params.limit,
       }),
-      this.prisma.tourPlanVisit.count({ where }),
+      this.prisma.working.tourPlanVisit.count({ where }),
     ]);
 
     const columns: ColumnDef[] = [

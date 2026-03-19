@@ -35,7 +35,7 @@ export class QuotationSummaryReport implements IReport {
     if (params.userId) where.createdById = params.userId;
     if (params.filters?.status) where.status = { in: params.filters.status };
 
-    const quotations = await this.prisma.quotation.findMany({
+    const quotations = await this.prisma.working.quotation.findMany({
       where,
       include: {
         sendLogs: { orderBy: { sentAt: 'asc' }, take: 1, select: { sentAt: true } },
@@ -140,11 +140,11 @@ export class QuotationSummaryReport implements IReport {
     if (params.dimension === 'status') where.status = params.value;
     const skip = (params.page - 1) * params.limit;
     const [records, total] = await Promise.all([
-      this.prisma.quotation.findMany({
+      this.prisma.working.quotation.findMany({
         where, skip, take: params.limit, orderBy: { createdAt: 'desc' },
         include: { createdByUser: { select: { firstName: true, lastName: true } } },
       }),
-      this.prisma.quotation.count({ where }),
+      this.prisma.working.quotation.count({ where }),
     ]);
     const columns: ColumnDef[] = [
       { key: 'quotationNo', header: 'Quotation #', width: 18 }, { key: 'title', header: 'Title', width: 25 },

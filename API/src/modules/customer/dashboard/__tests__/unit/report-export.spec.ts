@@ -39,6 +39,7 @@ describe('Report Export Service', () => {
         count: jest.fn().mockResolvedValue(1),
       },
     };
+(prisma as any).working = prisma;
     service = new ReportExportService(prisma);
   });
 

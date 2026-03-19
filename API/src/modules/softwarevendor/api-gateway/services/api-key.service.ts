@@ -76,7 +76,7 @@ export class ApiKeyService {
     const keyPrefix = `crm_${env}_`;
     const keyLastFour = random.substring(random.length - 4);
 
-    const apiKey = await this.prisma.apiKey.create({
+    const apiKey = await this.prisma.working.apiKey.create({
       data: {
         tenantId,
         name: dto.name,
@@ -114,12 +114,12 @@ export class ApiKeyService {
       return { apiKey: cached.apiKey, tenantId: cached.apiKey.tenantId };
     }
 
-    const apiKey = await this.prisma.apiKey.findUnique({ where: { keyHash } });
+    const apiKey = await this.prisma.working.apiKey.findUnique({ where: { keyHash } });
 
     if (!apiKey) return null;
     if (apiKey.status !== 'API_ACTIVE') return null;
     if (apiKey.expiresAt && apiKey.expiresAt < new Date()) {
-      await this.prisma.apiKey.update({
+      await this.prisma.working.apiKey.update({
         where: { id: apiKey.id },
         data: { status: 'API_EXPIRED' },
       });
@@ -127,7 +127,7 @@ export class ApiKeyService {
     }
 
     // Update usage
-    await this.prisma.apiKey.update({
+    await this.prisma.working.apiKey.update({
       where: { id: apiKey.id },
       data: {
         lastUsedAt: new Date(),
@@ -144,7 +144,7 @@ export class ApiKeyService {
   }
 
   async listByTenant(tenantId: string) {
-    return this.prisma.apiKey.findMany({
+    return this.prisma.working.apiKey.findMany({
       where: { tenantId },
       select: {
         id: true, name: true, description: true, keyPrefix: true, keyLastFour: true,
@@ -158,7 +158,7 @@ export class ApiKeyService {
   }
 
   async getById(tenantId: string, apiKeyId: string) {
-    const key = await this.prisma.apiKey.findFirst({
+    const key = await this.prisma.working.apiKey.findFirst({
       where: { id: apiKeyId, tenantId },
       select: {
         id: true, name: true, description: true, keyPrefix: true, keyLastFour: true,
@@ -174,12 +174,12 @@ export class ApiKeyService {
   }
 
   async revoke(tenantId: string, apiKeyId: string, reason: string, userId: string) {
-    const key = await this.prisma.apiKey.findFirst({
+    const key = await this.prisma.working.apiKey.findFirst({
       where: { id: apiKeyId, tenantId },
     });
     if (!key) throw AppError.from('API_KEY_NOT_FOUND');
 
-    await this.prisma.apiKey.update({
+    await this.prisma.working.apiKey.update({
       where: { id: apiKeyId },
       data: {
         status: 'API_REVOKED',
@@ -201,10 +201,10 @@ export class ApiKeyService {
       }
     }
 
-    const key = await this.prisma.apiKey.findFirst({ where: { id: apiKeyId, tenantId } });
+    const key = await this.prisma.working.apiKey.findFirst({ where: { id: apiKeyId, tenantId } });
     if (!key) throw AppError.from('API_KEY_NOT_FOUND');
 
-    const updated = await this.prisma.apiKey.update({
+    const updated = await this.prisma.working.apiKey.update({
       where: { id: apiKeyId },
       data: { scopes },
     });
@@ -214,7 +214,7 @@ export class ApiKeyService {
   }
 
   async regenerate(tenantId: string, apiKeyId: string, userId: string, userName: string) {
-    const oldKey = await this.prisma.apiKey.findFirst({ where: { id: apiKeyId, tenantId } });
+    const oldKey = await this.prisma.working.apiKey.findFirst({ where: { id: apiKeyId, tenantId } });
     if (!oldKey) throw AppError.from('API_KEY_NOT_FOUND');
 
     await this.revoke(tenantId, apiKeyId, 'Regenerated', userId);
@@ -232,7 +232,7 @@ export class ApiKeyService {
   }
 
   async resetDailyCounters() {
-    const result = await this.prisma.apiKey.updateMany({
+    const result = await this.prisma.working.apiKey.updateMany({
       where: { status: 'API_ACTIVE' },
       data: { requestsToday: 0, lastResetDate: new Date() },
     });
@@ -241,7 +241,7 @@ export class ApiKeyService {
   }
 
   async resetHourlyCounters() {
-    const result = await this.prisma.apiKey.updateMany({
+    const result = await this.prisma.working.apiKey.updateMany({
       where: { status: 'API_ACTIVE' },
       data: { requestsThisHour: 0, lastResetHour: new Date() },
     });
@@ -249,7 +249,7 @@ export class ApiKeyService {
   }
 
   async markExpiredKeys() {
-    const result = await this.prisma.apiKey.updateMany({
+    const result = await this.prisma.working.apiKey.updateMany({
       where: {
         status: 'API_ACTIVE',
         expiresAt: { lt: new Date() },

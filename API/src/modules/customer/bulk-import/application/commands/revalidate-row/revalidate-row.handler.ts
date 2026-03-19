@@ -11,14 +11,14 @@ export class RevalidateRowHandler implements ICommandHandler<RevalidateRowComman
   ) {}
 
   async execute(cmd: RevalidateRowCommand) {
-    const row = await this.prisma.importRow.findUniqueOrThrow({ where: { id: cmd.rowId } });
-    const job = await this.prisma.importJob.findUniqueOrThrow({ where: { id: cmd.jobId } });
+    const row = await this.prisma.working.importRow.findUniqueOrThrow({ where: { id: cmd.rowId } });
+    const job = await this.prisma.working.importJob.findUniqueOrThrow({ where: { id: cmd.jobId } });
 
     const data = (row.userEditedData || row.mappedData || {}) as Record<string, any>;
     const rules = (job.validationRules as any[]) || [];
     const result = this.rowValidator.validateRow(data, rules);
 
-    await this.prisma.importRow.update({
+    await this.prisma.working.importRow.update({
       where: { id: cmd.rowId },
       data: {
         rowStatus: result.valid ? 'VALID' : 'INVALID',

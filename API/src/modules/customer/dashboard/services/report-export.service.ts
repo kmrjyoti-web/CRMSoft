@@ -51,7 +51,7 @@ export class ReportExportService {
     }
 
     const duration = Date.now() - startTime;
-    await this.prisma.reportExportLog.create({
+    await this.prisma.working.reportExportLog.create({
       data: {
         reportType: reportType as any, format: format as any, filters: filters as any,
         recordCount: data.length, fileUrl: filePath, fileSize, status: 'COMPLETED',
@@ -75,7 +75,7 @@ export class ReportExportService {
         if (hasDateFilter) where.createdAt = dateFilter;
         if (filters.status) where.status = filters.status;
         if (filters.userId) where.allocatedToId = filters.userId;
-        const leads = await this.prisma.lead.findMany({
+        const leads = await this.prisma.working.lead.findMany({
           where, include: { contact: { select: { firstName: true, lastName: true } },
             organization: { select: { name: true } },
             allocatedTo: { select: { firstName: true, lastName: true } } },
@@ -106,7 +106,7 @@ export class ReportExportService {
         const where: any = {};
         if (hasDateFilter) where.createdAt = dateFilter;
         if (filters.userId) where.createdById = filters.userId;
-        const activities = await this.prisma.activity.findMany({
+        const activities = await this.prisma.working.activity.findMany({
           where, include: { lead: { select: { leadNumber: true } },
             createdByUser: { select: { firstName: true, lastName: true } } },
           orderBy: { createdAt: 'desc' },
@@ -131,7 +131,7 @@ export class ReportExportService {
         const where: any = {};
         if (hasDateFilter) where.createdAt = dateFilter;
         if (filters.status) where.status = filters.status;
-        const quotations = await this.prisma.quotation.findMany({
+        const quotations = await this.prisma.working.quotation.findMany({
           where, include: { lead: { select: { leadNumber: true } },
             createdByUser: { select: { firstName: true, lastName: true } } },
           orderBy: { createdAt: 'desc' },
@@ -224,10 +224,10 @@ export class ReportExportService {
   async getExportHistory(userId: string, page = 1, limit = 20) {
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
-      this.prisma.reportExportLog.findMany({
+      this.prisma.working.reportExportLog.findMany({
         where: { exportedById: userId }, orderBy: { createdAt: 'desc' }, skip, take: limit,
       }),
-      this.prisma.reportExportLog.count({ where: { exportedById: userId } }),
+      this.prisma.working.reportExportLog.count({ where: { exportedById: userId } }),
     ]);
     return { data, total, page, limit };
   }

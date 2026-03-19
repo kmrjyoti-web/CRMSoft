@@ -18,14 +18,14 @@ export class TeamPerformanceService {
     const userMetrics = await Promise.all(users.map(async u => {
       const [leadsWon, leadsLost, leadsActive, leadsNew,
              activities, demos, quotations, tourPlans] = await Promise.all([
-        this.prisma.lead.count({ where: { allocatedToId: u.id, status: 'WON', updatedAt: { gte: dateFrom, lte: dateTo } } }),
-        this.prisma.lead.count({ where: { allocatedToId: u.id, status: 'LOST', updatedAt: { gte: dateFrom, lte: dateTo } } }),
-        this.prisma.lead.count({ where: { allocatedToId: u.id, status: { notIn: ['WON', 'LOST'] } } }),
-        this.prisma.lead.count({ where: { allocatedToId: u.id, createdAt: { gte: dateFrom, lte: dateTo } } }),
-        this.prisma.activity.findMany({ where: { createdById: u.id, createdAt: { gte: dateFrom, lte: dateTo } }, select: { type: true } }),
-        this.prisma.demo.groupBy({ by: ['status'], where: { conductedById: u.id, scheduledAt: { gte: dateFrom, lte: dateTo } }, _count: true }),
-        this.prisma.quotation.findMany({ where: { createdById: u.id, createdAt: { gte: dateFrom, lte: dateTo } }, select: { status: true, totalAmount: true } }),
-        this.prisma.tourPlan.count({ where: { salesPersonId: u.id, status: 'COMPLETED', planDate: { gte: dateFrom, lte: dateTo } } }),
+        this.prisma.working.lead.count({ where: { allocatedToId: u.id, status: 'WON', updatedAt: { gte: dateFrom, lte: dateTo } } }),
+        this.prisma.working.lead.count({ where: { allocatedToId: u.id, status: 'LOST', updatedAt: { gte: dateFrom, lte: dateTo } } }),
+        this.prisma.working.lead.count({ where: { allocatedToId: u.id, status: { notIn: ['WON', 'LOST'] } } }),
+        this.prisma.working.lead.count({ where: { allocatedToId: u.id, createdAt: { gte: dateFrom, lte: dateTo } } }),
+        this.prisma.working.activity.findMany({ where: { createdById: u.id, createdAt: { gte: dateFrom, lte: dateTo } }, select: { type: true } }),
+        this.prisma.working.demo.groupBy({ by: ['status'], where: { conductedById: u.id, scheduledAt: { gte: dateFrom, lte: dateTo } }, _count: true }),
+        this.prisma.working.quotation.findMany({ where: { createdById: u.id, createdAt: { gte: dateFrom, lte: dateTo } }, select: { status: true, totalAmount: true } }),
+        this.prisma.working.tourPlan.count({ where: { salesPersonId: u.id, status: 'COMPLETED', planDate: { gte: dateFrom, lte: dateTo } } }),
       ]);
 
       const totalDays = Math.max(1, Math.ceil((dateTo.getTime() - dateFrom.getTime()) / 86400000));

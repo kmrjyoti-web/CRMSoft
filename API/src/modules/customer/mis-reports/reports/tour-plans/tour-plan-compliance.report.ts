@@ -39,7 +39,7 @@ export class TourPlanComplianceReport implements IReport {
     if (params.userId) where.salesPersonId = params.userId;
     if (params.filters?.status) where.status = params.filters.status;
 
-    const plans = await this.prisma.tourPlan.findMany({
+    const plans = await this.prisma.working.tourPlan.findMany({
       where,
       select: {
         id: true, planDate: true, status: true,

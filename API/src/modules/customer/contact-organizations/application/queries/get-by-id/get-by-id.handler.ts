@@ -8,7 +8,7 @@ export class GetContactOrgByIdHandler implements IQueryHandler<GetContactOrgById
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetContactOrgByIdQuery) {
-    const mapping = await this.prisma.contactOrganization.findUnique({
+    const mapping = await this.prisma.working.contactOrganization.findUnique({
       where: { id: query.mappingId },
       include: {
         contact: {

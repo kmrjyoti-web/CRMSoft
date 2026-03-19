@@ -16,11 +16,11 @@ export class GetProfileListHandler implements IQueryHandler<GetProfileListQuery>
     else where.status = { not: 'ARCHIVED' };
 
     const [data, total] = await Promise.all([
-      this.prisma.importProfile.findMany({
+      this.prisma.working.importProfile.findMany({
         where, skip: (page - 1) * limit, take: limit,
         orderBy: { usageCount: 'desc' },
       }),
-      this.prisma.importProfile.count({ where }),
+      this.prisma.working.importProfile.count({ where }),
     ]);
 
     return { data, total, page, limit };

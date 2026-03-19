@@ -13,6 +13,7 @@ const mockPrisma = {
     findMany: jest.fn().mockResolvedValue([]),
   },
 } as any;
+(mockPrisma as any).working = mockPrisma;
 
 const mockRegistry = {
   getHandler: jest.fn(),

@@ -17,6 +17,7 @@ describe('Sales Pipeline & Funnel', () => {
         count: jest.fn().mockResolvedValue(10),
       },
     };
+(prisma as any).working = prisma;
     service = new PipelineService(prisma);
   });
 

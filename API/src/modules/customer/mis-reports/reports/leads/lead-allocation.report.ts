@@ -35,7 +35,7 @@ export class LeadAllocationReport implements IReport {
   async generate(params: ReportParams): Promise<ReportData> {
     const where: any = { tenantId: params.tenantId, createdAt: { gte: params.dateFrom, lte: params.dateTo } };
 
-    const leads = await this.prisma.lead.findMany({
+    const leads = await this.prisma.working.lead.findMany({
       where,
       select: {
         status: true, expectedValue: true, allocatedToId: true,

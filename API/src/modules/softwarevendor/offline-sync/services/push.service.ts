@@ -64,7 +64,7 @@ export class PushService {
     for (const change of sorted) {
       try {
         // Validate policy
-        const policy = await this.prisma.syncPolicy.findFirst({
+        const policy = await this.prisma.working.syncPolicy.findFirst({
           where: { entityName: change.entityName, isEnabled: true },
         });
         if (!policy) {
@@ -102,7 +102,7 @@ export class PushService {
         }
 
         // Log to SyncChangeLog
-        await this.prisma.syncChangeLog.create({
+        await this.prisma.working.syncChangeLog.create({
           data: {
             deviceId,
             userId,
@@ -139,7 +139,7 @@ export class PushService {
 
     // Log audit
     const durationMs = Date.now() - startTime;
-    await this.prisma.syncAuditLog.create({
+    await this.prisma.working.syncAuditLog.create({
       data: {
         userId,
         deviceId,
@@ -313,16 +313,16 @@ export class PushService {
   }
 
   private async updateDevicePendingCount(userId: string, deviceId: string): Promise<void> {
-    const device = await this.prisma.syncDevice.findFirst({
+    const device = await this.prisma.working.syncDevice.findFirst({
       where: { userId, deviceId },
     });
     if (!device) return;
 
-    const pendingCount = await this.prisma.syncChangeLog.count({
+    const pendingCount = await this.prisma.working.syncChangeLog.count({
       where: { userId, deviceId, isPushed: false },
     });
 
-    await this.prisma.syncDevice.update({
+    await this.prisma.working.syncDevice.update({
       where: { id: device.id },
       data: { pendingUploadCount: pendingCount },
     });

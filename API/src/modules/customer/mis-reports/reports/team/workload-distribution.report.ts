@@ -37,19 +37,19 @@ export class WorkloadDistributionReport implements IReport {
     const userIds = users.map(u => u.id);
 
     const [activeLeads, activeDemos, activeQuotations, lastActivities] = await Promise.all([
-      this.prisma.lead.findMany({
+      this.prisma.working.lead.findMany({
         where: { tenantId, allocatedToId: { in: userIds }, status: { notIn: ['WON', 'LOST'] } },
         select: { allocatedToId: true },
       }),
-      this.prisma.demo.findMany({
+      this.prisma.working.demo.findMany({
         where: { tenantId, conductedById: { in: userIds }, status: 'SCHEDULED' },
         select: { conductedById: true },
       }),
-      this.prisma.quotation.findMany({
+      this.prisma.working.quotation.findMany({
         where: { tenantId, createdById: { in: userIds }, status: { in: ['SENT', 'VIEWED'] } },
         select: { createdById: true },
       }),
-      this.prisma.activity.findMany({
+      this.prisma.working.activity.findMany({
         where: { tenantId, createdById: { in: userIds } },
         orderBy: { createdAt: 'desc' },
         distinct: ['createdById'],

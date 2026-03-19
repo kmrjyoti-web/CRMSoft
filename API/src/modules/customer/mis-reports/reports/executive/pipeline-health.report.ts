@@ -42,7 +42,7 @@ export class PipelineHealthReport implements IReport {
     };
     if (params.userId) where.allocatedToId = params.userId;
 
-    const activeLeads = await this.prisma.lead.findMany({
+    const activeLeads = await this.prisma.working.lead.findMany({
       where,
       select: {
         id: true, leadNumber: true, status: true, expectedValue: true,
@@ -76,7 +76,7 @@ export class PipelineHealthReport implements IReport {
     // No activity deals: check max activity date per lead
     const leadIds = activeLeads.map(l => l.id);
     const recentActivities = leadIds.length > 0
-      ? await this.prisma.activity.findMany({
+      ? await this.prisma.working.activity.findMany({
           where: { tenantId, leadId: { in: leadIds } },
           select: { leadId: true, createdAt: true },
           orderBy: { createdAt: 'desc' },
@@ -165,11 +165,11 @@ export class PipelineHealthReport implements IReport {
       where.expectedCloseDate = { lt: now };
     } else if (params.dimension === 'noActivity') {
       // Fetch leads with no activity in 10+ days
-      const allActive = await this.prisma.lead.findMany({
+      const allActive = await this.prisma.working.lead.findMany({
         where, select: { id: true },
       });
       const leadIds = allActive.map(l => l.id);
-      const activities = await this.prisma.activity.findMany({
+      const activities = await this.prisma.working.activity.findMany({
         where: { tenantId, leadId: { in: leadIds }, createdAt: { gte: new Date(now.getTime() - 10 * 86400000) } },
         select: { leadId: true },
       });

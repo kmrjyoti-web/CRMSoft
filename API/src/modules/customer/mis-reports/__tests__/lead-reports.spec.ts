@@ -18,6 +18,7 @@ describe('LeadFunnelReport', () => {
     mockPrisma = {
       lead: { findMany: jest.fn(), count: jest.fn(), groupBy: jest.fn() },
     } as any;
+(mockPrisma as any).working = mockPrisma;
     mockDrillDown = { getLeads: jest.fn() } as any;
     report = new LeadFunnelReport(mockPrisma, mockDrillDown);
   });
@@ -71,6 +72,7 @@ describe('LeadAgingReport', () => {
     mockPrisma = {
       lead: { findMany: jest.fn(), count: jest.fn(), groupBy: jest.fn() },
     } as any;
+(mockPrisma as any).working = mockPrisma;
     mockDrillDown = { getLeads: jest.fn() } as any;
     report = new LeadAgingReport(mockPrisma, mockDrillDown);
   });
@@ -121,6 +123,7 @@ describe('HotLeadsReport', () => {
     mockPrisma = {
       lead: { findMany: jest.fn(), count: jest.fn(), groupBy: jest.fn() },
     } as any;
+(mockPrisma as any).working = mockPrisma;
     mockDrillDown = { getLeads: jest.fn() } as any;
     report = new HotLeadsReport(mockPrisma, mockDrillDown);
   });

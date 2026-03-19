@@ -42,7 +42,7 @@ export class SalesTrendReport implements IReport {
     };
     if (params.userId) where.allocatedToId = params.userId;
 
-    const wonLeads = await this.prisma.lead.findMany({
+    const wonLeads = await this.prisma.working.lead.findMany({
       where,
       select: { expectedValue: true, updatedAt: true },
     });

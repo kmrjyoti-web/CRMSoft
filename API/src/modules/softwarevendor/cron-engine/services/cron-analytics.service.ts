@@ -8,11 +8,11 @@ export class CronAnalyticsService {
 
   /** Get full dashboard overview. */
   async getDashboard(): Promise<any> {
-    const allJobs = await this.prisma.cronJobConfig.findMany();
+    const allJobs = await this.prisma.working.cronJobConfig.findMany();
     const now = new Date();
     const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-    const recentRuns = await this.prisma.cronJobRunLog.findMany({
+    const recentRuns = await this.prisma.working.cronJobRunLog.findMany({
       where: { createdAt: { gte: twentyFourHoursAgo } },
       orderBy: { createdAt: 'desc' },
     });
@@ -64,7 +64,7 @@ export class CronAnalyticsService {
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
-    return this.prisma.cronJobRunLog.findMany({
+    return this.prisma.working.cronJobRunLog.findMany({
       where: { createdAt: { gte: startOfDay } },
       select: {
         jobCode: true,
@@ -80,7 +80,7 @@ export class CronAnalyticsService {
 
   /** Get health score per job. */
   async getHealth(): Promise<any[]> {
-    return this.prisma.cronJobConfig.findMany({
+    return this.prisma.working.cronJobConfig.findMany({
       where: { status: 'ACTIVE' },
       select: {
         jobCode: true,

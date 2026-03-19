@@ -33,6 +33,7 @@ describe('CustomerPriceGroupsController', () => {
         count: jest.fn().mockResolvedValue(0),
       },
     };
+(prisma as any).working = prisma;
     controller = new CustomerPriceGroupsController(prisma);
   });
 

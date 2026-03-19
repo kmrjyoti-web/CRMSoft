@@ -34,7 +34,7 @@ export class OrgWiseRevenueReport implements IReport {
     };
     if (params.userId) baseWhere.allocatedToId = params.userId;
 
-    const orgs = await this.prisma.organization.findMany({
+    const orgs = await this.prisma.working.organization.findMany({
       where: {
         tenantId: params.tenantId,
         isActive: true,
@@ -49,7 +49,7 @@ export class OrgWiseRevenueReport implements IReport {
     }> = [];
 
     for (const org of orgs) {
-      const periodLeads = await this.prisma.lead.findMany({
+      const periodLeads = await this.prisma.working.lead.findMany({
         where: { ...baseWhere, organizationId: org.id },
         select: { status: true, expectedValue: true },
       });
@@ -58,7 +58,7 @@ export class OrgWiseRevenueReport implements IReport {
       const revenue = wonPeriod.reduce((s, l) => s + Number(l.expectedValue || 0), 0);
 
       // Lifetime value: all-time WON leads
-      const lifetimeWon = await this.prisma.lead.findMany({
+      const lifetimeWon = await this.prisma.working.lead.findMany({
         where: { tenantId: params.tenantId, organizationId: org.id, status: 'WON' },
         select: { expectedValue: true },
       });

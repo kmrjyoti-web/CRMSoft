@@ -61,7 +61,7 @@ export class ProfileMatcherService {
 
   /** Auto-detect best matching profiles for given file headers */
   async suggestProfiles(fileHeaders: string[], targetEntity: string): Promise<MatchResult[]> {
-    const profiles = await this.prisma.importProfile.findMany({
+    const profiles = await this.prisma.working.importProfile.findMany({
       where: { targetEntity: targetEntity as any, status: 'ACTIVE' },
       orderBy: { usageCount: 'desc' },
     });
