@@ -73,13 +73,13 @@ export class ModuleRegistryService {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.moduleDefinition.findMany({
+      this.prisma.platform.moduleDefinition.findMany({
         where,
         orderBy: [{ category: 'asc' }, { sortOrder: 'asc' }],
         skip,
         take: limit,
       }),
-      this.prisma.moduleDefinition.count({ where }),
+      this.prisma.platform.moduleDefinition.count({ where }),
     ]);
 
     return { data, total };
@@ -87,7 +87,7 @@ export class ModuleRegistryService {
 
   // ─── 2. Get by ID (includes packageModules count) ────────────────
   async getById(id: string) {
-    const module = await this.prisma.moduleDefinition.findUnique({
+    const module = await this.prisma.platform.moduleDefinition.findUnique({
       where: { id },
       include: {
         _count: { select: { packageModules: true } },
@@ -103,7 +103,7 @@ export class ModuleRegistryService {
 
   // ─── 3. Get by code ──────────────────────────────────────────────
   async getByCode(code: string) {
-    const module = await this.prisma.moduleDefinition.findUnique({
+    const module = await this.prisma.platform.moduleDefinition.findUnique({
       where: { code },
     });
 
@@ -141,7 +141,7 @@ export class ModuleRegistryService {
     isFeatured?: boolean;
     isActive?: boolean;
   }) {
-    return this.prisma.moduleDefinition.create({
+    return this.prisma.platform.moduleDefinition.create({
       data: {
         code: data.code,
         name: data.name,
@@ -171,7 +171,7 @@ export class ModuleRegistryService {
 
   // ─── 5. Update (partial) ─────────────────────────────────────────
   async update(id: string, data: Partial<Omit<Parameters<typeof this.create>[0], 'code'>>) {
-    const existing = await this.prisma.moduleDefinition.findUnique({
+    const existing = await this.prisma.platform.moduleDefinition.findUnique({
       where: { id },
     });
 
@@ -192,7 +192,7 @@ export class ModuleRegistryService {
       updateData.usagePricing = Prisma.JsonNull;
     }
 
-    return this.prisma.moduleDefinition.update({
+    return this.prisma.platform.moduleDefinition.update({
       where: { id },
       data: updateData,
     });
@@ -200,7 +200,7 @@ export class ModuleRegistryService {
 
   // ─── 6. Archive (soft-deactivate) ────────────────────────────────
   async archive(id: string) {
-    const existing = await this.prisma.moduleDefinition.findUnique({
+    const existing = await this.prisma.platform.moduleDefinition.findUnique({
       where: { id },
     });
 
@@ -208,7 +208,7 @@ export class ModuleRegistryService {
       throw new NotFoundException(`Module definition ${id} not found`);
     }
 
-    return this.prisma.moduleDefinition.update({
+    return this.prisma.platform.moduleDefinition.update({
       where: { id },
       data: { isActive: false },
     });
@@ -219,7 +219,7 @@ export class ModuleRegistryService {
     moduleId: string,
     feature: ModuleFeature,
   ) {
-    const module = await this.prisma.moduleDefinition.findUnique({
+    const module = await this.prisma.platform.moduleDefinition.findUnique({
       where: { id: moduleId },
     });
 
@@ -237,7 +237,7 @@ export class ModuleRegistryService {
 
     features.push(feature);
 
-    return this.prisma.moduleDefinition.update({
+    return this.prisma.platform.moduleDefinition.update({
       where: { id: moduleId },
       data: { features: features as any },
     });
@@ -249,7 +249,7 @@ export class ModuleRegistryService {
     featureCode: string,
     updates: Partial<Omit<ModuleFeature, 'code'>>,
   ) {
-    const module = await this.prisma.moduleDefinition.findUnique({
+    const module = await this.prisma.platform.moduleDefinition.findUnique({
       where: { id: moduleId },
     });
 
@@ -268,7 +268,7 @@ export class ModuleRegistryService {
 
     features[index] = { ...features[index], ...updates, code: featureCode };
 
-    return this.prisma.moduleDefinition.update({
+    return this.prisma.platform.moduleDefinition.update({
       where: { id: moduleId },
       data: { features: features as any },
     });
@@ -276,7 +276,7 @@ export class ModuleRegistryService {
 
   // ─── 9. Remove a feature from the JSONB array ────────────────────
   async removeFeature(moduleId: string, featureCode: string) {
-    const module = await this.prisma.moduleDefinition.findUnique({
+    const module = await this.prisma.platform.moduleDefinition.findUnique({
       where: { id: moduleId },
     });
 
@@ -293,7 +293,7 @@ export class ModuleRegistryService {
       );
     }
 
-    return this.prisma.moduleDefinition.update({
+    return this.prisma.platform.moduleDefinition.update({
       where: { id: moduleId },
       data: { features: filtered as any },
     });
@@ -301,7 +301,7 @@ export class ModuleRegistryService {
 
   // ─── 10. Set menu keys ───────────────────────────────────────────
   async setMenuKeys(moduleId: string, menuKeys: string[]) {
-    const module = await this.prisma.moduleDefinition.findUnique({
+    const module = await this.prisma.platform.moduleDefinition.findUnique({
       where: { id: moduleId },
     });
 
@@ -309,7 +309,7 @@ export class ModuleRegistryService {
       throw new NotFoundException(`Module definition ${moduleId} not found`);
     }
 
-    return this.prisma.moduleDefinition.update({
+    return this.prisma.platform.moduleDefinition.update({
       where: { id: moduleId },
       data: { menuKeys },
     });
@@ -317,7 +317,7 @@ export class ModuleRegistryService {
 
   // ─── 11. Get dependency tree (recursive) ─────────────────────────
   async getDependencyTree(moduleId: string): Promise<DependencyNode[]> {
-    const root = await this.prisma.moduleDefinition.findUnique({
+    const root = await this.prisma.platform.moduleDefinition.findUnique({
       where: { id: moduleId },
     });
 
@@ -340,7 +340,7 @@ export class ModuleRegistryService {
     while (queue.length > 0) {
       const { code, level } = queue.shift()!;
 
-      const dep = await this.prisma.moduleDefinition.findUnique({
+      const dep = await this.prisma.platform.moduleDefinition.findUnique({
         where: { code },
         select: { code: true, name: true, dependsOn: true },
       });
@@ -368,7 +368,7 @@ export class ModuleRegistryService {
 
   // ─── 12. Set dependencies (with circular check) ──────────────────
   async setDependencies(moduleId: string, dependsOn: string[]) {
-    const module = await this.prisma.moduleDefinition.findUnique({
+    const module = await this.prisma.platform.moduleDefinition.findUnique({
       where: { id: moduleId },
     });
 
@@ -378,7 +378,7 @@ export class ModuleRegistryService {
 
     // Validate all dependency codes exist
     if (dependsOn.length > 0) {
-      const existing = await this.prisma.moduleDefinition.findMany({
+      const existing = await this.prisma.platform.moduleDefinition.findMany({
         where: { code: { in: dependsOn } },
         select: { code: true },
       });
@@ -403,7 +403,7 @@ export class ModuleRegistryService {
       await this.checkCircularDependency(module.code, dependsOn);
     }
 
-    return this.prisma.moduleDefinition.update({
+    return this.prisma.platform.moduleDefinition.update({
       where: { id: moduleId },
       data: { dependsOn },
     });
@@ -411,7 +411,7 @@ export class ModuleRegistryService {
 
   // ─── 13. Get subscribers (tenants using this module) ─────────────
   async getSubscribers(moduleId: string, query?: SubscriberQuery) {
-    const module = await this.prisma.moduleDefinition.findUnique({
+    const module = await this.prisma.platform.moduleDefinition.findUnique({
       where: { id: moduleId },
     });
 
@@ -426,7 +426,7 @@ export class ModuleRegistryService {
     const where: Prisma.TenantModuleWhereInput = { moduleId };
 
     const [data, total] = await Promise.all([
-      this.prisma.tenantModule.findMany({
+      this.prisma.platform.tenantModule.findMany({
         where,
         include: {
           tenant: {
@@ -442,7 +442,7 @@ export class ModuleRegistryService {
         skip,
         take: limit,
       }),
-      this.prisma.tenantModule.count({ where }),
+      this.prisma.platform.tenantModule.count({ where }),
     ]);
 
     return { data, total };
@@ -491,7 +491,7 @@ export class ModuleRegistryService {
       if (visited.has(code)) continue;
       visited.add(code);
 
-      const dep = await this.prisma.moduleDefinition.findUnique({
+      const dep = await this.prisma.platform.moduleDefinition.findUnique({
         where: { code },
         select: { dependsOn: true },
       });

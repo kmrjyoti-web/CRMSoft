@@ -11,7 +11,7 @@ export class SecurityPolicyService {
 
   /** Get full security policy for a tenant (with IP rules). */
   async get(tenantId: string): Promise<SecurityPolicy & { ipRules: IpAccessRule[] }> {
-    const policy = await this.prisma.securityPolicy.findUnique({
+    const policy = await this.prisma.identity.securityPolicy.findUnique({
       where: { tenantId },
       include: { ipRules: { where: { isActive: true } } },
     });
@@ -21,7 +21,7 @@ export class SecurityPolicyService {
 
   /** Update security policy settings. */
   async update(tenantId: string, data: Partial<SecurityPolicy>, userId?: string): Promise<SecurityPolicy> {
-    return this.prisma.securityPolicy.upsert({
+    return this.prisma.identity.securityPolicy.upsert({
       where: { tenantId },
       update: { ...data, updatedById: userId },
       create: { tenantId, ...data, updatedById: userId } as any,
@@ -33,14 +33,14 @@ export class SecurityPolicyService {
     ruleType: IpRuleType; ipAddress: string; description?: string;
   }): Promise<IpAccessRule> {
     const policy = await this.ensurePolicy(tenantId);
-    return this.prisma.ipAccessRule.create({
+    return this.prisma.identity.ipAccessRule.create({
       data: { securityPolicyId: policy.id, ...rule },
     });
   }
 
   /** Remove an IP rule. */
   async removeIpRule(ruleId: string): Promise<void> {
-    await this.prisma.ipAccessRule.update({
+    await this.prisma.identity.ipAccessRule.update({
       where: { id: ruleId },
       data: { isActive: false },
     });
@@ -48,16 +48,16 @@ export class SecurityPolicyService {
 
   /** List all IP rules for a tenant. */
   async listIpRules(tenantId: string): Promise<IpAccessRule[]> {
-    const policy = await this.prisma.securityPolicy.findUnique({ where: { tenantId } });
+    const policy = await this.prisma.identity.securityPolicy.findUnique({ where: { tenantId } });
     if (!policy) return [];
-    return this.prisma.ipAccessRule.findMany({
+    return this.prisma.identity.ipAccessRule.findMany({
       where: { securityPolicyId: policy.id, isActive: true },
     });
   }
 
   /** Validate a password against tenant's password policy. */
   async validatePassword(tenantId: string, password: string): Promise<{ valid: boolean; errors: string[] }> {
-    const policy = await this.prisma.securityPolicy.findUnique({ where: { tenantId } });
+    const policy = await this.prisma.identity.securityPolicy.findUnique({ where: { tenantId } });
     if (!policy) return { valid: true, errors: [] };
     const errors: string[] = [];
 
@@ -77,7 +77,7 @@ export class SecurityPolicyService {
 
   /** Check if an IP is allowed based on tenant IP rules. */
   async isIpAllowed(tenantId: string, ip: string): Promise<boolean> {
-    const policy = await this.prisma.securityPolicy.findUnique({
+    const policy = await this.prisma.identity.securityPolicy.findUnique({
       where: { tenantId },
       include: { ipRules: { where: { isActive: true } } },
     });
@@ -105,7 +105,7 @@ export class SecurityPolicyService {
   }
 
   private async ensurePolicy(tenantId: string): Promise<SecurityPolicy> {
-    return this.prisma.securityPolicy.upsert({
+    return this.prisma.identity.securityPolicy.upsert({
       where: { tenantId },
       update: {},
       create: { tenantId },

@@ -12,7 +12,7 @@ export class GetPlanByIdHandler implements IQueryHandler<GetPlanByIdQuery> {
   async execute(query: GetPlanByIdQuery) {
     this.logger.log(`Fetching plan by id: ${query.planId}`);
 
-    const plan = await this.prisma.plan.findUnique({
+    const plan = await this.prisma.identity.plan.findUnique({
       where: { id: query.planId },
     });
 

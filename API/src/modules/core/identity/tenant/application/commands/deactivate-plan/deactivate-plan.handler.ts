@@ -10,7 +10,7 @@ export class DeactivatePlanHandler implements ICommandHandler<DeactivatePlanComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: DeactivatePlanCommand) {
-    const plan = await this.prisma.plan.update({
+    const plan = await this.prisma.identity.plan.update({
       where: { id: command.planId },
       data: { isActive: false },
     });

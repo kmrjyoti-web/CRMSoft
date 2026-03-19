@@ -10,7 +10,7 @@ export class UpdateTenantHandler implements ICommandHandler<UpdateTenantCommand>
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: UpdateTenantCommand) {
-    const tenant = await this.prisma.tenant.update({
+    const tenant = await this.prisma.identity.tenant.update({
       where: { id: command.tenantId },
       data: {
         ...(command.name !== undefined && { name: command.name }),

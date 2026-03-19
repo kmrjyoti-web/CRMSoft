@@ -10,7 +10,7 @@ export class RecordPaymentHandler implements ICommandHandler<RecordPaymentComman
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: RecordPaymentCommand) {
-    const invoice = await this.prisma.tenantInvoice.update({
+    const invoice = await this.prisma.identity.tenantInvoice.update({
       where: { id: command.invoiceId },
       data: {
         status: 'PAID',

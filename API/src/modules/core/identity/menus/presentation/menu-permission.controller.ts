@@ -145,7 +145,7 @@ export class MenuPermissionController {
     },
     @CurrentUser('tenantId') tenantId: string,
   ) {
-    const template = await this.prisma.permissionTemplate.create({
+    const template = await this.prisma.identity.permissionTemplate.create({
       data: {
         tenantId,
         name: body.name,

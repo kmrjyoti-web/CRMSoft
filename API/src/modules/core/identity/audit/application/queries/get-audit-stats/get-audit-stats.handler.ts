@@ -16,11 +16,11 @@ export class GetAuditStatsHandler implements IQueryHandler<GetAuditStatsQuery> {
     if (query.userId) where.performedById = query.userId;
 
     const [byAction, byEntity, totalChanges, sensitiveChanges, systemChanges] = await Promise.all([
-      this.prisma.auditLog.groupBy({ by: ['action'], where, _count: true }),
-      this.prisma.auditLog.groupBy({ by: ['entityType'], where, _count: true }),
-      this.prisma.auditLog.count({ where }),
-      this.prisma.auditLog.count({ where: { ...where, isSensitive: true } }),
-      this.prisma.auditLog.count({ where: { ...where, isSystemAction: true } }),
+      this.prisma.identity.auditLog.groupBy({ by: ['action'], where, _count: true }),
+      this.prisma.identity.auditLog.groupBy({ by: ['entityType'], where, _count: true }),
+      this.prisma.identity.auditLog.count({ where }),
+      this.prisma.identity.auditLog.count({ where: { ...where, isSensitive: true } }),
+      this.prisma.identity.auditLog.count({ where: { ...where, isSystemAction: true } }),
     ]);
 
     const actionMap: Record<string, number> = {};
@@ -30,7 +30,7 @@ export class GetAuditStatsHandler implements IQueryHandler<GetAuditStatsQuery> {
     for (const e of byEntity) entityMap[e.entityType] = e._count;
 
     // Top users
-    const topUsers = await this.prisma.auditLog.groupBy({
+    const topUsers = await this.prisma.identity.auditLog.groupBy({
       by: ['performedById', 'performedByName'],
       where: { ...where, performedById: { not: null } },
       _count: true,
@@ -45,7 +45,7 @@ export class GetAuditStatsHandler implements IQueryHandler<GetAuditStatsQuery> {
     }));
 
     // Module breakdown
-    const byModuleRaw = await this.prisma.auditLog.groupBy({
+    const byModuleRaw = await this.prisma.identity.auditLog.groupBy({
       by: ['module'],
       where: { ...where, module: { not: null } },
       _count: true,

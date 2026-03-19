@@ -15,7 +15,7 @@ export class AutoNumberService {
    * Used by LeadService, ContactService, QuotationService, etc.
    */
   async next(tenantId: string, entityName: string): Promise<string> {
-    return this.prisma.$transaction(async (tx: any) => {
+    return this.prisma.identity.$transaction(async (tx: any) => {
       const rows = await tx.$queryRawUnsafe<AutoNumberSequence[]>(
         `SELECT * FROM auto_number_sequences WHERE tenant_id = $1 AND entity_name = $2 FOR UPDATE`,
         tenantId,

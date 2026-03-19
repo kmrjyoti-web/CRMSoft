@@ -18,6 +18,8 @@ describe('RbacEngine', () => {
         ]),
       },
     };
+    (prisma as any).identity = prisma;
+    (prisma as any).platform = prisma;
     engine = new RbacEngine(prisma);
   });
 

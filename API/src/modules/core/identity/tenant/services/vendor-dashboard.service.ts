@@ -17,14 +17,14 @@ export class VendorDashboardService {
 
     // Count tenants by status
     const [totalTenants, activeTenants, trialTenants, suspendedTenants] = await Promise.all([
-      this.prisma.tenant.count(),
-      this.prisma.tenant.count({ where: { status: 'ACTIVE' } }),
-      this.prisma.tenant.count({ where: { status: 'TRIAL' } }),
-      this.prisma.tenant.count({ where: { status: 'SUSPENDED' } }),
+      this.prisma.identity.tenant.count(),
+      this.prisma.identity.tenant.count({ where: { status: 'ACTIVE' } }),
+      this.prisma.identity.tenant.count({ where: { status: 'TRIAL' } }),
+      this.prisma.identity.tenant.count({ where: { status: 'SUSPENDED' } }),
     ]);
 
     // Calculate MRR from active subscriptions
-    const activeSubscriptions = await this.prisma.subscription.findMany({
+    const activeSubscriptions = await this.prisma.identity.subscription.findMany({
       where: { status: 'ACTIVE' },
       include: { plan: { select: { price: true, interval: true } } },
     });
@@ -50,20 +50,20 @@ export class VendorDashboardService {
     const arr = mrr * 12;
 
     // New tenants in the period
-    const newTenants = await this.prisma.tenant.count({
+    const newTenants = await this.prisma.identity.tenant.count({
       where: { createdAt: { gte: periodStart } },
     });
 
     // Calculate churn rate
     // Churn = (cancelled in period / active at start of period) * 100
-    const cancelledInPeriod = await this.prisma.subscription.count({
+    const cancelledInPeriod = await this.prisma.identity.subscription.count({
       where: {
         status: 'CANCELLED',
         cancelledAt: { gte: periodStart },
       },
     });
 
-    const activeAtPeriodStart = await this.prisma.subscription.count({
+    const activeAtPeriodStart = await this.prisma.identity.subscription.count({
       where: {
         createdAt: { lt: periodStart },
         OR: [
@@ -98,7 +98,7 @@ export class VendorDashboardService {
     periodStart.setDate(periodStart.getDate() - days);
 
     // Get all subscriptions that were active during the period
-    const subscriptions = await this.prisma.subscription.findMany({
+    const subscriptions = await this.prisma.identity.subscription.findMany({
       where: {
         createdAt: { lte: new Date() },
         OR: [
@@ -165,7 +165,7 @@ export class VendorDashboardService {
     const periodStart = new Date();
     periodStart.setDate(periodStart.getDate() - days);
 
-    const tenants = await this.prisma.tenant.findMany({
+    const tenants = await this.prisma.identity.tenant.findMany({
       where: { createdAt: { gte: periodStart } },
       select: { createdAt: true },
       orderBy: { createdAt: 'asc' },
@@ -194,7 +194,7 @@ export class VendorDashboardService {
    * Returns plan name, code, count, and percentage.
    */
   async getPlanDistribution() {
-    const subscriptions = await this.prisma.subscription.findMany({
+    const subscriptions = await this.prisma.identity.subscription.findMany({
       where: { status: { in: ['ACTIVE', 'TRIALING'] } },
       include: { plan: { select: { name: true, code: true } } },
     });
@@ -233,7 +233,7 @@ export class VendorDashboardService {
     periodStart.setDate(periodStart.getDate() - days);
 
     // Get invoices in the period with their tenant info
-    const invoices = await this.prisma.tenantInvoice.findMany({
+    const invoices = await this.prisma.identity.tenantInvoice.findMany({
       where: {
         createdAt: { gte: periodStart },
         status: { in: ['PAID', 'PENDING'] },
@@ -245,7 +245,7 @@ export class VendorDashboardService {
     });
 
     // Get active subscriptions to map tenant -> plan
-    const subscriptions = await this.prisma.subscription.findMany({
+    const subscriptions = await this.prisma.identity.subscription.findMany({
       where: {
         status: { in: ['ACTIVE', 'TRIALING'] },
       },

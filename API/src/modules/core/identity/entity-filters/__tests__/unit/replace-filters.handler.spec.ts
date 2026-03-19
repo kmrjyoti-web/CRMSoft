@@ -18,6 +18,8 @@ describe('ReplaceFiltersHandler', () => {
         create: jest.fn().mockResolvedValue({ id: 'f-new' }),
       },
     };
+    (prisma as any).identity = prisma;
+    (prisma as any).platform = prisma;
     handler = new ReplaceFiltersHandler(prisma);
   });
 

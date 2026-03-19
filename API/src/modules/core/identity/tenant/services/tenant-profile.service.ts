@@ -9,7 +9,7 @@ export class TenantProfileService {
    * Get tenant profile by tenantId, including basic tenant info.
    */
   async getByTenantId(tenantId: string) {
-    const profile = await this.prisma.tenantProfile.findUnique({
+    const profile = await this.prisma.identity.tenantProfile.findUnique({
       where: { tenantId },
       include: {
         tenant: {
@@ -39,12 +39,12 @@ export class TenantProfileService {
    */
   async upsert(tenantId: string, data: any) {
     // Verify tenant exists
-    const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
+    const tenant = await this.prisma.identity.tenant.findUnique({ where: { id: tenantId } });
     if (!tenant) {
       throw new NotFoundException(`Tenant ${tenantId} not found`);
     }
 
-    return this.prisma.tenantProfile.upsert({
+    return this.prisma.identity.tenantProfile.upsert({
       where: { tenantId },
       update: {
         companyLegalName: data.companyLegalName,
@@ -93,7 +93,7 @@ export class TenantProfileService {
     tenantId: string,
     data: { gstin?: string; pan?: string; billingAddress?: any },
   ) {
-    const profile = await this.prisma.tenantProfile.findUnique({
+    const profile = await this.prisma.identity.tenantProfile.findUnique({
       where: { tenantId },
     });
 
@@ -101,7 +101,7 @@ export class TenantProfileService {
       throw new NotFoundException(`Tenant profile not found for tenant ${tenantId}`);
     }
 
-    return this.prisma.tenantProfile.update({
+    return this.prisma.identity.tenantProfile.update({
       where: { tenantId },
       data: {
         gstin: data.gstin,
@@ -140,7 +140,7 @@ export class TenantProfileService {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.tenantProfile.findMany({
+      this.prisma.identity.tenantProfile.findMany({
         where,
         skip,
         take: limit,
@@ -156,7 +156,7 @@ export class TenantProfileService {
           },
         },
       }),
-      this.prisma.tenantProfile.count({ where }),
+      this.prisma.identity.tenantProfile.count({ where }),
     ]);
 
     return { data, total, page, limit };

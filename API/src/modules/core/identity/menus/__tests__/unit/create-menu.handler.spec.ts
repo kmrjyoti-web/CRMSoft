@@ -16,6 +16,8 @@ describe('CreateMenuHandler', () => {
         })),
       },
     };
+    (prisma as any).identity = prisma;
+    (prisma as any).platform = prisma;
     handler = new CreateMenuHandler(prisma);
   });
 

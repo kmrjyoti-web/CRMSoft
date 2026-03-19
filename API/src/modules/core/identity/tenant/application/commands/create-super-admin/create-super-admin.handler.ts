@@ -13,7 +13,7 @@ export class CreateSuperAdminHandler implements ICommandHandler<CreateSuperAdmin
   async execute(command: CreateSuperAdminCommand) {
     const hashedPassword = await bcrypt.hash(command.password, 12);
 
-    const superAdmin = await this.prisma.superAdmin.create({
+    const superAdmin = await this.prisma.identity.superAdmin.create({
       data: {
         email: command.email,
         password: hashedPassword,

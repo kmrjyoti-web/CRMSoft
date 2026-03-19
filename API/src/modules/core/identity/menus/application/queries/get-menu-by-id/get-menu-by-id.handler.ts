@@ -9,7 +9,7 @@ export class GetMenuByIdHandler implements IQueryHandler<GetMenuByIdQuery> {
 
   /** Return a single menu with parent info and direct children. */
   async execute(query: GetMenuByIdQuery) {
-    const menu = await this.prisma.menu.findUnique({
+    const menu = await this.prisma.identity.menu.findUnique({
       where: { id: query.id },
       include: {
         parent: { select: { id: true, name: true, code: true } },

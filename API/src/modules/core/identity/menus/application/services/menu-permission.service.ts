@@ -211,13 +211,13 @@ export class MenuPermissionService implements OnModuleInit {
    * Get full permission matrix for a role (all menus with flags).
    */
   async getMatrix(tenantId: string, roleId: string): Promise<PermissionMatrixRow[]> {
-    const menus = await this.prisma.menu.findMany({
+    const menus = await this.prisma.identity.menu.findMany({
       where: { tenantId, isActive: true },
       orderBy: { sortOrder: 'asc' },
       select: { id: true, code: true, name: true, menuType: true, parentId: true },
     });
 
-    const existing = await this.prisma.roleMenuPermission.findMany({
+    const existing = await this.prisma.identity.roleMenuPermission.findMany({
       where: { tenantId, roleId },
     });
 
@@ -246,19 +246,19 @@ export class MenuPermissionService implements OnModuleInit {
     menus: Array<{ id: string; code: string; name: string; parentId: string | null }>;
     matrix: Record<string, Record<string, MenuPermissions | null>>;
   }> {
-    const roles = await this.prisma.role.findMany({
+    const roles = await this.prisma.identity.role.findMany({
       where: { tenantId },
       select: { id: true, name: true, displayName: true },
       orderBy: { level: 'asc' },
     });
 
-    const menus = await this.prisma.menu.findMany({
+    const menus = await this.prisma.identity.menu.findMany({
       where: { tenantId, isActive: true },
       select: { id: true, code: true, name: true, parentId: true },
       orderBy: { sortOrder: 'asc' },
     });
 
-    const allPerms = await this.prisma.roleMenuPermission.findMany({
+    const allPerms = await this.prisma.identity.roleMenuPermission.findMany({
       where: { tenantId },
     });
 
@@ -318,7 +318,7 @@ export class MenuPermissionService implements OnModuleInit {
       inheritFromParent: permissions.inheritFromParent ?? true,
     };
 
-    await this.prisma.roleMenuPermission.upsert({
+    await this.prisma.identity.roleMenuPermission.upsert({
       where: { tenantId_roleId_menuId: { tenantId, roleId, menuId } },
       create: { tenantId, roleId, menuId, ...data, createdById: userId },
       update: { ...data, updatedById: userId },
@@ -357,13 +357,13 @@ export class MenuPermissionService implements OnModuleInit {
     targetRoleId: string,
     userId?: string,
   ): Promise<number> {
-    const sourcePerms = await this.prisma.roleMenuPermission.findMany({
+    const sourcePerms = await this.prisma.identity.roleMenuPermission.findMany({
       where: { tenantId, roleId: sourceRoleId },
       include: { menu: { select: { code: true } } },
     });
 
     for (const sp of sourcePerms) {
-      await this.prisma.roleMenuPermission.upsert({
+      await this.prisma.identity.roleMenuPermission.upsert({
         where: {
           tenantId_roleId_menuId: { tenantId, roleId: targetRoleId, menuId: sp.menuId },
         },
@@ -401,7 +401,7 @@ export class MenuPermissionService implements OnModuleInit {
    * Get all permission templates (system + tenant-specific).
    */
   async getTemplates(tenantId?: string) {
-    return this.prisma.permissionTemplate.findMany({
+    return this.prisma.identity.permissionTemplate.findMany({
       where: tenantId
         ? { OR: [{ tenantId }, { tenantId: null }] }
         : undefined,
@@ -419,7 +419,7 @@ export class MenuPermissionService implements OnModuleInit {
     templateId: string,
     userId?: string,
   ): Promise<number> {
-    const template = await this.prisma.permissionTemplate.findUnique({
+    const template = await this.prisma.identity.permissionTemplate.findUnique({
       where: { id: templateId },
     });
     if (!template) throw new Error('Permission template not found');
@@ -427,7 +427,7 @@ export class MenuPermissionService implements OnModuleInit {
     const templatePerms = template.permissions as Record<string, any>;
 
     // Map menu codes to IDs
-    const menus = await this.prisma.menu.findMany({
+    const menus = await this.prisma.identity.menu.findMany({
       where: { tenantId },
       select: { id: true, code: true },
     });
@@ -455,7 +455,7 @@ export class MenuPermissionService implements OnModuleInit {
     templateCode: string,
     userId?: string,
   ): Promise<number> {
-    const template = await this.prisma.permissionTemplate.findUnique({
+    const template = await this.prisma.identity.permissionTemplate.findUnique({
       where: { code: templateCode },
     });
     if (!template) throw new Error(`Template not found: ${templateCode}`);
@@ -470,7 +470,7 @@ export class MenuPermissionService implements OnModuleInit {
    * Delete all permissions for a role.
    */
   async deleteRolePermissions(tenantId: string, roleId: string): Promise<number> {
-    const result = await this.prisma.roleMenuPermission.deleteMany({
+    const result = await this.prisma.identity.roleMenuPermission.deleteMany({
       where: { tenantId, roleId },
     });
     this.invalidateCache(tenantId, roleId);
@@ -481,7 +481,7 @@ export class MenuPermissionService implements OnModuleInit {
    * Delete permission for a specific menu.
    */
   async deleteMenuPermission(tenantId: string, roleId: string, menuId: string): Promise<void> {
-    await this.prisma.roleMenuPermission.deleteMany({
+    await this.prisma.identity.roleMenuPermission.deleteMany({
       where: { tenantId, roleId, menuId },
     });
     this.invalidateCache(tenantId, roleId);
@@ -497,12 +497,12 @@ export class MenuPermissionService implements OnModuleInit {
   private async loadRolePermissions(tenantId: string, roleId: string): Promise<void> {
     const cacheKey = `${tenantId}:${roleId}`;
 
-    const permissions = await this.prisma.roleMenuPermission.findMany({
+    const permissions = await this.prisma.identity.roleMenuPermission.findMany({
       where: { tenantId, roleId },
     });
 
     const menuIds = permissions.map((p) => p.menuId);
-    const menus = await this.prisma.menu.findMany({
+    const menus = await this.prisma.identity.menu.findMany({
       where: { id: { in: menuIds } },
       select: { id: true, code: true, parentId: true },
     });

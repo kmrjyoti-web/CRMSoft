@@ -48,7 +48,7 @@ export class AuthService {
   // ═══════════════════════════════════════
 
   async superAdminLogin(email: string, password: string) {
-    const admin = await this.prisma.superAdmin.findUnique({
+    const admin = await this.prisma.identity.superAdmin.findUnique({
       where: { email },
     });
 
@@ -60,7 +60,7 @@ export class AuthService {
     const valid = await bcrypt.compare(password, admin.password);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
-    await this.prisma.superAdmin.update({
+    await this.prisma.identity.superAdmin.update({
       where: { id: admin.id },
       data: { lastLoginAt: new Date() },
     });
@@ -103,7 +103,7 @@ export class AuthService {
 
   async vendorLogin(email: string, password: string) {
     // Reject SuperAdmin trying to use vendor portal
-    const superAdmin = await this.prisma.superAdmin.findUnique({ where: { email } });
+    const superAdmin = await this.prisma.identity.superAdmin.findUnique({ where: { email } });
     if (superAdmin) {
       throw new ForbiddenException(
         'This portal is for vendors only. Please use the CRM Admin portal.',
@@ -111,7 +111,7 @@ export class AuthService {
     }
 
     // Reject regular User (admin/employee/customer/partner)
-    const regularUser = await this.prisma.user.findFirst({ where: { email } });
+    const regularUser = await this.prisma.identity.user.findFirst({ where: { email } });
     if (regularUser) {
       throw new ForbiddenException(
         'This portal is for vendors only. Please use the CRM Admin portal.',
@@ -119,7 +119,7 @@ export class AuthService {
     }
 
     // Find vendor by email
-    const vendor = await this.prisma.marketplaceVendor.findUnique({
+    const vendor = await this.prisma.platform.marketplaceVendor.findUnique({
       where: { contactEmail: email },
     });
 
@@ -146,7 +146,7 @@ export class AuthService {
     }
 
     // Update last login
-    await this.prisma.marketplaceVendor.update({
+    await this.prisma.platform.marketplaceVendor.update({
       where: { id: vendor.id },
       data: { lastLoginAt: new Date() },
     });
@@ -206,11 +206,11 @@ export class AuthService {
     userType?: string; departmentId?: string; designationId?: string;
     createdBy: string;
   }) {
-    const existing = await this.prisma.user.findFirst({ where: { email: data.email } });
+    const existing = await this.prisma.identity.user.findFirst({ where: { email: data.email } });
     if (existing) {
       throw new ConflictException('Email already exists');
     }
-    const role = await this.prisma.role.findFirst({ where: { id: data.roleId } });
+    const role = await this.prisma.identity.role.findFirst({ where: { id: data.roleId } });
     if (!role) throw new NotFoundException('Role not found');
 
     const userType = data.userType || 'EMPLOYEE';
@@ -219,7 +219,7 @@ export class AuthService {
     }
 
     const hashed = await bcrypt.hash(data.password, this.getSaltRounds());
-    const user = await this.prisma.user.create({
+    const user = await this.prisma.identity.user.create({
       data: {
         email: data.email, password: hashed,
         firstName: data.firstName, lastName: data.lastName,
@@ -243,7 +243,7 @@ export class AuthService {
     gstNumber?: string; city?: string; state?: string;
     country?: string; industry?: string;
   }) {
-    const existing = await this.prisma.user.findFirst({ where: { email: data.email } });
+    const existing = await this.prisma.identity.user.findFirst({ where: { email: data.email } });
     if (existing) {
       throw new ConflictException('Email already exists');
     }
@@ -251,7 +251,7 @@ export class AuthService {
     const role = await this.getOrCreateRole('CUSTOMER', 'Customer');
 
     const hashed = await bcrypt.hash(data.password, this.getSaltRounds());
-    const user = await this.prisma.user.create({
+    const user = await this.prisma.identity.user.create({
       data: {
         email: data.email, password: hashed,
         firstName: data.firstName, lastName: data.lastName,
@@ -287,7 +287,7 @@ export class AuthService {
     lastName: string; phone?: string; panNumber?: string;
     bankName?: string; bankAccount?: string; ifscCode?: string;
   }) {
-    const existing = await this.prisma.user.findFirst({ where: { email: data.email } });
+    const existing = await this.prisma.identity.user.findFirst({ where: { email: data.email } });
     if (existing) {
       throw new ConflictException('Email already exists');
     }
@@ -296,7 +296,7 @@ export class AuthService {
     const referralCode = this.generateReferralCode(data.firstName);
 
     const hashed = await bcrypt.hash(data.password, this.getSaltRounds());
-    const user = await this.prisma.user.create({
+    const user = await this.prisma.identity.user.create({
       data: {
         email: data.email, password: hashed,
         firstName: data.firstName, lastName: data.lastName,
@@ -325,7 +325,7 @@ export class AuthService {
 
   /** Check if a company slug is available. */
   async isSlugAvailable(slug: string): Promise<boolean> {
-    const existing = await this.prisma.tenant.findFirst({ where: { slug } });
+    const existing = await this.prisma.identity.tenant.findFirst({ where: { slug } });
     return !existing;
   }
 
@@ -339,13 +339,13 @@ export class AuthService {
     phone?: string; planId?: string; businessTypeCode?: string;
   }) {
     // Check email uniqueness
-    const existingUser = await this.prisma.user.findFirst({ where: { email: data.email } });
+    const existingUser = await this.prisma.identity.user.findFirst({ where: { email: data.email } });
     if (existingUser) {
       throw new ConflictException('Email already registered');
     }
 
     // Check slug uniqueness
-    const existingTenant = await this.prisma.tenant.findFirst({ where: { slug: data.slug } });
+    const existingTenant = await this.prisma.identity.tenant.findFirst({ where: { slug: data.slug } });
     if (existingTenant) {
       throw new ConflictException('Company slug already taken');
     }
@@ -353,7 +353,7 @@ export class AuthService {
     // Find plan (use provided or first active plan)
     let planId = data.planId;
     if (!planId) {
-      const defaultPlan = await this.prisma.plan.findFirst({
+      const defaultPlan = await this.prisma.identity.plan.findFirst({
         where: { isActive: true },
         orderBy: { price: 'asc' },
       });
@@ -379,11 +379,11 @@ export class AuthService {
 
     // Assign business type if provided
     if (data.businessTypeCode) {
-      const bt = await this.prisma.businessTypeRegistry.findUnique({
+      const bt = await this.prisma.platform.businessTypeRegistry.findUnique({
         where: { typeCode: data.businessTypeCode },
       });
       if (bt) {
-        await this.prisma.tenant.update({
+        await this.prisma.identity.tenant.update({
           where: { id: tenant.id },
           data: { businessTypeId: bt.id, industryCode: data.businessTypeCode },
         });
@@ -428,7 +428,7 @@ export class AuthService {
 
       // Super admin refresh
       if (payload.isSuperAdmin) {
-        const admin = await this.prisma.superAdmin.findUnique({
+        const admin = await this.prisma.identity.superAdmin.findUnique({
           where: { id: payload.sub },
         });
         if (!admin || !admin.isActive) {
@@ -451,7 +451,7 @@ export class AuthService {
 
       // Vendor refresh
       if (payload.vendorId || payload.userType === 'VENDOR') {
-        const vendor = await this.prisma.marketplaceVendor.findUnique({
+        const vendor = await this.prisma.platform.marketplaceVendor.findUnique({
           where: { id: payload.sub },
         });
         if (!vendor || vendor.status === 'SUSPENDED') {
@@ -473,7 +473,7 @@ export class AuthService {
       }
 
       // Regular user refresh
-      const user = await this.prisma.user.findFirst({
+      const user = await this.prisma.identity.user.findFirst({
         where: { id: payload.sub },
         include: { role: true },
       });
@@ -489,12 +489,12 @@ export class AuthService {
   }
 
   async changePassword(userId: string, current: string, newPass: string) {
-    const user = await this.prisma.user.findFirst({ where: { id: userId } });
+    const user = await this.prisma.identity.user.findFirst({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
     if (!(await bcrypt.compare(current, user.password))) {
       throw new UnauthorizedException('Wrong current password');
     }
-    await this.prisma.user.update({
+    await this.prisma.identity.user.update({
       where: { id: userId },
       data: { password: await bcrypt.hash(newPass, this.getSaltRounds()) },
     });
@@ -502,7 +502,7 @@ export class AuthService {
   }
 
   async getProfile(userId: string) {
-    const user = await this.prisma.user.findFirst({
+    const user = await this.prisma.identity.user.findFirst({
       where: { id: userId },
       include: {
         role: { select: { id: true, name: true, displayName: true } },
@@ -515,7 +515,7 @@ export class AuthService {
   }
 
   async getVendorProfile(vendorId: string) {
-    const vendor = await this.prisma.marketplaceVendor.findUnique({ where: { id: vendorId } });
+    const vendor = await this.prisma.platform.marketplaceVendor.findUnique({ where: { id: vendorId } });
     if (!vendor) throw new NotFoundException('Vendor not found');
     const firstName = vendor.contactName?.split(' ')[0] ?? vendor.companyName;
     const lastName = vendor.contactName?.split(' ').slice(1).join(' ') ?? '';
@@ -537,7 +537,7 @@ export class AuthService {
   }
 
   async getSuperAdminProfile(adminId: string) {
-    const admin = await this.prisma.superAdmin.findUnique({ where: { id: adminId } });
+    const admin = await this.prisma.identity.superAdmin.findUnique({ where: { id: adminId } });
     if (!admin) throw new NotFoundException('Super admin not found');
     return {
       id: admin.id,
@@ -559,7 +559,7 @@ export class AuthService {
     allowedUserTypes: string[],
     allowedRoles: string[],
   ) {
-    const user = await this.prisma.user.findFirst({
+    const user = await this.prisma.identity.user.findFirst({
       where: { email },
       include: {
         role: true,
@@ -588,13 +588,13 @@ export class AuthService {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
-    await this.prisma.user.update({
+    await this.prisma.identity.user.update({
       where: { id: user.id },
       data: { lastLoginAt: new Date() },
     });
 
     // Fetch tenant info for response
-    const tenant = await this.prisma.tenant.findUnique({
+    const tenant = await this.prisma.identity.tenant.findUnique({
       where: { id: user.tenantId },
       select: { id: true, name: true, slug: true, status: true, onboardingStep: true, industryCode: true },
     });
@@ -649,9 +649,9 @@ export class AuthService {
   }
 
   private async getOrCreateRole(name: string, displayName: string) {
-    let role = await this.prisma.role.findFirst({ where: { name } });
+    let role = await this.prisma.identity.role.findFirst({ where: { name } });
     if (!role) {
-      role = await this.prisma.role.create({
+      role = await this.prisma.identity.role.create({
         data: { name, displayName, description: `${displayName} role` },
       });
     }

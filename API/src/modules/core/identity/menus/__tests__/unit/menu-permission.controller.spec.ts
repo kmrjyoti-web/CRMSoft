@@ -28,6 +28,8 @@ describe('MenuPermissionController', () => {
       create: jest.fn(),
     },
   };
+  (mockPrisma as any).identity = mockPrisma;
+  (mockPrisma as any).platform = mockPrisma;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

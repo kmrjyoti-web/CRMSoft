@@ -38,6 +38,13 @@ import { SoftDeleteUserHandler } from './application/commands/soft-delete-user/s
 import { RestoreUserHandler } from './application/commands/restore-user/restore-user.handler';
 import { PermanentDeleteUserHandler } from './application/commands/permanent-delete-user/permanent-delete-user.handler';
 
+// User Query Handlers
+import { ListUsersHandler } from './application/queries/list-users/list-users.handler';
+import { GetUserHandler } from './application/queries/get-user/get-user.handler';
+import { ListRolesHandler } from './application/queries/list-roles/list-roles.handler';
+import { GetRoleHandler } from './application/queries/get-role/get-role.handler';
+import { ListPermissionsHandler } from './application/queries/list-permissions/list-permissions.handler';
+
 const SERVICES = [
   AutoNumberService,
   BusinessHoursService,
@@ -57,6 +64,14 @@ const UserCommandHandlers = [
   SoftDeleteUserHandler,
   RestoreUserHandler,
   PermanentDeleteUserHandler,
+];
+
+const UserQueryHandlers = [
+  ListUsersHandler,
+  GetUserHandler,
+  ListRolesHandler,
+  GetRoleHandler,
+  ListPermissionsHandler,
 ];
 
 const CONTROLLERS = [
@@ -82,7 +97,7 @@ const CONTROLLERS = [
     MulterModule.register({ storage: memoryStorage() }),
   ],
   controllers: CONTROLLERS,
-  providers: [...SERVICES, ...UserCommandHandlers],
+  providers: [...SERVICES, ...UserCommandHandlers, ...UserQueryHandlers],
   exports: [
     AutoNumberService,
     BusinessHoursService,

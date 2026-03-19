@@ -42,6 +42,8 @@ describe('GetMyMenuHandler - 5-Check Visibility Chain', () => {
       tenant: { findUnique: jest.fn(), findFirst: jest.fn() },
       terminologyOverride: { findMany: jest.fn() },
     };
+    (mockPrisma as any).identity = mockPrisma;
+    (mockPrisma as any).platform = mockPrisma;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

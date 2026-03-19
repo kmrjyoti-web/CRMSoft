@@ -7,29 +7,29 @@ export class VendorPackagesService {
 
   async list(page: number, limit: number) {
     const [data, total] = await Promise.all([
-      this.prisma.plan.findMany({
+      this.prisma.identity.plan.findMany({
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.plan.count(),
+      this.prisma.identity.plan.count(),
     ]);
     return { data, total };
   }
 
   async getById(id: string) {
-    return this.prisma.plan.findUnique({ where: { id } });
+    return this.prisma.identity.plan.findUnique({ where: { id } });
   }
 
   async create(data: Record<string, unknown>) {
-    return this.prisma.plan.create({ data: data as any });
+    return this.prisma.identity.plan.create({ data: data as any });
   }
 
   async update(id: string, data: Record<string, unknown>) {
-    return this.prisma.plan.update({ where: { id }, data: data as any });
+    return this.prisma.identity.plan.update({ where: { id }, data: data as any });
   }
 
   async deactivate(id: string) {
-    return this.prisma.plan.update({ where: { id }, data: { isActive: false } });
+    return this.prisma.identity.plan.update({ where: { id }, data: { isActive: false } });
   }
 }

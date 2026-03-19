@@ -8,7 +8,7 @@ export class GetDiffViewHandler implements IQueryHandler<GetDiffViewQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetDiffViewQuery) {
-    const log = await this.prisma.auditLog.findUnique({
+    const log = await this.prisma.identity.auditLog.findUnique({
       where: { id: query.id },
       include: { fieldChanges: { orderBy: { createdAt: 'asc' } } },
     });

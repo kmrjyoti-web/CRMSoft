@@ -6,6 +6,8 @@ const mockPrisma = {
     upsert: jest.fn(),
   },
 } as any;
+(mockPrisma as any).identity = mockPrisma;
+(mockPrisma as any).platform = mockPrisma;
 
 describe('CompanyProfileService', () => {
   let service: CompanyProfileService;

@@ -12,7 +12,7 @@ export class GetFieldHistoryHandler implements IQueryHandler<GetFieldHistoryQuer
     const skip = (page - 1) * limit;
 
     const [changes, total] = await Promise.all([
-      this.prisma.auditFieldChange.findMany({
+      this.prisma.identity.auditFieldChange.findMany({
         where: {
           fieldName: query.fieldName,
           auditLog: { entityType: query.entityType as any, entityId: query.entityId },
@@ -24,7 +24,7 @@ export class GetFieldHistoryHandler implements IQueryHandler<GetFieldHistoryQuer
         skip,
         take: limit,
       }),
-      this.prisma.auditFieldChange.count({
+      this.prisma.identity.auditFieldChange.count({
         where: {
           fieldName: query.fieldName,
           auditLog: { entityType: query.entityType as any, entityId: query.entityId },

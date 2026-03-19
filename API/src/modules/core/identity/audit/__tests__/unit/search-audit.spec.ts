@@ -21,6 +21,8 @@ describe('SearchAuditLogs', () => {
         count: jest.fn().mockResolvedValue(1),
       },
     };
+    (prisma as any).identity = prisma;
+    (prisma as any).platform = prisma;
     handler = new SearchAuditLogsHandler(prisma);
   });
 

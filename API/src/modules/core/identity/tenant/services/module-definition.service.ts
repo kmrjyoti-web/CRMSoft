@@ -15,7 +15,7 @@ export class ModuleDefinitionService {
   async seed() {
     const results = await Promise.all(
       MODULE_SEED_DATA.map((mod) =>
-        this.prisma.moduleDefinition.upsert({
+        this.prisma.platform.moduleDefinition.upsert({
           where: { code: mod.code },
           update: {
             name: mod.name,
@@ -55,7 +55,7 @@ export class ModuleDefinitionService {
       where.category = query.category;
     }
 
-    return this.prisma.moduleDefinition.findMany({
+    return this.prisma.platform.moduleDefinition.findMany({
       where,
       orderBy: [{ category: 'asc' }, { sortOrder: 'asc' }],
     });
@@ -65,7 +65,7 @@ export class ModuleDefinitionService {
    * Get a single module definition by its unique code.
    */
   async getByCode(code: string) {
-    const module = await this.prisma.moduleDefinition.findUnique({
+    const module = await this.prisma.platform.moduleDefinition.findUnique({
       where: { code },
     });
 
@@ -90,7 +90,7 @@ export class ModuleDefinitionService {
     dependsOn?: string[];
     isActive?: boolean;
   }) {
-    return this.prisma.moduleDefinition.create({
+    return this.prisma.platform.moduleDefinition.create({
       data: {
         code: data.code,
         name: data.name,
@@ -109,12 +109,12 @@ export class ModuleDefinitionService {
    * Update an existing module definition.
    */
   async update(id: string, data: any) {
-    const module = await this.prisma.moduleDefinition.findUnique({ where: { id } });
+    const module = await this.prisma.platform.moduleDefinition.findUnique({ where: { id } });
     if (!module) {
       throw new NotFoundException(`Module definition ${id} not found`);
     }
 
-    return this.prisma.moduleDefinition.update({
+    return this.prisma.platform.moduleDefinition.update({
       where: { id },
       data,
     });

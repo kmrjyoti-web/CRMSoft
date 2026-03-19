@@ -113,7 +113,7 @@ export class BusinessHoursService {
 
   /** Bulk update the entire week schedule. */
   async updateWeek(tenantId: string, schedules: UpdateBusinessHoursDto[]): Promise<void> {
-    await this.prisma.$transaction(
+    await this.prisma.identity.$transaction(
       schedules.map((s) => {
         const { dayOfWeek, ...data } = s;
         return this.prisma.businessHoursSchedule.upsert({

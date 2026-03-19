@@ -10,7 +10,7 @@ export class PermanentDeleteUserHandler implements ICommandHandler<PermanentDele
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: PermanentDeleteUserCommand): Promise<void> {
-    const user = await this.prisma.user.findUnique({ where: { id: command.userId } });
+    const user = await this.prisma.identity.user.findUnique({ where: { id: command.userId } });
     if (!user) throw new NotFoundException(`User ${command.userId} not found`);
 
     if (!user.isDeleted) {
@@ -19,7 +19,7 @@ export class PermanentDeleteUserHandler implements ICommandHandler<PermanentDele
       );
     }
 
-    await this.prisma.user.delete({ where: { id: command.userId } });
+    await this.prisma.identity.user.delete({ where: { id: command.userId } });
 
     this.logger.log(`User ${command.userId} permanently deleted`);
   }

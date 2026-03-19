@@ -9,12 +9,12 @@ export class ModuleAccessService {
    * Get all module access entries for a specific plan.
    */
   async getByPlan(planId: string) {
-    const plan = await this.prisma.plan.findUnique({ where: { id: planId } });
+    const plan = await this.prisma.identity.plan.findUnique({ where: { id: planId } });
     if (!plan) {
       throw new NotFoundException(`Plan ${planId} not found`);
     }
 
-    return this.prisma.planModuleAccess.findMany({
+    return this.prisma.identity.planModuleAccess.findMany({
       where: { planId },
       orderBy: { moduleCode: 'asc' },
     });
@@ -32,14 +32,14 @@ export class ModuleAccessService {
       customConfig?: any;
     }>,
   ) {
-    const plan = await this.prisma.plan.findUnique({ where: { id: planId } });
+    const plan = await this.prisma.identity.plan.findUnique({ where: { id: planId } });
     if (!plan) {
       throw new NotFoundException(`Plan ${planId} not found`);
     }
 
-    return this.prisma.$transaction(
+    return this.prisma.identity.$transaction(
       modules.map((mod) =>
-        this.prisma.planModuleAccess.upsert({
+        this.prisma.identity.planModuleAccess.upsert({
           where: {
             planId_moduleCode: { planId, moduleCode: mod.moduleCode },
           },
@@ -68,7 +68,7 @@ export class ModuleAccessService {
     moduleCode: string,
   ): Promise<{ allowed: boolean; accessLevel: string }> {
     // Check if module is a core module (always allowed)
-    const moduleDef = await this.prisma.moduleDefinition.findUnique({
+    const moduleDef = await this.prisma.platform.moduleDefinition.findUnique({
       where: { code: moduleCode },
     });
 
@@ -77,7 +77,7 @@ export class ModuleAccessService {
     }
 
     // Get tenant's active subscription
-    const subscription = await this.prisma.subscription.findFirst({
+    const subscription = await this.prisma.identity.subscription.findFirst({
       where: {
         tenantId,
         status: { in: ['ACTIVE', 'TRIALING'] },
@@ -90,7 +90,7 @@ export class ModuleAccessService {
     }
 
     // Find module access for the subscription's plan
-    const access = await this.prisma.planModuleAccess.findUnique({
+    const access = await this.prisma.identity.planModuleAccess.findUnique({
       where: {
         planId_moduleCode: {
           planId: subscription.planId,
@@ -116,7 +116,7 @@ export class ModuleAccessService {
    * Useful for rendering a matrix view in the admin panel.
    */
   async getAccessMatrix() {
-    const plans = await this.prisma.plan.findMany({
+    const plans = await this.prisma.identity.plan.findMany({
       where: { isActive: true },
       orderBy: { sortOrder: 'asc' },
       select: {
@@ -129,7 +129,7 @@ export class ModuleAccessService {
       },
     });
 
-    const modules = await this.prisma.moduleDefinition.findMany({
+    const modules = await this.prisma.platform.moduleDefinition.findMany({
       where: { isActive: true },
       orderBy: [{ category: 'asc' }, { sortOrder: 'asc' }],
     });

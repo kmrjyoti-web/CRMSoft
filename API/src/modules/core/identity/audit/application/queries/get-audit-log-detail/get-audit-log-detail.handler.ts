@@ -8,7 +8,7 @@ export class GetAuditLogDetailHandler implements IQueryHandler<GetAuditLogDetail
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetAuditLogDetailQuery) {
-    const log = await this.prisma.auditLog.findUnique({
+    const log = await this.prisma.identity.auditLog.findUnique({
       where: { id: query.id },
       include: { fieldChanges: { orderBy: { createdAt: 'asc' } } },
     });

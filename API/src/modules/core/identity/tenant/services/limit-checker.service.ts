@@ -23,7 +23,7 @@ export class LimitCheckerService {
    * if no PlanLimit record exists.
    */
   async checkResource(tenantId: string, resourceKey: string): Promise<ResourceCheckResult> {
-    const subscription = await this.prisma.subscription.findFirst({
+    const subscription = await this.prisma.identity.subscription.findFirst({
       where: { tenantId, status: { in: ['ACTIVE', 'TRIALING'] } },
       include: {
         plan: {
@@ -49,7 +49,7 @@ export class LimitCheckerService {
       }
 
       // Get current usage from TenantUsageDetail
-      const usageDetail = await this.prisma.tenantUsageDetail.findUnique({
+      const usageDetail = await this.prisma.platform.tenantUsageDetail.findUnique({
         where: { tenantId_resourceKey: { tenantId, resourceKey } },
       });
 
@@ -90,7 +90,7 @@ export class LimitCheckerService {
       return { allowed: true, current: 0, limit: -1, limitType: 'UNLIMITED', isChargeable: false, chargeTokens: 0 };
     }
 
-    const usage = await this.prisma.tenantUsage.findUnique({ where: { tenantId } });
+    const usage = await this.prisma.identity.tenantUsage.findUnique({ where: { tenantId } });
     const plan = subscription.plan;
 
     const countMap: Record<string, number> = {
@@ -126,7 +126,7 @@ export class LimitCheckerService {
   }
 
   async hasFeature(tenantId: string, feature: string): Promise<boolean> {
-    const subscription = await this.prisma.subscription.findFirst({
+    const subscription = await this.prisma.identity.subscription.findFirst({
       where: { tenantId, status: { in: ['ACTIVE', 'TRIALING'] } },
       include: { plan: true },
     });
@@ -142,7 +142,7 @@ export class LimitCheckerService {
     planName: string;
     limits: Array<ResourceCheckResult & { resourceKey: string }>;
   }> {
-    const subscription = await this.prisma.subscription.findFirst({
+    const subscription = await this.prisma.identity.subscription.findFirst({
       where: { tenantId, status: { in: ['ACTIVE', 'TRIALING'] } },
       include: {
         plan: { include: { limits: true } },
@@ -153,7 +153,7 @@ export class LimitCheckerService {
       return { planName: '', limits: [] };
     }
 
-    const usageDetails = await this.prisma.tenantUsageDetail.findMany({
+    const usageDetails = await this.prisma.platform.tenantUsageDetail.findMany({
       where: { tenantId },
     });
 

@@ -11,6 +11,8 @@ const mockPrisma = {
     findMany: jest.fn(),
   },
 } as any;
+(mockPrisma as any).identity = mockPrisma;
+(mockPrisma as any).platform = mockPrisma;
 
 describe('SecurityPolicyService', () => {
   let service: SecurityPolicyService;

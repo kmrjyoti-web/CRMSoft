@@ -32,12 +32,12 @@ export class ReplaceFiltersHandler implements ICommandHandler<ReplaceFiltersComm
 
     // If category specified, only remove filters from that category
     if (command.category) {
-      const lookup = await this.prisma.masterLookup.findFirst({
+      const lookup = await this.prisma.platform.masterLookup.findFirst({
         where: { category: command.category.toUpperCase() },
       });
       if (!lookup) throw new NotFoundException(`Category ${command.category} not found`);
 
-      const categoryValueIds = await this.prisma.lookupValue.findMany({
+      const categoryValueIds = await this.prisma.platform.lookupValue.findMany({
         where: { lookupId: lookup.id },
         select: { id: true },
       });
@@ -50,7 +50,7 @@ export class ReplaceFiltersHandler implements ICommandHandler<ReplaceFiltersComm
     });
 
     // Assign new
-    const validValues = await this.prisma.lookupValue.findMany({
+    const validValues = await this.prisma.platform.lookupValue.findMany({
       where: { id: { in: command.lookupValueIds }, isActive: true },
     });
 

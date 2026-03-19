@@ -24,6 +24,8 @@ describe('MenuPermissionService', () => {
       create: jest.fn(),
     },
   };
+  (mockPrisma as any).identity = mockPrisma;
+  (mockPrisma as any).platform = mockPrisma;
 
   const fullPermRecord = {
     canView: true, canCreate: true, canEdit: true, canDelete: true,

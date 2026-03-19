@@ -18,7 +18,7 @@ export class InvoiceGeneratorService {
     const invoiceNumber = `INV-${Date.now()}`;
     const total = data.amount + data.tax;
 
-    const invoice = await this.prisma.tenantInvoice.create({
+    const invoice = await this.prisma.identity.tenantInvoice.create({
       data: {
         tenantId: data.tenantId,
         invoiceNumber,
@@ -40,7 +40,7 @@ export class InvoiceGeneratorService {
     this.logger.log(`Generating PDF for invoice ${invoiceId}`);
     const pdfUrl = `/invoices/${invoiceId}.pdf`;
 
-    await this.prisma.tenantInvoice.update({
+    await this.prisma.identity.tenantInvoice.update({
       where: { id: invoiceId },
       data: { pdfUrl },
     });

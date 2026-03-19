@@ -7,7 +7,7 @@ export class GetRetentionPoliciesHandler implements IQueryHandler<GetRetentionPo
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(_query: GetRetentionPoliciesQuery) {
-    return this.prisma.auditRetentionPolicy.findMany({
+    return this.prisma.identity.auditRetentionPolicy.findMany({
       orderBy: { entityType: 'asc' },
     });
   }

@@ -54,7 +54,7 @@ export class UsageTrackerService {
     const currentMonth = new Date().toISOString().slice(0, 7);
 
     // Update legacy TenantUsage table
-    await this.prisma.tenantUsage.upsert({
+    await this.prisma.identity.tenantUsage.upsert({
       where: { tenantId },
       update: {
         usersCount: counts.users ?? 0,
@@ -75,7 +75,7 @@ export class UsageTrackerService {
 
     // Update TenantUsageDetail table for all resources
     const detailUpserts = Object.entries(counts).map(([resourceKey, currentCount]) =>
-      this.prisma.tenantUsageDetail.upsert({
+      this.prisma.platform.tenantUsageDetail.upsert({
         where: { tenantId_resourceKey: { tenantId, resourceKey } },
         update: {
           currentCount,
@@ -109,7 +109,7 @@ export class UsageTrackerService {
   async incrementUsage(tenantId: string, resourceKey: string) {
     const currentMonth = new Date().toISOString().slice(0, 7);
 
-    const existing = await this.prisma.tenantUsageDetail.findUnique({
+    const existing = await this.prisma.platform.tenantUsageDetail.findUnique({
       where: { tenantId_resourceKey: { tenantId, resourceKey } },
     });
 
@@ -118,7 +118,7 @@ export class UsageTrackerService {
         ? existing.monthlyCount + 1
         : 1; // Reset if new month
 
-      await this.prisma.tenantUsageDetail.update({
+      await this.prisma.platform.tenantUsageDetail.update({
         where: { tenantId_resourceKey: { tenantId, resourceKey } },
         data: {
           currentCount: { increment: 1 },
@@ -128,7 +128,7 @@ export class UsageTrackerService {
         },
       });
     } else {
-      await this.prisma.tenantUsageDetail.create({
+      await this.prisma.platform.tenantUsageDetail.create({
         data: {
           tenantId,
           resourceKey,
@@ -143,7 +143,7 @@ export class UsageTrackerService {
     // Also update legacy TenantUsage for basic resources
     const legacyField = this.getLegacyField(resourceKey);
     if (legacyField) {
-      await this.prisma.tenantUsage.updateMany({
+      await this.prisma.identity.tenantUsage.updateMany({
         where: { tenantId },
         data: { [legacyField]: { increment: 1 } },
       });
@@ -154,12 +154,12 @@ export class UsageTrackerService {
    * Decrement usage counter when an entity is deleted.
    */
   async decrementUsage(tenantId: string, resourceKey: string) {
-    const existing = await this.prisma.tenantUsageDetail.findUnique({
+    const existing = await this.prisma.platform.tenantUsageDetail.findUnique({
       where: { tenantId_resourceKey: { tenantId, resourceKey } },
     });
 
     if (existing && existing.currentCount > 0) {
-      await this.prisma.tenantUsageDetail.update({
+      await this.prisma.platform.tenantUsageDetail.update({
         where: { tenantId_resourceKey: { tenantId, resourceKey } },
         data: {
           currentCount: { decrement: 1 },
@@ -170,7 +170,7 @@ export class UsageTrackerService {
 
     const legacyField = this.getLegacyField(resourceKey);
     if (legacyField) {
-      await this.prisma.tenantUsage.updateMany({
+      await this.prisma.identity.tenantUsage.updateMany({
         where: { tenantId },
         data: { [legacyField]: { decrement: 1 } },
       });
@@ -181,7 +181,7 @@ export class UsageTrackerService {
    * Get all usage details for a tenant.
    */
   async getUsageDetails(tenantId: string) {
-    return this.prisma.tenantUsageDetail.findMany({
+    return this.prisma.platform.tenantUsageDetail.findMany({
       where: { tenantId },
       orderBy: { resourceKey: 'asc' },
     });
@@ -196,7 +196,7 @@ export class UsageTrackerService {
       ? { tenantId, monthYear: { not: currentMonth } }
       : { monthYear: { not: currentMonth } };
 
-    await this.prisma.tenantUsageDetail.updateMany({
+    await this.prisma.platform.tenantUsageDetail.updateMany({
       where,
       data: { monthlyCount: 0, monthYear: currentMonth },
     });

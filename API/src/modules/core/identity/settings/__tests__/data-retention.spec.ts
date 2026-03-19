@@ -15,6 +15,8 @@ const mockPrisma = {
   },
   lead: mockLeadDelegate,
 } as any;
+(mockPrisma as any).identity = mockPrisma;
+(mockPrisma as any).platform = mockPrisma;
 
 describe('DataRetentionService', () => {
   let service: DataRetentionService;

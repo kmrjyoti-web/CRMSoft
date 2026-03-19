@@ -10,7 +10,7 @@ export class CompleteOnboardingStepHandler implements ICommandHandler<CompleteOn
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: CompleteOnboardingStepCommand) {
-    const tenant = await this.prisma.tenant.update({
+    const tenant = await this.prisma.identity.tenant.update({
       where: { id: command.tenantId },
       data: { onboardingStep: command.step },
     });

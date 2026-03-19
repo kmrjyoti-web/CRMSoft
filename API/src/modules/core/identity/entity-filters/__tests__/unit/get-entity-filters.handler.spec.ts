@@ -24,6 +24,8 @@ describe('GetEntityFiltersHandler', () => {
         ]),
       },
     };
+    (prisma as any).identity = prisma;
+    (prisma as any).platform = prisma;
     handler = new GetEntityFiltersHandler(prisma);
   });
 

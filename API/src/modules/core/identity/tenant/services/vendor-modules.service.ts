@@ -16,13 +16,13 @@ export class VendorModulesService {
     if (filters.vendorId) where.vendorId = filters.vendorId;
 
     const [rawData, total] = await Promise.all([
-      this.prisma.marketplaceModule.findMany({
+      this.prisma.platform.marketplaceModule.findMany({
         where,
         skip: (filters.page - 1) * filters.limit,
         take: filters.limit,
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.marketplaceModule.count({ where }),
+      this.prisma.platform.marketplaceModule.count({ where }),
     ]);
 
     const data = rawData.map((m) => ({
@@ -45,7 +45,7 @@ export class VendorModulesService {
   }
 
   async getById(id: string) {
-    const m = await this.prisma.marketplaceModule.findUnique({ where: { id } });
+    const m = await this.prisma.platform.marketplaceModule.findUnique({ where: { id } });
     if (!m) return null;
     return {
       id: m.id,
@@ -73,15 +73,15 @@ export class VendorModulesService {
     version: string;
     vendorId: string;
   }) {
-    return this.prisma.marketplaceModule.create({ data });
+    return this.prisma.platform.marketplaceModule.create({ data });
   }
 
   async update(id: string, data: Record<string, unknown>) {
-    return this.prisma.marketplaceModule.update({ where: { id }, data: data as any });
+    return this.prisma.platform.marketplaceModule.update({ where: { id }, data: data as any });
   }
 
   async deactivate(id: string) {
-    return this.prisma.marketplaceModule.update({
+    return this.prisma.platform.marketplaceModule.update({
       where: { id },
       data: { status: 'SUSPENDED' },
     });

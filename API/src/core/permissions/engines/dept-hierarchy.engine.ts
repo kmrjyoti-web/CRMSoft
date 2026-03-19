@@ -60,7 +60,7 @@ export class DeptHierarchyEngine {
   /** Look up department path by ID. */
   private async getDeptPath(deptId?: string): Promise<string | null> {
     if (!deptId) return null;
-    const dept = await this.prisma.department.findUnique({
+    const dept = await this.prisma.identity.department.findUnique({
       where: { id: deptId },
       select: { path: true },
     });

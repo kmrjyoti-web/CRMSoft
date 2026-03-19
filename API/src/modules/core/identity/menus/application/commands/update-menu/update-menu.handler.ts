@@ -9,7 +9,7 @@ export class UpdateMenuHandler implements ICommandHandler<UpdateMenuCommand> {
 
   /** Update a menu item. Prevents circular parent references. */
   async execute(cmd: UpdateMenuCommand) {
-    const menu = await this.prisma.menu.findUnique({ where: { id: cmd.id } });
+    const menu = await this.prisma.identity.menu.findUnique({ where: { id: cmd.id } });
     if (!menu) throw new NotFoundException('Menu not found');
 
     // Validate parent change — prevent circular reference
@@ -17,7 +17,7 @@ export class UpdateMenuHandler implements ICommandHandler<UpdateMenuCommand> {
       if (cmd.data.parentId === cmd.id) {
         throw new BadRequestException('Menu cannot be its own parent');
       }
-      const parent = await this.prisma.menu.findUnique({ where: { id: cmd.data.parentId } });
+      const parent = await this.prisma.identity.menu.findUnique({ where: { id: cmd.data.parentId } });
       if (!parent) throw new NotFoundException('Parent menu not found');
       // Check if new parent is a descendant of this menu
       if (await this.isDescendant(cmd.data.parentId, cmd.id)) {
@@ -25,17 +25,17 @@ export class UpdateMenuHandler implements ICommandHandler<UpdateMenuCommand> {
       }
     }
 
-    return this.prisma.menu.update({ where: { id: cmd.id }, data: cmd.data });
+    return this.prisma.identity.menu.update({ where: { id: cmd.id }, data: cmd.data });
   }
 
   /** Check if childId is a descendant of ancestorId. */
   private async isDescendant(childId: string, ancestorId: string): Promise<boolean> {
-    let current = await this.prisma.menu.findUnique({
+    let current = await this.prisma.identity.menu.findUnique({
       where: { id: childId }, select: { parentId: true },
     });
     while (current?.parentId) {
       if (current.parentId === ancestorId) return true;
-      current = await this.prisma.menu.findUnique({
+      current = await this.prisma.identity.menu.findUnique({
         where: { id: current.parentId }, select: { parentId: true },
       });
     }

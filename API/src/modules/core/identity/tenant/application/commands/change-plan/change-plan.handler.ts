@@ -10,7 +10,7 @@ export class ChangePlanHandler implements ICommandHandler<ChangePlanCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: ChangePlanCommand) {
-    const activeSubscription = await this.prisma.subscription.findFirst({
+    const activeSubscription = await this.prisma.identity.subscription.findFirst({
       where: {
         tenantId: command.tenantId,
         status: { in: ['ACTIVE', 'TRIALING'] },
@@ -23,7 +23,7 @@ export class ChangePlanHandler implements ICommandHandler<ChangePlanCommand> {
       );
     }
 
-    const updated = await this.prisma.subscription.update({
+    const updated = await this.prisma.identity.subscription.update({
       where: { id: activeSubscription.id },
       data: { planId: command.newPlanId },
     });

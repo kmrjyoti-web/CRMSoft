@@ -52,7 +52,7 @@ export class NotificationPrefService {
     tenantId: string,
     updates: { eventCode: string; changes: Prisma.NotificationConfigUpdateInput }[],
   ): Promise<void> {
-    await this.prisma.$transaction(
+    await this.prisma.identity.$transaction(
       updates.map((u) =>
         this.prisma.notificationConfig.update({
           where: { tenantId_eventCode: { tenantId, eventCode: u.eventCode } },

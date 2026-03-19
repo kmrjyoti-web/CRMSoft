@@ -41,7 +41,7 @@ export class RoleHierarchyEngine {
 
   /** Get all effective permissions for a user (own role + inherited from lower-authority roles). */
   async getEffectivePermissions(userId: string): Promise<string[]> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.identity.user.findUnique({
       where: { id: userId },
       select: { roleId: true, role: { select: { level: true } } },
     });
@@ -51,18 +51,18 @@ export class RoleHierarchyEngine {
 
     // SUPER_ADMIN inherits all
     if (userLevel === 0) {
-      const all = await this.prisma.permission.findMany();
+      const all = await this.prisma.identity.permission.findMany();
       return all.map((p) => `${p.module}:${p.action}`);
     }
 
     // Get own role + all roles with HIGHER level number (lower authority)
-    const inheritableRoles = await this.prisma.role.findMany({
+    const inheritableRoles = await this.prisma.identity.role.findMany({
       where: { level: { gte: userLevel } },
       select: { id: true },
     });
 
     const roleIds = inheritableRoles.map((r) => r.id);
-    const rolePerms = await this.prisma.rolePermission.findMany({
+    const rolePerms = await this.prisma.identity.rolePermission.findMany({
       where: { roleId: { in: roleIds } },
       include: { permission: true },
     });
@@ -76,11 +76,11 @@ export class RoleHierarchyEngine {
   /** Check if manager can manage target user based on role levels. */
   async canManageUser(managerUserId: string, targetUserId: string): Promise<boolean> {
     const [manager, target] = await Promise.all([
-      this.prisma.user.findUnique({
+      this.prisma.identity.user.findUnique({
         where: { id: managerUserId },
         select: { role: { select: { id: true, level: true, canManageLevels: true } } },
       }),
-      this.prisma.user.findUnique({
+      this.prisma.identity.user.findUnique({
         where: { id: targetUserId },
         select: { role: { select: { level: true } } },
       }),
@@ -106,7 +106,7 @@ export class RoleHierarchyEngine {
     if (this.roleMap.size > 0 && Date.now() - this.cacheLoadedAt < this.CACHE_TTL) {
       return;
     }
-    const roles = await this.prisma.role.findMany({
+    const roles = await this.prisma.identity.role.findMany({
       select: { id: true, name: true, level: true, canManageLevels: true },
     });
     this.roleMap.clear();
@@ -116,7 +116,7 @@ export class RoleHierarchyEngine {
 
   /** Get ALL permission codes in the system (for super admin). */
   async getAllPermissionCodes(): Promise<string[]> {
-    const all = await this.prisma.permission.findMany();
+    const all = await this.prisma.identity.permission.findMany();
     return all.map((p) => `${p.module}:${p.action}`);
   }
 

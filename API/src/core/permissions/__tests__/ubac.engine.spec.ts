@@ -10,6 +10,8 @@ describe('UbacEngine', () => {
 
   beforeEach(() => {
     prisma = { userPermissionOverride: { findMany: jest.fn().mockResolvedValue([]) } };
+    (prisma as any).identity = prisma;
+    (prisma as any).platform = prisma;
     engine = new UbacEngine(prisma);
   });
 

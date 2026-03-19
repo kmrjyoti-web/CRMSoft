@@ -41,7 +41,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     // Regular tenant user — explicit tenantId (interceptor hasn't run yet)
-    const user = await this.prisma.user.findFirst({
+    const user = await this.prisma.identity.user.findFirst({
       where: { id: payload.sub, tenantId: payload.tenantId },
       select: {
         id: true, email: true, firstName: true, lastName: true,
@@ -59,7 +59,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     // Lookup tenant's industry code for cross-cutting filters
     let businessTypeCode: string | undefined;
     if (user.tenantId) {
-      const tenant = await this.prisma.tenant.findUnique({
+      const tenant = await this.prisma.identity.tenant.findUnique({
         where: { id: user.tenantId },
         select: { industryCode: true },
       });

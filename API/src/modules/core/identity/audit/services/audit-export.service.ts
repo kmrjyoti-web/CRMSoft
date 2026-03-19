@@ -31,7 +31,7 @@ export class AuditExportService {
     if (params.entityId) where.entityId = params.entityId;
     if (params.userId) where.performedById = params.userId;
 
-    const logs = await this.prisma.auditLog.findMany({
+    const logs = await this.prisma.identity.auditLog.findMany({
       where,
       include: { fieldChanges: true },
       orderBy: { createdAt: 'desc' },

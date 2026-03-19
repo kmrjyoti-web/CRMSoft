@@ -52,6 +52,8 @@ describe('AuthService — Multi-Login', () => {
       referralPartner: { upsert: jest.fn() },
       tenant: { findUnique: jest.fn().mockResolvedValue({ id: 't-1', name: 'Test Tenant', slug: 'test', status: 'ACTIVE', onboardingStep: 'DONE', industryCode: null }) },
     };
+    (prisma as any).identity = prisma;
+    (prisma as any).platform = prisma;
     jwt = {
       signAsync: jest.fn().mockResolvedValue('mock-token'),
       verify: jest.fn(),

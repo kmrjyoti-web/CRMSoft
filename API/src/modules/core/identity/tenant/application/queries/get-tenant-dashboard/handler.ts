@@ -12,7 +12,7 @@ export class GetTenantDashboardHandler implements IQueryHandler<GetTenantDashboa
   async execute(query: GetTenantDashboardQuery) {
     this.logger.log(`Fetching dashboard for tenant: ${query.tenantId}`);
 
-    const tenant = await this.prisma.tenant.findUnique({
+    const tenant = await this.prisma.identity.tenant.findUnique({
       where: { id: query.tenantId },
       include: {
         subscriptions: {

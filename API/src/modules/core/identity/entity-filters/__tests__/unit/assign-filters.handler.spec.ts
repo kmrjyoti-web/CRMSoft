@@ -16,6 +16,8 @@ describe('AssignFiltersHandler', () => {
       },
       leadFilter: { create: jest.fn().mockResolvedValue({ id: 'f-1' }) },
     };
+    (prisma as any).identity = prisma;
+    (prisma as any).platform = prisma;
     handler = new AssignFiltersHandler(prisma);
   });
 

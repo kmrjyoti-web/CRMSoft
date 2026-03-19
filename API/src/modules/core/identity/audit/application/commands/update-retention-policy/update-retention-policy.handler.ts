@@ -7,12 +7,12 @@ export class UpdateRetentionPolicyHandler implements ICommandHandler<UpdateReten
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: UpdateRetentionPolicyCommand) {
-    const existing = await this.prisma.auditRetentionPolicy.findFirst({
+    const existing = await this.prisma.identity.auditRetentionPolicy.findFirst({
       where: { entityType: command.entityType as any },
     });
 
     if (existing) {
-      return this.prisma.auditRetentionPolicy.update({
+      return this.prisma.identity.auditRetentionPolicy.update({
         where: { id: existing.id },
         data: {
           retentionDays: command.retentionDays,
@@ -21,7 +21,7 @@ export class UpdateRetentionPolicyHandler implements ICommandHandler<UpdateReten
         },
       });
     } else {
-      return this.prisma.auditRetentionPolicy.create({
+      return this.prisma.identity.auditRetentionPolicy.create({
         data: {
           entityType: command.entityType as any,
           retentionDays: command.retentionDays,

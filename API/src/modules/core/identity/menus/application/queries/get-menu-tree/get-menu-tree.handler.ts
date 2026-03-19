@@ -32,7 +32,7 @@ export class GetMenuTreeHandler implements IQueryHandler<GetMenuTreeQuery> {
       const defaultTenantId = this.config.get<string>('DEFAULT_TENANT_ID');
       let targetId = defaultTenantId;
       if (!targetId) {
-        const defaultTenant = await this.prisma.tenant.findFirst({ where: { slug: 'default' } });
+        const defaultTenant = await this.prisma.identity.tenant.findFirst({ where: { slug: 'default' } });
         targetId = defaultTenant?.id;
       }
       if (targetId) {
@@ -40,7 +40,7 @@ export class GetMenuTreeHandler implements IQueryHandler<GetMenuTreeQuery> {
       }
     }
 
-    return this.prisma.menu.findMany({
+    return this.prisma.identity.menu.findMany({
       where: { parentId: null, ...tenantFilter, ...industryFilter(query.industryCode) } as any,
       select: {
         ...MENU_SELECT,

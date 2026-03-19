@@ -39,6 +39,8 @@ describe('GetEntityTimeline', () => {
         count: jest.fn().mockResolvedValue(3),
       },
     };
+    (prisma as any).identity = prisma;
+    (prisma as any).platform = prisma;
     snapshotService = {
       captureSnapshot: jest.fn().mockResolvedValue({ id: 'lead-1', status: 'VERIFIED' }),
       getEntityLabel: jest.fn().mockReturnValue('Lead #L-2026-00045'),

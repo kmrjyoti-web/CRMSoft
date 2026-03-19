@@ -14,18 +14,18 @@ export class CreateMenuHandler implements ICommandHandler<CreateMenuCommand> {
       || name.toUpperCase().replace(/[^A-Z0-9]+/g, '_').replace(/(^_|_$)/g, '');
 
     // Check uniqueness
-    const existing = await this.prisma.menu.findFirst({ where: { code } });
+    const existing = await this.prisma.identity.menu.findFirst({ where: { code } });
     if (existing) {
       throw new ConflictException(`Menu with code "${code}" already exists`);
     }
 
     // Validate parent
     if (cmd.parentId) {
-      const parent = await this.prisma.menu.findUnique({ where: { id: cmd.parentId } });
+      const parent = await this.prisma.identity.menu.findUnique({ where: { id: cmd.parentId } });
       if (!parent) throw new NotFoundException('Parent menu not found');
     }
 
-    return this.prisma.menu.create({
+    return this.prisma.identity.menu.create({
       data: {
         name,
         code,

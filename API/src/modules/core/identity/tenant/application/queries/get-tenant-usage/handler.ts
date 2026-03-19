@@ -12,7 +12,7 @@ export class GetTenantUsageHandler implements IQueryHandler<GetTenantUsageQuery>
   async execute(query: GetTenantUsageQuery) {
     this.logger.log(`Fetching usage for tenant: ${query.tenantId}`);
 
-    const usage = await this.prisma.tenantUsage.findUnique({
+    const usage = await this.prisma.identity.tenantUsage.findUnique({
       where: { tenantId: query.tenantId },
     });
 

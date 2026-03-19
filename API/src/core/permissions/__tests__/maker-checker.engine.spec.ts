@@ -28,6 +28,8 @@ describe('MakerCheckerEngine', () => {
         update: jest.fn().mockImplementation((args) => ({ id: args.where.id, ...args.data })),
       },
     };
+    (prisma as any).identity = prisma;
+    (prisma as any).platform = prisma;
     engine = new MakerCheckerEngine(prisma);
   });
 

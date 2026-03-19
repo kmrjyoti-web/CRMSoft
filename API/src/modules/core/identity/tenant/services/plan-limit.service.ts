@@ -14,22 +14,22 @@ export class PlanLimitService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getByPlan(planId: string) {
-    const plan = await this.prisma.plan.findUnique({ where: { id: planId } });
+    const plan = await this.prisma.identity.plan.findUnique({ where: { id: planId } });
     if (!plan) throw new NotFoundException('Plan not found');
 
-    return this.prisma.planLimit.findMany({
+    return this.prisma.identity.planLimit.findMany({
       where: { planId },
       orderBy: { resourceKey: 'asc' },
     });
   }
 
   async upsertLimits(planId: string, limits: UpsertPlanLimitItem[]) {
-    const plan = await this.prisma.plan.findUnique({ where: { id: planId } });
+    const plan = await this.prisma.identity.plan.findUnique({ where: { id: planId } });
     if (!plan) throw new NotFoundException('Plan not found');
 
     const results = await Promise.all(
       limits.map((item) =>
-        this.prisma.planLimit.upsert({
+        this.prisma.identity.planLimit.upsert({
           where: {
             planId_resourceKey: { planId, resourceKey: item.resourceKey },
           },
@@ -55,16 +55,16 @@ export class PlanLimitService {
   }
 
   async deleteLimit(planId: string, limitId: string) {
-    const limit = await this.prisma.planLimit.findFirst({
+    const limit = await this.prisma.identity.planLimit.findFirst({
       where: { id: limitId, planId },
     });
     if (!limit) throw new NotFoundException('Plan limit not found');
 
-    return this.prisma.planLimit.delete({ where: { id: limitId } });
+    return this.prisma.identity.planLimit.delete({ where: { id: limitId } });
   }
 
   async getResourceLimit(planId: string, resourceKey: string) {
-    return this.prisma.planLimit.findUnique({
+    return this.prisma.identity.planLimit.findUnique({
       where: { planId_resourceKey: { planId, resourceKey } },
     });
   }

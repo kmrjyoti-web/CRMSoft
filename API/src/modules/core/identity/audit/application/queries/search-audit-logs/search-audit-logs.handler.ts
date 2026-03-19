@@ -41,14 +41,14 @@ export class SearchAuditLogsHandler implements IQueryHandler<SearchAuditLogsQuer
     }
 
     const [logs, total] = await Promise.all([
-      this.prisma.auditLog.findMany({
+      this.prisma.identity.auditLog.findMany({
         where,
         include: { fieldChanges: true },
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
       }),
-      this.prisma.auditLog.count({ where }),
+      this.prisma.identity.auditLog.count({ where }),
     ]);
 
     return {

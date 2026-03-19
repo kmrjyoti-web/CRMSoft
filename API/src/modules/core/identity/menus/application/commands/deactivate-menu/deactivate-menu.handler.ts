@@ -9,13 +9,13 @@ export class DeactivateMenuHandler implements ICommandHandler<DeactivateMenuComm
 
   /** Deactivate a menu and cascade to all descendants. */
   async execute(cmd: DeactivateMenuCommand) {
-    const menu = await this.prisma.menu.findUnique({ where: { id: cmd.id } });
+    const menu = await this.prisma.identity.menu.findUnique({ where: { id: cmd.id } });
     if (!menu) throw new NotFoundException('Menu not found');
 
     const idsToDeactivate = await this.collectDescendantIds(cmd.id);
     idsToDeactivate.push(cmd.id);
 
-    await this.prisma.menu.updateMany({
+    await this.prisma.identity.menu.updateMany({
       where: { id: { in: idsToDeactivate } },
       data: { isActive: false },
     });
@@ -25,7 +25,7 @@ export class DeactivateMenuHandler implements ICommandHandler<DeactivateMenuComm
 
   /** Recursively collect all descendant IDs. */
   private async collectDescendantIds(parentId: string): Promise<string[]> {
-    const children = await this.prisma.menu.findMany({
+    const children = await this.prisma.identity.menu.findMany({
       where: { parentId }, select: { id: true },
     });
     const ids: string[] = [];

@@ -38,7 +38,7 @@ export class PackageBuilderService {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.subscriptionPackage.findMany({
+      this.prisma.platform.subscriptionPackage.findMany({
         where,
         skip,
         take: limit,
@@ -47,7 +47,7 @@ export class PackageBuilderService {
           _count: { select: { packageModules: true } },
         },
       }),
-      this.prisma.subscriptionPackage.count({ where }),
+      this.prisma.platform.subscriptionPackage.count({ where }),
     ]);
 
     return { data, total };
@@ -57,7 +57,7 @@ export class PackageBuilderService {
   /*  2. getById                                                         */
   /* ------------------------------------------------------------------ */
   async getById(id: string) {
-    const pkg = await this.prisma.subscriptionPackage.findUnique({
+    const pkg = await this.prisma.platform.subscriptionPackage.findUnique({
       where: { id },
       include: {
         packageModules: {
@@ -101,7 +101,7 @@ export class PackageBuilderService {
     isPublic?: boolean;
     sortOrder?: number;
   }) {
-    const existing = await this.prisma.subscriptionPackage.findUnique({
+    const existing = await this.prisma.platform.subscriptionPackage.findUnique({
       where: { packageCode: data.packageCode },
     });
 
@@ -111,7 +111,7 @@ export class PackageBuilderService {
       );
     }
 
-    return this.prisma.subscriptionPackage.create({
+    return this.prisma.platform.subscriptionPackage.create({
       data: {
         packageCode: data.packageCode,
         packageName: data.packageName,
@@ -175,7 +175,7 @@ export class PackageBuilderService {
 
     // Cast needed because entityLimits is Record<string, unknown> which doesn't satisfy Prisma's InputJsonValue
      
-    return this.prisma.subscriptionPackage.update({
+    return this.prisma.platform.subscriptionPackage.update({
       where: { id },
       data: data as any,
       include: {
@@ -193,7 +193,7 @@ export class PackageBuilderService {
   async archive(id: string) {
     await this.ensurePackageExists(id);
 
-    return this.prisma.subscriptionPackage.update({
+    return this.prisma.platform.subscriptionPackage.update({
       where: { id },
       data: { isActive: false },
     });
@@ -220,7 +220,7 @@ export class PackageBuilderService {
     await this.ensurePackageExists(packageId);
 
     // Validate module exists
-    const moduleDef = await this.prisma.moduleDefinition.findUnique({
+    const moduleDef = await this.prisma.platform.moduleDefinition.findUnique({
       where: { id: dto.moduleId },
     });
 
@@ -231,7 +231,7 @@ export class PackageBuilderService {
     }
 
     // Check for duplicate
-    const existing = await this.prisma.packageModule.findUnique({
+    const existing = await this.prisma.platform.packageModule.findUnique({
       where: {
         packageId_moduleId: { packageId, moduleId: dto.moduleId },
       },
@@ -243,7 +243,7 @@ export class PackageBuilderService {
       );
     }
 
-    return this.prisma.packageModule.create({
+    return this.prisma.platform.packageModule.create({
       data: {
         packageId,
         moduleId: dto.moduleId,
@@ -279,7 +279,7 @@ export class PackageBuilderService {
       sortOrder?: number;
     },
   ) {
-    const pkgModule = await this.prisma.packageModule.findUnique({
+    const pkgModule = await this.prisma.platform.packageModule.findUnique({
       where: {
         packageId_moduleId: { packageId, moduleId },
       },
@@ -292,7 +292,7 @@ export class PackageBuilderService {
     }
 
      
-    return this.prisma.packageModule.update({
+    return this.prisma.platform.packageModule.update({
       where: {
         packageId_moduleId: { packageId, moduleId },
       },
@@ -305,7 +305,7 @@ export class PackageBuilderService {
   /*  8. removeModule                                                    */
   /* ------------------------------------------------------------------ */
   async removeModule(packageId: string, moduleId: string) {
-    const pkgModule = await this.prisma.packageModule.findUnique({
+    const pkgModule = await this.prisma.platform.packageModule.findUnique({
       where: {
         packageId_moduleId: { packageId, moduleId },
       },
@@ -317,7 +317,7 @@ export class PackageBuilderService {
       );
     }
 
-    return this.prisma.packageModule.delete({
+    return this.prisma.platform.packageModule.delete({
       where: {
         packageId_moduleId: { packageId, moduleId },
       },
@@ -333,7 +333,7 @@ export class PackageBuilderService {
   ) {
     await this.ensurePackageExists(packageId);
 
-    return this.prisma.subscriptionPackage.update({
+    return this.prisma.platform.subscriptionPackage.update({
       where: { id: packageId },
       data: { entityLimits: entityLimits as unknown as Prisma.InputJsonValue },
     });
@@ -362,7 +362,7 @@ export class PackageBuilderService {
       );
     }
 
-    const packages = await this.prisma.subscriptionPackage.findMany({
+    const packages = await this.prisma.platform.subscriptionPackage.findMany({
       where: { id: { in: packageIds } },
       orderBy: { tier: 'asc' },
       include: {
@@ -420,7 +420,7 @@ export class PackageBuilderService {
   /*  Private helpers                                                    */
   /* ------------------------------------------------------------------ */
   private async ensurePackageExists(id: string) {
-    const pkg = await this.prisma.subscriptionPackage.findUnique({
+    const pkg = await this.prisma.platform.subscriptionPackage.findUnique({
       where: { id },
     });
 

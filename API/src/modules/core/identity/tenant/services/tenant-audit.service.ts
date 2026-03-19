@@ -17,7 +17,7 @@ export class TenantAuditService {
 
   private async loadActiveAudits() {
     try {
-      const active = await this.prisma.tenantAuditSession.findMany({
+      const active = await this.prisma.identity.tenantAuditSession.findMany({
         where: { status: 'ACTIVE' },
         select: { id: true, tenantId: true },
       });
@@ -45,7 +45,7 @@ export class TenantAuditService {
     reason: string,
     scheduledDays?: number,
   ) {
-    const existing = await this.prisma.tenantAuditSession.findFirst({
+    const existing = await this.prisma.identity.tenantAuditSession.findFirst({
       where: { tenantId, status: 'ACTIVE' },
     });
     if (existing) {
@@ -56,7 +56,7 @@ export class TenantAuditService {
       ? new Date(Date.now() + scheduledDays * 86_400_000)
       : undefined;
 
-    const session = await this.prisma.tenantAuditSession.create({
+    const session = await this.prisma.identity.tenantAuditSession.create({
       data: { tenantId, startedById, startedByName, reason, scheduledEndAt },
     });
 
@@ -65,19 +65,19 @@ export class TenantAuditService {
   }
 
   async stopAudit(tenantId: string) {
-    const session = await this.prisma.tenantAuditSession.findFirst({
+    const session = await this.prisma.identity.tenantAuditSession.findFirst({
       where: { tenantId, status: 'ACTIVE' },
     });
     if (!session) {
       throw new Error('No active audit session for this tenant');
     }
 
-    const uniqueUsersResult = await this.prisma.tenantAuditLog.groupBy({
+    const uniqueUsersResult = await this.prisma.identity.tenantAuditLog.groupBy({
       by: ['userId'],
       where: { sessionId: session.id },
     });
 
-    const updated = await this.prisma.tenantAuditSession.update({
+    const updated = await this.prisma.identity.tenantAuditSession.update({
       where: { id: session.id },
       data: {
         status: 'COMPLETED',
@@ -91,7 +91,7 @@ export class TenantAuditService {
   }
 
   async getAuditStatus(tenantId: string) {
-    return this.prisma.tenantAuditSession.findFirst({
+    return this.prisma.identity.tenantAuditSession.findFirst({
       where: { tenantId, status: 'ACTIVE' },
     });
   }
@@ -119,13 +119,13 @@ export class TenantAuditService {
     if (options.entityType) where.entityType = options.entityType;
 
     const [data, total] = await Promise.all([
-      this.prisma.tenantAuditLog.findMany({
+      this.prisma.identity.tenantAuditLog.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.tenantAuditLog.count({ where }),
+      this.prisma.identity.tenantAuditLog.count({ where }),
     ]);
 
     return {
@@ -139,30 +139,30 @@ export class TenantAuditService {
   /* ------------------------------------------------------------------ */
 
   async getLatestSession(tenantId: string) {
-    return this.prisma.tenantAuditSession.findFirst({
+    return this.prisma.identity.tenantAuditSession.findFirst({
       where: { tenantId },
       orderBy: { startedAt: 'desc' },
     });
   }
 
   async getAuditReport(sessionId: string) {
-    const session = await this.prisma.tenantAuditSession.findUnique({
+    const session = await this.prisma.identity.tenantAuditSession.findUnique({
       where: { id: sessionId },
     });
     if (!session) throw new Error('Audit session not found');
 
     const [actionBreakdown, userBreakdown, entityBreakdown] = await Promise.all([
-      this.prisma.tenantAuditLog.groupBy({
+      this.prisma.identity.tenantAuditLog.groupBy({
         by: ['actionType'],
         where: { sessionId },
         _count: { id: true },
       }),
-      this.prisma.tenantAuditLog.groupBy({
+      this.prisma.identity.tenantAuditLog.groupBy({
         by: ['userId', 'userName'],
         where: { sessionId },
         _count: { id: true },
       }),
-      this.prisma.tenantAuditLog.groupBy({
+      this.prisma.identity.tenantAuditLog.groupBy({
         by: ['entityType'],
         where: { sessionId },
         _count: { id: true },
@@ -192,7 +192,7 @@ export class TenantAuditService {
   }
 
   async getAuditHistory(tenantId: string) {
-    return this.prisma.tenantAuditSession.findMany({
+    return this.prisma.identity.tenantAuditSession.findMany({
       where: { tenantId },
       orderBy: { startedAt: 'desc' },
       take: 20,
@@ -200,7 +200,7 @@ export class TenantAuditService {
   }
 
   async getAllActiveAudits() {
-    return this.prisma.tenantAuditSession.findMany({
+    return this.prisma.identity.tenantAuditSession.findMany({
       where: { status: 'ACTIVE' },
       orderBy: { startedAt: 'desc' },
     });
@@ -227,8 +227,8 @@ export class TenantAuditService {
     userAgent?: string;
     deviceType?: string;
   }) {
-    await this.prisma.tenantAuditLog.create({ data: data as any });
-    await this.prisma.tenantAuditSession.update({
+    await this.prisma.identity.tenantAuditLog.create({ data: data as any });
+    await this.prisma.identity.tenantAuditSession.update({
       where: { id: data.sessionId },
       data: { totalActions: { increment: 1 } },
     });

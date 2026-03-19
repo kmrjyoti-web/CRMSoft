@@ -13,7 +13,7 @@ export class PageMenuSyncService {
    */
   async syncModulePages(moduleCode: string): Promise<{ synced: number; tenants: number }> {
     // Get pages for this module that should appear in menus
-    const pages = await this.prisma.pageRegistry.findMany({
+    const pages = await this.prisma.platform.pageRegistry.findMany({
       where: { moduleCode, showInMenu: true, isActive: true },
       orderBy: { menuSortOrder: 'asc' },
     });
@@ -23,7 +23,7 @@ export class PageMenuSyncService {
     }
 
     // Get all tenants (we sync menus to all tenants — module access is enforced at runtime)
-    const tenants = await this.prisma.tenant.findMany({
+    const tenants = await this.prisma.identity.tenant.findMany({
       select: { id: true },
     });
 
@@ -37,19 +37,19 @@ export class PageMenuSyncService {
         // Find or create parent menu if menuParentKey is set
         let parentId: string | null = null;
         if (page.menuParentKey) {
-          const parentMenu = await this.prisma.menu.findFirst({
+          const parentMenu = await this.prisma.identity.menu.findFirst({
             where: { tenantId: tenant.id, code: page.menuParentKey },
           });
           parentId = parentMenu?.id || null;
         }
 
         // Upsert menu item
-        const existingMenu = await this.prisma.menu.findFirst({
+        const existingMenu = await this.prisma.identity.menu.findFirst({
           where: { tenantId: tenant.id, code: menuCode },
         });
 
         if (existingMenu) {
-          await this.prisma.menu.update({
+          await this.prisma.identity.menu.update({
             where: { id: existingMenu.id },
             data: {
               name: page.menuLabel || page.friendlyName || page.routePath,
@@ -62,7 +62,7 @@ export class PageMenuSyncService {
             },
           });
         } else {
-          await this.prisma.menu.create({
+          await this.prisma.identity.menu.create({
             data: {
               tenantId: tenant.id,
               code: menuCode,

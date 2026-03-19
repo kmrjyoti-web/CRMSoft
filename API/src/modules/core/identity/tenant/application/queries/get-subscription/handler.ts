@@ -12,7 +12,7 @@ export class GetSubscriptionHandler implements IQueryHandler<GetSubscriptionQuer
   async execute(query: GetSubscriptionQuery) {
     this.logger.log(`Fetching subscription for tenant: ${query.tenantId}`);
 
-    const subscription = await this.prisma.subscription.findFirst({
+    const subscription = await this.prisma.identity.subscription.findFirst({
       where: {
         tenantId: query.tenantId,
         status: { in: ['ACTIVE', 'TRIALING'] },

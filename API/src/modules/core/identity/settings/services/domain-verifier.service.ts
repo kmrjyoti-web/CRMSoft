@@ -20,7 +20,7 @@ export class DomainVerifierService {
   ): Promise<{ domain: string; verifyMethod: string; verifyToken: string; instructions: string }> {
     const token = `crm-verify-${randomBytes(16).toString('hex')}`;
 
-    await this.prisma.tenantBranding.upsert({
+    await this.prisma.identity.tenantBranding.upsert({
       where: { tenantId },
       update: {
         customDomain: domain,
@@ -46,7 +46,7 @@ export class DomainVerifierService {
 
   /** Check if the domain TXT record matches the stored token. */
   async verify(tenantId: string): Promise<{ verified: boolean; error?: string }> {
-    const branding = await this.prisma.tenantBranding.findUnique({ where: { tenantId } });
+    const branding = await this.prisma.identity.tenantBranding.findUnique({ where: { tenantId } });
     if (!branding?.customDomain || !branding.domainVerifyToken) {
       throw AppError.from('CONFIG_ERROR');
     }
@@ -57,7 +57,7 @@ export class DomainVerifierService {
       const found = flat.includes(branding.domainVerifyToken);
 
       if (found) {
-        await this.prisma.tenantBranding.update({
+        await this.prisma.identity.tenantBranding.update({
           where: { tenantId },
           data: { domainVerified: true },
         });

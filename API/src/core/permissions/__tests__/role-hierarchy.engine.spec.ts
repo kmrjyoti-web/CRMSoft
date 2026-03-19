@@ -24,6 +24,8 @@ describe('RoleHierarchyEngine', () => {
       permission: { findMany: jest.fn().mockResolvedValue([]) },
       rolePermission: { findMany: jest.fn().mockResolvedValue([]) },
     };
+    (prisma as any).identity = prisma;
+    (prisma as any).platform = prisma;
     engine = new RoleHierarchyEngine(prisma);
   });
 

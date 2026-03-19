@@ -2,10 +2,13 @@ import {
   Controller, Get, Post, Put, Delete, Param, Body, Query, Req,
   HttpCode, HttpStatus, NotFoundException,
 } from '@nestjs/common';
+import { QueryBus } from '@nestjs/cqrs';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { IsOptional, IsString, IsArray, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PrismaService } from '../../../../../core/prisma/prisma.service';
+import { ListRolesQuery } from '../application/queries/list-roles/list-roles.query';
+import { GetRoleQuery } from '../application/queries/get-role/get-role.query';
 import { ApiResponse } from '../../../../../common/utils/api-response';
 
 // ── DTOs ─────────────────────────────────────────────────
@@ -33,51 +36,31 @@ class UpdateRolePermissionsDto {
 @ApiBearerAuth()
 @Controller('roles')
 export class RolesController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'List all roles with user counts' })
   async findAll(@Req() req: any, @Query('search') search?: string) {
     const tenantId = req.user?.tenantId;
-    const where: any = {};
-    if (tenantId) where.tenantId = tenantId;
-    if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { displayName: { contains: search, mode: 'insensitive' } },
-      ];
-    }
-    const roles = await this.prisma.role.findMany({
-      where,
-      orderBy: { level: 'asc' },
-      include: { _count: { select: { users: true } } },
-    });
+    const roles = await this.queryBus.execute(new ListRolesQuery(tenantId, search));
     return ApiResponse.success(roles);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get role by ID with permissions' })
-  async findOne(@Param('id') id: string) {
-    const role = await this.prisma.role.findUnique({
-      where: { id },
-      include: {
-        permissions: { include: { permission: true } },
-        _count: { select: { users: true } },
-      },
-    });
-    if (!role) throw new NotFoundException('Role not found');
-    // Flatten permissions for frontend compatibility
-    const result = {
-      ...role,
-      permissions: role.permissions.map((rp) => rp.permission),
-    };
-    return ApiResponse.success(result);
+  async findOne(@Param('id') id: string, @Req() req: any) {
+    const tenantId = req.user?.tenantId;
+    const role = await this.queryBus.execute(new GetRoleQuery(id, tenantId));
+    return ApiResponse.success(role);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create a new role' })
   async create(@Body() dto: CreateRoleDto) {
-    const role = await this.prisma.role.create({
+    const role = await this.prisma.identity.role.create({
       data: {
         name: dto.name,
         displayName: dto.displayName,
@@ -99,7 +82,7 @@ export class RolesController {
   @ApiOperation({ summary: 'Update role (display name, description, permissions)' })
   async update(@Param('id') id: string, @Body() dto: UpdateRoleDto) {
     // Update basic fields
-    await this.prisma.role.update({
+    await this.prisma.identity.role.update({
       where: { id },
       data: {
         ...(dto.displayName !== undefined && { displayName: dto.displayName }),
@@ -109,15 +92,15 @@ export class RolesController {
 
     // Sync permissions if provided
     if (dto.permissionIds !== undefined) {
-      await this.prisma.rolePermission.deleteMany({ where: { roleId: id } });
+      await this.prisma.identity.rolePermission.deleteMany({ where: { roleId: id } });
       if (dto.permissionIds.length > 0) {
-        await this.prisma.rolePermission.createMany({
+        await this.prisma.identity.rolePermission.createMany({
           data: dto.permissionIds.map((pid) => ({ roleId: id, permissionId: pid })),
         });
       }
     }
 
-    const role = await this.prisma.role.findUniqueOrThrow({
+    const role = await this.prisma.identity.role.findUniqueOrThrow({
       where: { id },
       include: {
         permissions: { include: { permission: true } },
@@ -134,9 +117,9 @@ export class RolesController {
     const tenantId = req.user?.tenantId;
     const deleteWhere: any = { roleId: id };
     if (tenantId) deleteWhere.tenantId = tenantId;
-    await this.prisma.rolePermission.deleteMany({ where: deleteWhere });
+    await this.prisma.identity.rolePermission.deleteMany({ where: deleteWhere });
     if (dto.permissionIds.length > 0) {
-      await this.prisma.rolePermission.createMany({
+      await this.prisma.identity.rolePermission.createMany({
         data: dto.permissionIds.map((pid) => ({
           roleId: id,
           permissionId: pid,
@@ -151,12 +134,12 @@ export class RolesController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete a custom role' })
   async remove(@Param('id') id: string) {
-    const role = await this.prisma.role.findUniqueOrThrow({ where: { id } });
+    const role = await this.prisma.identity.role.findUniqueOrThrow({ where: { id } });
     if (role.isSystem) {
       throw new NotFoundException('Cannot delete system roles');
     }
-    await this.prisma.rolePermission.deleteMany({ where: { roleId: id } });
-    await this.prisma.role.delete({ where: { id } });
+    await this.prisma.identity.rolePermission.deleteMany({ where: { roleId: id } });
+    await this.prisma.identity.role.delete({ where: { id } });
     return ApiResponse.success({ id }, 'Role deleted');
   }
 }

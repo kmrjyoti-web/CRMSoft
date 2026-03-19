@@ -35,6 +35,8 @@ describe('GetMyMenuHandler', () => {
       rolePermission: { findMany: jest.fn().mockResolvedValue([]) },
       tenant: { findFirst: jest.fn().mockResolvedValue({ id: 'default-tenant-id', slug: 'default' }) },
     };
+    (prisma as any).identity = prisma;
+    (prisma as any).platform = prisma;
     const configService = { get: jest.fn().mockReturnValue(undefined) } as any;
     handler = new GetMyMenuHandler(prisma, configService);
   });

@@ -88,7 +88,7 @@ export class PageScannerService {
     results.total = allPages.length;
 
     for (const page of allPages) {
-      const existing = await this.prisma.pageRegistry.findUnique({
+      const existing = await this.prisma.platform.pageRegistry.findUnique({
         where: { routePath: `${page.portal}:${page.routePath}` },
       });
 
@@ -96,13 +96,13 @@ export class PageScannerService {
       const uniqueRoutePath = `${page.portal}:${page.routePath}`;
 
       if (!existing) {
-        await this.prisma.pageRegistry.create({
+        await this.prisma.platform.pageRegistry.create({
           data: { ...page, routePath: uniqueRoutePath },
         });
         results.created++;
       } else {
         // Only update auto-discovered fields, preserve vendor-set fields
-        await this.prisma.pageRegistry.update({
+        await this.prisma.platform.pageRegistry.update({
           where: { routePath: uniqueRoutePath },
           data: {
             filePath: page.filePath,

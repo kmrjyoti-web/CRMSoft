@@ -19,13 +19,13 @@ export class ListInvoicesHandler implements IQueryHandler<ListInvoicesQuery> {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.tenantInvoice.findMany({
+      this.prisma.identity.tenantInvoice.findMany({
         where,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.tenantInvoice.count({ where }),
+      this.prisma.identity.tenantInvoice.count({ where }),
     ]);
 
     return { data, total, page: query.page, limit: query.limit };

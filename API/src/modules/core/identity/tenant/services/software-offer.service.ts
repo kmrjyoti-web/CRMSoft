@@ -22,7 +22,7 @@ export class SoftwareOfferService {
     autoApply?: boolean;
     terms?: string;
   }) {
-    return this.prisma.softwareOffer.create({
+    return this.prisma.platform.softwareOffer.create({
       data: {
         name: data.name,
         code: data.code,
@@ -45,12 +45,12 @@ export class SoftwareOfferService {
    * Update an existing software offer.
    */
   async update(id: string, data: any) {
-    const offer = await this.prisma.softwareOffer.findUnique({ where: { id } });
+    const offer = await this.prisma.platform.softwareOffer.findUnique({ where: { id } });
     if (!offer) {
       throw new NotFoundException(`Software offer ${id} not found`);
     }
 
-    return this.prisma.softwareOffer.update({
+    return this.prisma.platform.softwareOffer.update({
       where: { id },
       data,
     });
@@ -60,12 +60,12 @@ export class SoftwareOfferService {
    * Deactivate a software offer (soft delete).
    */
   async deactivate(id: string) {
-    const offer = await this.prisma.softwareOffer.findUnique({ where: { id } });
+    const offer = await this.prisma.platform.softwareOffer.findUnique({ where: { id } });
     if (!offer) {
       throw new NotFoundException(`Software offer ${id} not found`);
     }
 
-    return this.prisma.softwareOffer.update({
+    return this.prisma.platform.softwareOffer.update({
       where: { id },
       data: { isActive: false },
     });
@@ -81,7 +81,7 @@ export class SoftwareOfferService {
       where.isActive = query.isActive;
     }
 
-    return this.prisma.softwareOffer.findMany({
+    return this.prisma.platform.softwareOffer.findMany({
       where,
       orderBy: { createdAt: 'desc' },
     });
@@ -91,7 +91,7 @@ export class SoftwareOfferService {
    * Get a single software offer by ID.
    */
   async getById(id: string) {
-    const offer = await this.prisma.softwareOffer.findUnique({ where: { id } });
+    const offer = await this.prisma.platform.softwareOffer.findUnique({ where: { id } });
     if (!offer) {
       throw new NotFoundException(`Software offer ${id} not found`);
     }
@@ -106,7 +106,7 @@ export class SoftwareOfferService {
   async getApplicable(planId: string) {
     const now = new Date();
 
-    const offers = await this.prisma.softwareOffer.findMany({
+    const offers = await this.prisma.platform.softwareOffer.findMany({
       where: {
         isActive: true,
         validFrom: { lte: now },
@@ -127,7 +127,7 @@ export class SoftwareOfferService {
    * Increments currentRedemptions and checks maxRedemptions limit.
    */
   async redeem(offerId: string, tenantId: string) {
-    const offer = await this.prisma.softwareOffer.findUnique({ where: { id: offerId } });
+    const offer = await this.prisma.platform.softwareOffer.findUnique({ where: { id: offerId } });
     if (!offer) {
       throw new NotFoundException(`Software offer ${offerId} not found`);
     }
@@ -144,12 +144,12 @@ export class SoftwareOfferService {
     }
 
     // Verify tenant exists
-    const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
+    const tenant = await this.prisma.identity.tenant.findUnique({ where: { id: tenantId } });
     if (!tenant) {
       throw new NotFoundException(`Tenant ${tenantId} not found`);
     }
 
-    return this.prisma.softwareOffer.update({
+    return this.prisma.platform.softwareOffer.update({
       where: { id: offerId },
       data: { currentRedemptions: { increment: 1 } },
     });
@@ -159,7 +159,7 @@ export class SoftwareOfferService {
    * Check validity of an offer (dates, redemptions, active status).
    */
   async checkValidity(offerId: string): Promise<{ valid: boolean; reason?: string }> {
-    const offer = await this.prisma.softwareOffer.findUnique({ where: { id: offerId } });
+    const offer = await this.prisma.platform.softwareOffer.findUnique({ where: { id: offerId } });
     if (!offer) {
       return { valid: false, reason: 'Offer not found' };
     }

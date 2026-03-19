@@ -26,7 +26,7 @@ export class BulkSeedMenusHandler implements ICommandHandler<BulkSeedMenusComman
       if (defaultTenantId) {
         explicitTenantId = defaultTenantId;
       } else {
-        const defaultTenant = await this.prisma.tenant.findFirst({ where: { slug: 'default' } });
+        const defaultTenant = await this.prisma.identity.tenant.findFirst({ where: { slug: 'default' } });
         explicitTenantId = defaultTenant?.id;
       }
     } else if (cmd.tenantId) {
@@ -36,7 +36,7 @@ export class BulkSeedMenusHandler implements ICommandHandler<BulkSeedMenusComman
     const scopeFilter = explicitTenantId ? { tenantId: explicitTenantId } : {};
 
     // Step 1: Find all level-2 menu ids so we can delete level-3 first
-    const level2Menus = await this.prisma.menu.findMany({
+    const level2Menus = await this.prisma.identity.menu.findMany({
       where: { parentId: { not: null }, ...scopeFilter },
       select: { id: true },
     });
@@ -44,18 +44,18 @@ export class BulkSeedMenusHandler implements ICommandHandler<BulkSeedMenusComman
 
     // Step 2: Delete level-3 (grandchildren)
     if (level2Ids.length > 0) {
-      await this.prisma.menu.deleteMany({
+      await this.prisma.identity.menu.deleteMany({
         where: { parentId: { in: level2Ids }, ...scopeFilter },
       });
     }
 
     // Step 3: Delete level-2 (children)
-    await this.prisma.menu.deleteMany({
+    await this.prisma.identity.menu.deleteMany({
       where: { parentId: { not: null }, ...scopeFilter },
     });
 
     // Step 4: Delete level-1 (roots)
-    await this.prisma.menu.deleteMany({ where: { ...scopeFilter } });
+    await this.prisma.identity.menu.deleteMany({ where: { ...scopeFilter } });
 
     // Step 5: Create fresh from seed data (3 levels deep)
     let count = 0;
@@ -89,7 +89,7 @@ export class BulkSeedMenusHandler implements ICommandHandler<BulkSeedMenusComman
     sortOrder: number,
     explicitTenantId?: string,
   ) {
-    return this.prisma.menu.create({
+    return this.prisma.identity.menu.create({
       data: {
         ...(explicitTenantId ? { tenantId: explicitTenantId } : {}),
         name: item.name,

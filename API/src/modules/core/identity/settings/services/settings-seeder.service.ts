@@ -103,7 +103,7 @@ export class SettingsSeederService {
   }
 
   private async seedBranding(tid: string) {
-    await this.prisma.tenantBranding.upsert({ where: { tenantId: tid }, update: {}, create: { tenantId: tid } });
+    await this.prisma.identity.tenantBranding.upsert({ where: { tenantId: tid }, update: {}, create: { tenantId: tid } });
   }
 
   private async seedBusinessHours(tid: string) {
@@ -166,12 +166,12 @@ export class SettingsSeederService {
   }
 
   private async seedSecurityPolicy(tid: string) {
-    await this.prisma.securityPolicy.upsert({ where: { tenantId: tid }, update: {}, create: { tenantId: tid } });
+    await this.prisma.identity.securityPolicy.upsert({ where: { tenantId: tid }, update: {}, create: { tenantId: tid } });
   }
 
   private async seedRetention(tid: string) {
     for (const r of RETENTION_POLICIES) {
-      await this.prisma.dataRetentionPolicy.upsert({
+      await this.prisma.identity.dataRetentionPolicy.upsert({
         where: { tenantId_entityName: { tenantId: tid, entityName: r.entityName } },
         update: {},
         create: { tenantId: tid, ...r, isEnabled: false },

@@ -60,7 +60,7 @@ export class AuditSnapshotService {
           break;
 
         case 'USER':
-          entity = await this.prisma.user.findUnique({
+          entity = await this.prisma.identity.user.findUnique({
             where: { id: entityId },
             select: {
               id: true, email: true, firstName: true, lastName: true, phone: true,
@@ -72,11 +72,11 @@ export class AuditSnapshotService {
           break;
 
         case 'ROLE':
-          entity = await this.prisma.role.findUnique({ where: { id: entityId } });
+          entity = await this.prisma.identity.role.findUnique({ where: { id: entityId } });
           break;
 
         case 'LOOKUP_VALUE':
-          entity = await this.prisma.lookupValue.findUnique({ where: { id: entityId } });
+          entity = await this.prisma.platform.lookupValue.findUnique({ where: { id: entityId } });
           break;
 
         case 'SALES_TARGET':

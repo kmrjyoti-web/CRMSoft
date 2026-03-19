@@ -18,7 +18,7 @@ export class TenantActivityService {
     performedById?: string;
     ipAddress?: string;
   }) {
-    return this.prisma.tenantActivityLog.create({
+    return this.prisma.platform.tenantActivityLog.create({
       data: {
         tenantId: data.tenantId,
         action: data.action,
@@ -65,13 +65,13 @@ export class TenantActivityService {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.tenantActivityLog.findMany({
+      this.prisma.platform.tenantActivityLog.findMany({
         where,
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.tenantActivityLog.count({ where }),
+      this.prisma.platform.tenantActivityLog.count({ where }),
     ]);
 
     return { data, total, page, limit };
@@ -81,7 +81,7 @@ export class TenantActivityService {
    * Get the most recent activity logs across all tenants.
    */
   async getRecent(limit: number = 20) {
-    return this.prisma.tenantActivityLog.findMany({
+    return this.prisma.platform.tenantActivityLog.findMany({
       take: limit,
       orderBy: { createdAt: 'desc' },
       include: {

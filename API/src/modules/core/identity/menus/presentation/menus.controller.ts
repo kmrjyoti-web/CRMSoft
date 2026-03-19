@@ -114,7 +114,7 @@ export class MenusController {
   @RequirePermissions('menus:read')
   async getDiscovery(@CurrentUser() user: any) {
     const tenantId = user.tenantId || await this.getDefaultTenantId();
-    const menus = await this.prisma.menu.findMany({
+    const menus = await this.prisma.identity.menu.findMany({
       where: { tenantId, isActive: true },
       select: { route: true, code: true, isAdminOnly: true },
     });
@@ -123,11 +123,11 @@ export class MenusController {
     );
 
     // Get all unmapped items from DB
-    const unmappedGroup = await this.prisma.menu.findFirst({
+    const unmappedGroup = await this.prisma.identity.menu.findFirst({
       where: { tenantId, code: '_UNMAPPED', isActive: true },
     });
     const unmappedItems = unmappedGroup
-      ? await this.prisma.menu.findMany({
+      ? await this.prisma.identity.menu.findMany({
           where: { tenantId, isAdminOnly: true, route: { not: null }, isActive: true },
           select: { route: true, name: true, code: true },
         })
@@ -160,11 +160,11 @@ export class MenusController {
     // This endpoint triggers the discovery script logic server-side
     // For now, it returns the current count
     const tenantId = user.tenantId || await this.getDefaultTenantId();
-    const unmappedGroup = await this.prisma.menu.findFirst({
+    const unmappedGroup = await this.prisma.identity.menu.findFirst({
       where: { tenantId, code: '_UNMAPPED', isActive: true },
     });
     const unmappedCount = unmappedGroup
-      ? await this.prisma.menu.count({ where: { tenantId, isAdminOnly: true, route: { not: null }, isActive: true } })
+      ? await this.prisma.identity.menu.count({ where: { tenantId, isAdminOnly: true, route: { not: null }, isActive: true } })
       : 0;
     return ApiResponse.success(
       { unmapped: unmappedCount, message: 'Run node scripts/create-unmapped-menu.js to refresh.' },
@@ -191,7 +191,7 @@ export class MenusController {
   }
 
   private async getDefaultTenantId(): Promise<string> {
-    const t = await this.prisma.tenant.findFirst({ where: { slug: 'default' } });
+    const t = await this.prisma.identity.tenant.findFirst({ where: { slug: 'default' } });
     return t?.id ?? '';
   }
 }

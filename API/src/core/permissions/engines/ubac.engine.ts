@@ -47,7 +47,7 @@ export class UbacEngine {
       return { grants: cached.grants, denies: cached.denies };
     }
 
-    const overrides = await this.prisma.userPermissionOverride.findMany({
+    const overrides = await this.prisma.identity.userPermissionOverride.findMany({
       where: {
         userId,
         OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],

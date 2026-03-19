@@ -65,12 +65,12 @@ export class GetMyMenuHandler implements IQueryHandler<GetMyMenuQuery> {
       let tenantId = defaultTenantId;
 
       if (!tenantId) {
-        const defaultTenant = await this.prisma.tenant.findFirst({ where: { slug: 'default' } });
+        const defaultTenant = await this.prisma.identity.tenant.findFirst({ where: { slug: 'default' } });
         tenantId = defaultTenant?.id;
       }
 
       const menus = tenantId
-        ? await this.prisma.menu.findMany({
+        ? await this.prisma.identity.menu.findMany({
             where: { isActive: true, tenantId },
             orderBy: { sortOrder: 'asc' },
           })
@@ -79,7 +79,7 @@ export class GetMyMenuHandler implements IQueryHandler<GetMyMenuQuery> {
     }
 
     // 1. Load all active menus (isActive check + industry filter)
-    const allMenus = await this.prisma.menu.findMany({
+    const allMenus = await this.prisma.identity.menu.findMany({
       where: {
         isActive: true,
         tenantId: query.tenantId,
@@ -111,7 +111,7 @@ export class GetMyMenuHandler implements IQueryHandler<GetMyMenuQuery> {
 
   /** Load role permissions as Set of "module:action" strings. */
   private async loadRolePermissions(roleId: string): Promise<Set<string>> {
-    const rps = await this.prisma.rolePermission.findMany({
+    const rps = await this.prisma.identity.rolePermission.findMany({
       where: { roleId },
       include: { permission: { select: { module: true, action: true } } },
     });
@@ -121,7 +121,7 @@ export class GetMyMenuHandler implements IQueryHandler<GetMyMenuQuery> {
   /** Load enabled module codes for tenant (Check 2). */
   private async loadEnabledModules(tenantId?: string): Promise<Set<string>> {
     if (!tenantId) return new Set();
-    const modules = await this.prisma.tenantModule.findMany({
+    const modules = await this.prisma.platform.tenantModule.findMany({
       where: { tenantId, status: { in: ['ACTIVE', 'TRIAL'] } },
       include: { module: { select: { code: true } } },
     });
@@ -131,7 +131,7 @@ export class GetMyMenuHandler implements IQueryHandler<GetMyMenuQuery> {
   /** Load validated credential keys for tenant (Check 4). */
   private async loadValidCredentials(tenantId?: string): Promise<Set<string>> {
     if (!tenantId) return new Set();
-    const modules = await this.prisma.tenantModule.findMany({
+    const modules = await this.prisma.platform.tenantModule.findMany({
       where: { tenantId, credentialsStatus: 'VALID' },
       include: { module: { select: { code: true } } },
     });
@@ -141,7 +141,7 @@ export class GetMyMenuHandler implements IQueryHandler<GetMyMenuQuery> {
   /** Load resolved terminology map for tenant. */
   private async loadTerminology(tenantId?: string): Promise<Record<string, string>> {
     if (!tenantId) return {};
-    const tenant = await this.prisma.tenant.findUnique({
+    const tenant = await this.prisma.identity.tenant.findUnique({
       where: { id: tenantId },
       include: { businessType: true },
     });
@@ -151,7 +151,7 @@ export class GetMyMenuHandler implements IQueryHandler<GetMyMenuQuery> {
       ? { ...(tenant.businessType.terminologyMap as Record<string, string>) }
       : {};
 
-    const overrides = await this.prisma.terminologyOverride.findMany({
+    const overrides = await this.prisma.identity.terminologyOverride.findMany({
       where: { tenantId, isActive: true },
     });
     for (const ov of overrides) {

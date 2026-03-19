@@ -11,7 +11,7 @@ export class CreatePlanHandler implements ICommandHandler<CreatePlanCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: CreatePlanCommand) {
-    const plan = await this.prisma.plan.create({
+    const plan = await this.prisma.identity.plan.create({
       data: {
         name: command.name,
         code: command.code,

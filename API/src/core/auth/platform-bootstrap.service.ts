@@ -37,7 +37,7 @@ export class PlatformBootstrapService implements OnModuleInit {
 
   /** Create a platform SuperAdmin if none exists. */
   private async ensureSuperAdmin() {
-    const existing = await this.prisma.superAdmin.findFirst();
+    const existing = await this.prisma.identity.superAdmin.findFirst();
     if (existing) {
       this.logger.log('Platform Admin already exists — skipping bootstrap');
       return;
@@ -52,7 +52,7 @@ export class PlatformBootstrapService implements OnModuleInit {
     }
     const hashed = await bcrypt.hash(password, 12);
 
-    await this.prisma.superAdmin.create({
+    await this.prisma.identity.superAdmin.create({
       data: {
         email,
         password: hashed,
@@ -71,7 +71,7 @@ export class PlatformBootstrapService implements OnModuleInit {
 
   /** Create a demo MarketplaceVendor if none exists, so vendor portal login works. */
   private async ensureDemoVendor() {
-    const existing = await this.prisma.marketplaceVendor.findFirst();
+    const existing = await this.prisma.platform.marketplaceVendor.findFirst();
     if (existing) {
       // If vendor exists but has no password, set one
       if (!existing.password) {
@@ -81,7 +81,7 @@ export class PlatformBootstrapService implements OnModuleInit {
           return;
         }
         const hashed = await bcrypt.hash(password, 12);
-        await this.prisma.marketplaceVendor.update({
+        await this.prisma.platform.marketplaceVendor.update({
           where: { id: existing.id },
           data: { password: hashed, status: 'APPROVED' },
         });
@@ -103,7 +103,7 @@ export class PlatformBootstrapService implements OnModuleInit {
     }
     const hashed = await bcrypt.hash(password, 12);
 
-    await this.prisma.marketplaceVendor.create({
+    await this.prisma.platform.marketplaceVendor.create({
       data: {
         companyName: 'Demo Vendor Co.',
         contactName: 'Demo Vendor',
@@ -132,21 +132,21 @@ export class PlatformBootstrapService implements OnModuleInit {
     const created: string[] = [];
     for (const mod of missingModules) {
       for (const action of actions) {
-        const perm = await this.prisma.permission.upsert({
+        const perm = await this.prisma.identity.permission.upsert({
           where: { module_action: { module: mod, action } },
           update: {},
           create: { module: mod, action, description: `${action} ${mod}` },
         });
 
         // Assign to every ADMIN role across all tenants (upsert = safe re-run)
-        const adminRoles = await this.prisma.role.findMany({
+        const adminRoles = await this.prisma.identity.role.findMany({
           where: { name: { in: ['ADMIN', 'SUPER_ADMIN'] } },
           select: { id: true, tenantId: true },
         });
 
         for (const role of adminRoles) {
           if (!role.tenantId) continue;
-          await this.prisma.rolePermission.upsert({
+          await this.prisma.identity.rolePermission.upsert({
             where: {
               tenantId_roleId_permissionId: {
                 tenantId: role.tenantId,
@@ -167,15 +167,15 @@ export class PlatformBootstrapService implements OnModuleInit {
   /** Re-seed menus for any tenant that has fewer than expected menus or stale permissionAction values. */
   private async ensureTenantMenus() {
     // Step 0: Clean up orphaned menus with empty tenantId (from older seed runs)
-    const orphanedCount = await this.prisma.menu.count({ where: { tenantId: '' } });
+    const orphanedCount = await this.prisma.identity.menu.count({ where: { tenantId: '' } });
     if (orphanedCount > 0) {
-      await this.prisma.menu.deleteMany({ where: { tenantId: '', parentId: { not: null } } });
-      await this.prisma.menu.deleteMany({ where: { tenantId: '' } });
+      await this.prisma.identity.menu.deleteMany({ where: { tenantId: '', parentId: { not: null } } });
+      await this.prisma.identity.menu.deleteMany({ where: { tenantId: '' } });
       this.logger.warn(`Cleaned up ${orphanedCount} orphaned menus (empty tenantId)`);
     }
 
     const expectedCount = this.countExpectedMenus();
-    const tenants = await this.prisma.tenant.findMany({
+    const tenants = await this.prisma.identity.tenant.findMany({
       select: { id: true, name: true, slug: true },
     });
 
@@ -183,12 +183,12 @@ export class PlatformBootstrapService implements OnModuleInit {
       // Step 1: Deduplicate — remove duplicate menus with same code for this tenant
       await this.deduplicateMenus(tenant.id);
 
-      const menuCount = await this.prisma.menu.count({
+      const menuCount = await this.prisma.identity.menu.count({
         where: { tenantId: tenant.id },
       });
 
       // Check for stale 'view' permissionAction (should be 'read')
-      const staleCount = await this.prisma.menu.count({
+      const staleCount = await this.prisma.identity.menu.count({
         where: { tenantId: tenant.id, permissionAction: 'view' },
       });
 
@@ -200,7 +200,7 @@ export class PlatformBootstrapService implements OnModuleInit {
           `Tenant "${tenant.name}" needs repair (${reason}) — re-seeding...`,
         );
         await this.repairMenusForTenant(tenant.id);
-        const newCount = await this.prisma.menu.count({
+        const newCount = await this.prisma.identity.menu.count({
           where: { tenantId: tenant.id },
         });
         this.logger.log(
@@ -212,7 +212,7 @@ export class PlatformBootstrapService implements OnModuleInit {
 
   /** Remove duplicate menus (same tenantId + code), keeping only the newest one. */
   private async deduplicateMenus(tenantId: string) {
-    const allMenus = await this.prisma.menu.findMany({
+    const allMenus = await this.prisma.identity.menu.findMany({
       where: { tenantId },
       select: { id: true, code: true, createdAt: true },
       orderBy: { createdAt: 'desc' },
@@ -231,10 +231,10 @@ export class PlatformBootstrapService implements OnModuleInit {
 
     if (duplicateIds.length > 0) {
       // Delete children of duplicates first
-      await this.prisma.menu.deleteMany({
+      await this.prisma.identity.menu.deleteMany({
         where: { parentId: { in: duplicateIds } },
       });
-      await this.prisma.menu.deleteMany({
+      await this.prisma.identity.menu.deleteMany({
         where: { id: { in: duplicateIds } },
       });
       this.logger.warn(
@@ -255,7 +255,7 @@ export class PlatformBootstrapService implements OnModuleInit {
 
   /** Seed business types if table is empty or missing entries. */
   private async ensureBusinessTypes() {
-    const count = await this.prisma.businessTypeRegistry.count();
+    const count = await this.prisma.platform.businessTypeRegistry.count();
     if (count >= BUSINESS_TYPE_SEED_DATA.length) {
       this.logger.log(`Business types already seeded (${count} entries)`);
       return;
@@ -263,7 +263,7 @@ export class PlatformBootstrapService implements OnModuleInit {
 
     for (let i = 0; i < BUSINESS_TYPE_SEED_DATA.length; i++) {
       const bt = BUSINESS_TYPE_SEED_DATA[i];
-      await this.prisma.businessTypeRegistry.upsert({
+      await this.prisma.platform.businessTypeRegistry.upsert({
         where: { typeCode: bt.typeCode },
         update: {
           typeName: bt.typeName,
@@ -308,15 +308,15 @@ export class PlatformBootstrapService implements OnModuleInit {
    */
   private async repairMenusForTenant(tenantId: string) {
     // Delete children first (parentId not null), then parents
-    await this.prisma.menu.deleteMany({
+    await this.prisma.identity.menu.deleteMany({
       where: { tenantId, parentId: { not: null } },
     });
-    await this.prisma.menu.deleteMany({ where: { tenantId } });
+    await this.prisma.identity.menu.deleteMany({ where: { tenantId } });
 
     // Re-create from seed data
     let sortOrder = 0;
     for (const item of MENU_SEED_DATA) {
-      const parent = await this.prisma.menu.create({
+      const parent = await this.prisma.identity.menu.create({
         data: {
           tenantId,
           name: item.name,
@@ -335,7 +335,7 @@ export class PlatformBootstrapService implements OnModuleInit {
       if (item.children) {
         let childOrder = 0;
         for (const child of item.children) {
-          await this.prisma.menu.create({
+          await this.prisma.identity.menu.create({
             data: {
               tenantId,
               parentId: parent.id,

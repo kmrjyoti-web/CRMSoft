@@ -30,26 +30,26 @@ export class DataRetentionService {
 
   /** Get all retention policies for a tenant. */
   async getAll(tenantId: string): Promise<DataRetentionPolicy[]> {
-    return this.prisma.dataRetentionPolicy.findMany({ where: { tenantId } });
+    return this.prisma.identity.dataRetentionPolicy.findMany({ where: { tenantId } });
   }
 
   /** Update a retention policy. */
   async update(tenantId: string, entityName: string, data: Record<string, any>): Promise<DataRetentionPolicy> {
-    const policy = await this.prisma.dataRetentionPolicy.findUnique({
+    const policy = await this.prisma.identity.dataRetentionPolicy.findUnique({
       where: { tenantId_entityName: { tenantId, entityName } },
     });
     if (!policy) throw AppError.from('NOT_FOUND');
     const { scopeFilter, ...rest } = data;
     const updateData: any = { ...rest };
     if (scopeFilter !== undefined) updateData.scopeFilter = scopeFilter;
-    return this.prisma.dataRetentionPolicy.update({ where: { id: policy.id }, data: updateData });
+    return this.prisma.identity.dataRetentionPolicy.update({ where: { id: policy.id }, data: updateData });
   }
 
   /** Preview what would be affected by retention (dry run). */
   async preview(tenantId: string, entityName: string): Promise<{
     recordCount: number; oldestRecord: Date | null; action: RetentionAction;
   }> {
-    const policy = await this.prisma.dataRetentionPolicy.findUnique({
+    const policy = await this.prisma.identity.dataRetentionPolicy.findUnique({
       where: { tenantId_entityName: { tenantId, entityName } },
     });
     if (!policy) throw AppError.from('NOT_FOUND');
@@ -68,7 +68,7 @@ export class DataRetentionService {
 
   /** Execute retention policies for a tenant (called by CRON). */
   async execute(tenantId: string): Promise<RetentionResult[]> {
-    const policies = await this.prisma.dataRetentionPolicy.findMany({
+    const policies = await this.prisma.identity.dataRetentionPolicy.findMany({
       where: { tenantId, isEnabled: true },
     });
     const results: RetentionResult[] = [];
@@ -105,7 +105,7 @@ export class DataRetentionService {
         this.logger.error(`Retention failed for ${policy.entityName}: ${(err as Error).message}`);
       }
 
-      await this.prisma.dataRetentionPolicy.update({
+      await this.prisma.identity.dataRetentionPolicy.update({
         where: { id: policy.id },
         data: { lastExecutedAt: new Date(), lastRecordsAffected: affected },
       });

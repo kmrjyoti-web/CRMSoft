@@ -34,6 +34,8 @@ describe('AuditSnapshotService', () => {
       lookupValue: { findUnique: jest.fn().mockResolvedValue(null) },
       salesTarget: { findUnique: jest.fn().mockResolvedValue(null) },
     };
+    (prisma as any).identity = prisma;
+    (prisma as any).platform = prisma;
     service = new AuditSnapshotService(prisma);
   });
 

@@ -122,6 +122,8 @@ describe('Permission Templates Seed', () => {
           upsert: jest.fn().mockResolvedValue({}),
         },
       };
+      (mockPrisma as any).identity = mockPrisma;
+      (mockPrisma as any).platform = mockPrisma;
 
       const count = await seedPermissionTemplates(mockPrisma as any);
       expect(count).toBe(6);
@@ -134,6 +136,8 @@ describe('Permission Templates Seed', () => {
           upsert: jest.fn().mockResolvedValue({}),
         },
       };
+      (mockPrisma as any).identity = mockPrisma;
+      (mockPrisma as any).platform = mockPrisma;
 
       await seedPermissionTemplates(mockPrisma as any);
 
@@ -147,6 +151,8 @@ describe('Permission Templates Seed', () => {
           upsert: jest.fn().mockResolvedValue({}),
         },
       };
+      (mockPrisma as any).identity = mockPrisma;
+      (mockPrisma as any).platform = mockPrisma;
 
       await seedPermissionTemplates(mockPrisma as any);
 
@@ -164,6 +170,8 @@ describe('Permission Templates Seed', () => {
           upsert: jest.fn().mockResolvedValue({}),
         },
       };
+      (mockPrisma as any).identity = mockPrisma;
+      (mockPrisma as any).platform = mockPrisma;
 
       await seedPermissionTemplates(mockPrisma as any);
 

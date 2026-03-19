@@ -12,6 +12,8 @@ describe('ReorderMenusHandler', () => {
       },
       $transaction: jest.fn().mockImplementation((promises) => Promise.all(promises)),
     };
+    (prisma as any).identity = prisma;
+    (prisma as any).platform = prisma;
     handler = new ReorderMenusHandler(prisma);
   });
 

@@ -31,20 +31,20 @@ export class LicenseService {
     notes?: string;
   }) {
     // Verify tenant exists
-    const tenant = await this.prisma.tenant.findUnique({ where: { id: data.tenantId } });
+    const tenant = await this.prisma.identity.tenant.findUnique({ where: { id: data.tenantId } });
     if (!tenant) {
       throw new NotFoundException(`Tenant ${data.tenantId} not found`);
     }
 
     // Verify plan exists
-    const plan = await this.prisma.plan.findUnique({ where: { id: data.planId } });
+    const plan = await this.prisma.identity.plan.findUnique({ where: { id: data.planId } });
     if (!plan) {
       throw new NotFoundException(`Plan ${data.planId} not found`);
     }
 
     const licenseKey = this.generateKey();
 
-    const license = await this.prisma.licenseKey.create({
+    const license = await this.prisma.platform.licenseKey.create({
       data: {
         tenantId: data.tenantId,
         licenseKey,
@@ -66,7 +66,7 @@ export class LicenseService {
    * Validate a license key. Checks status and expiry, updates lastValidatedAt.
    */
   async validate(key: string): Promise<{ valid: boolean; license?: any; reason?: string }> {
-    const license = await this.prisma.licenseKey.findUnique({
+    const license = await this.prisma.platform.licenseKey.findUnique({
       where: { licenseKey: key },
       include: {
         tenant: { select: { id: true, name: true, status: true } },
@@ -83,7 +83,7 @@ export class LicenseService {
 
     if (license.expiresAt && license.expiresAt < new Date()) {
       // Auto-expire
-      await this.prisma.licenseKey.update({
+      await this.prisma.platform.licenseKey.update({
         where: { id: license.id },
         data: { status: 'LIC_EXPIRED' },
       });
@@ -91,7 +91,7 @@ export class LicenseService {
     }
 
     // Update last validated timestamp
-    await this.prisma.licenseKey.update({
+    await this.prisma.platform.licenseKey.update({
       where: { id: license.id },
       data: { lastValidatedAt: new Date() },
     });
@@ -103,12 +103,12 @@ export class LicenseService {
    * Revoke a license key.
    */
   async revoke(id: string) {
-    const license = await this.prisma.licenseKey.findUnique({ where: { id } });
+    const license = await this.prisma.platform.licenseKey.findUnique({ where: { id } });
     if (!license) {
       throw new NotFoundException(`License ${id} not found`);
     }
 
-    return this.prisma.licenseKey.update({
+    return this.prisma.platform.licenseKey.update({
       where: { id },
       data: { status: 'LIC_REVOKED' },
     });
@@ -118,12 +118,12 @@ export class LicenseService {
    * Suspend a license key.
    */
   async suspend(id: string) {
-    const license = await this.prisma.licenseKey.findUnique({ where: { id } });
+    const license = await this.prisma.platform.licenseKey.findUnique({ where: { id } });
     if (!license) {
       throw new NotFoundException(`License ${id} not found`);
     }
 
-    return this.prisma.licenseKey.update({
+    return this.prisma.platform.licenseKey.update({
       where: { id },
       data: { status: 'LIC_SUSPENDED' },
     });
@@ -133,12 +133,12 @@ export class LicenseService {
    * Re-activate a license key.
    */
   async activate(id: string) {
-    const license = await this.prisma.licenseKey.findUnique({ where: { id } });
+    const license = await this.prisma.platform.licenseKey.findUnique({ where: { id } });
     if (!license) {
       throw new NotFoundException(`License ${id} not found`);
     }
 
-    return this.prisma.licenseKey.update({
+    return this.prisma.platform.licenseKey.update({
       where: { id },
       data: { status: 'LIC_ACTIVE', activatedAt: new Date() },
     });
@@ -148,7 +148,7 @@ export class LicenseService {
    * Get all license keys for a tenant, ordered by creation date descending.
    */
   async getByTenant(tenantId: string) {
-    return this.prisma.licenseKey.findMany({
+    return this.prisma.platform.licenseKey.findMany({
       where: { tenantId },
       orderBy: { createdAt: 'desc' },
     });
@@ -158,7 +158,7 @@ export class LicenseService {
    * Get a single license key by ID.
    */
   async getById(id: string) {
-    const license = await this.prisma.licenseKey.findUnique({
+    const license = await this.prisma.platform.licenseKey.findUnique({
       where: { id },
       include: {
         tenant: { select: { id: true, name: true, slug: true, status: true } },
@@ -207,7 +207,7 @@ export class LicenseService {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.licenseKey.findMany({
+      this.prisma.platform.licenseKey.findMany({
         where,
         skip,
         take: limit,
@@ -216,7 +216,7 @@ export class LicenseService {
           tenant: { select: { id: true, name: true, slug: true } },
         },
       }),
-      this.prisma.licenseKey.count({ where }),
+      this.prisma.platform.licenseKey.count({ where }),
     ]);
 
     return { data, total, page, limit };
@@ -229,7 +229,7 @@ export class LicenseService {
   async checkExpiry() {
     const now = new Date();
 
-    const expiredLicenses = await this.prisma.licenseKey.findMany({
+    const expiredLicenses = await this.prisma.platform.licenseKey.findMany({
       where: {
         status: 'LIC_ACTIVE',
         expiresAt: { lt: now },
@@ -240,7 +240,7 @@ export class LicenseService {
       return { expired: 0 };
     }
 
-    const result = await this.prisma.licenseKey.updateMany({
+    const result = await this.prisma.platform.licenseKey.updateMany({
       where: {
         status: 'LIC_ACTIVE',
         expiresAt: { lt: now },

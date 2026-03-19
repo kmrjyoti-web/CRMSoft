@@ -14,7 +14,7 @@ export class CancelSubscriptionHandler implements ICommandHandler<CancelSubscrip
   ) {}
 
   async execute(command: CancelSubscriptionCommand) {
-    const subscription = await this.prisma.subscription.findFirstOrThrow({
+    const subscription = await this.prisma.identity.subscription.findFirstOrThrow({
       where: { id: command.subscriptionId, tenantId: command.tenantId },
     });
 
@@ -22,7 +22,7 @@ export class CancelSubscriptionHandler implements ICommandHandler<CancelSubscrip
       await this.paymentGateway.cancelSubscription(subscription.gatewayId);
     }
 
-    const updated = await this.prisma.subscription.update({
+    const updated = await this.prisma.identity.subscription.update({
       where: { id: command.subscriptionId },
       data: {
         status: 'CANCELLED',

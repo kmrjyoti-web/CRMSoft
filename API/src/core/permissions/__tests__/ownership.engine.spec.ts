@@ -17,6 +17,8 @@ describe('OwnershipEngine', () => {
         findMany: jest.fn().mockResolvedValue([]),
       },
     };
+    (prisma as any).identity = prisma;
+    (prisma as any).platform = prisma;
     engine = new OwnershipEngine(prisma);
   });
 

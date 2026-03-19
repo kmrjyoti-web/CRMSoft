@@ -53,7 +53,7 @@ export class RbacEngine {
       return cached.permissions;
     }
 
-    const rolePermissions = await this.prisma.rolePermission.findMany({
+    const rolePermissions = await this.prisma.identity.rolePermission.findMany({
       where: { roleId },
       include: { permission: true },
     });

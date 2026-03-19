@@ -26,7 +26,7 @@ export class AssignFiltersHandler implements ICommandHandler<AssignFiltersComman
     }
 
     // Verify all lookup values exist
-    const values = await this.prisma.lookupValue.findMany({
+    const values = await this.prisma.platform.lookupValue.findMany({
       where: { id: { in: command.lookupValueIds }, isActive: true },
     });
     const validIds = new Set(values.map(v => v.id));

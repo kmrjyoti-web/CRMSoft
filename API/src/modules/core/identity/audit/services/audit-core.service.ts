@@ -68,7 +68,7 @@ export class AuditCoreService {
       const isSensitive = fieldChanges.some(fc => fc.isSensitive);
       const isSystemAction = params.source === 'CRON' || params.source === 'WORKFLOW' || params.source === 'SYSTEM';
 
-      const auditLog = await this.prisma.auditLog.create({
+      const auditLog = await this.prisma.identity.auditLog.create({
         data: {
           tenantId: params.tenantId || '',
           entityType: params.entityType as any,
@@ -143,7 +143,7 @@ export class AuditCoreService {
         isSensitive: this.sanitizer.isSensitive(c.field),
       }));
 
-      const auditLog = await this.prisma.auditLog.create({
+      const auditLog = await this.prisma.identity.auditLog.create({
         data: {
           entityType: params.entityType as any,
           entityId: params.entityId,

@@ -108,7 +108,7 @@ export class IndustryPatchingService {
 
   private async createForceUpdateEntries(versionId: string, industryCode: string) {
     // Find all tenants with matching industry code
-    const tenants = await this.prisma.tenant.findMany({
+    const tenants = await this.prisma.identity.tenant.findMany({
       where: { businessTypeCode: industryCode } as any,
       select: { id: true },
     });

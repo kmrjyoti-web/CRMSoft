@@ -26,21 +26,21 @@ export class BrandingService {
 
   /** Get branding for a tenant (with defaults). */
   async get(tenantId: string): Promise<TenantBranding> {
-    const branding = await this.prisma.tenantBranding.findUnique({ where: { tenantId } });
+    const branding = await this.prisma.identity.tenantBranding.findUnique({ where: { tenantId } });
     if (!branding) throw AppError.from('CONFIG_ERROR');
     return branding;
   }
 
   /** Get branding by custom domain (for login page resolution). */
   async getByDomain(domain: string): Promise<TenantBranding | null> {
-    return this.prisma.tenantBranding.findFirst({
+    return this.prisma.identity.tenantBranding.findFirst({
       where: { customDomain: domain, domainVerified: true },
     });
   }
 
   /** Update branding fields. */
   async update(tenantId: string, data: Partial<TenantBranding>): Promise<TenantBranding> {
-    return this.prisma.tenantBranding.upsert({
+    return this.prisma.identity.tenantBranding.upsert({
       where: { tenantId },
       update: data,
       create: { tenantId, ...data } as any,
@@ -70,7 +70,7 @@ export class BrandingService {
 
     const url = `/uploads/branding/${tenantId}/${filename}`;
     const field = LOGO_FIELD_MAP[type];
-    await this.prisma.tenantBranding.upsert({
+    await this.prisma.identity.tenantBranding.upsert({
       where: { tenantId },
       update: { [field]: url },
       create: { tenantId, [field]: url } as any,
@@ -81,8 +81,8 @@ export class BrandingService {
 
   /** Reset branding to default values. */
   async resetToDefaults(tenantId: string): Promise<void> {
-    await this.prisma.tenantBranding.delete({ where: { tenantId } }).catch(() => {});
-    await this.prisma.tenantBranding.create({ data: { tenantId } });
+    await this.prisma.identity.tenantBranding.delete({ where: { tenantId } }).catch(() => {});
+    await this.prisma.identity.tenantBranding.create({ data: { tenantId } });
   }
 
   /** Generate CSS variables for the frontend to consume. */

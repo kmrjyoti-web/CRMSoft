@@ -22,7 +22,7 @@ export class TenantProvisioningService {
     adminLastName: string;
     planId: string;
   }) {
-    return this.prisma.$transaction(async (tx: any) => {
+    return this.prisma.identity.$transaction(async (tx: any) => {
       // 1. Create Tenant (global model — no tenantId needed)
       const tenant = await tx.tenant.create({
         data: {

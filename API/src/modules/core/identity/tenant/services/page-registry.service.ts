@@ -76,38 +76,38 @@ export class PageRegistryService {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.pageRegistry.findMany({
+      this.prisma.platform.pageRegistry.findMany({
         where,
         orderBy: [{ portal: 'asc' }, { category: 'asc' }, { menuSortOrder: 'asc' }],
         skip,
         take: limit,
       }),
-      this.prisma.pageRegistry.count({ where }),
+      this.prisma.platform.pageRegistry.count({ where }),
     ]);
 
     return { data, total };
   }
 
   async getById(id: string) {
-    const page = await this.prisma.pageRegistry.findUnique({ where: { id } });
+    const page = await this.prisma.platform.pageRegistry.findUnique({ where: { id } });
     if (!page) throw new NotFoundException('Page not found');
     return page;
   }
 
   async update(id: string, dto: UpdatePageDto) {
     await this.getById(id);
-    return this.prisma.pageRegistry.update({ where: { id }, data: dto });
+    return this.prisma.platform.pageRegistry.update({ where: { id }, data: dto });
   }
 
   async getStats() {
     const [total, byPortal, byCategory, byPageType, unassigned, byModule] =
       await Promise.all([
-        this.prisma.pageRegistry.count(),
-        this.prisma.pageRegistry.groupBy({ by: ['portal'], _count: true }),
-        this.prisma.pageRegistry.groupBy({ by: ['category'], _count: true }),
-        this.prisma.pageRegistry.groupBy({ by: ['pageType'], _count: true }),
-        this.prisma.pageRegistry.count({ where: { moduleCode: null } }),
-        this.prisma.pageRegistry.groupBy({
+        this.prisma.platform.pageRegistry.count(),
+        this.prisma.platform.pageRegistry.groupBy({ by: ['portal'], _count: true }),
+        this.prisma.platform.pageRegistry.groupBy({ by: ['category'], _count: true }),
+        this.prisma.platform.pageRegistry.groupBy({ by: ['pageType'], _count: true }),
+        this.prisma.platform.pageRegistry.count({ where: { moduleCode: null } }),
+        this.prisma.platform.pageRegistry.groupBy({
           by: ['moduleCode'],
           _count: true,
           where: { moduleCode: { not: null } },
@@ -139,7 +139,7 @@ export class PageRegistryService {
 
   async assignToModule(id: string, dto: AssignPageDto) {
     await this.getById(id);
-    return this.prisma.pageRegistry.update({
+    return this.prisma.platform.pageRegistry.update({
       where: { id },
       data: {
         moduleCode: dto.moduleCode,
@@ -154,7 +154,7 @@ export class PageRegistryService {
   }
 
   async bulkAssign(dto: BulkAssignDto) {
-    const result = await this.prisma.pageRegistry.updateMany({
+    const result = await this.prisma.platform.pageRegistry.updateMany({
       where: { id: { in: dto.pageIds } },
       data: { moduleCode: dto.moduleCode },
     });
@@ -163,14 +163,14 @@ export class PageRegistryService {
 
   async unassignFromModule(id: string) {
     await this.getById(id);
-    return this.prisma.pageRegistry.update({
+    return this.prisma.platform.pageRegistry.update({
       where: { id },
       data: { moduleCode: null, menuKey: null },
     });
   }
 
   async getModulePages(moduleCode: string) {
-    return this.prisma.pageRegistry.findMany({
+    return this.prisma.platform.pageRegistry.findMany({
       where: { moduleCode },
       orderBy: { menuSortOrder: 'asc' },
     });
@@ -178,12 +178,12 @@ export class PageRegistryService {
 
   async reorderModulePages(moduleCode: string, orderedIds: string[]) {
     const updates = orderedIds.map((id, index) =>
-      this.prisma.pageRegistry.update({
+      this.prisma.platform.pageRegistry.update({
         where: { id },
         data: { menuSortOrder: index },
       }),
     );
-    await this.prisma.$transaction(updates);
+    await this.prisma.identity.$transaction(updates);
     return this.getModulePages(moduleCode);
   }
 }

@@ -18,7 +18,7 @@ export class ListPlansHandler implements IQueryHandler<ListPlansQuery> {
       where.isActive = query.isActive;
     }
 
-    return this.prisma.plan.findMany({
+    return this.prisma.identity.plan.findMany({
       where,
       orderBy: { sortOrder: 'asc' },
     });

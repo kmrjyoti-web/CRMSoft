@@ -12,7 +12,7 @@ export class AuditCleanupService {
 
   /** Called by cron-engine (AUDIT_LOG_CLEANUP). */
   async cleanupOldLogs(): Promise<{ totalDeleted: number }> {
-    const policies = await this.prisma.auditRetentionPolicy.findMany({
+    const policies = await this.prisma.identity.auditRetentionPolicy.findMany({
       where: { isActive: true },
     });
 
@@ -22,7 +22,7 @@ export class AuditCleanupService {
       const cutoff = new Date(Date.now() - policy.retentionDays * 86400000);
       try {
         // Delete field changes first (cascade should handle it but being explicit)
-        await this.prisma.auditFieldChange.deleteMany({
+        await this.prisma.identity.auditFieldChange.deleteMany({
           where: {
             auditLog: {
               entityType: policy.entityType,
@@ -31,7 +31,7 @@ export class AuditCleanupService {
           },
         });
 
-        const result = await this.prisma.auditLog.deleteMany({
+        const result = await this.prisma.identity.auditLog.deleteMany({
           where: {
             entityType: policy.entityType,
             createdAt: { lt: cutoff },
@@ -52,7 +52,7 @@ export class AuditCleanupService {
     const defaultCutoff = new Date(Date.now() - DEFAULT_RETENTION_DAYS * 86400000);
 
     if (policyEntityTypes.length > 0) {
-      const defaultResult = await this.prisma.auditLog.deleteMany({
+      const defaultResult = await this.prisma.identity.auditLog.deleteMany({
         where: {
           entityType: { notIn: policyEntityTypes },
           createdAt: { lt: defaultCutoff },
@@ -72,7 +72,7 @@ export class AuditCleanupService {
   }
 
   async getCleanupPreview(): Promise<Array<{ entityType: string; totalRecords: number; wouldDelete: number; retentionDays: number }>> {
-    const policies = await this.prisma.auditRetentionPolicy.findMany({
+    const policies = await this.prisma.identity.auditRetentionPolicy.findMany({
       where: { isActive: true },
     });
 
@@ -81,8 +81,8 @@ export class AuditCleanupService {
     for (const policy of policies) {
       const cutoff = new Date(Date.now() - policy.retentionDays * 86400000);
       const [totalRecords, wouldDelete] = await Promise.all([
-        this.prisma.auditLog.count({ where: { entityType: policy.entityType } }),
-        this.prisma.auditLog.count({ where: { entityType: policy.entityType, createdAt: { lt: cutoff } } }),
+        this.prisma.identity.auditLog.count({ where: { entityType: policy.entityType } }),
+        this.prisma.identity.auditLog.count({ where: { entityType: policy.entityType, createdAt: { lt: cutoff } } }),
       ]);
       preview.push({
         entityType: policy.entityType,

@@ -23,12 +23,12 @@ export class ListTenantsHandler implements IQueryHandler<ListTenantsQuery> {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.tenant.findMany({
+      this.prisma.identity.tenant.findMany({
         where,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
       }),
-      this.prisma.tenant.count({ where }),
+      this.prisma.identity.tenant.count({ where }),
     ]);
 
     return { data, total, page: query.page, limit: query.limit };

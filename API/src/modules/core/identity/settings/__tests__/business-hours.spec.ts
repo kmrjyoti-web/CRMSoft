@@ -6,6 +6,8 @@ const mockPrisma = {
   holidayCalendar: { count: jest.fn() },
   $transaction: jest.fn(),
 } as any;
+(mockPrisma as any).identity = mockPrisma;
+(mockPrisma as any).platform = mockPrisma;
 
 describe('BusinessHoursService', () => {
   let service: BusinessHoursService;

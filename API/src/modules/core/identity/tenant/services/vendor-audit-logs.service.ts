@@ -18,13 +18,13 @@ export class VendorAuditLogsService {
     if (filters.action) where.action = { contains: filters.action, mode: 'insensitive' };
 
     const [data, total] = await Promise.all([
-      this.prisma.tenantActivityLog.findMany({
+      this.prisma.platform.tenantActivityLog.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip: (filters.page - 1) * filters.limit,
         take: filters.limit,
       }),
-      this.prisma.tenantActivityLog.count({ where }),
+      this.prisma.platform.tenantActivityLog.count({ where }),
     ]);
 
     return { data, total };

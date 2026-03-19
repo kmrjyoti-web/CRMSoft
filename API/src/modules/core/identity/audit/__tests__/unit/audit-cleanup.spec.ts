@@ -20,6 +20,8 @@ describe('AuditCleanupService', () => {
         deleteMany: jest.fn().mockResolvedValue({ count: 50 }),
       },
     };
+    (prisma as any).identity = prisma;
+    (prisma as any).platform = prisma;
     service = new AuditCleanupService(prisma);
   });
 

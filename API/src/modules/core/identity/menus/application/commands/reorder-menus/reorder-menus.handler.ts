@@ -9,10 +9,10 @@ export class ReorderMenusHandler implements ICommandHandler<ReorderMenusCommand>
   /** Reorder menu items by updating sortOrder in a transaction. */
   async execute(cmd: ReorderMenusCommand) {
     const updates = cmd.orderedIds.map((id, index) =>
-      this.prisma.menu.update({ where: { id }, data: { sortOrder: index } }),
+      this.prisma.identity.menu.update({ where: { id }, data: { sortOrder: index } }),
     );
 
-    await this.prisma.$transaction(updates);
+    await this.prisma.identity.$transaction(updates);
 
     return { reordered: cmd.orderedIds.length };
   }

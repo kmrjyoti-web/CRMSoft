@@ -23,7 +23,7 @@ export class SubscribeHandler implements ICommandHandler<SubscribeCommand> {
     const periodEnd = new Date(now);
     periodEnd.setMonth(periodEnd.getMonth() + 1);
 
-    const subscription = await this.prisma.subscription.create({
+    const subscription = await this.prisma.identity.subscription.create({
       data: {
         tenantId: command.tenantId,
         planId: command.planId,

@@ -12,7 +12,7 @@ export class ListSuperAdminsHandler implements IQueryHandler<ListSuperAdminsQuer
   async execute(_query: ListSuperAdminsQuery) {
     this.logger.log('Listing super admins');
 
-    return this.prisma.superAdmin.findMany({
+    return this.prisma.identity.superAdmin.findMany({
       select: {
         id: true,
         email: true,
