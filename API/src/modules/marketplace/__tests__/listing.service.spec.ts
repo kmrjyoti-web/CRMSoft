@@ -48,6 +48,7 @@ describe('ListingService', () => {
       updateMany: jest.fn(),
     },
   };
+(mockPrisma as any).platform = mockPrisma;
 
   const mockPricingService = {
     getPricingForUser: jest.fn().mockResolvedValue({

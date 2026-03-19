@@ -21,7 +21,7 @@ export class ReviewService {
     },
   ) {
     // Verify module exists
-    const mod = await this.prisma.marketplaceModule.findUnique({
+    const mod = await this.prisma.platform.marketplaceModule.findUnique({
       where: { id: moduleId },
     });
     if (!mod) {
@@ -29,7 +29,7 @@ export class ReviewService {
     }
 
     // Verify tenant has installed this module
-    const installation = await this.prisma.tenantMarketplaceModule.findUnique({
+    const installation = await this.prisma.platform.tenantMarketplaceModule.findUnique({
       where: { tenantId_moduleId: { tenantId, moduleId } },
     });
     if (!installation) {
@@ -46,7 +46,7 @@ export class ReviewService {
     }
 
     // Upsert review (unique constraint on moduleId + tenantId)
-    const review = await this.prisma.marketplaceReview.upsert({
+    const review = await this.prisma.platform.marketplaceReview.upsert({
       where: { moduleId_tenantId: { moduleId, tenantId } },
       update: {
         rating: data.rating,
@@ -76,13 +76,13 @@ export class ReviewService {
     const l = Math.min(50, Math.max(1, limit));
 
     const [data, total] = await Promise.all([
-      this.prisma.marketplaceReview.findMany({
+      this.prisma.platform.marketplaceReview.findMany({
         where: { moduleId },
         skip: (p - 1) * l,
         take: l,
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.marketplaceReview.count({ where: { moduleId } }),
+      this.prisma.platform.marketplaceReview.count({ where: { moduleId } }),
     ]);
 
     return { data, total, page: p, limit: l };
@@ -92,7 +92,7 @@ export class ReviewService {
    * Recalculate avgRating and reviewCount on MarketplaceModule.
    */
   async recalculateRating(moduleId: string) {
-    const result = await this.prisma.marketplaceReview.aggregate({
+    const result = await this.prisma.platform.marketplaceReview.aggregate({
       where: { moduleId },
       _avg: { rating: true },
       _count: { rating: true },
@@ -101,7 +101,7 @@ export class ReviewService {
     const avgRating = result._avg.rating ?? 0;
     const reviewCount = result._count.rating ?? 0;
 
-    await this.prisma.marketplaceModule.update({
+    await this.prisma.platform.marketplaceModule.update({
       where: { id: moduleId },
       data: {
         avgRating: Math.round(avgRating * 100) / 100,

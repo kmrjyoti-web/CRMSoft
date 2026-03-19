@@ -40,7 +40,7 @@ export class OrderService {
     // Validate all items belong to same vendor
     const listings = await Promise.all(
       dto.items.map(async (item) => {
-        const listing = await this.prisma.marketplaceListing.findUnique({
+        const listing = await this.prisma.platform.marketplaceListing.findUnique({
           where: { id: item.listingId },
           include: { priceTiers: { orderBy: { minQty: 'asc' } } },
         });
@@ -87,7 +87,7 @@ export class OrderService {
 
     const orderNumber = await this.generateOrderNumber(tenantId);
 
-    const order = await this.prisma.marketplaceOrder.create({
+    const order = await this.prisma.platform.marketplaceOrder.create({
       data: {
         orderNumber,
         tenantId,
@@ -132,7 +132,7 @@ export class OrderService {
 
     // Convert enquiry if sourced from one
     if (dto.sourceEnquiryId) {
-      await this.prisma.marketplaceEnquiry.update({
+      await this.prisma.platform.marketplaceEnquiry.update({
         where: { id: dto.sourceEnquiryId },
         data: {
           status: 'ENQ_CONVERTED',
@@ -156,7 +156,7 @@ export class OrderService {
     note?: string,
     changedBy?: string,
   ) {
-    const order = await this.prisma.marketplaceOrder.findUnique({
+    const order = await this.prisma.platform.marketplaceOrder.findUnique({
       where: { id: orderId },
     });
     if (!order) throw new NotFoundException('Order not found');
@@ -175,7 +175,7 @@ export class OrderService {
       updateData.deliveredAt = new Date();
     }
 
-    return this.prisma.marketplaceOrder.update({
+    return this.prisma.platform.marketplaceOrder.update({
       where: { id: orderId },
       data: updateData,
     });
@@ -186,7 +186,7 @@ export class OrderService {
   // ═══════════════════════════════════════════════════════
 
   async getVendorOrders(tenantId: string, vendorId: string, status?: MktOrderStatus) {
-    return this.prisma.marketplaceOrder.findMany({
+    return this.prisma.platform.marketplaceOrder.findMany({
       where: {
         tenantId,
         vendorId,
@@ -198,7 +198,7 @@ export class OrderService {
   }
 
   async getBuyerOrders(tenantId: string, buyerId: string) {
-    return this.prisma.marketplaceOrder.findMany({
+    return this.prisma.platform.marketplaceOrder.findMany({
       where: { tenantId, buyerId },
       orderBy: { createdAt: 'desc' },
       include: { items: true },
@@ -206,7 +206,7 @@ export class OrderService {
   }
 
   async findById(orderId: string) {
-    const order = await this.prisma.marketplaceOrder.findUnique({
+    const order = await this.prisma.platform.marketplaceOrder.findUnique({
       where: { id: orderId },
       include: { items: { include: { listing: { select: { mediaUrls: true, slug: true } } } } },
     });
@@ -219,7 +219,7 @@ export class OrderService {
   // ═══════════════════════════════════════════════════════
 
   async updateTracking(orderId: string, trackingNumber: string, carrier: string, estimatedDelivery?: Date) {
-    return this.prisma.marketplaceOrder.update({
+    return this.prisma.platform.marketplaceOrder.update({
       where: { id: orderId },
       data: {
         trackingNumber,
@@ -242,7 +242,7 @@ export class OrderService {
   // ═══════════════════════════════════════════════════════
 
   private async generateOrderNumber(tenantId: string): Promise<string> {
-    const count = await this.prisma.marketplaceOrder.count({
+    const count = await this.prisma.platform.marketplaceOrder.count({
       where: { tenantId },
     });
     return `ORD-${new Date().getFullYear()}-${String(count + 1).padStart(5, '0')}`;

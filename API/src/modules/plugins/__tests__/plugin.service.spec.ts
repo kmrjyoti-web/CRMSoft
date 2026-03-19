@@ -51,6 +51,7 @@ describe('PluginService', () => {
       update: jest.fn(),
     },
   };
+(mockPrisma as any).platform = mockPrisma;
 
   const mockEncryption = {
     encrypt: jest.fn().mockReturnValue('encrypted-blob'),

@@ -13,6 +13,7 @@ describe('UpdateLookupHandler', () => {
         update: jest.fn(),
       },
     };
+(prisma as any).platform = prisma;
     handler = new UpdateLookupHandler(prisma);
   });
 

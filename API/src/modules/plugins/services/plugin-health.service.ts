@@ -44,14 +44,14 @@ export class PluginHealthService {
    * Test connection for an already-installed plugin (uses stored encrypted credentials).
    */
   async testInstalled(tenantId: string, pluginCode: string): Promise<HealthCheckResult> {
-    const plugin = await this.prisma.pluginRegistry.findUnique({
+    const plugin = await this.prisma.platform.pluginRegistry.findUnique({
       where: { code: pluginCode },
     });
     if (!plugin) {
       throw new NotFoundException(`Plugin "${pluginCode}" not found`);
     }
 
-    const tenantPlugin = await this.prisma.tenantPlugin.findUnique({
+    const tenantPlugin = await this.prisma.platform.tenantPlugin.findUnique({
       where: {
         tenantId_pluginId: { tenantId, pluginId: plugin.id },
       },
@@ -78,7 +78,7 @@ export class PluginHealthService {
       const result = await handler.testConnection(credentials);
 
       // Update last verified timestamp
-      await this.prisma.tenantPlugin.update({
+      await this.prisma.platform.tenantPlugin.update({
         where: { id: tenantPlugin.id },
         data: {
           lastUsedAt: new Date(),
@@ -102,7 +102,7 @@ export class PluginHealthService {
    * Get health status summary for all installed plugins.
    */
   async getTenantPluginHealth(tenantId: string) {
-    const tenantPlugins = await this.prisma.tenantPlugin.findMany({
+    const tenantPlugins = await this.prisma.platform.tenantPlugin.findMany({
       where: { tenantId },
       include: { plugin: true },
     });

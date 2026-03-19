@@ -44,7 +44,7 @@ export class MarketplaceSchedulingService {
   // ═══════════════════════════════════════════════════════
 
   private async publishScheduledListings(now: Date): Promise<number> {
-    const result = await this.prisma.marketplaceListing.updateMany({
+    const result = await this.prisma.platform.marketplaceListing.updateMany({
       where: {
         status: 'LST_SCHEDULED',
         publishAt: { lte: now },
@@ -58,7 +58,7 @@ export class MarketplaceSchedulingService {
   }
 
   private async publishScheduledPosts(now: Date): Promise<number> {
-    const result = await this.prisma.marketplacePost.updateMany({
+    const result = await this.prisma.platform.marketplacePost.updateMany({
       where: {
         status: 'PS_SCHEDULED',
         publishAt: { lte: now },
@@ -77,7 +77,7 @@ export class MarketplaceSchedulingService {
 
   private async expireListings(now: Date): Promise<number> {
     // First get items to expire so we can process expiry actions
-    const toExpire = await this.prisma.marketplaceListing.findMany({
+    const toExpire = await this.prisma.platform.marketplaceListing.findMany({
       where: {
         status: 'LST_ACTIVE',
         expiresAt: { lte: now },
@@ -101,7 +101,7 @@ export class MarketplaceSchedulingService {
           newStatus = 'LST_EXPIRED';
       }
 
-      await this.prisma.marketplaceListing.update({
+      await this.prisma.platform.marketplaceListing.update({
         where: { id: listing.id },
         data: { status: newStatus as any },
       });
@@ -111,7 +111,7 @@ export class MarketplaceSchedulingService {
   }
 
   private async expirePosts(now: Date): Promise<number> {
-    const toExpire = await this.prisma.marketplacePost.findMany({
+    const toExpire = await this.prisma.platform.marketplacePost.findMany({
       where: {
         status: 'PS_ACTIVE',
         expiresAt: { lte: now },
@@ -134,7 +134,7 @@ export class MarketplaceSchedulingService {
           newStatus = 'PS_EXPIRED';
       }
 
-      await this.prisma.marketplacePost.update({
+      await this.prisma.platform.marketplacePost.update({
         where: { id: post.id },
         data: { status: newStatus as any },
       });

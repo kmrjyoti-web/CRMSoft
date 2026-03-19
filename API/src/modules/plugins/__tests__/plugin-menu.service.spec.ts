@@ -13,6 +13,7 @@ describe('PluginMenuService', () => {
       updateMany: jest.fn(),
     },
   };
+(mockPrisma as any).platform = mockPrisma;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

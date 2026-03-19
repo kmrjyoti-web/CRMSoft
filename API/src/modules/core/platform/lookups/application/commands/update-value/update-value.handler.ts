@@ -10,14 +10,14 @@ export class UpdateValueHandler implements ICommandHandler<UpdateValueCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: UpdateValueCommand): Promise<void> {
-    const val = await this.prisma.lookupValue.findUnique({
+    const val = await this.prisma.platform.lookupValue.findUnique({
       where: { id: command.valueId },
     });
     if (!val) throw new NotFoundException(`LookupValue ${command.valueId} not found`);
 
     // If setting as default, unset existing default
     if (command.data.isDefault) {
-      await this.prisma.lookupValue.updateMany({
+      await this.prisma.platform.lookupValue.updateMany({
         where: { lookupId: val.lookupId, isDefault: true },
         data: { isDefault: false },
       });
@@ -30,7 +30,7 @@ export class UpdateValueHandler implements ICommandHandler<UpdateValueCommand> {
     if (command.data.isDefault !== undefined) updateData.isDefault = command.data.isDefault;
     if (command.data.configJson !== undefined) updateData.configJson = command.data.configJson;
 
-    await this.prisma.lookupValue.update({ where: { id: command.valueId }, data: updateData });
+    await this.prisma.platform.lookupValue.update({ where: { id: command.valueId }, data: updateData });
     this.logger.log(`LookupValue ${val.value} updated`);
   }
 }

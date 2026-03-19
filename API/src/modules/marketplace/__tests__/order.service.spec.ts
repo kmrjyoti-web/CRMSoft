@@ -53,6 +53,7 @@ describe('OrderService', () => {
       updateMany: jest.fn(),
     },
   };
+(mockPrisma as any).platform = mockPrisma;
 
   const mockPricingService = {
     calculatePrice: jest.fn().mockResolvedValue({

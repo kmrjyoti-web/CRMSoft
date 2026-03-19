@@ -86,7 +86,7 @@ export class PluginMenuService {
    * Get all menu codes for a plugin from the registry.
    */
   private async getPluginMenuCodes(pluginCode: string): Promise<string[]> {
-    const plugin = await this.prisma.pluginRegistry.findUnique({
+    const plugin = await this.prisma.platform.pluginRegistry.findUnique({
       where: { code: pluginCode },
       select: { menuCodes: true },
     });

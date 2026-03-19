@@ -16,6 +16,7 @@ describe('AddValueHandler', () => {
         create: jest.fn().mockResolvedValue({ id: 'val-1' }),
       },
     };
+(prisma as any).platform = prisma;
     handler = new AddValueHandler(prisma);
   });
 

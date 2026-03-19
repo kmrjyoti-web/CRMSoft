@@ -13,7 +13,7 @@ export class GetValuesByCategoryHandler implements IQueryHandler<GetValuesByCate
 
   async execute(query: GetValuesByCategoryQuery) {
     const category = query.category.toUpperCase();
-    const lookup = await this.prisma.masterLookup.findFirst({
+    const lookup = await this.prisma.platform.masterLookup.findFirst({
       where: { category },
     });
     if (!lookup) throw new NotFoundException(`Lookup category "${category}" not found`);
@@ -21,7 +21,7 @@ export class GetValuesByCategoryHandler implements IQueryHandler<GetValuesByCate
     const where: any = { lookupId: lookup.id };
     if (query.activeOnly !== false) where.isActive = true;
 
-    const values = await this.prisma.lookupValue.findMany({
+    const values = await this.prisma.platform.lookupValue.findMany({
       where,
       orderBy: { rowIndex: 'asc' },
       select: {

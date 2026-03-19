@@ -89,7 +89,7 @@ export class PluginWebhookController {
     }
 
     // Get plugin registry for webhook config
-    const plugin = await this.prisma.pluginRegistry.findUnique({
+    const plugin = await this.prisma.platform.pluginRegistry.findUnique({
       where: { code: pluginCode },
     });
     if (!plugin?.webhookConfig) {

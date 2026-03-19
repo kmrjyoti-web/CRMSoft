@@ -65,7 +65,7 @@ function makeTenantModule(overrides: Record<string, any> = {}) {
 }
 
 function makePrisma(overrides: any = {}) {
-  return {
+  const result: any = {
     moduleDefinition: {
       findUnique: jest.fn(),
       findMany: jest.fn().mockResolvedValue([]),
@@ -78,7 +78,9 @@ function makePrisma(overrides: any = {}) {
       delete: jest.fn().mockResolvedValue({}),
     },
     ...overrides,
-  } as any;
+  };
+  result.platform = result;
+  return result;
 }
 
 /* ── tests ───────────────────────────────────────────────── */

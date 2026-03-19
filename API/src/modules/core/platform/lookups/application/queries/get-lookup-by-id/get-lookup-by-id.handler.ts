@@ -8,7 +8,7 @@ export class GetLookupByIdHandler implements IQueryHandler<GetLookupByIdQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetLookupByIdQuery) {
-    const lookup = await this.prisma.masterLookup.findUnique({
+    const lookup = await this.prisma.platform.masterLookup.findUnique({
       where: { id: query.lookupId },
       include: {
         values: {

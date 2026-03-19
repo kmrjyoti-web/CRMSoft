@@ -19,7 +19,7 @@ export class PackagesController {
   @ApiOperation({ summary: 'Create package' })
   @RequirePermissions('packages:create')
   async create(@Body() dto: CreatePackageDto) {
-    const pkg = await this.prisma.package.create({
+    const pkg = await this.prisma.platform.package.create({
       data: { ...dto, code: dto.code.toUpperCase() },
     });
     return ApiResponse.success(pkg, 'Package created');
@@ -43,8 +43,8 @@ export class PackagesController {
       ];
     }
     const [data, total] = await Promise.all([
-      this.prisma.package.findMany({ where, skip: (p - 1) * l, take: l, orderBy: { name: 'asc' } }),
-      this.prisma.package.count({ where }),
+      this.prisma.platform.package.findMany({ where, skip: (p - 1) * l, take: l, orderBy: { name: 'asc' } }),
+      this.prisma.platform.package.count({ where }),
     ]);
     return ApiResponse.paginated(data, total, p, l);
   }
@@ -53,7 +53,7 @@ export class PackagesController {
   @ApiOperation({ summary: 'Get package by ID' })
   @RequirePermissions('packages:read')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
-    const pkg = await this.prisma.package.findUniqueOrThrow({ where: { id } });
+    const pkg = await this.prisma.platform.package.findUniqueOrThrow({ where: { id } });
     return ApiResponse.success(pkg);
   }
 
@@ -63,7 +63,7 @@ export class PackagesController {
   async update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdatePackageDto) {
     const data: any = { ...dto };
     if (dto.code) data.code = dto.code.toUpperCase();
-    const pkg = await this.prisma.package.update({ where: { id }, data });
+    const pkg = await this.prisma.platform.package.update({ where: { id }, data });
     return ApiResponse.success(pkg, 'Package updated');
   }
 
@@ -71,7 +71,7 @@ export class PackagesController {
   @ApiOperation({ summary: 'Deactivate package' })
   @RequirePermissions('packages:delete')
   async deactivate(@Param('id', ParseUUIDPipe) id: string) {
-    const pkg = await this.prisma.package.update({ where: { id }, data: { isActive: false } });
+    const pkg = await this.prisma.platform.package.update({ where: { id }, data: { isActive: false } });
     return ApiResponse.success(pkg, 'Package deactivated');
   }
 }

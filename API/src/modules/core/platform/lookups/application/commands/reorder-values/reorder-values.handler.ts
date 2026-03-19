@@ -10,14 +10,14 @@ export class ReorderValuesHandler implements ICommandHandler<ReorderValuesComman
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: ReorderValuesCommand): Promise<void> {
-    const lookup = await this.prisma.masterLookup.findUnique({
+    const lookup = await this.prisma.platform.masterLookup.findUnique({
       where: { id: command.lookupId },
     });
     if (!lookup) throw new NotFoundException(`Lookup ${command.lookupId} not found`);
 
     // Update rowIndex for each value in order
     const updates = command.orderedIds.map((id, index) =>
-      this.prisma.lookupValue.update({
+      this.prisma.platform.lookupValue.update({
         where: { id },
         data: { rowIndex: index },
       }),

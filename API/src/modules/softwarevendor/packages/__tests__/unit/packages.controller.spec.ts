@@ -15,6 +15,7 @@ describe('PackagesController', () => {
         count: jest.fn(),
       },
     };
+(mockPrisma as any).platform = mockPrisma;
     controller = new PackagesController(mockPrisma);
   });
 

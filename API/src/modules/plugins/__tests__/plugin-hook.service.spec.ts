@@ -35,6 +35,7 @@ describe('PluginHookService', () => {
       findMany: jest.fn(),
     },
   };
+(mockPrisma as any).platform = mockPrisma;
 
   const mockPluginService = {
     clearErrors: jest.fn(),

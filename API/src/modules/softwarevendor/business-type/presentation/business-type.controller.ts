@@ -42,7 +42,7 @@ export class BusinessTypeController {
   @ApiOperation({ summary: 'Get packages for an industry (public)' })
   async publicPackages(@Param('code') code: string) {
     const bt = await this.btService.getByCode(code);
-    const packages = await this.prisma.industryPackage.findMany({
+    const packages = await this.prisma.platform.industryPackage.findMany({
       where: { industryId: bt.id },
       include: { package: true },
       orderBy: { sortOrder: 'asc' },

@@ -10,19 +10,19 @@ export class AddValueHandler implements ICommandHandler<AddValueCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: AddValueCommand): Promise<string> {
-    const lookup = await this.prisma.masterLookup.findUnique({
+    const lookup = await this.prisma.platform.masterLookup.findUnique({
       where: { id: command.lookupId },
     });
     if (!lookup) throw new NotFoundException(`Lookup ${command.lookupId} not found`);
 
     // Check duplicate value within same lookup
-    const existing = await this.prisma.lookupValue.findFirst({
+    const existing = await this.prisma.platform.lookupValue.findFirst({
       where: { lookupId: command.lookupId, value: command.value },
     });
     if (existing) throw new ConflictException(`Value "${command.value}" already exists in ${lookup.category}`);
 
     // Get next rowIndex
-    const maxRow = await this.prisma.lookupValue.aggregate({
+    const maxRow = await this.prisma.platform.lookupValue.aggregate({
       where: { lookupId: command.lookupId },
       _max: { rowIndex: true },
     });
@@ -30,13 +30,13 @@ export class AddValueHandler implements ICommandHandler<AddValueCommand> {
 
     // If setting as default, unset existing default
     if (command.isDefault) {
-      await this.prisma.lookupValue.updateMany({
+      await this.prisma.platform.lookupValue.updateMany({
         where: { lookupId: command.lookupId, isDefault: true },
         data: { isDefault: false },
       });
     }
 
-    const val = await this.prisma.lookupValue.create({
+    const val = await this.prisma.platform.lookupValue.create({
       data: {
         lookupId: command.lookupId,
         value: command.value.trim(),

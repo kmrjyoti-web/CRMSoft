@@ -36,7 +36,7 @@ export class PostService {
       status = 'PS_ACTIVE';
     }
 
-    const post = await this.prisma.marketplacePost.create({
+    const post = await this.prisma.platform.marketplacePost.create({
       data: {
         tenantId,
         authorId,
@@ -56,7 +56,7 @@ export class PostService {
       },
     });
 
-    await this.prisma.postAnalytics.create({
+    await this.prisma.platform.postAnalytics.create({
       data: { postId: post.id },
     });
 
@@ -77,7 +77,7 @@ export class PostService {
     const skip = (page - 1) * limit;
 
     const [posts, total] = await Promise.all([
-      this.prisma.marketplacePost.findMany({
+      this.prisma.platform.marketplacePost.findMany({
         where: { tenantId, status: 'PS_ACTIVE' },
         skip,
         take: limit,
@@ -90,7 +90,7 @@ export class PostService {
           },
         },
       }),
-      this.prisma.marketplacePost.count({
+      this.prisma.platform.marketplacePost.count({
         where: { tenantId, status: 'PS_ACTIVE' },
       }),
     ]);
@@ -98,7 +98,7 @@ export class PostService {
     // Check user engagement state
     let userEngagements = new Map<string, Set<string>>();
     if (userId) {
-      const engagements = await this.prisma.postEngagement.findMany({
+      const engagements = await this.prisma.platform.postEngagement.findMany({
         where: {
           postId: { in: posts.map((p) => p.id) },
           userId,
@@ -130,7 +130,7 @@ export class PostService {
   // ═══════════════════════════════════════════════════════
 
   async findById(postId: string) {
-    const post = await this.prisma.marketplacePost.findUnique({
+    const post = await this.prisma.platform.marketplacePost.findUnique({
       where: { id: postId },
       include: {
         comments: {
@@ -152,7 +152,7 @@ export class PostService {
     if (!post) throw new NotFoundException('Post not found');
 
     // Track view
-    await this.prisma.marketplacePost.update({
+    await this.prisma.platform.marketplacePost.update({
       where: { id: postId },
       data: { viewCount: { increment: 1 } },
     });
@@ -167,23 +167,23 @@ export class PostService {
   async toggleLike(postId: string, userId: string, tenantId: string) {
     const post = await this.findPostOrFail(postId);
 
-    const existing = await this.prisma.postEngagement.findUnique({
+    const existing = await this.prisma.platform.postEngagement.findUnique({
       where: { postId_userId_action: { postId, userId, action: 'EA_LIKE' } },
     });
 
     if (existing) {
-      await this.prisma.postEngagement.delete({ where: { id: existing.id } });
-      await this.prisma.marketplacePost.update({
+      await this.prisma.platform.postEngagement.delete({ where: { id: existing.id } });
+      await this.prisma.platform.marketplacePost.update({
         where: { id: postId },
         data: { likeCount: { decrement: 1 } },
       });
       return { liked: false, likeCount: post.likeCount - 1 };
     }
 
-    await this.prisma.postEngagement.create({
+    await this.prisma.platform.postEngagement.create({
       data: { tenantId, postId, userId, action: 'EA_LIKE' },
     });
-    await this.prisma.marketplacePost.update({
+    await this.prisma.platform.marketplacePost.update({
       where: { id: postId },
       data: { likeCount: { increment: 1 } },
     });
@@ -197,23 +197,23 @@ export class PostService {
   async toggleSave(postId: string, userId: string, tenantId: string) {
     await this.findPostOrFail(postId);
 
-    const existing = await this.prisma.postEngagement.findUnique({
+    const existing = await this.prisma.platform.postEngagement.findUnique({
       where: { postId_userId_action: { postId, userId, action: 'EA_SAVE' } },
     });
 
     if (existing) {
-      await this.prisma.postEngagement.delete({ where: { id: existing.id } });
-      await this.prisma.marketplacePost.update({
+      await this.prisma.platform.postEngagement.delete({ where: { id: existing.id } });
+      await this.prisma.platform.marketplacePost.update({
         where: { id: postId },
         data: { saveCount: { decrement: 1 } },
       });
       return { saved: false };
     }
 
-    await this.prisma.postEngagement.create({
+    await this.prisma.platform.postEngagement.create({
       data: { tenantId, postId, userId, action: 'EA_SAVE' },
     });
-    await this.prisma.marketplacePost.update({
+    await this.prisma.platform.marketplacePost.update({
       where: { id: postId },
       data: { saveCount: { increment: 1 } },
     });
@@ -233,16 +233,16 @@ export class PostService {
   ) {
     await this.findPostOrFail(postId);
 
-    const comment = await this.prisma.postComment.create({
+    const comment = await this.prisma.platform.postComment.create({
       data: { tenantId, postId, userId, content, parentId },
     });
 
-    await this.prisma.marketplacePost.update({
+    await this.prisma.platform.marketplacePost.update({
       where: { id: postId },
       data: { commentCount: { increment: 1 } },
     });
 
-    await this.prisma.postEngagement.create({
+    await this.prisma.platform.postEngagement.create({
       data: {
         tenantId,
         postId,
@@ -261,11 +261,11 @@ export class PostService {
   async trackShare(postId: string, userId: string, tenantId: string, sharedTo: string) {
     await this.findPostOrFail(postId);
 
-    await this.prisma.postEngagement.create({
+    await this.prisma.platform.postEngagement.create({
       data: { tenantId, postId, userId, action: 'EA_SHARE', sharedTo },
     });
 
-    await this.prisma.marketplacePost.update({
+    await this.prisma.platform.marketplacePost.update({
       where: { id: postId },
       data: { shareCount: { increment: 1 } },
     });
@@ -278,7 +278,7 @@ export class PostService {
   // ═══════════════════════════════════════════════════════
 
   private async findPostOrFail(postId: string) {
-    const post = await this.prisma.marketplacePost.findUnique({
+    const post = await this.prisma.platform.marketplacePost.findUnique({
       where: { id: postId },
     });
     if (!post) throw new NotFoundException('Post not found');

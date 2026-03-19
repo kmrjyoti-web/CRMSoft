@@ -12,14 +12,15 @@ const mockPrisma = {
     update: jest.fn(),
     count: jest.fn(),
   },
-} as any;
+};
+(mockPrisma as any).platform = mockPrisma;
 
 describe('HelpService', () => {
   let service: HelpService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new HelpService(mockPrisma);
+    service = new HelpService(mockPrisma as any);
   });
 
   // ─── listArticles ───

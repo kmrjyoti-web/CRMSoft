@@ -18,6 +18,7 @@ describe('GetValuesByCategoryHandler', () => {
         ]),
       },
     };
+(prisma as any).platform = prisma;
     handler = new GetValuesByCategoryHandler(prisma);
   });
 

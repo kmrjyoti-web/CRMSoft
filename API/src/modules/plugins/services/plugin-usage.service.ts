@@ -29,7 +29,7 @@ export class PluginUsageService {
    * Get usage summary for all installed plugins of a tenant.
    */
   async getTenantUsage(tenantId: string): Promise<UsageSummary[]> {
-    const tenantPlugins = await this.prisma.tenantPlugin.findMany({
+    const tenantPlugins = await this.prisma.platform.tenantPlugin.findMany({
       where: { tenantId },
       include: { plugin: true },
       orderBy: { plugin: { category: 'asc' } },
@@ -53,7 +53,7 @@ export class PluginUsageService {
    * Get aggregated usage stats for a tenant.
    */
   async getTenantStats(tenantId: string): Promise<UsageStats> {
-    const tenantPlugins = await this.prisma.tenantPlugin.findMany({
+    const tenantPlugins = await this.prisma.platform.tenantPlugin.findMany({
       where: { tenantId },
       include: { plugin: true },
     });
@@ -82,7 +82,7 @@ export class PluginUsageService {
    * Reset monthly usage for all plugins (called by cron on 1st of month).
    */
   async resetMonthlyUsage(): Promise<number> {
-    const result = await this.prisma.tenantPlugin.updateMany({
+    const result = await this.prisma.platform.tenantPlugin.updateMany({
       where: { monthlyUsage: { gt: 0 } },
       data: {
         monthlyUsage: 0,
@@ -101,12 +101,12 @@ export class PluginUsageService {
     tenantId: string,
     pluginCode: string,
   ): Promise<{ allowed: boolean; usage: number; limit: number | null }> {
-    const plugin = await this.prisma.pluginRegistry.findUnique({
+    const plugin = await this.prisma.platform.pluginRegistry.findUnique({
       where: { code: pluginCode },
     });
     if (!plugin) return { allowed: false, usage: 0, limit: null };
 
-    const tp = await this.prisma.tenantPlugin.findUnique({
+    const tp = await this.prisma.platform.tenantPlugin.findUnique({
       where: {
         tenantId_pluginId: { tenantId, pluginId: plugin.id },
       },
@@ -133,10 +133,10 @@ export class PluginUsageService {
     limit = 50,
   ) {
     const plugin = pluginCode
-      ? await this.prisma.pluginRegistry.findUnique({ where: { code: pluginCode } })
+      ? await this.prisma.platform.pluginRegistry.findUnique({ where: { code: pluginCode } })
       : null;
 
-    return this.prisma.pluginHookLog.findMany({
+    return this.prisma.platform.pluginHookLog.findMany({
       where: {
         tenantId,
         ...(plugin ? { pluginId: plugin.id } : {}),

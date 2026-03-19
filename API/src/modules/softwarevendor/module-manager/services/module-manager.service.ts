@@ -18,11 +18,11 @@ export class ModuleManagerService {
 
   async listTenantModules(tenantId: string) {
     const [definitions, tenantModules] = await Promise.all([
-      this.prisma.moduleDefinition.findMany({
+      this.prisma.platform.moduleDefinition.findMany({
         where: { isActive: true },
         orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
       }),
-      this.prisma.tenantModule.findMany({
+      this.prisma.platform.tenantModule.findMany({
         where: { tenantId },
       }),
     ]);
@@ -78,7 +78,7 @@ export class ModuleManagerService {
   async getModuleStatus(tenantId: string, moduleCode: string) {
     const definition = await this.findDefinitionByCode(moduleCode);
 
-    const tm = await this.prisma.tenantModule.findUnique({
+    const tm = await this.prisma.platform.tenantModule.findUnique({
       where: { tenantId_moduleId: { tenantId, moduleId: definition.id } },
     });
 
@@ -118,7 +118,7 @@ export class ModuleManagerService {
     const results: Array<{ code: string; status: string }> = [];
 
     for (const def of toEnable) {
-      const existing = await this.prisma.tenantModule.findUnique({
+      const existing = await this.prisma.platform.tenantModule.findUnique({
         where: { tenantId_moduleId: { tenantId, moduleId: def.id } },
       });
 
@@ -137,7 +137,7 @@ export class ModuleManagerService {
           ? TenantModuleStatus.TRIAL
           : TenantModuleStatus.ACTIVE;
 
-      await this.prisma.tenantModule.upsert({
+      await this.prisma.platform.tenantModule.upsert({
         where: { tenantId_moduleId: { tenantId, moduleId: def.id } },
         create: {
           tenantId,
@@ -176,11 +176,11 @@ export class ModuleManagerService {
     }
 
     // Check if any other active module depends on this one (via autoEnables)
-    const allDefinitions = await this.prisma.moduleDefinition.findMany({
+    const allDefinitions = await this.prisma.platform.moduleDefinition.findMany({
       where: { isActive: true },
     });
 
-    const tenantModules = await this.prisma.tenantModule.findMany({
+    const tenantModules = await this.prisma.platform.tenantModule.findMany({
       where: {
         tenantId,
         status: { in: [TenantModuleStatus.ACTIVE, TenantModuleStatus.TRIAL] },
@@ -209,7 +209,7 @@ export class ModuleManagerService {
       );
     }
 
-    const existing = await this.prisma.tenantModule.findUnique({
+    const existing = await this.prisma.platform.tenantModule.findUnique({
       where: { tenantId_moduleId: { tenantId, moduleId: definition.id } },
     });
 
@@ -219,7 +219,7 @@ export class ModuleManagerService {
       );
     }
 
-    await this.prisma.tenantModule.delete({
+    await this.prisma.platform.tenantModule.delete({
       where: { tenantId_moduleId: { tenantId, moduleId: definition.id } },
     });
 
@@ -243,7 +243,7 @@ export class ModuleManagerService {
       );
     }
 
-    const tm = await this.prisma.tenantModule.findUnique({
+    const tm = await this.prisma.platform.tenantModule.findUnique({
       where: { tenantId_moduleId: { tenantId, moduleId: definition.id } },
     });
 
@@ -256,7 +256,7 @@ export class ModuleManagerService {
     // Store credentials as JSON string (encryption should be handled at application layer)
     const credentialsEnc = JSON.stringify(credentials);
 
-    await this.prisma.tenantModule.update({
+    await this.prisma.platform.tenantModule.update({
       where: { tenantId_moduleId: { tenantId, moduleId: definition.id } },
       data: {
         credentialsEnc,
@@ -275,7 +275,7 @@ export class ModuleManagerService {
   async validateCredentials(tenantId: string, moduleCode: string) {
     const definition = await this.findDefinitionByCode(moduleCode);
 
-    const tm = await this.prisma.tenantModule.findUnique({
+    const tm = await this.prisma.platform.tenantModule.findUnique({
       where: { tenantId_moduleId: { tenantId, moduleId: definition.id } },
     });
 
@@ -292,7 +292,7 @@ export class ModuleManagerService {
     }
 
     // Update the validation timestamp
-    await this.prisma.tenantModule.update({
+    await this.prisma.platform.tenantModule.update({
       where: { tenantId_moduleId: { tenantId, moduleId: definition.id } },
       data: {
         credentialsValidatedAt: new Date(),
@@ -310,7 +310,7 @@ export class ModuleManagerService {
   /* ─────────────────── ENABLED CODES ────────────────────── */
 
   async getEnabledModuleCodes(tenantId: string): Promise<string[]> {
-    const tenantModules = await this.prisma.tenantModule.findMany({
+    const tenantModules = await this.prisma.platform.tenantModule.findMany({
       where: {
         tenantId,
         status: { in: [TenantModuleStatus.ACTIVE, TenantModuleStatus.TRIAL] },
@@ -336,7 +336,7 @@ export class ModuleManagerService {
   /* ─────────────────── PRIVATE HELPERS ──────────────────── */
 
   private async findDefinitionByCode(code: string) {
-    const definition = await this.prisma.moduleDefinition.findUnique({
+    const definition = await this.prisma.platform.moduleDefinition.findUnique({
       where: { code },
     });
 
@@ -362,7 +362,7 @@ export class ModuleManagerService {
 
     // First enable auto-dependencies
     for (const depCode of definition.autoEnables) {
-      const depDef = await this.prisma.moduleDefinition.findUnique({
+      const depDef = await this.prisma.platform.moduleDefinition.findUnique({
         where: { code: depCode },
       });
       if (depDef) {

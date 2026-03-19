@@ -11,7 +11,7 @@ export class SubscriptionPackageService {
     const where: any = { ...industryFilter(industryCode) };
     if (activeOnly) where.isActive = true;
 
-    return this.prisma.subscriptionPackage.findMany({
+    return this.prisma.platform.subscriptionPackage.findMany({
       where,
       orderBy: { planLevel: 'asc' },
       include: { coupons: { where: { isActive: true }, select: { id: true, code: true } } },
@@ -20,7 +20,7 @@ export class SubscriptionPackageService {
 
   /** Get a single package by its unique code */
   async getByCode(code: string) {
-    const pkg = await this.prisma.subscriptionPackage.findUnique({
+    const pkg = await this.prisma.platform.subscriptionPackage.findUnique({
       where: { packageCode: code },
       include: { coupons: true },
     });
@@ -46,7 +46,7 @@ export class SubscriptionPackageService {
     isFeatured?: boolean;
     sortOrder?: number;
   }) {
-    return this.prisma.subscriptionPackage.create({
+    return this.prisma.platform.subscriptionPackage.create({
       data: {
         packageCode: data.packageCode.toUpperCase(),
         packageName: data.packageName,
@@ -87,10 +87,10 @@ export class SubscriptionPackageService {
       sortOrder: number;
     }>,
   ) {
-    const existing = await this.prisma.subscriptionPackage.findUnique({ where: { id } });
+    const existing = await this.prisma.platform.subscriptionPackage.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException(`Package "${id}" not found`);
 
-    return this.prisma.subscriptionPackage.update({
+    return this.prisma.platform.subscriptionPackage.update({
       where: { id },
       data,
     });
@@ -98,10 +98,10 @@ export class SubscriptionPackageService {
 
   /** Soft-deactivate a package (set isActive = false) */
   async deactivate(id: string) {
-    const existing = await this.prisma.subscriptionPackage.findUnique({ where: { id } });
+    const existing = await this.prisma.platform.subscriptionPackage.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException(`Package "${id}" not found`);
 
-    return this.prisma.subscriptionPackage.update({
+    return this.prisma.platform.subscriptionPackage.update({
       where: { id },
       data: { isActive: false },
     });
@@ -109,7 +109,7 @@ export class SubscriptionPackageService {
 
   /** List featured active packages */
   async getFeatured(industryCode?: string) {
-    return this.prisma.subscriptionPackage.findMany({
+    return this.prisma.platform.subscriptionPackage.findMany({
       where: { isActive: true, isFeatured: true, ...industryFilter(industryCode) } as any,
       orderBy: { sortOrder: 'asc' },
     });

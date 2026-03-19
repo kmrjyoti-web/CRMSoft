@@ -13,6 +13,7 @@ describe('CreateLookupHandler', () => {
         create: jest.fn().mockResolvedValue({ id: 'lk-1' }),
       },
     };
+(prisma as any).platform = prisma;
     handler = new CreateLookupHandler(prisma);
   });
 

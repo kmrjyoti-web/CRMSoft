@@ -26,7 +26,7 @@ export class EnquiryService {
   // ═══════════════════════════════════════════════════════
 
   async create(tenantId: string, buyerId: string, dto: CreateEnquiryDto) {
-    const listing = await this.prisma.marketplaceListing.findUnique({
+    const listing = await this.prisma.platform.marketplaceListing.findUnique({
       where: { id: dto.listingId },
     });
     if (!listing) throw new NotFoundException('Listing not found');
@@ -38,7 +38,7 @@ export class EnquiryService {
 
     const enquiryNumber = await this.generateEnquiryNumber(tenantId);
 
-    const enquiry = await this.prisma.marketplaceEnquiry.create({
+    const enquiry = await this.prisma.platform.marketplaceEnquiry.create({
       data: {
         enquiryNumber,
         tenantId,
@@ -87,7 +87,7 @@ export class EnquiryService {
     senderType: 'BUYER' | 'VENDOR',
     message: string,
   ) {
-    const enquiry = await this.prisma.marketplaceEnquiry.findUnique({
+    const enquiry = await this.prisma.platform.marketplaceEnquiry.findUnique({
       where: { id: enquiryId },
     });
     if (!enquiry) throw new NotFoundException('Enquiry not found');
@@ -114,7 +114,7 @@ export class EnquiryService {
       }
     }
 
-    return this.prisma.marketplaceEnquiry.update({
+    return this.prisma.platform.marketplaceEnquiry.update({
       where: { id: enquiryId },
       data: updateData,
     });
@@ -125,12 +125,12 @@ export class EnquiryService {
   // ═══════════════════════════════════════════════════════
 
   async updateStatus(enquiryId: string, status: EnquiryStatus) {
-    const enquiry = await this.prisma.marketplaceEnquiry.findUnique({
+    const enquiry = await this.prisma.platform.marketplaceEnquiry.findUnique({
       where: { id: enquiryId },
     });
     if (!enquiry) throw new NotFoundException('Enquiry not found');
 
-    return this.prisma.marketplaceEnquiry.update({
+    return this.prisma.platform.marketplaceEnquiry.update({
       where: { id: enquiryId },
       data: { status },
     });
@@ -141,7 +141,7 @@ export class EnquiryService {
   // ═══════════════════════════════════════════════════════
 
   async getVendorEnquiries(tenantId: string, vendorId: string, status?: EnquiryStatus) {
-    return this.prisma.marketplaceEnquiry.findMany({
+    return this.prisma.platform.marketplaceEnquiry.findMany({
       where: {
         tenantId,
         vendorId,
@@ -153,7 +153,7 @@ export class EnquiryService {
   }
 
   async getBuyerEnquiries(tenantId: string, buyerId: string) {
-    return this.prisma.marketplaceEnquiry.findMany({
+    return this.prisma.platform.marketplaceEnquiry.findMany({
       where: { tenantId, buyerId },
       orderBy: { createdAt: 'desc' },
       include: { listing: { select: { title: true, b2cPrice: true, mediaUrls: true } } },
@@ -161,7 +161,7 @@ export class EnquiryService {
   }
 
   async findById(enquiryId: string) {
-    const enquiry = await this.prisma.marketplaceEnquiry.findUnique({
+    const enquiry = await this.prisma.platform.marketplaceEnquiry.findUnique({
       where: { id: enquiryId },
       include: { listing: true },
     });
@@ -174,7 +174,7 @@ export class EnquiryService {
   // ═══════════════════════════════════════════════════════
 
   async markRead(enquiryId: string, readerType: 'BUYER' | 'VENDOR') {
-    return this.prisma.marketplaceEnquiry.update({
+    return this.prisma.platform.marketplaceEnquiry.update({
       where: { id: enquiryId },
       data: readerType === 'BUYER'
         ? { unreadCountBuyer: 0 }
@@ -187,7 +187,7 @@ export class EnquiryService {
   // ═══════════════════════════════════════════════════════
 
   private async generateEnquiryNumber(tenantId: string): Promise<string> {
-    const count = await this.prisma.marketplaceEnquiry.count({
+    const count = await this.prisma.platform.marketplaceEnquiry.count({
       where: { tenantId },
     });
     return `ENQ-${new Date().getFullYear()}-${String(count + 1).padStart(5, '0')}`;

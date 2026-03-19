@@ -10,10 +10,10 @@ export class DeactivateValueHandler implements ICommandHandler<DeactivateValueCo
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: DeactivateValueCommand): Promise<void> {
-    const val = await this.prisma.lookupValue.findUnique({ where: { id: command.valueId } });
+    const val = await this.prisma.platform.lookupValue.findUnique({ where: { id: command.valueId } });
     if (!val) throw new NotFoundException(`LookupValue ${command.valueId} not found`);
 
-    await this.prisma.lookupValue.update({
+    await this.prisma.platform.lookupValue.update({
       where: { id: command.valueId },
       data: { isActive: false },
     });

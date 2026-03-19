@@ -26,21 +26,21 @@ export class PluginService {
   // ═══════════════════════════════════════════════════════
 
   async getAllPlugins(industryCode?: string) {
-    return this.prisma.pluginRegistry.findMany({
+    return this.prisma.platform.pluginRegistry.findMany({
       where: { status: 'PLUGIN_ACTIVE', ...industryFilter(industryCode) } as any,
       orderBy: [{ category: 'asc' }, { sortOrder: 'asc' }],
     });
   }
 
   async getPluginsByCategory(category: PluginCategory, industryCode?: string) {
-    return this.prisma.pluginRegistry.findMany({
+    return this.prisma.platform.pluginRegistry.findMany({
       where: { category, status: 'PLUGIN_ACTIVE', ...industryFilter(industryCode) } as any,
       orderBy: { sortOrder: 'asc' },
     });
   }
 
   async getPluginByCode(code: string) {
-    const plugin = await this.prisma.pluginRegistry.findUnique({
+    const plugin = await this.prisma.platform.pluginRegistry.findUnique({
       where: { code },
     });
     if (!plugin) {
@@ -54,7 +54,7 @@ export class PluginService {
   // ═══════════════════════════════════════════════════════
 
   async getTenantPlugins(tenantId: string) {
-    return this.prisma.tenantPlugin.findMany({
+    return this.prisma.platform.tenantPlugin.findMany({
       where: { tenantId },
       include: { plugin: true },
       orderBy: { plugin: { category: 'asc' } },
@@ -63,7 +63,7 @@ export class PluginService {
 
   async getTenantPlugin(tenantId: string, pluginCode: string) {
     const plugin = await this.getPluginByCode(pluginCode);
-    return this.prisma.tenantPlugin.findUnique({
+    return this.prisma.platform.tenantPlugin.findUnique({
       where: {
         tenantId_pluginId: { tenantId, pluginId: plugin.id },
       },
@@ -72,7 +72,7 @@ export class PluginService {
   }
 
   async getEnabledPlugins(tenantId: string) {
-    return this.prisma.tenantPlugin.findMany({
+    return this.prisma.platform.tenantPlugin.findMany({
       where: { tenantId, isEnabled: true, status: 'TP_ACTIVE' },
       include: { plugin: true },
     });
@@ -101,7 +101,7 @@ export class PluginService {
       ? this.generateWebhookUrl(pluginCode, tenantId)
       : null;
 
-    const tenantPlugin = await this.prisma.tenantPlugin.upsert({
+    const tenantPlugin = await this.prisma.platform.tenantPlugin.upsert({
       where: {
         tenantId_pluginId: { tenantId, pluginId: plugin.id },
       },
@@ -154,7 +154,7 @@ export class PluginService {
   async disablePlugin(tenantId: string, pluginCode: string, userId?: string) {
     const plugin = await this.getPluginByCode(pluginCode);
 
-    const tenantPlugin = await this.prisma.tenantPlugin.update({
+    const tenantPlugin = await this.prisma.platform.tenantPlugin.update({
       where: {
         tenantId_pluginId: { tenantId, pluginId: plugin.id },
       },
@@ -192,7 +192,7 @@ export class PluginService {
 
     const encryptedCredentials = this.encryption.encrypt(credentials);
 
-    await this.prisma.tenantPlugin.update({
+    await this.prisma.platform.tenantPlugin.update({
       where: {
         tenantId_pluginId: { tenantId, pluginId: plugin.id },
       },
@@ -243,7 +243,7 @@ export class PluginService {
    */
   async recordUsage(tenantId: string, pluginCode: string) {
     const plugin = await this.getPluginByCode(pluginCode);
-    await this.prisma.tenantPlugin.update({
+    await this.prisma.platform.tenantPlugin.update({
       where: {
         tenantId_pluginId: { tenantId, pluginId: plugin.id },
       },
@@ -260,7 +260,7 @@ export class PluginService {
   async recordError(tenantId: string, pluginCode: string, errorMessage: string) {
     const plugin = await this.getPluginByCode(pluginCode);
 
-    const tenantPlugin = await this.prisma.tenantPlugin.update({
+    const tenantPlugin = await this.prisma.platform.tenantPlugin.update({
       where: {
         tenantId_pluginId: { tenantId, pluginId: plugin.id },
       },
@@ -273,7 +273,7 @@ export class PluginService {
     });
 
     if (tenantPlugin.consecutiveErrors >= 10) {
-      await this.prisma.tenantPlugin.update({
+      await this.prisma.platform.tenantPlugin.update({
         where: { id: tenantPlugin.id },
         data: { status: 'TP_ERROR', isEnabled: false },
       });
@@ -288,7 +288,7 @@ export class PluginService {
    */
   async clearErrors(tenantId: string, pluginCode: string) {
     const plugin = await this.getPluginByCode(pluginCode);
-    await this.prisma.tenantPlugin.update({
+    await this.prisma.platform.tenantPlugin.update({
       where: {
         tenantId_pluginId: { tenantId, pluginId: plugin.id },
       },

@@ -13,7 +13,7 @@ export class MarketplaceInstallService {
    */
   async install(tenantId: string, moduleId: string) {
     // Verify module exists and is published
-    const mod = await this.prisma.marketplaceModule.findUnique({
+    const mod = await this.prisma.platform.marketplaceModule.findUnique({
       where: { id: moduleId },
     });
     if (!mod) {
@@ -26,7 +26,7 @@ export class MarketplaceInstallService {
     }
 
     // Check if already installed
-    const existing = await this.prisma.tenantMarketplaceModule.findUnique({
+    const existing = await this.prisma.platform.tenantMarketplaceModule.findUnique({
       where: { tenantId_moduleId: { tenantId, moduleId } },
     });
     if (existing && existing.status !== 'CANCELLED') {
@@ -40,7 +40,7 @@ export class MarketplaceInstallService {
     const trialEndsAt = new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000);
 
     // Upsert in case of re-install after cancellation
-    const installation = await this.prisma.tenantMarketplaceModule.upsert({
+    const installation = await this.prisma.platform.tenantMarketplaceModule.upsert({
       where: { tenantId_moduleId: { tenantId, moduleId } },
       update: {
         status: 'TRIAL',
@@ -58,7 +58,7 @@ export class MarketplaceInstallService {
     });
 
     // Increment install count on the module
-    await this.prisma.marketplaceModule.update({
+    await this.prisma.platform.marketplaceModule.update({
       where: { id: moduleId },
       data: { installCount: { increment: 1 } },
     });
@@ -70,7 +70,7 @@ export class MarketplaceInstallService {
    * Activate a module subscription (TRIAL -> ACTIVE).
    */
   async activate(tenantId: string, moduleId: string, subscriptionId?: string, planId?: string) {
-    const installation = await this.prisma.tenantMarketplaceModule.findUnique({
+    const installation = await this.prisma.platform.tenantMarketplaceModule.findUnique({
       where: { tenantId_moduleId: { tenantId, moduleId } },
     });
     if (!installation) {
@@ -89,7 +89,7 @@ export class MarketplaceInstallService {
       });
     }
 
-    return this.prisma.tenantMarketplaceModule.update({
+    return this.prisma.platform.tenantMarketplaceModule.update({
       where: { tenantId_moduleId: { tenantId, moduleId } },
       data: {
         status: 'ACTIVE',
@@ -104,7 +104,7 @@ export class MarketplaceInstallService {
    * Cancel/uninstall a module for a tenant.
    */
   async cancel(tenantId: string, moduleId: string) {
-    const installation = await this.prisma.tenantMarketplaceModule.findUnique({
+    const installation = await this.prisma.platform.tenantMarketplaceModule.findUnique({
       where: { tenantId_moduleId: { tenantId, moduleId } },
     });
     if (!installation) {
@@ -118,7 +118,7 @@ export class MarketplaceInstallService {
       });
     }
 
-    return this.prisma.tenantMarketplaceModule.update({
+    return this.prisma.platform.tenantMarketplaceModule.update({
       where: { tenantId_moduleId: { tenantId, moduleId } },
       data: { status: 'CANCELLED' },
     });
@@ -128,7 +128,7 @@ export class MarketplaceInstallService {
    * List all installed modules for a tenant.
    */
   async listInstalled(tenantId: string) {
-    return this.prisma.tenantMarketplaceModule.findMany({
+    return this.prisma.platform.tenantMarketplaceModule.findMany({
       where: { tenantId },
       include: {
         module: {
@@ -150,7 +150,7 @@ export class MarketplaceInstallService {
    * Check if a module is installed and active for a tenant.
    */
   async checkInstalled(tenantId: string, moduleCode: string): Promise<boolean> {
-    const installation = await this.prisma.tenantMarketplaceModule.findFirst({
+    const installation = await this.prisma.platform.tenantMarketplaceModule.findFirst({
       where: {
         tenantId,
         module: { moduleCode },

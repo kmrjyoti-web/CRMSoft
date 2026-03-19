@@ -31,7 +31,7 @@ export class CouponEngineService {
     packageCode?: string,
     amount?: number,
   ): Promise<DiscountPreview> {
-    const coupon = await this.prisma.coupon.findUnique({
+    const coupon = await this.prisma.platform.coupon.findUnique({
       where: { code: couponCode.toUpperCase() },
       include: { redemptions: true },
     });
@@ -80,7 +80,7 @@ export class CouponEngineService {
 
     // First-time only check
     if (coupon.firstTimeOnly) {
-      const anyPriorRedemption = await this.prisma.couponRedemption.findFirst({
+      const anyPriorRedemption = await this.prisma.platform.couponRedemption.findFirst({
         where: { tenantId, userId },
       });
       if (anyPriorRedemption) {
@@ -154,7 +154,7 @@ export class CouponEngineService {
     userId: string,
     discountApplied: number,
   ) {
-    const coupon = await this.prisma.coupon.findUnique({
+    const coupon = await this.prisma.platform.coupon.findUnique({
       where: { code: couponCode.toUpperCase() },
     });
     if (!coupon) throw new NotFoundException('Coupon not found');
@@ -200,7 +200,7 @@ export class CouponEngineService {
     firstTimeOnly?: boolean;
     packageId?: string;
   }) {
-    return this.prisma.coupon.create({
+    return this.prisma.platform.coupon.create({
       data: {
         code: data.code.toUpperCase(),
         type: data.type,
@@ -248,7 +248,7 @@ export class CouponEngineService {
       packageId: string;
     }>,
   ) {
-    const existing = await this.prisma.coupon.findUnique({ where: { id } });
+    const existing = await this.prisma.platform.coupon.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Coupon not found');
 
     const updateData: any = { ...data };
@@ -257,7 +257,7 @@ export class CouponEngineService {
     if (data.validFrom) updateData.validFrom = new Date(data.validFrom);
     if (data.validUntil) updateData.validUntil = new Date(data.validUntil);
 
-    return this.prisma.coupon.update({ where: { id }, data: updateData });
+    return this.prisma.platform.coupon.update({ where: { id }, data: updateData });
   }
 
   /** Paginated list of coupons */
@@ -281,14 +281,14 @@ export class CouponEngineService {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.coupon.findMany({
+      this.prisma.platform.coupon.findMany({
         where,
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
         include: { package: { select: { id: true, packageCode: true, packageName: true } } },
       }),
-      this.prisma.coupon.count({ where }),
+      this.prisma.platform.coupon.count({ where }),
     ]);
 
     return { data, total, page, limit };
@@ -296,7 +296,7 @@ export class CouponEngineService {
 
   /** Get coupon detail by code */
   async getByCode(code: string) {
-    const coupon = await this.prisma.coupon.findUnique({
+    const coupon = await this.prisma.platform.coupon.findUnique({
       where: { code: code.toUpperCase() },
       include: {
         package: true,

@@ -64,7 +64,7 @@ export class ListingService {
       status = 'LST_ACTIVE';
     }
 
-    const listing = await this.prisma.marketplaceListing.create({
+    const listing = await this.prisma.platform.marketplaceListing.create({
       data: {
         tenantId,
         vendorId,
@@ -90,7 +90,7 @@ export class ListingService {
     });
 
     // Create analytics record
-    await this.prisma.listingAnalytics.create({
+    await this.prisma.platform.listingAnalytics.create({
       data: { listingId: listing.id },
     });
 
@@ -103,7 +103,7 @@ export class ListingService {
   // ═══════════════════════════════════════════════════════
 
   async findById(listingId: string, userId?: string) {
-    const listing = await this.prisma.marketplaceListing.findUnique({
+    const listing = await this.prisma.platform.marketplaceListing.findUnique({
       where: { id: listingId },
       include: {
         priceTiers: { orderBy: { minQty: 'asc' } },
@@ -165,14 +165,14 @@ export class ListingService {
     }
 
     const [listings, total] = await Promise.all([
-      this.prisma.marketplaceListing.findMany({
+      this.prisma.platform.marketplaceListing.findMany({
         where,
         skip,
         take: limit,
         orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
         include: { priceTiers: { orderBy: { minQty: 'asc' } } },
       }),
-      this.prisma.marketplaceListing.count({ where }),
+      this.prisma.platform.marketplaceListing.count({ where }),
     ]);
 
     const data = await Promise.all(
@@ -202,22 +202,22 @@ export class ListingService {
   // ═══════════════════════════════════════════════════════
 
   async update(listingId: string, tenantId: string, vendorId: string, dto: Partial<CreateListingDto>) {
-    const listing = await this.prisma.marketplaceListing.findFirst({
+    const listing = await this.prisma.platform.marketplaceListing.findFirst({
       where: { id: listingId, tenantId, vendorId },
     });
     if (!listing) throw new NotFoundException('Listing not found');
 
     const { b2bTiers, ...updateData } = dto;
 
-    const updated = await this.prisma.marketplaceListing.update({
+    const updated = await this.prisma.platform.marketplaceListing.update({
       where: { id: listingId },
       data: updateData as any,
     });
 
     if (b2bTiers) {
-      await this.prisma.listingPriceTier.deleteMany({ where: { listingId } });
+      await this.prisma.platform.listingPriceTier.deleteMany({ where: { listingId } });
       if (b2bTiers.length > 0) {
-        await this.prisma.listingPriceTier.createMany({
+        await this.prisma.platform.listingPriceTier.createMany({
           data: b2bTiers.map((tier) => ({
             listingId,
             minQty: tier.minQty,
@@ -236,7 +236,7 @@ export class ListingService {
   // ═══════════════════════════════════════════════════════
 
   async getVendorListings(tenantId: string, vendorId: string) {
-    return this.prisma.marketplaceListing.findMany({
+    return this.prisma.platform.marketplaceListing.findMany({
       where: { tenantId, vendorId },
       orderBy: { createdAt: 'desc' },
       include: { analytics: true },
@@ -248,13 +248,13 @@ export class ListingService {
   // ═══════════════════════════════════════════════════════
 
   private async trackView(listingId: string) {
-    await this.prisma.marketplaceListing.update({
+    await this.prisma.platform.marketplaceListing.update({
       where: { id: listingId },
       data: { viewCount: { increment: 1 } },
     });
 
     const today = new Date().toISOString().split('T')[0];
-    const analytics = await this.prisma.listingAnalytics.findUnique({
+    const analytics = await this.prisma.platform.listingAnalytics.findUnique({
       where: { listingId },
     });
     if (!analytics) return;
@@ -267,7 +267,7 @@ export class ListingService {
       dailyStats.push({ date: today, views: 1, enquiries: 0, orders: 0 });
     }
 
-    await this.prisma.listingAnalytics.update({
+    await this.prisma.platform.listingAnalytics.update({
       where: { listingId },
       data: {
         totalViews: { increment: 1 },
@@ -277,22 +277,22 @@ export class ListingService {
   }
 
   async trackEnquiry(listingId: string) {
-    await this.prisma.marketplaceListing.update({
+    await this.prisma.platform.marketplaceListing.update({
       where: { id: listingId },
       data: { enquiryCount: { increment: 1 } },
     });
-    await this.prisma.listingAnalytics.updateMany({
+    await this.prisma.platform.listingAnalytics.updateMany({
       where: { listingId },
       data: { totalEnquiries: { increment: 1 } },
     });
   }
 
   async trackOrder(listingId: string) {
-    await this.prisma.marketplaceListing.update({
+    await this.prisma.platform.marketplaceListing.update({
       where: { id: listingId },
       data: { orderCount: { increment: 1 } },
     });
-    await this.prisma.listingAnalytics.updateMany({
+    await this.prisma.platform.listingAnalytics.updateMany({
       where: { listingId },
       data: { totalOrders: { increment: 1 } },
     });

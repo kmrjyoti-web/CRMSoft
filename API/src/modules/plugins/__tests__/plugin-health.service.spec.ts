@@ -41,6 +41,7 @@ describe('PluginHealthService', () => {
       update: jest.fn(),
     },
   };
+(mockPrisma as any).platform = mockPrisma;
 
   const mockEncryption = {
     decrypt: jest.fn().mockReturnValue({ phoneNumberId: '123', accessToken: 'tok' }),

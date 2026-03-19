@@ -40,7 +40,7 @@ export class HelpService {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.helpArticle.findMany({
+      this.prisma.platform.helpArticle.findMany({
         where,
         skip,
         take: limit,
@@ -64,7 +64,7 @@ export class HelpService {
           updatedAt: true,
         },
       }),
-      this.prisma.helpArticle.count({ where }),
+      this.prisma.platform.helpArticle.count({ where }),
     ]);
 
     return { data, total, page, limit };
@@ -72,13 +72,13 @@ export class HelpService {
 
   /** Get article by code and increment viewCount */
   async getByCode(articleCode: string) {
-    const article = await this.prisma.helpArticle.findUnique({
+    const article = await this.prisma.platform.helpArticle.findUnique({
       where: { articleCode },
     });
     if (!article) throw new NotFoundException(`Help article "${articleCode}" not found`);
 
     // Increment view count in the background
-    await this.prisma.helpArticle.update({
+    await this.prisma.platform.helpArticle.update({
       where: { id: article.id },
       data: { viewCount: { increment: 1 } },
     });
@@ -103,7 +103,7 @@ export class HelpService {
     if (screenCode) where.screenCode = screenCode;
     if (fieldCode) where.fieldCode = fieldCode;
 
-    const articles = await this.prisma.helpArticle.findMany({
+    const articles = await this.prisma.platform.helpArticle.findMany({
       where,
       orderBy: { viewCount: 'desc' },
       select: {
@@ -142,7 +142,7 @@ export class HelpService {
     tags?: any;
     isPublished?: boolean;
   }) {
-    return this.prisma.helpArticle.create({
+    return this.prisma.platform.helpArticle.create({
       data: {
         articleCode: data.articleCode,
         title: data.title,
@@ -185,10 +185,10 @@ export class HelpService {
       isPublished: boolean;
     }>,
   ) {
-    const existing = await this.prisma.helpArticle.findUnique({ where: { id } });
+    const existing = await this.prisma.platform.helpArticle.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException(`Help article "${id}" not found`);
 
-    return this.prisma.helpArticle.update({
+    return this.prisma.platform.helpArticle.update({
       where: { id },
       data,
     });
@@ -196,10 +196,10 @@ export class HelpService {
 
   /** Increment helpfulCount */
   async markHelpful(id: string) {
-    const existing = await this.prisma.helpArticle.findUnique({ where: { id } });
+    const existing = await this.prisma.platform.helpArticle.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException(`Help article "${id}" not found`);
 
-    return this.prisma.helpArticle.update({
+    return this.prisma.platform.helpArticle.update({
       where: { id },
       data: { helpfulCount: { increment: 1 } },
     });
@@ -207,10 +207,10 @@ export class HelpService {
 
   /** Increment notHelpfulCount */
   async markNotHelpful(id: string) {
-    const existing = await this.prisma.helpArticle.findUnique({ where: { id } });
+    const existing = await this.prisma.platform.helpArticle.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException(`Help article "${id}" not found`);
 
-    return this.prisma.helpArticle.update({
+    return this.prisma.platform.helpArticle.update({
       where: { id },
       data: { notHelpfulCount: { increment: 1 } },
     });
@@ -237,18 +237,18 @@ export class HelpService {
     const results: { articleCode: string; action: 'created' | 'updated' }[] = [];
 
     for (const article of helpSeedData) {
-      const existing = await this.prisma.helpArticle.findUnique({
+      const existing = await this.prisma.platform.helpArticle.findUnique({
         where: { articleCode: article.articleCode },
       });
 
       if (existing) {
-        await this.prisma.helpArticle.update({
+        await this.prisma.platform.helpArticle.update({
           where: { articleCode: article.articleCode },
           data: article,
         });
         results.push({ articleCode: article.articleCode, action: 'updated' });
       } else {
-        await this.prisma.helpArticle.create({ data: article as any });
+        await this.prisma.platform.helpArticle.create({ data: article as any });
         results.push({ articleCode: article.articleCode, action: 'created' });
       }
     }

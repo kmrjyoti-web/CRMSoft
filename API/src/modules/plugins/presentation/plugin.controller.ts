@@ -113,7 +113,7 @@ export class PluginController {
     @Body() body: { settings: Record<string, any> },
   ) {
     const plugin = await this.pluginService.getPluginByCode(code);
-    await this.prisma.tenantPlugin.update({
+    await this.prisma.platform.tenantPlugin.update({
       where: {
         tenantId_pluginId: { tenantId, pluginId: plugin.id },
       },
@@ -135,7 +135,7 @@ export class PluginController {
     }
     // Re-enable with existing credentials
     const plugin = await this.pluginService.getPluginByCode(code);
-    await this.prisma.tenantPlugin.update({
+    await this.prisma.platform.tenantPlugin.update({
       where: {
         tenantId_pluginId: { tenantId, pluginId: plugin.id },
       },

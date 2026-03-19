@@ -17,7 +17,7 @@ export class VendorService {
     gstNumber?: string;
     revenueSharePct?: number;
   }) {
-    const existing = await this.prisma.marketplaceVendor.findUnique({
+    const existing = await this.prisma.platform.marketplaceVendor.findUnique({
       where: { contactEmail: data.contactEmail },
     });
     if (existing) {
@@ -26,7 +26,7 @@ export class VendorService {
       });
     }
 
-    return this.prisma.marketplaceVendor.create({
+    return this.prisma.platform.marketplaceVendor.create({
       data: {
         companyName: data.companyName,
         contactEmail: data.contactEmail,
@@ -41,7 +41,7 @@ export class VendorService {
    * Approve a pending vendor.
    */
   async approve(vendorId: string) {
-    const vendor = await this.prisma.marketplaceVendor.findUnique({
+    const vendor = await this.prisma.platform.marketplaceVendor.findUnique({
       where: { id: vendorId },
     });
     if (!vendor) {
@@ -53,7 +53,7 @@ export class VendorService {
       });
     }
 
-    return this.prisma.marketplaceVendor.update({
+    return this.prisma.platform.marketplaceVendor.update({
       where: { id: vendorId },
       data: {
         status: 'APPROVED',
@@ -66,7 +66,7 @@ export class VendorService {
    * Suspend a vendor.
    */
   async suspend(vendorId: string) {
-    const vendor = await this.prisma.marketplaceVendor.findUnique({
+    const vendor = await this.prisma.platform.marketplaceVendor.findUnique({
       where: { id: vendorId },
     });
     if (!vendor) {
@@ -78,7 +78,7 @@ export class VendorService {
       });
     }
 
-    return this.prisma.marketplaceVendor.update({
+    return this.prisma.platform.marketplaceVendor.update({
       where: { id: vendorId },
       data: { status: 'SUSPENDED' },
     });
@@ -109,7 +109,7 @@ export class VendorService {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.marketplaceVendor.findMany({
+      this.prisma.platform.marketplaceVendor.findMany({
         where,
         skip: (page - 1) * limit,
         take: limit,
@@ -118,7 +118,7 @@ export class VendorService {
           _count: { select: { modules: true } },
         },
       }),
-      this.prisma.marketplaceVendor.count({ where }),
+      this.prisma.platform.marketplaceVendor.count({ where }),
     ]);
 
     return { data, total, page, limit };
@@ -128,7 +128,7 @@ export class VendorService {
    * Get vendor by ID with module count.
    */
   async getById(id: string) {
-    const vendor = await this.prisma.marketplaceVendor.findUnique({
+    const vendor = await this.prisma.platform.marketplaceVendor.findUnique({
       where: { id },
       include: {
         _count: { select: { modules: true } },

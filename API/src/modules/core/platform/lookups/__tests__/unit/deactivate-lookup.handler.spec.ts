@@ -13,6 +13,7 @@ describe('DeactivateLookupHandler', () => {
         update: jest.fn(),
       },
     };
+(prisma as any).platform = prisma;
     handler = new DeactivateLookupHandler(prisma);
   });
 

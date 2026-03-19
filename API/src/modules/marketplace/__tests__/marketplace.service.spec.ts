@@ -6,7 +6,7 @@ import { ReviewService } from '../services/review.service';
 // ─── Mock PrismaService ──────────────────────────────────
 
 function createMockPrisma() {
-  return {
+  const mock: any = {
     marketplaceVendor: {
       create: jest.fn(),
       findUnique: jest.fn(),
@@ -36,6 +36,8 @@ function createMockPrisma() {
       upsert: jest.fn(),
     },
   };
+  mock.platform = mock;
+  return mock;
 }
 
 // ═════════════════════════════════════════════════════════

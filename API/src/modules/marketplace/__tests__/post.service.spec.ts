@@ -41,6 +41,7 @@ describe('PostService', () => {
       create: jest.fn(),
     },
   };
+  (mockPrisma as any).platform = mockPrisma;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

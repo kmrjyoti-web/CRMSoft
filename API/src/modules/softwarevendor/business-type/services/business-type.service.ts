@@ -14,7 +14,7 @@ export class BusinessTypeService {
   async seed() {
     const results = await Promise.all(
       BUSINESS_TYPE_SEED_DATA.map((bt) =>
-        this.prisma.businessTypeRegistry.upsert({
+        this.prisma.platform.businessTypeRegistry.upsert({
           where: { typeCode: bt.typeCode },
           update: {
             typeName: bt.typeName,
@@ -63,7 +63,7 @@ export class BusinessTypeService {
 
   /** List all active business types (includes tenant count). */
   async listAll(activeOnly = true) {
-    return this.prisma.businessTypeRegistry.findMany({
+    return this.prisma.platform.businessTypeRegistry.findMany({
       where: activeOnly ? { isActive: true } : {},
       orderBy: { sortOrder: 'asc' },
       include: { _count: { select: { tenants: true } } },
@@ -72,7 +72,7 @@ export class BusinessTypeService {
 
   /** Get a single business type by code (includes packages). */
   async getByCode(typeCode: string) {
-    const bt = await this.prisma.businessTypeRegistry.findUnique({
+    const bt = await this.prisma.platform.businessTypeRegistry.findUnique({
       where: { typeCode },
       include: {
         industryPackages: { include: { package: true }, orderBy: { sortOrder: 'asc' } },
@@ -85,7 +85,7 @@ export class BusinessTypeService {
 
   /** Get by id. */
   async getById(id: string) {
-    const bt = await this.prisma.businessTypeRegistry.findUnique({ where: { id } });
+    const bt = await this.prisma.platform.businessTypeRegistry.findUnique({ where: { id } });
     if (!bt) throw new NotFoundException(`Business type ${id} not found`);
     return bt;
   }
@@ -142,7 +142,7 @@ export class BusinessTypeService {
       defaultModules, recommendedModules, excludedModules, defaultLeadStages,
       defaultActivityTypes, registrationFields, dashboardWidgets, isActive, sortOrder,
     } = data;
-    return this.prisma.businessTypeRegistry.update({
+    return this.prisma.platform.businessTypeRegistry.update({
       where: { id: bt.id },
       data: {
         ...(typeName !== undefined && { typeName }),

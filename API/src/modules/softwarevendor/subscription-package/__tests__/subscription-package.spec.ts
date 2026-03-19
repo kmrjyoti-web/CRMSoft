@@ -24,7 +24,8 @@ const mockPrisma = {
     findFirst: jest.fn(),
   },
   $transaction: jest.fn(),
-} as any;
+};
+(mockPrisma as any).platform = mockPrisma;
 
 // ═══════════════════════════════════════════════════════
 // SubscriptionPackageService
@@ -35,7 +36,7 @@ describe('SubscriptionPackageService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new SubscriptionPackageService(mockPrisma);
+    service = new SubscriptionPackageService(mockPrisma as any);
   });
 
   it('should list all packages ordered by planLevel', async () => {
@@ -144,7 +145,7 @@ describe('CouponEngineService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    engine = new CouponEngineService(mockPrisma);
+    engine = new CouponEngineService(mockPrisma as any);
   });
 
   const baseCoupon = {

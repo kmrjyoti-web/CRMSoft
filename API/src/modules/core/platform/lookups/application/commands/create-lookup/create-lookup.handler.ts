@@ -12,12 +12,12 @@ export class CreateLookupHandler implements ICommandHandler<CreateLookupCommand>
   async execute(command: CreateLookupCommand): Promise<string> {
     const category = command.category.toUpperCase().replace(/\s+/g, '_');
 
-    const existing = await this.prisma.masterLookup.findFirst({
+    const existing = await this.prisma.platform.masterLookup.findFirst({
       where: { category },
     });
     if (existing) throw new ConflictException(`Lookup category "${category}" already exists`);
 
-    const lookup = await this.prisma.masterLookup.create({
+    const lookup = await this.prisma.platform.masterLookup.create({
       data: {
         category,
         displayName: command.displayName.trim(),

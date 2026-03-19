@@ -10,13 +10,13 @@ export class DeactivateLookupHandler implements ICommandHandler<DeactivateLookup
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: DeactivateLookupCommand): Promise<void> {
-    const lookup = await this.prisma.masterLookup.findUnique({
+    const lookup = await this.prisma.platform.masterLookup.findUnique({
       where: { id: command.lookupId },
     });
     if (!lookup) throw new NotFoundException(`Lookup ${command.lookupId} not found`);
     if (lookup.isSystem) throw new ForbiddenException('Cannot deactivate system lookup');
 
-    await this.prisma.masterLookup.update({
+    await this.prisma.platform.masterLookup.update({
       where: { id: command.lookupId },
       data: { isActive: false },
     });

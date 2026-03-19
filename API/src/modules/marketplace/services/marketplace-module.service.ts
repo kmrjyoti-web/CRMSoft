@@ -30,7 +30,7 @@ export class MarketplaceModuleService {
     },
   ) {
     // Verify vendor exists and is approved
-    const vendor = await this.prisma.marketplaceVendor.findUnique({
+    const vendor = await this.prisma.platform.marketplaceVendor.findUnique({
       where: { id: vendorId },
     });
     if (!vendor) {
@@ -43,7 +43,7 @@ export class MarketplaceModuleService {
     }
 
     // Check moduleCode uniqueness
-    const existing = await this.prisma.marketplaceModule.findUnique({
+    const existing = await this.prisma.platform.marketplaceModule.findUnique({
       where: { moduleCode: data.moduleCode },
     });
     if (existing) {
@@ -56,7 +56,7 @@ export class MarketplaceModuleService {
       ? new Date(Date.now() + data.launchOfferDays * 24 * 60 * 60 * 1000)
       : null;
 
-    return this.prisma.marketplaceModule.create({
+    return this.prisma.platform.marketplaceModule.create({
       data: {
         vendorId,
         moduleCode: data.moduleCode,
@@ -99,7 +99,7 @@ export class MarketplaceModuleService {
       launchOfferDays?: number;
     },
   ) {
-    const mod = await this.prisma.marketplaceModule.findUnique({
+    const mod = await this.prisma.platform.marketplaceModule.findUnique({
       where: { id: moduleId },
     });
     if (!mod) {
@@ -126,7 +126,7 @@ export class MarketplaceModuleService {
         : null;
     }
 
-    return this.prisma.marketplaceModule.update({
+    return this.prisma.platform.marketplaceModule.update({
       where: { id: moduleId },
       data: updateData,
     });
@@ -136,7 +136,7 @@ export class MarketplaceModuleService {
    * Submit a DRAFT module for review.
    */
   async submitForReview(moduleId: string) {
-    const mod = await this.prisma.marketplaceModule.findUnique({
+    const mod = await this.prisma.platform.marketplaceModule.findUnique({
       where: { id: moduleId },
     });
     if (!mod) {
@@ -148,7 +148,7 @@ export class MarketplaceModuleService {
       });
     }
 
-    return this.prisma.marketplaceModule.update({
+    return this.prisma.platform.marketplaceModule.update({
       where: { id: moduleId },
       data: { status: 'REVIEW' },
     });
@@ -158,7 +158,7 @@ export class MarketplaceModuleService {
    * Publish a module (admin action, must be in REVIEW status).
    */
   async publish(moduleId: string) {
-    const mod = await this.prisma.marketplaceModule.findUnique({
+    const mod = await this.prisma.platform.marketplaceModule.findUnique({
       where: { id: moduleId },
     });
     if (!mod) {
@@ -170,7 +170,7 @@ export class MarketplaceModuleService {
       });
     }
 
-    return this.prisma.marketplaceModule.update({
+    return this.prisma.platform.marketplaceModule.update({
       where: { id: moduleId },
       data: {
         status: 'PUBLISHED',
@@ -183,7 +183,7 @@ export class MarketplaceModuleService {
    * Suspend a published module.
    */
   async suspend(moduleId: string) {
-    const mod = await this.prisma.marketplaceModule.findUnique({
+    const mod = await this.prisma.platform.marketplaceModule.findUnique({
       where: { id: moduleId },
     });
     if (!mod) {
@@ -195,7 +195,7 @@ export class MarketplaceModuleService {
       });
     }
 
-    return this.prisma.marketplaceModule.update({
+    return this.prisma.platform.marketplaceModule.update({
       where: { id: moduleId },
       data: { status: 'SUSPENDED' },
     });
@@ -233,7 +233,7 @@ export class MarketplaceModuleService {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.marketplaceModule.findMany({
+      this.prisma.platform.marketplaceModule.findMany({
         where,
         skip: (page - 1) * limit,
         take: limit,
@@ -248,7 +248,7 @@ export class MarketplaceModuleService {
           },
         },
       }),
-      this.prisma.marketplaceModule.count({ where }),
+      this.prisma.platform.marketplaceModule.count({ where }),
     ]);
 
     return { data, total, page, limit };
@@ -258,7 +258,7 @@ export class MarketplaceModuleService {
    * Get full module detail by code with vendor info and reviews.
    */
   async getDetail(moduleCode: string) {
-    const mod = await this.prisma.marketplaceModule.findUnique({
+    const mod = await this.prisma.platform.marketplaceModule.findUnique({
       where: { moduleCode },
       include: {
         vendor: {
@@ -288,7 +288,7 @@ export class MarketplaceModuleService {
    * Get featured modules (published, highest rated, most installs).
    */
   async getFeatured() {
-    const modules = await this.prisma.marketplaceModule.findMany({
+    const modules = await this.prisma.platform.marketplaceModule.findMany({
       where: { status: 'PUBLISHED' },
       orderBy: [
         { avgRating: 'desc' },

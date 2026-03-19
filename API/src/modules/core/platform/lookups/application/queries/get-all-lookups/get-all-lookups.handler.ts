@@ -10,7 +10,7 @@ export class GetAllLookupsHandler implements IQueryHandler<GetAllLookupsQuery> {
     const where: any = {};
     if (query.activeOnly !== false) where.isActive = true;
 
-    return this.prisma.masterLookup.findMany({
+    return this.prisma.platform.masterLookup.findMany({
       where,
       orderBy: { category: 'asc' },
       include: {

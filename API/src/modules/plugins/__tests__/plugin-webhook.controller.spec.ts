@@ -14,6 +14,7 @@ describe('PluginWebhookController', () => {
       findUnique: jest.fn(),
     },
   };
+(mockPrisma as any).platform = mockPrisma;
 
   const mockPluginService = {
     isPluginEnabled: jest.fn(),

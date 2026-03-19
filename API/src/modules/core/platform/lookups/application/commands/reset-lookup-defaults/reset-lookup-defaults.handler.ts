@@ -15,7 +15,7 @@ export class ResetLookupDefaultsHandler
 
     for (const lk of LOOKUP_SEED_DATA) {
       // Upsert the master lookup
-      const lookup = await this.prisma.masterLookup.upsert({
+      const lookup = await this.prisma.platform.masterLookup.upsert({
         where: { tenantId_category: { tenantId, category: lk.category } },
         create: {
           tenantId,
@@ -33,7 +33,7 @@ export class ResetLookupDefaultsHandler
       // Upsert each value (restore deleted, update existing)
       for (let i = 0; i < lk.values.length; i++) {
         const v = lk.values[i];
-        await this.prisma.lookupValue.upsert({
+        await this.prisma.platform.lookupValue.upsert({
           where: {
             tenantId_lookupId_value: {
               tenantId,

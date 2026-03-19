@@ -33,7 +33,7 @@ export class PluginHookService {
     this.logger.debug(`Firing hook: ${hookPoint} for tenant ${tenantId}`);
 
     // Find all enabled plugins with this hook point
-    const tenantPlugins = await this.prisma.tenantPlugin.findMany({
+    const tenantPlugins = await this.prisma.platform.tenantPlugin.findMany({
       where: {
         tenantId,
         isEnabled: true,
@@ -128,7 +128,7 @@ export class PluginHookService {
    * Get plugins that listen to a specific hook.
    */
   async getPluginsForHook(tenantId: string, hookPoint: string) {
-    return this.prisma.tenantPlugin.findMany({
+    return this.prisma.platform.tenantPlugin.findMany({
       where: {
         tenantId,
         isEnabled: true,
@@ -151,7 +151,7 @@ export class PluginHookService {
       limit?: number;
     },
   ) {
-    return this.prisma.pluginHookLog.findMany({
+    return this.prisma.platform.pluginHookLog.findMany({
       where: {
         tenantId,
         ...(filters?.pluginId && { pluginId: filters.pluginId }),
@@ -176,7 +176,7 @@ export class PluginHookService {
     responsePayload?: any,
   ) {
     try {
-      await this.prisma.pluginHookLog.create({
+      await this.prisma.platform.pluginHookLog.create({
         data: {
           tenantId,
           pluginId,

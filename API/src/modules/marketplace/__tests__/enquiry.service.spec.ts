@@ -56,6 +56,7 @@ describe('EnquiryService', () => {
       updateMany: jest.fn(),
     },
   };
+(mockPrisma as any).platform = mockPrisma;
 
   const mockListingService = {
     trackEnquiry: jest.fn(),
