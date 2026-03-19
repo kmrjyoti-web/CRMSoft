@@ -90,7 +90,7 @@ export class CalendarAdminController {
   @Get('holidays')
   @RequirePermissions('calendar:admin')
   async getHolidays(@CurrentUser('tenantId') tenantId: string) {
-    const holidays = await this.prisma.holidayCalendar.findMany({
+    const holidays = await this.prisma.working.holidayCalendar.findMany({
       where: { tenantId, isActive: true },
       orderBy: { date: 'asc' },
     });
@@ -117,7 +117,7 @@ export class CalendarAdminController {
       description?: string;
     },
   ) {
-    const holiday = await this.prisma.holidayCalendar.create({
+    const holiday = await this.prisma.working.holidayCalendar.create({
       data: {
         tenantId,
         name: body.name,
@@ -140,7 +140,7 @@ export class CalendarAdminController {
   @RequirePermissions('calendar:admin')
   @HttpCode(HttpStatus.OK)
   async deleteHoliday(@Param('id') id: string) {
-    await this.prisma.holidayCalendar.update({
+    await this.prisma.working.holidayCalendar.update({
       where: { id },
       data: { isActive: false },
     });

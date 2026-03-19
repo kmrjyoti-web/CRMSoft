@@ -26,7 +26,7 @@ export class TemplateCrudService {
     if (filters.isSystem !== undefined) where.isSystem = filters.isSystem;
     if (filters.tenantId) where.tenantId = filters.tenantId;
 
-    return this.prisma.documentTemplate.findMany({
+    return this.prisma.working.documentTemplate.findMany({
       where,
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
     });
@@ -36,7 +36,7 @@ export class TemplateCrudService {
    * Get a single template by ID, including tenant customizations.
    */
   async findById(id: string) {
-    const template = await this.prisma.documentTemplate.findUnique({
+    const template = await this.prisma.working.documentTemplate.findUnique({
       where: { id },
       include: { tenantCustomizations: true },
     });
@@ -69,7 +69,7 @@ export class TemplateCrudService {
       orConditions.push({ tenantId });
     }
 
-    return this.prisma.documentTemplate.findMany({
+    return this.prisma.working.documentTemplate.findMany({
       where: {
         documentType,
         isActive: true,
@@ -85,7 +85,7 @@ export class TemplateCrudService {
   async create(data: Prisma.DocumentTemplateCreateInput) {
     this.logger.log(`Creating template: ${data.name} (${data.documentType})`);
 
-    return this.prisma.documentTemplate.create({ data });
+    return this.prisma.working.documentTemplate.create({ data });
   }
 
   /**
@@ -96,7 +96,7 @@ export class TemplateCrudService {
 
     this.logger.log(`Updating template: ${id}`);
 
-    return this.prisma.documentTemplate.update({
+    return this.prisma.working.documentTemplate.update({
       where: { id },
       data,
     });
@@ -110,7 +110,7 @@ export class TemplateCrudService {
 
     this.logger.log(`Archiving template: ${id}`);
 
-    return this.prisma.documentTemplate.update({
+    return this.prisma.working.documentTemplate.update({
       where: { id },
       data: { isActive: false },
     });
@@ -124,7 +124,7 @@ export class TemplateCrudService {
 
     this.logger.log(`Duplicating template: ${original.name}`);
 
-    return this.prisma.documentTemplate.create({
+    return this.prisma.working.documentTemplate.create({
       data: {
         code: `${original.code}-copy`,
         name: `${original.name} - Copy`,

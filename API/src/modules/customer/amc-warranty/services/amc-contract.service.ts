@@ -7,12 +7,12 @@ export class AMCContractService {
 
   private async generateNumber(tenantId: string): Promise<string> {
     const year = new Date().getFullYear();
-    const count = await this.prisma.aMCContract.count({ where: { tenantId } });
+    const count = await this.prisma.working.aMCContract.count({ where: { tenantId } });
     return `AMC-${year}-${String(count + 1).padStart(4, '0')}`;
   }
 
   async findAll(tenantId: string, filters?: { customerId?: string; status?: string }) {
-    return this.prisma.aMCContract.findMany({
+    return this.prisma.working.aMCContract.findMany({
       where: {
         tenantId,
         ...(filters?.customerId && { customerId: filters.customerId }),
@@ -24,7 +24,7 @@ export class AMCContractService {
   }
 
   async findById(tenantId: string, id: string) {
-    const contract = await this.prisma.aMCContract.findFirst({
+    const contract = await this.prisma.working.aMCContract.findFirst({
       where: { id, tenantId },
       include: {
         plan: true,
@@ -38,7 +38,7 @@ export class AMCContractService {
   async findExpiring(tenantId: string, days = 30) {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() + days);
-    return this.prisma.aMCContract.findMany({
+    return this.prisma.working.aMCContract.findMany({
       where: {
         tenantId,
         status: 'ACTIVE',
@@ -50,13 +50,13 @@ export class AMCContractService {
   }
 
   async create(tenantId: string, dto: any) {
-    const plan = await this.prisma.aMCPlanTemplate.findFirst({ where: { id: dto.amcPlanId } });
+    const plan = await this.prisma.working.aMCPlanTemplate.findFirst({ where: { id: dto.amcPlanId } });
     if (!plan) throw new NotFoundException('AMC plan not found');
 
     const contractNumber = await this.generateNumber(tenantId);
     const balanceAmount = Number(dto.totalAmount) - (Number(dto.paidAmount) ?? 0);
 
-    const contract = await this.prisma.aMCContract.create({
+    const contract = await this.prisma.working.aMCContract.create({
       data: {
         ...dto,
         tenantId,
@@ -74,10 +74,10 @@ export class AMCContractService {
   }
 
   async activate(tenantId: string, id: string) {
-    const contract = await this.prisma.aMCContract.findFirst({ where: { id, tenantId } });
+    const contract = await this.prisma.working.aMCContract.findFirst({ where: { id, tenantId } });
     if (!contract) throw new NotFoundException('Contract not found');
 
-    const plan = await this.prisma.aMCPlanTemplate.findUnique({ where: { id: contract.amcPlanId } });
+    const plan = await this.prisma.working.aMCPlanTemplate.findUnique({ where: { id: contract.amcPlanId } });
     if (!plan) throw new NotFoundException('Plan not found');
 
     // Auto-schedule visits based on plan
@@ -100,15 +100,15 @@ export class AMCContractService {
     }
 
     await this.prisma.$transaction([
-      this.prisma.aMCContract.update({ where: { id }, data: { status: 'ACTIVE' } }),
-      ...schedules.map((s) => this.prisma.aMCSchedule.create({ data: s })),
+      this.prisma.working.aMCContract.update({ where: { id }, data: { status: 'ACTIVE' } }),
+      ...schedules.map((s) => this.prisma.working.aMCSchedule.create({ data: s })),
     ]);
 
     return this.findById(tenantId, id);
   }
 
   async renew(tenantId: string, id: string, dto: any) {
-    const contract = await this.prisma.aMCContract.findFirst({
+    const contract = await this.prisma.working.aMCContract.findFirst({
       where: { id, tenantId },
       include: { plan: true },
     });
@@ -127,7 +127,7 @@ export class AMCContractService {
     const discount = plan.renewalDiscount ? totalAmount * (Number(plan.renewalDiscount) / 100) : 0;
     const finalAmount = totalAmount - discount;
 
-    return this.prisma.aMCContract.create({
+    return this.prisma.working.aMCContract.create({
       data: {
         tenantId,
         amcPlanId: contract.amcPlanId,

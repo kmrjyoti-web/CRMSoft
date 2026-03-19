@@ -17,7 +17,7 @@ export class GetCommentThreadHandler implements IQueryHandler<GetCommentThreadQu
       roleLevel: query.roleLevel,
     });
 
-    return this.prisma.comment.findMany({
+    return this.prisma.working.comment.findMany({
       where: { ...visibilityFilter, parentId: query.parentId },
       orderBy: { createdAt: 'asc' },
       include: { author: { select: { id: true, firstName: true, lastName: true } } },

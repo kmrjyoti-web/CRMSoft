@@ -13,7 +13,7 @@ export class ApproveTaskHandler implements ICommandHandler<ApproveTaskCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: ApproveTaskCommand) {
-    const existing = await this.prisma.task.findUnique({
+    const existing = await this.prisma.working.task.findUnique({
       where: { id: cmd.id },
       include: {
         assignedTo: { select: { id: true, firstName: true, lastName: true } },
@@ -25,7 +25,7 @@ export class ApproveTaskHandler implements ICommandHandler<ApproveTaskCommand> {
       throw new BadRequestException('Task is not pending approval');
     }
 
-    const task = await this.prisma.task.update({
+    const task = await this.prisma.working.task.update({
       where: { id: cmd.id },
       data: {
         status: 'OPEN',
@@ -39,7 +39,7 @@ export class ApproveTaskHandler implements ICommandHandler<ApproveTaskCommand> {
     });
 
     // Record approval in history
-    await this.prisma.taskHistory.create({
+    await this.prisma.working.taskHistory.create({
       data: {
         tenantId: cmd.tenantId,
         taskId: cmd.id,
@@ -66,7 +66,7 @@ export class ApproveTaskHandler implements ICommandHandler<ApproveTaskCommand> {
     try {
       const activityType = this.mapTaskTypeToActivityType(task.type);
 
-      await this.prisma.activity.create({
+      await this.prisma.working.activity.create({
         data: {
           tenantId: cmd.tenantId || '',
           type: activityType as any,
@@ -97,11 +97,11 @@ export class ApproveTaskHandler implements ICommandHandler<ApproveTaskCommand> {
 
   private async syncCalendarEvent(task: any, cmd: ApproveTaskCommand) {
     try {
-      const existing = await this.prisma.calendarEvent.findFirst({
+      const existing = await this.prisma.working.calendarEvent.findFirst({
         where: { eventType: 'TASK', sourceId: task.id },
       });
       if (!existing) {
-        await this.prisma.calendarEvent.create({
+        await this.prisma.working.calendarEvent.create({
           data: {
             eventType: 'TASK',
             sourceId: task.id,

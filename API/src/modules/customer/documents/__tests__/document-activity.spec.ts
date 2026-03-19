@@ -17,6 +17,7 @@ describe('DocumentActivityService', () => {
         count: jest.fn().mockResolvedValue(2),
       },
     };
+    (prisma as any).working = prisma;
     service = new DocumentActivityService(prisma);
   });
 

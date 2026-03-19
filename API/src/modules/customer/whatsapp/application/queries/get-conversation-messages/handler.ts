@@ -10,13 +10,13 @@ export class GetConversationMessagesHandler implements IQueryHandler<GetConversa
     const where = { conversationId: query.conversationId };
 
     const [data, total] = await Promise.all([
-      this.prisma.waMessage.findMany({
+      this.prisma.working.waMessage.findMany({
         where,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.waMessage.count({ where }),
+      this.prisma.working.waMessage.count({ where }),
     ]);
 
     return {

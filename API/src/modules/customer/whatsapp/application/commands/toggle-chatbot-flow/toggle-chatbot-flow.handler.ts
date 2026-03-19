@@ -11,7 +11,7 @@ export class ToggleChatbotFlowHandler implements ICommandHandler<ToggleChatbotFl
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: ToggleChatbotFlowCommand) {
-    const flow = await this.prisma.waChatbotFlow.update({
+    const flow = await this.prisma.working.waChatbotFlow.update({
       where: { id: cmd.flowId },
       data: { status: cmd.status as WaChatbotFlowStatus },
     });

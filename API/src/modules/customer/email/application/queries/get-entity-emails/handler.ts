@@ -13,7 +13,7 @@ export class GetEntityEmailsHandler implements IQueryHandler<GetEntityEmailsQuer
     };
 
     const [data, total] = await Promise.all([
-      this.prisma.email.findMany({
+      this.prisma.working.email.findMany({
         where,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
@@ -23,7 +23,7 @@ export class GetEntityEmailsHandler implements IQueryHandler<GetEntityEmailsQuer
           attachments: { select: { id: true, fileName: true, fileSize: true } },
         },
       }),
-      this.prisma.email.count({ where }),
+      this.prisma.working.email.count({ where }),
     ]);
 
     return {

@@ -11,6 +11,7 @@ describe('LinkToEntityHandler', () => {
   beforeEach(() => {
     repo = { findById: jest.fn() };
     prisma = { communication: { update: jest.fn() } };
+(prisma as any).working = prisma;
     handler = new LinkToEntityHandler(repo, prisma);
   });
 

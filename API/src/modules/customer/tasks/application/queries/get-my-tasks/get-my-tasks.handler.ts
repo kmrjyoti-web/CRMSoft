@@ -14,7 +14,7 @@ export class GetMyTasksHandler implements IQueryHandler<GetMyTasksQuery> {
     const skip = (query.page - 1) * query.limit;
 
     const [data, total] = await Promise.all([
-      this.prisma.task.findMany({
+      this.prisma.working.task.findMany({
         where,
         skip,
         take: query.limit,
@@ -24,7 +24,7 @@ export class GetMyTasksHandler implements IQueryHandler<GetMyTasksQuery> {
           _count: { select: { comments: true, watchers: true } },
         },
       }),
-      this.prisma.task.count({ where }),
+      this.prisma.working.task.count({ where }),
     ]);
 
     return { data, total, page: query.page, limit: query.limit, totalPages: Math.ceil(total / query.limit) };

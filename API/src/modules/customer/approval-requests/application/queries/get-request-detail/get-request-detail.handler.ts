@@ -9,7 +9,7 @@ export class GetRequestDetailHandler implements IQueryHandler<GetRequestDetailQu
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetRequestDetailQuery) {
-    const request = await this.prisma.approvalRequest.findUnique({
+    const request = await this.prisma.working.approvalRequest.findUnique({
       where: { id: query.requestId },
       include: {
         maker: { select: { id: true, firstName: true, lastName: true, email: true } },

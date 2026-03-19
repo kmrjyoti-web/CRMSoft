@@ -10,13 +10,13 @@ export class OptOutContactHandler implements ICommandHandler<OptOutContactComman
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: OptOutContactCommand) {
-    const existing = await this.prisma.waOptOut.findFirst({
+    const existing = await this.prisma.working.waOptOut.findFirst({
       where: { wabaId: cmd.wabaId, phoneNumber: cmd.phoneNumber },
     });
 
     let optOut;
     if (existing) {
-      optOut = await this.prisma.waOptOut.update({
+      optOut = await this.prisma.working.waOptOut.update({
         where: { id: existing.id },
         data: {
           contactId: cmd.contactId,
@@ -24,7 +24,7 @@ export class OptOutContactHandler implements ICommandHandler<OptOutContactComman
         },
       });
     } else {
-      optOut = await this.prisma.waOptOut.create({
+      optOut = await this.prisma.working.waOptOut.create({
         data: {
           wabaId: cmd.wabaId,
           phoneNumber: cmd.phoneNumber,

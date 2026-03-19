@@ -38,6 +38,7 @@ describe('UnifiedCalendarService', () => {
         count: jest.fn().mockResolvedValue(0),
       },
     };
+(prisma as any).working = prisma;
 
     taskAssignment = {
       getReporteeIds: jest.fn().mockResolvedValue([]),

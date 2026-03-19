@@ -50,6 +50,7 @@ describe('WaWebhookService', () => {
         update: jest.fn().mockResolvedValue({}),
       },
     };
+(prisma as any).working = prisma;
 
     conversationService = {
       getOrCreate: jest.fn().mockResolvedValue(mockConversation),

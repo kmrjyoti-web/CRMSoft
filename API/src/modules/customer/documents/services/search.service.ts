@@ -54,7 +54,7 @@ export class DocumentSearchService {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.document.findMany({
+      this.prisma.working.document.findMany({
         where,
         skip,
         take: limit,
@@ -65,7 +65,7 @@ export class DocumentSearchService {
           _count: { select: { attachments: true } },
         },
       }),
-      this.prisma.document.count({ where }),
+      this.prisma.working.document.count({ where }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };

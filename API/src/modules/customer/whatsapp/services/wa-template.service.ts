@@ -17,7 +17,7 @@ export class WaTemplateService {
     let updated = 0;
 
     for (const mt of metaTemplates) {
-      const existing = await this.prisma.waTemplate.findFirst({
+      const existing = await this.prisma.working.waTemplate.findFirst({
         where: { metaTemplateId: mt.id },
       });
 
@@ -41,13 +41,13 @@ export class WaTemplateService {
       };
 
       if (existing) {
-        await this.prisma.waTemplate.update({
+        await this.prisma.working.waTemplate.update({
           where: { id: existing.id },
           data,
         });
         updated++;
       } else {
-        await this.prisma.waTemplate.create({
+        await this.prisma.working.waTemplate.create({
           data: {
             ...data,
             wabaId,
@@ -103,7 +103,7 @@ export class WaTemplateService {
       components,
     });
 
-    return this.prisma.waTemplate.create({
+    return this.prisma.working.waTemplate.create({
       data: {
         wabaId,
         metaTemplateId: metaResult.id,
@@ -123,9 +123,9 @@ export class WaTemplateService {
   }
 
   async deleteOnMeta(templateId: string): Promise<void> {
-    const template = await this.prisma.waTemplate.findUniqueOrThrow({ where: { id: templateId } });
+    const template = await this.prisma.working.waTemplate.findUniqueOrThrow({ where: { id: templateId } });
     await this.waApiService.deleteTemplate(template.wabaId, template.name);
-    await this.prisma.waTemplate.update({
+    await this.prisma.working.waTemplate.update({
       where: { id: templateId },
       data: { status: 'DELETED' },
     });

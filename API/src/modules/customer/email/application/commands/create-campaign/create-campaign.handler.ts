@@ -10,7 +10,7 @@ export class CreateCampaignHandler implements ICommandHandler<CreateCampaignComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CreateCampaignCommand) {
-    const campaign = await this.prisma.emailCampaign.create({
+    const campaign = await this.prisma.working.emailCampaign.create({
       data: {
         name: cmd.name,
         description: cmd.description,

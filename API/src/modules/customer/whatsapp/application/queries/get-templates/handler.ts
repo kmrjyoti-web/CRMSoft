@@ -13,13 +13,13 @@ export class GetTemplatesHandler implements IQueryHandler<GetTemplatesQuery> {
     if (query.category) where.category = query.category;
 
     const [data, total] = await Promise.all([
-      this.prisma.waTemplate.findMany({
+      this.prisma.working.waTemplate.findMany({
         where,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.waTemplate.count({ where }),
+      this.prisma.working.waTemplate.count({ where }),
     ]);
 
     return {

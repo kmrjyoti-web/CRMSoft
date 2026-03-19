@@ -16,7 +16,7 @@ export class UpdateWabaHandler implements ICommandHandler<UpdateWabaCommand> {
     if (cmd.accessToken !== undefined) updateData.accessToken = cmd.accessToken;
     if (cmd.settings !== undefined) updateData.settings = cmd.settings;
 
-    const waba = await this.prisma.whatsAppBusinessAccount.update({
+    const waba = await this.prisma.working.whatsAppBusinessAccount.update({
       where: { id: cmd.id },
       data: updateData,
     });

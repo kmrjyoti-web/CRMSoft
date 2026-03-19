@@ -7,7 +7,7 @@ export class GetWabaDetailHandler implements IQueryHandler<GetWabaDetailQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetWabaDetailQuery) {
-    return this.prisma.whatsAppBusinessAccount.findUniqueOrThrow({
+    return this.prisma.working.whatsAppBusinessAccount.findUniqueOrThrow({
       where: { id: query.wabaId },
     });
   }

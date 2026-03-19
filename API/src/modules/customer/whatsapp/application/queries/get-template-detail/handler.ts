@@ -7,7 +7,7 @@ export class GetTemplateDetailHandler implements IQueryHandler<GetTemplateDetail
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetTemplateDetailQuery) {
-    return this.prisma.waTemplate.findUniqueOrThrow({
+    return this.prisma.working.waTemplate.findUniqueOrThrow({
       where: { id: query.templateId },
     });
   }

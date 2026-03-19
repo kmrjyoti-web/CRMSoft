@@ -29,6 +29,7 @@ describe('ShareLinkService', () => {
         findMany: jest.fn().mockResolvedValue([]),
       },
     };
+(prisma as any).working = prisma;
     service = new ShareLinkService(prisma);
   });
 

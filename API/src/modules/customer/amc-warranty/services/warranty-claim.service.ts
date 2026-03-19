@@ -7,12 +7,12 @@ export class WarrantyClaimService {
 
   private async generateNumber(tenantId: string): Promise<string> {
     const year = new Date().getFullYear();
-    const count = await this.prisma.warrantyClaim.count({ where: { tenantId } });
+    const count = await this.prisma.working.warrantyClaim.count({ where: { tenantId } });
     return `WC-${year}-${String(count + 1).padStart(4, '0')}`;
   }
 
   async findAll(tenantId: string, filters?: { status?: string; assignedToId?: string }) {
-    return this.prisma.warrantyClaim.findMany({
+    return this.prisma.working.warrantyClaim.findMany({
       where: {
         tenantId,
         ...(filters?.status && { status: filters.status }),
@@ -24,7 +24,7 @@ export class WarrantyClaimService {
   }
 
   async findById(tenantId: string, id: string) {
-    const claim = await this.prisma.warrantyClaim.findFirst({
+    const claim = await this.prisma.working.warrantyClaim.findFirst({
       where: { id, tenantId },
       include: { warrantyRecord: { include: { template: true } } },
     });
@@ -33,7 +33,7 @@ export class WarrantyClaimService {
   }
 
   async create(tenantId: string, dto: any) {
-    const record = await this.prisma.warrantyRecord.findFirst({
+    const record = await this.prisma.working.warrantyRecord.findFirst({
       where: { id: dto.warrantyRecordId, tenantId, status: { in: ['ACTIVE', 'EXTENDED'] } },
       include: { template: true },
     });
@@ -48,10 +48,10 @@ export class WarrantyClaimService {
 
     const claimNumber = await this.generateNumber(tenantId);
     const [claim] = await this.prisma.$transaction([
-      this.prisma.warrantyClaim.create({
+      this.prisma.working.warrantyClaim.create({
         data: { ...dto, tenantId, claimNumber, status: 'OPEN' },
       }),
-      this.prisma.warrantyRecord.update({
+      this.prisma.working.warrantyRecord.update({
         where: { id: dto.warrantyRecordId },
         data: { claimsUsed: { increment: 1 } },
       }),
@@ -60,15 +60,15 @@ export class WarrantyClaimService {
   }
 
   async update(tenantId: string, id: string, dto: any) {
-    const claim = await this.prisma.warrantyClaim.findFirst({ where: { id, tenantId } });
+    const claim = await this.prisma.working.warrantyClaim.findFirst({ where: { id, tenantId } });
     if (!claim) throw new NotFoundException('Claim not found');
-    return this.prisma.warrantyClaim.update({ where: { id }, data: dto });
+    return this.prisma.working.warrantyClaim.update({ where: { id }, data: dto });
   }
 
   async reject(tenantId: string, id: string, reason: string) {
-    const claim = await this.prisma.warrantyClaim.findFirst({ where: { id, tenantId } });
+    const claim = await this.prisma.working.warrantyClaim.findFirst({ where: { id, tenantId } });
     if (!claim) throw new NotFoundException('Claim not found');
-    return this.prisma.warrantyClaim.update({
+    return this.prisma.working.warrantyClaim.update({
       where: { id },
       data: { status: 'REJECTED', rejectionReason: reason, isCovered: false },
     });

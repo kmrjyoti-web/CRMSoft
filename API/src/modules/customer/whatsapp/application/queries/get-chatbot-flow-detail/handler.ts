@@ -7,7 +7,7 @@ export class GetChatbotFlowDetailHandler implements IQueryHandler<GetChatbotFlow
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetChatbotFlowDetailQuery) {
-    return this.prisma.waChatbotFlow.findUniqueOrThrow({
+    return this.prisma.working.waChatbotFlow.findUniqueOrThrow({
       where: { id: query.flowId },
     });
   }

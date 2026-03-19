@@ -12,13 +12,13 @@ export class CreateSignatureHandler implements ICommandHandler<CreateSignatureCo
   async execute(cmd: CreateSignatureCommand) {
     // If isDefault -> set all other signatures for this user to non-default
     if (cmd.isDefault) {
-      await this.prisma.emailSignature.updateMany({
+      await this.prisma.working.emailSignature.updateMany({
         where: { userId: cmd.userId },
         data: { isDefault: false },
       });
     }
 
-    const signature = await this.prisma.emailSignature.create({
+    const signature = await this.prisma.working.emailSignature.create({
       data: {
         name: cmd.name,
         bodyHtml: cmd.bodyHtml,

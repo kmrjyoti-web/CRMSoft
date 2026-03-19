@@ -6,7 +6,7 @@ export class AMCScheduleService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(tenantId: string, filters?: { from?: Date; to?: Date; status?: string }) {
-    return this.prisma.aMCSchedule.findMany({
+    return this.prisma.working.aMCSchedule.findMany({
       where: {
         tenantId,
         ...(filters?.status && { status: filters.status }),
@@ -25,9 +25,9 @@ export class AMCScheduleService {
   }
 
   async complete(tenantId: string, id: string, dto: any) {
-    const schedule = await this.prisma.aMCSchedule.findFirst({ where: { id, tenantId } });
+    const schedule = await this.prisma.working.aMCSchedule.findFirst({ where: { id, tenantId } });
     if (!schedule) throw new NotFoundException('Schedule not found');
-    return this.prisma.aMCSchedule.update({
+    return this.prisma.working.aMCSchedule.update({
       where: { id },
       data: {
         status: 'COMPLETED',
@@ -44,9 +44,9 @@ export class AMCScheduleService {
   }
 
   async reschedule(tenantId: string, id: string, newDate: Date) {
-    const schedule = await this.prisma.aMCSchedule.findFirst({ where: { id, tenantId } });
+    const schedule = await this.prisma.working.aMCSchedule.findFirst({ where: { id, tenantId } });
     if (!schedule) throw new NotFoundException('Schedule not found');
-    return this.prisma.aMCSchedule.update({
+    return this.prisma.working.aMCSchedule.update({
       where: { id },
       data: { scheduleDate: newDate, status: 'RESCHEDULED' },
     });

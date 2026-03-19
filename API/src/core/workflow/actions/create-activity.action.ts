@@ -27,7 +27,7 @@ export class CreateActivityAction implements IActionHandler {
       if (context.entityType === 'LEAD') data.leadId = context.entityId;
       if (context.entityType === 'CONTACT') data.contactId = context.entityId;
 
-      const activity = await this.prisma.activity.create({ data });
+      const activity = await this.prisma.working.activity.create({ data });
       this.logger.log(`Created activity ${activity.id} for ${context.entityType}/${context.entityId}`);
       return { status: 'SUCCESS', result: { activityId: activity.id } };
     } catch (error: any) {

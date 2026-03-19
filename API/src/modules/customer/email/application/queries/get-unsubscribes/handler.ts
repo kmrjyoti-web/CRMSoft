@@ -10,13 +10,13 @@ export class GetUnsubscribesHandler implements IQueryHandler<GetUnsubscribesQuer
     const where = {};
 
     const [data, total] = await Promise.all([
-      this.prisma.emailUnsubscribe.findMany({
+      this.prisma.working.emailUnsubscribe.findMany({
         where,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
         orderBy: { unsubscribedAt: 'desc' },
       }),
-      this.prisma.emailUnsubscribe.count({ where }),
+      this.prisma.working.emailUnsubscribe.count({ where }),
     ]);
 
     return {

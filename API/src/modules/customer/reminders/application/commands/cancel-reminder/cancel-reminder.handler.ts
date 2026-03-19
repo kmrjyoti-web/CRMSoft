@@ -8,10 +8,10 @@ export class CancelReminderHandler implements ICommandHandler<CancelReminderComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CancelReminderCommand) {
-    const reminder = await this.prisma.reminder.findUnique({ where: { id: cmd.id } });
+    const reminder = await this.prisma.working.reminder.findUnique({ where: { id: cmd.id } });
     if (!reminder || !reminder.isActive) throw new NotFoundException('Reminder not found');
 
-    return this.prisma.reminder.update({
+    return this.prisma.working.reminder.update({
       where: { id: cmd.id },
       data: { status: 'CANCELLED' },
     });

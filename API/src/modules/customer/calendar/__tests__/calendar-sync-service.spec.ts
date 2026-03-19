@@ -43,6 +43,7 @@ describe('CalendarSyncService', () => {
         count: jest.fn().mockResolvedValue(0),
       },
     };
+(prisma as any).working = prisma;
 
     const googleAdapter = {} as any;
     const outlookAdapter = {} as any;

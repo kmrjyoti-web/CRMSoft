@@ -17,6 +17,7 @@ describe('WaTemplateService', () => {
         update: jest.fn().mockResolvedValue({}),
       },
     };
+(prisma as any).working = prisma;
 
     waApiService = {
       getTemplates: jest.fn().mockResolvedValue([]),

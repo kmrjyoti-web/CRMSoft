@@ -8,7 +8,7 @@ export class DeleteCommentHandler implements ICommandHandler<DeleteCommentComman
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: DeleteCommentCommand) {
-    const comment = await this.prisma.comment.findUnique({ where: { id: cmd.commentId } });
+    const comment = await this.prisma.working.comment.findUnique({ where: { id: cmd.commentId } });
     if (!comment || !comment.isActive) throw new NotFoundException('Comment not found');
 
     // Only author or admin can delete
@@ -16,7 +16,7 @@ export class DeleteCommentHandler implements ICommandHandler<DeleteCommentComman
       throw new ForbiddenException('Only the author or an admin can delete a comment');
     }
 
-    return this.prisma.comment.update({
+    return this.prisma.working.comment.update({
       where: { id: cmd.commentId },
       data: { isActive: false },
     });

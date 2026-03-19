@@ -29,7 +29,7 @@ export class CreateTaskAction implements IActionHandler {
       if (context.entityType === 'LEAD') data.leadId = context.entityId;
       if (context.entityType === 'CONTACT') data.contactId = context.entityId;
 
-      const activity = await this.prisma.activity.create({ data });
+      const activity = await this.prisma.working.activity.create({ data });
       this.logger.log(`Created task ${activity.id} due ${scheduledAt.toISOString()}`);
       return { status: 'SUCCESS', result: { taskId: activity.id, dueAt: scheduledAt } };
     } catch (error: any) {

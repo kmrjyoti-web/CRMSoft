@@ -8,7 +8,7 @@ export class CreateReminderHandler implements ICommandHandler<CreateReminderComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CreateReminderCommand) {
-    return this.prisma.reminder.create({
+    return this.prisma.working.reminder.create({
       data: {
         title: cmd.title,
         message: cmd.message,

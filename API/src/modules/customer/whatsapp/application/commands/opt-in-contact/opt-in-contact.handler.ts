@@ -10,7 +10,7 @@ export class OptInContactHandler implements ICommandHandler<OptInContactCommand>
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: OptInContactCommand) {
-    const result = await this.prisma.waOptOut.deleteMany({
+    const result = await this.prisma.working.waOptOut.deleteMany({
       where: {
         wabaId: cmd.wabaId,
         phoneNumber: cmd.phoneNumber,

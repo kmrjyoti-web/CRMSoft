@@ -12,10 +12,10 @@ export class UpdateSignatureHandler implements ICommandHandler<UpdateSignatureCo
   async execute(cmd: UpdateSignatureCommand) {
     // If setting as default -> update all others for the same user
     if (cmd.isDefault) {
-      const existing = await this.prisma.emailSignature.findUniqueOrThrow({
+      const existing = await this.prisma.working.emailSignature.findUniqueOrThrow({
         where: { id: cmd.id },
       });
-      await this.prisma.emailSignature.updateMany({
+      await this.prisma.working.emailSignature.updateMany({
         where: { userId: existing.userId },
         data: { isDefault: false },
       });
@@ -26,7 +26,7 @@ export class UpdateSignatureHandler implements ICommandHandler<UpdateSignatureCo
     if (cmd.bodyHtml !== undefined) data.bodyHtml = cmd.bodyHtml;
     if (cmd.isDefault !== undefined) data.isDefault = cmd.isDefault;
 
-    const signature = await this.prisma.emailSignature.update({
+    const signature = await this.prisma.working.emailSignature.update({
       where: { id: cmd.id },
       data,
     });

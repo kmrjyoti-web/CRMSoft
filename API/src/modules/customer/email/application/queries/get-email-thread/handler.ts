@@ -8,7 +8,7 @@ export class GetEmailThreadHandler implements IQueryHandler<GetEmailThreadQuery>
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetEmailThreadQuery) {
-    const thread = await this.prisma.emailThread.findUnique({
+    const thread = await this.prisma.working.emailThread.findUnique({
       where: { id: query.threadId },
       include: {
         emails: {

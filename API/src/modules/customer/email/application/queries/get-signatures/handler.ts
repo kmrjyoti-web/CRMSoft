@@ -7,7 +7,7 @@ export class GetSignaturesHandler implements IQueryHandler<GetSignaturesQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetSignaturesQuery) {
-    return this.prisma.emailSignature.findMany({
+    return this.prisma.working.emailSignature.findMany({
       where: { userId: query.userId },
       orderBy: { createdAt: 'desc' },
     });

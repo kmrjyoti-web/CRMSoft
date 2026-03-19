@@ -16,7 +16,7 @@ export class GetEmailsHandler implements IQueryHandler<GetEmailsQuery> {
     if (query.isRead !== undefined) where.isRead = query.isRead;
 
     const [data, total] = await Promise.all([
-      this.prisma.email.findMany({
+      this.prisma.working.email.findMany({
         where,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
@@ -27,7 +27,7 @@ export class GetEmailsHandler implements IQueryHandler<GetEmailsQuery> {
           attachments: { select: { id: true, fileName: true, fileSize: true } },
         },
       }),
-      this.prisma.email.count({ where }),
+      this.prisma.working.email.count({ where }),
     ]);
 
     return {

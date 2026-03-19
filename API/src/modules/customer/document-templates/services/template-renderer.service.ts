@@ -25,7 +25,7 @@ export class TemplateRendererService {
     tenantId: string,
     data: Record<string, any>,
   ): Promise<string> {
-    const template = await this.prisma.documentTemplate.findUnique({
+    const template = await this.prisma.working.documentTemplate.findUnique({
       where: { id: templateId },
     });
 
@@ -53,7 +53,7 @@ export class TemplateRendererService {
     tenantId: string,
     data: Record<string, any>,
   ): Promise<string> {
-    const template = await this.prisma.documentTemplate.findUnique({
+    const template = await this.prisma.working.documentTemplate.findUnique({
       where: { id: templateId },
     });
 
@@ -62,7 +62,7 @@ export class TemplateRendererService {
     }
 
     // Fetch tenant customization if available
-    const customization = await this.prisma.tenantTemplateCustomization.findUnique({
+    const customization = await this.prisma.working.tenantTemplateCustomization.findUnique({
       where: {
         tenantId_templateId: { tenantId, templateId },
       },

@@ -26,11 +26,11 @@ export class GetManagerReminderStatsHandler implements IQueryHandler<GetManagerR
     const where = { recipientId: { in: allIds }, isActive: true };
 
     const [total, pending, sent, missed, snoozed] = await Promise.all([
-      this.prisma.reminder.count({ where }),
-      this.prisma.reminder.count({ where: { ...where, status: 'PENDING' } }),
-      this.prisma.reminder.count({ where: { ...where, status: 'SENT' } }),
-      this.prisma.reminder.count({ where: { ...where, status: 'MISSED' } }),
-      this.prisma.reminder.count({ where: { ...where, status: 'SNOOZED' } }),
+      this.prisma.working.reminder.count({ where }),
+      this.prisma.working.reminder.count({ where: { ...where, status: 'PENDING' } }),
+      this.prisma.working.reminder.count({ where: { ...where, status: 'SENT' } }),
+      this.prisma.working.reminder.count({ where: { ...where, status: 'MISSED' } }),
+      this.prisma.working.reminder.count({ where: { ...where, status: 'SNOOZED' } }),
     ]);
 
     // Manager stats: counts only, NO content/titles (privacy)
@@ -40,11 +40,11 @@ export class GetManagerReminderStatsHandler implements IQueryHandler<GetManagerR
   private async getOwnStats(userId: string) {
     const where = { recipientId: userId, isActive: true };
     const [total, pending, sent, missed, snoozed] = await Promise.all([
-      this.prisma.reminder.count({ where }),
-      this.prisma.reminder.count({ where: { ...where, status: 'PENDING' } }),
-      this.prisma.reminder.count({ where: { ...where, status: 'SENT' } }),
-      this.prisma.reminder.count({ where: { ...where, status: 'MISSED' } }),
-      this.prisma.reminder.count({ where: { ...where, status: 'SNOOZED' } }),
+      this.prisma.working.reminder.count({ where }),
+      this.prisma.working.reminder.count({ where: { ...where, status: 'PENDING' } }),
+      this.prisma.working.reminder.count({ where: { ...where, status: 'SENT' } }),
+      this.prisma.working.reminder.count({ where: { ...where, status: 'MISSED' } }),
+      this.prisma.working.reminder.count({ where: { ...where, status: 'SNOOZED' } }),
     ]);
     return { total, pending, sent, missed, snoozed, reporteeCount: 0 };
   }

@@ -70,7 +70,7 @@ export class ActionExecutorService {
     result: ActionResult,
   ): Promise<void> {
     try {
-      await this.prisma.workflowActionLog.create({
+      await this.prisma.working.workflowActionLog.create({
         data: {
           instanceId,
           transitionId,

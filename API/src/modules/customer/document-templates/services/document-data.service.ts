@@ -11,7 +11,7 @@ export class DocumentDataService {
    * Fetch all data required to render an invoice template.
    */
   async getInvoiceData(invoiceId: string, tenantId: string) {
-    const invoice = await this.prisma.invoice.findFirst({
+    const invoice = await this.prisma.working.invoice.findFirst({
       where: { id: invoiceId, tenantId },
       include: {
         lineItems: { orderBy: { createdAt: 'asc' } },
@@ -115,7 +115,7 @@ export class DocumentDataService {
    * Fetch all data required to render a quotation template.
    */
   async getQuotationData(quotationId: string, tenantId: string) {
-    const quotation = await this.prisma.quotation.findFirst({
+    const quotation = await this.prisma.working.quotation.findFirst({
       where: { id: quotationId, tenantId },
       include: {
         lineItems: { orderBy: { createdAt: 'asc' } },

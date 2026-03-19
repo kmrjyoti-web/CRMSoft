@@ -13,7 +13,7 @@ export class CompleteTaskHandler implements ICommandHandler<CompleteTaskCommand>
   ) {}
 
   async execute(cmd: CompleteTaskCommand) {
-    const task = await this.prisma.task.findUnique({ where: { id: cmd.taskId } });
+    const task = await this.prisma.working.task.findUnique({ where: { id: cmd.taskId } });
     if (!task || !task.isActive) throw new NotFoundException('Task not found');
 
     const data: any = {
@@ -23,7 +23,7 @@ export class CompleteTaskHandler implements ICommandHandler<CompleteTaskCommand>
     if (cmd.completionNotes !== undefined) data.completionNotes = cmd.completionNotes;
     if (cmd.actualMinutes !== undefined) data.actualMinutes = cmd.actualMinutes;
 
-    const updated = await this.prisma.task.update({
+    const updated = await this.prisma.working.task.update({
       where: { id: cmd.taskId },
       data,
       include: {
@@ -33,7 +33,7 @@ export class CompleteTaskHandler implements ICommandHandler<CompleteTaskCommand>
     });
 
     // Record history
-    await this.prisma.taskHistory.create({
+    await this.prisma.working.taskHistory.create({
       data: {
         taskId: cmd.taskId,
         action: 'STATUS_CHANGED',

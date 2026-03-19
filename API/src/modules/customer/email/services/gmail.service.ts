@@ -15,7 +15,7 @@ export class GmailService implements IEmailProviderService {
     // 1. Build RFC 2822 MIME message
     // 2. Base64url encode
     // 3. POST https://gmail.googleapis.com/gmail/v1/users/me/messages/send
-    const account = await this.prisma.emailAccount.findUniqueOrThrow({ where: { id: accountId } });
+    const account = await this.prisma.working.emailAccount.findUniqueOrThrow({ where: { id: accountId } });
     return {
       messageId: `gmail-${Date.now()}@mail.gmail.com`,
       providerMessageId: `msg-${Date.now()}`,

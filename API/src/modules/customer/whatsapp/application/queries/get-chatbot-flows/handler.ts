@@ -11,7 +11,7 @@ export class GetChatbotFlowsHandler implements IQueryHandler<GetChatbotFlowsQuer
 
     if (query.status) where.status = query.status;
 
-    return this.prisma.waChatbotFlow.findMany({
+    return this.prisma.working.waChatbotFlow.findMany({
       where,
       orderBy: { createdAt: 'desc' },
     });

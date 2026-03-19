@@ -10,7 +10,7 @@ export class CreateBroadcastHandler implements ICommandHandler<CreateBroadcastCo
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: CreateBroadcastCommand) {
-    const broadcast = await this.prisma.waBroadcast.create({
+    const broadcast = await this.prisma.working.waBroadcast.create({
       data: {
         wabaId: command.wabaId,
         name: command.name,

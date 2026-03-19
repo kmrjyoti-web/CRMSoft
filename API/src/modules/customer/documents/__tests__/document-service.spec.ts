@@ -34,6 +34,7 @@ describe('DocumentService', () => {
         findUnique: jest.fn().mockResolvedValue({ id: 'f1', isActive: true }),
       },
     };
+(prisma as any).working = prisma;
     service = new DocumentService(prisma);
   });
 

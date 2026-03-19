@@ -25,7 +25,7 @@ export class UpdateTemplateHandler implements ICommandHandler<UpdateTemplateComm
       updateData.buttons = command.buttons;
     }
 
-    const template = await this.prisma.waTemplate.update({
+    const template = await this.prisma.working.waTemplate.update({
       where: { id: command.templateId },
       data: updateData,
     });

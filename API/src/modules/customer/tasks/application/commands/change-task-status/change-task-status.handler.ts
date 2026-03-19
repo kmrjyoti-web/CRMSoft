@@ -22,7 +22,7 @@ export class ChangeTaskStatusHandler implements ICommandHandler<ChangeTaskStatus
   ) {}
 
   async execute(cmd: ChangeTaskStatusCommand) {
-    const task = await this.prisma.task.findUnique({ where: { id: cmd.taskId } });
+    const task = await this.prisma.working.task.findUnique({ where: { id: cmd.taskId } });
     if (!task || !task.isActive) throw new NotFoundException('Task not found');
 
     // Validate transition
@@ -37,7 +37,7 @@ export class ChangeTaskStatusHandler implements ICommandHandler<ChangeTaskStatus
       data.completedAt = new Date();
     }
 
-    const updated = await this.prisma.task.update({
+    const updated = await this.prisma.working.task.update({
       where: { id: cmd.taskId },
       data,
       include: {
@@ -47,7 +47,7 @@ export class ChangeTaskStatusHandler implements ICommandHandler<ChangeTaskStatus
     });
 
     // Record history
-    await this.prisma.taskHistory.create({
+    await this.prisma.working.taskHistory.create({
       data: {
         taskId: cmd.taskId,
         field: 'status',

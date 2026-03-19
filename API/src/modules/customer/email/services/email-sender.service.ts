@@ -12,7 +12,7 @@ export class EmailSenderService {
   ) {}
 
   async send(emailId: string): Promise<void> {
-    const email = await this.prisma.email.findUniqueOrThrow({
+    const email = await this.prisma.working.email.findUniqueOrThrow({
       where: { id: emailId },
       include: { account: true, attachments: true },
     });
@@ -25,11 +25,11 @@ export class EmailSenderService {
 
     // Check unsubscribes
     const toEmails = (email.toEmails as any[]).map(t => t.email);
-    const unsubscribed = await this.prisma.emailUnsubscribe.findMany({
+    const unsubscribed = await this.prisma.working.emailUnsubscribe.findMany({
       where: { email: { in: toEmails } },
     });
     if (unsubscribed.length === toEmails.length) {
-      await this.prisma.email.update({
+      await this.prisma.working.email.update({
         where: { id: emailId },
         data: { status: 'CANCELLED', errorMessage: 'All recipients are unsubscribed' },
       });
@@ -37,7 +37,7 @@ export class EmailSenderService {
     }
 
     // Update status to SENDING
-    await this.prisma.email.update({ where: { id: emailId }, data: { status: 'SENDING' } });
+    await this.prisma.working.email.update({ where: { id: emailId }, data: { status: 'SENDING' } });
 
     try {
       const providerService = this.providerFactory.getService(account.provider);
@@ -57,7 +57,7 @@ export class EmailSenderService {
       });
 
       // Success
-      await this.prisma.email.update({
+      await this.prisma.working.email.update({
         where: { id: emailId },
         data: {
           status: 'SENT',
@@ -69,7 +69,7 @@ export class EmailSenderService {
       });
 
       // Update account counters
-      await this.prisma.emailAccount.update({
+      await this.prisma.working.emailAccount.update({
         where: { id: account.id },
         data: {
           todaySentCount: { increment: 1 },
@@ -78,7 +78,7 @@ export class EmailSenderService {
       });
     } catch (error: any) {
       const retryCount = email.retryCount + 1;
-      await this.prisma.email.update({
+      await this.prisma.working.email.update({
         where: { id: emailId },
         data: {
           status: retryCount < 3 ? 'QUEUED' : 'FAILED',
@@ -90,7 +90,7 @@ export class EmailSenderService {
   }
 
   async processScheduledEmails(): Promise<number> {
-    const emails = await this.prisma.email.findMany({
+    const emails = await this.prisma.working.email.findMany({
       where: {
         status: 'QUEUED',
         scheduledAt: { lte: new Date() },

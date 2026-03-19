@@ -10,7 +10,7 @@ export class SupportTicketService {
   /** Generate ticket number: TKT-2026-0001 */
   private async generateTicketNo(): Promise<string> {
     const year = new Date().getFullYear();
-    const count = await this.prisma.supportTicket.count({
+    const count = await this.prisma.working.supportTicket.count({
       where: {
         createdAt: {
           gte: new Date(`${year}-01-01`),
@@ -36,7 +36,7 @@ export class SupportTicketService {
     linkedErrorIds?: string[];
   }) {
     const ticketNo = await this.generateTicketNo();
-    return this.prisma.supportTicket.create({
+    return this.prisma.working.supportTicket.create({
       data: {
         ticketNo,
         tenantId: data.tenantId,
@@ -88,14 +88,14 @@ export class SupportTicketService {
     if (options.category) where.category = options.category;
 
     const [data, total] = await Promise.all([
-      this.prisma.supportTicket.findMany({
+      this.prisma.working.supportTicket.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
         include: { _count: { select: { messages: true } } },
       }),
-      this.prisma.supportTicket.count({ where }),
+      this.prisma.working.supportTicket.count({ where }),
     ]);
     return {
       data,
@@ -122,14 +122,14 @@ export class SupportTicketService {
     if (options.assignedToId) where.assignedToId = options.assignedToId;
 
     const [data, total] = await Promise.all([
-      this.prisma.supportTicket.findMany({
+      this.prisma.working.supportTicket.findMany({
         where,
         orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
         skip: (page - 1) * limit,
         take: limit,
         include: { _count: { select: { messages: true } } },
       }),
-      this.prisma.supportTicket.count({ where }),
+      this.prisma.working.supportTicket.count({ where }),
     ]);
     return {
       data,
@@ -138,7 +138,7 @@ export class SupportTicketService {
   }
 
   async findById(id: string) {
-    return this.prisma.supportTicket.findUnique({
+    return this.prisma.working.supportTicket.findUnique({
       where: { id },
       include: { messages: { orderBy: { createdAt: 'asc' } } },
     });
@@ -155,7 +155,7 @@ export class SupportTicketService {
       isInternal?: boolean;
     },
   ) {
-    const msg = await this.prisma.supportTicketMessage.create({
+    const msg = await this.prisma.working.supportTicketMessage.create({
       data: {
         ticketId,
         senderId: data.senderId,
@@ -169,11 +169,11 @@ export class SupportTicketService {
 
     // Update firstResponseAt if this is the first vendor response
     if (data.senderType === 'VENDOR') {
-      const ticket = await this.prisma.supportTicket.findUnique({
+      const ticket = await this.prisma.working.supportTicket.findUnique({
         where: { id: ticketId },
       });
       if (ticket && !ticket.firstResponseAt) {
-        await this.prisma.supportTicket.update({
+        await this.prisma.working.supportTicket.update({
           where: { id: ticketId },
           data: { firstResponseAt: new Date() },
         });
@@ -201,21 +201,21 @@ export class SupportTicketService {
     if (data.status === 'RESOLVED') updateData.resolvedAt = new Date();
     if (data.status === 'CLOSED') updateData.closedAt = new Date();
 
-    return this.prisma.supportTicket.update({
+    return this.prisma.working.supportTicket.update({
       where: { id },
       data: updateData,
     });
   }
 
   async closeTicket(id: string) {
-    return this.prisma.supportTicket.update({
+    return this.prisma.working.supportTicket.update({
       where: { id },
       data: { status: 'CLOSED', closedAt: new Date() },
     });
   }
 
   async rateTicket(id: string, rating: number, comment?: string) {
-    return this.prisma.supportTicket.update({
+    return this.prisma.working.supportTicket.update({
       where: { id },
       data: { satisfactionRating: rating, satisfactionComment: comment },
     });
@@ -223,11 +223,11 @@ export class SupportTicketService {
 
   async getStats() {
     const [open, inProgress, resolved, closed, all] = await Promise.all([
-      this.prisma.supportTicket.count({ where: { status: 'OPEN' } }),
-      this.prisma.supportTicket.count({ where: { status: 'IN_PROGRESS' } }),
-      this.prisma.supportTicket.count({ where: { status: 'RESOLVED' } }),
-      this.prisma.supportTicket.count({ where: { status: 'CLOSED' } }),
-      this.prisma.supportTicket.findMany({
+      this.prisma.working.supportTicket.count({ where: { status: 'OPEN' } }),
+      this.prisma.working.supportTicket.count({ where: { status: 'IN_PROGRESS' } }),
+      this.prisma.working.supportTicket.count({ where: { status: 'RESOLVED' } }),
+      this.prisma.working.supportTicket.count({ where: { status: 'CLOSED' } }),
+      this.prisma.working.supportTicket.findMany({
         where: { firstResponseAt: { not: null } },
         select: { createdAt: true, firstResponseAt: true },
       }),
@@ -244,7 +244,7 @@ export class SupportTicketService {
     }
 
     // Satisfaction average
-    const ratings = await this.prisma.supportTicket.aggregate({
+    const ratings = await this.prisma.working.supportTicket.aggregate({
       where: { satisfactionRating: { not: null } },
       _avg: { satisfactionRating: true },
       _count: { satisfactionRating: true },
@@ -263,7 +263,7 @@ export class SupportTicketService {
   }
 
   async getContext(ticketId: string) {
-    const ticket = await this.prisma.supportTicket.findUnique({
+    const ticket = await this.prisma.working.supportTicket.findUnique({
       where: { id: ticketId },
       select: { autoContext: true, linkedErrorIds: true },
     });

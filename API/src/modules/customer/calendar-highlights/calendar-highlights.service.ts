@@ -20,7 +20,7 @@ export class CalendarHighlightsService {
     if (types?.length) {
       where.highlightType = { in: types };
     }
-    return this.prisma.calendarHighlight.findMany({
+    return this.prisma.working.calendarHighlight.findMany({
       where,
       orderBy: { date: 'asc' },
     });
@@ -29,7 +29,7 @@ export class CalendarHighlightsService {
   async getHolidays(tenantId: string, year: number) {
     const from = new Date(`${year}-01-01`);
     const to = new Date(`${year}-12-31`);
-    return this.prisma.calendarHighlight.findMany({
+    return this.prisma.working.calendarHighlight.findMany({
       where: {
         date: { gte: from, lte: to },
         isHoliday: true,
@@ -54,7 +54,7 @@ export class CalendarHighlightsService {
     industryCode?: string;
     stateCode?: string;
   }) {
-    return this.prisma.calendarHighlight.create({
+    return this.prisma.working.calendarHighlight.create({
       data: {
         tenantId,
         date: new Date(data.date),

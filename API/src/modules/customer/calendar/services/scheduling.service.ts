@@ -15,10 +15,10 @@ export class SchedulingService {
   ) {}
 
   async createEvent(dto: any, userId: string, tenantId: string, roleLevel: number) {
-    const count = await this.prisma.scheduledEvent.count({ where: { tenantId } });
+    const count = await this.prisma.working.scheduledEvent.count({ where: { tenantId } });
     const eventNumber = `EVT-${String(count + 1).padStart(4, '0')}`;
 
-    const event = await this.prisma.scheduledEvent.create({
+    const event = await this.prisma.working.scheduledEvent.create({
       data: {
         tenantId,
         eventNumber,
@@ -43,13 +43,13 @@ export class SchedulingService {
     });
 
     // Add organizer as participant
-    await this.prisma.eventParticipant.create({
+    await this.prisma.working.eventParticipant.create({
       data: { tenantId, eventId: event.id, userId, role: 'ORGANIZER', rsvpStatus: 'ACCEPTED', rsvpAt: new Date() },
     });
 
     // Add extra participants
     if (dto.participants?.length) {
-      await this.prisma.eventParticipant.createMany({
+      await this.prisma.working.eventParticipant.createMany({
         data: dto.participants.map((p: any) => ({
           tenantId, eventId: event.id, userId: p.userId ?? null,
           email: p.email ?? null, name: p.name ?? null,
@@ -68,7 +68,7 @@ export class SchedulingService {
     });
 
     // Record history
-    await this.prisma.eventHistory.create({
+    await this.prisma.working.eventHistory.create({
       data: { tenantId, eventId: event.id, action: 'CREATED', changedById: userId },
     });
 
@@ -103,11 +103,11 @@ export class SchedulingService {
     if (dto.entityType !== undefined) data.entityType = dto.entityType;
     if (dto.entityId !== undefined) data.entityId = dto.entityId;
 
-    const updated = await this.prisma.scheduledEvent.update({ where: { id }, data });
+    const updated = await this.prisma.working.scheduledEvent.update({ where: { id }, data });
 
     // Record field changes
     for (const change of changes) {
-      await this.prisma.eventHistory.create({
+      await this.prisma.working.eventHistory.create({
         data: { tenantId, eventId: id, action: 'UPDATED', field: change.field, oldValue: change.oldValue, newValue: change.newValue, changedById: userId },
       });
     }
@@ -127,17 +127,17 @@ export class SchedulingService {
     const event = await this.findEventOrThrow(id, tenantId);
     this.validateOwnership(event, userId);
 
-    const updated = await this.prisma.scheduledEvent.update({
+    const updated = await this.prisma.working.scheduledEvent.update({
       where: { id },
       data: { status: 'CANCELLED', cancelledAt: new Date(), cancelReason: reason ?? null, isActive: false },
     });
 
-    await this.prisma.eventHistory.create({
+    await this.prisma.working.eventHistory.create({
       data: { tenantId, eventId: id, action: 'CANCELLED', field: 'status', oldValue: event.status, newValue: 'CANCELLED', changedById: userId },
     });
 
     // Notify all participants
-    const participants = await this.prisma.eventParticipant.findMany({ where: { eventId: id, userId: { not: userId } }, select: { userId: true } });
+    const participants = await this.prisma.working.eventParticipant.findMany({ where: { eventId: id, userId: { not: userId } }, select: { userId: true } });
     for (const p of participants) {
       if (p.userId) {
         await this.notifications.dispatch({
@@ -154,18 +154,18 @@ export class SchedulingService {
     const event = await this.findEventOrThrow(id, tenantId);
     this.validateOwnership(event, userId);
 
-    const updated = await this.prisma.scheduledEvent.update({
+    const updated = await this.prisma.working.scheduledEvent.update({
       where: { id },
       data: { startTime: new Date(newStartTime), endTime: new Date(newEndTime), status: 'RESCHEDULED' },
     });
 
     // Reset all participant RSVPs to PENDING
-    await this.prisma.eventParticipant.updateMany({
+    await this.prisma.working.eventParticipant.updateMany({
       where: { eventId: id, role: { not: 'ORGANIZER' } },
       data: { rsvpStatus: 'PENDING', rsvpAt: null },
     });
 
-    await this.prisma.eventHistory.create({
+    await this.prisma.working.eventHistory.create({
       data: {
         tenantId, eventId: id, action: 'RESCHEDULED', field: 'startTime',
         oldValue: event.startTime.toISOString(), newValue: newStartTime, changedById: userId,
@@ -191,7 +191,7 @@ export class SchedulingService {
     const ctx: CalendarVisibilityContext = { userId, roleLevel, tenantId };
     const visibilityWhere = await this.visibility.buildWhereClause(ctx);
 
-    const event = await this.prisma.scheduledEvent.findFirst({
+    const event = await this.prisma.working.scheduledEvent.findFirst({
       where: { id, ...visibilityWhere },
       include: {
         participants: { include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } } },
@@ -218,14 +218,14 @@ export class SchedulingService {
     orderBy[filters.sortBy ?? 'startTime'] = filters.sortOrder ?? 'desc';
 
     const [data, total] = await Promise.all([
-      this.prisma.scheduledEvent.findMany({
+      this.prisma.working.scheduledEvent.findMany({
         where, skip: (page - 1) * limit, take: limit, orderBy,
         include: {
           organizer: { select: { id: true, firstName: true, lastName: true } },
           participants: { select: { id: true, userId: true, rsvpStatus: true, role: true } },
         },
       }),
-      this.prisma.scheduledEvent.count({ where }),
+      this.prisma.working.scheduledEvent.count({ where }),
     ]);
 
     return { data, total, page, limit };
@@ -234,7 +234,7 @@ export class SchedulingService {
   async addParticipant(eventId: string, participantDto: any, userId: string, tenantId: string) {
     await this.findEventOrThrow(eventId, tenantId);
 
-    const participant = await this.prisma.eventParticipant.create({
+    const participant = await this.prisma.working.eventParticipant.create({
       data: {
         tenantId, eventId,
         userId: participantDto.userId ?? null,
@@ -245,7 +245,7 @@ export class SchedulingService {
       },
     });
 
-    await this.prisma.eventHistory.create({
+    await this.prisma.working.eventHistory.create({
       data: { tenantId, eventId, action: 'PARTICIPANT_ADDED', newValue: participantDto.userId ?? participantDto.email, changedById: userId },
     });
 
@@ -255,29 +255,29 @@ export class SchedulingService {
   async removeParticipant(eventId: string, participantUserId: string, userId: string, tenantId: string) {
     const event = await this.findEventOrThrow(eventId, tenantId);
 
-    await this.prisma.eventParticipant.deleteMany({
+    await this.prisma.working.eventParticipant.deleteMany({
       where: { eventId, userId: participantUserId },
     });
 
-    await this.prisma.eventHistory.create({
+    await this.prisma.working.eventHistory.create({
       data: { tenantId, eventId, action: 'PARTICIPANT_REMOVED', newValue: participantUserId, changedById: userId },
     });
   }
 
   async updateRSVP(eventId: string, userId: string, rsvpStatus: string, tenantId: string) {
-    const participant = await this.prisma.eventParticipant.findFirst({
+    const participant = await this.prisma.working.eventParticipant.findFirst({
       where: { eventId, userId, tenantId },
     });
     if (!participant) throw new NotFoundException('You are not a participant of this event');
 
-    return this.prisma.eventParticipant.update({
+    return this.prisma.working.eventParticipant.update({
       where: { id: participant.id },
       data: { rsvpStatus: rsvpStatus as any, rsvpAt: new Date() },
     });
   }
 
   async getEventHistory(eventId: string, tenantId: string) {
-    return this.prisma.eventHistory.findMany({
+    return this.prisma.working.eventHistory.findMany({
       where: { eventId, tenantId },
       include: { changedBy: { select: { id: true, firstName: true, lastName: true } } },
       orderBy: { createdAt: 'desc' },
@@ -285,7 +285,7 @@ export class SchedulingService {
   }
 
   private async findEventOrThrow(id: string, tenantId: string) {
-    const event = await this.prisma.scheduledEvent.findFirst({ where: { id, tenantId } });
+    const event = await this.prisma.working.scheduledEvent.findFirst({ where: { id, tenantId } });
     if (!event) throw new NotFoundException('Scheduled event not found');
     return event;
   }

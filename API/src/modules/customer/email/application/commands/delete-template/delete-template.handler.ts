@@ -10,7 +10,7 @@ export class DeleteTemplateHandler implements ICommandHandler<DeleteTemplateComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: DeleteTemplateCommand) {
-    const template = await this.prisma.emailTemplate.findUniqueOrThrow({
+    const template = await this.prisma.working.emailTemplate.findUniqueOrThrow({
       where: { id: cmd.id },
     });
 
@@ -18,7 +18,7 @@ export class DeleteTemplateHandler implements ICommandHandler<DeleteTemplateComm
       throw new BadRequestException('System templates cannot be deleted');
     }
 
-    await this.prisma.emailTemplate.delete({
+    await this.prisma.working.emailTemplate.delete({
       where: { id: cmd.id },
     });
 

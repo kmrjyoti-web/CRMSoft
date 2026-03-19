@@ -28,7 +28,7 @@ export class DocumentActivityService {
     details?: Record<string, any>;
     ipAddress?: string;
   }) {
-    return this.prisma.documentActivity.create({
+    return this.prisma.working.documentActivity.create({
       data: {
         documentId: data.documentId,
         action: data.action,
@@ -44,7 +44,7 @@ export class DocumentActivityService {
     const skip = (page - 1) * limit;
 
     const [data, total] = await Promise.all([
-      this.prisma.documentActivity.findMany({
+      this.prisma.working.documentActivity.findMany({
         where,
         skip,
         take: limit,
@@ -53,7 +53,7 @@ export class DocumentActivityService {
           user: { select: { id: true, firstName: true, lastName: true } },
         },
       }),
-      this.prisma.documentActivity.count({ where }),
+      this.prisma.working.documentActivity.count({ where }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
@@ -64,7 +64,7 @@ export class DocumentActivityService {
     const skip = (page - 1) * limit;
 
     const [data, total] = await Promise.all([
-      this.prisma.documentActivity.findMany({
+      this.prisma.working.documentActivity.findMany({
         where,
         skip,
         take: limit,
@@ -73,7 +73,7 @@ export class DocumentActivityService {
           document: { select: { id: true, originalName: true, mimeType: true } },
         },
       }),
-      this.prisma.documentActivity.count({ where }),
+      this.prisma.working.documentActivity.count({ where }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };

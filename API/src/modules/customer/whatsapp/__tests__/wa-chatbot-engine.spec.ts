@@ -59,6 +59,7 @@ describe('WaChatbotEngineService', () => {
         create: jest.fn().mockResolvedValue({ id: 'msg-bot-1' }),
       },
     };
+(prisma as any).working = prisma;
 
     waApiService = {
       sendText: jest.fn().mockResolvedValue({}),

@@ -24,14 +24,14 @@ export class WaAnalyticsService {
       openConversations,
       resolvedConversations,
     ] = await Promise.all([
-      this.prisma.waMessage.count({ where: { ...messageWhere, direction: 'OUTBOUND' } }),
-      this.prisma.waMessage.count({ where: { ...messageWhere, direction: 'INBOUND' } }),
-      this.prisma.waMessage.count({ where: { ...messageWhere, direction: 'OUTBOUND', status: 'DELIVERED' } }),
-      this.prisma.waMessage.count({ where: { ...messageWhere, direction: 'OUTBOUND', status: 'READ' } }),
-      this.prisma.waMessage.count({ where: { ...messageWhere, direction: 'OUTBOUND', status: 'FAILED' } }),
-      this.prisma.waConversation.count({ where: { wabaId } }),
-      this.prisma.waConversation.count({ where: { wabaId, status: 'OPEN' } }),
-      this.prisma.waConversation.count({ where: { wabaId, status: 'RESOLVED' } }),
+      this.prisma.working.waMessage.count({ where: { ...messageWhere, direction: 'OUTBOUND' } }),
+      this.prisma.working.waMessage.count({ where: { ...messageWhere, direction: 'INBOUND' } }),
+      this.prisma.working.waMessage.count({ where: { ...messageWhere, direction: 'OUTBOUND', status: 'DELIVERED' } }),
+      this.prisma.working.waMessage.count({ where: { ...messageWhere, direction: 'OUTBOUND', status: 'READ' } }),
+      this.prisma.working.waMessage.count({ where: { ...messageWhere, direction: 'OUTBOUND', status: 'FAILED' } }),
+      this.prisma.working.waConversation.count({ where: { wabaId } }),
+      this.prisma.working.waConversation.count({ where: { wabaId, status: 'OPEN' } }),
+      this.prisma.working.waConversation.count({ where: { wabaId, status: 'RESOLVED' } }),
     ]);
 
     const deliveryRate = totalSent > 0 ? Math.round((totalDelivered / totalSent) * 100) : 0;
@@ -54,7 +54,7 @@ export class WaAnalyticsService {
   async getAgentPerformance(wabaId: string, dateFrom?: Date, dateTo?: Date) {
     const conversationWhere: any = { wabaId, assignedToId: { not: null } };
 
-    const assignedConversations = await this.prisma.waConversation.findMany({
+    const assignedConversations = await this.prisma.working.waConversation.findMany({
       where: conversationWhere,
       select: {
         assignedToId: true,
@@ -89,11 +89,11 @@ export class WaAnalyticsService {
   }
 
   async getBroadcastStats(broadcastId: string) {
-    const broadcast = await this.prisma.waBroadcast.findUniqueOrThrow({
+    const broadcast = await this.prisma.working.waBroadcast.findUniqueOrThrow({
       where: { id: broadcastId },
     });
 
-    const recipientStats = await this.prisma.waBroadcastRecipient.groupBy({
+    const recipientStats = await this.prisma.working.waBroadcastRecipient.groupBy({
       by: ['status'],
       where: { broadcastId },
       _count: { id: true },

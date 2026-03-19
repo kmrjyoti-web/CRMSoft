@@ -71,6 +71,7 @@ describe('EmailSyncService', () => {
         createMany: jest.fn().mockResolvedValue({}),
       },
     };
+(prisma as any).working = prisma;
 
     providerFactory = {
       getService: jest.fn().mockReturnValue(mockProviderService),

@@ -75,10 +75,10 @@ export class UnifiedCalendarService {
     const [todayEvents, weekEvents, overdueTasks, pendingRsvps] = await Promise.all([
       this.getUnifiedView(userId, tenantId, roleLevel, todayStart, todayEnd).then((e) => e.length),
       this.getUnifiedView(userId, tenantId, roleLevel, todayStart, weekEnd).then((e) => e.length),
-      this.prisma.task.count({
+      this.prisma.working.task.count({
         where: { tenantId, assignedToId: userId, isActive: true, status: 'OPEN', dueDate: { lt: now } },
       }),
-      this.prisma.eventParticipant.count({
+      this.prisma.working.eventParticipant.count({
         where: { tenantId, userId, rsvpStatus: 'PENDING', event: { isActive: true, startTime: { gte: now } } },
       }),
     ]);
@@ -111,7 +111,7 @@ export class UnifiedCalendarService {
         { startDate: { gte: start, lte: end } },
       ],
     };
-    const tasks = await this.prisma.task.findMany({
+    const tasks = await this.prisma.working.task.findMany({
       where, select: { id: true, title: true, description: true, dueDate: true, startDate: true, status: true, priority: true, assignedToId: true, assignedTo: { select: { firstName: true, lastName: true } }, entityType: true, entityId: true, createdAt: true },
     });
     return tasks.filter((t) => t.dueDate || t.startDate).map((t) => ({
@@ -131,7 +131,7 @@ export class UnifiedCalendarService {
         { endTime: { gte: start, lte: end } },
       ],
     };
-    const items = await this.prisma.activity.findMany({
+    const items = await this.prisma.working.activity.findMany({
       where, select: { id: true, subject: true, description: true, scheduledAt: true, endTime: true, type: true, createdById: true, createdByUser: { select: { firstName: true, lastName: true } }, locationName: true, createdAt: true },
     });
     return items.filter((a) => a.scheduledAt || a.endTime).map((a) => ({
@@ -144,7 +144,7 @@ export class UnifiedCalendarService {
 
   private async fetchDemos(tenantId: string, userIds: string[], start: Date, end: Date): Promise<UnifiedCalendarEvent[]> {
     const where: any = { ...this.applyUserFilter(tenantId, userIds, 'conductedById'), scheduledAt: { gte: start, lte: end } };
-    const items = await this.prisma.demo.findMany({
+    const items = await this.prisma.working.demo.findMany({
       where,
       include: {
         conductedBy: { select: { firstName: true, lastName: true } },
@@ -167,7 +167,7 @@ export class UnifiedCalendarService {
 
   private async fetchTourPlans(tenantId: string, userIds: string[], start: Date, end: Date): Promise<UnifiedCalendarEvent[]> {
     const where: any = { ...this.applyUserFilter(tenantId, userIds, 'salesPersonId'), planDate: { gte: start, lte: end } };
-    const items = await this.prisma.tourPlan.findMany({
+    const items = await this.prisma.working.tourPlan.findMany({
       where, select: { id: true, title: true, description: true, planDate: true, status: true, salesPersonId: true, salesPerson: { select: { firstName: true, lastName: true } }, startLocation: true },
     });
     return items.map((tp) => ({
@@ -180,7 +180,7 @@ export class UnifiedCalendarService {
 
   private async fetchReminders(tenantId: string, userIds: string[], start: Date, end: Date): Promise<UnifiedCalendarEvent[]> {
     const where: any = { ...this.applyUserFilter(tenantId, userIds, 'recipientId'), isActive: true, scheduledAt: { gte: start, lte: end } };
-    const items = await this.prisma.reminder.findMany({
+    const items = await this.prisma.working.reminder.findMany({
       where, select: { id: true, title: true, description: true, scheduledAt: true, recipientId: true, recipient: { select: { firstName: true, lastName: true } }, status: true },
     });
     return items.map((r) => ({
@@ -193,7 +193,7 @@ export class UnifiedCalendarService {
 
   private async fetchFollowUps(tenantId: string, userIds: string[], start: Date, end: Date): Promise<UnifiedCalendarEvent[]> {
     const where: any = { ...this.applyUserFilter(tenantId, userIds, 'assignedToId'), isActive: true, dueDate: { gte: start, lte: end } };
-    const items = await this.prisma.followUp.findMany({
+    const items = await this.prisma.working.followUp.findMany({
       where, select: { id: true, title: true, description: true, dueDate: true, priority: true, assignedToId: true, assignedTo: { select: { firstName: true, lastName: true } }, isOverdue: true },
     });
     return items.map((f) => ({
@@ -213,7 +213,7 @@ export class UnifiedCalendarService {
     } else if (roleLevel > 3) {
       where.OR = [{ organizerId: userId }, { participants: { some: { userId } } }];
     }
-    const items = await this.prisma.scheduledEvent.findMany({
+    const items = await this.prisma.working.scheduledEvent.findMany({
       where, select: {
         id: true, title: true, description: true, startTime: true, endTime: true, allDay: true,
         color: true, location: true, meetingLink: true, status: true, type: true,

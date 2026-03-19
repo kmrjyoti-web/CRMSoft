@@ -21,7 +21,7 @@ export class MarkVerifiedHandler implements ICommandHandler<MarkVerifiedCommand>
 
     if (comm.isVerified) return; // Already verified
 
-    await this.prisma.communication.update({
+    await this.prisma.working.communication.update({
       where: { id: command.communicationId },
       data: { isVerified: true },
     });

@@ -10,7 +10,7 @@ export class SlaMonitorService {
   /** Called by cron-engine (CHECK_SLA_BREACHES). */
   async checkSlaBreaches(): Promise<void> {
     try {
-      const instances = await this.prisma.workflowInstance.findMany({
+      const instances = await this.prisma.working.workflowInstance.findMany({
         where: { isActive: true },
         include: { currentState: true },
       });
@@ -35,7 +35,7 @@ export class SlaMonitorService {
 
     const escalationLevel = Math.min(Math.floor(hoursInState / slaHours), 3);
 
-    const existingEscalation = await this.prisma.workflowSlaEscalation.findFirst({
+    const existingEscalation = await this.prisma.working.workflowSlaEscalation.findFirst({
       where: {
         instanceId: instance.id,
         stateId: instance.currentStateId,
@@ -48,7 +48,7 @@ export class SlaMonitorService {
 
     const escalatedToId = await this.findEscalationTarget(escalationLevel);
 
-    await this.prisma.workflowSlaEscalation.create({
+    await this.prisma.working.workflowSlaEscalation.create({
       data: {
         instanceId: instance.id,
         stateId: instance.currentStateId,
@@ -81,7 +81,7 @@ export class SlaMonitorService {
   }
 
   async resolveEscalations(instanceId: string, stateId: string): Promise<void> {
-    await this.prisma.workflowSlaEscalation.updateMany({
+    await this.prisma.working.workflowSlaEscalation.updateMany({
       where: { instanceId, stateId, isResolved: false },
       data: { isResolved: true, resolvedAt: new Date() },
     });

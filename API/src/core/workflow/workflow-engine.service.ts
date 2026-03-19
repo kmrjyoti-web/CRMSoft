@@ -19,15 +19,15 @@ export class WorkflowEngineService {
     entityType: string, entityId: string, userId: string, workflowId?: string,
   ) {
     const workflow = workflowId
-      ? await this.prisma.workflow.findUnique({ where: { id: workflowId }, include: { states: true } })
-      : await this.prisma.workflow.findFirst({
+      ? await this.prisma.working.workflow.findUnique({ where: { id: workflowId }, include: { states: true } })
+      : await this.prisma.working.workflow.findFirst({
           where: { entityType, isDefault: true, isActive: true },
           include: { states: true },
         });
 
     if (!workflow) throw new NotFoundException(`No workflow found for entity type "${entityType}"`);
 
-    const existing = await this.prisma.workflowInstance.findFirst({
+    const existing = await this.prisma.working.workflowInstance.findFirst({
       where: { entityType, entityId, workflowId: workflow.id },
     });
     if (existing?.isActive) throw new ConflictException('Active workflow instance already exists');
@@ -39,7 +39,7 @@ export class WorkflowEngineService {
       where: { id: userId }, select: { firstName: true, lastName: true },
     });
 
-    const instance = await this.prisma.workflowInstance.create({
+    const instance = await this.prisma.working.workflowInstance.create({
       data: {
         workflowId: workflow.id, entityType, entityId,
         currentStateId: initialState.id, data: {},
@@ -47,7 +47,7 @@ export class WorkflowEngineService {
       include: { currentState: true, workflow: { select: { name: true } } },
     });
 
-    await this.prisma.workflowHistory.create({
+    await this.prisma.working.workflowHistory.create({
       data: {
         instanceId: instance.id, toStateId: initialState.id,
         action: 'INITIALIZE', performedById: userId,
@@ -64,7 +64,7 @@ export class WorkflowEngineService {
     comment?: string, data?: Record<string, any>,
   ): Promise<TransitionResult> {
     const instance = await this.loadInstance(instanceId);
-    const transition = await this.prisma.workflowTransition.findFirst({
+    const transition = await this.prisma.working.workflowTransition.findFirst({
       where: { workflowId: instance.workflowId, code: transitionCode, fromStateId: instance.currentStateId, isActive: true },
       include: { toState: true },
     });
@@ -76,7 +76,7 @@ export class WorkflowEngineService {
     }
 
     if (transition.triggerType === 'APPROVAL') {
-      await this.prisma.workflowApproval.create({
+      await this.prisma.working.workflowApproval.create({
         data: {
           instanceId, transitionId: transition.id, requestedById: userId,
           status: 'PENDING', comment,
@@ -91,7 +91,7 @@ export class WorkflowEngineService {
 
   async getAvailableTransitions(instanceId: string, userId?: string): Promise<AvailableTransition[]> {
     const instance = await this.loadInstance(instanceId);
-    const transitions = await this.prisma.workflowTransition.findMany({
+    const transitions = await this.prisma.working.workflowTransition.findMany({
       where: { workflowId: instance.workflowId, fromStateId: instance.currentStateId, isActive: true },
       include: { toState: { select: { id: true, name: true, code: true, color: true } } },
       orderBy: { sortOrder: 'asc' },
@@ -108,14 +108,14 @@ export class WorkflowEngineService {
   }
 
   async approveTransition(approvalId: string, userId: string, comment?: string) {
-    const approval = await this.prisma.workflowApproval.findUnique({
+    const approval = await this.prisma.working.workflowApproval.findUnique({
       where: { id: approvalId }, include: { transition: { include: { toState: true } }, instance: { include: { currentState: true } } },
     });
     if (!approval) throw new NotFoundException('Approval not found');
     if (approval.status !== 'PENDING') throw new BadRequestException(`Approval already ${approval.status}`);
     if (approval.requestedById === userId) throw new BadRequestException('Cannot approve own request');
 
-    await this.prisma.workflowApproval.update({
+    await this.prisma.working.workflowApproval.update({
       where: { id: approvalId }, data: { status: 'APPROVED', approvedById: userId, comment, decidedAt: new Date() },
     });
 
@@ -124,17 +124,17 @@ export class WorkflowEngineService {
   }
 
   async rejectTransition(approvalId: string, userId: string, comment?: string) {
-    const approval = await this.prisma.workflowApproval.findUnique({ where: { id: approvalId } });
+    const approval = await this.prisma.working.workflowApproval.findUnique({ where: { id: approvalId } });
     if (!approval) throw new NotFoundException('Approval not found');
     if (approval.status !== 'PENDING') throw new BadRequestException(`Approval already ${approval.status}`);
 
-    return this.prisma.workflowApproval.update({
+    return this.prisma.working.workflowApproval.update({
       where: { id: approvalId }, data: { status: 'REJECTED', approvedById: userId, comment, decidedAt: new Date() },
     });
   }
 
   async getEntityStatus(entityType: string, entityId: string): Promise<EntityStatus | null> {
-    const instance = await this.prisma.workflowInstance.findFirst({
+    const instance = await this.prisma.working.workflowInstance.findFirst({
       where: { entityType, entityId, isActive: true },
       include: { workflow: { select: { id: true, name: true } }, currentState: true, previousState: true },
     });
@@ -151,7 +151,7 @@ export class WorkflowEngineService {
   }
 
   async fastForwardToState(instanceId: string, targetStateCode: string, userId: string) {
-    const instance = await this.prisma.workflowInstance.findUnique({
+    const instance = await this.prisma.working.workflowInstance.findUnique({
       where: { id: instanceId },
       include: { workflow: { include: { states: true } } },
     });
@@ -164,7 +164,7 @@ export class WorkflowEngineService {
       where: { id: userId }, select: { firstName: true, lastName: true },
     });
 
-    await this.prisma.workflowInstance.update({
+    await this.prisma.working.workflowInstance.update({
       where: { id: instanceId },
       data: {
         currentStateId: targetState.id,
@@ -173,7 +173,7 @@ export class WorkflowEngineService {
       },
     });
 
-    await this.prisma.workflowHistory.create({
+    await this.prisma.working.workflowHistory.create({
       data: {
         instanceId, fromStateId: instance.currentStateId, toStateId: targetState.id,
         action: 'FAST_FORWARD', performedById: userId,
@@ -186,7 +186,7 @@ export class WorkflowEngineService {
   }
 
   async getInstanceHistory(instanceId: string) {
-    return this.prisma.workflowHistory.findMany({
+    return this.prisma.working.workflowHistory.findMany({
       where: { instanceId },
       include: {
         fromState: { select: { id: true, name: true, code: true, color: true } },
@@ -202,7 +202,7 @@ export class WorkflowEngineService {
     const performerName = user ? `${user.firstName} ${user.lastName}` : userId;
     const isTerminal = transition.toState.stateType === 'TERMINAL';
 
-    const updated = await this.prisma.workflowInstance.update({
+    const updated = await this.prisma.working.workflowInstance.update({
       where: { id: instance.id },
       data: {
         currentStateId: transition.toStateId, previousStateId: instance.currentStateId,
@@ -210,7 +210,7 @@ export class WorkflowEngineService {
       },
     });
 
-    const history = await this.prisma.workflowHistory.create({
+    const history = await this.prisma.working.workflowHistory.create({
       data: {
         instanceId: instance.id, fromStateId: instance.currentStateId, toStateId: transition.toStateId,
         transitionId: transition.id, action: 'TRANSITION', performedById: userId, performedByName: performerName, comment,
@@ -232,7 +232,7 @@ export class WorkflowEngineService {
   }
 
   private async loadInstance(instanceId: string) {
-    const instance = await this.prisma.workflowInstance.findUnique({
+    const instance = await this.prisma.working.workflowInstance.findUnique({
       where: { id: instanceId }, include: { currentState: true, workflow: true },
     });
     if (!instance) throw new NotFoundException(`Workflow instance "${instanceId}" not found`);

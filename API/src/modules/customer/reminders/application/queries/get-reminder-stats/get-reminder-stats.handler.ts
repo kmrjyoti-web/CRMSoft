@@ -11,10 +11,10 @@ export class GetReminderStatsHandler implements IQueryHandler<GetReminderStatsQu
     if (query.userId) where.recipientId = query.userId;
 
     const [total, sent, pending, byChannel] = await Promise.all([
-      this.prisma.reminder.count({ where }),
-      this.prisma.reminder.count({ where: { ...where, isSent: true } }),
-      this.prisma.reminder.count({ where: { ...where, isSent: false } }),
-      this.prisma.reminder.groupBy({ by: ['channel'], where, _count: true }),
+      this.prisma.working.reminder.count({ where }),
+      this.prisma.working.reminder.count({ where: { ...where, isSent: true } }),
+      this.prisma.working.reminder.count({ where: { ...where, isSent: false } }),
+      this.prisma.working.reminder.groupBy({ by: ['channel'], where, _count: true }),
     ]);
 
     return {

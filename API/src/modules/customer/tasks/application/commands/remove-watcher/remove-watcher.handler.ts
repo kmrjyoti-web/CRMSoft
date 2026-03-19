@@ -8,12 +8,12 @@ export class RemoveWatcherHandler implements ICommandHandler<RemoveWatcherComman
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: RemoveWatcherCommand) {
-    const existing = await this.prisma.taskWatcher.findUnique({
+    const existing = await this.prisma.working.taskWatcher.findUnique({
       where: { taskId_userId: { taskId: cmd.taskId, userId: cmd.watcherUserId } },
     });
     if (!existing) throw new NotFoundException('Watcher not found');
 
-    return this.prisma.taskWatcher.delete({
+    return this.prisma.working.taskWatcher.delete({
       where: { taskId_userId: { taskId: cmd.taskId, userId: cmd.watcherUserId } },
     });
   }

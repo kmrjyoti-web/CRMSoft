@@ -18,13 +18,13 @@ export class GetTaskStatsHandler implements IQueryHandler<GetTaskStatsQuery> {
     });
 
     const [total, open, inProgress, completed, overdue, cancelled, onHold] = await Promise.all([
-      this.prisma.task.count({ where }),
-      this.prisma.task.count({ where: { ...where, status: 'OPEN' } }),
-      this.prisma.task.count({ where: { ...where, status: 'IN_PROGRESS' } }),
-      this.prisma.task.count({ where: { ...where, status: 'COMPLETED' } }),
-      this.prisma.task.count({ where: { ...where, status: 'OVERDUE' } }),
-      this.prisma.task.count({ where: { ...where, status: 'CANCELLED' } }),
-      this.prisma.task.count({ where: { ...where, status: 'ON_HOLD' } }),
+      this.prisma.working.task.count({ where }),
+      this.prisma.working.task.count({ where: { ...where, status: 'OPEN' } }),
+      this.prisma.working.task.count({ where: { ...where, status: 'IN_PROGRESS' } }),
+      this.prisma.working.task.count({ where: { ...where, status: 'COMPLETED' } }),
+      this.prisma.working.task.count({ where: { ...where, status: 'OVERDUE' } }),
+      this.prisma.working.task.count({ where: { ...where, status: 'CANCELLED' } }),
+      this.prisma.working.task.count({ where: { ...where, status: 'ON_HOLD' } }),
     ]);
 
     return { total, open, inProgress, completed, overdue, cancelled, onHold };

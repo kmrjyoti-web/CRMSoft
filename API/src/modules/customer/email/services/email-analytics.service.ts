@@ -9,7 +9,7 @@ export class EmailAnalyticsService {
     const accountWhere: any = {};
     if (userId) accountWhere.userId = userId;
 
-    const accounts = await this.prisma.emailAccount.findMany({
+    const accounts = await this.prisma.working.emailAccount.findMany({
       where: accountWhere,
       select: { id: true },
     });
@@ -24,12 +24,12 @@ export class EmailAnalyticsService {
     }
 
     const [totalSent, totalReceived, totalOpened, totalClicked, totalBounced, totalReplied] = await Promise.all([
-      this.prisma.email.count({ where: { ...emailWhere, direction: 'OUTBOUND', status: { in: ['SENT', 'DELIVERED', 'OPENED', 'CLICKED', 'REPLIED'] } } }),
-      this.prisma.email.count({ where: { ...emailWhere, direction: 'INBOUND' } }),
-      this.prisma.email.count({ where: { ...emailWhere, direction: 'OUTBOUND', openCount: { gt: 0 } } }),
-      this.prisma.email.count({ where: { ...emailWhere, direction: 'OUTBOUND', clickCount: { gt: 0 } } }),
-      this.prisma.email.count({ where: { ...emailWhere, isBounced: true } }),
-      this.prisma.email.count({ where: { ...emailWhere, isReplied: true } }),
+      this.prisma.working.email.count({ where: { ...emailWhere, direction: 'OUTBOUND', status: { in: ['SENT', 'DELIVERED', 'OPENED', 'CLICKED', 'REPLIED'] } } }),
+      this.prisma.working.email.count({ where: { ...emailWhere, direction: 'INBOUND' } }),
+      this.prisma.working.email.count({ where: { ...emailWhere, direction: 'OUTBOUND', openCount: { gt: 0 } } }),
+      this.prisma.working.email.count({ where: { ...emailWhere, direction: 'OUTBOUND', clickCount: { gt: 0 } } }),
+      this.prisma.working.email.count({ where: { ...emailWhere, isBounced: true } }),
+      this.prisma.working.email.count({ where: { ...emailWhere, isReplied: true } }),
     ]);
 
     const openRate = totalSent > 0 ? Math.round((totalOpened / totalSent) * 100) : 0;
@@ -52,11 +52,11 @@ export class EmailAnalyticsService {
   }
 
   async getCampaignStats(campaignId: string) {
-    const campaign = await this.prisma.emailCampaign.findUniqueOrThrow({
+    const campaign = await this.prisma.working.emailCampaign.findUniqueOrThrow({
       where: { id: campaignId },
     });
 
-    const recipientStats = await this.prisma.campaignRecipient.groupBy({
+    const recipientStats = await this.prisma.working.campaignRecipient.groupBy({
       by: ['status'],
       where: { campaignId },
       _count: { id: true },

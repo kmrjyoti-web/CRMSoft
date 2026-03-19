@@ -8,7 +8,7 @@ export class GetTemplateDetailHandler implements IQueryHandler<GetTemplateDetail
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetTemplateDetailQuery) {
-    const template = await this.prisma.emailTemplate.findUnique({
+    const template = await this.prisma.working.emailTemplate.findUnique({
       where: { id: query.templateId },
     });
 

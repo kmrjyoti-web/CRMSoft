@@ -12,13 +12,13 @@ export class GetBroadcastRecipientsHandler implements IQueryHandler<GetBroadcast
     if (query.status) where.status = query.status;
 
     const [data, total] = await Promise.all([
-      this.prisma.waBroadcastRecipient.findMany({
+      this.prisma.working.waBroadcastRecipient.findMany({
         where,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.waBroadcastRecipient.count({ where }),
+      this.prisma.working.waBroadcastRecipient.count({ where }),
     ]);
 
     return {

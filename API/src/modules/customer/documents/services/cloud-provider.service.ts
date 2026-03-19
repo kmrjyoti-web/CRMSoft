@@ -47,12 +47,12 @@ export class CloudProviderService {
     accountEmail?: string,
     accountName?: string,
   ) {
-    const existing = await this.prisma.cloudConnection.findFirst({
+    const existing = await this.prisma.working.cloudConnection.findFirst({
       where: { provider, userId },
     });
 
     if (existing) {
-      return this.prisma.cloudConnection.update({
+      return this.prisma.working.cloudConnection.update({
         where: { id: existing.id },
         data: {
           accessToken,
@@ -65,7 +65,7 @@ export class CloudProviderService {
         },
       });
     } else {
-      return this.prisma.cloudConnection.create({
+      return this.prisma.working.cloudConnection.create({
         data: {
           provider,
           userId,
@@ -81,14 +81,14 @@ export class CloudProviderService {
   }
 
   async disconnectProvider(userId: string, provider: StorageProvider) {
-    return this.prisma.cloudConnection.updateMany({
+    return this.prisma.working.cloudConnection.updateMany({
       where: { userId, provider },
       data: { status: 'REVOKED', isActive: false },
     });
   }
 
   async getConnections(userId: string) {
-    return this.prisma.cloudConnection.findMany({
+    return this.prisma.working.cloudConnection.findMany({
       where: { userId, isActive: true },
       select: {
         id: true,
@@ -103,7 +103,7 @@ export class CloudProviderService {
   }
 
   private async getConnection(userId: string, provider: StorageProvider) {
-    return this.prisma.cloudConnection.findFirst({
+    return this.prisma.working.cloudConnection.findFirst({
       where: {
         provider,
         userId,

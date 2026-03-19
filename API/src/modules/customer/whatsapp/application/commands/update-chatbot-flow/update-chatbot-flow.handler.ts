@@ -16,7 +16,7 @@ export class UpdateChatbotFlowHandler implements ICommandHandler<UpdateChatbotFl
     if (cmd.triggerKeywords !== undefined) updateData.triggerKeywords = cmd.triggerKeywords;
     if (cmd.nodes !== undefined) updateData.nodes = cmd.nodes;
 
-    const flow = await this.prisma.waChatbotFlow.update({
+    const flow = await this.prisma.working.waChatbotFlow.update({
       where: { id: cmd.flowId },
       data: updateData,
     });

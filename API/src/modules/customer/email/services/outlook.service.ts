@@ -12,7 +12,7 @@ export class OutlookService implements IEmailProviderService {
 
   async sendEmail(accountId: string, params: SendEmailParams): Promise<SendResult> {
     // In production: POST https://graph.microsoft.com/v1.0/me/sendMail
-    const account = await this.prisma.emailAccount.findUniqueOrThrow({ where: { id: accountId } });
+    const account = await this.prisma.working.emailAccount.findUniqueOrThrow({ where: { id: accountId } });
     return {
       messageId: `outlook-${Date.now()}@outlook.com`,
       providerMessageId: `msg-${Date.now()}`,

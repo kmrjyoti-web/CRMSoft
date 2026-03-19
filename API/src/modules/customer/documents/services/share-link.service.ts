@@ -16,14 +16,14 @@ export class ShareLinkService {
     maxViews?: number;
     createdById: string;
   }) {
-    const doc = await this.prisma.document.findUnique({
+    const doc = await this.prisma.working.document.findUnique({
       where: { id: data.documentId, isActive: true },
     });
     if (!doc) throw new NotFoundException('Document not found');
 
     const token = uuidv4().replace(/-/g, '');
 
-    return this.prisma.documentShareLink.create({
+    return this.prisma.working.documentShareLink.create({
       data: {
         documentId: data.documentId,
         token,
@@ -41,7 +41,7 @@ export class ShareLinkService {
   }
 
   async accessLink(token: string, password?: string) {
-    const link = await this.prisma.documentShareLink.findUnique({
+    const link = await this.prisma.working.documentShareLink.findUnique({
       where: { token },
       include: {
         document: {
@@ -67,7 +67,7 @@ export class ShareLinkService {
     }
 
     // Increment view count
-    await this.prisma.documentShareLink.update({
+    await this.prisma.working.documentShareLink.update({
       where: { id: link.id },
       data: { viewCount: { increment: 1 } },
     });
@@ -79,20 +79,20 @@ export class ShareLinkService {
   }
 
   async revokeLink(linkId: string, userId: string) {
-    const link = await this.prisma.documentShareLink.findUnique({
+    const link = await this.prisma.working.documentShareLink.findUnique({
       where: { id: linkId },
     });
     if (!link) throw new NotFoundException('Share link not found');
     if (link.createdById !== userId) throw new ForbiddenException('You can only revoke your own share links');
 
-    return this.prisma.documentShareLink.update({
+    return this.prisma.working.documentShareLink.update({
       where: { id: linkId },
       data: { isActive: false },
     });
   }
 
   async getDocumentLinks(documentId: string) {
-    return this.prisma.documentShareLink.findMany({
+    return this.prisma.working.documentShareLink.findMany({
       where: { documentId, isActive: true },
       include: {
         createdBy: { select: { id: true, firstName: true, lastName: true } },

@@ -13,7 +13,7 @@ export class ApproveRequestHandler implements ICommandHandler<ApproveRequestComm
 
   async execute(cmd: ApproveRequestCommand) {
     // Validate checker has the right role
-    const request = await this.prisma.approvalRequest.findUnique({
+    const request = await this.prisma.working.approvalRequest.findUnique({
       where: { id: cmd.requestId },
     });
     if (request && request.checkerRole !== cmd.checkerRole) {

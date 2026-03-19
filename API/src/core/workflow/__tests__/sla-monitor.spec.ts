@@ -14,6 +14,7 @@ describe('SlaMonitorService', () => {
       },
       user: { findFirst: jest.fn().mockResolvedValue({ id: 'manager-1' }) },
     };
+(prisma as any).working = prisma;
     service = new SlaMonitorService(prisma as any);
   });
 

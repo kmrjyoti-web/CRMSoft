@@ -60,6 +60,7 @@ describe('EmailSenderService', () => {
         update: jest.fn().mockResolvedValue(mockAccount),
       },
     };
+(prisma as any).working = prisma;
 
     providerFactory = {
       getService: jest.fn().mockReturnValue(mockProviderService),

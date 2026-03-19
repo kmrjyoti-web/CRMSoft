@@ -8,10 +8,10 @@ export class UpdateRecurrenceHandler implements ICommandHandler<UpdateRecurrence
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: UpdateRecurrenceCommand) {
-    const existing = await this.prisma.recurringEvent.findUnique({ where: { id: cmd.id } });
+    const existing = await this.prisma.working.recurringEvent.findUnique({ where: { id: cmd.id } });
     if (!existing) throw new NotFoundException('Recurring event not found');
 
-    return this.prisma.recurringEvent.update({
+    return this.prisma.working.recurringEvent.update({
       where: { id: cmd.id },
       data: cmd.data as any,
     });

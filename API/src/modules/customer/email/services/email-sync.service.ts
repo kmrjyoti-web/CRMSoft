@@ -15,7 +15,7 @@ export class EmailSyncService {
   ) {}
 
   async syncAccount(accountId: string): Promise<{ newEmails: number; errors: number }> {
-    const account = await this.prisma.emailAccount.findUniqueOrThrow({
+    const account = await this.prisma.working.emailAccount.findUniqueOrThrow({
       where: { id: accountId },
     });
 
@@ -23,7 +23,7 @@ export class EmailSyncService {
       return { newEmails: 0, errors: 0 };
     }
 
-    await this.prisma.emailAccount.update({
+    await this.prisma.working.emailAccount.update({
       where: { id: accountId },
       data: { status: 'SYNCING' },
     });
@@ -42,14 +42,14 @@ export class EmailSyncService {
         try {
           // Dedup by internetMessageId
           if (fetched.internetMessageId) {
-            const existing = await this.prisma.email.findFirst({
+            const existing = await this.prisma.working.email.findFirst({
               where: { internetMessageId: fetched.internetMessageId },
             });
             if (existing) continue;
           }
 
           // Create email record
-          const email = await this.prisma.email.create({
+          const email = await this.prisma.working.email.create({
             data: {
               accountId,
               direction: 'INBOUND',
@@ -77,7 +77,7 @@ export class EmailSyncService {
 
           // Create attachments
           if (fetched.attachments?.length) {
-            await this.prisma.emailAttachment.createMany({
+            await this.prisma.working.emailAttachment.createMany({
               data: fetched.attachments.map(a => ({
                 emailId: email.id,
                 fileName: a.fileName,
@@ -104,7 +104,7 @@ export class EmailSyncService {
       }
 
       // Update sync state
-      await this.prisma.emailAccount.update({
+      await this.prisma.working.emailAccount.update({
         where: { id: accountId },
         data: {
           status: 'ACTIVE',
@@ -115,7 +115,7 @@ export class EmailSyncService {
         },
       });
     } catch (error: any) {
-      await this.prisma.emailAccount.update({
+      await this.prisma.working.emailAccount.update({
         where: { id: accountId },
         data: {
           status: 'ERROR',
@@ -129,7 +129,7 @@ export class EmailSyncService {
   }
 
   async syncAllAccounts(): Promise<{ synced: number; failed: number }> {
-    const accounts = await this.prisma.emailAccount.findMany({
+    const accounts = await this.prisma.working.emailAccount.findMany({
       where: { syncEnabled: true, status: 'ACTIVE' },
     });
 

@@ -9,7 +9,7 @@ export class GetRecurrenceByIdHandler implements IQueryHandler<GetRecurrenceById
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetRecurrenceByIdQuery) {
-    const event = await this.prisma.recurringEvent.findUnique({
+    const event = await this.prisma.working.recurringEvent.findUnique({
       where: { id: query.id },
       include: { createdBy: { select: { id: true, firstName: true, lastName: true } } },
     });

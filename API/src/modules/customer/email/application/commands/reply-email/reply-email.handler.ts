@@ -10,7 +10,7 @@ export class ReplyEmailHandler implements ICommandHandler<ReplyEmailCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: ReplyEmailCommand) {
-    const original = await this.prisma.email.findUnique({
+    const original = await this.prisma.working.email.findUnique({
       where: { id: cmd.originalEmailId },
       include: { account: true },
     });
@@ -56,7 +56,7 @@ export class ReplyEmailHandler implements ICommandHandler<ReplyEmailCommand> {
       ? [...existingRefs, original.internetMessageId]
       : existingRefs;
 
-    const email = await this.prisma.email.create({
+    const email = await this.prisma.working.email.create({
       data: {
         accountId: original.accountId,
         direction: 'OUTBOUND',

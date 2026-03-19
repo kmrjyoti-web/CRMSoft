@@ -10,7 +10,7 @@ export class UpdateCampaignHandler implements ICommandHandler<UpdateCampaignComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: UpdateCampaignCommand) {
-    const campaign = await this.prisma.emailCampaign.findUniqueOrThrow({
+    const campaign = await this.prisma.working.emailCampaign.findUniqueOrThrow({
       where: { id: cmd.id },
     });
 
@@ -27,7 +27,7 @@ export class UpdateCampaignHandler implements ICommandHandler<UpdateCampaignComm
     if (cmd.sendRatePerMinute !== undefined) data.sendRatePerMinute = cmd.sendRatePerMinute;
     if (cmd.scheduledAt !== undefined) data.scheduledAt = cmd.scheduledAt;
 
-    const updated = await this.prisma.emailCampaign.update({
+    const updated = await this.prisma.working.emailCampaign.update({
       where: { id: cmd.id },
       data,
     });

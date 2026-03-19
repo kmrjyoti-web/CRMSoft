@@ -7,7 +7,7 @@ export class CreateRecurrenceHandler implements ICommandHandler<CreateRecurrence
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CreateRecurrenceCommand) {
-    return this.prisma.recurringEvent.create({
+    return this.prisma.working.recurringEvent.create({
       data: {
         entityType: cmd.entityType,
         entityId: cmd.entityId,

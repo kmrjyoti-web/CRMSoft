@@ -14,7 +14,7 @@ export class WaEntityLinkerService {
     const normalized = this.normalizePhone(phoneNumber);
 
     // Search Communication table for matching phone
-    const comm = await this.prisma.communication.findFirst({
+    const comm = await this.prisma.working.communication.findFirst({
       where: {
         type: { in: ['PHONE', 'MOBILE', 'WHATSAPP'] },
         value: { endsWith: normalized },
@@ -30,13 +30,13 @@ export class WaEntityLinkerService {
       const contact = comm.rawContact.contact;
 
       // Check for active lead
-      const lead = await this.prisma.lead.findFirst({
+      const lead = await this.prisma.working.lead.findFirst({
         where: { contactId: contact.id, status: { notIn: ['WON', 'LOST'] } },
         orderBy: { createdAt: 'desc' },
       });
 
       if (lead) {
-        await this.prisma.waConversation.update({
+        await this.prisma.working.waConversation.update({
           where: { id: conversationId },
           data: { linkedEntityType: 'LEAD', linkedEntityId: lead.id },
         });
@@ -44,7 +44,7 @@ export class WaEntityLinkerService {
       }
 
       // Link to contact
-      await this.prisma.waConversation.update({
+      await this.prisma.working.waConversation.update({
         where: { id: conversationId },
         data: { linkedEntityType: 'CONTACT', linkedEntityId: contact.id },
       });
@@ -52,7 +52,7 @@ export class WaEntityLinkerService {
     }
 
     // Search organization via Communication
-    const orgComm = await this.prisma.communication.findFirst({
+    const orgComm = await this.prisma.working.communication.findFirst({
       where: {
         type: { in: ['PHONE', 'MOBILE', 'WHATSAPP'] },
         value: { endsWith: normalized },
@@ -61,7 +61,7 @@ export class WaEntityLinkerService {
     });
 
     if (orgComm?.organizationId) {
-      await this.prisma.waConversation.update({
+      await this.prisma.working.waConversation.update({
         where: { id: conversationId },
         data: { linkedEntityType: 'ORGANIZATION', linkedEntityId: orgComm.organizationId },
       });
@@ -72,14 +72,14 @@ export class WaEntityLinkerService {
   }
 
   async manualLink(conversationId: string, entityType: string, entityId: string): Promise<void> {
-    await this.prisma.waConversation.update({
+    await this.prisma.working.waConversation.update({
       where: { id: conversationId },
       data: { linkedEntityType: entityType, linkedEntityId: entityId },
     });
   }
 
   async unlink(conversationId: string): Promise<void> {
-    await this.prisma.waConversation.update({
+    await this.prisma.working.waConversation.update({
       where: { id: conversationId },
       data: { linkedEntityType: null, linkedEntityId: null },
     });

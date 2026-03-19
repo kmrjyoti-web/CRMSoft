@@ -63,6 +63,7 @@ describe('SchedulingService', () => {
         ),
       },
     };
+(prisma as any).working = prisma;
 
     calendarSync = {
       syncEvent: jest.fn().mockResolvedValue(undefined),

@@ -32,7 +32,7 @@ export class LinkToEntityHandler implements ICommandHandler<LinkToEntityCommand>
       default: throw new Error(`Invalid entity type: ${command.entityType}`);
     }
 
-    await this.prisma.communication.update({
+    await this.prisma.working.communication.update({
       where: { id: command.communicationId },
       data: updateData,
     });

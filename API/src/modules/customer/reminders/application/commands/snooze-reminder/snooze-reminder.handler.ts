@@ -8,7 +8,7 @@ export class SnoozeReminderHandler implements ICommandHandler<SnoozeReminderComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: SnoozeReminderCommand) {
-    const reminder = await this.prisma.reminder.findUnique({ where: { id: cmd.id } });
+    const reminder = await this.prisma.working.reminder.findUnique({ where: { id: cmd.id } });
     if (!reminder || !reminder.isActive) throw new NotFoundException('Reminder not found');
     if (reminder.recipientId !== cmd.userId) throw new BadRequestException('Not your reminder');
 
@@ -19,7 +19,7 @@ export class SnoozeReminderHandler implements ICommandHandler<SnoozeReminderComm
     // Default snooze: 30 minutes from now
     const snoozedUntil = cmd.snoozedUntil || new Date(Date.now() + 30 * 60 * 1000);
 
-    return this.prisma.reminder.update({
+    return this.prisma.working.reminder.update({
       where: { id: cmd.id },
       data: {
         status: 'SNOOZED',

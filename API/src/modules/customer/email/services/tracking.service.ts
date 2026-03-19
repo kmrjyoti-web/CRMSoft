@@ -38,7 +38,7 @@ export class TrackingService {
   }
 
   async recordOpen(trackingPixelId: string, ipAddress?: string, userAgent?: string) {
-    const email = await this.prisma.email.findFirst({
+    const email = await this.prisma.working.email.findFirst({
       where: { trackingPixelId },
     });
     if (!email) return;
@@ -56,9 +56,9 @@ export class TrackingService {
       updateData.status = 'OPENED';
     }
 
-    await this.prisma.email.update({ where: { id: email.id }, data: updateData });
+    await this.prisma.working.email.update({ where: { id: email.id }, data: updateData });
 
-    await this.prisma.emailTrackingEvent.create({
+    await this.prisma.working.emailTrackingEvent.create({
       data: {
         emailId: email.id,
         eventType: 'OPEN',
@@ -72,13 +72,13 @@ export class TrackingService {
 
     // Update campaign recipient if applicable
     if (email.campaignRecipientId) {
-      await this.prisma.campaignRecipient.update({
+      await this.prisma.working.campaignRecipient.update({
         where: { id: email.campaignRecipientId },
         data: { openedAt: new Date(), openCount: { increment: 1 } },
       });
     }
     if (email.campaignId) {
-      await this.prisma.emailCampaign.update({
+      await this.prisma.working.emailCampaign.update({
         where: { id: email.campaignId },
         data: { openedCount: { increment: 1 } },
       });
@@ -86,7 +86,7 @@ export class TrackingService {
   }
 
   async recordClick(emailId: string, originalUrl: string, ipAddress?: string, userAgent?: string): Promise<string> {
-    const email = await this.prisma.email.findUnique({ where: { id: emailId } });
+    const email = await this.prisma.working.email.findUnique({ where: { id: emailId } });
     if (!email) return originalUrl;
 
     const updateData: any = {
@@ -99,9 +99,9 @@ export class TrackingService {
       updateData.status = 'CLICKED';
     }
 
-    await this.prisma.email.update({ where: { id: emailId }, data: updateData });
+    await this.prisma.working.email.update({ where: { id: emailId }, data: updateData });
 
-    await this.prisma.emailTrackingEvent.create({
+    await this.prisma.working.emailTrackingEvent.create({
       data: {
         emailId,
         eventType: 'CLICK',
@@ -115,13 +115,13 @@ export class TrackingService {
     });
 
     if (email.campaignRecipientId) {
-      await this.prisma.campaignRecipient.update({
+      await this.prisma.working.campaignRecipient.update({
         where: { id: email.campaignRecipientId },
         data: { clickedAt: new Date(), clickCount: { increment: 1 } },
       });
     }
     if (email.campaignId) {
-      await this.prisma.emailCampaign.update({
+      await this.prisma.working.emailCampaign.update({
         where: { id: email.campaignId },
         data: { clickedCount: { increment: 1 } },
       });
@@ -131,20 +131,20 @@ export class TrackingService {
   }
 
   async recordBounce(emailId: string, reason: string) {
-    await this.prisma.email.update({
+    await this.prisma.working.email.update({
       where: { id: emailId },
       data: { isBounced: true, bounceReason: reason, status: 'BOUNCED' },
     });
 
-    const email = await this.prisma.email.findUnique({ where: { id: emailId } });
+    const email = await this.prisma.working.email.findUnique({ where: { id: emailId } });
     if (!email) return;
 
-    await this.prisma.emailTrackingEvent.create({
+    await this.prisma.working.emailTrackingEvent.create({
       data: { emailId, eventType: 'BOUNCE', campaignId: email.campaignId, recipientId: email.campaignRecipientId },
     });
 
     if (email.campaignId) {
-      await this.prisma.emailCampaign.update({
+      await this.prisma.working.emailCampaign.update({
         where: { id: email.campaignId },
         data: { bouncedCount: { increment: 1 } },
       });

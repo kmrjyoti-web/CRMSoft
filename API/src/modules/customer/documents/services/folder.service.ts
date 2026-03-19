@@ -15,18 +15,18 @@ export class FolderService {
     createdById: string;
   }) {
     if (data.parentId) {
-      const parent = await this.prisma.documentFolder.findUnique({
+      const parent = await this.prisma.working.documentFolder.findUnique({
         where: { id: data.parentId, isActive: true },
       });
       if (!parent) throw new BadRequestException('Parent folder not found');
     }
 
-    const maxSort = await this.prisma.documentFolder.aggregate({
+    const maxSort = await this.prisma.working.documentFolder.aggregate({
       where: { parentId: data.parentId || null, isActive: true },
       _max: { sortOrder: true },
     });
 
-    return this.prisma.documentFolder.create({
+    return this.prisma.working.documentFolder.create({
       data: {
         name: data.name,
         description: data.description,
@@ -44,10 +44,10 @@ export class FolderService {
   }
 
   async update(id: string, data: { name?: string; description?: string; color?: string; icon?: string }) {
-    const folder = await this.prisma.documentFolder.findUnique({ where: { id, isActive: true } });
+    const folder = await this.prisma.working.documentFolder.findUnique({ where: { id, isActive: true } });
     if (!folder) throw new NotFoundException('Folder not found');
 
-    return this.prisma.documentFolder.update({
+    return this.prisma.working.documentFolder.update({
       where: { id },
       data,
       include: {
@@ -58,7 +58,7 @@ export class FolderService {
   }
 
   async softDelete(id: string) {
-    const folder = await this.prisma.documentFolder.findUnique({
+    const folder = await this.prisma.working.documentFolder.findUnique({
       where: { id, isActive: true },
       include: { _count: { select: { documents: true, children: true } } },
     });
@@ -68,7 +68,7 @@ export class FolderService {
       throw new BadRequestException('Cannot delete folder that contains documents or sub-folders. Move or delete contents first.');
     }
 
-    return this.prisma.documentFolder.update({
+    return this.prisma.working.documentFolder.update({
       where: { id },
       data: { isActive: false },
     });
@@ -78,7 +78,7 @@ export class FolderService {
     const where: any = { isActive: true, parentId: null };
     if (userId) where.createdById = userId;
 
-    const roots = await this.prisma.documentFolder.findMany({
+    const roots = await this.prisma.working.documentFolder.findMany({
       where,
       orderBy: { sortOrder: 'asc' },
       include: {
@@ -105,7 +105,7 @@ export class FolderService {
   }
 
   async getContents(folderId: string, page = 1, limit = 20) {
-    const folder = await this.prisma.documentFolder.findUnique({
+    const folder = await this.prisma.working.documentFolder.findUnique({
       where: { id: folderId, isActive: true },
     });
     if (!folder) throw new NotFoundException('Folder not found');
@@ -113,12 +113,12 @@ export class FolderService {
     const skip = (page - 1) * limit;
 
     const [subFolders, documents, totalDocs] = await Promise.all([
-      this.prisma.documentFolder.findMany({
+      this.prisma.working.documentFolder.findMany({
         where: { parentId: folderId, isActive: true },
         orderBy: { sortOrder: 'asc' },
         include: { _count: { select: { documents: true, children: true } } },
       }),
-      this.prisma.document.findMany({
+      this.prisma.working.document.findMany({
         where: { folderId, isActive: true },
         skip,
         take: limit,
@@ -128,7 +128,7 @@ export class FolderService {
           _count: { select: { attachments: true } },
         },
       }),
-      this.prisma.document.count({ where: { folderId, isActive: true } }),
+      this.prisma.working.document.count({ where: { folderId, isActive: true } }),
     ]);
 
     return {

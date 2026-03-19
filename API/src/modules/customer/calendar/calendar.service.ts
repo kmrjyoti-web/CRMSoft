@@ -15,14 +15,14 @@ export class CalendarService {
     };
     if (eventTypes?.length) where.eventType = { in: eventTypes };
 
-    return this.prisma.calendarEvent.findMany({
+    return this.prisma.working.calendarEvent.findMany({
       where,
       orderBy: { startTime: 'asc' },
     });
   }
 
   async getTeamCalendar(tenantId: string, userIds: string[], startDate: Date, endDate: Date) {
-    return this.prisma.calendarEvent.findMany({
+    return this.prisma.working.calendarEvent.findMany({
       where: {
         tenantId,
         userId: { in: userIds },
@@ -40,7 +40,7 @@ export class CalendarService {
     const dayEnd = new Date(date);
     dayEnd.setHours(23, 59, 59, 999);
 
-    const events = await this.prisma.calendarEvent.findMany({
+    const events = await this.prisma.working.calendarEvent.findMany({
       where: {
         tenantId,
         userId,

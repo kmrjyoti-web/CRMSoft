@@ -31,7 +31,7 @@ export class CreateCommentHandler implements ICommandHandler<CreateCommentComman
 
     const createdByRole = this.deriveRoleLabel(cmd.authorRoleLevel);
 
-    return this.prisma.comment.create({
+    return this.prisma.working.comment.create({
       data: {
         tenantId: cmd.tenantId,
         entityType: cmd.entityType as any,

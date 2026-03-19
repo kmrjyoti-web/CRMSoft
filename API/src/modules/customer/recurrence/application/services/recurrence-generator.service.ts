@@ -11,13 +11,13 @@ export class RecurrenceGeneratorService {
   /** Called by cron-engine (GENERATE_RECURRENCES). */
   async generateOccurrences() {
     const now = new Date();
-    const events = await this.prisma.recurringEvent.findMany({
+    const events = await this.prisma.working.recurringEvent.findMany({
       where: {
         isActive: true,
         nextOccurrence: { lte: now },
         OR: [{ endDate: null }, { endDate: { gte: now } }],
         AND: [
-          { OR: [{ maxOccurrences: null }, { occurrenceCount: { lt: this.prisma.recurringEvent.fields?.maxOccurrences as any } }] },
+          { OR: [{ maxOccurrences: null }, { occurrenceCount: { lt: this.prisma.working.recurringEvent.fields?.maxOccurrences as any } }] },
         ],
       },
       take: 100,
@@ -25,14 +25,14 @@ export class RecurrenceGeneratorService {
 
     for (const event of events) {
       if (event.maxOccurrences && event.occurrenceCount >= event.maxOccurrences) {
-        await this.prisma.recurringEvent.update({ where: { id: event.id }, data: { isActive: false } });
+        await this.prisma.working.recurringEvent.update({ where: { id: event.id }, data: { isActive: false } });
         continue;
       }
 
       try {
         const nextDate = this.calculateNextOccurrence(event);
 
-        await this.prisma.recurringEvent.update({
+        await this.prisma.working.recurringEvent.update({
           where: { id: event.id },
           data: {
             lastGenerated: now,

@@ -32,6 +32,7 @@ describe('AvailabilityService', () => {
       },
       $transaction: jest.fn().mockImplementation((promises) => Promise.all(promises)),
     };
+(prisma as any).working = prisma;
 
     service = new AvailabilityService(prisma);
   });

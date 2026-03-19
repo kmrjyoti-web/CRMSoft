@@ -10,7 +10,7 @@ export class ConnectAccountHandler implements ICommandHandler<ConnectAccountComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: ConnectAccountCommand) {
-    const account = await this.prisma.emailAccount.create({
+    const account = await this.prisma.working.emailAccount.create({
       data: {
         provider: cmd.provider as any,
         userId: cmd.userId,

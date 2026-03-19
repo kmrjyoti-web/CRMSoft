@@ -22,11 +22,11 @@ export class CalendarSyncService {
   // ─── Existing Methods (unchanged) ─────────────────────────────
 
   async syncEvent(input: CalendarEventInput) {
-    const existing = await this.prisma.calendarEvent.findFirst({
+    const existing = await this.prisma.working.calendarEvent.findFirst({
       where: { eventType: input.eventType, sourceId: input.sourceId },
     });
     if (existing) {
-      return this.prisma.calendarEvent.update({
+      return this.prisma.working.calendarEvent.update({
         where: { id: existing.id },
         data: {
           title: input.title,
@@ -38,7 +38,7 @@ export class CalendarSyncService {
         },
       });
     } else {
-      return this.prisma.calendarEvent.create({
+      return this.prisma.working.calendarEvent.create({
         data: {
           eventType: input.eventType,
           sourceId: input.sourceId,
@@ -55,7 +55,7 @@ export class CalendarSyncService {
   }
 
   async removeEvent(eventType: string, sourceId: string) {
-    await this.prisma.calendarEvent.updateMany({
+    await this.prisma.working.calendarEvent.updateMany({
       where: { eventType, sourceId },
       data: { isActive: false },
     });
@@ -77,7 +77,7 @@ export class CalendarSyncService {
     calendarId: string,
     externalEmail: string,
   ) {
-    const sync = await this.prisma.userCalendarSync.upsert({
+    const sync = await this.prisma.working.userCalendarSync.upsert({
       where: {
         tenantId_userId_provider: { tenantId, userId, provider },
       },
@@ -116,7 +116,7 @@ export class CalendarSyncService {
     tenantId: string,
     provider: 'GOOGLE' | 'OUTLOOK',
   ) {
-    await this.prisma.userCalendarSync.updateMany({
+    await this.prisma.working.userCalendarSync.updateMany({
       where: { tenantId, userId, provider },
       data: {
         status: 'DISCONNECTED',
@@ -137,7 +137,7 @@ export class CalendarSyncService {
     tenantId: string,
     provider: 'GOOGLE' | 'OUTLOOK',
   ) {
-    const sync = await this.prisma.userCalendarSync.findUnique({
+    const sync = await this.prisma.working.userCalendarSync.findUnique({
       where: {
         tenantId_userId_provider: { tenantId, userId, provider },
       },
@@ -155,14 +155,14 @@ export class CalendarSyncService {
       inbound = await this.syncInbound(sync);
       outbound = await this.syncOutbound(sync);
 
-      await this.prisma.userCalendarSync.update({
+      await this.prisma.working.userCalendarSync.update({
         where: { id: sync.id },
         data: { lastSyncAt: new Date(), errorMessage: null },
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`Sync failed for ${provider}: ${message}`);
-      await this.prisma.userCalendarSync.update({
+      await this.prisma.working.userCalendarSync.update({
         where: { id: sync.id },
         data: { errorMessage: message, status: 'ERROR' },
       });
@@ -175,7 +175,7 @@ export class CalendarSyncService {
    * Get all sync configurations for a user.
    */
   async getSyncStatus(userId: string, tenantId: string) {
-    return this.prisma.userCalendarSync.findMany({
+    return this.prisma.working.userCalendarSync.findMany({
       where: { tenantId, userId },
       orderBy: { createdAt: 'desc' },
     });
@@ -208,7 +208,7 @@ export class CalendarSyncService {
 
     let processed = 0;
     for (const ext of events) {
-      const existing = await this.prisma.scheduledEvent.findFirst({
+      const existing = await this.prisma.working.scheduledEvent.findFirst({
         where: {
           tenantId: sync.tenantId,
           externalEventId: ext.id,
@@ -217,7 +217,7 @@ export class CalendarSyncService {
       });
 
       if (existing) {
-        await this.prisma.scheduledEvent.update({
+        await this.prisma.working.scheduledEvent.update({
           where: { id: existing.id },
           data: {
             title: ext.title,
@@ -229,12 +229,12 @@ export class CalendarSyncService {
           },
         });
       } else {
-        const count = await this.prisma.scheduledEvent.count({
+        const count = await this.prisma.working.scheduledEvent.count({
           where: { tenantId: sync.tenantId },
         });
         const eventNumber = `EVT-${String(count + 1).padStart(5, '0')}`;
 
-        await this.prisma.scheduledEvent.create({
+        await this.prisma.working.scheduledEvent.create({
           data: {
             tenantId: sync.tenantId,
             eventNumber,
@@ -257,7 +257,7 @@ export class CalendarSyncService {
 
     // Persist the new sync token for incremental sync
     if (nextSyncToken) {
-      await this.prisma.userCalendarSync.update({
+      await this.prisma.working.userCalendarSync.update({
         where: { id: sync.id },
         data: { syncToken: nextSyncToken },
       });
@@ -287,7 +287,7 @@ export class CalendarSyncService {
     }
 
     // Find CRM events that haven't been synced to this provider
-    const events = await this.prisma.scheduledEvent.findMany({
+    const events = await this.prisma.working.scheduledEvent.findMany({
       where: {
         tenantId: sync.tenantId,
         organizerId: sync.userId,
@@ -316,7 +316,7 @@ export class CalendarSyncService {
           },
         );
 
-        await this.prisma.scheduledEvent.update({
+        await this.prisma.working.scheduledEvent.update({
           where: { id: event.id },
           data: {
             externalEventId: externalId,
@@ -350,7 +350,7 @@ export class CalendarSyncService {
       return;
     }
 
-    const sync = await this.prisma.userCalendarSync.findFirst({
+    const sync = await this.prisma.working.userCalendarSync.findFirst({
       where: { provider: provider as any, webhookId: channelId, isActive: true },
     });
 

@@ -8,7 +8,7 @@ export class GetCampaignDetailHandler implements IQueryHandler<GetCampaignDetail
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetCampaignDetailQuery) {
-    const campaign = await this.prisma.emailCampaign.findUnique({
+    const campaign = await this.prisma.working.emailCampaign.findUnique({
       where: { id: query.campaignId },
     });
 

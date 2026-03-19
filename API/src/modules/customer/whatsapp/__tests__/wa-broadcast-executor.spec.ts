@@ -68,6 +68,7 @@ describe('WaBroadcastExecutorService', () => {
         create: jest.fn().mockResolvedValue({ id: 'conv-new-1' }),
       },
     };
+(prisma as any).working = prisma;
 
     waApiService = {
       sendTemplate: jest.fn().mockResolvedValue({ messages: [{ id: 'wamid-1' }] }),

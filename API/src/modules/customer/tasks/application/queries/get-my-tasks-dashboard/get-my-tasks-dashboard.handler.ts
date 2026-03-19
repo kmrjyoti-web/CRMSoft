@@ -20,7 +20,7 @@ export class GetMyTasksDashboardHandler implements IQueryHandler<GetMyTasksDashb
 
     const [overdue, dueToday, upcoming, recentlyCompleted] = await Promise.all([
       // Overdue: open/in-progress tasks past their due date
-      this.prisma.task.findMany({
+      this.prisma.working.task.findMany({
         where: {
           ...baseWhere,
           status: { in: ['OPEN', 'IN_PROGRESS'] },
@@ -33,7 +33,7 @@ export class GetMyTasksDashboardHandler implements IQueryHandler<GetMyTasksDashb
       }),
 
       // Due today: tasks due within today that are not completed/cancelled
-      this.prisma.task.findMany({
+      this.prisma.working.task.findMany({
         where: {
           ...baseWhere,
           status: { notIn: ['COMPLETED', 'CANCELLED'] },
@@ -46,7 +46,7 @@ export class GetMyTasksDashboardHandler implements IQueryHandler<GetMyTasksDashb
       }),
 
       // Upcoming: tasks due after today, not completed/cancelled, limit 10
-      this.prisma.task.findMany({
+      this.prisma.working.task.findMany({
         where: {
           ...baseWhere,
           status: { notIn: ['COMPLETED', 'CANCELLED'] },
@@ -60,7 +60,7 @@ export class GetMyTasksDashboardHandler implements IQueryHandler<GetMyTasksDashb
       }),
 
       // Recently completed: last 10 completed tasks
-      this.prisma.task.findMany({
+      this.prisma.working.task.findMany({
         where: {
           ...baseWhere,
           status: 'COMPLETED',

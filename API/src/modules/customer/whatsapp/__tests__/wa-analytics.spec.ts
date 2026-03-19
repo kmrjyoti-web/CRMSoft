@@ -22,6 +22,7 @@ describe('WaAnalyticsService', () => {
         groupBy: jest.fn(),
       },
     };
+(prisma as any).working = prisma;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

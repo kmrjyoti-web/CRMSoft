@@ -48,6 +48,7 @@ describe('WaMessageSenderService', () => {
         update: jest.fn().mockResolvedValue({}),
       },
     };
+(prisma as any).working = prisma;
 
     waApiService = {
       sendText: jest.fn().mockResolvedValue({ messages: [{ id: 'wamid.sent-1' }] }),

@@ -10,7 +10,7 @@ export class CreateQuickReplyHandler implements ICommandHandler<CreateQuickReply
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CreateQuickReplyCommand) {
-    const quickReply = await this.prisma.waQuickReply.create({
+    const quickReply = await this.prisma.working.waQuickReply.create({
       data: {
         wabaId: cmd.wabaId,
         shortcut: cmd.shortcut,

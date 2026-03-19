@@ -32,6 +32,7 @@ describe('WorkflowEngineService', () => {
       user: { findUnique: jest.fn().mockResolvedValue({ firstName: 'Raj', lastName: 'Patel', email: 'raj@crm.com' }) },
       lead: { findUnique: jest.fn().mockResolvedValue({ id: 'lead-1', status: 'NEW' }) },
     };
+(prisma as any).working = prisma;
     conditionEvaluator = { evaluate: jest.fn().mockReturnValue(true) };
     actionExecutor = { executeAll: jest.fn().mockResolvedValue(undefined) };
     service = new WorkflowEngineService(prisma as any, conditionEvaluator, actionExecutor);

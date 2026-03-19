@@ -11,6 +11,7 @@ describe('SetPrimaryHandler', () => {
   beforeEach(() => {
     repo = { findById: jest.fn() };
     prisma = { communication: { updateMany: jest.fn(), update: jest.fn() } };
+(prisma as any).working = prisma;
     handler = new SetPrimaryHandler(repo, prisma);
   });
 

@@ -13,13 +13,13 @@ export class AssignTaskHandler implements ICommandHandler<AssignTaskCommand> {
   ) {}
 
   async execute(cmd: AssignTaskCommand) {
-    const task = await this.prisma.task.findUnique({ where: { id: cmd.taskId } });
+    const task = await this.prisma.working.task.findUnique({ where: { id: cmd.taskId } });
     if (!task || !task.isActive) throw new NotFoundException('Task not found');
 
     // Validate RBAC
     await this.assignmentService.validateAssignment(cmd.userId, cmd.newAssigneeId, cmd.userRoleLevel);
 
-    const updated = await this.prisma.task.update({
+    const updated = await this.prisma.working.task.update({
       where: { id: cmd.taskId },
       data: { assignedToId: cmd.newAssigneeId },
       include: {
@@ -28,7 +28,7 @@ export class AssignTaskHandler implements ICommandHandler<AssignTaskCommand> {
     });
 
     // Record history
-    await this.prisma.taskHistory.create({
+    await this.prisma.working.taskHistory.create({
       data: {
         taskId: cmd.taskId,
         field: 'assignedToId',

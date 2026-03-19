@@ -13,13 +13,13 @@ export class GetRecurrenceListHandler implements IQueryHandler<GetRecurrenceList
     if (query.isActive !== undefined) where.isActive = query.isActive;
 
     const [data, total] = await Promise.all([
-      this.prisma.recurringEvent.findMany({
+      this.prisma.working.recurringEvent.findMany({
         where,
         orderBy: { nextOccurrence: 'asc' },
         skip: (query.page - 1) * query.limit,
         take: query.limit,
       }),
-      this.prisma.recurringEvent.count({ where }),
+      this.prisma.working.recurringEvent.count({ where }),
     ]);
 
     return { data, total, page: query.page, limit: query.limit };

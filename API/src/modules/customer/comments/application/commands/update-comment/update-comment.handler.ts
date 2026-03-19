@@ -15,7 +15,7 @@ export class UpdateCommentHandler implements ICommandHandler<UpdateCommentComman
    * Falls back to the default (30 minutes) if no row exists.
    */
   private async getEditWindowMinutes(tenantId: string): Promise<number> {
-    const config = await this.prisma.taskLogicConfig.findFirst({
+    const config = await this.prisma.working.taskLogicConfig.findFirst({
       where: {
         tenantId,
         configKey: 'COMMENT_EDIT_WINDOW_MINUTES',
@@ -34,7 +34,7 @@ export class UpdateCommentHandler implements ICommandHandler<UpdateCommentComman
   }
 
   async execute(cmd: UpdateCommentCommand) {
-    const comment = await this.prisma.comment.findUnique({ where: { id: cmd.commentId } });
+    const comment = await this.prisma.working.comment.findUnique({ where: { id: cmd.commentId } });
     if (!comment || !comment.isActive) throw new NotFoundException('Comment not found');
     if (comment.authorId !== cmd.userId) throw new ForbiddenException('Only the author can edit a comment');
 
@@ -49,7 +49,7 @@ export class UpdateCommentHandler implements ICommandHandler<UpdateCommentComman
       }
     }
 
-    return this.prisma.comment.update({
+    return this.prisma.working.comment.update({
       where: { id: cmd.commentId },
       data: {
         content: cmd.content,

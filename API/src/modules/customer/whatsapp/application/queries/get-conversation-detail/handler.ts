@@ -8,7 +8,7 @@ export class GetConversationDetailHandler implements IQueryHandler<GetConversati
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetConversationDetailQuery) {
-    return this.prisma.waConversation.findUniqueOrThrow({
+    return this.prisma.working.waConversation.findUniqueOrThrow({
       where: { id: query.conversationId },
       include: {
         assignedTo: {

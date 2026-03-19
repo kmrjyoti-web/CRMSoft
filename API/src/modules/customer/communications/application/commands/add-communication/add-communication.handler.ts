@@ -58,7 +58,7 @@ export class AddCommunicationHandler implements ICommandHandler<AddCommunication
     else if (cmd.organizationId) where.organizationId = cmd.organizationId;
     else if (cmd.leadId) where.leadId = cmd.leadId;
 
-    await this.prisma.communication.updateMany({
+    await this.prisma.working.communication.updateMany({
       where,
       data: { isPrimary: false },
     });

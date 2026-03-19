@@ -36,7 +36,7 @@ export class WaWebhookService {
         const phoneNumberId = value?.metadata?.phone_number_id;
         if (!phoneNumberId) continue;
 
-        const waba = await this.prisma.whatsAppBusinessAccount.findFirst({
+        const waba = await this.prisma.working.whatsAppBusinessAccount.findFirst({
           where: { phoneNumberId },
         });
         if (!waba) {
@@ -130,14 +130,14 @@ export class WaWebhookService {
         break;
     }
 
-    const message = await this.prisma.waMessage.create({ data: messageData });
+    const message = await this.prisma.working.waMessage.create({ data: messageData });
 
     // Update conversation
     const snippet = messageData.textBody || messageData.mediaCaption || `[${msg.type}]`;
     await this.conversationService.updateLastMessage(conversation.id, snippet.substring(0, 200), 'INBOUND');
 
     // Increment WABA received count
-    await this.prisma.whatsAppBusinessAccount.update({
+    await this.prisma.working.whatsAppBusinessAccount.update({
       where: { id: wabaId },
       data: { totalMessagesReceived: { increment: 1 } },
     });
@@ -153,7 +153,7 @@ export class WaWebhookService {
 
   private async handleStatusUpdate(status: any): Promise<void> {
     const waMessageId = status.id;
-    const message = await this.prisma.waMessage.findFirst({
+    const message = await this.prisma.working.waMessage.findFirst({
       where: { waMessageId },
     });
     if (!message) return;
@@ -180,7 +180,7 @@ export class WaWebhookService {
     }
 
     if (Object.keys(updateData).length > 0) {
-      await this.prisma.waMessage.update({
+      await this.prisma.working.waMessage.update({
         where: { id: message.id },
         data: updateData,
       });
@@ -191,7 +191,7 @@ export class WaWebhookService {
       const templateUpdate: any = {};
       if (updateData.status === 'DELIVERED') templateUpdate.deliveredCount = { increment: 1 };
       if (updateData.status === 'READ') templateUpdate.readCount = { increment: 1 };
-      await this.prisma.waTemplate.update({
+      await this.prisma.working.waTemplate.update({
         where: { id: message.templateId },
         data: templateUpdate,
       });
@@ -206,7 +206,7 @@ export class WaWebhookService {
       if (status.status === 'failed') { recipientUpdate.status = 'FAILED'; recipientUpdate.failedAt = new Date(); recipientUpdate.failureReason = status.errors?.[0]?.message; }
 
       if (Object.keys(recipientUpdate).length > 0) {
-        await this.prisma.waBroadcastRecipient.update({
+        await this.prisma.working.waBroadcastRecipient.update({
           where: { id: message.broadcastRecipientId },
           data: recipientUpdate,
         });
@@ -218,7 +218,7 @@ export class WaWebhookService {
           if (status.status === 'read') broadcastUpdate.readCount = { increment: 1 };
           if (status.status === 'failed') broadcastUpdate.failedCount = { increment: 1 };
           if (Object.keys(broadcastUpdate).length > 0) {
-            await this.prisma.waBroadcast.update({
+            await this.prisma.working.waBroadcast.update({
               where: { id: message.broadcastId },
               data: broadcastUpdate,
             });

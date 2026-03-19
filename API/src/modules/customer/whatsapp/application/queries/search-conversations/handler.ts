@@ -17,13 +17,13 @@ export class SearchConversationsHandler implements IQueryHandler<SearchConversat
     };
 
     const [data, total] = await Promise.all([
-      this.prisma.waConversation.findMany({
+      this.prisma.working.waConversation.findMany({
         where,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
         orderBy: { lastMessageAt: 'desc' },
       }),
-      this.prisma.waConversation.count({ where }),
+      this.prisma.working.waConversation.count({ where }),
     ]);
 
     return {

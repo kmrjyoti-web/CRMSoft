@@ -20,6 +20,7 @@ describe('Calendar Cron Handlers', () => {
           findMany: jest.fn().mockResolvedValue([]),
         },
       };
+(prisma as any).working = prisma;
 
       notificationDispatch = {
         dispatch: jest.fn().mockResolvedValue({ dispatched: 1, skipped: 0 }),

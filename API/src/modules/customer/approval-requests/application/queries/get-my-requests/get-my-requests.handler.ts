@@ -8,7 +8,7 @@ export class GetMyRequestsHandler implements IQueryHandler<GetMyRequestsQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetMyRequestsQuery) {
-    return this.prisma.approvalRequest.findMany({
+    return this.prisma.working.approvalRequest.findMany({
       where: { makerId: query.makerId },
       include: {
         checker: { select: { id: true, firstName: true, lastName: true } },

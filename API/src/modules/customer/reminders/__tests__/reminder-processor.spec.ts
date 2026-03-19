@@ -18,6 +18,7 @@ describe('Reminder Handlers', () => {
         updateMany: jest.fn().mockResolvedValue({ count: 0 }),
       },
     };
+(prisma as any).working = prisma;
   });
 
   it('should create a reminder', async () => {

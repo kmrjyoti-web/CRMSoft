@@ -10,7 +10,7 @@ export class ScheduleEmailHandler implements ICommandHandler<ScheduleEmailComman
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: ScheduleEmailCommand) {
-    const email = await this.prisma.email.update({
+    const email = await this.prisma.working.email.update({
       where: { id: cmd.emailId },
       data: {
         status: 'QUEUED',

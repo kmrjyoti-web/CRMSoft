@@ -40,7 +40,7 @@ export class GetTaskListHandler implements IQueryHandler<GetTaskListQuery> {
     const orderBy = { [query.sortBy]: query.sortOrder };
 
     const [data, total] = await Promise.all([
-      this.prisma.task.findMany({
+      this.prisma.working.task.findMany({
         where,
         skip,
         take: query.limit,
@@ -51,7 +51,7 @@ export class GetTaskListHandler implements IQueryHandler<GetTaskListQuery> {
           _count: { select: { comments: true, watchers: true, reminders: true } },
         },
       }),
-      this.prisma.task.count({ where }),
+      this.prisma.working.task.count({ where }),
     ]);
 
     return { data, total, page: query.page, limit: query.limit, totalPages: Math.ceil(total / query.limit) };

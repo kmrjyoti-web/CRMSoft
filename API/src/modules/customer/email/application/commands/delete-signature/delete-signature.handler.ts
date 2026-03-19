@@ -10,7 +10,7 @@ export class DeleteSignatureHandler implements ICommandHandler<DeleteSignatureCo
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: DeleteSignatureCommand) {
-    await this.prisma.emailSignature.delete({
+    await this.prisma.working.emailSignature.delete({
       where: { id: cmd.id },
     });
 

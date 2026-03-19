@@ -36,7 +36,7 @@ export class TaskRecurrenceService {
 
   /** Process recurring tasks: create next occurrence for completed recurring tasks. */
   async processRecurringTasks(): Promise<number> {
-    const completedRecurring = await this.prisma.task.findMany({
+    const completedRecurring = await this.prisma.working.task.findMany({
       where: {
         status: 'COMPLETED',
         recurrence: { not: 'NONE' },
@@ -53,10 +53,10 @@ export class TaskRecurrenceService {
         if (!nextDue) continue;
 
         // Generate task number
-        const count = await this.prisma.task.count({ where: { tenantId: task.tenantId } });
+        const count = await this.prisma.working.task.count({ where: { tenantId: task.tenantId } });
         const taskNumber = `TSK-${String(count + 1).padStart(4, '0')}`;
 
-        await this.prisma.task.create({
+        await this.prisma.working.task.create({
           data: {
             tenantId: task.tenantId,
             taskNumber,
@@ -75,7 +75,7 @@ export class TaskRecurrenceService {
         });
 
         // Clear the nextRecurrenceDate on the completed task
-        await this.prisma.task.update({
+        await this.prisma.working.task.update({
           where: { id: task.id },
           data: { nextRecurrenceDate: null },
         });

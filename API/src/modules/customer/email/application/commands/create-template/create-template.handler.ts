@@ -10,7 +10,7 @@ export class CreateTemplateHandler implements ICommandHandler<CreateTemplateComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CreateTemplateCommand) {
-    const template = await this.prisma.emailTemplate.create({
+    const template = await this.prisma.working.emailTemplate.create({
       data: {
         name: cmd.name,
         category: cmd.category as any,

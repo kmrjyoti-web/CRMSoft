@@ -7,7 +7,7 @@ export class ImapSmtpService implements IEmailProviderService {
   constructor(private readonly prisma: PrismaService) {}
 
   async sendEmail(accountId: string, params: SendEmailParams): Promise<SendResult> {
-    const account = await this.prisma.emailAccount.findUniqueOrThrow({ where: { id: accountId } });
+    const account = await this.prisma.working.emailAccount.findUniqueOrThrow({ where: { id: accountId } });
 
     if (!account.smtpHost || !account.smtpPort) {
       throw new BadRequestException('SMTP configuration is incomplete');
@@ -26,7 +26,7 @@ export class ImapSmtpService implements IEmailProviderService {
   }
 
   async fetchEmails(accountId: string, options: FetchOptions): Promise<FetchResult> {
-    const account = await this.prisma.emailAccount.findUniqueOrThrow({ where: { id: accountId } });
+    const account = await this.prisma.working.emailAccount.findUniqueOrThrow({ where: { id: accountId } });
 
     if (!account.imapHost || !account.imapPort) {
       throw new BadRequestException('IMAP configuration is incomplete');

@@ -12,7 +12,7 @@ export class TemplateCustomizationService {
    * Get tenant customization for a specific template, or null if none exists.
    */
   async getCustomization(tenantId: string, templateId: string) {
-    return this.prisma.tenantTemplateCustomization.findUnique({
+    return this.prisma.working.tenantTemplateCustomization.findUnique({
       where: {
         tenantId_templateId: { tenantId, templateId },
       },
@@ -40,7 +40,7 @@ export class TemplateCustomizationService {
       `Saving customization for tenant ${tenantId}, template ${templateId}`,
     );
 
-    return this.prisma.tenantTemplateCustomization.upsert({
+    return this.prisma.working.tenantTemplateCustomization.upsert({
       where: {
         tenantId_templateId: { tenantId, templateId },
       },
@@ -77,7 +77,7 @@ export class TemplateCustomizationService {
       `Resetting customization for tenant ${tenantId}, template ${templateId}`,
     );
 
-    const existing = await this.prisma.tenantTemplateCustomization.findUnique({
+    const existing = await this.prisma.working.tenantTemplateCustomization.findUnique({
       where: {
         tenantId_templateId: { tenantId, templateId },
       },
@@ -87,7 +87,7 @@ export class TemplateCustomizationService {
       return null;
     }
 
-    return this.prisma.tenantTemplateCustomization.delete({
+    return this.prisma.working.tenantTemplateCustomization.delete({
       where: {
         tenantId_templateId: { tenantId, templateId },
       },
@@ -100,7 +100,7 @@ export class TemplateCustomizationService {
    */
   async getDefaultTemplate(tenantId: string, documentType: DocumentType) {
     // 1. Check for tenant-specific default customization
-    const tenantDefault = await this.prisma.tenantTemplateCustomization.findFirst({
+    const tenantDefault = await this.prisma.working.tenantTemplateCustomization.findFirst({
       where: {
         tenantId,
         isDefault: true,
@@ -114,7 +114,7 @@ export class TemplateCustomizationService {
     }
 
     // 2. Fall back to system default template for this type
-    const systemDefault = await this.prisma.documentTemplate.findFirst({
+    const systemDefault = await this.prisma.working.documentTemplate.findFirst({
       where: {
         documentType,
         isSystem: true,
@@ -128,7 +128,7 @@ export class TemplateCustomizationService {
     }
 
     // 3. Fall back to any active system template of this type
-    return this.prisma.documentTemplate.findFirst({
+    return this.prisma.working.documentTemplate.findFirst({
       where: {
         documentType,
         isSystem: true,

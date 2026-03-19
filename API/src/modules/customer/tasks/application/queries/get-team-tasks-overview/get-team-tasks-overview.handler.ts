@@ -41,17 +41,17 @@ export class GetTeamTasksOverviewHandler implements IQueryHandler<GetTeamTasksOv
         };
 
         const [pending, inProgress, overdue, onHold, completedThisWeek] = await Promise.all([
-          this.prisma.task.count({ where: { ...baseWhere, status: 'OPEN' } }),
-          this.prisma.task.count({ where: { ...baseWhere, status: 'IN_PROGRESS' } }),
-          this.prisma.task.count({
+          this.prisma.working.task.count({ where: { ...baseWhere, status: 'OPEN' } }),
+          this.prisma.working.task.count({ where: { ...baseWhere, status: 'IN_PROGRESS' } }),
+          this.prisma.working.task.count({
             where: {
               ...baseWhere,
               status: { in: ['OPEN', 'IN_PROGRESS'] },
               dueDate: { lt: now },
             },
           }),
-          this.prisma.task.count({ where: { ...baseWhere, status: 'ON_HOLD' } }),
-          this.prisma.task.count({
+          this.prisma.working.task.count({ where: { ...baseWhere, status: 'ON_HOLD' } }),
+          this.prisma.working.task.count({
             where: {
               ...baseWhere,
               status: 'COMPLETED',

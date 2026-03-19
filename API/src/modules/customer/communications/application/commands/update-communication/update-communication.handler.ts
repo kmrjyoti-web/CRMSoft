@@ -28,7 +28,7 @@ export class UpdateCommunicationHandler implements ICommandHandler<UpdateCommuni
       throw new Error('No fields provided to update');
     }
 
-    await this.prisma.communication.update({
+    await this.prisma.working.communication.update({
       where: { id: command.communicationId },
       data: updateData,
     });

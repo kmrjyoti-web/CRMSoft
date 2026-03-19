@@ -12,7 +12,7 @@ export class WaChatbotEngineService {
   ) {}
 
   async checkAndTrigger(wabaId: string, conversationId: string, message: any): Promise<void> {
-    const conversation = await this.prisma.waConversation.findUniqueOrThrow({
+    const conversation = await this.prisma.working.waConversation.findUniqueOrThrow({
       where: { id: conversationId },
     });
 
@@ -22,7 +22,7 @@ export class WaChatbotEngineService {
     const text = (message.textBody || '').toLowerCase().trim();
 
     // Check for keyword-triggered flows
-    const flows = await this.prisma.waChatbotFlow.findMany({
+    const flows = await this.prisma.working.waChatbotFlow.findMany({
       where: { wabaId, status: 'ACTIVE' },
     });
 
@@ -44,7 +44,7 @@ export class WaChatbotEngineService {
     if (!matchedFlow) return;
 
     // Increment trigger count
-    await this.prisma.waChatbotFlow.update({
+    await this.prisma.working.waChatbotFlow.update({
       where: { id: matchedFlow.id },
       data: { triggeredCount: { increment: 1 } },
     });
@@ -56,7 +56,7 @@ export class WaChatbotEngineService {
     const nodes = (flow.nodes as any[]) || [];
     if (nodes.length === 0) return;
 
-    const conversation = await this.prisma.waConversation.findUniqueOrThrow({
+    const conversation = await this.prisma.working.waConversation.findUniqueOrThrow({
       where: { id: conversationId },
     });
 
@@ -70,7 +70,7 @@ export class WaChatbotEngineService {
     }
 
     // Increment completed count
-    await this.prisma.waChatbotFlow.update({
+    await this.prisma.working.waChatbotFlow.update({
       where: { id: flow.id },
       data: { completedCount: { increment: 1 } },
     });
@@ -106,7 +106,7 @@ export class WaChatbotEngineService {
 
       case 'ASSIGN_AGENT':
         if (node.assignToUserId) {
-          await this.prisma.waConversation.update({
+          await this.prisma.working.waConversation.update({
             where: { id: conversation.id },
             data: { assignedToId: node.assignToUserId },
           });
@@ -121,7 +121,7 @@ export class WaChatbotEngineService {
 
       case 'TAG_CONTACT':
         if (node.tag) {
-          await this.prisma.waConversation.update({
+          await this.prisma.working.waConversation.update({
             where: { id: conversation.id },
             data: { tags: { push: node.tag } },
           });
@@ -155,7 +155,7 @@ export class WaChatbotEngineService {
   }
 
   private async recordChatbotMessage(wabaId: string, conversationId: string, type: string, snippet: string): Promise<void> {
-    await this.prisma.waMessage.create({
+    await this.prisma.working.waMessage.create({
       data: {
         wabaId,
         conversationId,

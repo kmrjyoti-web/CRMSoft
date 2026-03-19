@@ -13,15 +13,15 @@ export class AttachmentService {
       throw new BadRequestException(`Invalid entity type: ${entityType}. Allowed: ${VALID_ENTITY_TYPES.join(', ')}`);
     }
 
-    const doc = await this.prisma.document.findUnique({ where: { id: documentId, isActive: true } });
+    const doc = await this.prisma.working.document.findUnique({ where: { id: documentId, isActive: true } });
     if (!doc) throw new NotFoundException('Document not found');
 
-    const existing = await this.prisma.documentAttachment.findFirst({
+    const existing = await this.prisma.working.documentAttachment.findFirst({
       where: { documentId, entityType, entityId },
     });
     if (existing) throw new BadRequestException('Document is already attached to this entity');
 
-    return this.prisma.documentAttachment.create({
+    return this.prisma.working.documentAttachment.create({
       data: {
         documentId,
         entityType,
@@ -38,12 +38,12 @@ export class AttachmentService {
   }
 
   async detachDocument(documentId: string, entityType: string, entityId: string) {
-    const attachment = await this.prisma.documentAttachment.findFirst({
+    const attachment = await this.prisma.working.documentAttachment.findFirst({
       where: { documentId, entityType, entityId },
     });
     if (!attachment) throw new NotFoundException('Attachment not found');
 
-    return this.prisma.documentAttachment.delete({
+    return this.prisma.working.documentAttachment.delete({
       where: { id: attachment.id },
     });
   }
@@ -53,7 +53,7 @@ export class AttachmentService {
     const skip = (page - 1) * limit;
 
     const [data, total] = await Promise.all([
-      this.prisma.documentAttachment.findMany({
+      this.prisma.working.documentAttachment.findMany({
         where,
         skip,
         take: limit,
@@ -70,14 +70,14 @@ export class AttachmentService {
           attachedBy: { select: { id: true, firstName: true, lastName: true } },
         },
       }),
-      this.prisma.documentAttachment.count({ where }),
+      this.prisma.working.documentAttachment.count({ where }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   async getDocumentEntities(documentId: string) {
-    return this.prisma.documentAttachment.findMany({
+    return this.prisma.working.documentAttachment.findMany({
       where: { documentId },
       select: {
         id: true,

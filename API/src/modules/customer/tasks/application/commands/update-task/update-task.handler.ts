@@ -9,7 +9,7 @@ export class UpdateTaskHandler implements ICommandHandler<UpdateTaskCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: UpdateTaskCommand) {
-    const existing = await this.prisma.task.findUnique({ where: { id: cmd.taskId } });
+    const existing = await this.prisma.working.task.findUnique({ where: { id: cmd.taskId } });
     if (!existing || !existing.isActive) throw new NotFoundException('Task not found');
 
     const changes: any = {};
@@ -38,7 +38,7 @@ export class UpdateTaskHandler implements ICommandHandler<UpdateTaskCommand> {
 
     if (Object.keys(changes).length === 0) return existing;
 
-    const task = await this.prisma.task.update({
+    const task = await this.prisma.working.task.update({
       where: { id: cmd.taskId },
       data: changes,
       include: {
@@ -49,7 +49,7 @@ export class UpdateTaskHandler implements ICommandHandler<UpdateTaskCommand> {
 
     // Record history
     if (history.length > 0) {
-      await this.prisma.taskHistory.createMany({
+      await this.prisma.working.taskHistory.createMany({
         data: history.map(h => ({
           taskId: cmd.taskId,
           field: h.field,

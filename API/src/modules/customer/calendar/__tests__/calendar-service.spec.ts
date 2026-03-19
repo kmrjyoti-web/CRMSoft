@@ -23,6 +23,7 @@ describe('CalendarService', () => {
         updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
     };
+(prisma as any).working = prisma;
     service = new CalendarService(prisma);
     syncService = new CalendarSyncService(prisma, {} as any, {} as any);
   });

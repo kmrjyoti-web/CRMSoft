@@ -18,7 +18,7 @@ export class WaWindowCheckerService {
 
   async refreshWindow(conversationId: string): Promise<Date> {
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    await this.prisma.waConversation.update({
+    await this.prisma.working.waConversation.update({
       where: { id: conversationId },
       data: { windowExpiresAt: expiresAt, isWindowOpen: true },
     });
@@ -26,7 +26,7 @@ export class WaWindowCheckerService {
   }
 
   async closeExpiredWindows(): Promise<number> {
-    const result = await this.prisma.waConversation.updateMany({
+    const result = await this.prisma.working.waConversation.updateMany({
       where: { isWindowOpen: true, windowExpiresAt: { lt: new Date() } },
       data: { isWindowOpen: false },
     });

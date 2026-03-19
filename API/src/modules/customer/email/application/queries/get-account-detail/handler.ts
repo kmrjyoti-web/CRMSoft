@@ -8,7 +8,7 @@ export class GetAccountDetailHandler implements IQueryHandler<GetAccountDetailQu
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetAccountDetailQuery) {
-    const account = await this.prisma.emailAccount.findUnique({
+    const account = await this.prisma.working.emailAccount.findUnique({
       where: { id: query.accountId },
     });
 

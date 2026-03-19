@@ -24,7 +24,7 @@ export class ComposeEmailHandler implements ICommandHandler<ComposeEmailCommand>
 
     // 1. If templateId -> render template
     if (cmd.templateId) {
-      const template = await this.prisma.emailTemplate.findUniqueOrThrow({
+      const template = await this.prisma.working.emailTemplate.findUniqueOrThrow({
         where: { id: cmd.templateId },
       });
       const data = cmd.templateData || {};
@@ -37,7 +37,7 @@ export class ComposeEmailHandler implements ICommandHandler<ComposeEmailCommand>
 
     // 2. If signatureId -> append signature
     if (cmd.signatureId) {
-      const signature = await this.prisma.emailSignature.findUniqueOrThrow({
+      const signature = await this.prisma.working.emailSignature.findUniqueOrThrow({
         where: { id: cmd.signatureId },
       });
       bodyHtml = bodyHtml + '<br/><div class="email-signature">' + signature.bodyHtml + '</div>';
@@ -60,11 +60,11 @@ export class ComposeEmailHandler implements ICommandHandler<ComposeEmailCommand>
     }
 
     // 6. Create email record
-    const account = await this.prisma.emailAccount.findUniqueOrThrow({
+    const account = await this.prisma.working.emailAccount.findUniqueOrThrow({
       where: { id: cmd.accountId },
     });
 
-    const email = await this.prisma.email.create({
+    const email = await this.prisma.working.email.create({
       data: {
         accountId: cmd.accountId,
         direction: 'OUTBOUND',
@@ -99,7 +99,7 @@ export class ComposeEmailHandler implements ICommandHandler<ComposeEmailCommand>
 
     // Update body if tracking modified it
     if (cmd.trackOpens || cmd.trackClicks) {
-      await this.prisma.email.update({
+      await this.prisma.working.email.update({
         where: { id: email.id },
         data: { bodyHtml },
       });

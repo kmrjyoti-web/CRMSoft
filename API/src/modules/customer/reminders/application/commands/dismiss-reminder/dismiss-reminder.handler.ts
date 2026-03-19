@@ -8,10 +8,10 @@ export class DismissReminderHandler implements ICommandHandler<DismissReminderCo
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: DismissReminderCommand) {
-    const existing = await this.prisma.reminder.findUnique({ where: { id: cmd.id } });
+    const existing = await this.prisma.working.reminder.findUnique({ where: { id: cmd.id } });
     if (!existing) throw new NotFoundException('Reminder not found');
 
-    return this.prisma.reminder.update({
+    return this.prisma.working.reminder.update({
       where: { id: cmd.id },
       data: { isSent: true, sentAt: new Date() },
     });

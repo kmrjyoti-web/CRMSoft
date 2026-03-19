@@ -17,6 +17,7 @@ describe('ICalService', () => {
         count: jest.fn().mockResolvedValue(0),
       },
     };
+(prisma as any).working = prisma;
 
     service = new ICalService(prisma);
   });

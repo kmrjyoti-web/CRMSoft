@@ -13,7 +13,7 @@ export class WaApiService {
   ) {}
 
   private async getConfig(wabaId: string) {
-    return this.prisma.whatsAppBusinessAccount.findUniqueOrThrow({ where: { id: wabaId } });
+    return this.prisma.working.whatsAppBusinessAccount.findUniqueOrThrow({ where: { id: wabaId } });
   }
 
   private baseUrl(apiVersion: string, phoneNumberId: string) {

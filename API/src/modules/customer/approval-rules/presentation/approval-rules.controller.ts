@@ -14,7 +14,7 @@ export class ApprovalRulesController {
   /** POST / — Create approval rule. */
   @Post()
   async create(@Body() dto: CreateApprovalRuleDto) {
-    const rule = await this.prisma.approvalRule.create({
+    const rule = await this.prisma.working.approvalRule.create({
       data: {
         entityType: dto.entityType,
         action: dto.action,
@@ -32,7 +32,7 @@ export class ApprovalRulesController {
   /** GET / — List all rules. */
   @Get()
   async list() {
-    const rules = await this.prisma.approvalRule.findMany({
+    const rules = await this.prisma.working.approvalRule.findMany({
       orderBy: { createdAt: 'desc' },
     });
     return ApiResponse.success(rules);
@@ -41,7 +41,7 @@ export class ApprovalRulesController {
   /** PUT /:id — Update rule. */
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: UpdateApprovalRuleDto) {
-    const rule = await this.prisma.approvalRule.update({
+    const rule = await this.prisma.working.approvalRule.update({
       where: { id },
       data: dto,
     });
@@ -51,7 +51,7 @@ export class ApprovalRulesController {
   /** DELETE /:id — Delete rule. */
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    await this.prisma.approvalRule.delete({ where: { id } });
+    await this.prisma.working.approvalRule.delete({ where: { id } });
     return ApiResponse.success(null, 'Approval rule deleted');
   }
 }

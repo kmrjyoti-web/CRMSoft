@@ -16,7 +16,7 @@ export class WaMessageSenderService {
   ) {}
 
   async sendText(wabaId: string, conversationId: string, text: string, senderUserId?: string) {
-    const conversation = await this.prisma.waConversation.findUniqueOrThrow({
+    const conversation = await this.prisma.working.waConversation.findUniqueOrThrow({
       where: { id: conversationId },
     });
 
@@ -25,7 +25,7 @@ export class WaMessageSenderService {
 
     const result = await this.waApiService.sendText(wabaId, conversation.contactPhone, text);
 
-    const message = await this.prisma.waMessage.create({
+    const message = await this.prisma.working.waMessage.create({
       data: {
         wabaId,
         conversationId,
@@ -46,10 +46,10 @@ export class WaMessageSenderService {
   }
 
   async sendTemplate(wabaId: string, conversationId: string, templateId: string, variables?: any, senderUserId?: string) {
-    const conversation = await this.prisma.waConversation.findUniqueOrThrow({
+    const conversation = await this.prisma.working.waConversation.findUniqueOrThrow({
       where: { id: conversationId },
     });
-    const template = await this.prisma.waTemplate.findUniqueOrThrow({
+    const template = await this.prisma.working.waTemplate.findUniqueOrThrow({
       where: { id: templateId },
     });
 
@@ -61,7 +61,7 @@ export class WaMessageSenderService {
       wabaId, conversation.contactPhone, template.name, template.language, components,
     );
 
-    const message = await this.prisma.waMessage.create({
+    const message = await this.prisma.working.waMessage.create({
       data: {
         wabaId,
         conversationId,
@@ -79,7 +79,7 @@ export class WaMessageSenderService {
 
     await this.conversationService.updateLastMessage(conversationId, `[Template: ${template.name}]`, 'OUTBOUND');
     await this.incrementWabaSent(wabaId);
-    await this.prisma.waTemplate.update({
+    await this.prisma.working.waTemplate.update({
       where: { id: templateId },
       data: { sentCount: { increment: 1 } },
     });
@@ -88,7 +88,7 @@ export class WaMessageSenderService {
   }
 
   async sendMedia(wabaId: string, conversationId: string, type: string, mediaUrl: string, caption?: string, senderUserId?: string) {
-    const conversation = await this.prisma.waConversation.findUniqueOrThrow({
+    const conversation = await this.prisma.working.waConversation.findUniqueOrThrow({
       where: { id: conversationId },
     });
 
@@ -97,7 +97,7 @@ export class WaMessageSenderService {
 
     const result = await this.waApiService.sendMedia(wabaId, conversation.contactPhone, type, mediaUrl, caption);
 
-    const message = await this.prisma.waMessage.create({
+    const message = await this.prisma.working.waMessage.create({
       data: {
         wabaId,
         conversationId,
@@ -119,7 +119,7 @@ export class WaMessageSenderService {
   }
 
   async sendInteractive(wabaId: string, conversationId: string, interactiveType: string, interactiveData: any, senderUserId?: string) {
-    const conversation = await this.prisma.waConversation.findUniqueOrThrow({
+    const conversation = await this.prisma.working.waConversation.findUniqueOrThrow({
       where: { id: conversationId },
     });
 
@@ -128,7 +128,7 @@ export class WaMessageSenderService {
 
     const result = await this.waApiService.sendInteractive(wabaId, conversation.contactPhone, interactiveType, interactiveData);
 
-    const message = await this.prisma.waMessage.create({
+    const message = await this.prisma.working.waMessage.create({
       data: {
         wabaId,
         conversationId,
@@ -150,7 +150,7 @@ export class WaMessageSenderService {
   }
 
   async sendLocation(wabaId: string, conversationId: string, lat: number, lng: number, name?: string, address?: string, senderUserId?: string) {
-    const conversation = await this.prisma.waConversation.findUniqueOrThrow({
+    const conversation = await this.prisma.working.waConversation.findUniqueOrThrow({
       where: { id: conversationId },
     });
 
@@ -159,7 +159,7 @@ export class WaMessageSenderService {
 
     const result = await this.waApiService.sendLocation(wabaId, conversation.contactPhone, lat, lng, name, address);
 
-    const message = await this.prisma.waMessage.create({
+    const message = await this.prisma.working.waMessage.create({
       data: {
         wabaId,
         conversationId,
@@ -183,7 +183,7 @@ export class WaMessageSenderService {
   }
 
   private async checkOptOut(wabaId: string, phoneNumber: string): Promise<void> {
-    const optOut = await this.prisma.waOptOut.findFirst({
+    const optOut = await this.prisma.working.waOptOut.findFirst({
       where: { wabaId, phoneNumber },
     });
     if (optOut) {
@@ -215,7 +215,7 @@ export class WaMessageSenderService {
   }
 
   private async incrementWabaSent(wabaId: string): Promise<void> {
-    await this.prisma.whatsAppBusinessAccount.update({
+    await this.prisma.working.whatsAppBusinessAccount.update({
       where: { id: wabaId },
       data: { totalMessagesSent: { increment: 1 } },
     });

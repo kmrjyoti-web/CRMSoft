@@ -15,7 +15,7 @@ export class CampaignExecutorService {
   ) {}
 
   async executeCampaign(campaignId: string): Promise<void> {
-    const campaign = await this.prisma.emailCampaign.findUniqueOrThrow({
+    const campaign = await this.prisma.working.emailCampaign.findUniqueOrThrow({
       where: { id: campaignId },
     });
 
@@ -23,19 +23,19 @@ export class CampaignExecutorService {
       throw new BadRequestException(`Campaign is in ${campaign.status} status, cannot start`);
     }
 
-    await this.prisma.emailCampaign.update({
+    await this.prisma.working.emailCampaign.update({
       where: { id: campaignId },
       data: { status: 'SENDING', startedAt: new Date() },
     });
 
     try {
-      const recipients = await this.prisma.campaignRecipient.findMany({
+      const recipients = await this.prisma.working.campaignRecipient.findMany({
         where: { campaignId, status: 'PENDING' },
       });
 
       // Check for unsubscribes
       const recipientEmails = recipients.map(r => r.email);
-      const unsubscribed = await this.prisma.emailUnsubscribe.findMany({
+      const unsubscribed = await this.prisma.working.emailUnsubscribe.findMany({
         where: { email: { in: recipientEmails } },
       });
       const unsubscribedEmails = new Set(unsubscribed.map(u => u.email));
@@ -45,11 +45,11 @@ export class CampaignExecutorService {
 
       for (const recipient of recipients) {
         // Check if campaign was paused/cancelled
-        const current = await this.prisma.emailCampaign.findUnique({ where: { id: campaignId } });
+        const current = await this.prisma.working.emailCampaign.findUnique({ where: { id: campaignId } });
         if (current?.status === 'PAUSED' || current?.status === 'CANCELLED') break;
 
         if (unsubscribedEmails.has(recipient.email)) {
-          await this.prisma.campaignRecipient.update({
+          await this.prisma.working.campaignRecipient.update({
             where: { id: recipient.id },
             data: { status: 'UNSUBSCRIBED', unsubscribedAt: new Date() },
           });
@@ -68,7 +68,7 @@ export class CampaignExecutorService {
           const trackingPixelId = this.trackingService.generateTrackingPixelId();
 
           // Create email record
-          const email = await this.prisma.email.create({
+          const email = await this.prisma.working.email.create({
             data: {
               accountId: campaign.accountId,
               direction: 'OUTBOUND',
@@ -95,7 +95,7 @@ export class CampaignExecutorService {
           }
 
           // Update email with tracking-enhanced body
-          await this.prisma.email.update({
+          await this.prisma.working.email.update({
             where: { id: email.id },
             data: { bodyHtml },
           });
@@ -103,14 +103,14 @@ export class CampaignExecutorService {
           // Send
           await this.emailSender.send(email.id);
 
-          await this.prisma.campaignRecipient.update({
+          await this.prisma.working.campaignRecipient.update({
             where: { id: recipient.id },
             data: { status: 'SENT', sentAt: new Date(), emailId: email.id },
           });
 
           sentCount++;
         } catch (error: any) {
-          await this.prisma.campaignRecipient.update({
+          await this.prisma.working.campaignRecipient.update({
             where: { id: recipient.id },
             data: { status: 'FAILED', failedAt: new Date(), errorMessage: error.message },
           });
@@ -126,7 +126,7 @@ export class CampaignExecutorService {
 
       // Update campaign
       const finalStatus = failedCount === recipients.length ? 'FAILED' : 'COMPLETED';
-      await this.prisma.emailCampaign.update({
+      await this.prisma.working.emailCampaign.update({
         where: { id: campaignId },
         data: {
           status: finalStatus,
@@ -136,7 +136,7 @@ export class CampaignExecutorService {
         },
       });
     } catch (error: any) {
-      await this.prisma.emailCampaign.update({
+      await this.prisma.working.emailCampaign.update({
         where: { id: campaignId },
         data: { status: 'FAILED', errorMessage: error.message },
       });
@@ -144,19 +144,19 @@ export class CampaignExecutorService {
   }
 
   async pauseCampaign(campaignId: string): Promise<void> {
-    await this.prisma.emailCampaign.update({
+    await this.prisma.working.emailCampaign.update({
       where: { id: campaignId },
       data: { status: 'PAUSED' },
     });
   }
 
   async cancelCampaign(campaignId: string): Promise<void> {
-    await this.prisma.emailCampaign.update({
+    await this.prisma.working.emailCampaign.update({
       where: { id: campaignId },
       data: { status: 'CANCELLED' },
     });
     // Cancel pending recipients
-    await this.prisma.campaignRecipient.updateMany({
+    await this.prisma.working.campaignRecipient.updateMany({
       where: { campaignId, status: 'PENDING' },
       data: { status: 'FAILED', errorMessage: 'Campaign cancelled' },
     });

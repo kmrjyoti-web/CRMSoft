@@ -11,14 +11,14 @@ export class GetTaskHistoryHandler implements IQueryHandler<GetTaskHistoryQuery>
     const skip = (query.page - 1) * query.limit;
 
     const [data, total] = await Promise.all([
-      this.prisma.taskHistory.findMany({
+      this.prisma.working.taskHistory.findMany({
         where: { taskId: query.taskId },
         skip,
         take: query.limit,
         orderBy: { createdAt: 'desc' },
         include: { changedBy: { select: { id: true, firstName: true, lastName: true } } },
       }),
-      this.prisma.taskHistory.count({ where: { taskId: query.taskId } }),
+      this.prisma.working.taskHistory.count({ where: { taskId: query.taskId } }),
     ]);
 
     return { data, total, page: query.page, limit: query.limit };

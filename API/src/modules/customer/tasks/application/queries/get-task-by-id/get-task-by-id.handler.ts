@@ -9,7 +9,7 @@ export class GetTaskByIdHandler implements IQueryHandler<GetTaskByIdQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetTaskByIdQuery) {
-    const task = await this.prisma.task.findUnique({
+    const task = await this.prisma.working.task.findUnique({
       where: { id: query.taskId },
       include: {
         assignedTo: { select: { id: true, firstName: true, lastName: true, email: true } },

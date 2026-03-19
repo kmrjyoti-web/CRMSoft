@@ -20,7 +20,7 @@ export class UpdateTemplateHandler implements ICommandHandler<UpdateTemplateComm
     if (cmd.description !== undefined) data.description = cmd.description;
     if (cmd.isShared !== undefined) data.isShared = cmd.isShared;
 
-    const template = await this.prisma.emailTemplate.update({
+    const template = await this.prisma.working.emailTemplate.update({
       where: { id: cmd.id },
       data,
     });

@@ -25,6 +25,7 @@ describe('WaApiService', () => {
         findUniqueOrThrow: jest.fn().mockResolvedValue(mockConfig),
       },
     };
+(prisma as any).working = prisma;
 
     httpService = {
       post: jest.fn().mockReturnValue(

@@ -16,12 +16,12 @@ export class MarkConversationReadHandler implements ICommandHandler<MarkConversa
   ) {}
 
   async execute(cmd: MarkConversationReadCommand) {
-    const conversation = await this.prisma.waConversation.findUniqueOrThrow({
+    const conversation = await this.prisma.working.waConversation.findUniqueOrThrow({
       where: { id: cmd.conversationId },
     });
 
     // Find the last inbound message to mark as read via WhatsApp API
-    const lastInboundMessage = await this.prisma.waMessage.findFirst({
+    const lastInboundMessage = await this.prisma.working.waMessage.findFirst({
       where: {
         conversationId: cmd.conversationId,
         direction: 'INBOUND',

@@ -64,7 +64,7 @@ export class CalendarConfigService {
 
   /** Get a single config value by key, parsed from JSON. */
   async getConfig(tenantId: string, key: string): Promise<any> {
-    const record = await this.prisma.calendarConfig.findUnique({
+    const record = await this.prisma.working.calendarConfig.findUnique({
       where: { tenantId_configKey: { tenantId, configKey: key } },
     });
     return record?.configValue ?? null;
@@ -72,7 +72,7 @@ export class CalendarConfigService {
 
   /** Get all calendar configs for a tenant. */
   async getAllConfigs(tenantId: string) {
-    return this.prisma.calendarConfig.findMany({
+    return this.prisma.working.calendarConfig.findMany({
       where: { tenantId, isActive: true },
       orderBy: { configKey: 'asc' },
     });
@@ -86,7 +86,7 @@ export class CalendarConfigService {
     description?: string,
     updatedById?: string,
   ) {
-    return this.prisma.calendarConfig.upsert({
+    return this.prisma.working.calendarConfig.upsert({
       where: { tenantId_configKey: { tenantId, configKey: key } },
       update: { configValue: value, ...(description ? { description } : {}), updatedById },
       create: { tenantId, configKey: key, configValue: value, description, updatedById },
@@ -95,10 +95,10 @@ export class CalendarConfigService {
 
   /** Delete all configs for a tenant and re-seed defaults. */
   async resetToDefaults(tenantId: string, updatedById?: string) {
-    await this.prisma.calendarConfig.deleteMany({ where: { tenantId } });
+    await this.prisma.working.calendarConfig.deleteMany({ where: { tenantId } });
 
     for (const cfg of CALENDAR_CONFIG_DEFAULTS) {
-      await this.prisma.calendarConfig.create({
+      await this.prisma.working.calendarConfig.create({
         data: {
           tenantId,
           configKey: cfg.configKey,

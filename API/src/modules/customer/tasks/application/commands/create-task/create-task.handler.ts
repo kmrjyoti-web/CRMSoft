@@ -30,7 +30,7 @@ export class CreateTaskHandler implements ICommandHandler<CreateTaskCommand> {
     }
 
     // Generate task number
-    const count = await this.prisma.task.count({ where: { tenantId: cmd.tenantId } });
+    const count = await this.prisma.working.task.count({ where: { tenantId: cmd.tenantId } });
     const taskNumber = `TSK-${String(count + 1).padStart(4, '0')}`;
 
     const recurrence = (cmd.recurrence as TaskRecurrence) || 'NONE';
@@ -49,7 +49,7 @@ export class CreateTaskHandler implements ICommandHandler<CreateTaskCommand> {
     const isNonManager = cmd.creatorRoleLevel >= 4;
     const initialStatus = (isSelfTask && isNonManager) ? 'PENDING_APPROVAL' : 'OPEN';
 
-    const task = await this.prisma.task.create({
+    const task = await this.prisma.working.task.create({
       data: {
         tenantId: cmd.tenantId,
         taskNumber,
@@ -87,13 +87,13 @@ export class CreateTaskHandler implements ICommandHandler<CreateTaskCommand> {
 
     // Auto-add creator as watcher if different from assignee
     if (cmd.createdById !== assigneeId) {
-      await this.prisma.taskWatcher.create({
+      await this.prisma.working.taskWatcher.create({
         data: { taskId: task.id, userId: cmd.createdById },
       });
     }
 
     // Record creation in history
-    await this.prisma.taskHistory.create({
+    await this.prisma.working.taskHistory.create({
       data: {
         tenantId: cmd.tenantId,
         taskId: task.id,
@@ -127,7 +127,7 @@ export class CreateTaskHandler implements ICommandHandler<CreateTaskCommand> {
     try {
       const activityType = cmd.activityType || this.mapTaskTypeToActivityType(cmd.type);
 
-      const activity = await this.prisma.activity.create({
+      const activity = await this.prisma.working.activity.create({
         data: {
           tenantId: cmd.tenantId || '',
           type: activityType as any,
@@ -160,7 +160,7 @@ export class CreateTaskHandler implements ICommandHandler<CreateTaskCommand> {
     try {
       const reminderTime = new Date(dueDate.getTime() - (cmd.reminderMinutesBefore! * 60 * 1000));
 
-      await this.prisma.reminder.create({
+      await this.prisma.working.reminder.create({
         data: {
           title: `Reminder: ${cmd.title}`,
           entityType: 'TASK',
@@ -182,7 +182,7 @@ export class CreateTaskHandler implements ICommandHandler<CreateTaskCommand> {
 
   private async syncCalendarEvent(cmd: CreateTaskCommand, task: any, dueDate: Date) {
     try {
-      await this.prisma.calendarEvent.create({
+      await this.prisma.working.calendarEvent.create({
         data: {
           eventType: 'TASK',
           sourceId: task.id,

@@ -8,10 +8,10 @@ export class CancelRecurrenceHandler implements ICommandHandler<CancelRecurrence
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CancelRecurrenceCommand) {
-    const existing = await this.prisma.recurringEvent.findUnique({ where: { id: cmd.id } });
+    const existing = await this.prisma.working.recurringEvent.findUnique({ where: { id: cmd.id } });
     if (!existing) throw new NotFoundException('Recurring event not found');
 
-    return this.prisma.recurringEvent.update({
+    return this.prisma.working.recurringEvent.update({
       where: { id: cmd.id },
       data: { isActive: false },
     });

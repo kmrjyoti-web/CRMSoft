@@ -9,15 +9,15 @@ export class AddWatcherHandler implements ICommandHandler<AddWatcherCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: AddWatcherCommand) {
-    const task = await this.prisma.task.findUnique({ where: { id: cmd.taskId } });
+    const task = await this.prisma.working.task.findUnique({ where: { id: cmd.taskId } });
     if (!task || !task.isActive) throw new NotFoundException('Task not found');
 
-    const existing = await this.prisma.taskWatcher.findUnique({
+    const existing = await this.prisma.working.taskWatcher.findUnique({
       where: { taskId_userId: { taskId: cmd.taskId, userId: cmd.watcherUserId } },
     });
     if (existing) throw new ConflictException('User is already watching this task');
 
-    return this.prisma.taskWatcher.create({
+    return this.prisma.working.taskWatcher.create({
       data: { taskId: cmd.taskId, userId: cmd.watcherUserId },
       include: { user: { select: { id: true, firstName: true, lastName: true } } },
     });

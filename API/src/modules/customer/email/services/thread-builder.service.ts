@@ -6,13 +6,13 @@ export class ThreadBuilderService {
   constructor(private readonly prisma: PrismaService) {}
 
   async assignThread(emailId: string): Promise<string | null> {
-    const email = await this.prisma.email.findUniqueOrThrow({ where: { id: emailId } });
+    const email = await this.prisma.working.email.findUniqueOrThrow({ where: { id: emailId } });
 
     let threadId: string | null = null;
 
     // 1. Check providerThreadId
     if (email.providerThreadId) {
-      const existing = await this.prisma.emailThread.findFirst({
+      const existing = await this.prisma.working.emailThread.findFirst({
         where: { providerThreadId: email.providerThreadId },
       });
       if (existing) threadId = existing.id;
@@ -20,7 +20,7 @@ export class ThreadBuilderService {
 
     // 2. Check inReplyToMessageId
     if (!threadId && email.inReplyToMessageId) {
-      const parent = await this.prisma.email.findFirst({
+      const parent = await this.prisma.working.email.findFirst({
         where: { internetMessageId: email.inReplyToMessageId },
       });
       if (parent?.threadId) threadId = parent.threadId;
@@ -28,7 +28,7 @@ export class ThreadBuilderService {
 
     // 3. Check References header
     if (!threadId && email.references.length > 0) {
-      const referenced = await this.prisma.email.findFirst({
+      const referenced = await this.prisma.working.email.findFirst({
         where: { internetMessageId: { in: email.references } },
       });
       if (referenced?.threadId) threadId = referenced.threadId;
@@ -37,7 +37,7 @@ export class ThreadBuilderService {
     // 4. Match by normalized subject
     if (!threadId) {
       const normalized = this.normalizeSubject(email.subject);
-      const existingThread = await this.prisma.emailThread.findFirst({
+      const existingThread = await this.prisma.working.emailThread.findFirst({
         where: { subject: normalized },
         orderBy: { lastMessageAt: 'desc' },
       });
@@ -47,7 +47,7 @@ export class ThreadBuilderService {
     // 5. Create new thread if none found
     if (!threadId) {
       const allEmails = this.collectParticipants(email);
-      const thread = await this.prisma.emailThread.create({
+      const thread = await this.prisma.working.emailThread.create({
         data: {
           subject: this.normalizeSubject(email.subject),
           participantEmails: allEmails,
@@ -62,7 +62,7 @@ export class ThreadBuilderService {
       threadId = thread.id;
     } else {
       // Update existing thread
-      await this.prisma.emailThread.update({
+      await this.prisma.working.emailThread.update({
         where: { id: threadId },
         data: {
           messageCount: { increment: 1 },
@@ -73,7 +73,7 @@ export class ThreadBuilderService {
     }
 
     // Set thread on email
-    await this.prisma.email.update({
+    await this.prisma.working.email.update({
       where: { id: emailId },
       data: { threadId },
     });

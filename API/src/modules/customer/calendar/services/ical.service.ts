@@ -21,7 +21,7 @@ export class ICalService {
     startDate: Date,
     endDate: Date,
   ): Promise<string> {
-    const events = await this.prisma.scheduledEvent.findMany({
+    const events = await this.prisma.working.scheduledEvent.findMany({
       where: {
         tenantId,
         organizerId: userId,
@@ -97,10 +97,10 @@ export class ICalService {
       const endTime = dtEnd ? this.parseIcalDate(dtEnd) : new Date(startTime.getTime() + 3600000);
       const allDay = dtStart.length === 8; // DATE-only format: YYYYMMDD
 
-      const count = await this.prisma.scheduledEvent.count({ where: { tenantId } });
+      const count = await this.prisma.working.scheduledEvent.count({ where: { tenantId } });
       const eventNumber = `EVT-${String(count + 1).padStart(5, '0')}`;
 
-      await this.prisma.scheduledEvent.create({
+      await this.prisma.working.scheduledEvent.create({
         data: {
           tenantId,
           eventNumber,

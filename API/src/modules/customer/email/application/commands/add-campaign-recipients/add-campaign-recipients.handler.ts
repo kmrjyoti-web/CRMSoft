@@ -11,7 +11,7 @@ export class AddCampaignRecipientsHandler implements ICommandHandler<AddCampaign
 
   async execute(cmd: AddCampaignRecipientsCommand) {
     // Create recipient records
-    await this.prisma.campaignRecipient.createMany({
+    await this.prisma.working.campaignRecipient.createMany({
       data: cmd.recipients.map((r) => ({
         campaignId: cmd.campaignId,
         email: r.email,
@@ -25,11 +25,11 @@ export class AddCampaignRecipientsHandler implements ICommandHandler<AddCampaign
     });
 
     // Update totalRecipients on campaign
-    const count = await this.prisma.campaignRecipient.count({
+    const count = await this.prisma.working.campaignRecipient.count({
       where: { campaignId: cmd.campaignId },
     });
 
-    await this.prisma.emailCampaign.update({
+    await this.prisma.working.emailCampaign.update({
       where: { id: cmd.campaignId },
       data: { totalRecipients: count },
     });

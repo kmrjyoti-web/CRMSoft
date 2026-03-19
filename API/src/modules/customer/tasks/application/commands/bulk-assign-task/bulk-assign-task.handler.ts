@@ -14,13 +14,13 @@ export class BulkAssignTaskHandler implements ICommandHandler<BulkAssignTaskComm
     }
 
     // Update all tasks with the new assignee
-    const updateResult = await this.prisma.task.updateMany({
+    const updateResult = await this.prisma.working.task.updateMany({
       where: { id: { in: cmd.taskIds }, tenantId: cmd.tenantId, isActive: true },
       data: { assignedToId: cmd.assignedToId },
     });
 
     // Create TaskHistory records for each task
-    await this.prisma.taskHistory.createMany({
+    await this.prisma.working.taskHistory.createMany({
       data: cmd.taskIds.map((taskId) => ({
         taskId,
         action: 'REASSIGNED',

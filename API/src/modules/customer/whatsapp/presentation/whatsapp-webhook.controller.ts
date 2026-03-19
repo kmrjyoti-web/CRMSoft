@@ -20,7 +20,7 @@ export class WhatsAppWebhookController {
     @Query('hub.challenge') challenge: string,
   ) {
     // Look up WABA by verify token
-    const waba = await this.prisma.whatsAppBusinessAccount.findFirst({
+    const waba = await this.prisma.working.whatsAppBusinessAccount.findFirst({
       where: { webhookVerifyToken: token },
     });
     if (!waba) return 'Invalid token';

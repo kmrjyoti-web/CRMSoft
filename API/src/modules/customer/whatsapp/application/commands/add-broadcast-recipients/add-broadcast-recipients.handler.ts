@@ -17,11 +17,11 @@ export class AddBroadcastRecipientsHandler implements ICommandHandler<AddBroadca
       variables: r.variables,
     }));
 
-    await this.prisma.waBroadcastRecipient.createMany({
+    await this.prisma.working.waBroadcastRecipient.createMany({
       data: recipientData,
     });
 
-    await this.prisma.waBroadcast.update({
+    await this.prisma.working.waBroadcast.update({
       where: { id: command.broadcastId },
       data: {
         totalRecipients: { increment: command.recipients.length },

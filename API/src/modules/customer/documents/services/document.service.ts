@@ -25,13 +25,13 @@ export class DocumentService {
     uploadedById: string;
   }) {
     if (data.folderId) {
-      const folder = await this.prisma.documentFolder.findUnique({
+      const folder = await this.prisma.working.documentFolder.findUnique({
         where: { id: data.folderId, isActive: true },
       });
       if (!folder) throw new BadRequestException('Folder not found');
     }
 
-    return this.prisma.document.create({
+    return this.prisma.working.document.create({
       data: {
         fileName: data.fileName,
         originalName: data.originalName,
@@ -57,7 +57,7 @@ export class DocumentService {
   }
 
   async getById(id: string) {
-    const doc = await this.prisma.document.findUnique({
+    const doc = await this.prisma.working.document.findUnique({
       where: { id, isActive: true },
       include: {
         uploadedBy: { select: { id: true, firstName: true, lastName: true } },
@@ -99,7 +99,7 @@ export class DocumentService {
 
     const skip = (params.page - 1) * params.limit;
     const [data, total] = await Promise.all([
-      this.prisma.document.findMany({
+      this.prisma.working.document.findMany({
         where,
         skip,
         take: params.limit,
@@ -110,7 +110,7 @@ export class DocumentService {
           _count: { select: { attachments: true } },
         },
       }),
-      this.prisma.document.count({ where }),
+      this.prisma.working.document.count({ where }),
     ]);
 
     return { data, total, page: params.page, limit: params.limit, totalPages: Math.ceil(total / params.limit) };
@@ -123,7 +123,7 @@ export class DocumentService {
     folderId?: string | null;
   }) {
     await this.getById(id);
-    return this.prisma.document.update({
+    return this.prisma.working.document.update({
       where: { id },
       data,
       include: {
@@ -135,7 +135,7 @@ export class DocumentService {
 
   async softDelete(id: string) {
     await this.getById(id);
-    return this.prisma.document.update({
+    return this.prisma.working.document.update({
       where: { id },
       data: { isActive: false, status: DocumentStatus.DELETED },
     });
@@ -144,12 +144,12 @@ export class DocumentService {
   async moveToFolder(id: string, folderId: string | null) {
     await this.getById(id);
     if (folderId) {
-      const folder = await this.prisma.documentFolder.findUnique({
+      const folder = await this.prisma.working.documentFolder.findUnique({
         where: { id: folderId, isActive: true },
       });
       if (!folder) throw new BadRequestException('Target folder not found');
     }
-    return this.prisma.document.update({
+    return this.prisma.working.document.update({
       where: { id },
       data: { folderId },
     });
@@ -163,7 +163,7 @@ export class DocumentService {
       // Trace back to the root
       let current = doc;
       while (current.parentVersionId) {
-        const parent = await this.prisma.document.findUnique({ where: { id: current.parentVersionId } });
+        const parent = await this.prisma.working.document.findUnique({ where: { id: current.parentVersionId } });
         if (!parent) break;
         rootId = parent.id;
         current = parent as any;
@@ -171,7 +171,7 @@ export class DocumentService {
     }
 
     // Get all versions in the chain
-    const versions = await this.prisma.document.findMany({
+    const versions = await this.prisma.working.document.findMany({
       where: {
         OR: [
           { id: rootId },
@@ -201,7 +201,7 @@ export class DocumentService {
     uploadedById: string;
   }) {
     const parent = await this.getById(parentId);
-    const latestVersion = await this.prisma.document.findFirst({
+    const latestVersion = await this.prisma.working.document.findFirst({
       where: {
         OR: [{ id: parentId }, { parentVersionId: parentId }],
         isActive: true,
@@ -211,7 +211,7 @@ export class DocumentService {
 
     const nextVersion = (latestVersion?.version || parent.version) + 1;
 
-    return this.prisma.document.create({
+    return this.prisma.working.document.create({
       data: {
         ...data,
         storageProvider: parent.storageProvider,
@@ -233,10 +233,10 @@ export class DocumentService {
     if (userId) where.uploadedById = userId;
 
     const [totalDocuments, totalSize, byCategory, byStorageType] = await Promise.all([
-      this.prisma.document.count({ where }),
-      this.prisma.document.aggregate({ where, _sum: { fileSize: true } }),
-      this.prisma.document.groupBy({ by: ['category'], where, _count: { id: true } }),
-      this.prisma.document.groupBy({ by: ['storageType'], where, _count: { id: true } }),
+      this.prisma.working.document.count({ where }),
+      this.prisma.working.document.aggregate({ where, _sum: { fileSize: true } }),
+      this.prisma.working.document.groupBy({ by: ['category'], where, _count: { id: true } }),
+      this.prisma.working.document.groupBy({ by: ['storageType'], where, _count: { id: true } }),
     ]);
 
     return {

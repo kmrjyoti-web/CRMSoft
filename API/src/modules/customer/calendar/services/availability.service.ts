@@ -30,7 +30,7 @@ export class AvailabilityService {
   ) {
     const results = await this.prisma.$transaction(
       hours.map((h) =>
-        this.prisma.userAvailability.upsert({
+        this.prisma.working.userAvailability.upsert({
           where: {
             tenantId_userId_dayOfWeek: {
               tenantId,
@@ -61,7 +61,7 @@ export class AvailabilityService {
 
   /** Get working hours for a user (all 7 days, ordered). */
   async getWorkingHours(userId: string, tenantId: string) {
-    return this.prisma.userAvailability.findMany({
+    return this.prisma.working.userAvailability.findMany({
       where: { tenantId, userId, isActive: true },
       orderBy: { dayOfWeek: 'asc' },
     });
@@ -73,7 +73,7 @@ export class AvailabilityService {
 
   /** Create a blocked slot (vacation, OOO, personal block). */
   async createBlockedSlot(userId: string, tenantId: string, dto: any) {
-    return this.prisma.blockedSlot.create({
+    return this.prisma.working.blockedSlot.create({
       data: {
         tenantId,
         userId,
@@ -91,12 +91,12 @@ export class AvailabilityService {
 
   /** Delete a blocked slot (soft-delete via isActive flag). */
   async deleteBlockedSlot(id: string, userId: string, tenantId: string) {
-    const slot = await this.prisma.blockedSlot.findFirst({
+    const slot = await this.prisma.working.blockedSlot.findFirst({
       where: { id, userId, tenantId, isActive: true },
     });
     if (!slot) throw new NotFoundException('Blocked slot not found');
 
-    await this.prisma.blockedSlot.update({
+    await this.prisma.working.blockedSlot.update({
       where: { id },
       data: { isActive: false },
     });
@@ -109,7 +109,7 @@ export class AvailabilityService {
     startDate: Date,
     endDate: Date,
   ) {
-    return this.prisma.blockedSlot.findMany({
+    return this.prisma.working.blockedSlot.findMany({
       where: {
         tenantId,
         userId,
@@ -146,7 +146,7 @@ export class AvailabilityService {
       eventWhere.id = { not: excludeEventId };
     }
 
-    const eventConflicts = await this.prisma.scheduledEvent.findMany({
+    const eventConflicts = await this.prisma.working.scheduledEvent.findMany({
       where: eventWhere,
       select: {
         id: true,
@@ -158,7 +158,7 @@ export class AvailabilityService {
     });
 
     // Overlapping blocked slots
-    const blockedConflicts = await this.prisma.blockedSlot.findMany({
+    const blockedConflicts = await this.prisma.working.blockedSlot.findMany({
       where: {
         tenantId,
         userId,
@@ -205,7 +205,7 @@ export class AvailabilityService {
     const dayOfWeek = dayStart.getDay(); // 0=Sun .. 6=Sat
 
     // 1. Check holiday calendar for the date
-    const holiday = await this.prisma.holidayCalendar.findFirst({
+    const holiday = await this.prisma.working.holidayCalendar.findFirst({
       where: {
         tenantId,
         isActive: true,
@@ -226,7 +226,7 @@ export class AvailabilityService {
 
     for (const userId of userIds) {
       // 2a. Get working hours for that day
-      const workingHour = await this.prisma.userAvailability.findFirst({
+      const workingHour = await this.prisma.working.userAvailability.findFirst({
         where: {
           tenantId,
           userId,
@@ -254,7 +254,7 @@ export class AvailabilityService {
       }
 
       // 2b. Get busy ranges: scheduled events + blocked slots
-      const events = await this.prisma.scheduledEvent.findMany({
+      const events = await this.prisma.working.scheduledEvent.findMany({
         where: {
           tenantId,
           organizerId: userId,
@@ -267,7 +267,7 @@ export class AvailabilityService {
         orderBy: { startTime: 'asc' },
       });
 
-      const blocked = await this.prisma.blockedSlot.findMany({
+      const blocked = await this.prisma.working.blockedSlot.findMany({
         where: {
           tenantId,
           userId,
@@ -339,7 +339,7 @@ export class AvailabilityService {
     const dayOfWeek = dateTime.getDay();
 
     // 1. Check working hours
-    const workingHour = await this.prisma.userAvailability.findFirst({
+    const workingHour = await this.prisma.working.userAvailability.findFirst({
       where: { tenantId, userId, dayOfWeek, isActive: true },
     });
 
@@ -357,7 +357,7 @@ export class AvailabilityService {
     }
 
     // 2. Check blocked slots
-    const blockedSlot = await this.prisma.blockedSlot.findFirst({
+    const blockedSlot = await this.prisma.working.blockedSlot.findFirst({
       where: {
         tenantId,
         userId,
@@ -372,7 +372,7 @@ export class AvailabilityService {
     }
 
     // 3. Check scheduled events
-    const event = await this.prisma.scheduledEvent.findFirst({
+    const event = await this.prisma.working.scheduledEvent.findFirst({
       where: {
         tenantId,
         organizerId: userId,

@@ -12,7 +12,7 @@ export class WaBroadcastExecutorService {
   ) {}
 
   async executeBroadcast(broadcastId: string): Promise<void> {
-    const broadcast = await this.prisma.waBroadcast.findUniqueOrThrow({
+    const broadcast = await this.prisma.working.waBroadcast.findUniqueOrThrow({
       where: { id: broadcastId },
       include: { template: true },
     });
@@ -21,19 +21,19 @@ export class WaBroadcastExecutorService {
       throw new BadRequestException(`Broadcast is in ${broadcast.status} status, cannot start`);
     }
 
-    await this.prisma.waBroadcast.update({
+    await this.prisma.working.waBroadcast.update({
       where: { id: broadcastId },
       data: { status: 'SENDING', startedAt: new Date() },
     });
 
     try {
-      const recipients = await this.prisma.waBroadcastRecipient.findMany({
+      const recipients = await this.prisma.working.waBroadcastRecipient.findMany({
         where: { broadcastId, status: 'PENDING' },
       });
 
       // Check opt-outs
       const phoneNumbers = recipients.map(r => r.phoneNumber);
-      const optOuts = await this.prisma.waOptOut.findMany({
+      const optOuts = await this.prisma.working.waOptOut.findMany({
         where: { wabaId: broadcast.wabaId, phoneNumber: { in: phoneNumbers } },
       });
       const optedOutPhones = new Set(optOuts.map(o => o.phoneNumber));
@@ -44,11 +44,11 @@ export class WaBroadcastExecutorService {
 
       for (const recipient of recipients) {
         // Check if broadcast was paused/cancelled
-        const current = await this.prisma.waBroadcast.findUnique({ where: { id: broadcastId } });
+        const current = await this.prisma.working.waBroadcast.findUnique({ where: { id: broadcastId } });
         if (current?.status === 'PAUSED' || current?.status === 'CANCELLED') break;
 
         if (optedOutPhones.has(recipient.phoneNumber)) {
-          await this.prisma.waBroadcastRecipient.update({
+          await this.prisma.working.waBroadcastRecipient.update({
             where: { id: recipient.id },
             data: { status: 'OPTED_OUT' },
           });
@@ -69,7 +69,7 @@ export class WaBroadcastExecutorService {
           );
 
           // Create message record
-          const message = await this.prisma.waMessage.create({
+          const message = await this.prisma.working.waMessage.create({
             data: {
               wabaId: broadcast.wabaId,
               conversationId: await this.getOrCreateConversationId(broadcast.wabaId, recipient.phoneNumber, recipient.contactName),
@@ -86,14 +86,14 @@ export class WaBroadcastExecutorService {
             },
           });
 
-          await this.prisma.waBroadcastRecipient.update({
+          await this.prisma.working.waBroadcastRecipient.update({
             where: { id: recipient.id },
             data: { status: 'SENT', sentAt: new Date(), waMessageId: message.waMessageId },
           });
 
           sentCount++;
         } catch (error: any) {
-          await this.prisma.waBroadcastRecipient.update({
+          await this.prisma.working.waBroadcastRecipient.update({
             where: { id: recipient.id },
             data: { status: 'FAILED', failedAt: new Date(), failureReason: error.message },
           });
@@ -108,7 +108,7 @@ export class WaBroadcastExecutorService {
       }
 
       const finalStatus = failedCount === recipients.length ? 'FAILED' : 'COMPLETED';
-      await this.prisma.waBroadcast.update({
+      await this.prisma.working.waBroadcast.update({
         where: { id: broadcastId },
         data: {
           status: finalStatus,
@@ -119,7 +119,7 @@ export class WaBroadcastExecutorService {
         },
       });
     } catch (error: any) {
-      await this.prisma.waBroadcast.update({
+      await this.prisma.working.waBroadcast.update({
         where: { id: broadcastId },
         data: { status: 'FAILED' },
       });
@@ -128,18 +128,18 @@ export class WaBroadcastExecutorService {
   }
 
   async pauseBroadcast(broadcastId: string): Promise<void> {
-    await this.prisma.waBroadcast.update({
+    await this.prisma.working.waBroadcast.update({
       where: { id: broadcastId },
       data: { status: 'PAUSED' },
     });
   }
 
   async cancelBroadcast(broadcastId: string): Promise<void> {
-    await this.prisma.waBroadcast.update({
+    await this.prisma.working.waBroadcast.update({
       where: { id: broadcastId },
       data: { status: 'CANCELLED' },
     });
-    await this.prisma.waBroadcastRecipient.updateMany({
+    await this.prisma.working.waBroadcastRecipient.updateMany({
       where: { broadcastId, status: 'PENDING' },
       data: { status: 'FAILED', failureReason: 'Broadcast cancelled' },
     });
@@ -160,11 +160,11 @@ export class WaBroadcastExecutorService {
   }
 
   private async getOrCreateConversationId(wabaId: string, phoneNumber: string, contactName?: string | null): Promise<string> {
-    let conversation = await this.prisma.waConversation.findFirst({
+    let conversation = await this.prisma.working.waConversation.findFirst({
       where: { wabaId, contactPhone: phoneNumber },
     });
     if (!conversation) {
-      conversation = await this.prisma.waConversation.create({
+      conversation = await this.prisma.working.waConversation.create({
         data: { wabaId, contactPhone: phoneNumber, contactName, status: 'OPEN' },
       });
     }

@@ -45,14 +45,14 @@ export class FormulaService {
   async findAll(tenantId?: string) {
     const orConditions: any[] = [{ isSystem: true }];
     if (tenantId) orConditions.push({ tenantId });
-    return this.prisma.savedFormula.findMany({
+    return this.prisma.working.savedFormula.findMany({
       where: { OR: orConditions },
       orderBy: [{ category: 'asc' }, { name: 'asc' }],
     });
   }
 
   async findById(id: string) {
-    const formula = await this.prisma.savedFormula.findUnique({ where: { id } });
+    const formula = await this.prisma.working.savedFormula.findUnique({ where: { id } });
     if (!formula) throw new NotFoundException(`Formula "${id}" not found`);
     return formula;
   }
@@ -60,7 +60,7 @@ export class FormulaService {
   async findByCategory(category: string, tenantId?: string) {
     const orConditions: any[] = [{ isSystem: true }];
     if (tenantId) orConditions.push({ tenantId });
-    return this.prisma.savedFormula.findMany({
+    return this.prisma.working.savedFormula.findMany({
       where: { category, OR: orConditions },
       orderBy: { name: 'asc' },
     });
@@ -78,7 +78,7 @@ export class FormulaService {
     isSystem?: boolean;
   }) {
     this.logger.log(`Creating formula: ${data.name}`);
-    return this.prisma.savedFormula.create({
+    return this.prisma.working.savedFormula.create({
       data: {
         name: data.name,
         category: data.category,
@@ -104,13 +104,13 @@ export class FormulaService {
   }) {
     await this.findById(id);
     this.logger.log(`Updating formula: ${id}`);
-    return this.prisma.savedFormula.update({ where: { id }, data });
+    return this.prisma.working.savedFormula.update({ where: { id }, data });
   }
 
   async delete(id: string) {
     await this.findById(id);
     this.logger.log(`Deleting formula: ${id}`);
-    return this.prisma.savedFormula.delete({ where: { id } });
+    return this.prisma.working.savedFormula.delete({ where: { id } });
   }
 
   // ── EVALUATE ──

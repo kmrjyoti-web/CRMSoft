@@ -7,12 +7,12 @@ export class ServiceVisitService {
 
   private async generateNumber(tenantId: string): Promise<string> {
     const year = new Date().getFullYear();
-    const count = await this.prisma.serviceVisitLog.count({ where: { tenantId } });
+    const count = await this.prisma.working.serviceVisitLog.count({ where: { tenantId } });
     return `SV-${year}-${String(count + 1).padStart(4, '0')}`;
   }
 
   async findAll(tenantId: string, filters?: { customerId?: string; sourceType?: string; status?: string }) {
-    return this.prisma.serviceVisitLog.findMany({
+    return this.prisma.working.serviceVisitLog.findMany({
       where: {
         tenantId,
         ...(filters?.customerId && { customerId: filters.customerId }),
@@ -25,7 +25,7 @@ export class ServiceVisitService {
   }
 
   async findById(tenantId: string, id: string) {
-    const visit = await this.prisma.serviceVisitLog.findFirst({
+    const visit = await this.prisma.working.serviceVisitLog.findFirst({
       where: { id, tenantId },
       include: { charges: true },
     });
@@ -35,16 +35,16 @@ export class ServiceVisitService {
 
   async create(tenantId: string, dto: any) {
     const visitNumber = await this.generateNumber(tenantId);
-    return this.prisma.serviceVisitLog.create({
+    return this.prisma.working.serviceVisitLog.create({
       data: { ...dto, tenantId, visitNumber },
       include: { charges: true },
     });
   }
 
   async update(tenantId: string, id: string, dto: any) {
-    const visit = await this.prisma.serviceVisitLog.findFirst({ where: { id, tenantId } });
+    const visit = await this.prisma.working.serviceVisitLog.findFirst({ where: { id, tenantId } });
     if (!visit) throw new NotFoundException('Visit not found');
-    return this.prisma.serviceVisitLog.update({
+    return this.prisma.working.serviceVisitLog.update({
       where: { id },
       data: dto,
       include: { charges: true },

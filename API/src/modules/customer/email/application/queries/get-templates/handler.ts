@@ -19,13 +19,13 @@ export class GetTemplatesHandler implements IQueryHandler<GetTemplatesQuery> {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.emailTemplate.findMany({
+      this.prisma.working.emailTemplate.findMany({
         where,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.emailTemplate.count({ where }),
+      this.prisma.working.emailTemplate.count({ where }),
     ]);
 
     return {

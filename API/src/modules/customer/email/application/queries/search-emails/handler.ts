@@ -18,7 +18,7 @@ export class SearchEmailsHandler implements IQueryHandler<SearchEmailsQuery> {
     if (query.accountId) where.accountId = query.accountId;
 
     const [data, total] = await Promise.all([
-      this.prisma.email.findMany({
+      this.prisma.working.email.findMany({
         where,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
@@ -28,7 +28,7 @@ export class SearchEmailsHandler implements IQueryHandler<SearchEmailsQuery> {
           thread: { select: { id: true, subject: true } },
         },
       }),
-      this.prisma.email.count({ where }),
+      this.prisma.working.email.count({ where }),
     ]);
 
     return {

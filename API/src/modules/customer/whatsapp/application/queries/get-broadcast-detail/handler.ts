@@ -7,7 +7,7 @@ export class GetBroadcastDetailHandler implements IQueryHandler<GetBroadcastDeta
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetBroadcastDetailQuery) {
-    return this.prisma.waBroadcast.findUniqueOrThrow({
+    return this.prisma.working.waBroadcast.findUniqueOrThrow({
       where: { id: query.broadcastId },
       include: { template: true },
     });

@@ -71,7 +71,7 @@ export class CalendarICalController {
   @Get('feed/:token')
   async publicFeed(@Param('token') token: string, @Res() res: Response) {
     // Look up the sync record by token (stored as calendarId for ICAL provider)
-    const sync = await this.prisma.userCalendarSync.findFirst({
+    const sync = await this.prisma.working.userCalendarSync.findFirst({
       where: {
         provider: 'ICAL',
         calendarId: token,
@@ -95,7 +95,7 @@ export class CalendarICalController {
     );
 
     // Update last sync timestamp
-    await this.prisma.userCalendarSync.update({
+    await this.prisma.working.userCalendarSync.update({
       where: { id: sync.id },
       data: { lastSyncAt: new Date() },
     });
@@ -121,7 +121,7 @@ export class CalendarICalController {
     const token = this.icalService.generateFeedToken(userId, tenantId);
 
     // Store the token as calendarId in UserCalendarSync for ICAL provider
-    await this.prisma.userCalendarSync.upsert({
+    await this.prisma.working.userCalendarSync.upsert({
       where: {
         tenantId_userId_provider: { tenantId, userId, provider: 'ICAL' },
       },

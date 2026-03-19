@@ -14,7 +14,7 @@ export class ReminderProcessorService {
     const now = new Date();
 
     // 1. Re-activate snoozed reminders whose snooze time has passed
-    const unsnoozed = await this.prisma.reminder.updateMany({
+    const unsnoozed = await this.prisma.working.reminder.updateMany({
       where: { isActive: true, status: 'SNOOZED', snoozedUntil: { lte: now } },
       data: { status: 'PENDING', snoozedUntil: null },
     });
@@ -23,7 +23,7 @@ export class ReminderProcessorService {
     }
 
     // 2. Fetch PENDING reminders that are due
-    const dueReminders = await this.prisma.reminder.findMany({
+    const dueReminders = await this.prisma.working.reminder.findMany({
       where: { isActive: true, status: 'PENDING', scheduledAt: { lte: now } },
       include: { recipient: { select: { id: true, email: true, firstName: true } } },
       take: 100,
@@ -51,7 +51,7 @@ export class ReminderProcessorService {
             break;
         }
 
-        await this.prisma.reminder.update({
+        await this.prisma.working.reminder.update({
           where: { id: reminder.id },
           data: { isSent: true, sentAt: now, status: 'TRIGGERED', triggeredAt: now },
         });
@@ -67,7 +67,7 @@ export class ReminderProcessorService {
   async detectMissedReminders() {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
-    const missed = await this.prisma.reminder.updateMany({
+    const missed = await this.prisma.working.reminder.updateMany({
       where: {
         isActive: true,
         status: 'PENDING',

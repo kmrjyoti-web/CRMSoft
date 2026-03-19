@@ -7,7 +7,7 @@ export class StarEmailHandler implements ICommandHandler<StarEmailCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: StarEmailCommand) {
-    const email = await this.prisma.email.update({
+    const email = await this.prisma.working.email.update({
       where: { id: cmd.emailId },
       data: { isStarred: cmd.starred },
     });

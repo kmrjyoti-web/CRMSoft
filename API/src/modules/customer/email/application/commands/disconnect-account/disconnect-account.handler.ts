@@ -10,7 +10,7 @@ export class DisconnectAccountHandler implements ICommandHandler<DisconnectAccou
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: DisconnectAccountCommand) {
-    const account = await this.prisma.emailAccount.update({
+    const account = await this.prisma.working.emailAccount.update({
       where: { id: cmd.accountId },
       data: {
         status: 'DISCONNECTED',

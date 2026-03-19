@@ -8,7 +8,7 @@ export class GetCommunicationByIdHandler implements IQueryHandler<GetCommunicati
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetCommunicationByIdQuery) {
-    const comm = await this.prisma.communication.findUnique({
+    const comm = await this.prisma.working.communication.findUnique({
       where: { id: query.communicationId },
       include: {
         contact: { select: { id: true, firstName: true, lastName: true } },

@@ -11,7 +11,7 @@ export class GetQuickRepliesHandler implements IQueryHandler<GetQuickRepliesQuer
 
     if (query.category) where.category = query.category;
 
-    return this.prisma.waQuickReply.findMany({
+    return this.prisma.working.waQuickReply.findMany({
       where,
       orderBy: { createdAt: 'desc' },
     });

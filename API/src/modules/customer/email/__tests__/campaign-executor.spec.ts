@@ -66,6 +66,7 @@ describe('CampaignExecutorService', () => {
         update: jest.fn().mockResolvedValue({}),
       },
     };
+(prisma as any).working = prisma;
 
     templateRenderer = {
       render: jest.fn().mockImplementation((tpl: string, data: Record<string, string>) => tpl.replace(/\{\{(\w+)\}\}/g, (_: string, k: string) => data[k] || '')),

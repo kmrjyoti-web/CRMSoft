@@ -20,6 +20,7 @@ describe('CalendarConfigService', () => {
         deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
       },
     };
+(prisma as any).working = prisma;
 
     service = new CalendarConfigService(prisma);
   });

@@ -25,6 +25,7 @@ describe('FolderService', () => {
         aggregate: jest.fn().mockResolvedValue({ _max: { sortOrder: 0 } }),
       },
     };
+(prisma as any).working = prisma;
     service = new FolderService(prisma);
   });
 

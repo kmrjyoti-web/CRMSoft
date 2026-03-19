@@ -7,12 +7,12 @@ export class WarrantyRecordService {
 
   private async generateNumber(tenantId: string): Promise<string> {
     const year = new Date().getFullYear();
-    const count = await this.prisma.warrantyRecord.count({ where: { tenantId } });
+    const count = await this.prisma.working.warrantyRecord.count({ where: { tenantId } });
     return `WR-${year}-${String(count + 1).padStart(4, '0')}`;
   }
 
   async findAll(tenantId: string, filters?: { customerId?: string; productId?: string; status?: string }) {
-    return this.prisma.warrantyRecord.findMany({
+    return this.prisma.working.warrantyRecord.findMany({
       where: {
         tenantId,
         ...(filters?.customerId && { customerId: filters.customerId }),
@@ -25,7 +25,7 @@ export class WarrantyRecordService {
   }
 
   async findById(tenantId: string, id: string) {
-    const record = await this.prisma.warrantyRecord.findFirst({
+    const record = await this.prisma.working.warrantyRecord.findFirst({
       where: { id, tenantId },
       include: {
         template: true,
@@ -39,7 +39,7 @@ export class WarrantyRecordService {
   async findExpiring(tenantId: string, days = 30) {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() + days);
-    return this.prisma.warrantyRecord.findMany({
+    return this.prisma.working.warrantyRecord.findMany({
       where: {
         tenantId,
         status: 'ACTIVE',
@@ -51,19 +51,19 @@ export class WarrantyRecordService {
   }
 
   async checkBySerial(tenantId: string, serialMasterId: string) {
-    return this.prisma.warrantyRecord.findFirst({
+    return this.prisma.working.warrantyRecord.findFirst({
       where: { tenantId, serialMasterId, status: 'ACTIVE' },
       include: { template: true },
     });
   }
 
   async extend(tenantId: string, id: string, dto: { months: number; reason?: string }) {
-    const record = await this.prisma.warrantyRecord.findFirst({ where: { id, tenantId } });
+    const record = await this.prisma.working.warrantyRecord.findFirst({ where: { id, tenantId } });
     if (!record) throw new NotFoundException('Warranty record not found');
     const base = record.extendedUntil ?? record.endDate;
     const extended = new Date(base);
     extended.setMonth(extended.getMonth() + dto.months);
-    return this.prisma.warrantyRecord.update({
+    return this.prisma.working.warrantyRecord.update({
       where: { id },
       data: { extendedUntil: extended, status: 'EXTENDED', notes: dto.reason },
     });
@@ -77,7 +77,7 @@ export class WarrantyRecordService {
     for (const item of invoice.lineItems) {
       if (!item.productId) continue;
 
-      const template = await this.prisma.warrantyTemplate.findFirst({
+      const template = await this.prisma.working.warrantyTemplate.findFirst({
         where: {
           tenantId,
           OR: [
@@ -94,7 +94,7 @@ export class WarrantyRecordService {
       const endDate = this.calcEndDate(startDate, template.durationValue, template.durationType);
       const warrantyNumber = await this.generateNumber(tenantId);
 
-      const record = await this.prisma.warrantyRecord.create({
+      const record = await this.prisma.working.warrantyRecord.create({
         data: {
           tenantId,
           warrantyTemplateId: template.id,

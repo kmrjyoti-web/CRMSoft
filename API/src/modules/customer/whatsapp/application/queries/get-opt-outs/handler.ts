@@ -10,13 +10,13 @@ export class GetOptOutsHandler implements IQueryHandler<GetOptOutsQuery> {
     const where = { wabaId: query.wabaId };
 
     const [data, total] = await Promise.all([
-      this.prisma.waOptOut.findMany({
+      this.prisma.working.waOptOut.findMany({
         where,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
         orderBy: { optedOutAt: 'desc' },
       }),
-      this.prisma.waOptOut.count({ where }),
+      this.prisma.working.waOptOut.count({ where }),
     ]);
 
     return {

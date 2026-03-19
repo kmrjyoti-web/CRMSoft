@@ -20,7 +20,7 @@ export class GetCommunicationsByEntityHandler implements IQueryHandler<GetCommun
     // Filter by type (PHONE, EMAIL, etc.)
     if (query.type) where.type = query.type;
 
-    const communications = await this.prisma.communication.findMany({
+    const communications = await this.prisma.working.communication.findMany({
       where,
       orderBy: [{ isPrimary: 'desc' }, { type: 'asc' }, { createdAt: 'asc' }],
       select: {

@@ -8,7 +8,7 @@ export class GetEmailHandler implements IQueryHandler<GetEmailQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetEmailQuery) {
-    const email = await this.prisma.email.findUnique({
+    const email = await this.prisma.working.email.findUnique({
       where: { id: query.emailId },
       include: {
         account: true,

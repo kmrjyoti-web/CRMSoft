@@ -21,6 +21,7 @@ describe('AttachmentService', () => {
         count: jest.fn().mockResolvedValue(5),
       },
     };
+(prisma as any).working = prisma;
     service = new AttachmentService(prisma);
   });
 

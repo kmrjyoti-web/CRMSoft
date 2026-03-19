@@ -32,10 +32,10 @@ export class SetPrimaryHandler implements ICommandHandler<SetPrimaryCommunicatio
     else if (comm.organizationId) where.organizationId = comm.organizationId;
     else if (comm.leadId) where.leadId = comm.leadId;
 
-    await this.prisma.communication.updateMany({ where, data: { isPrimary: false } });
+    await this.prisma.working.communication.updateMany({ where, data: { isPrimary: false } });
 
     // Set this one as primary
-    await this.prisma.communication.update({
+    await this.prisma.working.communication.update({
       where: { id: command.communicationId },
       data: { isPrimary: true },
     });

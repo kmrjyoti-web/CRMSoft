@@ -6,7 +6,7 @@ export class WarrantyTemplateService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(tenantId: string, filters?: { industryCode?: string; systemOnly?: boolean }) {
-    return this.prisma.warrantyTemplate.findMany({
+    return this.prisma.working.warrantyTemplate.findMany({
       where: {
         OR: [
           { tenantId },
@@ -21,7 +21,7 @@ export class WarrantyTemplateService {
   }
 
   async findById(tenantId: string, id: string) {
-    const template = await this.prisma.warrantyTemplate.findFirst({
+    const template = await this.prisma.working.warrantyTemplate.findFirst({
       where: { id, OR: [{ tenantId }, { isSystemTemplate: true }] },
       include: { _count: { select: { records: true } } },
     });
@@ -30,32 +30,32 @@ export class WarrantyTemplateService {
   }
 
   async findByIndustry(industryCode: string) {
-    return this.prisma.warrantyTemplate.findMany({
+    return this.prisma.working.warrantyTemplate.findMany({
       where: { industryCode, isSystemTemplate: true, isActive: true },
       orderBy: { name: 'asc' },
     });
   }
 
   async create(tenantId: string, dto: any) {
-    const existing = await this.prisma.warrantyTemplate.findFirst({
+    const existing = await this.prisma.working.warrantyTemplate.findFirst({
       where: { tenantId, code: dto.code },
     });
     if (existing) throw new ConflictException(`Template with code ${dto.code} already exists`);
-    return this.prisma.warrantyTemplate.create({
+    return this.prisma.working.warrantyTemplate.create({
       data: { ...dto, tenantId, isSystemTemplate: false },
     });
   }
 
   async update(tenantId: string, id: string, dto: any) {
-    const template = await this.prisma.warrantyTemplate.findFirst({
+    const template = await this.prisma.working.warrantyTemplate.findFirst({
       where: { id, tenantId, isSystemTemplate: false },
     });
     if (!template) throw new NotFoundException('Template not found or cannot edit system template');
-    return this.prisma.warrantyTemplate.update({ where: { id }, data: dto });
+    return this.prisma.working.warrantyTemplate.update({ where: { id }, data: dto });
   }
 
   async importSystemTemplate(tenantId: string, systemTemplateId: string) {
-    const systemTemplate = await this.prisma.warrantyTemplate.findFirst({
+    const systemTemplate = await this.prisma.working.warrantyTemplate.findFirst({
       where: { id: systemTemplateId, isSystemTemplate: true },
     });
     if (!systemTemplate) throw new NotFoundException('System template not found');
@@ -63,12 +63,12 @@ export class WarrantyTemplateService {
     const { id, tenantId: _, isSystemTemplate, createdAt, updatedAt, ...data } = systemTemplate as any;
     const newCode = `${data.code}-${tenantId.slice(0, 4).toUpperCase()}`;
 
-    const existing = await this.prisma.warrantyTemplate.findFirst({
+    const existing = await this.prisma.working.warrantyTemplate.findFirst({
       where: { tenantId, code: newCode },
     });
     if (existing) throw new ConflictException('Template already imported');
 
-    return this.prisma.warrantyTemplate.create({
+    return this.prisma.working.warrantyTemplate.create({
       data: { ...data, tenantId, code: newCode, isSystemTemplate: false },
     });
   }

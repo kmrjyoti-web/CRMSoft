@@ -27,7 +27,7 @@ export class GetCommentsByEntityHandler implements IQueryHandler<GetCommentsByEn
     const skip = (query.page - 1) * query.limit;
 
     const [data, total] = await Promise.all([
-      this.prisma.comment.findMany({
+      this.prisma.working.comment.findMany({
         where,
         skip,
         take: query.limit,
@@ -42,7 +42,7 @@ export class GetCommentsByEntityHandler implements IQueryHandler<GetCommentsByEn
           _count: { select: { replies: true } },
         },
       }),
-      this.prisma.comment.count({ where }),
+      this.prisma.working.comment.count({ where }),
     ]);
 
     return { data, total, page: query.page, limit: query.limit };

@@ -12,13 +12,13 @@ export class GetCampaignRecipientsHandler implements IQueryHandler<GetCampaignRe
     if (query.status) where.status = query.status;
 
     const [data, total] = await Promise.all([
-      this.prisma.campaignRecipient.findMany({
+      this.prisma.working.campaignRecipient.findMany({
         where,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.campaignRecipient.count({ where }),
+      this.prisma.working.campaignRecipient.count({ where }),
     ]);
 
     return {

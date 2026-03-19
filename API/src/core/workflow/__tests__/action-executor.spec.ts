@@ -23,6 +23,7 @@ describe('ActionExecutorService', () => {
 
   beforeEach(() => {
     prisma = { workflowActionLog: { create: jest.fn().mockResolvedValue({}) } };
+(prisma as any).working = prisma;
     templateResolver = { resolveObject: jest.fn((obj) => obj) };
 
     const mockHandler = (type: string) => ({

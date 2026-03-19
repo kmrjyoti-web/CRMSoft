@@ -10,7 +10,7 @@ export class SetupWabaHandler implements ICommandHandler<SetupWabaCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: SetupWabaCommand) {
-    const waba = await this.prisma.whatsAppBusinessAccount.create({
+    const waba = await this.prisma.working.whatsAppBusinessAccount.create({
       data: {
         wabaId: cmd.wabaId,
         phoneNumberId: cmd.phoneNumberId,

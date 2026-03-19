@@ -18,6 +18,7 @@ describe('Recurrence Handlers', () => {
         fields: {},
       },
     };
+(prisma as any).working = prisma;
   });
 
   it('should create a recurring event', async () => {

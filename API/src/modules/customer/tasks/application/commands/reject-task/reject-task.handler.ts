@@ -9,13 +9,13 @@ export class RejectTaskHandler implements ICommandHandler<RejectTaskCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: RejectTaskCommand) {
-    const existing = await this.prisma.task.findUnique({ where: { id: cmd.id } });
+    const existing = await this.prisma.working.task.findUnique({ where: { id: cmd.id } });
     if (!existing) throw new NotFoundException('Task not found');
     if (existing.status !== 'PENDING_APPROVAL') {
       throw new BadRequestException('Task is not pending approval');
     }
 
-    const task = await this.prisma.task.update({
+    const task = await this.prisma.working.task.update({
       where: { id: cmd.id },
       data: {
         status: 'CANCELLED',
@@ -28,7 +28,7 @@ export class RejectTaskHandler implements ICommandHandler<RejectTaskCommand> {
     });
 
     // Record rejection in history
-    await this.prisma.taskHistory.create({
+    await this.prisma.working.taskHistory.create({
       data: {
         tenantId: existing.tenantId,
         taskId: cmd.id,

@@ -24,6 +24,7 @@ describe('CloudProviderService', () => {
         ]),
       },
     };
+(prisma as any).working = prisma;
     service = new CloudProviderService(prisma);
   });
 

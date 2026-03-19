@@ -10,7 +10,7 @@ export class CreateChatbotFlowHandler implements ICommandHandler<CreateChatbotFl
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CreateChatbotFlowCommand) {
-    const flow = await this.prisma.waChatbotFlow.create({
+    const flow = await this.prisma.working.waChatbotFlow.create({
       data: {
         wabaId: cmd.wabaId,
         name: cmd.name,

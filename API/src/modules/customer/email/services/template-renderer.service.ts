@@ -74,7 +74,7 @@ export class TemplateRendererService {
   }
 
   async preview(templateId: string, sampleData?: Record<string, any>) {
-    const template = await this.prisma.emailTemplate.findUniqueOrThrow({ where: { id: templateId } });
+    const template = await this.prisma.working.emailTemplate.findUniqueOrThrow({ where: { id: templateId } });
     const vars = template.variables as any[] || [];
     const data = sampleData || {};
 
