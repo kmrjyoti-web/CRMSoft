@@ -5,14 +5,14 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { VendorGuard } from '../infrastructure/vendor.guard';
 import { ApiResponse } from '../../../common/utils/api-response';
-import { PrismaService } from '../../../core/prisma/prisma.service';
+import { VendorTenantsService } from '../services/vendor-tenants.service';
 
 @ApiTags('DB Admin')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, VendorGuard)
 @Controller('admin/db')
 export class VendorDbAdminController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly vendorTenantsService: VendorTenantsService) {}
 
   @Get()
   @ApiOperation({ summary: 'List tenants as databases' })
@@ -22,17 +22,7 @@ export class VendorDbAdminController {
   ) {
     const p = +page;
     const l = +limit;
-
-    const [tenants, total] = await Promise.all([
-      this.prisma.tenant.findMany({
-        skip: (p - 1) * l,
-        take: l,
-        orderBy: { createdAt: 'desc' },
-        select: { id: true, name: true, slug: true, status: true, createdAt: true },
-      }),
-      this.prisma.tenant.count(),
-    ]);
-
+    const { tenants, total } = await this.vendorTenantsService.listForDbAdmin(p, l);
     return ApiResponse.paginated(tenants, total, p, l);
   }
 

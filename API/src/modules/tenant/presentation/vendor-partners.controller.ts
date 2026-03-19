@@ -6,14 +6,12 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { VendorGuard } from '../infrastructure/vendor.guard';
 import { ApiResponse } from '../../../common/utils/api-response';
-import { PrismaService } from '../../../core/prisma/prisma.service';
 
 @ApiTags('Vendor Partners')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, VendorGuard)
 @Controller('vendor/partners')
 export class VendorPartnersController {
-  constructor(private readonly prisma: PrismaService) {}
 
   @Get()
   @ApiOperation({ summary: 'List all partners (stub)' })

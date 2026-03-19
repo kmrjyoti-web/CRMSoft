@@ -4,7 +4,7 @@ import {
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { VendorGuard } from '../infrastructure/vendor.guard';
-import { PrismaService } from '../../../core/prisma/prisma.service';
+import { VendorTenantsService } from '../services/vendor-tenants.service';
 import { ApiResponse } from '../../../common/utils/api-response';
 
 @ApiTags('Vendor Tenants')
@@ -12,7 +12,7 @@ import { ApiResponse } from '../../../common/utils/api-response';
 @UseGuards(JwtAuthGuard, VendorGuard)
 @Controller('vendor/tenants')
 export class VendorTenantsController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly vendorTenantsService: VendorTenantsService) {}
 
   @Get()
   @ApiOperation({ summary: 'List tenants with pagination' })
@@ -23,54 +23,26 @@ export class VendorTenantsController {
   ) {
     const p = Math.max(Number(page) || 1, 1);
     const l = Math.min(Math.max(Number(limit) || 20, 1), 100);
-
-    const where: any = {};
-    if (status) where.status = status;
-
-    const [data, total] = await Promise.all([
-      this.prisma.tenant.findMany({
-        where,
-        skip: (p - 1) * l,
-        take: l,
-        orderBy: { createdAt: 'desc' },
-      }),
-      this.prisma.tenant.count({ where }),
-    ]);
-
+    const { data, total } = await this.vendorTenantsService.list({ status, page: p, limit: l });
     return ApiResponse.paginated(data, total, p, l);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get tenant detail' })
   async getById(@Param('id') id: string) {
-    const tenant = await this.prisma.tenant.findUnique({
-      where: { id },
-      include: {
-        subscriptions: true,
-        profile: true,
-      },
-    });
-    return ApiResponse.success(tenant);
+    return ApiResponse.success(await this.vendorTenantsService.getById(id));
   }
 
   @Post(':id/suspend')
   @ApiOperation({ summary: 'Suspend a tenant' })
   async suspend(@Param('id') id: string) {
-    const tenant = await this.prisma.tenant.update({
-      where: { id },
-      data: { status: 'SUSPENDED' },
-    });
-    return ApiResponse.success(tenant, 'Tenant suspended');
+    return ApiResponse.success(await this.vendorTenantsService.suspend(id), 'Tenant suspended');
   }
 
   @Post(':id/activate')
   @ApiOperation({ summary: 'Activate a tenant' })
   async activate(@Param('id') id: string) {
-    const tenant = await this.prisma.tenant.update({
-      where: { id },
-      data: { status: 'ACTIVE' },
-    });
-    return ApiResponse.success(tenant, 'Tenant activated');
+    return ApiResponse.success(await this.vendorTenantsService.activate(id), 'Tenant activated');
   }
 
   @Post(':id/extend-trial')

@@ -27,6 +27,11 @@ import { IndustryPatchingService } from './services/industry-patching.service';
 import { RollbackEngineService } from './services/rollback-engine.service';
 import { NotionDocsService } from './services/notion-docs.service';
 import { TenantAuditService } from './services/tenant-audit.service';
+import { VendorModulesService } from './services/vendor-modules.service';
+import { VendorTenantsService } from './services/vendor-tenants.service';
+import { VendorAuditLogsService } from './services/vendor-audit-logs.service';
+import { VendorPackagesService } from './services/vendor-packages.service';
+import { SystemHealthService } from './services/system-health.service';
 
 // Infrastructure
 import { TenantContextService } from './infrastructure/tenant-context.service';
@@ -191,6 +196,11 @@ const QueryHandlers = [
     RollbackEngineService,
     NotionDocsService,
     TenantAuditService,
+    VendorModulesService,
+    VendorTenantsService,
+    VendorAuditLogsService,
+    VendorPackagesService,
+    SystemHealthService,
     // Infrastructure
     TenantContextService,
     TenantContextInterceptor,

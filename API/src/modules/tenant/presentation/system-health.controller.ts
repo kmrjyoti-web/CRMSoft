@@ -4,34 +4,22 @@ import {
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { ApiResponse } from '../../../common/utils/api-response';
-import { PrismaService } from '../../../core/prisma/prisma.service';
+import { SystemHealthService } from '../services/system-health.service';
 
 @ApiTags('System Health')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('admin/system-health')
 export class SystemHealthController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly systemHealthService: SystemHealthService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get system health status' })
   async getHealth() {
     const start = Date.now();
-
-    let dbOk = false;
-    let dbTime = 0;
-    try {
-      const dbStart = Date.now();
-      await this.prisma.$queryRaw`SELECT 1`;
-      dbTime = Date.now() - dbStart;
-      dbOk = true;
-    } catch {
-      dbTime = Date.now() - start;
-    }
+    const { ok: dbOk, latencyMs: dbTime } = await this.systemHealthService.checkDatabase();
 
     const responseTimeMs = Date.now() - start;
-    const mem = process.memoryUsage();
-    const toMB = (bytes: number) => Math.round((bytes / 1024 / 1024) * 100) / 100;
 
     return ApiResponse.success({
       api: {
