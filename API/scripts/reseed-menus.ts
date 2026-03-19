@@ -6,7 +6,7 @@
  * them from MENU_SEED_DATA (3-level structure).
  */
 import { PrismaClient } from '@prisma/client';
-import { MENU_SEED_DATA } from '../src/modules/menus/presentation/menu-seed-data';
+import { MENU_SEED_DATA } from '../src/modules/core/menus/presentation/menu-seed-data';
 
 interface MenuSeedItem {
   name: string;

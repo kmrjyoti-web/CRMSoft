@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../core/prisma/prisma.module';
-import { VerificationModule } from '../verification/verification.module';
+import { VerificationModule } from '../softwarevendor/verification/verification.module';
 
 // ─── SaaS Marketplace (Vendors, Modules, Installs) ───
 import { VendorService } from './services/vendor.service';

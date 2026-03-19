@@ -6,7 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
-import { TenantProvisioningService } from '../../modules/tenant/services/tenant-provisioning.service';
+import { TenantProvisioningService } from '../../modules/core/tenant/services/tenant-provisioning.service';
 import { randomBytes } from 'crypto';
 
 @Injectable()

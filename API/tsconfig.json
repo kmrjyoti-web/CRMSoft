@@ -23,7 +23,12 @@
       "@/*": ["src/*"],
       "@shared/*": ["src/shared/*"],
       "@core/*": ["src/core/*"],
-      "@modules/*": ["src/modules/*"]
+      "@modules/*": ["src/modules/*"],
+      "@modules/core/*": ["src/modules/core/*"],
+      "@modules/customer/*": ["src/modules/customer/*"],
+      "@modules/softwarevendor/*": ["src/modules/softwarevendor/*"],
+      "@modules/marketplace/*": ["src/modules/marketplace/*"],
+      "@modules/plugins/*": ["src/modules/plugins/*"]
     }
   }
 }

@@ -3,7 +3,7 @@ import { PluginHookService } from '../services/plugin-hook.service';
 import { PluginService } from '../services/plugin.service';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { PluginHandlerRegistry } from '../handlers/handler-registry';
-import { EncryptionService } from '../../tenant-config/services/encryption.service';
+import { EncryptionService } from '../../softwarevendor/tenant-config/services/encryption.service';
 
 describe('PluginHookService', () => {
   let service: PluginHookService;

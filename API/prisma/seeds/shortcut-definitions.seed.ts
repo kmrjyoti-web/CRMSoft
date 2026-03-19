@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { SHORTCUT_DEFINITIONS } from '../../src/modules/keyboard-shortcuts/data/shortcut-definitions.data';
+import { SHORTCUT_DEFINITIONS } from '../../src/modules/softwarevendor/keyboard-shortcuts/data/shortcut-definitions.data';
 
 export async function seedShortcutDefinitions(prisma: PrismaClient, tenantId = '') {
   let count = 0;

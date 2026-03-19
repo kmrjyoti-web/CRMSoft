@@ -2,8 +2,8 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
-import { MENU_SEED_DATA } from '../../modules/menus/presentation/menu-seed-data';
-import { BUSINESS_TYPE_SEED_DATA } from '../../modules/business-type/services/business-type-seed-data';
+import { MENU_SEED_DATA } from '../../modules/core/menus/presentation/menu-seed-data';
+import { BUSINESS_TYPE_SEED_DATA } from '../../modules/softwarevendor/business-type/services/business-type-seed-data';
 
 @Injectable()
 export class PlatformBootstrapService implements OnModuleInit {

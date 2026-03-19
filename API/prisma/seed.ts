@@ -16,10 +16,10 @@ import { seedInventory } from './seeds/inventory.seed';
 import { seedShortcutDefinitions } from './seeds/shortcut-definitions.seed';
 import { seedAmcWarranty } from './seeds/amc-warranty.seed';
 import { seedCalendarHighlights } from './seeds/calendar-highlights.seed';
-import { LOOKUP_SEED_DATA } from '../src/modules/lookups/data/lookup-seed-data';
-import { MENU_SEED_DATA } from '../src/modules/menus/presentation/menu-seed-data';
-import { BUSINESS_TYPE_SEED_DATA } from '../src/modules/business-type/services/business-type-seed-data';
-import type { MenuSeedItem } from '../src/modules/menus/application/commands/bulk-seed-menus/bulk-seed-menus.command';
+import { LOOKUP_SEED_DATA } from '../src/modules/core/lookups/data/lookup-seed-data';
+import { MENU_SEED_DATA } from '../src/modules/core/menus/presentation/menu-seed-data';
+import { BUSINESS_TYPE_SEED_DATA } from '../src/modules/softwarevendor/business-type/services/business-type-seed-data';
+import type { MenuSeedItem } from '../src/modules/core/menus/application/commands/bulk-seed-menus/bulk-seed-menus.command';
 
 const prisma = new PrismaClient();
 

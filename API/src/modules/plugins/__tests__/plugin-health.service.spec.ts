@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { PluginHealthService } from '../services/plugin-health.service';
 import { PrismaService } from '../../../core/prisma/prisma.service';
-import { EncryptionService } from '../../tenant-config/services/encryption.service';
+import { EncryptionService } from '../../softwarevendor/tenant-config/services/encryption.service';
 import { PluginHandlerRegistry } from '../handlers/handler-registry';
 
 describe('PluginHealthService', () => {

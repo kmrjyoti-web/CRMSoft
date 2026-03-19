@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { TenantConfigModule } from '../tenant-config/tenant-config.module';
+import { TenantConfigModule } from '../softwarevendor/tenant-config/tenant-config.module';
 
 // Core services
 import { PluginService } from './services/plugin.service';

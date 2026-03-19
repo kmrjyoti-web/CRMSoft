@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit, OnModuleDestroy, Logger, Optional, Inject } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { TenantContextService } from '../../modules/tenant/infrastructure/tenant-context.service';
-import { createTenantMiddleware } from '../../modules/tenant/infrastructure/prisma-tenant.middleware';
+import { TenantContextService } from '../../modules/core/tenant/infrastructure/tenant-context.service';
+import { createTenantMiddleware } from '../../modules/core/tenant/infrastructure/prisma-tenant.middleware';
 import { createSoftDeleteMiddleware } from './soft-delete.middleware';
 
 @Injectable()

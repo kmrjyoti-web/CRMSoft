@@ -15,7 +15,7 @@ import * as crypto from 'crypto';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { PluginHookService } from '../services/plugin-hook.service';
 import { PluginService } from '../services/plugin.service';
-import { EncryptionService } from '../../tenant-config/services/encryption.service';
+import { EncryptionService } from '../../softwarevendor/tenant-config/services/encryption.service';
 
 /**
  * Inbound webhook handler for external plugin callbacks.

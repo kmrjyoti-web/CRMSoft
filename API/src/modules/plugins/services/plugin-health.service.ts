@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
-import { EncryptionService } from '../../tenant-config/services/encryption.service';
+import { EncryptionService } from '../../softwarevendor/tenant-config/services/encryption.service';
 import { PluginHandlerRegistry, HealthCheckResult } from '../handlers/handler-registry';
 import { getErrorMessage } from '@/common/utils/error.utils';
 

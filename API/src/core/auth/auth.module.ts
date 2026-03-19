@@ -8,7 +8,7 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { PlatformBootstrapService } from './platform-bootstrap.service';
-import { TenantModule } from '../../modules/tenant/tenant.module';
+import { TenantModule } from '../../modules/core/tenant/tenant.module';
 
 @Module({
   imports: [

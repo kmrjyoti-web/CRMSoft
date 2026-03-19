@@ -13,8 +13,8 @@ import {
 } from '@nestjs/common';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { RequirePermissions } from '../../../core/permissions/decorators/require-permissions.decorator';
-import { RequireVerification } from '../../verification/decorators/require-verification.decorator';
-import { VerificationGuard } from '../../verification/guards/verification.guard';
+import { RequireVerification } from '../../softwarevendor/verification/decorators/require-verification.decorator';
+import { VerificationGuard } from '../../softwarevendor/verification/guards/verification.guard';
 import { ListingService } from '../services/listing.service';
 import { PostService } from '../services/post.service';
 import { EnquiryService } from '../services/enquiry.service';

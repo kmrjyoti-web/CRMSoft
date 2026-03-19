@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { PluginService } from '../services/plugin.service';
 import { PrismaService } from '../../../core/prisma/prisma.service';
-import { EncryptionService } from '../../tenant-config/services/encryption.service';
+import { EncryptionService } from '../../softwarevendor/tenant-config/services/encryption.service';
 import { PluginMenuService } from '../services/plugin-menu.service';
 
 describe('PluginService', () => {

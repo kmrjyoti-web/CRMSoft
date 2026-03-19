@@ -3,7 +3,7 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { OrderService } from '../services/order.service';
 import { ListingService } from '../services/listing.service';
 import { PrismaService } from '../../../core/prisma/prisma.service';
-import { PricingAccessService } from '../../verification/services/pricing-access.service';
+import { PricingAccessService } from '../../softwarevendor/verification/services/pricing-access.service';
 
 describe('OrderService', () => {
   let service: OrderService;
