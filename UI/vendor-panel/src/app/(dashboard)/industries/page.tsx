@@ -99,8 +99,7 @@ export default function IndustriesPage() {
   const handleSeed = async () => {
     try {
       const result = await seedMut.mutateAsync();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const seeded = (result as any)?.data?.seeded ?? (result as any)?.seeded ?? 0;
+      const seeded = result?.data?.seeded ?? 0;
       toast.success(`Seeded ${seeded} industry types`);
     } catch {
       toast.error('Failed to seed industry types');

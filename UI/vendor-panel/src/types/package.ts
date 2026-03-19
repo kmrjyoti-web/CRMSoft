@@ -47,7 +47,7 @@ export interface SubscriptionPackage {
   sortOrder: number;
   industryCode?: string | null;
   packageModules?: PackageModuleConfig[];
-  _count?: { packageModules: number };
+  _count?: { packageModules: number; subscriptions?: number };
   createdAt: string;
   updatedAt: string;
 }

@@ -483,8 +483,7 @@ export default function NewPackagePage() {
                         options={PRICING_TYPE_OPTIONS}
                         value={config.pricingType}
                         onChange={(e) =>
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          updateModuleConfig(config.moduleId, { pricingType: e.target.value as any })
+                          updateModuleConfig(config.moduleId, { pricingType: e.target.value as ModulePricingType })
                         }
                       />
 

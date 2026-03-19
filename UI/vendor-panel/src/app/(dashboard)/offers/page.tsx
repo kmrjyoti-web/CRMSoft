@@ -19,7 +19,7 @@ import { IndustrySelect } from '@/components/common/industry-select';
 import { useOffers, useCreateOffer, useDeactivateOffer } from '@/hooks/use-offers';
 import { useDebounce } from '@/hooks/use-debounce';
 import { formatCurrency, formatDate, formatNumber, extractList, extractMeta } from '@/lib/utils';
-import type { Offer } from '@/types/offer';
+import type { Offer, OfferCreateData } from '@/types/offer';
 
 const OFFER_TYPES = [
   { value: 'DISCOUNT_PERCENTAGE', label: 'Discount %' },
@@ -81,8 +81,7 @@ export default function OffersPage() {
 
   const onSubmit = async (values: OfferFormValues) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await createMut.mutateAsync({ ...values, industryCode: formIndustryCode || undefined } as any);
+      await createMut.mutateAsync({ ...values, industryCode: formIndustryCode || undefined } as OfferCreateData);
       toast.success('Offer created');
       reset();
       setFormIndustryCode(null);

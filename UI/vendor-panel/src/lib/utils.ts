@@ -64,21 +64,29 @@ export function truncate(text: string | null | undefined, length: number): strin
 }
 
 /** Extract array data from API response (handles nested {data: [...]} or direct [...]) */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function extractList<T>(res: any): T[] {
-  if (!res) return [];
-  const d = res.data;
-  if (Array.isArray(d)) return d;
-  if (d && typeof d === 'object' && Array.isArray(d.data)) return d.data;
+export function extractList<T>(res: unknown): T[] {
+  if (!res || typeof res !== 'object') return [];
+  const r = res as Record<string, unknown>;
+  const d = r.data;
+  if (Array.isArray(d)) return d as T[];
+  if (d && typeof d === 'object') {
+    const inner = (d as Record<string, unknown>).data;
+    if (Array.isArray(inner)) return inner as T[];
+  }
   return [];
 }
 
 /** Extract meta from paginated API response */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function extractMeta(res: any): { totalPages?: number; total?: number } | undefined {
-  const d = res?.data;
-  if (d && typeof d === 'object' && d.meta) return d.meta;
-  return res?.meta;
+export function extractMeta(res: unknown): { totalPages?: number; total?: number } | undefined {
+  if (!res || typeof res !== 'object') return undefined;
+  const r = res as Record<string, unknown>;
+  const d = r.data;
+  if (d && typeof d === 'object') {
+    const meta = (d as Record<string, unknown>).meta;
+    if (meta && typeof meta === 'object') return meta as { totalPages?: number; total?: number };
+  }
+  if (r.meta && typeof r.meta === 'object') return r.meta as { totalPages?: number; total?: number };
+  return undefined;
 }
 
 export function getInitials(name: string): string {

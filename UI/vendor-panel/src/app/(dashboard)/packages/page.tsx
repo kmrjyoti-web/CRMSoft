@@ -204,10 +204,7 @@ export default function PackagesPage() {
                   <span className="flex items-center gap-1">
                     <Users className="h-3.5 w-3.5" />
                     {/* subscriber count from _count or fallback */}
-                    {formatNumber(
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      (pkg as any)._count?.subscriptions ?? 0,
-                    )}
+                    {formatNumber(pkg._count?.subscriptions ?? 0)}
                   </span>
                 </div>
               </CardContent>

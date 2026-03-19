@@ -34,6 +34,17 @@ import { formatCurrency, formatNumber, formatDate, extractList, extractMeta, cn 
 import { MODULE_CATEGORIES } from '@/lib/constants';
 import type { SoftwareModule, ModulePricingType } from '@/types/module';
 
+// ─── Types ───
+
+interface ModuleSubscriber {
+  id?: string;
+  tenantId?: string;
+  isEnabled: boolean;
+  enabledAt?: string;
+  enabledFeatures?: string[];
+  tenant?: { name?: string; domain?: string };
+}
+
 // ─── Constants ───
 
 const PRICING_TYPES: { value: ModulePricingType; label: string }[] = [
@@ -86,7 +97,7 @@ export default function ModuleDetailPage({ params }: { params: { id: string } })
     if (!mod) return;
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data: Record<string, any> = {
+      const data: Record<string, unknown> = {
         name: editName,
         description: editDescription || undefined,
         category: editCategory,
@@ -110,16 +121,14 @@ export default function ModuleDetailPage({ params }: { params: { id: string } })
     enabled: activeTab === 'Subscribers' && !!params.id,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const subscribers: any[] = extractList(subRes);
+  const subscribers: ModuleSubscriber[] = extractList<ModuleSubscriber>(subRes);
   const subMeta = extractMeta(subRes);
 
   // ─── Delete ───
   const handleDelete = async () => {
-    if (!confirm('Delete this module? This action cannot be undone.')) return;
+    if (!mod || !confirm('Delete this module? This action cannot be undone.')) return;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await deleteMut.mutateAsync((mod as any).id);
+      await deleteMut.mutateAsync(mod.id);
       toast.success('Module deleted');
       router.push('/modules');
     } catch {
@@ -644,8 +653,7 @@ export default function ModuleDetailPage({ params }: { params: { id: string } })
                       </tr>
                     </thead>
                     <tbody>
-                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                      {subscribers.map((sub: any, i: number) => (
+                      {subscribers.map((sub, i) => (
                         <tr key={sub.id ?? i} className="border-b last:border-0">
                           <td className="py-2.5 pr-4">
                             <div>

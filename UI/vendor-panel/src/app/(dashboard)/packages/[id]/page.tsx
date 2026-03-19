@@ -75,8 +75,7 @@ export default function PackageDetailPage({ params }: { params: { id: string } }
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
   const [editing, setEditing] = useState(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const pkg: SubscriptionPackage | undefined = (res as any)?.data;
+  const pkg: SubscriptionPackage | undefined = res?.data;
 
   // Editable limits state
   const [editLimits, setEditLimits] = useState<Record<string, EntityLimit> | null>(null);
@@ -554,8 +553,7 @@ export default function PackageDetailPage({ params }: { params: { id: string } }
                           options={PRICING_TYPE_OPTIONS}
                           value={pm.pricingType}
                           onChange={(e) =>
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            handleModulePricingChange(pm.moduleId, e.target.value as any)
+                            handleModulePricingChange(pm.moduleId, e.target.value as ModulePricingType)
                           }
                           className="w-36"
                         />
