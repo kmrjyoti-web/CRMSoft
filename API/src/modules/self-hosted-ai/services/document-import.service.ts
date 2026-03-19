@@ -1,6 +1,7 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as ExcelJS from 'exceljs';
 
 @Injectable()
 export class DocumentImportService {
@@ -31,8 +32,13 @@ export class DocumentImportService {
       return this.extractFromPdf(file.buffer, title);
     }
 
-    if (ext === '.xlsx' || ext === '.xls') {
+    if (ext === '.xlsx') {
       return this.extractFromExcel(file.buffer, title);
+    }
+    if (ext === '.xls') {
+      throw new BadRequestException(
+        'Legacy .xls format is not supported. Please convert your file to .xlsx (Excel 2007+) and re-upload.',
+      );
     }
 
     if (ext === '.json') {
@@ -43,7 +49,7 @@ export class DocumentImportService {
     }
 
     throw new BadRequestException(
-      `Unsupported file type: ${ext}. Supported: .txt, .md, .csv, .xlsx, .xls, .pdf, .json`,
+      `Unsupported file type: ${ext}. Supported: .txt, .md, .csv, .xlsx, .pdf, .json`,
     );
   }
 
@@ -134,37 +140,40 @@ export class DocumentImportService {
 
   // ── Extract text from Excel ──
 
-  private extractFromExcel(
+  private async extractFromExcel(
     buffer: Buffer,
     title: string,
-  ): { title: string; content: string; contentType: string } {
+  ): Promise<{ title: string; content: string; contentType: string }> {
     try {
-      const XLSX = require('xlsx');
-      const workbook = XLSX.read(buffer, { type: 'buffer' });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer as any);
 
       const allSheetText: string[] = [];
 
-      for (const sheetName of workbook.SheetNames) {
-        const sheet = workbook.Sheets[sheetName];
-        const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+      for (const sheet of workbook.worksheets) {
+        if (sheet.rowCount < 2) continue;
 
-        if (!rows || rows.length < 2) continue;
+        const headerRow = sheet.getRow(1);
+        const headers: string[] = [];
+        headerRow.eachCell((cell, colNumber) => {
+          headers[colNumber - 1] = String(cell.value ?? '').trim();
+        });
 
-        const headers: string[] = rows[0].map((h: any) => String(h ?? '').trim());
         const records: string[] = [];
-
-        for (let i = 1; i < rows.length; i++) {
-          const values = rows[i];
-          const pairs = headers
-            .map((h, idx) => `${h}: ${values[idx] ?? ''}`)
-            .filter((p) => !p.endsWith(': '));
+        for (let r = 2; r <= sheet.rowCount; r++) {
+          const row = sheet.getRow(r);
+          const pairs: string[] = [];
+          headers.forEach((h, idx) => {
+            const val = String(row.getCell(idx + 1).value ?? '').trim();
+            if (h && val) pairs.push(`${h}: ${val}`);
+          });
           if (pairs.length > 0) {
-            records.push(`Record ${i}:\n${pairs.join('\n')}`);
+            records.push(`Record ${r - 1}:\n${pairs.join('\n')}`);
           }
         }
 
         if (records.length > 0) {
-          const sheetHeader = workbook.SheetNames.length > 1 ? `\n=== Sheet: ${sheetName} ===\n\n` : '';
+          const sheetHeader = workbook.worksheets.length > 1 ? `\n=== Sheet: ${sheet.name} ===\n\n` : '';
           allSheetText.push(sheetHeader + records.join('\n\n'));
         }
       }
@@ -172,7 +181,7 @@ export class DocumentImportService {
       const content = allSheetText.join('\n\n').trim();
       if (!content) throw new BadRequestException('Excel file contains no readable data');
 
-      this.logger.log(`Excel extracted: ${title} — ${workbook.SheetNames.length} sheets, ${content.length} chars`);
+      this.logger.log(`Excel extracted: ${title} — ${workbook.worksheets.length} sheets, ${content.length} chars`);
 
       return { title, content, contentType: 'excel' };
     } catch (e: any) {

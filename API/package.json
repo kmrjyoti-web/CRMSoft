@@ -30,6 +30,7 @@
     "docker:down": "docker-compose down"
   },
   "dependencies": {
+    "@mapbox/node-pre-gyp": "^2.0.3",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/common": "^10.4.0",
     "@nestjs/config": "^3.2.0",
@@ -57,9 +58,9 @@
     "cron-parser": "^5.5.0",
     "decimal.js": "^10.6.0",
     "exceljs": "^4.4.0",
-    "expr-eval": "^2.0.2",
     "handlebars": "^4.7.8",
     "helmet": "^7.1.0",
+    "mathjs": "^15.1.1",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.2",
@@ -75,11 +76,11 @@
     "rxjs": "^7.8.1",
     "sharp": "^0.34.5",
     "socket.io": "^4.8.3",
-    "uuid": "^10.0.0",
-    "xlsx": "^0.18.5"
+    "tar": "^7.5.11",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
-    "@nestjs/cli": "^10.4.0",
+    "@nestjs/cli": "^11.0.16",
     "@nestjs/schematics": "^10.1.0",
     "@nestjs/testing": "^10.4.0",
     "@types/bcrypt": "^5.0.2",

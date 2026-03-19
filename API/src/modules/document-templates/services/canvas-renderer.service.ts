@@ -166,7 +166,7 @@ ${elementsHtml}
     if (props.formulaExpression) {
       const result = this.formulaService.evaluate(props.formulaExpression, this.flattenData(data));
       if (props.outputFormat === 'currency') {
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2 }).format(result ?? 0);
+        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2 }).format((result as number) ?? 0);
       }
       return String(result ?? '');
     }

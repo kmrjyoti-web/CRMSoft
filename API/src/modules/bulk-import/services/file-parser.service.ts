@@ -1,7 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import * as Papa from 'papaparse';
 import * as ExcelJS from 'exceljs';
-import * as XLSX from 'xlsx';
 
 export interface ParsedFile {
   headers: string[];
@@ -29,7 +28,9 @@ export class FileParserService {
       return this.parseExcelXlsx(buffer);
     }
     if (ext === 'xls') {
-      return this.parseExcelXls(buffer);
+      throw new BadRequestException(
+        'Legacy .xls format is not supported. Please convert your file to .xlsx (Excel 2007+) and re-upload.',
+      );
     }
     throw new BadRequestException(`Unsupported file type: .${ext}. Use CSV, XLS, or XLSX.`);
   }
@@ -75,8 +76,7 @@ export class FileParserService {
     try {
       await workbook.xlsx.load(buffer as any);
     } catch {
-      // Fallback to SheetJS if ExcelJS fails
-      return this.parseExcelXls(buffer);
+      throw new BadRequestException('Failed to parse Excel file. Ensure the file is a valid .xlsx (Excel 2007+) format.');
     }
     const sheet = workbook.worksheets[0];
 
@@ -118,38 +118,5 @@ export class FileParserService {
     };
   }
 
-  /** Parse .xls (legacy binary) using SheetJS */
-  private parseExcelXls(buffer: Buffer): ParsedFile {
-    const workbook = XLSX.read(buffer, { type: 'buffer' });
-    const sheetName = workbook.SheetNames[0];
-    if (!sheetName) {
-      throw new BadRequestException('Excel file has no sheets');
-    }
-
-    const sheet = workbook.Sheets[sheetName];
-    const jsonData: Record<string, any>[] = XLSX.utils.sheet_to_json(sheet, {
-      defval: '',
-      raw: false, // Return formatted strings
-    });
-
-    if (jsonData.length === 0) {
-      throw new BadRequestException('File contains no data rows');
-    }
-
-    const headers = Object.keys(jsonData[0]).map((h) => h.trim());
-    const rows = jsonData.slice(0, MAX_ROWS).map((row) => {
-      const clean: Record<string, string> = {};
-      for (const [k, v] of Object.entries(row)) {
-        clean[k.trim()] = v != null ? String(v).trim().replace(/\0/g, '') : '';
-      }
-      return clean;
-    });
-
-    return {
-      headers,
-      rows,
-      totalRows: rows.length,
-      sampleData: rows.slice(0, 5),
-    };
-  }
 }
+

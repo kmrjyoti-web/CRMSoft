@@ -1,48 +1,43 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
-import { Parser } from 'expr-eval';
+import { create, all, MathJsInstance } from 'mathjs';
 
 @Injectable()
 export class FormulaService {
   private readonly logger = new Logger(FormulaService.name);
-  private parser: Parser;
+  private math: MathJsInstance;
 
   constructor(private readonly prisma: PrismaService) {
-    this.parser = new Parser();
+    this.math = create(all, {});
     this.registerCustomFunctions();
   }
 
   // Register custom formula functions
   private registerCustomFunctions() {
-    // FORMAT_INR: format number as Indian currency
-    this.parser.functions.FORMAT_INR = (n: number) => {
-      if (n == null || isNaN(n)) return '₹0.00';
-      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2 }).format(n);
-    };
-
-    // ROUND: round to N decimals
-    this.parser.functions.ROUND = (n: number, decimals = 2) => {
-      const factor = Math.pow(10, decimals);
-      return Math.round(n * factor) / factor;
-    };
-
-    // IS_INTERSTATE: check if two state codes differ
-    this.parser.functions.IS_INTERSTATE = (companyState: string, customerState: string) => {
-      return companyState !== customerState ? 1 : 0;
-    };
-
-    // SUM: sum array of numbers
-    this.parser.functions.SUM = (...args: number[]) => args.reduce((a, b) => a + (b || 0), 0);
-    this.parser.functions.AVG = (...args: number[]) => args.length ? args.reduce((a, b) => a + (b || 0), 0) / args.length : 0;
-    this.parser.functions.COUNT = (...args: any[]) => args.length;
-    this.parser.functions.CONCAT = (...args: any[]) => args.join('');
-    this.parser.functions.TODAY = () => new Date().toISOString().split('T')[0];
-    this.parser.functions.PAGE_NO = () => 1; // placeholder, resolved at render time
-
-    // AMOUNT_WORDS: number to Indian English words
-    this.parser.functions.AMOUNT_WORDS = (amount: number) => {
-      return this.numberToWordsINR(amount);
-    };
+    this.math.import({
+      // FORMAT_INR: format number as Indian currency
+      FORMAT_INR: (n: number) => {
+        if (n == null || isNaN(n)) return '₹0.00';
+        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2 }).format(n);
+      },
+      // ROUND_INR: round to N decimals (mathjs already has round(), alias for clarity)
+      ROUND2: (n: number, decimals = 2) => {
+        const factor = Math.pow(10, decimals);
+        return Math.round(n * factor) / factor;
+      },
+      // IS_INTERSTATE: check if two state codes differ
+      IS_INTERSTATE: (companyState: string, customerState: string) => {
+        return companyState !== customerState ? 1 : 0;
+      },
+      // CONCAT: join values into a string
+      CONCAT: (...args: unknown[]) => args.join(''),
+      // TODAY: current date as ISO string
+      TODAY: () => new Date().toISOString().split('T')[0],
+      // PAGE_NO: placeholder, resolved at render time
+      PAGE_NO: () => 1,
+      // AMOUNT_WORDS: number to Indian English words
+      AMOUNT_WORDS: (amount: number) => this.numberToWordsINR(amount),
+    }, { override: true });
   }
 
   // ── CRUD ──
@@ -120,10 +115,9 @@ export class FormulaService {
 
   // ── EVALUATE ──
 
-  evaluate(expression: string, variables: Record<string, any> = {}): any {
+  evaluate(expression: string, variables: Record<string, unknown> = {}): unknown {
     try {
-      const expr = this.parser.parse(expression);
-      return expr.evaluate(variables);
+      return this.math.evaluate(expression, variables);
     } catch (error) {
       this.logger.warn(`Formula evaluation failed: ${expression}`, error);
       return null;
