@@ -25,6 +25,7 @@
     "test:int": "jest --testPathPattern=integration",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:security": "jest --testPathPattern=security",
+    "test:microservice-bootstrap": "ts-node -r tsconfig-paths/register --project tsconfig.json scripts/microservice/test-bootstrap.ts",
     "report:cross-service": "ts-node --project tsconfig.json scripts/audit/cross-service-report.ts",
     "report:cross-service:save": "ts-node --project tsconfig.json scripts/audit/cross-service-report.ts --save",
     "prisma:generate": "prisma generate",
