@@ -47,3 +47,5 @@ CRMSoft/
 # Test artifacts
 playwright-report/
 e2e/
+# Keep API E2E source tests (not Playwright output)
+!API/test/e2e/

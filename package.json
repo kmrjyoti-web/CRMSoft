@@ -11,7 +11,10 @@
     "build": "concurrently --names \"API,ADMIN,VENDOR\" \"npm run build:api\" \"npm run build:web\" \"npm run build:vendor\"",
     "build:api": "cd API && npm run build",
     "build:web": "cd UI/crm-admin && npm run build",
-    "build:vendor": "cd UI/vendor-panel && npm run build"
+    "build:vendor": "cd UI/vendor-panel && npm run build",
+    "audit:run": "npx ts-node --project API/tsconfig.json scripts/audit/run-audit.ts",
+    "audit:save": "npx ts-node --project API/tsconfig.json scripts/audit/run-audit.ts --save",
+    "audit:quick": "npx ts-node --project API/tsconfig.json scripts/audit/run-audit.ts --quick --save"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
