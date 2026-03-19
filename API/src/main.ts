@@ -90,7 +90,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`Server running on port ${port}`);
+  new Logger('Bootstrap').log(`Server running on port ${port}`);
 }
 bootstrap().catch((err) => {
   console.error('FATAL: App failed to start', err);

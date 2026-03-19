@@ -2,6 +2,7 @@
  * Control Room seed data — master rule definitions for the 7-level override system.
  * Used by prisma/seed.ts and any "Reset Defaults" handler.
  */
+import { Logger } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -806,5 +807,5 @@ export async function seedControlRoomRules(prisma: PrismaService): Promise<void>
     ),
   );
 
-  console.log(`[ControlRoom] Seeded ${results.length} rules across categories.`);
+  new Logger('ControlRoomSeed').log(`Seeded ${results.length} rules across categories.`);
 }

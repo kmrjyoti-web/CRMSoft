@@ -43,8 +43,13 @@ export class PlatformBootstrapService implements OnModuleInit {
       return;
     }
 
-    const email = 'platform@crm.com';
-    const password = 'PlatformAdmin@123';
+    const email = this.config.get<string>('PLATFORM_ADMIN_EMAIL') ?? 'platform@crm.com';
+    const password = this.config.get<string>('PLATFORM_ADMIN_DEFAULT_PASSWORD');
+    if (!password) {
+      throw new Error(
+        'PLATFORM_ADMIN_DEFAULT_PASSWORD must be set in environment before first boot',
+      );
+    }
     const hashed = await bcrypt.hash(password, 12);
 
     await this.prisma.superAdmin.create({
@@ -58,8 +63,8 @@ export class PlatformBootstrapService implements OnModuleInit {
 
     this.logger.warn('================================================');
     this.logger.warn('  PLATFORM ADMIN AUTO-PROVISIONED');
-    this.logger.warn(`  Email:    ${email}`);
-    this.logger.warn(`  Password: ${password}`);
+    this.logger.warn(`  Email: ${email}`);
+    this.logger.warn('  Password set from PLATFORM_ADMIN_DEFAULT_PASSWORD env var');
     this.logger.warn('  Change this password after first login!');
     this.logger.warn('================================================');
   }
@@ -70,7 +75,11 @@ export class PlatformBootstrapService implements OnModuleInit {
     if (existing) {
       // If vendor exists but has no password, set one
       if (!existing.password) {
-        const password = 'Vendor@123';
+        const password = this.config.get<string>('VENDOR_DEFAULT_PASSWORD');
+        if (!password) {
+          this.logger.error('VENDOR_DEFAULT_PASSWORD env var not set — skipping vendor password update');
+          return;
+        }
         const hashed = await bcrypt.hash(password, 12);
         await this.prisma.marketplaceVendor.update({
           where: { id: existing.id },
@@ -78,15 +87,20 @@ export class PlatformBootstrapService implements OnModuleInit {
         });
         this.logger.warn('================================================');
         this.logger.warn('  VENDOR PASSWORD SET');
-        this.logger.warn(`  Email:    ${existing.contactEmail}`);
-        this.logger.warn(`  Password: ${password}`);
+        this.logger.warn(`  Email: ${existing.contactEmail}`);
+        this.logger.warn('  Password set from VENDOR_DEFAULT_PASSWORD env var');
         this.logger.warn('================================================');
       }
       return;
     }
 
-    const email = 'vendor@demo.com';
-    const password = 'Vendor@123';
+    const email = this.config.get<string>('VENDOR_DEFAULT_EMAIL') ?? 'vendor@demo.com';
+    const password = this.config.get<string>('VENDOR_DEFAULT_PASSWORD');
+    if (!password) {
+      throw new Error(
+        'VENDOR_DEFAULT_PASSWORD must be set in environment before first boot',
+      );
+    }
     const hashed = await bcrypt.hash(password, 12);
 
     await this.prisma.marketplaceVendor.create({
@@ -101,8 +115,8 @@ export class PlatformBootstrapService implements OnModuleInit {
 
     this.logger.warn('================================================');
     this.logger.warn('  DEMO VENDOR AUTO-PROVISIONED');
-    this.logger.warn(`  Email:    ${email}`);
-    this.logger.warn(`  Password: ${password}`);
+    this.logger.warn(`  Email: ${email}`);
+    this.logger.warn('  Password set from VENDOR_DEFAULT_PASSWORD env var');
     this.logger.warn('  Change this password after first login!');
     this.logger.warn('================================================');
   }
