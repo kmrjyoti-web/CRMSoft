@@ -39,7 +39,7 @@ export class OwnershipCronService {
    * Called by cron-engine (ESCALATE_UNATTENDED).
    */
   async escalateUnattended() {
-    const rules = await this.prisma.assignmentRule.findMany({
+    const rules = await this.prisma.working.assignmentRule.findMany({
       where: { isActive: true, escalateAfterHours: { not: null } },
     });
 
@@ -47,7 +47,7 @@ export class OwnershipCronService {
       if (!rule.escalateAfterHours) continue;
       const cutoff = new Date(Date.now() - rule.escalateAfterHours * 60 * 60 * 1000);
 
-      const staleOwners = await this.prisma.entityOwner.findMany({
+      const staleOwners = await this.prisma.working.entityOwner.findMany({
         where: {
           entityType: rule.entityType, ownerType: 'PRIMARY_OWNER', isActive: true,
           createdAt: { lte: cutoff },
@@ -57,7 +57,7 @@ export class OwnershipCronService {
 
       for (const owner of staleOwners) {
         if (!owner.userId) continue;
-        const hasActivity = await this.prisma.ownershipLog.findFirst({
+        const hasActivity = await this.prisma.working.ownershipLog.findFirst({
           where: { entityType: owner.entityType, entityId: owner.entityId, createdAt: { gte: cutoff } },
         });
         if (hasActivity) continue;
@@ -85,14 +85,14 @@ export class OwnershipCronService {
    * Called by cron-engine (EXPIRE_TIME_LIMITED_OWNERSHIP).
    */
   async expireTimeLimitedOwnership() {
-    const expired = await this.prisma.entityOwner.findMany({
+    const expired = await this.prisma.working.entityOwner.findMany({
       where: { validTo: { lte: new Date() }, isActive: true },
     });
 
     for (const owner of expired) {
-      await this.prisma.entityOwner.update({ where: { id: owner.id }, data: { isActive: false } });
+      await this.prisma.working.entityOwner.update({ where: { id: owner.id }, data: { isActive: false } });
 
-      await this.prisma.ownershipLog.create({
+      await this.prisma.working.ownershipLog.create({
         data: {
           entityType: owner.entityType, entityId: owner.entityId,
           action: 'REVOKE', ownerType: owner.ownerType,

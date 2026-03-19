@@ -18,7 +18,7 @@ export class EntityVerificationService {
   private async getEntity(tenantId: string, entityType: string, entityId: string) {
     switch (entityType) {
       case 'CONTACT': {
-        const c = await this.prisma.contact.findFirst({
+        const c = await this.prisma.working.contact.findFirst({
           where: { id: entityId, tenantId },
           include: {
             communications: { where: { type: 'EMAIL' }, take: 1, orderBy: { createdAt: 'desc' } },
@@ -34,7 +34,7 @@ export class EntityVerificationService {
         };
       }
       case 'ORGANIZATION': {
-        const o = await this.prisma.organization.findFirst({ where: { id: entityId, tenantId } });
+        const o = await this.prisma.working.organization.findFirst({ where: { id: entityId, tenantId } });
         if (!o) throw new NotFoundException('Organization not found');
         return {
           name: o.name,
@@ -46,7 +46,7 @@ export class EntityVerificationService {
         };
       }
       case 'RAW_CONTACT': {
-        const r = await this.prisma.rawContact.findFirst({
+        const r = await this.prisma.working.rawContact.findFirst({
           where: { id: entityId, tenantId },
           include: {
             communications: { where: { type: 'EMAIL' }, take: 1, orderBy: { createdAt: 'desc' } },
@@ -81,13 +81,13 @@ export class EntityVerificationService {
     }
     switch (entityType) {
       case 'CONTACT':
-        await this.prisma.contact.update({ where: { id: entityId }, data });
+        await this.prisma.working.contact.update({ where: { id: entityId }, data });
         break;
       case 'ORGANIZATION':
-        await this.prisma.organization.update({ where: { id: entityId }, data });
+        await this.prisma.working.organization.update({ where: { id: entityId }, data });
         break;
       case 'RAW_CONTACT':
-        await this.prisma.rawContact.update({ where: { id: entityId }, data });
+        await this.prisma.working.rawContact.update({ where: { id: entityId }, data });
         break;
     }
   }
@@ -112,7 +112,7 @@ export class EntityVerificationService {
     }
 
     // Expire existing pending records (skip records created in the last 10s to prevent double-click race)
-    const expired = await this.prisma.entityVerificationRecord.updateMany({
+    const expired = await this.prisma.working.entityVerificationRecord.updateMany({
       where: {
         tenantId,
         entityType: dto.entityType,
@@ -137,7 +137,7 @@ export class EntityVerificationService {
     const otp = String(Math.floor(100000 + Math.random() * 900000));
     const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
 
-    const record = await this.prisma.entityVerificationRecord.create({
+    const record = await this.prisma.working.entityVerificationRecord.create({
       data: {
         tenantId,
         entityType: dto.entityType,
@@ -188,7 +188,7 @@ export class EntityVerificationService {
     const baseUrl = process.env.FRONTEND_URL || process.env.APP_URL || 'http://localhost:3005';
     const linkUrl = `${baseUrl}/verify/${token}`;
 
-    const record = await this.prisma.entityVerificationRecord.create({
+    const record = await this.prisma.working.entityVerificationRecord.create({
       data: {
         tenantId,
         entityType: dto.entityType,
@@ -240,7 +240,7 @@ export class EntityVerificationService {
 
   // ── Verify OTP ───────────────────────────────────────────
   async verifyOtp(tenantId: string, recordId: string, otpInput: string) {
-    const record = await this.prisma.entityVerificationRecord.findFirst({
+    const record = await this.prisma.working.entityVerificationRecord.findFirst({
       where: { id: recordId, tenantId },
     });
 
@@ -255,13 +255,13 @@ export class EntityVerificationService {
       );
     }
     if (!record.otpExpiresAt || new Date() > record.otpExpiresAt) {
-      await this.prisma.entityVerificationRecord.update({
+      await this.prisma.working.entityVerificationRecord.update({
         where: { id: recordId }, data: { status: 'EXPIRED' },
       });
       throw new BadRequestException('OTP has expired. Please request a new one.');
     }
     if (record.otpAttempts >= 3) {
-      await this.prisma.entityVerificationRecord.update({
+      await this.prisma.working.entityVerificationRecord.update({
         where: { id: recordId }, data: { status: 'FAILED' },
       });
       throw new BadRequestException('Too many failed attempts. Please request a new OTP.');
@@ -271,7 +271,7 @@ export class EntityVerificationService {
     const isValid = otpHash === record.otp;
 
     if (!isValid) {
-      await this.prisma.entityVerificationRecord.update({
+      await this.prisma.working.entityVerificationRecord.update({
         where: { id: recordId }, data: { otpAttempts: { increment: 1 } },
       });
       const remaining = 3 - (record.otpAttempts + 1);
@@ -279,7 +279,7 @@ export class EntityVerificationService {
     }
 
     const via = `${record.channel}_OTP`;
-    await this.prisma.entityVerificationRecord.update({
+    await this.prisma.working.entityVerificationRecord.update({
       where: { id: recordId }, data: { status: 'VERIFIED', verifiedAt: new Date() },
     });
     await this.updateEntityStatus(tenantId, record.entityType, record.entityId, 'VERIFIED', via);
@@ -290,7 +290,7 @@ export class EntityVerificationService {
   // ── Reset verification (delete all records, set entity back to UNVERIFIED) ──
   async resetVerification(tenantId: string, entityType: string, entityId: string) {
     // Delete all verification records for this entity
-    const { count } = await this.prisma.entityVerificationRecord.deleteMany({
+    const { count } = await this.prisma.working.entityVerificationRecord.deleteMany({
       where: { tenantId, entityType, entityId },
     });
 
@@ -302,7 +302,7 @@ export class EntityVerificationService {
 
   // ── Resend ───────────────────────────────────────────────
   async resend(tenantId: string, userId: string, userName: string, recordId: string) {
-    const record = await this.prisma.entityVerificationRecord.findFirst({
+    const record = await this.prisma.working.entityVerificationRecord.findFirst({
       where: { id: recordId, tenantId },
     });
     if (!record) throw new NotFoundException('Verification record not found.');
@@ -316,7 +316,7 @@ export class EntityVerificationService {
 
   // ── History ──────────────────────────────────────────────
   async getHistory(tenantId: string, entityType: string, entityId: string) {
-    return this.prisma.entityVerificationRecord.findMany({
+    return this.prisma.working.entityVerificationRecord.findMany({
       where: { tenantId, entityType, entityId },
       orderBy: { createdAt: 'desc' },
     });
@@ -325,7 +325,7 @@ export class EntityVerificationService {
   // ── Status ───────────────────────────────────────────────
   async getStatus(tenantId: string, entityType: string, entityId: string) {
     const entity = await this.getEntity(tenantId, entityType, entityId);
-    const latest = await this.prisma.entityVerificationRecord.findFirst({
+    const latest = await this.prisma.working.entityVerificationRecord.findFirst({
       where: { tenantId, entityType, entityId },
       orderBy: { createdAt: 'desc' },
     });
@@ -339,7 +339,7 @@ export class EntityVerificationService {
 
   // ── Pending list ─────────────────────────────────────────
   async getPending(tenantId: string) {
-    return this.prisma.entityVerificationRecord.findMany({
+    return this.prisma.working.entityVerificationRecord.findMany({
       where: { tenantId, status: 'PENDING' },
       orderBy: { createdAt: 'desc' },
     });
@@ -347,7 +347,7 @@ export class EntityVerificationService {
 
   // ── PUBLIC: Get verification page data ──────────────────
   async getVerificationPage(token: string) {
-    const record = await this.prisma.entityVerificationRecord.findUnique({
+    const record = await this.prisma.working.entityVerificationRecord.findUnique({
       where: { verificationToken: token },
     });
     if (!record) throw new NotFoundException('Verification link not found.');
@@ -355,7 +355,7 @@ export class EntityVerificationService {
       return { alreadyVerified: true, entityName: record.entityName };
     }
     if (!record.linkExpiresAt || new Date() > record.linkExpiresAt) {
-      await this.prisma.entityVerificationRecord.update({
+      await this.prisma.working.entityVerificationRecord.update({
         where: { id: record.id }, data: { status: 'EXPIRED' },
       });
       return { expired: true, entityName: record.entityName };
@@ -378,7 +378,7 @@ export class EntityVerificationService {
 
   // ── PUBLIC: Confirm verification ─────────────────────────
   async confirmVerification(token: string, ipAddress: string, userAgent: string) {
-    const record = await this.prisma.entityVerificationRecord.findUnique({
+    const record = await this.prisma.working.entityVerificationRecord.findUnique({
       where: { verificationToken: token },
     });
     if (!record || record.status !== 'PENDING') {
@@ -388,7 +388,7 @@ export class EntityVerificationService {
       throw new BadRequestException('Verification link has expired.');
     }
 
-    await this.prisma.entityVerificationRecord.update({
+    await this.prisma.working.entityVerificationRecord.update({
       where: { id: record.id },
       data: { status: 'VERIFIED', verifiedAt: new Date(), ipAddress, userAgent },
     });
@@ -402,14 +402,14 @@ export class EntityVerificationService {
 
   // ── PUBLIC: Reject verification ──────────────────────────
   async rejectVerification(token: string, reason: string, ipAddress: string) {
-    const record = await this.prisma.entityVerificationRecord.findUnique({
+    const record = await this.prisma.working.entityVerificationRecord.findUnique({
       where: { verificationToken: token },
     });
     if (!record || record.status !== 'PENDING') {
       throw new BadRequestException('Invalid link.');
     }
 
-    await this.prisma.entityVerificationRecord.update({
+    await this.prisma.working.entityVerificationRecord.update({
       where: { id: record.id },
       data: { status: 'REJECTED', rejectionReason: reason, ipAddress },
     });
@@ -420,7 +420,7 @@ export class EntityVerificationService {
 
   // ── Auto-expire old pending verifications ────────────────
   async expireOld() {
-    const { count } = await this.prisma.entityVerificationRecord.updateMany({
+    const { count } = await this.prisma.working.entityVerificationRecord.updateMany({
       where: {
         status: 'PENDING',
         OR: [
@@ -439,7 +439,7 @@ export class EntityVerificationService {
 
   private async getSmtpConfig(tenantId: string) {
     // Use the first connected SMTP email account for the tenant
-    const account = await this.prisma.emailAccount.findFirst({
+    const account = await this.prisma.working.emailAccount.findFirst({
       where: { tenantId, provider: { in: ['IMAP_SMTP', 'ORGANIZATION_SMTP'] }, status: 'ACTIVE' },
     });
     if (!account || !account.smtpHost || !account.smtpPort) return null;
@@ -518,7 +518,7 @@ export class EntityVerificationService {
   }
 
   private async sendWhatsAppOtp(tenantId: string, phone: string, otp: string) {
-    const waba = await this.prisma.whatsAppBusinessAccount.findFirst({
+    const waba = await this.prisma.working.whatsAppBusinessAccount.findFirst({
       where: { tenantId },
     });
     if (!waba) {
@@ -540,7 +540,7 @@ export class EntityVerificationService {
   }
 
   private async sendWhatsAppLink(tenantId: string, phone: string, name: string, linkUrl: string) {
-    const waba = await this.prisma.whatsAppBusinessAccount.findFirst({
+    const waba = await this.prisma.working.whatsAppBusinessAccount.findFirst({
       where: { tenantId },
     });
     if (!waba) {
@@ -572,32 +572,32 @@ export class EntityVerificationService {
     }
 
     const [total, verified, pending, expired, failed, rejected] = await Promise.all([
-      this.prisma.entityVerificationRecord.count({ where }),
-      this.prisma.entityVerificationRecord.count({ where: { ...where, status: 'VERIFIED' } }),
-      this.prisma.entityVerificationRecord.count({ where: { ...where, status: 'PENDING' } }),
-      this.prisma.entityVerificationRecord.count({ where: { ...where, status: 'EXPIRED' } }),
-      this.prisma.entityVerificationRecord.count({ where: { ...where, status: 'FAILED' } }),
-      this.prisma.entityVerificationRecord.count({ where: { ...where, status: 'REJECTED' } }),
+      this.prisma.working.entityVerificationRecord.count({ where }),
+      this.prisma.working.entityVerificationRecord.count({ where: { ...where, status: 'VERIFIED' } }),
+      this.prisma.working.entityVerificationRecord.count({ where: { ...where, status: 'PENDING' } }),
+      this.prisma.working.entityVerificationRecord.count({ where: { ...where, status: 'EXPIRED' } }),
+      this.prisma.working.entityVerificationRecord.count({ where: { ...where, status: 'FAILED' } }),
+      this.prisma.working.entityVerificationRecord.count({ where: { ...where, status: 'REJECTED' } }),
     ]);
 
     // Channel breakdown
     const [emailCount, smsCount, whatsappCount] = await Promise.all([
-      this.prisma.entityVerificationRecord.count({ where: { ...where, channel: 'EMAIL' } }),
-      this.prisma.entityVerificationRecord.count({ where: { ...where, channel: 'MOBILE_SMS' } }),
-      this.prisma.entityVerificationRecord.count({ where: { ...where, channel: 'WHATSAPP' } }),
+      this.prisma.working.entityVerificationRecord.count({ where: { ...where, channel: 'EMAIL' } }),
+      this.prisma.working.entityVerificationRecord.count({ where: { ...where, channel: 'MOBILE_SMS' } }),
+      this.prisma.working.entityVerificationRecord.count({ where: { ...where, channel: 'WHATSAPP' } }),
     ]);
 
     // Mode breakdown
     const [otpCount, linkCount] = await Promise.all([
-      this.prisma.entityVerificationRecord.count({ where: { ...where, mode: 'OTP' } }),
-      this.prisma.entityVerificationRecord.count({ where: { ...where, mode: 'LINK' } }),
+      this.prisma.working.entityVerificationRecord.count({ where: { ...where, mode: 'OTP' } }),
+      this.prisma.working.entityVerificationRecord.count({ where: { ...where, mode: 'LINK' } }),
     ]);
 
     // Entity type breakdown
     const [contactCount, orgCount, rawContactCount] = await Promise.all([
-      this.prisma.entityVerificationRecord.count({ where: { ...where, entityType: 'CONTACT' } }),
-      this.prisma.entityVerificationRecord.count({ where: { ...where, entityType: 'ORGANIZATION' } }),
-      this.prisma.entityVerificationRecord.count({ where: { ...where, entityType: 'RAW_CONTACT' } }),
+      this.prisma.working.entityVerificationRecord.count({ where: { ...where, entityType: 'CONTACT' } }),
+      this.prisma.working.entityVerificationRecord.count({ where: { ...where, entityType: 'ORGANIZATION' } }),
+      this.prisma.working.entityVerificationRecord.count({ where: { ...where, entityType: 'RAW_CONTACT' } }),
     ]);
 
     const verificationRate = total > 0 ? Math.round((verified / total) * 100) : 0;
@@ -647,10 +647,10 @@ export class EntityVerificationService {
     const skip = (page - 1) * limit;
 
     const [data, total] = await Promise.all([
-      this.prisma.entityVerificationRecord.findMany({
+      this.prisma.working.entityVerificationRecord.findMany({
         where, orderBy: { createdAt: 'desc' }, skip, take: limit,
       }),
-      this.prisma.entityVerificationRecord.count({ where }),
+      this.prisma.working.entityVerificationRecord.count({ where }),
     ]);
 
     return {
@@ -663,7 +663,7 @@ export class EntityVerificationService {
   }
 
   async getExpiredLinks(tenantId: string) {
-    return this.prisma.entityVerificationRecord.findMany({
+    return this.prisma.working.entityVerificationRecord.findMany({
       where: {
         tenantId,
         mode: 'LINK',
@@ -678,7 +678,7 @@ export class EntityVerificationService {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    const records = await this.prisma.entityVerificationRecord.findMany({
+    const records = await this.prisma.working.entityVerificationRecord.findMany({
       where: { tenantId, createdAt: { gte: startDate } },
       select: { status: true, channel: true, createdAt: true },
       orderBy: { createdAt: 'asc' },
@@ -712,7 +712,7 @@ export class EntityVerificationService {
       if (filters.dateTo) where.createdAt.lte = new Date(filters.dateTo + 'T23:59:59.999Z');
     }
 
-    const records = await this.prisma.entityVerificationRecord.findMany({
+    const records = await this.prisma.working.entityVerificationRecord.findMany({
       where, orderBy: { createdAt: 'desc' }, take: 5000,
     });
 

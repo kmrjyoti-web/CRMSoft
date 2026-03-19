@@ -9,7 +9,7 @@ export class CheckInVisitHandler implements ICommandHandler<CheckInVisitCommand>
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CheckInVisitCommand) {
-    const visit = await this.prisma.tourPlanVisit.findUnique({
+    const visit = await this.prisma.working.tourPlanVisit.findUnique({
       where: { id: cmd.visitId },
       include: { tourPlan: true, lead: true },
     });
@@ -18,7 +18,7 @@ export class CheckInVisitHandler implements ICommandHandler<CheckInVisitCommand>
 
     let distanceFromTarget: number | undefined;
     if (visit.lead) {
-      const leadWithOrg = await this.prisma.lead.findUnique({
+      const leadWithOrg = await this.prisma.working.lead.findUnique({
         where: { id: visit.lead.id },
         include: { organization: true },
       });
@@ -33,7 +33,7 @@ export class CheckInVisitHandler implements ICommandHandler<CheckInVisitCommand>
       }
     }
 
-    const updated = await this.prisma.tourPlanVisit.update({
+    const updated = await this.prisma.working.tourPlanVisit.update({
       where: { id: cmd.visitId },
       data: {
         actualArrival: new Date(),
@@ -45,7 +45,7 @@ export class CheckInVisitHandler implements ICommandHandler<CheckInVisitCommand>
     });
 
     if (cmd.photoUrl) {
-      await this.prisma.tourPlanPhoto.create({
+      await this.prisma.working.tourPlanPhoto.create({
         data: {
           tourPlanVisitId: cmd.visitId,
           photoUrl: cmd.photoUrl,

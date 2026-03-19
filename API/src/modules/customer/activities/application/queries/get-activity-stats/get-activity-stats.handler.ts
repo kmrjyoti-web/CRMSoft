@@ -16,9 +16,9 @@ export class GetActivityStatsHandler implements IQueryHandler<GetActivityStatsQu
     }
 
     const [total, completed, byType] = await Promise.all([
-      this.prisma.activity.count({ where }),
-      this.prisma.activity.count({ where: { ...where, completedAt: { not: null } } }),
-      this.prisma.activity.groupBy({ by: ['type'], where, _count: true }),
+      this.prisma.working.activity.count({ where }),
+      this.prisma.working.activity.count({ where: { ...where, completedAt: { not: null } } }),
+      this.prisma.working.activity.groupBy({ by: ['type'], where, _count: true }),
     ]);
 
     return {

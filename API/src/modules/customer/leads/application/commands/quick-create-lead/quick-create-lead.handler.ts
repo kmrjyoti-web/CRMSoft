@@ -40,7 +40,7 @@ export class QuickCreateLeadHandler implements ICommandHandler<QuickCreateLeadCo
 
     // If using existing contactId, validate it exists
     if (command.contactId && !command.inlineContact) {
-      const contact = await this.prisma.contact.findUnique({
+      const contact = await this.prisma.working.contact.findUnique({
         where: { id: command.contactId },
         select: { id: true, isActive: true },
       });
@@ -50,7 +50,7 @@ export class QuickCreateLeadHandler implements ICommandHandler<QuickCreateLeadCo
 
     // If using existing organizationId, validate it exists
     if (command.organizationId && !command.inlineOrganization) {
-      const org = await this.prisma.organization.findUnique({
+      const org = await this.prisma.working.organization.findUnique({
         where: { id: command.organizationId },
         select: { id: true },
       });

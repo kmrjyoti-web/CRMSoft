@@ -25,7 +25,7 @@ export class GetDemoListHandler implements IQueryHandler<GetDemoListQuery> {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.demo.findMany({
+      this.prisma.working.demo.findMany({
         where,
         include: {
           lead: { select: { id: true, leadNumber: true } },
@@ -35,7 +35,7 @@ export class GetDemoListHandler implements IQueryHandler<GetDemoListQuery> {
         skip: (query.page - 1) * query.limit,
         take: query.limit,
       }),
-      this.prisma.demo.count({ where }),
+      this.prisma.working.demo.count({ where }),
     ]);
 
     return { data, total, page: query.page, limit: query.limit };

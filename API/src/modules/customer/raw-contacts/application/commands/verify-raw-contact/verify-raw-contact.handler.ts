@@ -37,7 +37,7 @@ export class VerifyRawContactHandler implements ICommandHandler<VerifyRawContact
     }
 
     // 2. Get tenantId from the raw contact DB record
-    const rawContactDb = await this.prisma.rawContact.findUnique({
+    const rawContactDb = await this.prisma.working.rawContact.findUnique({
       where: { id: command.rawContactId },
       select: { tenantId: true },
     });
@@ -45,7 +45,7 @@ export class VerifyRawContactHandler implements ICommandHandler<VerifyRawContact
 
     // 3. Create Contact record
     const contactId = randomUUID();
-    await this.prisma.contact.create({
+    await this.prisma.working.contact.create({
       data: {
         id: contactId,
         tenantId,
@@ -63,17 +63,17 @@ export class VerifyRawContactHandler implements ICommandHandler<VerifyRawContact
     withEvents.verify(contactId, command.verifiedById);
 
     // 5. Update all Communications → link to new Contact
-    await this.prisma.communication.updateMany({
+    await this.prisma.working.communication.updateMany({
       where: { rawContactId: rawContact.id },
       data: { contactId },
     });
 
     // 6. Copy filters from raw_contact_filters → contact_filters
-    const rawFilters = await this.prisma.rawContactFilter.findMany({
+    const rawFilters = await this.prisma.working.rawContactFilter.findMany({
       where: { rawContactId: rawContact.id },
     });
     if (rawFilters.length) {
-      await this.prisma.contactFilter.createMany({
+      await this.prisma.working.contactFilter.createMany({
         data: rawFilters.map(f => ({
           contactId,
           lookupValueId: f.lookupValueId,
@@ -84,7 +84,7 @@ export class VerifyRawContactHandler implements ICommandHandler<VerifyRawContact
 
     // 7. If organization provided → create mapping
     if (command.organizationId) {
-      await this.prisma.contactOrganization.create({
+      await this.prisma.working.contactOrganization.create({
         data: {
           contactId,
           organizationId: command.organizationId,
@@ -95,7 +95,7 @@ export class VerifyRawContactHandler implements ICommandHandler<VerifyRawContact
       });
 
       // Update primary communications with organizationId
-      await this.prisma.communication.updateMany({
+      await this.prisma.working.communication.updateMany({
         where: { rawContactId: rawContact.id, isPrimary: true },
         data: { organizationId: command.organizationId },
       });

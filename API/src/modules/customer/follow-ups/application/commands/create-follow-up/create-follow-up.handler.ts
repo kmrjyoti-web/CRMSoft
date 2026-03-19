@@ -9,7 +9,7 @@ export class CreateFollowUpHandler implements ICommandHandler<CreateFollowUpComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CreateFollowUpCommand) {
-    const followUp = await this.prisma.followUp.create({
+    const followUp = await this.prisma.working.followUp.create({
       data: {
         title: cmd.title,
         description: cmd.description,

@@ -9,7 +9,7 @@ export class CancelDemoHandler implements ICommandHandler<CancelDemoCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CancelDemoCommand) {
-    const existing = await this.prisma.demo.findUnique({ where: { id: cmd.id } });
+    const existing = await this.prisma.working.demo.findUnique({ where: { id: cmd.id } });
     if (!existing) throw new NotFoundException('Demo not found');
 
     const data: any = {
@@ -18,13 +18,13 @@ export class CancelDemoHandler implements ICommandHandler<CancelDemoCommand> {
     };
     if (cmd.isNoShow) data.noShowReason = cmd.reason;
 
-    const demo = await this.prisma.demo.update({
+    const demo = await this.prisma.working.demo.update({
       where: { id: cmd.id },
       data,
       include: { lead: true, conductedBy: true },
     });
 
-    await this.prisma.calendarEvent.updateMany({
+    await this.prisma.working.calendarEvent.updateMany({
       where: { eventType: 'DEMO', sourceId: cmd.id },
       data: { isActive: false },
     });

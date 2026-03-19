@@ -15,6 +15,7 @@ describe('UpdateLeadHandler', () => {
       mergeObjectContext: jest.fn((e: any) => { e.commit = jest.fn(); return e; }),
     };
     prisma = { leadFilter: { deleteMany: jest.fn(), createMany: jest.fn() } };
+(prisma as any).working = prisma;
     handler = new UpdateLeadHandler(repo, publisher, prisma);
   });
 

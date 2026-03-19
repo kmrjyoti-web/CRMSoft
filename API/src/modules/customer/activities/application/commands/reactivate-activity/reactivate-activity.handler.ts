@@ -10,14 +10,14 @@ export class ReactivateActivityHandler implements ICommandHandler<ReactivateActi
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: ReactivateActivityCommand): Promise<void> {
-    const activity = await this.prisma.activity.findUnique({ where: { id: command.activityId } });
+    const activity = await this.prisma.working.activity.findUnique({ where: { id: command.activityId } });
     if (!activity) throw new NotFoundException(`Activity ${command.activityId} not found`);
 
     if (activity.isActive) {
       throw new Error('Activity is already active');
     }
 
-    await this.prisma.activity.update({
+    await this.prisma.working.activity.update({
       where: { id: command.activityId },
       data: { isActive: true, updatedAt: new Date() },
     });

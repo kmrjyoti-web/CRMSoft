@@ -9,10 +9,10 @@ export class CompleteActivityHandler implements ICommandHandler<CompleteActivity
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CompleteActivityCommand) {
-    const existing = await this.prisma.activity.findUnique({ where: { id: cmd.id } });
+    const existing = await this.prisma.working.activity.findUnique({ where: { id: cmd.id } });
     if (!existing) throw new NotFoundException('Activity not found');
 
-    return this.prisma.activity.update({
+    return this.prisma.working.activity.update({
       where: { id: cmd.id },
       data: {
         outcome: cmd.outcome,

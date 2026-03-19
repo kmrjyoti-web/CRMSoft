@@ -10,14 +10,14 @@ export class GetDemosByLeadHandler implements IQueryHandler<GetDemosByLeadQuery>
   async execute(query: GetDemosByLeadQuery) {
     const where = { leadId: query.leadId };
     const [data, total] = await Promise.all([
-      this.prisma.demo.findMany({
+      this.prisma.working.demo.findMany({
         where,
         include: { conductedBy: { select: { id: true, firstName: true, lastName: true } } },
         orderBy: { scheduledAt: 'desc' },
         skip: (query.page - 1) * query.limit,
         take: query.limit,
       }),
-      this.prisma.demo.count({ where }),
+      this.prisma.working.demo.count({ where }),
     ]);
     return { data, total, page: query.page, limit: query.limit };
   }

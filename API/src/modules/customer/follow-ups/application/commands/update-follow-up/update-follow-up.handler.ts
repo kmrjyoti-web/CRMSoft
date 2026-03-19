@@ -9,10 +9,10 @@ export class UpdateFollowUpHandler implements ICommandHandler<UpdateFollowUpComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: UpdateFollowUpCommand) {
-    const existing = await this.prisma.followUp.findUnique({ where: { id: cmd.id } });
+    const existing = await this.prisma.working.followUp.findUnique({ where: { id: cmd.id } });
     if (!existing) throw new NotFoundException('Follow-up not found');
 
-    return this.prisma.followUp.update({
+    return this.prisma.working.followUp.update({
       where: { id: cmd.id },
       data: cmd.data as any,
       include: {

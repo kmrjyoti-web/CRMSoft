@@ -22,6 +22,7 @@ describe('VerifyRawContactHandler', () => {
       contactFilter: { createMany: jest.fn() },
       contactOrganization: { create: jest.fn() },
     };
+(prisma as any).working = prisma;
     handler = new VerifyRawContactHandler(repo, publisher, prisma);
   });
 

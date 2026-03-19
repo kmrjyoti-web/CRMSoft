@@ -22,6 +22,7 @@ describe('TransferOwnerHandler', () => {
       ownershipLog: { create: jest.fn().mockResolvedValue({}) },
       userCapacity: { findUnique: jest.fn().mockResolvedValue({ activeLeads: 5, activeTotal: 20 }), upsert: jest.fn().mockResolvedValue({}), update: jest.fn().mockResolvedValue({}) },
     };
+(prisma as any).working = prisma;
     ownershipCore = new OwnershipCoreService(prisma);
     handler = new TransferOwnerHandler(ownershipCore);
   });

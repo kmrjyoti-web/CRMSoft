@@ -31,14 +31,14 @@ export class GetActivityListHandler implements IQueryHandler<GetActivityListQuer
     const { page, limit, skip, orderBy } = buildPaginationParams(query);
 
     const [data, total] = await Promise.all([
-      this.prisma.activity.findMany({
+      this.prisma.working.activity.findMany({
         where,
         include: { lead: { select: { id: true, leadNumber: true } }, contact: { select: { id: true, firstName: true, lastName: true } }, createdByUser: { select: { id: true, firstName: true, lastName: true } } },
         orderBy,
         skip,
         take: limit,
       }),
-      this.prisma.activity.count({ where }),
+      this.prisma.working.activity.count({ where }),
     ]);
 
     return buildPaginatedResult(data, total, page, limit);

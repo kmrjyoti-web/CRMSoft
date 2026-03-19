@@ -16,10 +16,10 @@ export class GetTourPlanStatsHandler implements IQueryHandler<GetTourPlanStatsQu
     }
 
     const [total, byStatus, totalVisits, completedVisits] = await Promise.all([
-      this.prisma.tourPlan.count({ where }),
-      this.prisma.tourPlan.groupBy({ by: ['status'], where, _count: true }),
-      this.prisma.tourPlanVisit.count({ where: { tourPlan: where } }),
-      this.prisma.tourPlanVisit.count({ where: { tourPlan: where, isCompleted: true } }),
+      this.prisma.working.tourPlan.count({ where }),
+      this.prisma.working.tourPlan.groupBy({ by: ['status'], where, _count: true }),
+      this.prisma.working.tourPlanVisit.count({ where: { tourPlan: where } }),
+      this.prisma.working.tourPlanVisit.count({ where: { tourPlan: where, isCompleted: true } }),
     ]);
 
     return {

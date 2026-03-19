@@ -17,6 +17,7 @@ describe('UpdateOrganizationHandler', () => {
     prisma = {
       organizationFilter: { deleteMany: jest.fn(), createMany: jest.fn() },
     };
+(prisma as any).working = prisma;
     handler = new UpdateOrganizationHandler(repo, publisher, prisma);
   });
 

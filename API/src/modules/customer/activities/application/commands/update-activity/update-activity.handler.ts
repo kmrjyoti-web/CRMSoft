@@ -10,10 +10,10 @@ export class UpdateActivityHandler implements ICommandHandler<UpdateActivityComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: UpdateActivityCommand) {
-    const existing = await this.prisma.activity.findUnique({ where: { id: cmd.id } });
+    const existing = await this.prisma.working.activity.findUnique({ where: { id: cmd.id } });
     if (!existing) throw new NotFoundException('Activity not found');
 
-    const activity = await this.prisma.activity.update({
+    const activity = await this.prisma.working.activity.update({
       where: { id: cmd.id },
       data: cmd.data as any,
       include: { lead: true, contact: true, createdByUser: true },
@@ -21,11 +21,11 @@ export class UpdateActivityHandler implements ICommandHandler<UpdateActivityComm
 
     const scheduledAt = cmd.data.scheduledAt || existing.scheduledAt;
     if (scheduledAt) {
-      const existingEvent = await this.prisma.calendarEvent.findFirst({
+      const existingEvent = await this.prisma.working.calendarEvent.findFirst({
         where: { eventType: 'ACTIVITY', sourceId: activity.id },
       });
       if (existingEvent) {
-        await this.prisma.calendarEvent.update({
+        await this.prisma.working.calendarEvent.update({
           where: { id: existingEvent.id },
           data: {
             title: activity.subject,
@@ -34,7 +34,7 @@ export class UpdateActivityHandler implements ICommandHandler<UpdateActivityComm
           },
         });
       } else {
-        await this.prisma.calendarEvent.create({
+        await this.prisma.working.calendarEvent.create({
           data: {
             eventType: 'ACTIVITY',
             sourceId: activity.id,

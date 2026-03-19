@@ -9,7 +9,7 @@ export class GetLeadByIdHandler implements IQueryHandler<GetLeadByIdQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetLeadByIdQuery) {
-    const lead = await this.prisma.lead.findUnique({
+    const lead = await this.prisma.working.lead.findUnique({
       where: { id: query.leadId },
       include: {
         contact: {

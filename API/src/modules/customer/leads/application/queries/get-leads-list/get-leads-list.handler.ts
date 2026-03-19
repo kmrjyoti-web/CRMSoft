@@ -47,7 +47,7 @@ export class GetLeadsListHandler implements IQueryHandler<GetLeadsListQuery> {
     const { page, limit, skip, orderBy } = buildPaginationParams(query);
 
     const [data, total] = await Promise.all([
-      this.prisma.lead.findMany({
+      this.prisma.working.lead.findMany({
         where,
         skip,
         take: limit,
@@ -78,7 +78,7 @@ export class GetLeadsListHandler implements IQueryHandler<GetLeadsListQuery> {
           },
         },
       }),
-      this.prisma.lead.count({ where }),
+      this.prisma.working.lead.count({ where }),
     ]);
 
     return buildPaginatedResult(data, total, page, limit);

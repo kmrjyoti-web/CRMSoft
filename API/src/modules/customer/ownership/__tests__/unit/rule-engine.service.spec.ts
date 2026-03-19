@@ -22,6 +22,7 @@ describe('RuleEngineService', () => {
       quotation: { findUnique: jest.fn() },
       user: { findUnique: jest.fn() },
     };
+(prisma as any).working = prisma;
     roundRobin = { executeForRule: jest.fn() };
     ownershipCore = { assign: jest.fn().mockResolvedValue({ id: 'eo-1' }) };
     service = new RuleEngineService(prisma, roundRobin, ownershipCore);

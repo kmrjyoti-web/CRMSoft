@@ -22,7 +22,7 @@ export class GetFollowUpListHandler implements IQueryHandler<GetFollowUpListQuer
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.followUp.findMany({
+      this.prisma.working.followUp.findMany({
         where,
         include: {
           assignedTo: { select: { id: true, firstName: true, lastName: true } },
@@ -32,7 +32,7 @@ export class GetFollowUpListHandler implements IQueryHandler<GetFollowUpListQuer
         skip: (query.page - 1) * query.limit,
         take: query.limit,
       }),
-      this.prisma.followUp.count({ where }),
+      this.prisma.working.followUp.count({ where }),
     ]);
 
     return { data, total, page: query.page, limit: query.limit };

@@ -33,6 +33,7 @@ describe('Tour Plan Handlers', () => {
         update: jest.fn().mockResolvedValue({}),
       },
     };
+(prisma as any).working = prisma;
   });
 
   it('should create a tour plan with visits', async () => {

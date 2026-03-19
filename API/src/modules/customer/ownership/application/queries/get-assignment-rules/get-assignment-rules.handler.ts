@@ -15,11 +15,11 @@ export class GetAssignmentRulesHandler implements IQueryHandler<GetAssignmentRul
     const limit = query.limit || 20;
 
     const [data, total] = await Promise.all([
-      this.prisma.assignmentRule.findMany({
+      this.prisma.working.assignmentRule.findMany({
         where, orderBy: { priority: 'asc' },
         skip: (page - 1) * limit, take: limit,
       }),
-      this.prisma.assignmentRule.count({ where }),
+      this.prisma.working.assignmentRule.count({ where }),
     ]);
 
     return { data, total, page, limit };

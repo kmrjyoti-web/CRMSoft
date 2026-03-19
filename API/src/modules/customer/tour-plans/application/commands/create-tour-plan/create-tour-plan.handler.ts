@@ -10,7 +10,7 @@ export class CreateTourPlanHandler implements ICommandHandler<CreateTourPlanComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CreateTourPlanCommand) {
-    const tourPlan = await this.prisma.tourPlan.create({
+    const tourPlan = await this.prisma.working.tourPlan.create({
       data: {
         title: cmd.title,
         description: cmd.description,
@@ -40,16 +40,16 @@ export class CreateTourPlanHandler implements ICommandHandler<CreateTourPlanComm
       createdById: cmd.userId,
     });
 
-    const existingEvent = await this.prisma.calendarEvent.findFirst({
+    const existingEvent = await this.prisma.working.calendarEvent.findFirst({
       where: { eventType: 'TOUR_PLAN', sourceId: tourPlan.id },
     });
     if (existingEvent) {
-      await this.prisma.calendarEvent.update({
+      await this.prisma.working.calendarEvent.update({
         where: { id: existingEvent.id },
         data: { title: cmd.title, startTime: cmd.planDate },
       });
     } else {
-      await this.prisma.calendarEvent.create({
+      await this.prisma.working.calendarEvent.create({
         data: {
           eventType: 'TOUR_PLAN',
           sourceId: tourPlan.id,

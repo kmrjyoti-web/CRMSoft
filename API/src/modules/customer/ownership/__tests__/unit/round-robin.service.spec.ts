@@ -11,6 +11,7 @@ describe('RoundRobinService', () => {
       userCapacity: { findUnique: jest.fn() },
       assignmentRule: { findUnique: jest.fn(), update: jest.fn().mockResolvedValue({}) },
     };
+(prisma as any).working = prisma;
     service = new RoundRobinService(prisma);
   });
 

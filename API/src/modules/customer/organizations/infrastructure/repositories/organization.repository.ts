@@ -9,12 +9,12 @@ export class OrganizationRepository implements IOrganizationRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<OrganizationEntity | null> {
-    const record = await this.prisma.organization.findUnique({ where: { id } });
+    const record = await this.prisma.working.organization.findUnique({ where: { id } });
     return record ? OrganizationMapper.toDomain(record) : null;
   }
 
   async findByName(name: string): Promise<OrganizationEntity | null> {
-    const record = await this.prisma.organization.findFirst({
+    const record = await this.prisma.working.organization.findFirst({
       where: { name: { equals: name, mode: 'insensitive' } },
     });
     return record ? OrganizationMapper.toDomain(record) : null;
@@ -22,7 +22,7 @@ export class OrganizationRepository implements IOrganizationRepository {
 
   async save(entity: OrganizationEntity): Promise<void> {
     const data = OrganizationMapper.toPersistence(entity);
-    await this.prisma.organization.upsert({
+    await this.prisma.working.organization.upsert({
       where: { id: entity.id },
       create: data,
       update: data,
@@ -30,6 +30,6 @@ export class OrganizationRepository implements IOrganizationRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.prisma.organization.delete({ where: { id } });
+    await this.prisma.working.organization.delete({ where: { id } });
   }
 }

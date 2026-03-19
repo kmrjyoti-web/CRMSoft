@@ -16,7 +16,7 @@ export class RuleEngineService {
 
   /** Evaluate entity against all active rules. Returns first match by priority. */
   async evaluate(params: { entityType: string; entityId: string; triggerEvent: string }) {
-    const rules = await this.prisma.assignmentRule.findMany({
+    const rules = await this.prisma.working.assignmentRule.findMany({
       where: { entityType: params.entityType as any, triggerEvent: params.triggerEvent, isActive: true, status: 'ACTIVE' },
       orderBy: { priority: 'asc' },
     });
@@ -68,7 +68,7 @@ export class RuleEngineService {
       reasonDetail: `Rule: ${rule.name}`, method: rule.assignmentMethod,
     });
 
-    await this.prisma.assignmentRule.update({
+    await this.prisma.working.assignmentRule.update({
       where: { id: rule.id },
       data: { executionCount: { increment: 1 }, lastExecutedAt: new Date() },
     });
@@ -78,7 +78,7 @@ export class RuleEngineService {
 
   /** Test a rule against an entity (dry run). */
   async testRule(ruleId: string, entityType: string, entityId: string) {
-    const rule = await this.prisma.assignmentRule.findUnique({ where: { id: ruleId } });
+    const rule = await this.prisma.working.assignmentRule.findUnique({ where: { id: ruleId } });
     if (!rule) return { ruleMatches: false, reason: 'Rule not found', conditionResults: [] };
 
     const entity = await this.loadEntityData(entityType, entityId);
@@ -137,16 +137,16 @@ export class RuleEngineService {
   private async loadEntityData(entityType: string, entityId: string) {
     switch (entityType) {
       case 'LEAD':
-        return this.prisma.lead.findUnique({
+        return this.prisma.working.lead.findUnique({
           where: { id: entityId },
           include: { contact: true, organization: true, filters: { include: { lookupValue: { include: { lookup: true } } } } },
         });
       case 'CONTACT':
-        return this.prisma.contact.findUnique({ where: { id: entityId }, include: { communications: true } });
+        return this.prisma.working.contact.findUnique({ where: { id: entityId }, include: { communications: true } });
       case 'ORGANIZATION':
-        return this.prisma.organization.findUnique({ where: { id: entityId } });
+        return this.prisma.working.organization.findUnique({ where: { id: entityId } });
       case 'QUOTATION':
-        return this.prisma.quotation.findUnique({ where: { id: entityId }, include: { lead: true } });
+        return this.prisma.working.quotation.findUnique({ where: { id: entityId }, include: { lead: true } });
       default: return null;
     }
   }

@@ -16,10 +16,10 @@ export class GetFollowUpStatsHandler implements IQueryHandler<GetFollowUpStatsQu
     }
 
     const [total, completed, overdue, byPriority] = await Promise.all([
-      this.prisma.followUp.count({ where }),
-      this.prisma.followUp.count({ where: { ...where, completedAt: { not: null } } }),
-      this.prisma.followUp.count({ where: { ...where, isOverdue: true, completedAt: null } }),
-      this.prisma.followUp.groupBy({ by: ['priority'], where, _count: true }),
+      this.prisma.working.followUp.count({ where }),
+      this.prisma.working.followUp.count({ where: { ...where, completedAt: { not: null } } }),
+      this.prisma.working.followUp.count({ where: { ...where, isOverdue: true, completedAt: null } }),
+      this.prisma.working.followUp.groupBy({ by: ['priority'], where, _count: true }),
     ]);
 
     return {

@@ -10,7 +10,7 @@ export class GetProductPricingHandler
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetProductPricingQuery) {
-    const product = await this.prisma.product.findUnique({
+    const product = await this.prisma.working.product.findUnique({
       where: { id: query.productId },
       select: { id: true },
     });
@@ -19,7 +19,7 @@ export class GetProductPricingHandler
       throw new NotFoundException(`Product "${query.productId}" not found`);
     }
 
-    const prices = await this.prisma.productPrice.findMany({
+    const prices = await this.prisma.working.productPrice.findMany({
       where: { productId: query.productId, isActive: true },
       include: {
         priceGroup: { select: { id: true, name: true, code: true } },

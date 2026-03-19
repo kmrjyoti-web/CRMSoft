@@ -56,7 +56,7 @@ export class GetContactsListHandler implements IQueryHandler<GetContactsListQuer
     const { page, limit, skip, orderBy } = buildPaginationParams(query);
 
     const [data, total] = await Promise.all([
-      this.prisma.contact.findMany({
+      this.prisma.working.contact.findMany({
         where,
         skip,
         take: limit,
@@ -87,7 +87,7 @@ export class GetContactsListHandler implements IQueryHandler<GetContactsListQuer
           },
         },
       }),
-      this.prisma.contact.count({ where }),
+      this.prisma.working.contact.count({ where }),
     ]);
 
     return buildPaginatedResult(data, total, page, limit);

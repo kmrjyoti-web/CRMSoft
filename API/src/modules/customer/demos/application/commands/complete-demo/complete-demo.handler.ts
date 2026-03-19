@@ -9,10 +9,10 @@ export class CompleteDemoHandler implements ICommandHandler<CompleteDemoCommand>
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CompleteDemoCommand) {
-    const existing = await this.prisma.demo.findUnique({ where: { id: cmd.id } });
+    const existing = await this.prisma.working.demo.findUnique({ where: { id: cmd.id } });
     if (!existing) throw new NotFoundException('Demo not found');
 
-    return this.prisma.demo.update({
+    return this.prisma.working.demo.update({
       where: { id: cmd.id },
       data: {
         status: 'COMPLETED',

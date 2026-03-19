@@ -9,7 +9,7 @@ export class GetFollowUpByIdHandler implements IQueryHandler<GetFollowUpByIdQuer
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetFollowUpByIdQuery) {
-    const followUp = await this.prisma.followUp.findUnique({
+    const followUp = await this.prisma.working.followUp.findUnique({
       where: { id: query.id },
       include: {
         assignedTo: { select: { id: true, firstName: true, lastName: true, email: true } },

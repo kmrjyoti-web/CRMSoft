@@ -9,7 +9,7 @@ export class GetTourPlanByIdHandler implements IQueryHandler<GetTourPlanByIdQuer
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetTourPlanByIdQuery) {
-    const tourPlan = await this.prisma.tourPlan.findUnique({
+    const tourPlan = await this.prisma.working.tourPlan.findUnique({
       where: { id: query.id },
       include: {
         lead: { select: { id: true, leadNumber: true, status: true } },

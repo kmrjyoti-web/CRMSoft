@@ -26,6 +26,7 @@ describe('CreateLeadHandler', () => {
       organization: { findUnique: jest.fn().mockResolvedValue({ id: 'org-1' }) },
       $transaction: jest.fn(async (cb: any) => cb(txMock)),
     };
+(prisma as any).working = prisma;
     workflowEngine = {
       initializeWorkflow: jest.fn().mockResolvedValue({}),
     };

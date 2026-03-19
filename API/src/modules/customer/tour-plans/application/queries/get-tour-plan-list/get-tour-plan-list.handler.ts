@@ -24,7 +24,7 @@ export class GetTourPlanListHandler implements IQueryHandler<GetTourPlanListQuer
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.tourPlan.findMany({
+      this.prisma.working.tourPlan.findMany({
         where,
         include: {
           lead: { select: { id: true, leadNumber: true } },
@@ -35,7 +35,7 @@ export class GetTourPlanListHandler implements IQueryHandler<GetTourPlanListQuer
         skip: (query.page - 1) * query.limit,
         take: query.limit,
       }),
-      this.prisma.tourPlan.count({ where }),
+      this.prisma.working.tourPlan.count({ where }),
     ]);
 
     return { data, total, page: query.page, limit: query.limit };

@@ -10,13 +10,13 @@ export class RescheduleDemoHandler implements ICommandHandler<RescheduleDemoComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: RescheduleDemoCommand) {
-    const existing = await this.prisma.demo.findUnique({ where: { id: cmd.id } });
+    const existing = await this.prisma.working.demo.findUnique({ where: { id: cmd.id } });
     if (!existing) throw new NotFoundException('Demo not found');
     if (existing.status === 'COMPLETED' || existing.status === 'CANCELLED') {
       throw new BadRequestException('Cannot reschedule a completed or cancelled demo');
     }
 
-    const demo = await this.prisma.demo.update({
+    const demo = await this.prisma.working.demo.update({
       where: { id: cmd.id },
       data: {
         scheduledAt: cmd.scheduledAt,
@@ -35,7 +35,7 @@ export class RescheduleDemoHandler implements ICommandHandler<RescheduleDemoComm
       createdById: cmd.userId,
     });
 
-    await this.prisma.calendarEvent.updateMany({
+    await this.prisma.working.calendarEvent.updateMany({
       where: { eventType: 'DEMO', sourceId: cmd.id },
       data: { startTime: cmd.scheduledAt },
     });

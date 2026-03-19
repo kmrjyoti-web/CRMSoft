@@ -21,6 +21,7 @@ describe('CreateProductHandler', () => {
         createMany: jest.fn().mockResolvedValue({ count: 2 }),
       },
     };
+(prisma as any).working = prisma;
     handler = new CreateProductHandler(prisma);
   });
 

@@ -27,11 +27,11 @@ export class UpdateLeadHandler implements ICommandHandler<UpdateLeadCommand> {
 
     // Replace filters if provided
     if (command.filterIds !== undefined) {
-      await this.prisma.leadFilter.deleteMany({
+      await this.prisma.working.leadFilter.deleteMany({
         where: { leadId: lead.id },
       });
       if (command.filterIds.length) {
-        await this.prisma.leadFilter.createMany({
+        await this.prisma.working.leadFilter.createMany({
           data: command.filterIds.map(fid => ({
             leadId: lead.id,
             lookupValueId: fid,

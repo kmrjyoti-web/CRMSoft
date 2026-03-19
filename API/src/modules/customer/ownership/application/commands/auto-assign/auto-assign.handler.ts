@@ -12,7 +12,7 @@ export class AutoAssignHandler implements ICommandHandler<AutoAssignCommand> {
 
   async execute(command: AutoAssignCommand) {
     // Check if entity already has a primary owner
-    const existing = await this.prisma.entityOwner.findFirst({
+    const existing = await this.prisma.working.entityOwner.findFirst({
       where: { entityType: command.entityType as any, entityId: command.entityId, ownerType: 'PRIMARY_OWNER', isActive: true },
     });
     if (existing) return { assigned: false, reason: 'Entity already has a primary owner' };

@@ -19,24 +19,24 @@ export class LinkProductsHandler implements ICommandHandler<LinkProductsCommand>
     }
 
     // Upsert the forward relation
-    const existingForward = await this.prisma.productRelation.findFirst({
+    const existingForward = await this.prisma.working.productRelation.findFirst({
       where: { fromProductId, toProductId, relationType },
     });
     let relation;
     if (existingForward) {
-      relation = await this.prisma.productRelation.update({
+      relation = await this.prisma.working.productRelation.update({
         where: { id: existingForward.id },
         data: { isActive: true },
       });
     } else {
-      relation = await this.prisma.productRelation.create({
+      relation = await this.prisma.working.productRelation.create({
         data: { fromProductId, toProductId, relationType },
       });
     }
 
     // For VARIANT and SUBSTITUTE, create reverse (bidirectional)
     if (BIDIRECTIONAL_TYPES.includes(relationType)) {
-      const existingReverse = await this.prisma.productRelation.findFirst({
+      const existingReverse = await this.prisma.working.productRelation.findFirst({
         where: {
           fromProductId: toProductId,
           toProductId: fromProductId,
@@ -44,12 +44,12 @@ export class LinkProductsHandler implements ICommandHandler<LinkProductsCommand>
         },
       });
       if (existingReverse) {
-        await this.prisma.productRelation.update({
+        await this.prisma.working.productRelation.update({
           where: { id: existingReverse.id },
           data: { isActive: true },
         });
       } else {
-        await this.prisma.productRelation.create({
+        await this.prisma.working.productRelation.create({
           data: {
             fromProductId: toProductId,
             toProductId: fromProductId,

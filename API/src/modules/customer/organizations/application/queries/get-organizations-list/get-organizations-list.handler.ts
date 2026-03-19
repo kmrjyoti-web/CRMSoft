@@ -26,7 +26,7 @@ export class GetOrganizationsListHandler implements IQueryHandler<GetOrganizatio
     const { page, limit, skip, orderBy } = buildPaginationParams(query);
 
     const [data, total] = await Promise.all([
-      this.prisma.organization.findMany({
+      this.prisma.working.organization.findMany({
         where,
         skip,
         take: limit,
@@ -48,7 +48,7 @@ export class GetOrganizationsListHandler implements IQueryHandler<GetOrganizatio
           },
         },
       }),
-      this.prisma.organization.count({ where }),
+      this.prisma.working.organization.count({ where }),
     ]);
 
     return buildPaginatedResult(data, total, page, limit);

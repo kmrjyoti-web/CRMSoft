@@ -52,7 +52,7 @@ export class RoundRobinService {
 
   /** Execute round-robin for an assignment rule. */
   async executeForRule(ruleId: string, entityType: string, entityId: string): Promise<string> {
-    const rule = await this.prisma.assignmentRule.findUnique({ where: { id: ruleId } });
+    const rule = await this.prisma.working.assignmentRule.findUnique({ where: { id: ruleId } });
     if (!rule) throw new BadRequestException('Assignment rule not found');
 
     const result = await this.getNextUser({
@@ -62,7 +62,7 @@ export class RoundRobinService {
       respectCapacity: rule.respectWorkload,
     });
 
-    await this.prisma.assignmentRule.update({
+    await this.prisma.working.assignmentRule.update({
       where: { id: ruleId },
       data: { lastAssignedIndex: result.newIndex },
     });

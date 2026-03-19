@@ -45,7 +45,7 @@ export class CreateContactHandler implements ICommandHandler<CreateContactComman
     // 4. Create communications (phone, email, etc.)
     if (command.communications?.length) {
       for (const comm of command.communications) {
-        await this.prisma.communication.create({
+        await this.prisma.working.communication.create({
           data: {
             type: comm.type as any,
             value: comm.value,
@@ -60,7 +60,7 @@ export class CreateContactHandler implements ICommandHandler<CreateContactComman
 
     // 5. Link to organization
     if (command.organizationId) {
-      await this.prisma.contactOrganization.create({
+      await this.prisma.working.contactOrganization.create({
         data: {
           contactId: contact.id,
           organizationId: command.organizationId,
@@ -73,7 +73,7 @@ export class CreateContactHandler implements ICommandHandler<CreateContactComman
 
     // 6. Create filter associations
     if (command.filterIds?.length) {
-      await this.prisma.contactFilter.createMany({
+      await this.prisma.working.contactFilter.createMany({
         data: command.filterIds.map(fid => ({
           contactId: contact.id,
           lookupValueId: fid,

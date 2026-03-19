@@ -23,6 +23,7 @@ describe('WorkloadService', () => {
       },
       ownershipLog: { findMany: jest.fn().mockResolvedValue([]) },
     };
+(prisma as any).working = prisma;
     service = new WorkloadService(prisma);
   });
 

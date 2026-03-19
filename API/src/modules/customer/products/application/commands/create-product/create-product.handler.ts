@@ -15,12 +15,12 @@ export class CreateProductHandler implements ICommandHandler<CreateProductComman
     // Auto-generate code if not provided
     let code = data.code;
     if (!code) {
-      const count = await this.prisma.product.count();
+      const count = await this.prisma.working.product.count();
       code = `PRD-${String(count + 1).padStart(5, '0')}`;
     }
 
     // Check code uniqueness
-    const existing = await this.prisma.product.findFirst({ where: { code } });
+    const existing = await this.prisma.working.product.findFirst({ where: { code } });
     if (existing) {
       throw new ConflictException(`Product code "${code}" already exists`);
     }
@@ -33,7 +33,7 @@ export class CreateProductHandler implements ICommandHandler<CreateProductComman
     let isMaster = data.isMaster ?? false;
 
     if (parentId) {
-      const parent = await this.prisma.product.findUnique({
+      const parent = await this.prisma.working.product.findUnique({
         where: { id: parentId },
       });
       if (!parent) {
@@ -47,7 +47,7 @@ export class CreateProductHandler implements ICommandHandler<CreateProductComman
     }
 
     // Create product
-    const product = await this.prisma.product.create({
+    const product = await this.prisma.working.product.create({
       data: {
         name: data.name,
         code,
@@ -114,7 +114,7 @@ export class CreateProductHandler implements ICommandHandler<CreateProductComman
     let slug = base;
     let suffix = 1;
 
-    while (await this.prisma.product.findFirst({ where: { slug } })) {
+    while (await this.prisma.working.product.findFirst({ where: { slug } })) {
       suffix++;
       slug = `${base}-${suffix}`;
     }
@@ -142,6 +142,6 @@ export class CreateProductHandler implements ICommandHandler<CreateProductComman
       });
     }
 
-    await this.prisma.productTaxDetail.createMany({ data: entries });
+    await this.prisma.working.productTaxDetail.createMany({ data: entries });
   }
 }

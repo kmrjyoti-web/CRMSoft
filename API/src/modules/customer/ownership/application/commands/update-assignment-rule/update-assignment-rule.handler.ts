@@ -8,7 +8,7 @@ export class UpdateAssignmentRuleHandler implements ICommandHandler<UpdateAssign
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: UpdateAssignmentRuleCommand) {
-    const rule = await this.prisma.assignmentRule.findUnique({ where: { id: command.id } });
+    const rule = await this.prisma.working.assignmentRule.findUnique({ where: { id: command.id } });
     if (!rule) throw new NotFoundException('Assignment rule not found');
 
     const updateData: any = {};
@@ -29,6 +29,6 @@ export class UpdateAssignmentRuleHandler implements ICommandHandler<UpdateAssign
     if (d.escalateToUserId !== undefined) updateData.escalateToUserId = d.escalateToUserId;
     if (d.escalateToRoleId !== undefined) updateData.escalateToRoleId = d.escalateToRoleId;
 
-    return this.prisma.assignmentRule.update({ where: { id: command.id }, data: updateData });
+    return this.prisma.working.assignmentRule.update({ where: { id: command.id }, data: updateData });
   }
 }

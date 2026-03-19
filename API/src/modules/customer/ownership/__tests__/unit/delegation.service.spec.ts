@@ -25,6 +25,7 @@ describe('DelegationService', () => {
       ownershipLog: { create: jest.fn().mockResolvedValue({}) },
       userCapacity: { upsert: jest.fn().mockResolvedValue({}), update: jest.fn().mockResolvedValue({}) },
     };
+(prisma as any).working = prisma;
     service = new DelegationService(prisma);
   });
 

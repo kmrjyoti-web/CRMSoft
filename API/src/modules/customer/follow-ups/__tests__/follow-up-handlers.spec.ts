@@ -24,6 +24,7 @@ describe('Follow-up Handlers', () => {
       },
       reminder: { create: jest.fn().mockResolvedValue({}) },
     };
+(prisma as any).working = prisma;
   });
 
   it('should create a follow-up with auto-reminder', async () => {

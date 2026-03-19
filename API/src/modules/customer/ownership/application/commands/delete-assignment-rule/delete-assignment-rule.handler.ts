@@ -8,10 +8,10 @@ export class DeleteAssignmentRuleHandler implements ICommandHandler<DeleteAssign
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: DeleteAssignmentRuleCommand) {
-    const rule = await this.prisma.assignmentRule.findUnique({ where: { id: command.id } });
+    const rule = await this.prisma.working.assignmentRule.findUnique({ where: { id: command.id } });
     if (!rule) throw new NotFoundException('Assignment rule not found');
 
-    await this.prisma.assignmentRule.update({
+    await this.prisma.working.assignmentRule.update({
       where: { id: command.id },
       data: { isActive: false, status: 'INACTIVE' },
     });

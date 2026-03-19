@@ -26,16 +26,16 @@ export class DelegationService {
     const where: any = { userId: params.fromUserId, isActive: true };
     if (params.entityType) where.entityType = params.entityType;
 
-    const ownerships = await this.prisma.entityOwner.findMany({ where });
+    const ownerships = await this.prisma.working.entityOwner.findMany({ where });
     let count = 0;
 
     for (const o of ownerships) {
-      const existing = await this.prisma.entityOwner.findFirst({
+      const existing = await this.prisma.working.entityOwner.findFirst({
         where: { entityType: o.entityType, entityId: o.entityId, userId: params.toUserId, ownerType: 'DELEGATED_OWNER', isActive: true },
       });
       if (existing) continue;
 
-      await this.prisma.entityOwner.create({
+      await this.prisma.working.entityOwner.create({
         data: {
           entityType: o.entityType, entityId: o.entityId,
           ownerType: 'DELEGATED_OWNER', userId: params.toUserId,
@@ -46,7 +46,7 @@ export class DelegationService {
 
       const fromUser = await this.prisma.user.findUnique({ where: { id: params.fromUserId } });
       const changedBy = await this.prisma.user.findUnique({ where: { id: params.delegatedById } });
-      await this.prisma.ownershipLog.create({
+      await this.prisma.working.ownershipLog.create({
         data: {
           entityType: o.entityType, entityId: o.entityId,
           action: 'DELEGATE', ownerType: 'DELEGATED_OWNER',
@@ -77,7 +77,7 @@ export class DelegationService {
     if (!record) throw new NotFoundException('Delegation record not found');
     if (record.isReverted) throw new BadRequestException('Delegation already reverted');
 
-    const delegatedOwners = await this.prisma.entityOwner.findMany({
+    const delegatedOwners = await this.prisma.working.entityOwner.findMany({
       where: { userId: record.toUserId, ownerType: 'DELEGATED_OWNER', isActive: true,
         ...(record.entityType ? { entityType: record.entityType } : {}),
       },
@@ -85,10 +85,10 @@ export class DelegationService {
 
     let count = 0;
     for (const o of delegatedOwners) {
-      await this.prisma.entityOwner.update({ where: { id: o.id }, data: { isActive: false, validTo: new Date() } });
+      await this.prisma.working.entityOwner.update({ where: { id: o.id }, data: { isActive: false, validTo: new Date() } });
 
       const changedBy = await this.prisma.user.findUnique({ where: { id: revertedById } });
-      await this.prisma.ownershipLog.create({
+      await this.prisma.working.ownershipLog.create({
         data: {
           entityType: o.entityType, entityId: o.entityId,
           action: 'AUTO_REVERT', ownerType: 'DELEGATED_OWNER',

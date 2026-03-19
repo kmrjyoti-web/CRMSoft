@@ -33,7 +33,7 @@ export class CreateLeadHandler implements ICommandHandler<CreateLeadCommand> {
 
   async execute(command: CreateLeadCommand): Promise<string> {
     // 1. Validate contact exists
-    const contact = await this.prisma.contact.findUnique({
+    const contact = await this.prisma.working.contact.findUnique({
       where: { id: command.contactId },
       select: { id: true, isActive: true },
     });
@@ -46,7 +46,7 @@ export class CreateLeadHandler implements ICommandHandler<CreateLeadCommand> {
 
     // 2. Validate organization if provided
     if (command.organizationId) {
-      const org = await this.prisma.organization.findUnique({
+      const org = await this.prisma.working.organization.findUnique({
         where: { id: command.organizationId },
         select: { id: true },
       });

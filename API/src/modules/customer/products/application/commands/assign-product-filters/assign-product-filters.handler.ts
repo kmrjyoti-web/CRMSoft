@@ -15,7 +15,7 @@ export class AssignProductFiltersHandler
   async execute(command: AssignProductFiltersCommand) {
     const { productId, lookupValueIds } = command;
 
-    const product = await this.prisma.product.findUnique({
+    const product = await this.prisma.working.product.findUnique({
       where: { id: productId },
     });
     if (!product) {
@@ -23,13 +23,13 @@ export class AssignProductFiltersHandler
     }
 
     // Delete all existing filters for this product
-    await this.prisma.productFilter.deleteMany({
+    await this.prisma.working.productFilter.deleteMany({
       where: { productId },
     });
 
     // Create new filter associations
     if (lookupValueIds.length > 0) {
-      await this.prisma.productFilter.createMany({
+      await this.prisma.working.productFilter.createMany({
         data: lookupValueIds.map((lookupValueId) => ({
           productId,
           lookupValueId,
@@ -42,7 +42,7 @@ export class AssignProductFiltersHandler
       `Product filters assigned: ${productId} (${lookupValueIds.length} filters)`,
     );
 
-    return this.prisma.productFilter.findMany({
+    return this.prisma.working.productFilter.findMany({
       where: { productId },
       include: {
         lookupValue: { select: { id: true, value: true, label: true } },

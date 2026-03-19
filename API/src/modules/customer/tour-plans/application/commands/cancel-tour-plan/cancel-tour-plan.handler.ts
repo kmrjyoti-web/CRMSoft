@@ -9,19 +9,19 @@ export class CancelTourPlanHandler implements ICommandHandler<CancelTourPlanComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CancelTourPlanCommand) {
-    const existing = await this.prisma.tourPlan.findUnique({ where: { id: cmd.id } });
+    const existing = await this.prisma.working.tourPlan.findUnique({ where: { id: cmd.id } });
     if (!existing) throw new NotFoundException('Tour plan not found');
     if (existing.status === 'COMPLETED' || existing.status === 'CANCELLED') {
       throw new BadRequestException('Cannot cancel a completed or already cancelled tour plan');
     }
 
-    const tourPlan = await this.prisma.tourPlan.update({
+    const tourPlan = await this.prisma.working.tourPlan.update({
       where: { id: cmd.id },
       data: { status: 'CANCELLED' },
       include: { lead: true, salesPerson: true },
     });
 
-    await this.prisma.calendarEvent.updateMany({
+    await this.prisma.working.calendarEvent.updateMany({
       where: { eventType: 'TOUR_PLAN', sourceId: cmd.id },
       data: { isActive: false },
     });

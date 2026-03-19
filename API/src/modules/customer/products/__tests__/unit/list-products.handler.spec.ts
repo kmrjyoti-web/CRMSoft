@@ -17,6 +17,7 @@ describe('ListProductsHandler', () => {
         count: jest.fn().mockResolvedValue(2),
       },
     };
+(prisma as any).working = prisma;
     handler = new ListProductsHandler(prisma);
   });
 

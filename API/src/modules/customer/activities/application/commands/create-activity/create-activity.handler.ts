@@ -18,7 +18,7 @@ export class CreateActivityHandler implements ICommandHandler<CreateActivityComm
   ) {}
 
   async execute(cmd: CreateActivityCommand) {
-    const activity = await this.prisma.activity.create({
+    const activity = await this.prisma.working.activity.create({
       data: {
         tenantId: cmd.tenantId || '',
         type: cmd.type as any,
@@ -70,7 +70,7 @@ export class CreateActivityHandler implements ICommandHandler<CreateActivityComm
     const tenantId = cmd.tenantId || '';
 
     // Generate next task number
-    const lastTask = await this.prisma.task.findFirst({
+    const lastTask = await this.prisma.working.task.findFirst({
       where: { tenantId },
       orderBy: { createdAt: 'desc' },
       select: { taskNumber: true },
@@ -80,7 +80,7 @@ export class CreateActivityHandler implements ICommandHandler<CreateActivityComm
       : 1;
     const taskNumber = `TSK-${String(nextNum).padStart(4, '0')}`;
 
-    const task = await this.prisma.task.create({
+    const task = await this.prisma.working.task.create({
       data: {
         tenantId,
         taskNumber,
@@ -98,12 +98,12 @@ export class CreateActivityHandler implements ICommandHandler<CreateActivityComm
     });
 
     // Add creator as watcher
-    await this.prisma.taskWatcher.create({
+    await this.prisma.working.taskWatcher.create({
       data: { taskId: task.id, userId: cmd.userId },
     });
 
     // Record creation history
-    await this.prisma.taskHistory.create({
+    await this.prisma.working.taskHistory.create({
       data: {
         taskId: task.id,
         field: 'status',
@@ -121,7 +121,7 @@ export class CreateActivityHandler implements ICommandHandler<CreateActivityComm
     const scheduledAt = new Date(cmd.scheduledAt!);
     const reminderTime = new Date(scheduledAt.getTime() - (cmd.reminderMinutesBefore! * 60 * 1000));
 
-    await this.prisma.reminder.create({
+    await this.prisma.working.reminder.create({
       data: {
         title: `Reminder: ${cmd.subject}`,
         entityType: 'ACTIVITY',
@@ -149,11 +149,11 @@ export class CreateActivityHandler implements ICommandHandler<CreateActivityComm
       if (taggedUserId === cmd.userId) continue; // Skip creator
 
       // Add tagged user as watcher on any linked task
-      const linkedTask = await this.prisma.task.findFirst({
+      const linkedTask = await this.prisma.working.task.findFirst({
         where: { entityType: 'activity', entityId: activity.id, isActive: true },
       });
       if (linkedTask) {
-        await this.prisma.taskWatcher.upsert({
+        await this.prisma.working.taskWatcher.upsert({
           where: { taskId_userId: { taskId: linkedTask.id, userId: taggedUserId } },
           create: { taskId: linkedTask.id, userId: taggedUserId },
           update: {},
@@ -182,11 +182,11 @@ export class CreateActivityHandler implements ICommandHandler<CreateActivityComm
   }
 
   private async syncCalendarEvent(cmd: CreateActivityCommand, activityId: string) {
-    const existingEvent = await this.prisma.calendarEvent.findFirst({
+    const existingEvent = await this.prisma.working.calendarEvent.findFirst({
       where: { eventType: 'ACTIVITY', sourceId: activityId },
     });
     if (existingEvent) {
-      await this.prisma.calendarEvent.update({
+      await this.prisma.working.calendarEvent.update({
         where: { id: existingEvent.id },
         data: {
           title: cmd.subject,
@@ -195,7 +195,7 @@ export class CreateActivityHandler implements ICommandHandler<CreateActivityComm
         },
       });
     } else {
-      await this.prisma.calendarEvent.create({
+      await this.prisma.working.calendarEvent.create({
         data: {
           eventType: 'ACTIVITY',
           sourceId: activityId,

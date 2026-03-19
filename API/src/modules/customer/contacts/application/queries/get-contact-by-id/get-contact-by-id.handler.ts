@@ -9,7 +9,7 @@ export class GetContactByIdHandler implements IQueryHandler<GetContactByIdQuery>
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetContactByIdQuery) {
-    const contact = await this.prisma.contact.findUnique({
+    const contact = await this.prisma.working.contact.findUnique({
       where: { id: query.contactId },
       include: {
         communications: {

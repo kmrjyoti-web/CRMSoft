@@ -28,7 +28,7 @@ export class UpdateContactHandler implements ICommandHandler<UpdateContactComman
 
     // Update organizationId if provided
     if (command.organizationId !== undefined) {
-      await this.prisma.contact.update({
+      await this.prisma.working.contact.update({
         where: { id: contact.id },
         data: { organizationId: command.organizationId || null },
       });
@@ -36,11 +36,11 @@ export class UpdateContactHandler implements ICommandHandler<UpdateContactComman
 
     // Update communications (replace strategy: delete all, re-create)
     if (command.communications !== undefined) {
-      await this.prisma.communication.deleteMany({
+      await this.prisma.working.communication.deleteMany({
         where: { contactId: contact.id },
       });
       if (command.communications.length) {
-        await this.prisma.communication.createMany({
+        await this.prisma.working.communication.createMany({
           data: command.communications.map(c => ({
             contactId: contact.id,
             type: c.type as CommunicationType,
@@ -56,11 +56,11 @@ export class UpdateContactHandler implements ICommandHandler<UpdateContactComman
 
     // Update filters (replace strategy: delete all, re-create)
     if (command.filterIds !== undefined) {
-      await this.prisma.contactFilter.deleteMany({
+      await this.prisma.working.contactFilter.deleteMany({
         where: { contactId: contact.id },
       });
       if (command.filterIds.length) {
-        await this.prisma.contactFilter.createMany({
+        await this.prisma.working.contactFilter.createMany({
           data: command.filterIds.map(fid => ({
             contactId: contact.id,
             lookupValueId: fid,

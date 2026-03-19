@@ -16,6 +16,7 @@ describe('CreateRawContactHandler', () => {
       communication: { create: jest.fn() },
       rawContactFilter: { createMany: jest.fn() },
     };
+(prisma as any).working = prisma;
     handler = new CreateRawContactHandler(repo, publisher, prisma);
   });
 

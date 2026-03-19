@@ -7,7 +7,7 @@ export class GetProductTreeHandler implements IQueryHandler<GetProductTreeQuery>
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(_query: GetProductTreeQuery) {
-    return this.prisma.product.findMany({
+    return this.prisma.working.product.findMany({
       where: {
         isMaster: true,
         isActive: true,

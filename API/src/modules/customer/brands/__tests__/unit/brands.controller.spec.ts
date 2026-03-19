@@ -31,6 +31,7 @@ describe('BrandsController', () => {
         findMany: jest.fn().mockResolvedValue([]),
       },
     };
+(prisma as any).working = prisma;
     controller = new BrandsController(prisma);
   });
 

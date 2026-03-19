@@ -14,7 +14,7 @@ export class GetReassignmentPreviewHandler implements IQueryHandler<GetReassignm
     const where: any = { userId: query.fromUserId, isActive: true };
     if (query.entityType) where.entityType = query.entityType;
 
-    const ownerships = await this.prisma.entityOwner.findMany({ where });
+    const ownerships = await this.prisma.working.entityOwner.findMany({ where });
 
     const byType: Record<string, number> = {};
     for (const o of ownerships) byType[o.entityType] = (byType[o.entityType] || 0) + 1;

@@ -7,7 +7,7 @@ export class CreateAssignmentRuleHandler implements ICommandHandler<CreateAssign
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: CreateAssignmentRuleCommand) {
-    return this.prisma.assignmentRule.create({
+    return this.prisma.working.assignmentRule.create({
       data: {
         name: command.name, description: command.description,
         entityType: command.entityType as any, triggerEvent: command.triggerEvent,

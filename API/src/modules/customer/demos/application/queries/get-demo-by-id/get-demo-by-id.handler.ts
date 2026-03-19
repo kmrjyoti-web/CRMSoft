@@ -9,7 +9,7 @@ export class GetDemoByIdHandler implements IQueryHandler<GetDemoByIdQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetDemoByIdQuery) {
-    const demo = await this.prisma.demo.findUnique({
+    const demo = await this.prisma.working.demo.findUnique({
       where: { id: query.id },
       include: {
         lead: { select: { id: true, leadNumber: true, status: true } },

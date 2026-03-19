@@ -27,11 +27,11 @@ export class UpdateOrganizationHandler implements ICommandHandler<UpdateOrganiza
 
     // Update filters (replace strategy: delete all, re-create)
     if (command.filterIds !== undefined) {
-      await this.prisma.organizationFilter.deleteMany({
+      await this.prisma.working.organizationFilter.deleteMany({
         where: { organizationId: org.id },
       });
       if (command.filterIds.length) {
-        await this.prisma.organizationFilter.createMany({
+        await this.prisma.working.organizationFilter.createMany({
           data: command.filterIds.map(fid => ({
             organizationId: org.id,
             lookupValueId: fid,

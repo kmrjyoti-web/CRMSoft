@@ -9,7 +9,7 @@ export class GetActivityByIdHandler implements IQueryHandler<GetActivityByIdQuer
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetActivityByIdQuery) {
-    const activity = await this.prisma.activity.findUnique({
+    const activity = await this.prisma.working.activity.findUnique({
       where: { id: query.id },
       include: {
         lead: { select: { id: true, leadNumber: true, status: true } },

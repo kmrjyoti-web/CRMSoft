@@ -8,12 +8,12 @@ export class DeleteActivityHandler implements ICommandHandler<DeleteActivityComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: DeleteActivityCommand) {
-    const existing = await this.prisma.activity.findUnique({ where: { id: cmd.id } });
+    const existing = await this.prisma.working.activity.findUnique({ where: { id: cmd.id } });
     if (!existing) throw new NotFoundException('Activity not found');
 
-    await this.prisma.activity.delete({ where: { id: cmd.id } });
+    await this.prisma.working.activity.delete({ where: { id: cmd.id } });
 
-    await this.prisma.calendarEvent.updateMany({
+    await this.prisma.working.calendarEvent.updateMany({
       where: { eventType: 'ACTIVITY', sourceId: cmd.id },
       data: { isActive: false },
     });

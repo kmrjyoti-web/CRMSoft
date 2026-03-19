@@ -10,7 +10,7 @@ export class PermanentDeleteActivityHandler implements ICommandHandler<Permanent
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: PermanentDeleteActivityCommand): Promise<void> {
-    const activity = await this.prisma.activity.findUnique({ where: { id: command.activityId } });
+    const activity = await this.prisma.working.activity.findUnique({ where: { id: command.activityId } });
     if (!activity) throw new NotFoundException(`Activity ${command.activityId} not found`);
 
     if (!activity.isDeleted) {
@@ -19,9 +19,9 @@ export class PermanentDeleteActivityHandler implements ICommandHandler<Permanent
       );
     }
 
-    await this.prisma.activity.delete({ where: { id: command.activityId } });
+    await this.prisma.working.activity.delete({ where: { id: command.activityId } });
 
-    await this.prisma.calendarEvent.updateMany({
+    await this.prisma.working.calendarEvent.updateMany({
       where: { eventType: 'ACTIVITY', sourceId: command.activityId },
       data: { isActive: false },
     });

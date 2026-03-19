@@ -16,9 +16,9 @@ export class GetDemoStatsHandler implements IQueryHandler<GetDemoStatsQuery> {
     }
 
     const [total, byStatus, byResult] = await Promise.all([
-      this.prisma.demo.count({ where }),
-      this.prisma.demo.groupBy({ by: ['status'], where, _count: true }),
-      this.prisma.demo.groupBy({ by: ['result'], where: { ...where, result: { not: null } }, _count: true }),
+      this.prisma.working.demo.count({ where }),
+      this.prisma.working.demo.groupBy({ by: ['status'], where, _count: true }),
+      this.prisma.working.demo.groupBy({ by: ['result'], where: { ...where, result: { not: null } }, _count: true }),
     ]);
 
     return {

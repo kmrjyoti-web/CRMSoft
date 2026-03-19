@@ -14,7 +14,7 @@ export class BulkTransferHandler implements ICommandHandler<BulkTransferCommand>
     const where: any = { userId: command.fromUserId, isActive: true };
     if (command.entityType) where.entityType = command.entityType;
 
-    const ownerships = await this.prisma.entityOwner.findMany({ where });
+    const ownerships = await this.prisma.working.entityOwner.findMany({ where });
     let transferred = 0;
     let failed = 0;
     const byType: Record<string, number> = {};

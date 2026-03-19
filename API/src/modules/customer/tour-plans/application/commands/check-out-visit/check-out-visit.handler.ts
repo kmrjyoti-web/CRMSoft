@@ -8,12 +8,12 @@ export class CheckOutVisitHandler implements ICommandHandler<CheckOutVisitComman
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CheckOutVisitCommand) {
-    const visit = await this.prisma.tourPlanVisit.findUnique({ where: { id: cmd.visitId } });
+    const visit = await this.prisma.working.tourPlanVisit.findUnique({ where: { id: cmd.visitId } });
     if (!visit) throw new NotFoundException('Visit not found');
     if (!visit.actualArrival) throw new BadRequestException('Must check in before checking out');
     if (visit.actualDeparture) throw new BadRequestException('Already checked out');
 
-    const updated = await this.prisma.tourPlanVisit.update({
+    const updated = await this.prisma.working.tourPlanVisit.update({
       where: { id: cmd.visitId },
       data: {
         actualDeparture: new Date(),
@@ -27,7 +27,7 @@ export class CheckOutVisitHandler implements ICommandHandler<CheckOutVisitComman
     });
 
     if (cmd.photoUrl) {
-      await this.prisma.tourPlanPhoto.create({
+      await this.prisma.working.tourPlanPhoto.create({
         data: {
           tourPlanVisitId: cmd.visitId,
           photoUrl: cmd.photoUrl,

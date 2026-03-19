@@ -13,7 +13,7 @@ export class GetActivitiesByEntityHandler implements IQueryHandler<GetActivities
     else if (query.entityType === 'CONTACT') where.contactId = query.entityId;
 
     const [data, total] = await Promise.all([
-      this.prisma.activity.findMany({
+      this.prisma.working.activity.findMany({
         where,
         include: {
           createdByUser: { select: { id: true, firstName: true, lastName: true } },
@@ -22,7 +22,7 @@ export class GetActivitiesByEntityHandler implements IQueryHandler<GetActivities
         skip: (query.page - 1) * query.limit,
         take: query.limit,
       }),
-      this.prisma.activity.count({ where }),
+      this.prisma.working.activity.count({ where }),
     ]);
 
     return { data, total, page: query.page, limit: query.limit };

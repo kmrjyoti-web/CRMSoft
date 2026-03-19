@@ -25,6 +25,7 @@ describe('Bulk Operations', () => {
       ownershipLog: { create: jest.fn().mockResolvedValue({}) },
       userCapacity: { findUnique: jest.fn().mockResolvedValue(null), upsert: jest.fn().mockResolvedValue({}), update: jest.fn().mockResolvedValue({}) },
     };
+(prisma as any).working = prisma;
     ownershipCore = new OwnershipCoreService(prisma);
   });
 

@@ -9,13 +9,13 @@ export class RejectTourPlanHandler implements ICommandHandler<RejectTourPlanComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: RejectTourPlanCommand) {
-    const existing = await this.prisma.tourPlan.findUnique({ where: { id: cmd.id } });
+    const existing = await this.prisma.working.tourPlan.findUnique({ where: { id: cmd.id } });
     if (!existing) throw new NotFoundException('Tour plan not found');
     if (existing.status !== 'PENDING_APPROVAL') {
       throw new BadRequestException('Tour plan is not pending approval');
     }
 
-    return this.prisma.tourPlan.update({
+    return this.prisma.working.tourPlan.update({
       where: { id: cmd.id },
       data: { status: 'REJECTED', rejectedReason: cmd.reason },
       include: { lead: true, salesPerson: true },

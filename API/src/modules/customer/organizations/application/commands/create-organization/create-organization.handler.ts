@@ -52,7 +52,7 @@ export class CreateOrganizationHandler implements ICommandHandler<CreateOrganiza
 
     // 5. Create filter associations
     if (command.filterIds?.length) {
-      await this.prisma.organizationFilter.createMany({
+      await this.prisma.working.organizationFilter.createMany({
         data: command.filterIds.map(fid => ({
           organizationId: org.id,
           lookupValueId: fid,

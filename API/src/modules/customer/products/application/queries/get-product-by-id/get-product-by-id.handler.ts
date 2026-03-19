@@ -9,7 +9,7 @@ export class GetProductByIdHandler implements IQueryHandler<GetProductByIdQuery>
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetProductByIdQuery) {
-    const product = await this.prisma.product.findUnique({
+    const product = await this.prisma.working.product.findUnique({
       where: { id: query.id },
       include: {
         parent: { select: { id: true, name: true, code: true } },

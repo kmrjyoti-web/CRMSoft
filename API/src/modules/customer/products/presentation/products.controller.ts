@@ -67,7 +67,7 @@ export class ProductsController {
   @RequirePermissions('products:read')
   @ApiOperation({ summary: 'Quick search products by name or code (limit 20)' })
   async quickSearch(@Query('q') q: string) {
-    const data = await this.prisma.product.findMany({
+    const data = await this.prisma.working.product.findMany({
       where: {
         isActive: true,
         OR: [
@@ -131,7 +131,7 @@ export class ProductsController {
   @RequirePermissions('products:update')
   @ApiOperation({ summary: 'Remove a product relation' })
   async unlinkProduct(@Param('relationId') relationId: string) {
-    await this.prisma.productRelation.delete({ where: { id: relationId } });
+    await this.prisma.working.productRelation.delete({ where: { id: relationId } });
     return ApiResponse.success(null, 'Product relation removed');
   }
 
@@ -139,7 +139,7 @@ export class ProductsController {
   @RequirePermissions('products:read')
   @ApiOperation({ summary: 'Get all relations for a product' })
   async getRelations(@Param('id') id: string) {
-    const relations = await this.prisma.productRelation.findMany({
+    const relations = await this.prisma.working.productRelation.findMany({
       where: { OR: [{ fromProductId: id }, { toProductId: id }] },
       include: {
         fromProduct: { select: { id: true, name: true, code: true, image: true } },
@@ -161,7 +161,7 @@ export class ProductsController {
   @RequirePermissions('products:read')
   @ApiOperation({ summary: 'Get product filters' })
   async getFilters(@Param('id') id: string) {
-    const filters = await this.prisma.productFilter.findMany({
+    const filters = await this.prisma.working.productFilter.findMany({
       where: { productId: id },
       include: {
         lookupValue: {

@@ -43,7 +43,7 @@ export class GetRawContactsListHandler implements IQueryHandler<GetRawContactsLi
     const { page, limit, skip, orderBy } = buildPaginationParams(query);
 
     const [data, total] = await Promise.all([
-      this.prisma.rawContact.findMany({
+      this.prisma.working.rawContact.findMany({
         where,
         skip,
         take: limit,
@@ -68,7 +68,7 @@ export class GetRawContactsListHandler implements IQueryHandler<GetRawContactsLi
           },
         },
       }),
-      this.prisma.rawContact.count({ where }),
+      this.prisma.working.rawContact.count({ where }),
     ]);
 
     return buildPaginatedResult(data, total, page, limit);

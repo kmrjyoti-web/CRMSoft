@@ -14,14 +14,14 @@ export class ManageProductImagesHandler
   async execute(command: ManageProductImagesCommand) {
     const { productId, images } = command;
 
-    const product = await this.prisma.product.findUnique({
+    const product = await this.prisma.working.product.findUnique({
       where: { id: productId },
     });
     if (!product) {
       throw new NotFoundException(`Product "${productId}" not found`);
     }
 
-    const updated = await this.prisma.product.update({
+    const updated = await this.prisma.working.product.update({
       where: { id: productId },
       data: { images: images as any },
     });

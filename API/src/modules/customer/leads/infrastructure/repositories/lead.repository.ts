@@ -9,7 +9,7 @@ export class LeadRepository implements ILeadRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<LeadEntity | null> {
-    const record = await this.prisma.lead.findUnique({ where: { id } });
+    const record = await this.prisma.working.lead.findUnique({ where: { id } });
     return record ? LeadMapper.toDomain(record) : null;
   }
 
@@ -24,7 +24,7 @@ export class LeadRepository implements ILeadRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.prisma.lead.delete({ where: { id } });
+    await this.prisma.working.lead.delete({ where: { id } });
   }
 
   /**

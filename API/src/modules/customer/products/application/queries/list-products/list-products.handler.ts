@@ -51,7 +51,7 @@ export class ListProductsHandler implements IQueryHandler<ListProductsQuery> {
     const skip = (page - 1) * limit;
 
     const [data, total] = await Promise.all([
-      this.prisma.product.findMany({
+      this.prisma.working.product.findMany({
         where,
         skip,
         take: limit,
@@ -63,7 +63,7 @@ export class ListProductsHandler implements IQueryHandler<ListProductsQuery> {
           _count: { select: { children: true } },
         },
       }),
-      this.prisma.product.count({ where }),
+      this.prisma.working.product.count({ where }),
     ]);
 
     return { data, total, page, limit };

@@ -101,6 +101,15 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
+   * WorkingDB — global working client shortcut.
+   * Use in CQRS handlers, repositories, and services for customer CRM data.
+   * For dedicated-DB tenants, use getWorkingClient(tenantId) instead.
+   */
+  get working(): WorkingClient {
+    return this._globalWorking;
+  }
+
+  /**
    * WorkingDB — CRM business data.
    *   Free/shared tenants → GlobalWorkingDB
    *   Paid dedicated tenants → their own DB (lazy-connected + cached)

@@ -14,19 +14,19 @@ export class DeactivateProductHandler
   async execute(command: DeactivateProductCommand) {
     const { id } = command;
 
-    const product = await this.prisma.product.findUnique({ where: { id } });
+    const product = await this.prisma.working.product.findUnique({ where: { id } });
     if (!product) {
       throw new NotFoundException(`Product "${id}" not found`);
     }
 
     // Deactivate the product
-    await this.prisma.product.update({
+    await this.prisma.working.product.update({
       where: { id },
       data: { isActive: false, status: 'INACTIVE' },
     });
 
     // Cascade deactivation to children
-    await this.prisma.product.updateMany({
+    await this.prisma.working.product.updateMany({
       where: { parentId: id },
       data: { isActive: false, status: 'INACTIVE' },
     });

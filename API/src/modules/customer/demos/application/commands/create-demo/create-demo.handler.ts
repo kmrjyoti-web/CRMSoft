@@ -10,7 +10,7 @@ export class CreateDemoHandler implements ICommandHandler<CreateDemoCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: CreateDemoCommand) {
-    const demo = await this.prisma.demo.create({
+    const demo = await this.prisma.working.demo.create({
       data: {
         mode: cmd.mode as any,
         scheduledAt: cmd.scheduledAt,
@@ -33,16 +33,16 @@ export class CreateDemoHandler implements ICommandHandler<CreateDemoCommand> {
       createdById: cmd.userId,
     });
 
-    const existingEvent = await this.prisma.calendarEvent.findFirst({
+    const existingEvent = await this.prisma.working.calendarEvent.findFirst({
       where: { eventType: 'DEMO', sourceId: demo.id },
     });
     if (existingEvent) {
-      await this.prisma.calendarEvent.update({
+      await this.prisma.working.calendarEvent.update({
         where: { id: existingEvent.id },
         data: { startTime: cmd.scheduledAt },
       });
     } else {
-      await this.prisma.calendarEvent.create({
+      await this.prisma.working.calendarEvent.create({
         data: {
           eventType: 'DEMO',
           sourceId: demo.id,

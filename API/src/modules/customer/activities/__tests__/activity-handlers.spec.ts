@@ -32,6 +32,7 @@ describe('Activity Handlers', () => {
         updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
     };
+(prisma as any).working = prisma;
   });
 
   it('should create an activity with reminder and calendar event', async () => {

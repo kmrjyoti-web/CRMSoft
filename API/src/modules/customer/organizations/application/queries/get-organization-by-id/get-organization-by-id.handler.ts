@@ -9,7 +9,7 @@ export class GetOrganizationByIdHandler implements IQueryHandler<GetOrganization
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetOrganizationByIdQuery) {
-    const org = await this.prisma.organization.findUnique({
+    const org = await this.prisma.working.organization.findUnique({
       where: { id: query.organizationId },
       include: {
         contacts: {

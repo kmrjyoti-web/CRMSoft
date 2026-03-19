@@ -19,7 +19,7 @@ export class OwnershipCoreService {
     if (!user || user.status !== 'ACTIVE') throw new BadRequestException('User not found or inactive');
 
     if (params.ownerType === 'PRIMARY_OWNER') {
-      const existing = await this.prisma.entityOwner.findFirst({
+      const existing = await this.prisma.working.entityOwner.findFirst({
         where: { entityType: params.entityType as any, entityId: params.entityId, ownerType: 'PRIMARY_OWNER', isActive: true },
       });
       if (existing && existing.userId !== params.userId) {
@@ -29,20 +29,20 @@ export class OwnershipCoreService {
           ownerType: 'PRIMARY_OWNER', transferredById: params.assignedById,
           reason: params.reason, reasonDetail: params.reasonDetail,
         });
-        return this.prisma.entityOwner.findFirst({
+        return this.prisma.working.entityOwner.findFirst({
           where: { entityType: params.entityType as any, entityId: params.entityId, userId: params.userId, ownerType: 'PRIMARY_OWNER', isActive: true },
           include: { user: { select: { id: true, firstName: true, lastName: true, email: true, avatar: true } } },
         });
       }
       if (existing && existing.userId === params.userId) return existing;
     } else {
-      const dup = await this.prisma.entityOwner.findFirst({
+      const dup = await this.prisma.working.entityOwner.findFirst({
         where: { entityType: params.entityType as any, entityId: params.entityId, userId: params.userId, ownerType: params.ownerType as any, isActive: true },
       });
       if (dup) throw new BadRequestException('Already assigned with same owner type');
     }
 
-    const owner = await this.prisma.entityOwner.create({
+    const owner = await this.prisma.working.entityOwner.create({
       data: {
         entityType: params.entityType as any, entityId: params.entityId,
         ownerType: params.ownerType as any, userId: params.userId,
@@ -53,7 +53,7 @@ export class OwnershipCoreService {
     });
 
     const assignedBy = await this.prisma.user.findUnique({ where: { id: params.assignedById } });
-    await this.prisma.ownershipLog.create({
+    await this.prisma.working.ownershipLog.create({
       data: {
         entityType: params.entityType as any, entityId: params.entityId,
         action: 'ASSIGN', ownerType: params.ownerType as any,
@@ -67,7 +67,7 @@ export class OwnershipCoreService {
     await this.incrementCapacity(params.userId, params.entityType);
 
     if (params.entityType === 'LEAD') {
-      await this.prisma.lead.update({ where: { id: params.entityId }, data: { allocatedToId: params.userId, allocatedAt: new Date() } }).catch(() => {});
+      await this.prisma.working.lead.update({ where: { id: params.entityId }, data: { allocatedToId: params.userId, allocatedAt: new Date() } }).catch(() => {});
     }
 
     this.logger.log(`Assigned ${params.ownerType} on ${params.entityType}/${params.entityId} to ${user.firstName} ${user.lastName}`);
@@ -79,7 +79,7 @@ export class OwnershipCoreService {
     entityType: string; entityId: string; fromUserId: string; toUserId: string;
     ownerType: string; transferredById: string; reason: string; reasonDetail?: string;
   }) {
-    const existing = await this.prisma.entityOwner.findFirst({
+    const existing = await this.prisma.working.entityOwner.findFirst({
       where: { entityType: params.entityType as any, entityId: params.entityId, userId: params.fromUserId, ownerType: params.ownerType as any, isActive: true },
     });
     if (!existing) throw new NotFoundException('No active ownership to transfer');
@@ -87,9 +87,9 @@ export class OwnershipCoreService {
     const toUser = await this.prisma.user.findUnique({ where: { id: params.toUserId } });
     if (!toUser || toUser.status !== 'ACTIVE') throw new BadRequestException('Target user not found or inactive');
 
-    await this.prisma.entityOwner.update({ where: { id: existing.id }, data: { isActive: false, validTo: new Date() } });
+    await this.prisma.working.entityOwner.update({ where: { id: existing.id }, data: { isActive: false, validTo: new Date() } });
 
-    const owner = await this.prisma.entityOwner.create({
+    const owner = await this.prisma.working.entityOwner.create({
       data: {
         entityType: params.entityType as any, entityId: params.entityId,
         ownerType: params.ownerType as any, userId: params.toUserId,
@@ -100,7 +100,7 @@ export class OwnershipCoreService {
 
     const fromUser = await this.prisma.user.findUnique({ where: { id: params.fromUserId } });
     const changedBy = await this.prisma.user.findUnique({ where: { id: params.transferredById } });
-    await this.prisma.ownershipLog.create({
+    await this.prisma.working.ownershipLog.create({
       data: {
         entityType: params.entityType as any, entityId: params.entityId,
         action: 'TRANSFER', ownerType: params.ownerType as any,
@@ -115,7 +115,7 @@ export class OwnershipCoreService {
     await this.incrementCapacity(params.toUserId, params.entityType);
 
     if (params.entityType === 'LEAD') {
-      await this.prisma.lead.update({ where: { id: params.entityId }, data: { allocatedToId: params.toUserId, allocatedAt: new Date() } }).catch(() => {});
+      await this.prisma.working.lead.update({ where: { id: params.entityId }, data: { allocatedToId: params.toUserId, allocatedAt: new Date() } }).catch(() => {});
     }
 
     return owner;
@@ -126,16 +126,16 @@ export class OwnershipCoreService {
     entityType: string; entityId: string; userId: string; ownerType: string;
     revokedById: string; reason: string;
   }) {
-    const existing = await this.prisma.entityOwner.findFirst({
+    const existing = await this.prisma.working.entityOwner.findFirst({
       where: { entityType: params.entityType as any, entityId: params.entityId, userId: params.userId, ownerType: params.ownerType as any, isActive: true },
     });
     if (!existing) throw new NotFoundException('No active ownership to revoke');
 
-    await this.prisma.entityOwner.update({ where: { id: existing.id }, data: { isActive: false, validTo: new Date() } });
+    await this.prisma.working.entityOwner.update({ where: { id: existing.id }, data: { isActive: false, validTo: new Date() } });
 
     const user = await this.prisma.user.findUnique({ where: { id: params.userId } });
     const changedBy = await this.prisma.user.findUnique({ where: { id: params.revokedById } });
-    await this.prisma.ownershipLog.create({
+    await this.prisma.working.ownershipLog.create({
       data: {
         entityType: params.entityType as any, entityId: params.entityId,
         action: 'REVOKE', ownerType: params.ownerType as any,
@@ -148,13 +148,13 @@ export class OwnershipCoreService {
     await this.decrementCapacity(params.userId, params.entityType);
 
     if (params.entityType === 'LEAD' && params.ownerType === 'PRIMARY_OWNER') {
-      await this.prisma.lead.update({ where: { id: params.entityId }, data: { allocatedToId: null } }).catch(() => {});
+      await this.prisma.working.lead.update({ where: { id: params.entityId }, data: { allocatedToId: null } }).catch(() => {});
     }
   }
 
   /** Get all owners of an entity. */
   async getEntityOwners(entityType: string, entityId: string) {
-    return this.prisma.entityOwner.findMany({
+    return this.prisma.working.entityOwner.findMany({
       where: { entityType: entityType as any, entityId, isActive: true },
       include: { user: { select: { id: true, firstName: true, lastName: true, email: true, avatar: true } }, assignedByUser: { select: { id: true, firstName: true, lastName: true } } },
       orderBy: [{ ownerType: 'asc' }, { createdAt: 'asc' }],
@@ -167,7 +167,7 @@ export class OwnershipCoreService {
     if (params.entityType) where.entityType = params.entityType;
     if (params.ownerType) where.ownerType = params.ownerType;
 
-    const owners = await this.prisma.entityOwner.findMany({ where, orderBy: { createdAt: 'desc' } });
+    const owners = await this.prisma.working.entityOwner.findMany({ where, orderBy: { createdAt: 'desc' } });
     const grouped: Record<string, any[]> = { LEAD: [], CONTACT: [], ORGANIZATION: [], QUOTATION: [] };
     for (const o of owners) { if (grouped[o.entityType]) grouped[o.entityType].push(o); }
 
@@ -187,11 +187,11 @@ export class OwnershipCoreService {
     const page = params.page || 1;
     const limit = params.limit || 20;
     const [data, total] = await Promise.all([
-      this.prisma.ownershipLog.findMany({
+      this.prisma.working.ownershipLog.findMany({
         where: { entityType: params.entityType as any, entityId: params.entityId },
         orderBy: { createdAt: 'desc' }, skip: (page - 1) * limit, take: limit,
       }),
-      this.prisma.ownershipLog.count({ where: { entityType: params.entityType as any, entityId: params.entityId } }),
+      this.prisma.working.ownershipLog.count({ where: { entityType: params.entityType as any, entityId: params.entityId } }),
     ]);
     return { data, total, page, limit };
   }
@@ -200,10 +200,10 @@ export class OwnershipCoreService {
   async validateEntity(entityType: string, entityId: string) {
     let entity: any = null;
     switch (entityType) {
-      case 'LEAD': entity = await this.prisma.lead.findUnique({ where: { id: entityId } }); break;
-      case 'CONTACT': entity = await this.prisma.contact.findUnique({ where: { id: entityId } }); break;
-      case 'ORGANIZATION': entity = await this.prisma.organization.findUnique({ where: { id: entityId } }); break;
-      case 'QUOTATION': entity = await this.prisma.quotation.findUnique({ where: { id: entityId } }); break;
+      case 'LEAD': entity = await this.prisma.working.lead.findUnique({ where: { id: entityId } }); break;
+      case 'CONTACT': entity = await this.prisma.working.contact.findUnique({ where: { id: entityId } }); break;
+      case 'ORGANIZATION': entity = await this.prisma.working.organization.findUnique({ where: { id: entityId } }); break;
+      case 'QUOTATION': entity = await this.prisma.working.quotation.findUnique({ where: { id: entityId } }); break;
       default: throw new BadRequestException(`Unsupported entity type: ${entityType}`);
     }
     if (!entity) throw new NotFoundException(`${entityType} ${entityId} not found`);

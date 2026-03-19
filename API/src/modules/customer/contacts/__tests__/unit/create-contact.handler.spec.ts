@@ -17,6 +17,7 @@ describe('CreateContactHandler', () => {
       contactOrganization: { create: jest.fn() },
       contactFilter: { createMany: jest.fn() },
     };
+(prisma as any).working = prisma;
     handler = new CreateContactHandler(repo, publisher, prisma);
   });
 

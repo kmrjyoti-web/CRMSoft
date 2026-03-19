@@ -8,10 +8,10 @@ export class DeleteFollowUpHandler implements ICommandHandler<DeleteFollowUpComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: DeleteFollowUpCommand) {
-    const existing = await this.prisma.followUp.findUnique({ where: { id: cmd.id } });
+    const existing = await this.prisma.working.followUp.findUnique({ where: { id: cmd.id } });
     if (!existing) throw new NotFoundException('Follow-up not found');
 
-    await this.prisma.followUp.update({
+    await this.prisma.working.followUp.update({
       where: { id: cmd.id },
       data: { isActive: false },
     });

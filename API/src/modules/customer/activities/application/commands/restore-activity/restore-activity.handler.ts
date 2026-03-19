@@ -10,14 +10,14 @@ export class RestoreActivityHandler implements ICommandHandler<RestoreActivityCo
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: RestoreActivityCommand): Promise<void> {
-    const activity = await this.prisma.activity.findUnique({ where: { id: command.activityId } });
+    const activity = await this.prisma.working.activity.findUnique({ where: { id: command.activityId } });
     if (!activity) throw new NotFoundException(`Activity ${command.activityId} not found`);
 
     if (!activity.isDeleted) {
       throw new Error('Activity is not deleted');
     }
 
-    await this.prisma.activity.update({
+    await this.prisma.working.activity.update({
       where: { id: command.activityId },
       data: {
         isDeleted: false,

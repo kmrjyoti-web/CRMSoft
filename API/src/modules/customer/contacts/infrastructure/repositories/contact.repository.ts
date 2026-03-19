@@ -9,13 +9,13 @@ export class ContactRepository implements IContactRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<ContactEntity | null> {
-    const record = await this.prisma.contact.findUnique({ where: { id } });
+    const record = await this.prisma.working.contact.findUnique({ where: { id } });
     return record ? ContactMapper.toDomain(record) : null;
   }
 
   async save(entity: ContactEntity): Promise<void> {
     const data = ContactMapper.toPersistence(entity);
-    await this.prisma.contact.upsert({
+    await this.prisma.working.contact.upsert({
       where: { id: entity.id },
       create: data,
       update: data,
@@ -23,6 +23,6 @@ export class ContactRepository implements IContactRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.prisma.contact.delete({ where: { id } });
+    await this.prisma.working.contact.delete({ where: { id } });
   }
 }

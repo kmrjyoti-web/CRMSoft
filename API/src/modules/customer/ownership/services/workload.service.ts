@@ -51,12 +51,12 @@ export class WorkloadService {
     const total = counts.leads + counts.contacts + counts.organizations + counts.quotations;
     const loadPercent = capacity.maxTotal > 0 ? Math.round((total / capacity.maxTotal) * 100) : 0;
 
-    const recentActivity = await this.prisma.ownershipLog.findMany({
+    const recentActivity = await this.prisma.working.ownershipLog.findMany({
       where: { OR: [{ fromUserId: userId }, { toUserId: userId }] },
       orderBy: { createdAt: 'desc' }, take: 5,
     });
 
-    const delegatedFrom = await this.prisma.entityOwner.findMany({
+    const delegatedFrom = await this.prisma.working.entityOwner.findMany({
       where: { userId, ownerType: 'DELEGATED_OWNER', isActive: true },
     });
 
@@ -84,7 +84,7 @@ export class WorkloadService {
       const count = Math.min(5, from.current[entityType === 'LEAD' ? 'leads' : entityType === 'CONTACT' ? 'contacts' : 'organizations']);
       if (count === 0) continue;
 
-      const entities = await this.prisma.entityOwner.findMany({
+      const entities = await this.prisma.working.entityOwner.findMany({
         where: { userId: from.userId, entityType: entityType as any, isActive: true },
         orderBy: { createdAt: 'asc' }, take: count,
       });
@@ -144,7 +144,7 @@ export class WorkloadService {
   }
 
   private async getActualCounts(userId: string) {
-    const owners = await this.prisma.entityOwner.groupBy({
+    const owners = await this.prisma.working.entityOwner.groupBy({
       by: ['entityType'], where: { userId, isActive: true }, _count: true,
     });
     const map: Record<string, number> = {};

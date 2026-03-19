@@ -40,7 +40,7 @@ export class OnRawContactVerifiedHandler implements IEventHandler<RawContactVeri
 
   private async autoCreateLedger(event: RawContactVerifiedEvent): Promise<void> {
     // Look up the contact to get its tenantId
-    const contact = await this.prisma.contact.findUnique({
+    const contact = await this.prisma.working.contact.findUnique({
       where: { id: event.contactId },
       select: {
         id: true,
@@ -68,7 +68,7 @@ export class OnRawContactVerifiedHandler implements IEventHandler<RawContactVeri
     }
 
     // Check if a ledger mapping already exists for this contact
-    const existingMapping = await this.prisma.ledgerMapping.findFirst({
+    const existingMapping = await this.prisma.working.ledgerMapping.findFirst({
       where: { tenantId, entityType: 'CONTACT', entityId: event.contactId },
     });
     if (existingMapping) {
@@ -77,7 +77,7 @@ export class OnRawContactVerifiedHandler implements IEventHandler<RawContactVeri
     }
 
     // Get contact communications for email/phone
-    const comms = await this.prisma.communication.findMany({
+    const comms = await this.prisma.working.communication.findMany({
       where: { contactId: event.contactId },
       select: { type: true, value: true, isPrimary: true },
     });
@@ -85,7 +85,7 @@ export class OnRawContactVerifiedHandler implements IEventHandler<RawContactVeri
     const phone = comms.find((c) => c.type === 'MOBILE' || c.type === 'PHONE')?.value ?? undefined;
 
     // Get organization details if linked
-    const contactOrg = await this.prisma.contactOrganization.findFirst({
+    const contactOrg = await this.prisma.working.contactOrganization.findFirst({
       where: { contactId: event.contactId },
       include: { organization: { select: { name: true, gstNumber: true, address: true, city: true, state: true, pincode: true, country: true } } },
     });
@@ -94,7 +94,7 @@ export class OnRawContactVerifiedHandler implements IEventHandler<RawContactVeri
     const contactName = `${contact.firstName} ${contact.lastName}`.trim();
 
     // Find the "Sundry Debtors" account group for this tenant (standard for customer contacts)
-    const sundryDebtorsGroup = await this.prisma.accountGroup.findFirst({
+    const sundryDebtorsGroup = await this.prisma.working.accountGroup.findFirst({
       where: { tenantId, primaryGroup: 'SUNDRY_DEBTORS' },
       select: { id: true },
     });

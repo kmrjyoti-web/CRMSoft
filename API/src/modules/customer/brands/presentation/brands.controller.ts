@@ -20,7 +20,7 @@ export class BrandsController {
   @ApiOperation({ summary: 'Create brand' })
   @RequirePermissions('brands:create')
   async create(@Body() dto: CreateBrandDto) {
-    const brand = await this.prisma.brand.create({
+    const brand = await this.prisma.working.brand.create({
       data: { ...dto, code: dto.code.toUpperCase() },
     });
     return ApiResponse.success(brand, 'Brand created');
@@ -44,8 +44,8 @@ export class BrandsController {
       ];
     }
     const [data, total] = await Promise.all([
-      this.prisma.brand.findMany({ where, skip: (p - 1) * l, take: l, orderBy: { name: 'asc' } }),
-      this.prisma.brand.count({ where }),
+      this.prisma.working.brand.findMany({ where, skip: (p - 1) * l, take: l, orderBy: { name: 'asc' } }),
+      this.prisma.working.brand.count({ where }),
     ]);
     return ApiResponse.paginated(data, total, p, l);
   }
@@ -54,7 +54,7 @@ export class BrandsController {
   @ApiOperation({ summary: 'Get brand by ID' })
   @RequirePermissions('brands:read')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
-    const brand = await this.prisma.brand.findUniqueOrThrow({
+    const brand = await this.prisma.working.brand.findUniqueOrThrow({
       where: { id },
       include: {
         brandOrganizations: { include: { organization: { select: { id: true, name: true } } } },
@@ -70,7 +70,7 @@ export class BrandsController {
   async update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateBrandDto) {
     const data: any = { ...dto };
     if (dto.code) data.code = dto.code.toUpperCase();
-    const brand = await this.prisma.brand.update({ where: { id }, data });
+    const brand = await this.prisma.working.brand.update({ where: { id }, data });
     return ApiResponse.success(brand, 'Brand updated');
   }
 
@@ -78,7 +78,7 @@ export class BrandsController {
   @ApiOperation({ summary: 'Deactivate brand' })
   @RequirePermissions('brands:delete')
   async deactivate(@Param('id', ParseUUIDPipe) id: string) {
-    const brand = await this.prisma.brand.update({ where: { id }, data: { isActive: false } });
+    const brand = await this.prisma.working.brand.update({ where: { id }, data: { isActive: false } });
     return ApiResponse.success(brand, 'Brand deactivated');
   }
 
@@ -90,17 +90,17 @@ export class BrandsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: LinkBrandOrganizationDto,
   ) {
-    const existing = await this.prisma.brandOrganization.findFirst({
+    const existing = await this.prisma.working.brandOrganization.findFirst({
       where: { brandId: id, organizationId: dto.organizationId },
     });
     let link;
     if (existing) {
-      link = await this.prisma.brandOrganization.update({
+      link = await this.prisma.working.brandOrganization.update({
         where: { id: existing.id },
         data: { isPrimary: dto.isPrimary, notes: dto.notes },
       });
     } else {
-      link = await this.prisma.brandOrganization.create({
+      link = await this.prisma.working.brandOrganization.create({
         data: { brandId: id, ...dto },
       });
     }
@@ -114,7 +114,7 @@ export class BrandsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Param('orgId', ParseUUIDPipe) orgId: string,
   ) {
-    await this.prisma.brandOrganization.deleteMany({
+    await this.prisma.working.brandOrganization.deleteMany({
       where: { brandId: id, organizationId: orgId },
     });
     return ApiResponse.success(null, 'Organization unlinked');
@@ -128,17 +128,17 @@ export class BrandsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: LinkBrandContactDto,
   ) {
-    const existing = await this.prisma.brandContact.findFirst({
+    const existing = await this.prisma.working.brandContact.findFirst({
       where: { brandId: id, contactId: dto.contactId },
     });
     let link;
     if (existing) {
-      link = await this.prisma.brandContact.update({
+      link = await this.prisma.working.brandContact.update({
         where: { id: existing.id },
         data: { role: dto.role, isPrimary: dto.isPrimary },
       });
     } else {
-      link = await this.prisma.brandContact.create({
+      link = await this.prisma.working.brandContact.create({
         data: { brandId: id, ...dto },
       });
     }
@@ -152,7 +152,7 @@ export class BrandsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Param('contactId', ParseUUIDPipe) contactId: string,
   ) {
-    await this.prisma.brandContact.deleteMany({
+    await this.prisma.working.brandContact.deleteMany({
       where: { brandId: id, contactId },
     });
     return ApiResponse.success(null, 'Contact unlinked');
@@ -162,7 +162,7 @@ export class BrandsController {
   @ApiOperation({ summary: 'Get brand organizations' })
   @RequirePermissions('brands:read')
   async getOrganizations(@Param('id', ParseUUIDPipe) id: string) {
-    const orgs = await this.prisma.brandOrganization.findMany({
+    const orgs = await this.prisma.working.brandOrganization.findMany({
       where: { brandId: id },
       include: { organization: { select: { id: true, name: true, city: true } } },
     });
@@ -173,7 +173,7 @@ export class BrandsController {
   @ApiOperation({ summary: 'Get brand contacts' })
   @RequirePermissions('brands:read')
   async getContacts(@Param('id', ParseUUIDPipe) id: string) {
-    const contacts = await this.prisma.brandContact.findMany({
+    const contacts = await this.prisma.working.brandContact.findMany({
       where: { brandId: id },
       include: { contact: { select: { id: true, firstName: true, lastName: true } } },
     });

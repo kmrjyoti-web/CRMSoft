@@ -47,7 +47,7 @@ export class OwnershipRulesController {
   @Get(':id')
   @RequirePermissions('ownership:read')
   async getRule(@Param('id') id: string) {
-    const rule = await this.prisma.assignmentRule.findUnique({ where: { id } });
+    const rule = await this.prisma.working.assignmentRule.findUnique({ where: { id } });
     return ApiResponse.success(rule);
   }
 

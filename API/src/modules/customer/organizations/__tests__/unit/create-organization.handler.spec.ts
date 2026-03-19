@@ -15,6 +15,7 @@ describe('CreateOrganizationHandler', () => {
       mergeObjectContext: jest.fn((e: any) => { e.commit = jest.fn(); return e; }),
     };
     prisma = { organizationFilter: { createMany: jest.fn() } };
+(prisma as any).working = prisma;
     handler = new CreateOrganizationHandler(repo, publisher, prisma);
   });
 

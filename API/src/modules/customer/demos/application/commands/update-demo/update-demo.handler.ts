@@ -9,17 +9,17 @@ export class UpdateDemoHandler implements ICommandHandler<UpdateDemoCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(cmd: UpdateDemoCommand) {
-    const existing = await this.prisma.demo.findUnique({ where: { id: cmd.id } });
+    const existing = await this.prisma.working.demo.findUnique({ where: { id: cmd.id } });
     if (!existing) throw new NotFoundException('Demo not found');
 
-    const demo = await this.prisma.demo.update({
+    const demo = await this.prisma.working.demo.update({
       where: { id: cmd.id },
       data: cmd.data as any,
       include: { lead: true, conductedBy: true },
     });
 
     if (cmd.data.scheduledAt) {
-      await this.prisma.calendarEvent.updateMany({
+      await this.prisma.working.calendarEvent.updateMany({
         where: { eventType: 'DEMO', sourceId: cmd.id },
         data: { startTime: cmd.data.scheduledAt },
       });

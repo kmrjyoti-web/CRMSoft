@@ -43,7 +43,7 @@ export class CreateRawContactHandler implements ICommandHandler<CreateRawContact
       for (const comm of command.communications) {
         const isFirstOfType = !seenTypes.has(comm.type);
         seenTypes.add(comm.type);
-        await this.prisma.communication.create({
+        await this.prisma.working.communication.create({
           data: {
             type: comm.type as any,
             value: comm.value,
@@ -58,7 +58,7 @@ export class CreateRawContactHandler implements ICommandHandler<CreateRawContact
 
     // 5. Create filter associations
     if (command.filterIds?.length) {
-      await this.prisma.rawContactFilter.createMany({
+      await this.prisma.working.rawContactFilter.createMany({
         data: command.filterIds.map(fid => ({
           rawContactId: rawContact.id,
           lookupValueId: fid,

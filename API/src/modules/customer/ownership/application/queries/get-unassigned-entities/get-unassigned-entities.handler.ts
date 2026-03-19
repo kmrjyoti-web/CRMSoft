@@ -11,7 +11,7 @@ export class GetUnassignedEntitiesHandler implements IQueryHandler<GetUnassigned
     const limit = query.limit || 20;
 
     // Get all entity IDs that have active PRIMARY_OWNER
-    const ownedIds = await this.prisma.entityOwner.findMany({
+    const ownedIds = await this.prisma.working.entityOwner.findMany({
       where: { entityType: query.entityType as any, ownerType: 'PRIMARY_OWNER', isActive: true },
       select: { entityId: true },
     });
@@ -22,7 +22,7 @@ export class GetUnassignedEntitiesHandler implements IQueryHandler<GetUnassigned
 
     switch (query.entityType) {
       case 'LEAD': {
-        const all = await this.prisma.lead.findMany({
+        const all = await this.prisma.working.lead.findMany({
           select: { id: true, leadNumber: true, status: true, createdAt: true },
           orderBy: { createdAt: 'asc' },
         });
@@ -32,7 +32,7 @@ export class GetUnassignedEntitiesHandler implements IQueryHandler<GetUnassigned
         break;
       }
       case 'CONTACT': {
-        const all = await this.prisma.contact.findMany({
+        const all = await this.prisma.working.contact.findMany({
           where: { isActive: true }, select: { id: true, firstName: true, lastName: true, createdAt: true },
           orderBy: { createdAt: 'asc' },
         });
@@ -42,7 +42,7 @@ export class GetUnassignedEntitiesHandler implements IQueryHandler<GetUnassigned
         break;
       }
       case 'ORGANIZATION': {
-        const all = await this.prisma.organization.findMany({
+        const all = await this.prisma.working.organization.findMany({
           where: { isActive: true }, select: { id: true, name: true, createdAt: true },
           orderBy: { createdAt: 'asc' },
         });
@@ -52,7 +52,7 @@ export class GetUnassignedEntitiesHandler implements IQueryHandler<GetUnassigned
         break;
       }
       case 'QUOTATION': {
-        const all = await this.prisma.quotation.findMany({
+        const all = await this.prisma.working.quotation.findMany({
           select: { id: true, quotationNo: true, status: true, createdAt: true },
           orderBy: { createdAt: 'asc' },
         });

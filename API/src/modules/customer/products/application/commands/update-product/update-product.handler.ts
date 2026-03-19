@@ -12,7 +12,7 @@ export class UpdateProductHandler implements ICommandHandler<UpdateProductComman
   async execute(command: UpdateProductCommand) {
     const { id, data } = command;
 
-    const existing = await this.prisma.product.findUnique({ where: { id } });
+    const existing = await this.prisma.working.product.findUnique({ where: { id } });
     if (!existing) {
       throw new NotFoundException(`Product "${id}" not found`);
     }
@@ -45,14 +45,14 @@ export class UpdateProductHandler implements ICommandHandler<UpdateProductComman
     if (updateData.secondaryUnit) updateData.secondaryUnit = updateData.secondaryUnit as any;
     if (updateData.packingUnit) updateData.packingUnit = updateData.packingUnit as any;
 
-    const product = await this.prisma.product.update({
+    const product = await this.prisma.working.product.update({
       where: { id },
       data: updateData,
     });
 
     // If gstRate changes, recreate tax details
     if (data.gstRate !== undefined) {
-      await this.prisma.productTaxDetail.deleteMany({
+      await this.prisma.working.productTaxDetail.deleteMany({
         where: { productId: id },
       });
 
@@ -70,7 +70,7 @@ export class UpdateProductHandler implements ICommandHandler<UpdateProductComman
             description: 'Compensation Cess',
           });
         }
-        await this.prisma.productTaxDetail.createMany({ data: entries });
+        await this.prisma.working.productTaxDetail.createMany({ data: entries });
       }
     }
 
@@ -90,7 +90,7 @@ export class UpdateProductHandler implements ICommandHandler<UpdateProductComman
     let suffix = 1;
 
     while (true) {
-      const found = await this.prisma.product.findFirst({ where: { slug } });
+      const found = await this.prisma.working.product.findFirst({ where: { slug } });
       if (!found || found.id === excludeId) break;
       suffix++;
       slug = `${base}-${suffix}`;
@@ -100,7 +100,7 @@ export class UpdateProductHandler implements ICommandHandler<UpdateProductComman
   }
 
   private async isDescendant(candidateId: string, ancestorId: string): Promise<boolean> {
-    const children = await this.prisma.product.findMany({
+    const children = await this.prisma.working.product.findMany({
       where: { parentId: ancestorId },
       select: { id: true },
     });

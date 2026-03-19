@@ -11,7 +11,7 @@ export class OverdueCheckerService {
   async checkOverdueFollowUps() {
     const now = new Date();
 
-    const result = await this.prisma.followUp.updateMany({
+    const result = await this.prisma.working.followUp.updateMany({
       where: {
         isActive: true,
         completedAt: null,
