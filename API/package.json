@@ -20,6 +20,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
+    "test:coverage": "jest --coverage",
     "test:unit": "jest --testPathPattern=unit",
     "test:int": "jest --testPathPattern=integration",
     "test:e2e": "jest --config ./test/jest-e2e.json",
@@ -153,7 +154,8 @@
       "^@/(.*)$": "<rootDir>/src/$1",
       "^@shared/(.*)$": "<rootDir>/src/shared/$1",
       "^@core/(.*)$": "<rootDir>/src/core/$1",
-      "^@modules/(.*)$": "<rootDir>/src/modules/$1"
+      "^@modules/(.*)$": "<rootDir>/src/modules/$1",
+      "^test/(.*)$": "<rootDir>/test/$1"
     }
   }
 }
