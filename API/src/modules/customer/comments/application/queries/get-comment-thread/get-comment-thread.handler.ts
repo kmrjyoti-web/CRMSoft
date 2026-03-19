@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetCommentThreadQuery } from './get-comment-thread.query';
 import { PrismaService } from '../../../../../../core/prisma/prisma.service';

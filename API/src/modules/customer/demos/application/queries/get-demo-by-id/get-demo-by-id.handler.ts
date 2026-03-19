@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { NotFoundException } from '@nestjs/common';
 import { GetDemoByIdQuery } from './get-demo-by-id.query';

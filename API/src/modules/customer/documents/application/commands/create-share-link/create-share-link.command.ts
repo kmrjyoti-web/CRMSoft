@@ -1,4 +1,4 @@
-import { ShareLinkAccess } from '@prisma/client';
+import { ShareLinkAccess } from '@prisma/working-client';
 
 export class CreateShareLinkCommand {
   constructor(

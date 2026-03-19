@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/working-client';
 import { LeadEntity } from '../entities/lead.entity';
 
 /** Prisma interactive-transaction client (same API minus connection methods). */

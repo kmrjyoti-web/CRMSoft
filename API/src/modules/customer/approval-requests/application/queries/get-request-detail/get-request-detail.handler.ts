@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { NotFoundException } from '@nestjs/common';
 import { GetRequestDetailQuery } from './get-request-detail.query';

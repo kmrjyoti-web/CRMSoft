@@ -3,7 +3,7 @@ import { UploadVersionCommand } from './upload-version.command';
 import { StorageLocalService } from '../../../services/storage-local.service';
 import { DocumentService } from '../../../services/document.service';
 import { DocumentActivityService } from '../../../services/document-activity.service';
-import { StorageType } from '@prisma/client';
+import { StorageType } from '@prisma/working-client';
 
 @CommandHandler(UploadVersionCommand)
 export class UploadVersionHandler implements ICommandHandler<UploadVersionCommand> {

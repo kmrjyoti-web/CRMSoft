@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { PricingAccessService } from '../../softwarevendor/verification/services/pricing-access.service';
-import { MktOrderStatus } from '@prisma/client';
+import { MktOrderStatus } from '@prisma/platform-client';
 import { ListingService } from './listing.service';
 
 interface OrderItemDto {

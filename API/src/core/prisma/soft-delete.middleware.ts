@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/working-client';
 
 /**
  * Prisma middleware that auto-adds `isDeleted: false` to findMany/findFirst/count

@@ -1,6 +1,6 @@
 import { IsString, IsNumber, IsUUID, Min, IsOptional, IsEnum, IsDateString } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreditNoteStatus } from '@prisma/client';
+import { CreditNoteStatus } from '@prisma/working-client';
 
 export class CreateCreditNoteDto {
   @IsUUID() invoiceId: string;

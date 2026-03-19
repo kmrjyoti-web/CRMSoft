@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/working-client';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 
 export interface IssueFlushParams {

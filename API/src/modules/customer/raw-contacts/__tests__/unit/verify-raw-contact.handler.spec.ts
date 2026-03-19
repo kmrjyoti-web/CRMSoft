@@ -15,6 +15,7 @@ describe('VerifyRawContactHandler', () => {
       mergeObjectContext: jest.fn((e: any) => { e.commit = jest.fn(); return e; }),
     };
     prisma = {
+      rawContact: { findUnique: jest.fn().mockResolvedValue({ tenantId: 'tenant-1' }) },
       contact: { create: jest.fn() },
       communication: { updateMany: jest.fn() },
       rawContactFilter: { findMany: jest.fn().mockResolvedValue([]) },

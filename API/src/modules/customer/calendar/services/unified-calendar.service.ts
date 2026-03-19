@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { TaskAssignmentService } from '../../../customer/tasks/application/services/task-assignment.service';

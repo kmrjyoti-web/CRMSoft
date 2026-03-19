@@ -8,6 +8,7 @@ describe('ImportExecutorService', () => {
     prisma = {
       rawContact: {
         create: jest.fn().mockResolvedValue({ id: 'rc1' }),
+        update: jest.fn().mockResolvedValue({ id: 'rc1' }),
       },
       communication: {
         createMany: jest.fn().mockResolvedValue({ count: 2 }),
@@ -45,7 +46,7 @@ describe('ImportExecutorService', () => {
 
     expect(result.success).toBe(true);
     expect(result.action).toBe('UPDATED');
-    expect(prisma.contact.update).toHaveBeenCalled();
+    expect(prisma.rawContact.update).toHaveBeenCalled();
   });
 
   it('should SKIP when userAction=SKIP', async () => {

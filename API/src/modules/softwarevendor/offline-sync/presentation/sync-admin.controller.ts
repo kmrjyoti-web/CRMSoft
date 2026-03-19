@@ -5,7 +5,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/working-client';
 import { ApiResponse } from '../../../../common/utils/api-response';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { SyncEngineService } from '../services/sync-engine.service';

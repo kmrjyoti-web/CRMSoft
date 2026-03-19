@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { NotFoundException, Logger } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/working-client';
 import { PrismaService } from '../../../../../../core/prisma/prisma.service';
 import { CloneWorkflowCommand } from './clone-workflow.command';
 
@@ -17,7 +17,7 @@ export class CloneWorkflowHandler implements ICommandHandler<CloneWorkflowComman
     });
     if (!source) throw new NotFoundException(`Source workflow "${cmd.sourceId}" not found`);
 
-    return this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx: any) => {
       const clone = await tx.workflow.create({
         data: {
           name: `${source.name} (Copy)`,

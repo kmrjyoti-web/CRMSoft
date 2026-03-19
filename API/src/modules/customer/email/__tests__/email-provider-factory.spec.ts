@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
-import { EmailProvider } from '@prisma/client';
+import { EmailProvider } from '@prisma/working-client';
 import { EmailProviderFactoryService } from '../services/email-provider-factory.service';
 import { GmailService } from '../services/gmail.service';
 import { OutlookService } from '../services/outlook.service';

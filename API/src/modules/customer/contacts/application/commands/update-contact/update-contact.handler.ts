@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler, EventPublisher } from '@nestjs/cqrs';
 import { Inject, NotFoundException, Logger } from '@nestjs/common';
-import { CommunicationType, PriorityType } from '@prisma/client';
+import { CommunicationType, PriorityType } from '@prisma/working-client';
 import { UpdateContactCommand } from './update-contact.command';
 import {
   IContactRepository, CONTACT_REPOSITORY,

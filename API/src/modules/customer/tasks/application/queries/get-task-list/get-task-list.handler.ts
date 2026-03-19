@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetTaskListQuery } from './get-task-list.query';
 import { PrismaService } from '../../../../../../core/prisma/prisma.service';

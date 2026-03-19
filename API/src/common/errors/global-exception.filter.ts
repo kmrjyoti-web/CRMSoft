@@ -5,7 +5,7 @@ import {
   HttpException,
   BadRequestException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/working-client';
 import { randomUUID } from 'crypto';
 import { AppError } from './app-error';
 import { ERROR_CODES } from './error-codes';

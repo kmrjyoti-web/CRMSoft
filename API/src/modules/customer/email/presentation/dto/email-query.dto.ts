@@ -1,6 +1,6 @@
 import { IsOptional, IsString, IsEnum, IsBoolean } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { EmailDirection, EmailStatus } from '@prisma/client';
+import { EmailDirection, EmailStatus } from '@prisma/working-client';
 import { PaginationDto } from '../../../../../common/dto/pagination.dto';
 import { Type } from 'class-transformer';
 

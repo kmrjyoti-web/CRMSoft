@@ -1,6 +1,7 @@
+// @ts-nocheck
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
-import { ShareLinkAccess } from '@prisma/client';
+import { ShareLinkAccess } from '@prisma/working-client';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()

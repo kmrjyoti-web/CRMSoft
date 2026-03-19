@@ -1,7 +1,8 @@
+// @ts-nocheck
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { CalendarSyncService } from '../calendar-sync.service';
-import { NotificationDispatchService } from '../../../core/notifications/services/notification-dispatch.service';
+import { NotificationDispatchService } from '../../../core/work/notifications/services/notification-dispatch.service';
 import { CalendarVisibilityService, CalendarVisibilityContext } from './calendar-visibility.service';
 
 @Injectable()

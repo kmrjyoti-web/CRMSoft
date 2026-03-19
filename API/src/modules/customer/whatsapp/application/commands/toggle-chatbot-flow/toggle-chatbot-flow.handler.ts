@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Logger } from '@nestjs/common';
 import { ToggleChatbotFlowCommand } from './toggle-chatbot-flow.command';
 import { PrismaService } from '../../../../../../core/prisma/prisma.service';
-import { WaChatbotFlowStatus } from '@prisma/client';
+import { WaChatbotFlowStatus } from '@prisma/working-client';
 
 @CommandHandler(ToggleChatbotFlowCommand)
 export class ToggleChatbotFlowHandler implements ICommandHandler<ToggleChatbotFlowCommand> {

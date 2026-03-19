@@ -57,7 +57,7 @@ export class QuickCreateLeadHandler implements ICommandHandler<QuickCreateLeadCo
       if (!org) throw new NotFoundException(`Organization ${command.organizationId} not found`);
     }
 
-    const result = await this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx: any) => {
       let orgId = command.organizationId;
       let contactId = command.contactId;
       let rawContactId: string | undefined;

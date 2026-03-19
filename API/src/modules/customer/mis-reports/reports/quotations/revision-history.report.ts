@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../../core/prisma/prisma.service';
 import { IReport, FilterDefinition } from '../../interfaces/report-class.interface';

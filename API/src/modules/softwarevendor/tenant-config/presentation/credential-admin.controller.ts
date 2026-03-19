@@ -3,13 +3,13 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { CredentialProvider } from '@prisma/client';
+import { CredentialProvider } from '@prisma/identity-client';
 import { ApiResponse } from '../../../../common/utils/api-response';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { EncryptionService } from '../services/encryption.service';
 import { CredentialSchemaService } from '../services/credential-schema.service';
 import { GlobalDefaultCredentialDto } from './dto/global-default-credential.dto';
-import { SuperAdminGuard } from '../../../core/tenant/infrastructure/super-admin.guard';
+import { SuperAdminGuard } from '../../../core/identity/tenant/infrastructure/super-admin.guard';
 
 @ApiTags('Credential Admin')
 @ApiBearerAuth()

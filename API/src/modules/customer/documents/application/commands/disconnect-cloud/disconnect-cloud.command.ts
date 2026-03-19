@@ -1,4 +1,4 @@
-import { StorageProvider } from '@prisma/client';
+import { StorageProvider } from '@prisma/working-client';
 
 export class DisconnectCloudCommand {
   constructor(

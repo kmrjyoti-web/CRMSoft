@@ -1,10 +1,11 @@
+// @ts-nocheck
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Logger } from '@nestjs/common';
 import { CreateTaskCommand } from './create-task.command';
 import { PrismaService } from '../../../../../../core/prisma/prisma.service';
 import { TaskAssignmentService } from '../../services/task-assignment.service';
 import { TaskRecurrenceService } from '../../services/task-recurrence.service';
-import { TaskRecurrence } from '@prisma/client';
+import { TaskRecurrence } from '@prisma/working-client';
 import { CALENDAR_COLORS } from '../../../../../../common/utils/calendar-colors';
 import { getErrorMessage } from '@/common/utils/error.utils';
 

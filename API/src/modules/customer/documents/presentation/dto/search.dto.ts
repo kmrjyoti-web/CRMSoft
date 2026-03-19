@@ -1,6 +1,6 @@
 import { IsOptional, IsString, IsEnum, IsArray, IsDateString, IsInt, Min } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { DocumentCategory, StorageType } from '@prisma/client';
+import { DocumentCategory, StorageType } from '@prisma/working-client';
 import { Type } from 'class-transformer';
 import { PaginationDto } from '../../../../../common/dto/pagination.dto';
 

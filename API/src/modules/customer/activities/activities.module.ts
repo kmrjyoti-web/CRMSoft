@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TableConfigModule } from '../../softwarevendor/table-config/table-config.module';
-import { NotificationsModule } from '../../core/notifications/notifications.module';
+import { NotificationsModule } from '../../core/work/notifications/notifications.module';
 import { ActivityController } from './presentation/activity.controller';
 import { CreateActivityHandler } from './application/commands/create-activity/create-activity.handler';
 import { UpdateActivityHandler } from './application/commands/update-activity/update-activity.handler';

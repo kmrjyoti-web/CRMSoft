@@ -4,7 +4,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { MENU_PERMISSION_KEY, MenuPermissionMeta } from '../decorators/require-menu-permission.decorator';
 import { IS_PUBLIC_KEY } from '../../../common/decorators/roles.decorator';
-import { MenuPermissionService } from '../../../modules/core/menus/application/services/menu-permission.service';
+import { MenuPermissionService } from '../../../modules/core/identity/menus/application/services/menu-permission.service';
 
 /**
  * Guard that checks per-menu CRUD permissions via RoleMenuPermission table.

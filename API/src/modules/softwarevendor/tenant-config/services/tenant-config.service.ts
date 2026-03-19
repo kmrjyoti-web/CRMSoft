@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { ConfigCategory } from '@prisma/client';
+import { ConfigCategory } from '@prisma/identity-client';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { ConfigSeederService } from './config-seeder.service';
 

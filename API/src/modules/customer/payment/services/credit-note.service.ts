@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { AppError } from '../../../../common/errors/app-error';
-import { AutoNumberService } from '../../../core/settings/services/auto-number.service';
+import { AutoNumberService } from '../../../core/identity/settings/services/auto-number.service';
 import { InvoiceService } from './invoice.service';
 import { CreateCreditNoteDto, ApplyCreditNoteDto, CreditNoteQueryDto } from '../presentation/dto/credit-note.dto';
 

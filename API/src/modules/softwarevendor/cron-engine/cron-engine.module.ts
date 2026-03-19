@@ -1,6 +1,6 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { PrismaModule } from '../../../core/prisma/prisma.module';
-import { NotificationsModule } from '../../core/notifications/notifications.module';
+import { NotificationsModule } from '../../core/work/notifications/notifications.module';
 import { CalendarModule } from '../../customer/calendar/calendar.module';
 
 // ─── SERVICES ───

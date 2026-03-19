@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigCategory, ConfigValueType } from '@prisma/client';
+import { ConfigCategory, ConfigValueType } from '@prisma/identity-client';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 
 interface SeedConfig {

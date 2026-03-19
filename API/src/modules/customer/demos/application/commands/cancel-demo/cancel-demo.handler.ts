@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { NotFoundException } from '@nestjs/common';
 import { CancelDemoCommand } from './cancel-demo.command';

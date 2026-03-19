@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/working-client';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { ICronJobHandler, CronJobResult } from '../services/job-registry.service';
 import { CalendarSyncService } from '../../../customer/calendar/calendar-sync.service';
 import {
   NotificationDispatchService,
   DispatchEvent,
-} from '../../../core/notifications/services/notification-dispatch.service';
+} from '../../../core/work/notifications/services/notification-dispatch.service';
 
 // ─── 1. Process Event Reminders ─────────────────────────────────
 

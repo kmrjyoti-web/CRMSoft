@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsOptional, IsString, IsBoolean, IsEnum } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TemplateCategory } from '@prisma/client';
+import { TemplateCategory } from '@prisma/working-client';
 
 export class CreateTemplateDto {
   @ApiProperty()

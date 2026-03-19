@@ -33,6 +33,9 @@ export interface ErrorLogEntry {
 /** Sensitive keys to redact from request bodies. */
 const SENSITIVE_KEYS = ['password', 'token', 'secret', 'authorization', 'apiKey', 'accessToken', 'refreshToken'];
 
+/** Error codes that always get persisted regardless of HTTP status. */
+const ALWAYS_PERSIST_CODES = ['AUTH_TOKEN_INVALID', 'AUTH_TOKEN_EXPIRED', 'UNAUTHORIZED', 'FORBIDDEN', 'RATE_LIMIT_EXCEEDED'];
+
 /**
  * Logs errors to both console and database (fire-and-forget).
  * Never throws — logging must never interrupt the error response.
@@ -56,8 +59,11 @@ export class ErrorLoggerService {
       this.logger.warn(`${tag} — ${entry.message}`);
     }
 
-    // Async DB persist (fire-and-forget) — persist ALL errors
-    void this.persistAsync(entry);
+    // Async DB persist (fire-and-forget) — skip 4xx unless special codes
+    const is4xx = entry.statusCode >= 400 && entry.statusCode < 500;
+    if (!is4xx || ALWAYS_PERSIST_CODES.includes(entry.errorCode)) {
+      void this.persistAsync(entry);
+    }
   }
 
   /** Get a single error log by ID. */

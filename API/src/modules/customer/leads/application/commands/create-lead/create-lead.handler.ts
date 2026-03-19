@@ -56,7 +56,7 @@ export class CreateLeadHandler implements ICommandHandler<CreateLeadCommand> {
     }
 
     // 3. All writes inside a single transaction
-    const lead = await this.prisma.$transaction(async (tx) => {
+    const lead = await this.prisma.$transaction(async (tx: any) => {
       // Generate next lead number atomically (prevents duplicate numbers)
       const leadNumber = await this.repo.nextLeadNumber(tx);
 

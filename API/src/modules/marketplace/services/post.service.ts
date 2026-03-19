@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
-import { PostStatus, PostType, VisibilityType } from '@prisma/client';
+import { PostStatus, PostType, VisibilityType } from '@prisma/platform-client';
 
 interface CreatePostDto {
   postType: PostType;

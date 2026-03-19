@@ -1,6 +1,6 @@
 import { IsOptional, IsString, IsEnum, IsInt, IsDateString, Min } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { ShareLinkAccess } from '@prisma/client';
+import { ShareLinkAccess } from '@prisma/working-client';
 import { Type } from 'class-transformer';
 
 export class CreateShareLinkDto {

@@ -3,7 +3,7 @@ import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { TemplateRendererService } from './template-renderer.service';
 import { TrackingService } from './tracking.service';
 import { EmailSenderService } from './email-sender.service';
-import { CampaignStatus } from '@prisma/client';
+import { CampaignStatus } from '@prisma/working-client';
 
 @Injectable()
 export class CampaignExecutorService {

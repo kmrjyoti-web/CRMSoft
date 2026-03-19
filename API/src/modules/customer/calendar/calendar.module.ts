@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TasksModule } from '../../customer/tasks/tasks.module';
-import { NotificationsModule } from '../../core/notifications/notifications.module';
+import { NotificationsModule } from '../../core/work/notifications/notifications.module';
 import { CalendarController } from './presentation/calendar.controller';
 import { CalendarEventsController } from './presentation/calendar-events.controller';
 import { CalendarAvailabilityController } from './presentation/calendar-availability.controller';

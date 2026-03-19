@@ -2,7 +2,7 @@ import {
   IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsUUID, Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { PaymentMethod, PaymentGateway, PaymentStatus } from '@prisma/client';
+import { PaymentMethod, PaymentGateway, PaymentStatus } from '@prisma/working-client';
 
 export class RecordPaymentDto {
   @IsUUID() invoiceId: string;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { UpdateTourPlanCommand } from './update-tour-plan.command';

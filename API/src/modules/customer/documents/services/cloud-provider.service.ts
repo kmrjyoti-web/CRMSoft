@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { StorageProvider } from '@prisma/client';
+import { StorageProvider } from '@prisma/working-client';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 
 export interface CloudFileMetadata {

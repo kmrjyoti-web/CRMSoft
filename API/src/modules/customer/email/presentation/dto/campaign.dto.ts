@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsOptional, IsString, IsBoolean, IsInt, IsArray, IsDateString, IsEnum, ValidateNested, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { CampaignStatus } from '@prisma/client';
+import { CampaignStatus } from '@prisma/working-client';
 import { PaginationDto } from '../../../../../common/dto/pagination.dto';
 
 export class CreateCampaignDto {

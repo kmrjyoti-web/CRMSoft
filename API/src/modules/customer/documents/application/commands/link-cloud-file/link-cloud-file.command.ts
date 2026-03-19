@@ -1,4 +1,4 @@
-import { DocumentCategory } from '@prisma/client';
+import { DocumentCategory } from '@prisma/working-client';
 
 export class LinkCloudFileCommand {
   constructor(

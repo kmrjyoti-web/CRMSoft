@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
-import { DocumentType } from '@prisma/client';
+import { DocumentType } from '@prisma/working-client';
 
 @Injectable()
 export class TemplateCustomizationService {

@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { EncryptionService } from '../../softwarevendor/tenant-config/services/encryption.service';
-import { PluginCategory } from '@prisma/client';
+import { PluginCategory } from '@prisma/platform-client';
 import { PluginMenuService } from './plugin-menu.service';
 import { industryFilter } from '../../../common/utils/industry-filter.util';
 import { getErrorMessage } from '@/common/utils/error.utils';

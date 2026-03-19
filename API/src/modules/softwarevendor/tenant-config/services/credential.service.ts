@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { CredentialProvider, CredentialStatus } from '@prisma/client';
+import { CredentialProvider, CredentialStatus } from '@prisma/identity-client';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { EncryptionService } from './encryption.service';
 import { CredentialSchemaService } from './credential-schema.service';

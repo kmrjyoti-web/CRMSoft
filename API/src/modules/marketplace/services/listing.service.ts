@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { PricingAccessService } from '../../softwarevendor/verification/services/pricing-access.service';
-import { ListingStatus, ListingType, VisibilityType } from '@prisma/client';
+import { ListingStatus, ListingType, VisibilityType } from '@prisma/platform-client';
 
 interface CreateListingDto {
   listingType: ListingType;

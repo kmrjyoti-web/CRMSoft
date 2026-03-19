@@ -1,7 +1,7 @@
 import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { OtpService } from './otp.service';
-import { VerificationStatus, RegistrationType } from '@prisma/client';
+import { VerificationStatus, RegistrationType } from '@prisma/identity-client';
 
 export interface UserVerificationInfo {
   userId: string;

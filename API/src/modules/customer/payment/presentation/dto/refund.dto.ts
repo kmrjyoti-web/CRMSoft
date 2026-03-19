@@ -1,6 +1,6 @@
 import { IsString, IsNumber, IsUUID, Min, IsOptional, IsEnum, IsDateString } from 'class-validator';
 import { Type } from 'class-transformer';
-import { RefundStatus } from '@prisma/client';
+import { RefundStatus } from '@prisma/working-client';
 
 export class CreateRefundDto {
   @IsUUID() paymentId: string;

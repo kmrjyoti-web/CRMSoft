@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../../core/prisma/prisma.service';
-import { TaskRecurrence } from '@prisma/client';
+import { TaskRecurrence } from '@prisma/working-client';
 import { getErrorMessage } from '@/common/utils/error.utils';
 
 @Injectable()

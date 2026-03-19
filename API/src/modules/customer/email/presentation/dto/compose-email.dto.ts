@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsOptional, IsString, IsBoolean, IsArray, IsEnum, IsDateString, ValidateNested } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { EmailPriority } from '@prisma/client';
+import { EmailPriority } from '@prisma/working-client';
 
 export class EmailRecipientDto {
   @ApiProperty()

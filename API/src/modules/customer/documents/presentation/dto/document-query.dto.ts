@@ -1,6 +1,6 @@
 import { IsOptional, IsString, IsEnum, IsArray } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { DocumentCategory, StorageType } from '@prisma/client';
+import { DocumentCategory, StorageType } from '@prisma/working-client';
 import { PaginationDto } from '../../../../../common/dto/pagination.dto';
 
 export class DocumentQueryDto extends PaginationDto {

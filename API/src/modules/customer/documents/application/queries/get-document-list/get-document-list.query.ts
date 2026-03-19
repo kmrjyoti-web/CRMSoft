@@ -1,4 +1,4 @@
-import { DocumentCategory, StorageType } from '@prisma/client';
+import { DocumentCategory, StorageType } from '@prisma/working-client';
 
 export class GetDocumentListQuery {
   constructor(

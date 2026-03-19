@@ -12,11 +12,17 @@ describe('CreateQuotationHandler', () => {
   beforeEach(() => {
     prisma = {
       lead: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'lead-1', organization: { id: 'org-1', state: 'Maharashtra' },
+        }),
         findUnique: jest.fn().mockResolvedValue({
           id: 'lead-1', organization: { id: 'org-1', state: 'Maharashtra' },
         }),
       },
       product: {
+        findFirst: jest.fn().mockResolvedValue({
+          code: 'PRD-001', hsnCode: '8471', gstRate: 18, mrp: 50000,
+        }),
         findUnique: jest.fn().mockResolvedValue({
           code: 'PRD-001', hsnCode: '8471', gstRate: 18, mrp: 50000,
         }),
@@ -26,6 +32,10 @@ describe('CreateQuotationHandler', () => {
           id: 'q-1', quotationNo: 'QTN-2026-00001', status: 'DRAFT',
           lineItems: [{ id: 'li-1', productName: 'CRM License', lineTotal: 45000 }],
           lead: { id: 'lead-1' },
+        }),
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'q-1', quotationNo: 'QTN-2026-00001', totalAmount: 53100,
+          lineItems: [{ id: 'li-1' }], lead: { id: 'lead-1' },
         }),
         findUnique: jest.fn().mockResolvedValue({
           id: 'q-1', quotationNo: 'QTN-2026-00001', totalAmount: 53100,
@@ -54,7 +64,7 @@ describe('CreateQuotationHandler', () => {
       items: [{ productId: 'prod-1', productName: 'CRM License', quantity: 1, unitPrice: 45000 }],
     } as any);
     expect(prisma.quotation.create).toHaveBeenCalled();
-    expect(calculator.recalculate).toHaveBeenCalledWith('q-1', 'Maharashtra');
+    expect(calculator.recalculate).toHaveBeenCalledWith('q-1', 'Maharashtra', undefined);
     expect(result!.quotationNo).toBe('QTN-2026-00001');
   });
 
@@ -68,11 +78,11 @@ describe('CreateQuotationHandler', () => {
       userId: 'user-1', userName: 'Raj', leadId: 'lead-1',
       items: [{ productId: 'prod-1', productName: 'CRM', quantity: 1, unitPrice: 45000 }],
     } as any);
-    expect(prisma.product.findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 'prod-1' } }));
+    expect(prisma.product.findFirst).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ id: 'prod-1' }) }));
   });
 
   it('should validate lead exists', async () => {
-    prisma.lead.findUnique.mockResolvedValue(null);
+    prisma.lead.findFirst.mockResolvedValue(null);
     await expect(handler.execute({ userId: 'u', userName: 'U', leadId: 'bad' } as any)).rejects.toThrow(NotFoundException);
   });
 

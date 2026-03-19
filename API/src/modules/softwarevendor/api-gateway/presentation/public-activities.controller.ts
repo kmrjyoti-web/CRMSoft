@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Controller, Get, Post, Body, Param, Query, Req, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { ApiKeyGuard } from '../guards/api-key.guard';

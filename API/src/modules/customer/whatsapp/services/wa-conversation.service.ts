@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
-import { WaMessageDirection } from '@prisma/client';
+import { WaMessageDirection } from '@prisma/working-client';
 
 @Injectable()
 export class WaConversationService {

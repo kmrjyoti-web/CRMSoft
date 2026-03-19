@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
-import { ConflictStrategy, Prisma } from '@prisma/client';
+import { ConflictStrategy, Prisma } from '@prisma/working-client';
 import { EntityResolverService } from './entity-resolver.service';
 
 export interface ConflictResolveParams {

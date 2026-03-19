@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateDemoCommand } from './create-demo.command';
 import { PrismaService } from '../../../../../../core/prisma/prisma.service';

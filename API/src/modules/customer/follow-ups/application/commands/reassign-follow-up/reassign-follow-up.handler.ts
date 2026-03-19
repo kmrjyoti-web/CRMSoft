@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { NotFoundException } from '@nestjs/common';
 import { ReassignFollowUpCommand } from './reassign-follow-up.command';

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { StorageProvider } from '@prisma/client';
+import { StorageProvider } from '@prisma/working-client';
 
 export interface CloudLinkInfo {
   provider: StorageProvider;

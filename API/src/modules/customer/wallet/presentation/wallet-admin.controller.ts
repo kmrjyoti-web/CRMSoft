@@ -5,8 +5,8 @@ import {
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { ApiResponse } from '../../../../common/utils/api-response';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
-import { SuperAdminGuard } from '../../../core/tenant/infrastructure/super-admin.guard';
-import { SuperAdminRoute } from '../../../core/tenant/infrastructure/decorators/super-admin-route.decorator';
+import { SuperAdminGuard } from '../../../core/identity/tenant/infrastructure/super-admin.guard';
+import { SuperAdminRoute } from '../../../core/identity/tenant/infrastructure/decorators/super-admin-route.decorator';
 import { WalletService } from '../services/wallet.service';
 import { WalletTransactionService } from '../services/wallet-transaction.service';
 import { RechargeService } from '../services/recharge.service';

@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsOptional, IsString, IsBoolean, IsInt, IsEnum } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { EmailProvider } from '@prisma/client';
+import { EmailProvider } from '@prisma/working-client';
 
 export class TestConnectionDto {
   @ApiProperty()

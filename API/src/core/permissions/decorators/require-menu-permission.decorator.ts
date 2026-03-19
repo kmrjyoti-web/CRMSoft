@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import type { PermissionAction } from '../../../modules/core/menus/application/services/menu-permission.service';
+import type { PermissionAction } from '../../../modules/core/identity/menus/application/services/menu-permission.service';
 
 export const MENU_PERMISSION_KEY = 'menuPermission';
 

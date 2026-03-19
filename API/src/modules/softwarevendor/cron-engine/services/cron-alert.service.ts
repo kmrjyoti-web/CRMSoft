@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
-import { CronJobConfig, CronJobRunLog } from '@prisma/client';
+import { CronJobConfig, CronJobRunLog } from '@prisma/working-client';
 import { getErrorMessage } from '@/common/utils/error.utils';
 
 /**

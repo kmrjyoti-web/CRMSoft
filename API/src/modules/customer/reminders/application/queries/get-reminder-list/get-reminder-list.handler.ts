@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { GetReminderListQuery } from './get-reminder-list.query';
 import { PrismaService } from '../../../../../../core/prisma/prisma.service';

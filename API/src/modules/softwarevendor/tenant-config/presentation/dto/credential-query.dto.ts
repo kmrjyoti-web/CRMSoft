@@ -1,5 +1,5 @@
 import { IsOptional, IsEnum } from 'class-validator';
-import { CredentialProvider, CredentialStatus } from '@prisma/client';
+import { CredentialProvider, CredentialStatus } from '@prisma/identity-client';
 import { PaginationDto } from '../../../../../common/dto/pagination.dto';
 
 export class CredentialQueryDto extends PaginationDto {

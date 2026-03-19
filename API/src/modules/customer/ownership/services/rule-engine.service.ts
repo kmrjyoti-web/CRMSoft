@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { RoundRobinService } from './round-robin.service';

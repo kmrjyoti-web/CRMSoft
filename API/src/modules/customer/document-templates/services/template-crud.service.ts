@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
-import { DocumentType, Prisma } from '@prisma/client';
+import { DocumentType, Prisma } from '@prisma/working-client';
 
 @Injectable()
 export class TemplateCrudService {
@@ -154,7 +154,7 @@ export class TemplateCrudService {
       `Setting default template: ${templateId} for tenant ${tenantId}, type ${documentType}`,
     );
 
-    await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx: any) => {
       // Unset existing default customization for this tenant + type
       const existingDefaults = await tx.tenantTemplateCustomization.findMany({
         where: {

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../../core/prisma/prisma.module';
-import { SettingsModule } from '../../core/settings/settings.module';
+import { SettingsModule } from '../../core/identity/settings/settings.module';
 
 // ── Services ──
 import { GstCalculatorService } from './services/gst-calculator.service';

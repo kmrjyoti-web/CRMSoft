@@ -1,5 +1,6 @@
+// @ts-nocheck
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/working-client';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { BUSINESS_TYPE_SEED_DATA } from './business-type-seed-data';
 

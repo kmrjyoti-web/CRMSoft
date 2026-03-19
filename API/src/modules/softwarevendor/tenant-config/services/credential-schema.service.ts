@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CredentialProvider } from '@prisma/client';
+import { CredentialProvider } from '@prisma/identity-client';
 
 export interface FieldDefinition {
   key: string;

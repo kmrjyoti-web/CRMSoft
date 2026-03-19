@@ -3,7 +3,7 @@ import {
   IsEnum, IsNumber, ValidateNested, IsUUID, Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ProformaInvoiceStatus } from '@prisma/client';
+import { ProformaInvoiceStatus } from '@prisma/working-client';
 
 export class ProformaLineItemDto {
   @IsOptional() @IsString() productId?: string;

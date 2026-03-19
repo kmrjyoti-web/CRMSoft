@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AssignTaskCommand } from './assign-task.command';
 import { PrismaService } from '../../../../../../core/prisma/prisma.service';

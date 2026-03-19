@@ -3,8 +3,8 @@ import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { AppError } from '../../../../common/errors/app-error';
 import { GstCalculatorService, GstLineInput } from './gst-calculator.service';
 import { AmountInWordsService } from './amount-in-words.service';
-import { AutoNumberService } from '../../../core/settings/services/auto-number.service';
-import { CompanyProfileService } from '../../../core/settings/services/company-profile.service';
+import { AutoNumberService } from '../../../core/identity/settings/services/auto-number.service';
+import { CompanyProfileService } from '../../../core/identity/settings/services/company-profile.service';
 import { InvoiceService } from './invoice.service';
 import {
   CreateProformaInvoiceDto,

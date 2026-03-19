@@ -3,7 +3,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { CredentialProvider } from '@prisma/client';
+import { CredentialProvider } from '@prisma/identity-client';
 import { ApiResponse } from '../../../../common/utils/api-response';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { CredentialService } from '../services/credential.service';

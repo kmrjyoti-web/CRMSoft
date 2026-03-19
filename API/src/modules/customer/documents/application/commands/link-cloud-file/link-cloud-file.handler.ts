@@ -5,7 +5,7 @@ import { CloudLinkParserService } from '../../../services/cloud-link-parser.serv
 import { CloudProviderService } from '../../../services/cloud-provider.service';
 import { DocumentService } from '../../../services/document.service';
 import { DocumentActivityService } from '../../../services/document-activity.service';
-import { StorageType } from '@prisma/client';
+import { StorageType } from '@prisma/working-client';
 
 @CommandHandler(LinkCloudFileCommand)
 export class LinkCloudFileHandler implements ICommandHandler<LinkCloudFileCommand> {

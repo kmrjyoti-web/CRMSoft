@@ -1,5 +1,5 @@
 import { IsEnum, IsOptional, IsString, IsBoolean, IsObject, IsNotEmpty } from 'class-validator';
-import { CredentialProvider } from '@prisma/client';
+import { CredentialProvider } from '@prisma/identity-client';
 
 export class GlobalDefaultCredentialDto {
   @IsEnum(CredentialProvider)

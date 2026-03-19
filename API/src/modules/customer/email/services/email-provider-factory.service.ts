@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { EmailProvider } from '@prisma/client';
+import { EmailProvider } from '@prisma/working-client';
 import { IEmailProviderService } from './email-provider.interface';
 import { GmailService } from './gmail.service';
 import { OutlookService } from './outlook.service';

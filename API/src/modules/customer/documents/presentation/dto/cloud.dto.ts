@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, IsOptional, IsEnum, IsDateString, IsUrl } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { StorageProvider, DocumentCategory } from '@prisma/client';
+import { StorageProvider, DocumentCategory } from '@prisma/working-client';
 
 export class ConnectCloudDto {
   @ApiProperty({ enum: StorageProvider })

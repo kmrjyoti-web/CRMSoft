@@ -9,7 +9,7 @@ import { ConnectCloudCommand } from '../application/commands/connect-cloud/conne
 import { DisconnectCloudCommand } from '../application/commands/disconnect-cloud/disconnect-cloud.command';
 import { GetCloudConnectionsQuery } from '../application/queries/get-cloud-connections/get-cloud-connections.query';
 import { ConnectCloudDto } from './dto/cloud.dto';
-import { StorageProvider } from '@prisma/client';
+import { StorageProvider } from '@prisma/working-client';
 
 @ApiTags('Cloud Connections')
 @ApiBearerAuth()

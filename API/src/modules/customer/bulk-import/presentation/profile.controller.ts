@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { RequirePermissions } from '../../../../core/permissions/decorators/require-permissions.decorator';
 import { ApiResponse } from '../../../../common/utils/api-response';
-import { AuditSkip } from '../../../core/audit/decorators/audit-skip.decorator';
+import { AuditSkip } from '../../../core/identity/audit/decorators/audit-skip.decorator';
 import { CreateProfileCommand } from '../application/commands/create-profile/create-profile.command';
 import { UpdateProfileCommand } from '../application/commands/update-profile/update-profile.command';
 import { DeleteProfileCommand } from '../application/commands/delete-profile/delete-profile.command';

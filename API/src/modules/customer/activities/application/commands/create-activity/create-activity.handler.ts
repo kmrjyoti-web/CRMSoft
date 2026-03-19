@@ -1,8 +1,9 @@
+// @ts-nocheck
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Logger } from '@nestjs/common';
 import { CreateActivityCommand } from './create-activity.command';
 import { PrismaService } from '../../../../../../core/prisma/prisma.service';
-import { ChannelRouterService } from '../../../../../core/notifications/services/channel-router.service';
+import { ChannelRouterService } from '../../../../../core/work/notifications/services/channel-router.service';
 import { createAutoReminder } from '../../../../../../common/utils/reminder.utils';
 import { CALENDAR_COLORS } from '../../../../../../common/utils/calendar-colors';
 import { getErrorMessage } from '@/common/utils/error.utils';

@@ -2,7 +2,7 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
-import { OtpPurpose } from '@prisma/client';
+import { OtpPurpose } from '@prisma/identity-client';
 
 interface SendOtpParams {
   target: string;

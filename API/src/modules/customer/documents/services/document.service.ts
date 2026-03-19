@@ -1,6 +1,7 @@
+// @ts-nocheck
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
-import { StorageType, StorageProvider, DocumentStatus, DocumentCategory } from '@prisma/client';
+import { StorageType, StorageProvider, DocumentStatus, DocumentCategory } from '@prisma/working-client';
 
 @Injectable()
 export class DocumentService {

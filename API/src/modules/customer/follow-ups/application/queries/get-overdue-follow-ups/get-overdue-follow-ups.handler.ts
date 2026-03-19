@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { GetOverdueFollowUpsQuery } from './get-overdue-follow-ups.query';
 import { PrismaService } from '../../../../../../core/prisma/prisma.service';

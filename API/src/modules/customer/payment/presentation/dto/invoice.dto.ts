@@ -3,7 +3,7 @@ import {
   IsEnum, IsNumber, ValidateNested, IsUUID, Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { InvoiceStatus } from '@prisma/client';
+import { InvoiceStatus } from '@prisma/working-client';
 
 export class InvoiceLineItemDto {
   @IsOptional() @IsString() productId?: string;

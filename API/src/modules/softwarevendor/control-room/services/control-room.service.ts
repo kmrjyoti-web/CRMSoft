@@ -163,7 +163,7 @@ export class ControlRoomService {
     const previousValue = existing?.value ?? null;
 
     // Use transaction for atomicity
-    const result = await this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx: any) => {
       // Upsert the value
       const value = existing
         ? await tx.controlRoomValue.update({
@@ -302,7 +302,7 @@ export class ControlRoomService {
       );
     }
 
-    await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx: any) => {
       // Soft-delete the value
       await tx.controlRoomValue.update({
         where: { id: existing.id },
@@ -411,7 +411,7 @@ export class ControlRoomService {
 
     const batchId = drafts[0].id;
 
-    await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx: any) => {
       for (const draft of drafts) {
         // Upsert live value
         const existing = await tx.controlRoomValue.findFirst({

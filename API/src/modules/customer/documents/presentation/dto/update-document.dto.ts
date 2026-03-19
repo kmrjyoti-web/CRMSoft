@@ -1,6 +1,6 @@
 import { IsOptional, IsString, IsArray, IsEnum } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { DocumentCategory } from '@prisma/client';
+import { DocumentCategory } from '@prisma/working-client';
 
 export class UpdateDocumentDto {
   @ApiPropertyOptional()

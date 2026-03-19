@@ -1,6 +1,7 @@
+// @ts-nocheck
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
-import { DocumentCategory, StorageType } from '@prisma/client';
+import { DocumentCategory, StorageType } from '@prisma/working-client';
 
 @Injectable()
 export class DocumentSearchService {

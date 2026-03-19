@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
-import { VendorGuard } from '../../../core/tenant/infrastructure/vendor.guard';
+import { VendorGuard } from '../../../core/identity/tenant/infrastructure/vendor.guard';
 import { ApiResponse } from '../../../../common/utils/api-response';
 import { SupportTicketService } from '../services/support-ticket.service';
 

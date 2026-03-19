@@ -6,7 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
-import { TenantModuleStatus, CredentialValidationStatus } from '@prisma/client';
+import { TenantModuleStatus, CredentialValidationStatus } from '@prisma/platform-client';
 
 @Injectable()
 export class ModuleManagerService {

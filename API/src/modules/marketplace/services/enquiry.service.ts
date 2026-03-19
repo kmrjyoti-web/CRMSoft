@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
-import { EnquiryStatus } from '@prisma/client';
+import { EnquiryStatus } from '@prisma/platform-client';
 import { ListingService } from './listing.service';
 
 interface CreateEnquiryDto {

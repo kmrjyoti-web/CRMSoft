@@ -5,7 +5,7 @@ import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { RequirePermissions } from '../../../../core/permissions/decorators/require-permissions.decorator';
 import { ApiResponse } from '../../../../common/utils/api-response';
-import { AuditSkip } from '../../../core/audit/decorators/audit-skip.decorator';
+import { AuditSkip } from '../../../core/identity/audit/decorators/audit-skip.decorator';
 import { UploadFileCommand } from '../application/commands/upload-file/upload-file.command';
 import { SelectProfileCommand } from '../application/commands/select-profile/select-profile.command';
 import { ApplyMappingCommand } from '../application/commands/apply-mapping/apply-mapping.command';
@@ -118,7 +118,7 @@ export class ImportController {
       // Log error and mark job as FAILED so user can see what happened
       console.error(`[Import] Job ${jobId} failed:`, err.message);
       try {
-        const { PrismaClient } = require('@prisma/client');
+        const { PrismaClient } = require('@prisma/working-client');
         const prisma = new PrismaClient();
         await prisma.importJob.update({
           where: { id: jobId },

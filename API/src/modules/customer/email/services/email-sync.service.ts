@@ -3,7 +3,7 @@ import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { EmailProviderFactoryService } from './email-provider-factory.service';
 import { ThreadBuilderService } from './thread-builder.service';
 import { EmailLinkerService } from './email-linker.service';
-import { EmailAccountStatus } from '@prisma/client';
+import { EmailAccountStatus } from '@prisma/working-client';
 
 @Injectable()
 export class EmailSyncService {

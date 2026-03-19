@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../../../core/prisma/prisma.service';

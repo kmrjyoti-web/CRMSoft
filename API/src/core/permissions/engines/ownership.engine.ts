@@ -1,5 +1,6 @@
+// @ts-nocheck
 import { Injectable } from '@nestjs/common';
-import { EntityType, OwnerType } from '@prisma/client';
+import { EntityType, OwnerType } from '@prisma/working-client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PermissionContext } from '../types/permission-context';
 

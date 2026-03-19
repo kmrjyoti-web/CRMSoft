@@ -11,7 +11,7 @@ import { PermissionCacheService } from './services/permission-cache.service';
 import { PermissionPolicyGuard } from './guards/permission-policy.guard';
 import { OwnershipGuard } from './guards/ownership.guard';
 import { MenuPermissionGuard } from './guards/menu-permission.guard';
-import { MenusModule } from '../../modules/core/menus/menus.module';
+import { MenusModule } from '../../modules/core/identity/menus/menus.module';
 
 @Global()
 @Module({

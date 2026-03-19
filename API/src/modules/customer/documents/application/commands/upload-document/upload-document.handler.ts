@@ -3,7 +3,7 @@ import { UploadDocumentCommand } from './upload-document.command';
 import { StorageLocalService } from '../../../services/storage-local.service';
 import { DocumentService } from '../../../services/document.service';
 import { DocumentActivityService } from '../../../services/document-activity.service';
-import { StorageType, DocumentCategory } from '@prisma/client';
+import { StorageType, DocumentCategory } from '@prisma/working-client';
 
 @CommandHandler(UploadDocumentCommand)
 export class UploadDocumentHandler implements ICommandHandler<UploadDocumentCommand> {
