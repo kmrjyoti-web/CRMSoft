@@ -510,6 +510,9 @@ model User {
   dataMaskingPolicies DataMaskingPolicy[] @relation("DataMaskingPolicyUser")
   unmaskAuditLogs     UnmaskAuditLog[]    @relation("UnmaskAuditLogUser")
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, email])
   @@unique([tenantId, employeeCode])
   @@index([userType, status])
@@ -535,6 +538,13 @@ model CustomerProfile {
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, userId])
   @@index([tenantId])
   @@map("customer_profiles")
@@ -558,6 +568,13 @@ model ReferralPartner {
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, userId])
   @@unique([tenantId, referralCode])
   @@index([tenantId])
@@ -584,6 +601,13 @@ model Department {
   users        User[]        @relation("UserDepartment")
   designations Designation[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, name])
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -608,6 +632,13 @@ model Designation {
   updatedAt    DateTime      @updatedAt @map("updated_at")
   users        User[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, name])
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -631,6 +662,13 @@ model Role {
   menuPermissions     RoleMenuPermission[]
   dataMaskingPolicies DataMaskingPolicy[]  @relation("DataMaskingPolicyRole")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, name])
   @@index([tenantId])
   @@map("roles")
@@ -656,6 +694,13 @@ model RolePermission {
   role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
   permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, roleId, permissionId])
   @@index([tenantId])
   @@map("role_permissions")
@@ -707,6 +752,11 @@ model RoleMenuPermission {
   createdById String?  @map("created_by_id")
   updatedById String?  @map("updated_by_id")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+
+  @@index([isDeleted])
   @@unique([tenantId, roleId, menuId])
   @@index([tenantId, roleId])
   @@index([menuId])
@@ -728,6 +778,13 @@ model PermissionTemplate {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, name])
   @@index([tenantId])
   @@map("permission_templates")
@@ -747,6 +804,13 @@ model MasterLookup {
   updatedAt   DateTime      @updatedAt @map("updated_at")
   values      LookupValue[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, category])
   @@index([tenantId])
   @@map("master_lookups")
@@ -778,6 +842,13 @@ model LookupValue {
   leadFilters         LeadFilter[]
   productFilters      ProductFilter[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, lookupId, value])
   @@index([tenantId])
   @@map("lookup_values")
@@ -817,6 +888,9 @@ model RawContact {
   filters        RawContactFilter[]
   communications Communication[]    @relation("CommRawContact")
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@index([status])
   @@index([firstName, lastName])
   @@index([tenantId])
@@ -832,6 +906,13 @@ model RawContactFilter {
   rawContact    RawContact  @relation(fields: [rawContactId], references: [id], onDelete: Cascade)
   lookupValue   LookupValue @relation(fields: [lookupValueId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, rawContactId, lookupValueId])
   @@index([tenantId])
   @@map("raw_contact_filters")
@@ -878,6 +959,9 @@ model Contact {
   proformaInvoices     ProformaInvoice[]
   quotations           Quotation[] @relation("QuotationContactPerson")
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@index([firstName, lastName])
   @@index([tenantId])
   @@index([isDeleted])
@@ -892,6 +976,13 @@ model ContactFilter {
   contact       Contact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
   lookupValue   LookupValue @relation(fields: [lookupValueId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, contactId, lookupValueId])
   @@index([tenantId])
   @@map("contact_filters")
@@ -943,6 +1034,9 @@ model Organization {
   proformaInvoices   ProformaInvoice[]
   quotations         Quotation[] @relation("QuotationOrganization")
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@index([tenantId])
   @@index([isDeleted])
   @@map("organizations")
@@ -956,6 +1050,13 @@ model OrganizationFilter {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   lookupValue    LookupValue  @relation(fields: [lookupValueId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, organizationId, lookupValueId])
   @@index([tenantId])
   @@map("organization_filters")
@@ -984,6 +1085,13 @@ model ContactOrganization {
   contact      Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, contactId, organizationId, relationType])
   @@index([organizationId, isActive])
   @@index([contactId, isActive])
@@ -1021,6 +1129,13 @@ model Communication {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([rawContactId])
   @@index([contactId])
   @@index([organizationId])
@@ -1067,6 +1182,9 @@ model Lead {
   communications    Communication[]
   tourPlanVisits    TourPlanVisit[]
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, leadNumber])
   @@index([status, allocatedToId])
   @@index([tenantId])
@@ -1082,6 +1200,13 @@ model LeadFilter {
   lead          Lead        @relation(fields: [leadId], references: [id], onDelete: Cascade)
   lookupValue   LookupValue @relation(fields: [lookupValueId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, leadId, lookupValueId])
   @@index([tenantId])
   @@map("lead_filters")
@@ -1116,6 +1241,9 @@ model Activity {
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@index([leadId, type])
   @@index([tenantId])
   @@index([isDeleted])
@@ -1147,6 +1275,13 @@ model Demo {
   createdAt       DateTime    @default(now()) @map("created_at")
   updatedAt       DateTime    @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([leadId, status])
   @@index([tenantId])
   @@map("demos")
@@ -1182,6 +1317,13 @@ model TourPlan {
 
   visits TourPlanVisit[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([salesPersonId, planDate])
   @@index([tenantId])
   @@map("tour_plans")
@@ -1273,6 +1415,9 @@ model Quotation {
   invoices         Invoice[]
   proformaInvoices ProformaInvoice[]
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, quotationNo])
   @@index([leadId, status])
   @@index([status, createdAt])
@@ -1323,6 +1468,13 @@ model QuotationLineItem {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([quotationId])
   @@index([tenantId])
   @@map("quotation_line_items")
@@ -1363,6 +1515,13 @@ model QuotationSendLog {
 
   createdAt DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([quotationId])
   @@index([sentById])
   @@index([tenantId])
@@ -1404,6 +1563,13 @@ model QuotationNegotiationLog {
 
   createdAt DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([quotationId, loggedAt])
   @@index([tenantId])
   @@map("quotation_negotiation_logs")
@@ -1428,6 +1594,13 @@ model QuotationActivity {
   performedByName String   @map("performed_by_name")
   createdAt       DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([quotationId, createdAt])
   @@index([tenantId])
   @@map("quotation_activities")
@@ -1457,6 +1630,13 @@ model QuotationTemplate {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, name])
   @@index([tenantId])
   @@map("quotation_templates")
@@ -1484,6 +1664,13 @@ model EntityOwner {
   createdAt        DateTime   @default(now()) @map("created_at")
   updatedAt        DateTime   @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([entityType, entityId, isActive])
   @@index([userId, entityType, isActive])
   @@index([tenantId])
@@ -1513,6 +1700,13 @@ model OwnershipLog {
   entitySnapshot        Json?           @map("entity_snapshot")
   createdAt             DateTime        @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([entityType, entityId])
   @@index([tenantId])
   @@map("ownership_logs")
@@ -1557,6 +1751,13 @@ model AssignmentRule {
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, name])
   @@index([entityType, triggerEvent, isActive])
   @@index([priority])
@@ -1598,6 +1799,13 @@ model UserCapacity {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, userId])
   @@index([tenantId])
   @@map("user_capacities")
@@ -1623,6 +1831,13 @@ model DelegationRecord {
   createdAt   DateTime    @default(now()) @map("created_at")
   updatedAt   DateTime    @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([fromUserId, isActive])
   @@index([toUserId, isActive])
   @@index([endDate, isActive])
@@ -1646,6 +1861,13 @@ model UserPermissionOverride {
   createdBy String?   @map("created_by")
   createdAt DateTime  @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, userId, action, effect])
   @@index([tenantId])
   @@map("user_permission_overrides")
@@ -1674,6 +1896,13 @@ model ApprovalRequest {
   decidedAt   DateTime? @map("decided_at")
   createdAt   DateTime  @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([status])
   @@index([makerId])
   @@index([checkerRole, status])
@@ -1699,6 +1928,13 @@ model ApprovalRule {
   isActive        Boolean  @default(true) @map("is_active")
   createdAt       DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, entityType, action])
   @@index([tenantId])
   @@map("approval_rules")
@@ -1737,6 +1973,13 @@ model Menu {
   updatedAt                 DateTime             @updatedAt @map("updated_at")
   roleMenuPermissions       RoleMenuPermission[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, code])
   @@index([tenantId])
   @@index([industryCode])
@@ -1762,6 +2005,13 @@ model Brand {
   brandContacts      BrandContact[]
   products           Product[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, name])
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -1779,6 +2029,13 @@ model BrandOrganization {
   notes          String?
   createdAt      DateTime     @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, brandId, organizationId])
   @@index([tenantId])
   @@map("brand_organizations")
@@ -1795,6 +2052,13 @@ model BrandContact {
   isPrimary Boolean  @default(false) @map("is_primary")
   createdAt DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, brandId, contactId])
   @@index([tenantId])
   @@map("brand_contacts")
@@ -1815,6 +2079,13 @@ model Package {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, name])
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -1841,6 +2112,13 @@ model Manufacturer {
   manufacturerContacts      ManufacturerContact[]
   products                  Product[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, name])
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -1858,6 +2136,13 @@ model ManufacturerOrganization {
   notes          String?
   createdAt      DateTime     @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, manufacturerId, organizationId])
   @@index([tenantId])
   @@map("manufacturer_organizations")
@@ -1874,6 +2159,13 @@ model ManufacturerContact {
   isPrimary      Boolean      @default(false) @map("is_primary")
   createdAt      DateTime     @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, manufacturerId, contactId])
   @@index([tenantId])
   @@map("manufacturer_contacts")
@@ -1899,6 +2191,13 @@ model BusinessLocation {
   updatedAt             DateTime               @updatedAt @map("updated_at")
   organizationLocations OrganizationLocation[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, code])
   @@index([level, parentId])
   @@index([tenantId])
@@ -1915,6 +2214,13 @@ model OrganizationLocation {
   isPrimary      Boolean          @default(false) @map("is_primary")
   createdAt      DateTime         @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, organizationId, locationId])
   @@index([tenantId])
   @@map("organization_locations")
@@ -1944,6 +2250,13 @@ model CompanyCountry {
 
   states         CompanyState[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, countryCode])
   @@index([tenantId])
   @@map("company_countries")
@@ -1972,6 +2285,13 @@ model CompanyState {
   country          CompanyCountry @relation(fields: [companyCountryId], references: [id], onDelete: Cascade)
   cities           CompanyCity[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, companyCountryId, stateCode])
   @@index([tenantId])
   @@map("company_states")
@@ -1997,6 +2317,13 @@ model CompanyCity {
   state          CompanyState    @relation(fields: [companyStateId], references: [id], onDelete: Cascade)
   pincodes       CompanyPincode[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, companyStateId, cityName])
   @@index([tenantId])
   @@map("company_cities")
@@ -2014,6 +2341,13 @@ model CompanyPincode {
 
   city          CompanyCity @relation(fields: [companyCityId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, companyCityId, pincode])
   @@index([tenantId])
   @@map("company_pincodes")
@@ -2039,6 +2373,13 @@ model CustomFieldDefinition {
   updatedAt    DateTime            @updatedAt @map("updated_at")
   values       EntityConfigValue[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, entityType, fieldName])
   @@index([entityType, isActive])
   @@index([tenantId])
@@ -2061,6 +2402,13 @@ model EntityConfigValue {
   createdAt     DateTime              @default(now()) @map("created_at")
   updatedAt     DateTime              @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, definitionId, entityId])
   @@index([entityType, entityId])
   @@index([definitionId, valueText])
@@ -2158,6 +2506,9 @@ model Product {
   relatedFrom     ProductRelation[]       @relation("RelatedFrom")
   relatedTo       ProductRelation[]       @relation("RelatedTo")
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, code])
   @@unique([tenantId, slug])
   @@index([code])
@@ -2189,6 +2540,13 @@ model ProductPrice {
   createdAt    DateTime            @default(now()) @map("created_at")
   updatedAt    DateTime            @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([productId, priceType, priceGroupId])
   @@index([tenantId])
   @@map("product_prices")
@@ -2208,6 +2566,13 @@ model CustomerPriceGroup {
   prices      ProductPrice[]
   customers   CustomerGroupMapping[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, name])
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -2224,6 +2589,13 @@ model CustomerGroupMapping {
   isActive       Boolean            @default(true) @map("is_active")
   createdAt      DateTime           @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, priceGroupId, contactId])
   @@unique([tenantId, priceGroupId, organizationId])
   @@index([tenantId])
@@ -2245,6 +2617,13 @@ model ProductTaxDetail {
   isActive    Boolean  @default(true) @map("is_active")
   createdAt   DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, productId, taxName])
   @@index([tenantId])
   @@map("product_tax_details")
@@ -2265,6 +2644,13 @@ model ProductUnitConversion {
   isDefault      Boolean  @default(false) @map("is_default")
   createdAt      DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, productId, fromUnit, toUnit])
   @@index([tenantId])
   @@map("product_unit_conversions")
@@ -2286,6 +2672,13 @@ model ProductRelation {
   isActive      Boolean  @default(true) @map("is_active")
   createdAt     DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, fromProductId, toProductId, relationType])
   @@index([tenantId])
   @@map("product_relations")
@@ -2303,6 +2696,13 @@ model ProductFilter {
   lookupValueId String      @map("lookup_value_id")
   lookupValue   LookupValue @relation(fields: [lookupValueId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, productId, lookupValueId])
   @@index([tenantId])
   @@map("product_filters")
@@ -2362,6 +2762,13 @@ model Workflow {
   transitions WorkflowTransition[]
   instances   WorkflowInstance[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, code])
   @@index([entityType, isDefault])
   @@index([tenantId])
@@ -2397,6 +2804,13 @@ model WorkflowState {
   historyTo         WorkflowHistory[]       @relation("HistoryToState")
   slaEscalations    WorkflowSlaEscalation[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, workflowId, code])
   @@index([workflowId, stateType])
   @@index([tenantId])
@@ -2432,6 +2846,13 @@ model WorkflowTransition {
   approvals      WorkflowApproval[]
   actionLogs     WorkflowActionLog[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, workflowId, code])
   @@index([workflowId, fromStateId])
   @@index([tenantId])
@@ -2465,6 +2886,13 @@ model WorkflowInstance {
   actionLogs  WorkflowActionLog[]
   escalations WorkflowSlaEscalation[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, entityType, entityId, workflowId])
   @@index([entityType, entityId])
   @@index([workflowId, currentStateId])
@@ -2496,6 +2924,13 @@ model WorkflowHistory {
   duration        Int?
   createdAt       DateTime            @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([instanceId, createdAt])
   @@index([tenantId])
   @@map("workflow_history")
@@ -2521,6 +2956,13 @@ model WorkflowApproval {
   createdAt     DateTime               @default(now()) @map("created_at")
   updatedAt     DateTime               @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([instanceId, status])
   @@index([requestedById])
   @@index([tenantId])
@@ -2546,6 +2988,13 @@ model WorkflowActionLog {
   executedAt   DateTime?          @map("executed_at")
   createdAt    DateTime           @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([instanceId, actionType])
   @@index([tenantId])
   @@map("workflow_action_logs")
@@ -2570,6 +3019,13 @@ model WorkflowSlaEscalation {
   isResolved      Boolean          @default(false) @map("is_resolved")
   createdAt       DateTime         @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([instanceId, isResolved])
   @@index([tenantId])
   @@map("workflow_sla_escalations")
@@ -3091,6 +3547,13 @@ model FollowUp {
   createdAt    DateTime         @default(now()) @map("created_at")
   updatedAt    DateTime         @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([assignedToId, isActive])
   @@index([dueDate, isOverdue])
   @@index([entityType, entityId])
@@ -3140,6 +3603,13 @@ model Reminder {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([scheduledAt, isSent])
   @@index([recipientId, isSent])
   @@index([tenantId, recipientId, status])
@@ -3176,6 +3646,13 @@ model RecurringEvent {
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([nextOccurrence, isActive])
   @@index([createdById])
   @@index([tenantId])
@@ -3214,6 +3691,13 @@ model TourPlanVisit {
 
   photos TourPlanPhoto[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tourPlanId, sortOrder])
   @@index([tenantId])
   @@map("tour_plan_visits")
@@ -3234,6 +3718,13 @@ model TourPlanPhoto {
   longitude       Float?
   createdAt       DateTime      @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tourPlanVisitId])
   @@index([tenantId])
   @@map("tour_plan_photos")
@@ -3260,6 +3751,13 @@ model CalendarEvent {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, eventType, sourceId])
   @@index([userId, startTime])
   @@index([startTime, endTime])
@@ -3304,6 +3802,13 @@ model Notification {
   createdAt     DateTime               @default(now()) @map("created_at")
   updatedAt     DateTime               @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([recipientId, status])
   @@index([recipientId, category])
   @@index([recipientId, createdAt])
@@ -3329,6 +3834,13 @@ model NotificationPreference {
   createdAt       DateTime        @default(now()) @map("created_at")
   updatedAt       DateTime        @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, userId])
   @@index([tenantId])
   @@map("notification_preferences")
@@ -3355,6 +3867,13 @@ model NotificationTemplate {
 
   notificationConfigs NotificationConfig[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, name])
   @@unique([tenantId, code, channel])
   @@index([tenantId])
@@ -3374,6 +3893,13 @@ model PushSubscription {
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([userId])
   @@index([tenantId])
   @@map("push_subscriptions")
@@ -3403,6 +3929,13 @@ model SalesTarget {
   createdAt        DateTime     @default(now()) @map("created_at")
   updatedAt        DateTime     @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([userId, metric, period])
   @@index([periodStart, periodEnd])
   @@index([tenantId])
@@ -3431,6 +3964,13 @@ model ReportExportLog {
   generationTimeMs  Int?         @map("generation_time_ms")
   createdAt         DateTime     @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([exportedById, createdAt])
   @@index([reportCode, createdAt])
   @@index([tenantId])
@@ -3465,6 +4005,13 @@ model ReportDefinition {
   schedules ScheduledReport[]
   templates ReportTemplate[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, code])
   @@index([category, isActive])
   @@index([tenantId])
@@ -3483,6 +4030,13 @@ model ReportBookmark {
   createdAt   DateTime         @default(now()) @map("created_at")
   updatedAt   DateTime         @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([userId])
   @@index([tenantId])
   @@map("report_bookmarks")
@@ -3512,6 +4066,13 @@ model ScheduledReport {
   createdAt        DateTime              @default(now()) @map("created_at")
   updatedAt        DateTime              @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([status, nextScheduledAt])
   @@index([tenantId])
   @@map("scheduled_reports")
@@ -3532,6 +4093,13 @@ model ReportTemplate {
   createdAt    DateTime          @default(now()) @map("created_at")
   updatedAt    DateTime          @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@index([createdById])
   @@index([industryCode])
@@ -3588,6 +4156,13 @@ model AuditLog {
 
   createdAt DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([entityType, entityId, createdAt])
   @@index([performedById, createdAt])
   @@index([entityType, action, createdAt])
@@ -3619,6 +4194,13 @@ model AuditFieldChange {
 
   createdAt DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([auditLogId])
   @@index([fieldName, createdAt])
   @@index([tenantId])
@@ -3636,6 +4218,13 @@ model AuditRetentionPolicy {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, entityType])
   @@index([tenantId])
   @@map("audit_retention_policies")
@@ -3682,6 +4271,13 @@ model ImportProfile {
 
   importJobs ImportJob[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, name])
   @@index([targetEntity, status])
   @@index([tenantId])
@@ -3743,6 +4339,13 @@ model ImportJob {
 
   rows ImportRow[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([status, createdById])
   @@index([profileId])
   @@index([tenantId])
@@ -3790,6 +4393,13 @@ model ImportRow {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([importJobId, rowStatus])
   @@index([importJobId, rowNumber])
   @@index([tenantId])
@@ -3816,6 +4426,13 @@ model ExportJob {
   completedAt   DateTime?    @map("completed_at")
   createdAt     DateTime     @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("export_jobs")
 }
@@ -3910,6 +4527,13 @@ model Document {
   shareLinks   DocumentShareLink[]
   activityLogs DocumentActivity[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([uploadedById, status])
   @@index([folderId])
   @@index([category])
@@ -3933,6 +4557,13 @@ model DocumentAttachment {
   attachedBy   User     @relation("AttachmentAttachedBy", fields: [attachedById], references: [id])
   createdAt    DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, documentId, entityType, entityId])
   @@index([entityType, entityId])
   @@index([tenantId])
@@ -3962,6 +4593,13 @@ model DocumentFolder {
 
   documents Document[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([parentId])
   @@index([createdById])
   @@index([tenantId])
@@ -3989,6 +4627,13 @@ model CloudConnection {
   createdAt    DateTime              @default(now()) @map("created_at")
   updatedAt    DateTime              @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, provider, userId])
   @@index([userId])
   @@index([tenantId])
@@ -4015,6 +4660,13 @@ model DocumentShareLink {
   createdBy   User            @relation("ShareLinkCreatedBy", fields: [createdById], references: [id])
   createdAt   DateTime        @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([token])
   @@index([documentId])
   @@index([tenantId])
@@ -4037,6 +4689,13 @@ model DocumentActivity {
   ipAddress  String?  @map("ip_address")
   createdAt  DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([documentId])
   @@index([userId])
   @@index([tenantId])
@@ -4180,6 +4839,13 @@ model EmailAccount {
 
   emails Email[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, userId, emailAddress])
   @@index([userId, status])
   @@index([tenantId])
@@ -4206,6 +4872,13 @@ model EmailThread {
 
   emails Email[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([linkedEntityType, linkedEntityId])
   @@index([lastMessageAt])
   @@index([tenantId])
@@ -4289,6 +4962,13 @@ model Email {
   attachments    EmailAttachment[]
   trackingEvents EmailTrackingEvent[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, internetMessageId])
   @@unique([tenantId, trackingPixelId])
   @@index([accountId, direction, createdAt])
@@ -4320,6 +5000,13 @@ model EmailAttachment {
   documentId           String?  @map("document_id")
   createdAt            DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([emailId])
   @@index([tenantId])
   @@map("email_attachments")
@@ -4350,6 +5037,13 @@ model EmailTemplate {
   createdAt     DateTime         @default(now()) @map("created_at")
   updatedAt     DateTime         @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([category, isShared])
   @@index([tenantId])
   @@map("email_templates")
@@ -4370,6 +5064,13 @@ model EmailSignature {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([userId])
   @@index([tenantId])
   @@map("email_signatures")
@@ -4424,6 +5125,13 @@ model EmailCampaign {
   emails     Email[]
   recipients CampaignRecipient[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([status, scheduledAt])
   @@index([tenantId])
   @@map("email_campaigns")
@@ -4458,6 +5166,13 @@ model CampaignRecipient {
   emailId        String?                 @map("email_id")
   createdAt      DateTime                @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, campaignId, email])
   @@index([campaignId, status])
   @@index([tenantId])
@@ -4483,6 +5198,13 @@ model EmailTrackingEvent {
   recipientId String?  @map("recipient_id")
   createdAt   DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([emailId, eventType])
   @@index([campaignId, eventType])
   @@index([tenantId])
@@ -4502,6 +5224,13 @@ model EmailUnsubscribe {
   campaignId     String?  @map("campaign_id")
   unsubscribedAt DateTime @default(now()) @map("unsubscribed_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, email])
   @@index([email])
   @@index([tenantId])
@@ -4741,6 +5470,13 @@ model WhatsAppBusinessAccount {
   quickReplies  WaQuickReply[]
   optOuts       WaOptOut[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, wabaId])
   @@unique([tenantId, phoneNumberId])
   @@index([tenantId])
@@ -4787,6 +5523,13 @@ model WaConversation {
   // Relations
   messages WaMessage[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, wabaId, contactPhone])
   @@index([wabaId, status])
   @@index([wabaId, lastMessageAt])
@@ -4869,6 +5612,13 @@ model WaMessage {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, waMessageId])
   @@index([conversationId, createdAt])
   @@index([wabaId, createdAt])
@@ -4920,6 +5670,13 @@ model WaTemplate {
   // Relations
   broadcasts WaBroadcast[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, wabaId, name, language])
   @@unique([tenantId, metaTemplateId])
   @@index([wabaId, status])
@@ -4964,6 +5721,13 @@ model WaBroadcast {
   // Relations
   recipients WaBroadcastRecipient[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([wabaId, status])
   @@index([scheduledAt])
   @@index([tenantId])
@@ -4991,6 +5755,13 @@ model WaBroadcastRecipient {
   failureReason String?                    @map("failure_reason")
   createdAt     DateTime                   @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([broadcastId, status])
   @@index([tenantId])
   @@map("wa_broadcast_recipients")
@@ -5019,6 +5790,13 @@ model WaChatbotFlow {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([wabaId, status])
   @@index([tenantId])
   @@map("wa_chatbot_flows")
@@ -5040,6 +5818,13 @@ model WaQuickReply {
   createdAt   DateTime                @default(now()) @map("created_at")
   updatedAt   DateTime                @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, wabaId, shortcut])
   @@index([tenantId])
   @@map("wa_quick_replies")
@@ -5059,6 +5844,13 @@ model WaOptOut {
   reason      String?
   optedOutAt  DateTime                @default(now()) @map("opted_out_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, wabaId, phoneNumber])
   @@index([wabaId])
   @@index([tenantId])
@@ -5150,6 +5942,13 @@ model Subscription {
   tenant Tenant @relation(fields: [tenantId], references: [id])
   plan   Plan   @relation(fields: [planId], references: [id])
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, status])
   @@map("subscriptions")
 }
@@ -5172,6 +5971,13 @@ model TenantInvoice {
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("tenant_invoices")
 }
@@ -5190,6 +5996,13 @@ model TenantUsage {
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("tenant_usage")
 }
@@ -5255,6 +6068,11 @@ model SyncPolicy {
 
   warningRules SyncWarningRule[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+
+  @@index([isDeleted])
   @@unique([tenantId, entityName])
   @@index([tenantId])
   @@map("sync_policies")
@@ -5301,6 +6119,13 @@ model SyncWarningRule {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([trigger, isEnabled])
   @@index([tenantId])
   @@map("sync_warning_rules")
@@ -5343,6 +6168,13 @@ model SyncDevice {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, userId, deviceId])
   @@index([userId, status])
   @@index([tenantId])
@@ -5382,6 +6214,13 @@ model SyncConflict {
   tenantId  String   @default("") @map("tenant_id")
   createdAt DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([userId, status])
   @@index([entityName, entityId])
   @@index([tenantId])
@@ -5412,6 +6251,13 @@ model SyncFlushCommand {
   tenantId  String   @default("") @map("tenant_id")
   createdAt DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([targetUserId, status])
   @@index([tenantId])
   @@map("sync_flush_commands")
@@ -5445,6 +6291,13 @@ model SyncChangeLog {
   tenantId  String   @default("") @map("tenant_id")
   createdAt DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([userId, deviceId, isPushed])
   @@index([entityName, entityId])
   @@index([tenantId])
@@ -5473,6 +6326,13 @@ model SyncAuditLog {
   tenantId  String   @default("") @map("tenant_id")
   createdAt DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([userId, createdAt])
   @@index([action, createdAt])
   @@index([tenantId])
@@ -5577,6 +6437,11 @@ model TenantConfig {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+
+  @@index([isDeleted])
   @@unique([tenantId, configKey])
   @@index([tenantId, category])
   @@map("tenant_configs")
@@ -5631,6 +6496,11 @@ model TenantCredential {
   // Relations
   accessLogs CredentialAccessLog[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+
+  @@index([isDeleted])
   @@unique([tenantId, provider, instanceName])
   @@index([tenantId, provider, status])
   @@map("tenant_credentials")
@@ -5652,6 +6522,13 @@ model CredentialAccessLog {
 
   createdAt DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, credentialId, createdAt])
   @@map("credential_access_logs")
 }
@@ -5802,6 +6679,13 @@ model CronJobRunLog {
 
   createdAt DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([jobCode, createdAt])
   @@index([status, createdAt])
   @@index([tenantId])
@@ -5901,6 +6785,13 @@ model ErrorLog {
 
   createdAt DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([errorCode, createdAt])
   @@index([tenantId, createdAt])
   @@index([requestId])
@@ -5931,6 +6822,13 @@ model ErrorAutoReportRule {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("error_auto_report_rules")
 }
@@ -5985,6 +6883,13 @@ model TenantAuditSession {
 
   logs TenantAuditLog[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, status])
   @@map("tenant_audit_sessions")
 }
@@ -6015,6 +6920,13 @@ model TenantAuditLog {
 
   session TenantAuditSession @relation(fields: [sessionId], references: [id])
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([sessionId, createdAt])
   @@index([tenantId, userId, createdAt])
   @@map("tenant_audit_logs")
@@ -6089,6 +7001,13 @@ model SupportTicket {
 
   messages SupportTicketMessage[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, status])
   @@index([assignedToId, status])
   @@index([priority, status])
@@ -6207,6 +7126,11 @@ model TenantBranding {
   createdAt          DateTime  @default(now()) @map("created_at")
   updatedAt          DateTime  @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("tenant_brandings")
 }
@@ -6227,6 +7151,13 @@ model BusinessHoursSchedule {
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, dayOfWeek])
   @@index([tenantId])
   @@map("business_hours_schedules")
@@ -6247,6 +7178,13 @@ model HolidayCalendar {
   isActive         Boolean     @default(true) @map("is_active")
   createdAt        DateTime    @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, date])
   @@map("holiday_calendars")
 }
@@ -6267,6 +7205,13 @@ model CalendarHighlight {
   isActive        Boolean   @default(true) @map("is_active")
   createdAt       DateTime  @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, date])
   @@index([date, highlightType])
   @@map("calendar_highlights")
@@ -6292,6 +7237,11 @@ model AutoNumberSequence {
   createdAt         DateTime            @default(now()) @map("created_at")
   updatedAt         DateTime            @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+
+  @@index([isDeleted])
   @@unique([tenantId, entityName])
   @@index([tenantId])
   @@map("auto_number_sequences")
@@ -6411,6 +7361,11 @@ model CompanyProfile {
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("company_profiles")
 }
@@ -6448,6 +7403,11 @@ model SecurityPolicy {
   updatedAt                DateTime       @updatedAt @map("updated_at")
   ipRules                  IpAccessRule[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("security_policies")
 }
@@ -6483,6 +7443,13 @@ model DataRetentionPolicy {
   createdAt           DateTime        @default(now()) @map("created_at")
   updatedAt           DateTime        @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, entityName])
   @@index([tenantId])
   @@map("data_retention_policies")
@@ -6499,6 +7466,13 @@ model EmailFooterTemplate {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, isDefault])
   @@map("email_footer_templates")
 }
@@ -6514,6 +7488,11 @@ model NotionConfig {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("notion_configs")
 }
@@ -6672,6 +7651,9 @@ model Invoice {
   reminders       PaymentReminder[]
   proformaInvoice ProformaInvoice?
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, invoiceNo])
   @@index([tenantId, status])
   @@index([tenantId, contactId])
@@ -6720,6 +7702,13 @@ model InvoiceLineItem {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([invoiceId])
   @@index([tenantId])
   @@map("invoice_line_items")
@@ -6814,6 +7803,9 @@ model ProformaInvoice {
   cancelledById String?   @map("cancelled_by_id")
   cancelReason  String?   @map("cancel_reason")
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, proformaNo])
   @@index([tenantId, status])
   @@index([tenantId, quotationId])
@@ -6858,6 +7850,13 @@ model ProformaLineItem {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([proformaInvoiceId])
   @@index([tenantId])
   @@map("proforma_line_items")
@@ -6905,6 +7904,13 @@ model Payment {
   receipt PaymentReceipt?
   refunds Refund[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, paymentNo])
   @@index([tenantId, invoiceId])
   @@index([tenantId, status])
@@ -6932,6 +7938,9 @@ model PaymentReceipt {
   createdAt     DateTime @default(now()) @map("created_at")
   isDeleted   Boolean   @default(false) @map("is_deleted")
   deletedAt   DateTime? @map("deleted_at")
+
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
 
   @@unique([tenantId, receiptNo])
   @@index([tenantId])
@@ -6961,6 +7970,13 @@ model Refund {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, refundNo])
   @@index([tenantId, paymentId])
   @@index([tenantId, status])
@@ -6992,6 +8008,9 @@ model CreditNote {
   isDeleted   Boolean   @default(false) @map("is_deleted")
   deletedAt   DateTime? @map("deleted_at")
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, creditNoteNo])
   @@index([tenantId, invoiceId])
   @@index([tenantId, status])
@@ -7014,6 +8033,13 @@ model PaymentReminder {
 
   createdAt DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, invoiceId])
   @@index([tenantId, isSent, scheduledAt])
   @@map("payment_reminders")
@@ -7119,6 +8145,13 @@ model ApiKey {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, status])
   @@index([keyHash])
   @@map("api_keys")
@@ -7157,6 +8190,13 @@ model ApiRequestLog {
 
   createdAt DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, apiKeyId, createdAt])
   @@index([tenantId, path, createdAt])
   @@index([tenantId, statusCode, createdAt])
@@ -7194,6 +8234,13 @@ model WebhookEndpoint {
 
   deliveries WebhookDelivery[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, status])
   @@map("webhook_endpoints")
 }
@@ -7229,6 +8276,13 @@ model WebhookDelivery {
 
   createdAt DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([endpointId, status, scheduledAt])
   @@index([tenantId, eventType, createdAt])
   @@map("webhook_deliveries")
@@ -7276,6 +8330,13 @@ model TableConfig {
 
   user User? @relation("TableConfigUser", fields: [userId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, tableKey, userId])
   @@index([tenantId, tableKey])
   @@map("table_configs")
@@ -7298,6 +8359,13 @@ model DataMaskingPolicy {
   role Role? @relation("DataMaskingPolicyRole", fields: [roleId], references: [id])
   user User? @relation("DataMaskingPolicyUser", fields: [userId], references: [id])
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, tableKey])
   @@map("data_masking_policies")
 }
@@ -7314,6 +8382,13 @@ model UnmaskAuditLog {
 
   user User @relation("UnmaskAuditLogUser", fields: [userId], references: [id])
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, userId])
   @@map("unmask_audit_logs")
 }
@@ -7388,6 +8463,9 @@ model Task {
   comments  Comment[]     @relation("TaskComments")
   reminders Reminder[]    @relation("TaskReminders")
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, taskNumber])
   @@index([tenantId, assignedToId, status])
   @@index([tenantId, createdById])
@@ -7411,6 +8489,13 @@ model TaskHistory {
   changedBy   User     @relation("TaskHistoryChangedBy", fields: [changedById], references: [id])
   createdAt   DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([taskId])
   @@index([tenantId, changedById])
   @@map("task_history")
@@ -7469,6 +8554,13 @@ model Comment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([entityType, entityId])
   @@index([tenantId, entityType, entityId, visibility])
   @@index([taskId])
@@ -7534,6 +8626,13 @@ model NotificationConfig {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, eventCode])
   @@index([tenantId])
   @@index([tenantId, eventCategory])
@@ -7564,6 +8663,13 @@ model EscalationRule {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, entityType])
   @@index([tenantId, triggerEventType])
   @@map("escalation_rules")
@@ -7607,6 +8713,13 @@ model CommunicationLog {
   deliveredAt DateTime? @map("delivered_at")
   createdAt   DateTime  @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, channel, createdAt])
   @@index([tenantId, entityType, entityId])
   @@index([tenantId, recipientId])
@@ -7629,6 +8742,11 @@ model TaskLogicConfig {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+
+  @@index([isDeleted])
   @@unique([tenantId, configKey])
   @@index([tenantId])
   @@map("task_logic_configs")
@@ -7654,6 +8772,13 @@ model QuietHourConfig {
 
   user User? @relation("QuietHourUser", fields: [userId], references: [id])
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, userId])
   @@map("quiet_hour_configs")
 }
@@ -7713,6 +8838,13 @@ model ScheduledEvent {
   participants EventParticipant[]
   history      EventHistory[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, organizerId, startTime])
   @@index([tenantId, startTime, endTime])
   @@index([tenantId, entityType, entityId])
@@ -7738,6 +8870,13 @@ model EventParticipant {
   notifiedAt DateTime?      @map("notified_at")
   createdAt  DateTime       @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([eventId, userId])
   @@index([tenantId, userId])
   @@map("event_participants")
@@ -7756,6 +8895,13 @@ model EventHistory {
   changedBy   User           @relation("EventHistoryChangedBy", fields: [changedById], references: [id])
   createdAt   DateTime       @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([eventId])
   @@index([tenantId, changedById])
   @@map("event_history")
@@ -7783,6 +8929,13 @@ model UserCalendarSync {
   createdAt      DateTime              @default(now()) @map("created_at")
   updatedAt      DateTime              @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, userId, provider])
   @@index([tenantId, userId])
   @@map("user_calendar_syncs")
@@ -7802,6 +8955,13 @@ model UserAvailability {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, userId, dayOfWeek])
   @@index([tenantId, userId])
   @@map("user_availability")
@@ -7825,6 +8985,13 @@ model BlockedSlot {
   createdAt         DateTime           @default(now()) @map("created_at")
   updatedAt         DateTime           @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, userId, startTime, endTime])
   @@map("blocked_slots")
 }
@@ -7840,6 +9007,11 @@ model CalendarConfig {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+
+  @@index([isDeleted])
   @@unique([tenantId, configKey])
   @@index([tenantId])
   @@map("calendar_configs")
@@ -7864,6 +9036,13 @@ model GoogleConnection {
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, userId], name: "tenantId_userId")
   @@index([tenantId])
   @@map("google_connections")
@@ -7888,6 +9067,13 @@ model AiUsageLog {
   entityId     String?  @map("entity_id")
   createdAt    DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, provider])
   @@index([userId])
   @@map("ai_usage_logs")
@@ -7904,6 +9090,13 @@ model AiSettings {
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("ai_settings")
 }
@@ -7939,6 +9132,13 @@ model TenantUsageDetail {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, resourceKey])
   @@index([tenantId])
   @@map("tenant_usage_details")
@@ -7961,6 +9161,13 @@ model Wallet {
 
   transactions WalletTransaction[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("wallets")
 }
@@ -7984,6 +9191,13 @@ model WalletTransaction {
 
   wallet Wallet @relation(fields: [walletId], references: [id])
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([walletId, createdAt])
   @@index([tenantId, type])
   @@index([tenantId, createdAt])
@@ -8172,6 +9386,13 @@ model TenantProfile {
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("tenant_profiles")
 }
@@ -8216,6 +9437,13 @@ model LicenseKey {
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@index([status])
   @@map("license_keys")
@@ -8315,6 +9543,13 @@ model TenantActivityLog {
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, createdAt])
   @@index([tenantId, category])
   @@map("tenant_activity_logs")
@@ -8405,6 +9640,13 @@ model TerminologyOverride {
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, termKey, scope])
   @@index([tenantId])
   @@map("terminology_overrides")
@@ -8458,6 +9700,13 @@ model TenantModule {
   tenant Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   module ModuleDefinition @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, moduleId])
   @@index([tenantId, isEnabled])
   @@map("tenant_modules")
@@ -8653,6 +9902,13 @@ model MarketplaceReview {
 
   module MarketplaceModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([moduleId, tenantId])
   @@index([moduleId])
   @@index([tenantId])
@@ -8674,6 +9930,13 @@ model TenantMarketplaceModule {
   tenant Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   module MarketplaceModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, moduleId])
   @@index([tenantId])
   @@map("tenant_marketplace_modules")
@@ -8754,6 +10017,13 @@ model CouponRedemption {
 
   coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([couponId, tenantId, userId])
   @@index([couponId])
   @@index([tenantId])
@@ -8924,6 +10194,11 @@ model TenantPlugin {
   createdById String?  @map("created_by_id")
   updatedById String?  @map("updated_by_id")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+
+  @@index([isDeleted])
   @@unique([tenantId, pluginId])
   @@index([tenantId, status])
   @@index([pluginId])
@@ -8952,6 +10227,13 @@ model PluginHookLog {
   // Timestamp
   executedAt DateTime @default(now()) @map("executed_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, hookPoint, executedAt])
   @@index([tenantId, pluginId, executedAt])
   @@map("plugin_hook_logs")
@@ -8976,6 +10258,13 @@ model VerificationOtp {
   userAgent   String?    @map("user_agent")
   createdAt   DateTime   @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([target, purpose, status])
   @@index([userId, purpose])
   @@index([expiresAt])
@@ -8998,6 +10287,13 @@ model GstVerificationLog {
   approvalNotes      String?  @map("approval_notes")
   createdAt          DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, userId])
   @@index([gstNumber])
   @@map("gst_verification_logs")
@@ -9059,6 +10355,13 @@ model MarketplaceListing {
   orderItems MarketplaceOrderItem[]
   analytics  ListingAnalytics?
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, status])
   @@index([vendorId])
   @@index([listingType, status])
@@ -9113,6 +10416,13 @@ model MarketplacePost {
   comments    PostComment[]
   analytics   PostAnalytics?
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, status, createdAt])
   @@index([authorId])
   @@index([status, publishAt])
@@ -9134,6 +10444,13 @@ model PostEngagement {
   deviceType String?          @map("device_type")
   createdAt  DateTime         @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([postId, userId, action])
   @@index([postId, action])
   @@index([tenantId, createdAt])
@@ -9156,6 +10473,9 @@ model PostComment {
   isDeleted Boolean         @default(false) @map("is_deleted")
   createdAt DateTime        @default(now()) @map("created_at")
   updatedAt DateTime        @updatedAt @map("updated_at")
+
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
 
   @@index([postId, createdAt])
   @@index([userId])
@@ -9198,6 +10518,13 @@ model MarketplaceEnquiry {
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime           @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, status])
   @@index([vendorId, status])
   @@index([buyerId])
@@ -9244,6 +10571,13 @@ model MarketplaceOrder {
 
   items MarketplaceOrderItem[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, status])
   @@index([vendorId, status])
   @@index([buyerId])
@@ -9534,6 +10868,13 @@ model TenantVersion {
 
   version AppVersion @relation(fields: [versionId], references: [id])
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, versionId])
   @@index([tenantId])
   @@index([forceUpdatePending])
@@ -9631,6 +10972,13 @@ model DocumentTemplate {
   // ─── RELATIONS ───
   tenantCustomizations TenantTemplateCustomization[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([code, tenantId])
   @@index([documentType, industryCode, isActive])
   @@index([tenantId])
@@ -9662,6 +11010,13 @@ model TenantTemplateCustomization {
   // ─── RELATIONS ───
   template DocumentTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, templateId])
   @@index([tenantId])
   @@map("tenant_template_customizations")
@@ -9684,6 +11039,13 @@ model SavedFormula {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([name, tenantId])
   @@index([category])
   @@index([tenantId])
@@ -9801,6 +11163,13 @@ model InventoryItem {
   bomFormulasAsFinished BOMFormula[]       @relation("FinishedProduct")
   bomItemsAsRaw         BOMFormulaItem[]   @relation("RawMaterial")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, productId])
   @@index([tenantId, inventoryType])
   @@index([tenantId, isRawMaterial])
@@ -9829,6 +11198,13 @@ model StockLocation {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, code])
   @@index([tenantId])
   @@map("stock_locations")
@@ -9863,6 +11239,13 @@ model StockTransaction {
 
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, productId, transactionDate])
   @@index([tenantId, transactionType])
   @@map("stock_transactions")
@@ -9886,6 +11269,13 @@ model StockSummary {
 
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, productId, locationId])
   
   @@index([tenantId])
@@ -9910,6 +11300,13 @@ model StockAdjustment {
   createdAt   DateTime @default(now())
 
   
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@index([tenantId, status])
   @@map("stock_adjustments")
@@ -9960,6 +11357,13 @@ model SerialMaster {
 
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, serialNo])
   @@index([tenantId, status])
   @@index([tenantId, productId])
@@ -9995,6 +11399,13 @@ model BOMFormula {
   items           BOMFormulaItem[]
   productions     BOMProduction[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, formulaCode])
   @@index([tenantId])
   @@map("bom_formulas")
@@ -10019,6 +11430,13 @@ model BOMFormulaItem {
   rawMaterial InventoryItem @relation("RawMaterial", fields: [rawMaterialId], references: [id])
 
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("bom_formula_items")
 }
@@ -10041,6 +11459,13 @@ model BOMProduction {
 
   formula BOMFormula @relation(fields: [formulaId], references: [id])
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("bom_productions")
 }
@@ -10072,6 +11497,13 @@ model ScrapRecord {
   createdById String?  @map("created_by_id")
   createdAt   DateTime @default(now())
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, scrapType])
   @@map("scrap_records")
 }
@@ -10116,6 +11548,13 @@ model UnitMaster {
   isSystem     Boolean      @default(false) @map("is_system")
   createdAt    DateTime     @default(now())
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, symbol])
   
   @@index([tenantId])
@@ -10131,6 +11570,13 @@ model UnitConversion {
   productId        String? @map("product_id")
   isActive         Boolean @default(true) @map("is_active")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, fromUnitId, toUnitId, productId])
   
   @@index([tenantId])
@@ -10163,6 +11609,9 @@ model PurchaseRFQ {
   items      PurchaseRFQItem[]
   quotations PurchaseQuotation[]
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, rfqNumber])
   @@map("purchase_rfqs")
   @@index([tenantId])
@@ -10182,6 +11631,13 @@ model PurchaseRFQItem {
   rfq            PurchaseRFQ @relation(fields: [rfqId], references: [id], onDelete: Cascade)
 
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("purchase_rfq_items")
 
@@ -10218,6 +11674,9 @@ model PurchaseQuotation {
   rfq   PurchaseRFQ?            @relation(fields: [rfqId], references: [id])
   items PurchaseQuotationItem[]
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, quotationNumber])
   
   @@index([tenantId])
@@ -10242,6 +11701,13 @@ model PurchaseQuotationItem {
   quotation    PurchaseQuotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
 
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("purchase_quotation_items")
 
@@ -10260,6 +11726,13 @@ model QuotationComparison {
   createdById         String   @map("created_by_id")
   createdAt           DateTime @default(now())
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("quotation_comparisons")
 }
@@ -10300,6 +11773,9 @@ model PurchaseOrder {
   goodsReceipts    GoodsReceipt[]
   purchaseInvoices PurchaseInvoice[]
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, poNumber])
   
   @@index([tenantId])
@@ -10327,6 +11803,13 @@ model PurchaseOrderItem {
   po          PurchaseOrder @relation(fields: [poId], references: [id], onDelete: Cascade)
 
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("purchase_order_items")
 
@@ -10363,6 +11846,9 @@ model GoodsReceipt {
   items GoodsReceiptItem[]
   po    PurchaseOrder?     @relation(fields: [poId], references: [id])
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, receiptNumber])
   
   @@index([tenantId])
@@ -10390,6 +11876,13 @@ model GoodsReceiptItem {
   receipt         GoodsReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
 
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("goods_receipt_items")
 
@@ -10440,6 +11933,9 @@ model PurchaseInvoice {
   items PurchaseInvoiceItem[]
   po    PurchaseOrder?        @relation(fields: [poId], references: [id])
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, ourReference])
   
   @@index([tenantId])
@@ -10469,6 +11965,13 @@ model PurchaseInvoiceItem {
   invoice       PurchaseInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("purchase_invoice_items")
 
@@ -10524,6 +12027,13 @@ model LedgerMaster {
   accountGroup       AccountGroup?   @relation(fields: [accountGroupId], references: [id])
   mappings           LedgerMapping[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, code])
   
   @@index([tenantId])
@@ -10547,6 +12057,13 @@ model LedgerMapping {
   updatedAt   DateTime     @updatedAt
   ledger      LedgerMaster @relation(fields: [ledgerId], references: [id])
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, entityType, entityId])
   @@index([tenantId, ledgerId])
   @@map("ledger_mappings")
@@ -10568,6 +12085,9 @@ model AccountTransaction {
   createdAt       DateTime @default(now())
   isDeleted   Boolean   @default(false) @map("is_deleted")
   deletedAt   DateTime? @map("deleted_at")
+
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
 
   @@index([tenantId, transactionDate])
   @@map("account_transactions")
@@ -10606,6 +12126,13 @@ model PaymentRecord {
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, paymentNumber])
   @@index([tenantId, paymentType, paymentDate])
   @@index([tenantId, entityId])
@@ -10631,6 +12158,9 @@ model BankAccount {
   isDeleted   Boolean   @default(false) @map("is_deleted")
   deletedAt   DateTime? @map("deleted_at")
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, accountNumber])
   
   @@index([tenantId])
@@ -10653,6 +12183,13 @@ model BankReconciliation {
   createdAt          DateTime  @default(now())
 
   
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@index([tenantId, status])
   @@map("bank_reconciliations")
@@ -10684,6 +12221,13 @@ model GSTReturn {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, returnType, period])
   
   @@index([tenantId])
@@ -10714,6 +12258,13 @@ model TDSRecord {
   financialYear   String    @map("financial_year")
   createdAt       DateTime  @default(now())
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, section, financialYear])
   @@map("tds_records")
 }
@@ -10758,6 +12309,9 @@ model SaleOrder {
   items            SaleOrderItem[]
   deliveryChallans DeliveryChallan[]
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, orderNumber])
   @@index([tenantId, customerId, status])
   @@map("sale_orders")
@@ -10784,6 +12338,13 @@ model SaleOrderItem {
   saleOrder SaleOrder @relation(fields: [saleOrderId], references: [id], onDelete: Cascade)
 
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("sale_order_items")
 }
@@ -10817,6 +12378,9 @@ model DeliveryChallan {
   items     DeliveryChallanItem[]
   saleOrder SaleOrder?            @relation(fields: [saleOrderId], references: [id])
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, challanNumber])
   @@index([tenantId, customerId])
   @@map("delivery_challans")
@@ -10839,6 +12403,13 @@ model DeliveryChallanItem {
   challan DeliveryChallan @relation(fields: [challanId], references: [id], onDelete: Cascade)
 
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("delivery_challan_items")
 }
@@ -10870,6 +12441,9 @@ model SaleReturn {
 
   items SaleReturnItem[]
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, returnNumber])
   
   @@index([tenantId])
@@ -10899,6 +12473,13 @@ model SaleReturnItem {
   saleReturn SaleReturn @relation(fields: [returnId], references: [id], onDelete: Cascade)
 
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("sale_return_items")
 
@@ -10932,6 +12513,9 @@ model DebitNote {
 
   items DebitNoteItem[]
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, debitNoteNumber])
   
   @@index([tenantId])
@@ -10957,6 +12541,13 @@ model DebitNoteItem {
   debitNote DebitNote @relation(fields: [debitNoteId], references: [id], onDelete: Cascade)
 
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("debit_note_items")
 
@@ -10985,6 +12576,9 @@ model AccountGroup {
   children     AccountGroup[] @relation("GroupTree")
   parent       AccountGroup?  @relation("GroupTree", fields: [parentId], references: [id])
   ledgers      LedgerMaster[]
+
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
 
   @@unique([tenantId, code])
   
@@ -11017,6 +12611,9 @@ model SaleMaster {
   isDeleted   Boolean   @default(false) @map("is_deleted")
   deletedAt   DateTime? @map("deleted_at")
 
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, code])
   
   @@index([tenantId])
@@ -11046,6 +12643,13 @@ model PurchaseMaster {
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, code])
   
   @@index([tenantId])
@@ -11077,6 +12681,13 @@ model ShortcutDefinition {
 
   userOverrides  ShortcutUserOverride[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, code])
   @@index([tenantId, category])
   @@map("shortcut_definitions")
@@ -11094,6 +12705,13 @@ model ShortcutUserOverride {
 
   shortcut   ShortcutDefinition @relation(fields: [shortcutId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, userId, shortcutId])
   @@unique([tenantId, userId, customKey])
   @@index([tenantId])
@@ -11156,6 +12774,13 @@ model EntityVerificationRecord {
   createdAt           DateTime                  @default(now()) @map("created_at")
   updatedAt           DateTime                  @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, entityType, entityId])
   @@index([verificationToken])
   @@index([status, createdAt])
@@ -11203,6 +12828,13 @@ model WarrantyTemplate {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
   records               WarrantyRecord[]
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, code])
   @@index([industryCode, isSystemTemplate])
   @@index([tenantId])
@@ -11233,6 +12865,9 @@ model WarrantyRecord {
   deletedAt   DateTime? @map("deleted_at")
   template              WarrantyTemplate @relation(fields: [warrantyTemplateId], references: [id])
   claims                WarrantyClaim[]
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, warrantyNumber])
   @@index([tenantId, customerId, status])
   @@index([tenantId, endDate])
@@ -11266,6 +12901,9 @@ model WarrantyClaim {
   isDeleted   Boolean   @default(false) @map("is_deleted")
   deletedAt   DateTime? @map("deleted_at")
   warrantyRecord        WarrantyRecord @relation(fields: [warrantyRecordId], references: [id])
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, claimNumber])
   
   @@index([tenantId])
@@ -11310,6 +12948,13 @@ model AMCPlanTemplate {
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
   contracts               AMCContract[]
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, code])
   @@index([industryCode, isSystemTemplate])
   @@index([tenantId])
@@ -11350,6 +12995,9 @@ model AMCContract {
   deletedAt   DateTime? @map("deleted_at")
   plan                  AMCPlanTemplate @relation(fields: [amcPlanId], references: [id])
   schedules             AMCSchedule[]
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, contractNumber])
   @@index([tenantId, customerId, status])
   @@index([tenantId, endDate])
@@ -11374,6 +13022,13 @@ model AMCSchedule {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
   contract              AMCContract @relation(fields: [amcContractId], references: [id])
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, scheduleDate, status])
   @@map("amc_schedules")
 }
@@ -11407,6 +13062,9 @@ model ServiceVisitLog {
   isDeleted   Boolean   @default(false) @map("is_deleted")
   deletedAt   DateTime? @map("deleted_at")
   charges               ServiceCharge[]
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
   @@unique([tenantId, visitNumber])
   @@index([tenantId, customerId])
   @@map("service_visit_logs")
@@ -11425,6 +13083,13 @@ model ServiceCharge {
   isCoveredByAMC        Boolean   @default(false) @map("is_covered_by_amc")
   invoiceId             String?   @map("invoice_id")
   serviceVisit          ServiceVisitLog @relation(fields: [serviceVisitId], references: [id])
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("service_charges")
 }
@@ -11483,6 +13148,13 @@ model AiModel {
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, modelId])
   @@index([tenantId, source])
   @@map("ai_models")
@@ -11507,6 +13179,13 @@ model AiDataset {
   documents     AiDocument[]
   trainingJobs  AiTrainingJob[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, status])
   @@map("ai_datasets")
 }
@@ -11528,6 +13207,13 @@ model AiDocument {
 
   dataset       AiDataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, datasetId])
   @@map("ai_documents")
 }
@@ -11551,6 +13237,13 @@ model AiTrainingJob {
 
   dataset       AiDataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, status])
   @@map("ai_training_jobs")
 }
@@ -11567,6 +13260,13 @@ model AiEmbedding {
   metadata    Json?
   createdAt   DateTime @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, datasetId])
   @@index([documentId])
   @@map("ai_embeddings")
@@ -11589,6 +13289,13 @@ model AiChatSession {
   messages    AiChatMessage[]
   systemPrompt AiSystemPrompt?   @relation(fields: [systemPromptId], references: [id])
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, userId])
   @@index([tenantId, status])
   @@map("ai_chat_sessions")
@@ -11607,6 +13314,13 @@ model AiChatMessage {
 
   session     AiChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([sessionId])
   @@index([tenantId])
   @@map("ai_chat_messages")
@@ -11628,6 +13342,13 @@ model AiSystemPrompt {
 
   chatSessions AiChatSession[]
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, category])
   @@map("ai_system_prompts")
 }
@@ -11682,6 +13403,13 @@ model ControlRoomValue {
 
   rule          ControlRoomRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, ruleId, level, pageCode, roleId, userId])
   @@index([tenantId, level])
   @@index([ruleId, tenantId])
@@ -11706,6 +13434,13 @@ model ControlRoomAuditLog {
   batchId         String?   @map("batch_id")
   createdAt       DateTime  @default(now()) @map("created_at")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId, createdAt])
   @@index([ruleCode, tenantId])
   @@index([batchId])
@@ -11719,6 +13454,13 @@ model TenantRuleCacheVersion {
   lastChangedAt DateTime  @default(now()) @map("last_changed_at")
   lastChangedBy String?   @map("last_changed_by")
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@index([tenantId])
   @@map("tenant_rule_cache_versions")
 }
@@ -11742,6 +13484,13 @@ model ControlRoomDraft {
 
   rule            ControlRoomRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
 
+  isDeleted     Boolean   @default(false) @map("is_deleted")
+  deletedAt     DateTime? @map("deleted_at")
+  deletedById   String?   @map("deleted_by_id")
+  updatedById   String?   @map("updated_by_id")
+  updatedByName String?   @map("updated_by_name")
+
+  @@index([isDeleted])
   @@unique([tenantId, ruleId, level])
   @@index([tenantId, status])
   @@map("control_room_drafts")
