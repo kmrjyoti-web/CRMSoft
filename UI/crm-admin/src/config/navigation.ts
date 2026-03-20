@@ -232,7 +232,26 @@ export const DEFAULT_NAV: NavItem[] = [
   },
 
   // ─────────────────────────────────────────────────────────────
-  // 13. SETTINGS
+  // 13. MARKETPLACE
+  // ─────────────────────────────────────────────────────────────
+  {
+    label: 'Market HUB', path: '/marketplace', icon: 'store', permission: 'marketplace:read',
+    children: [
+      { label: 'Dashboard', path: '/marketplace', icon: 'layout-dashboard' },
+      { label: 'Listings', path: '/marketplace/listings', icon: 'list' },
+      { label: 'Posts & Feed', path: '/marketplace/posts', icon: 'rss' },
+      { label: 'Offers', path: '/marketplace/offers', icon: 'tag' },
+      { label: 'Enquiries', path: '/marketplace/enquiries', icon: 'mail' },
+      { label: 'Requirements', path: '/marketplace/requirements', icon: 'file-search' },
+      { label: 'Reviews', path: '/marketplace/reviews', icon: 'star' },
+      { label: 'Analytics', path: '/marketplace/analytics', icon: 'bar-chart-2' },
+      { label: 'Installed Modules', path: '/marketplace/modules', icon: 'package' },
+      { label: 'Vendor Portal', path: '/marketplace/vendor', icon: 'briefcase' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────
+  // 14. SETTINGS
   // ─────────────────────────────────────────────────────────────
   {
     label: 'Settings', path: '/settings', icon: 'settings', permission: 'settings:view',
