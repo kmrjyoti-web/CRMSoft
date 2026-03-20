@@ -8,7 +8,8 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "scripts": {
-    "build": "npx prisma generate && tsc -p tsconfig.build.json",
+    "build": "npx prisma generate && npx prisma generate --schema=prisma/schemas/identity.prisma && npx prisma generate --schema=prisma/schemas/platform.prisma && npx prisma generate --schema=prisma/schemas/working.prisma && npx prisma generate --schema=prisma/schemas/marketplace.prisma && tsc -p tsconfig.build.json",
+    "prisma:generate": "npx prisma generate && npx prisma generate --schema=prisma/schemas/identity.prisma && npx prisma generate --schema=prisma/schemas/platform.prisma && npx prisma generate --schema=prisma/schemas/working.prisma && npx prisma generate --schema=prisma/schemas/marketplace.prisma",
     "start": "node dist/src/main",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
