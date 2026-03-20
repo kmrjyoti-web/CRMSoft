@@ -237,6 +237,7 @@ export const DEFAULT_NAV: NavItem[] = [
   {
     label: 'Market HUB', path: '/marketplace', icon: 'store', permission: 'marketplace:read',
     children: [
+      { label: 'Market Feed', path: '/marketplace/feed', icon: 'activity' },
       { label: 'Dashboard', path: '/marketplace', icon: 'layout-dashboard' },
       { label: 'Listings', path: '/marketplace/listings', icon: 'list' },
       { label: 'Posts & Feed', path: '/marketplace/posts', icon: 'rss' },

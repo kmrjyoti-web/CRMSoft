@@ -262,6 +262,7 @@ export const MENU_SEED_DATA: MenuSeedItem[] = [
     name: 'Market HUB', code: 'MARKETPLACE', icon: 'store', menuType: 'GROUP',
     route: '/marketplace', permissionModule: 'marketplace', permissionAction: 'read',
     children: [
+      { name: 'Market Feed', code: 'MP_FEED', icon: 'activity', route: '/marketplace/feed', permissionModule: 'marketplace', permissionAction: 'read' },
       { name: 'Dashboard', code: 'MP_DASHBOARD', icon: 'layout-dashboard', route: '/marketplace', permissionModule: 'marketplace', permissionAction: 'read' },
       { name: 'Listings', code: 'MP_LISTINGS', icon: 'list', route: '/marketplace/listings', permissionModule: 'marketplace', permissionAction: 'read' },
       { name: 'Posts & Feed', code: 'MP_POSTS', icon: 'rss', route: '/marketplace/posts', permissionModule: 'marketplace', permissionAction: 'read' },
