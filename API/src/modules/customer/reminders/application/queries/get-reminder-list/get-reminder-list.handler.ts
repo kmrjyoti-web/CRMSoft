@@ -16,7 +16,6 @@ export class GetReminderListHandler implements IQueryHandler<GetReminderListQuer
     const [data, total] = await Promise.all([
       this.prisma.working.reminder.findMany({
         where,
-        include: { recipient: { select: { id: true, firstName: true, lastName: true } } },
         orderBy: { scheduledAt: 'asc' },
         skip: (query.page - 1) * query.limit,
         take: query.limit,

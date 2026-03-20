@@ -133,7 +133,6 @@ export class NotificationCoreService {
     const [data, total] = await Promise.all([
       this.prisma.notification.findMany({
         where,
-        include: { sender: { select: { id: true, firstName: true, lastName: true, avatar: true } } },
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
@@ -147,7 +146,6 @@ export class NotificationCoreService {
   async getById(id: string, userId: string) {
     const notification = await this.prisma.notification.findFirst({
       where: { id, recipientId: userId, isActive: true },
-      include: { sender: { select: { id: true, firstName: true, lastName: true, avatar: true } } },
     });
     if (!notification) throw new NotFoundException('Notification not found');
     return notification;

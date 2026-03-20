@@ -6,13 +6,18 @@ import { PrismaService } from '../../../../core/prisma/prisma.service';
 export class IndustryConfigService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /** Fetch tenant + its business type (cross-db: Tenant=IdentityDB, BusinessTypeRegistry=PlatformDB). */
+  private async getTenantWithBt(tenantId: string) {
+    const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
+    const bt = tenant?.businessTypeId
+      ? await this.prisma.platform.businessTypeRegistry.findUnique({ where: { id: tenant.businessTypeId } })
+      : null;
+    return { tenant, bt };
+  }
+
   async getConfig(tenantId: string) {
-    const tenant = await this.prisma.tenant.findUnique({
-      where: { id: tenantId },
-      include: { businessType: true },
-    });
-    if (!tenant?.businessType) return null;
-    const bt = tenant.businessType;
+    const { bt } = await this.getTenantWithBt(tenantId);
+    if (!bt) return null;
     return {
       typeCode: bt.typeCode,
       typeName: bt.typeName,
@@ -27,28 +32,19 @@ export class IndustryConfigService {
   }
 
   async getExtraFields(tenantId: string, entity: string) {
-    const tenant = await this.prisma.tenant.findUnique({
-      where: { id: tenantId },
-      include: { businessType: true },
-    });
-    if (!tenant?.businessType) return [];
-    const extraFields = (tenant.businessType.extraFields ?? {}) as Record<string, any[]>;
+    const { bt } = await this.getTenantWithBt(tenantId);
+    if (!bt) return [];
+    const extraFields = (bt.extraFields ?? {}) as Record<string, any[]>;
     return extraFields[entity] || [];
   }
 
   async getLeadStages(tenantId: string) {
-    const tenant = await this.prisma.tenant.findUnique({
-      where: { id: tenantId },
-      include: { businessType: true },
-    });
-    return (tenant?.businessType?.defaultLeadStages as string[]) ?? null;
+    const { bt } = await this.getTenantWithBt(tenantId);
+    return (bt?.defaultLeadStages as string[]) ?? null;
   }
 
   async getActivityTypes(tenantId: string) {
-    const tenant = await this.prisma.tenant.findUnique({
-      where: { id: tenantId },
-      include: { businessType: true },
-    });
-    return (tenant?.businessType?.defaultActivityTypes as string[]) ?? null;
+    const { bt } = await this.getTenantWithBt(tenantId);
+    return (bt?.defaultActivityTypes as string[]) ?? null;
   }
 }

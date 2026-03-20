@@ -471,3 +471,36 @@ model MktAnalyticsSummary {
   @@index([tenantId])
   @@map("mkt_analytics_summaries")
 }
+
+model MktFollow {
+  id          String   @id @default(uuid())
+  followerId  String   @map("follower_id")
+  followingId String   @map("following_id")
+  tenantId    String   @map("tenant_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@map("mkt_follows")
+}
+
+model MktRequirementQuote {
+  id             String   @id @default(uuid())
+  requirementId  String   @map("requirement_id")
+  sellerId       String   @map("seller_id")
+  tenantId       String   @map("tenant_id")
+  pricePerUnit   Int      @map("price_per_unit")
+  quantity       Int
+  deliveryDays   Int      @map("delivery_days")
+  creditDays     Int?     @map("credit_days")
+  notes          String?  @db.Text
+  certifications String[] @default([])
+  status         String   @default("SUBMITTED")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([requirementId])
+  @@index([sellerId])
+  @@map("mkt_requirement_quotes")
+}

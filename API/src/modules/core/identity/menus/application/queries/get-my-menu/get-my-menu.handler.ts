@@ -143,12 +143,16 @@ export class GetMyMenuHandler implements IQueryHandler<GetMyMenuQuery> {
     if (!tenantId) return {};
     const tenant = await this.prisma.identity.tenant.findUnique({
       where: { id: tenantId },
-      include: { businessType: true },
     });
     if (!tenant) return {};
 
-    const result: Record<string, string> = tenant.businessType
-      ? { ...(tenant.businessType.terminologyMap as Record<string, string>) }
+    // Fetch business type separately (cross-db: Tenant=IdentityDB, BusinessTypeRegistry=PlatformDB)
+    const businessType = tenant.businessTypeId
+      ? await this.prisma.platform.businessTypeRegistry.findUnique({ where: { id: tenant.businessTypeId } })
+      : null;
+
+    const result: Record<string, string> = businessType
+      ? { ...(businessType.terminologyMap as Record<string, string>) }
       : {};
 
     const overrides = await this.prisma.identity.terminologyOverride.findMany({

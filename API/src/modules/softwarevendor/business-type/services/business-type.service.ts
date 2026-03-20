@@ -61,12 +61,11 @@ export class BusinessTypeService {
     return results;
   }
 
-  /** List all active business types (includes tenant count). */
+  /** List all active business types. */
   async listAll(activeOnly = true) {
     return this.prisma.platform.businessTypeRegistry.findMany({
       where: activeOnly ? { isActive: true } : {},
       orderBy: { sortOrder: 'asc' },
-      include: { _count: { select: { tenants: true } } },
     });
   }
 
@@ -76,7 +75,6 @@ export class BusinessTypeService {
       where: { typeCode },
       include: {
         industryPackages: { include: { package: true }, orderBy: { sortOrder: 'asc' } },
-        _count: { select: { tenants: true } },
       },
     });
     if (!bt) throw new NotFoundException(`Business type '${typeCode}' not found`);
@@ -97,11 +95,13 @@ export class BusinessTypeService {
   async resolveProfile(tenantId: string) {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
-      include: { businessType: true },
     });
     if (!tenant) throw new NotFoundException('Tenant not found');
 
-    const bt = tenant.businessType;
+    // Fetch business type separately (cross-db: Tenant in IdentityDB, BusinessTypeRegistry in PlatformDB)
+    const bt = tenant.businessTypeId
+      ? await this.prisma.platform.businessTypeRegistry.findUnique({ where: { id: tenant.businessTypeId } })
+      : null;
     const terminologyMap: Record<string, string> = bt
       ? (bt.terminologyMap as Record<string, string>) ?? {}
       : {};

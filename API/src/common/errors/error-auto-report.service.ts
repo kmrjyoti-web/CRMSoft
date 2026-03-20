@@ -18,7 +18,7 @@ export class ErrorAutoReportService {
    */
   async checkAndReport(errorLog: any): Promise<void> {
     try {
-      const rules = await this.prisma.errorAutoReportRule.findMany({
+      const rules = await this.prisma.platform.errorAutoReportRule.findMany({
         where: {
           severity: errorLog.severity,
           isActive: true,
@@ -42,7 +42,7 @@ export class ErrorAutoReportService {
         );
 
         // Update error log with auto-report info
-        await this.prisma.errorLog.update({
+        await this.prisma.platform.errorLog.update({
           where: { id: errorLog.id },
           data: {
             isAutoReported: true,
@@ -52,7 +52,7 @@ export class ErrorAutoReportService {
         });
 
         // Update rule last triggered timestamp
-        await this.prisma.errorAutoReportRule.update({
+        await this.prisma.platform.errorAutoReportRule.update({
           where: { id: rule.id },
           data: { lastTriggeredAt: new Date() },
         });
@@ -68,7 +68,7 @@ export class ErrorAutoReportService {
     if (tenantId) {
       where.OR = [{ tenantId: null }, { tenantId }];
     }
-    return this.prisma.errorAutoReportRule.findMany({
+    return this.prisma.platform.errorAutoReportRule.findMany({
       where,
       orderBy: { createdAt: 'desc' },
     });
@@ -86,7 +86,7 @@ export class ErrorAutoReportService {
     throttleMinutes?: number;
     isActive?: boolean;
   }) {
-    return this.prisma.errorAutoReportRule.create({
+    return this.prisma.platform.errorAutoReportRule.create({
       data: {
         name: data.name,
         severity: data.severity as any,
@@ -114,7 +114,7 @@ export class ErrorAutoReportService {
   }>) {
     const updateData: any = { ...data };
     if (data.severity) updateData.severity = data.severity as any;
-    return this.prisma.errorAutoReportRule.update({
+    return this.prisma.platform.errorAutoReportRule.update({
       where: { id },
       data: updateData,
     });
@@ -122,6 +122,6 @@ export class ErrorAutoReportService {
 
   /** Delete an auto-report rule. */
   async deleteRule(id: string) {
-    return this.prisma.errorAutoReportRule.delete({ where: { id } });
+    return this.prisma.platform.errorAutoReportRule.delete({ where: { id } });
   }
 }

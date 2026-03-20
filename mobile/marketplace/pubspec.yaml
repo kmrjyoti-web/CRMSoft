@@ -1,0 +1,61 @@
+name: crmsoft_marketplace
+description: CRMSoft Social Marketplace — LinkedIn + Instagram hybrid for B2B commerce
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Navigation
+  go_router: ^13.0.0
+
+  # State management
+  flutter_riverpod: ^2.5.0
+  riverpod_annotation: ^2.3.0
+
+  # HTTP
+  dio: ^5.4.0
+  retrofit: ^4.1.0
+
+  # Local storage
+  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.0
+
+  # UI
+  cached_network_image: ^3.3.0
+  shimmer: ^3.0.0
+  video_player: ^2.8.0
+  chewie: ^1.7.0
+  image_picker: ^1.0.0
+  photo_view: ^0.14.0
+
+  # Utils
+  intl: ^0.19.0
+  timeago: ^3.6.0
+  url_launcher: ^6.2.0
+  share_plus: ^7.2.0
+
+  # Analytics / Monitoring
+  flutter_dotenv: ^5.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  build_runner: ^2.4.0
+  riverpod_generator: ^2.3.0
+  retrofit_generator: ^8.1.0
+  json_serializable: ^6.7.0
+  freezed: ^2.4.0
+  freezed_annotation: ^2.4.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
+    - .env

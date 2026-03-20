@@ -9,17 +9,26 @@ import type {
   MarketplaceEnquiry,
   MarketplaceOrder,
   MarketplaceReview,
+  MarketplaceOffer,
+  AnalyticsSummary,
+  RequirementQuote,
+  MarketplaceDashboardStats,
   RegisterVendorDto,
   CreateModuleDto,
   CreateListingDto,
+  CreateOfferDto,
+  CreateReviewDto,
+  CreatePostDto,
   CreateOrderDto,
   UpdateOrderStatusDto,
   UpdateTrackingDto,
-  CreateReviewDto,
   CreateEnquiryDto,
   ReplyEnquiryDto,
-  CreatePostDto,
   MarketplaceFilters,
+  ListingListParams,
+  OfferListParams,
+  ReviewListParams,
+  PostListParams,
 } from "../types/marketplace.types";
 
 const BASE = "/api/v1/marketplace";
@@ -53,7 +62,7 @@ export function listInstalledModules() {
   return apiClient.get<ApiResponse<InstalledModule[]>>(`${BASE}/installed`).then((r) => r.data);
 }
 
-// ── Reviews ──────────────────────────────────────────
+// ── Reviews (module marketplace) ─────────────────────────────────────────
 export function submitReview(moduleId: string, dto: CreateReviewDto) {
   return apiClient.post<ApiResponse<MarketplaceReview>>(`${BASE}/modules/${moduleId}/reviews`, dto).then((r) => r.data);
 }
@@ -100,7 +109,7 @@ export function publishModule(id: string) {
   return apiClient.put<ApiResponse<MarketplaceModule>>(`${BASE}/vendors/modules/${id}/publish`).then((r) => r.data);
 }
 
-// ── Listings ─────────────────────────────────────────
+// ── Listings (admin) ──────────────────────────────────────────────────────
 export function listListings(filters?: MarketplaceFilters) {
   return apiClient.get<ApiResponse<MarketplaceListing[]>>(`${BASE}/listings`, { params: filters }).then((r) => r.data);
 }
@@ -117,13 +126,83 @@ export function updateListing(id: string, dto: Partial<CreateListingDto>) {
   return apiClient.put<ApiResponse<MarketplaceListing>>(`${BASE}/listings/${id}`, dto).then((r) => r.data);
 }
 
+export function deleteListing(id: string) {
+  return apiClient.delete<ApiResponse<void>>(`${BASE}/listings/${id}`).then((r) => r.data);
+}
+
+export function publishListing(id: string) {
+  return apiClient.post<ApiResponse<MarketplaceListing>>(`${BASE}/listings/${id}/publish`).then((r) => r.data);
+}
+
 export function getMyListings() {
   return apiClient.get<ApiResponse<MarketplaceListing[]>>(`${BASE}/listings/vendor/mine`).then((r) => r.data);
 }
 
-// ── Posts ─────────────────────────────────────────────
+export function getAdminListings(params?: ListingListParams) {
+  return apiClient
+    .get<ApiResponse<{ data: MarketplaceListing[]; meta: unknown }>>(`${BASE}/admin/listings`, { params })
+    .then((r) => r.data);
+}
+
+// ── Offers ────────────────────────────────────────────────────────────────
+export function getOffers(params?: OfferListParams) {
+  return apiClient
+    .get<ApiResponse<{ data: MarketplaceOffer[]; meta: unknown }>>(`${BASE}/offers`, { params })
+    .then((r) => r.data);
+}
+
+export function getOffer(id: string) {
+  return apiClient.get<ApiResponse<MarketplaceOffer>>(`${BASE}/offers/${id}`).then((r) => r.data);
+}
+
+export function createOffer(dto: CreateOfferDto) {
+  return apiClient.post<ApiResponse<MarketplaceOffer>>(`${BASE}/offers`, dto).then((r) => r.data);
+}
+
+export function updateOffer(id: string, dto: Partial<CreateOfferDto>) {
+  return apiClient.put<ApiResponse<MarketplaceOffer>>(`${BASE}/offers/${id}`, dto).then((r) => r.data);
+}
+
+export function deleteOffer(id: string) {
+  return apiClient.delete<ApiResponse<void>>(`${BASE}/offers/${id}`).then((r) => r.data);
+}
+
+export function activateOffer(id: string) {
+  return apiClient.post<ApiResponse<MarketplaceOffer>>(`${BASE}/offers/${id}/activate`).then((r) => r.data);
+}
+
+export function pauseOffer(id: string) {
+  return apiClient.post<ApiResponse<MarketplaceOffer>>(`${BASE}/offers/${id}/pause`).then((r) => r.data);
+}
+
+export function closeOffer(id: string) {
+  return apiClient.post<ApiResponse<MarketplaceOffer>>(`${BASE}/offers/${id}/close`).then((r) => r.data);
+}
+
+// ── Reviews (admin moderation) ────────────────────────────────────────────
+export function getReviews(params?: ReviewListParams) {
+  return apiClient
+    .get<ApiResponse<{ data: MarketplaceReview[]; meta: unknown }>>(`${BASE}/reviews`, { params })
+    .then((r) => r.data);
+}
+
+export function approveReview(id: string) {
+  return apiClient.post<ApiResponse<MarketplaceReview>>(`${BASE}/reviews/${id}/approve`).then((r) => r.data);
+}
+
+export function rejectReview(id: string, note: string) {
+  return apiClient.post<ApiResponse<MarketplaceReview>>(`${BASE}/reviews/${id}/reject`, { note }).then((r) => r.data);
+}
+
+// ── Posts / Feed ──────────────────────────────────────────────────────────
 export function getFeed(params?: { page?: number; limit?: number }) {
   return apiClient.get<ApiResponse<MarketplacePost[]>>(`${BASE}/posts/feed`, { params }).then((r) => r.data);
+}
+
+export function getPosts(params?: PostListParams) {
+  return apiClient
+    .get<ApiResponse<{ data: MarketplacePost[]; meta: unknown }>>(`${BASE}/posts`, { params })
+    .then((r) => r.data);
 }
 
 export function getPost(id: string) {
@@ -132,6 +211,10 @@ export function getPost(id: string) {
 
 export function createPost(dto: CreatePostDto) {
   return apiClient.post<ApiResponse<MarketplacePost>>(`${BASE}/posts`, dto).then((r) => r.data);
+}
+
+export function deletePost(id: string) {
+  return apiClient.delete<ApiResponse<void>>(`${BASE}/posts/${id}`).then((r) => r.data);
 }
 
 export function toggleLike(id: string) {
@@ -150,7 +233,28 @@ export function sharePost(id: string) {
   return apiClient.post<ApiResponse<void>>(`${BASE}/posts/${id}/share`).then((r) => r.data);
 }
 
-// ── Enquiries ────────────────────────────────────────
+// ── Analytics ─────────────────────────────────────────────────────────────
+export function getEntityAnalytics(entityType: string, entityId: string) {
+  return apiClient
+    .get<ApiResponse<AnalyticsSummary>>(`${BASE}/analytics/${entityType}/${entityId}`)
+    .then((r) => r.data);
+}
+
+export function getDashboard() {
+  return apiClient
+    .get<ApiResponse<MarketplaceDashboardStats>>(`${BASE}/admin/dashboard`)
+    .then((r) => r.data);
+}
+
+export function getTopPerforming() {
+  return apiClient
+    .get<ApiResponse<{ posts: MarketplacePost[]; listings: MarketplaceListing[]; offers: MarketplaceOffer[] }>>(
+      `${BASE}/analytics/top-performing`,
+    )
+    .then((r) => r.data);
+}
+
+// ── Enquiries ─────────────────────────────────────────────────────────────
 export function createEnquiry(dto: CreateEnquiryDto) {
   return apiClient.post<ApiResponse<MarketplaceEnquiry>>(`${BASE}/enquiries`, dto).then((r) => r.data);
 }
@@ -167,6 +271,12 @@ export function getEnquiry(id: string) {
   return apiClient.get<ApiResponse<MarketplaceEnquiry>>(`${BASE}/enquiries/${id}`).then((r) => r.data);
 }
 
+export function getEnquiries(params?: Record<string, unknown>) {
+  return apiClient
+    .get<ApiResponse<{ data: MarketplaceEnquiry[]; meta: unknown }>>(`${BASE}/enquiries`, { params })
+    .then((r) => r.data);
+}
+
 export function replyEnquiry(id: string, dto: ReplyEnquiryDto) {
   return apiClient.post<ApiResponse<void>>(`${BASE}/enquiries/${id}/reply`, dto).then((r) => r.data);
 }
@@ -175,7 +285,11 @@ export function markEnquiryRead(id: string) {
   return apiClient.post<ApiResponse<void>>(`${BASE}/enquiries/${id}/read`).then((r) => r.data);
 }
 
-// ── Orders ───────────────────────────────────────────
+export function convertEnquiryToLead(id: string) {
+  return apiClient.post<ApiResponse<{ leadId: string }>>(`${BASE}/enquiries/${id}/convert-lead`).then((r) => r.data);
+}
+
+// ── Orders ────────────────────────────────────────────────────────────────
 export function createOrder(dto: CreateOrderDto) {
   return apiClient.post<ApiResponse<MarketplaceOrder>>(`${BASE}/orders`, dto).then((r) => r.data);
 }
@@ -198,4 +312,28 @@ export function updateOrderStatus(id: string, dto: UpdateOrderStatusDto) {
 
 export function updateTracking(id: string, dto: UpdateTrackingDto) {
   return apiClient.put<ApiResponse<MarketplaceOrder>>(`${BASE}/orders/${id}/tracking`, dto).then((r) => r.data);
+}
+
+// ── Requirements ──────────────────────────────────────────────────────────
+export function getRequirements(params?: Record<string, unknown>) {
+  return apiClient
+    .get<ApiResponse<{ data: MarketplaceListing[]; meta: unknown }>>(`${BASE}/requirements`, { params })
+    .then((r) => r.data);
+}
+
+export function postRequirement(dto: Partial<CreateListingDto>) {
+  return apiClient.post<ApiResponse<MarketplaceListing>>(`${BASE}/requirements`, dto).then((r) => r.data);
+}
+
+export function getRequirementQuotes(requirementId: string) {
+  return apiClient
+    .get<ApiResponse<RequirementQuote[]>>(`${BASE}/requirements/${requirementId}/quotes`)
+    .then((r) => r.data);
+}
+
+// ── Storage ───────────────────────────────────────────────────────────────
+export function getPresignedUrl(contentType: string, filename: string) {
+  return apiClient
+    .post<ApiResponse<{ url: string; key: string }>>(`${BASE}/storage/presigned`, { contentType, filename })
+    .then((r) => r.data);
 }

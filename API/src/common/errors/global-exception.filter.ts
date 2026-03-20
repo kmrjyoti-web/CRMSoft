@@ -5,7 +5,9 @@ import {
   HttpException,
   BadRequestException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/working-client';
+import { Prisma as WorkingPrisma } from '@prisma/working-client';
+import { Prisma as IdentityPrisma } from '@prisma/identity-client';
+import { Prisma as PlatformPrisma } from '@prisma/platform-client';
 import { randomUUID } from 'crypto';
 import { AppError } from './app-error';
 import { ERROR_CODES } from './error-codes';
@@ -83,9 +85,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         ERROR_CODES[errorCode]?.suggestion || 'Check the request and try again.';
       severity = statusCode >= 500 ? 'ERROR' : 'WARNING';
     }
-    // CASE 4: Prisma errors
-    else if (exception instanceof Prisma.PrismaClientKnownRequestError) {
-      const prismaResult = this.handlePrismaError(exception);
+    // CASE 4: Prisma errors — must check all three DB clients (each has its own class)
+    else if (
+      exception instanceof WorkingPrisma.PrismaClientKnownRequestError ||
+      exception instanceof IdentityPrisma.PrismaClientKnownRequestError ||
+      exception instanceof PlatformPrisma.PrismaClientKnownRequestError
+    ) {
+      const prismaResult = this.handlePrismaError(exception as WorkingPrisma.PrismaClientKnownRequestError);
       statusCode = prismaResult.statusCode;
       errorCode = prismaResult.errorCode;
       message = prismaResult.message;
@@ -220,7 +226,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     return match ? match[1] : 'unknown';
   }
 
-  private handlePrismaError(error: Prisma.PrismaClientKnownRequestError): {
+  private handlePrismaError(error: WorkingPrisma.PrismaClientKnownRequestError): {
     statusCode: number;
     errorCode: string;
     message: string;

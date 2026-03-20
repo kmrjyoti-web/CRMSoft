@@ -68,7 +68,7 @@ export class ErrorLoggerService {
 
   /** Get a single error log by ID. */
   async getById(id: string) {
-    return this.prisma.errorLog.findUnique({ where: { id } });
+    return this.prisma.platform.errorLog.findUnique({ where: { id } });
   }
 
   /** Look up error logs by trace/request ID. */
@@ -106,13 +106,13 @@ export class ErrorLoggerService {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.errorLog.findMany({
+      this.prisma.platform.errorLog.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.errorLog.count({ where }),
+      this.prisma.platform.errorLog.count({ where }),
     ]);
 
     return {
@@ -135,18 +135,18 @@ export class ErrorLoggerService {
     if (options?.since) where.createdAt = { gte: new Date(options.since) };
 
     const [byCodeStats, bySeverityStats, total] = await Promise.all([
-      this.prisma.errorLog.groupBy({
+      this.prisma.platform.errorLog.groupBy({
         by: ['errorCode'],
         where,
         _count: { id: true },
         orderBy: { _count: { id: 'desc' } },
       }),
-      this.prisma.errorLog.groupBy({
+      this.prisma.platform.errorLog.groupBy({
         by: ['severity'],
         where,
         _count: { id: true },
       }),
-      this.prisma.errorLog.count({ where }),
+      this.prisma.platform.errorLog.count({ where }),
     ]);
 
     const bySeverity: Record<string, number> = { INFO: 0, WARNING: 0, ERROR: 0, CRITICAL: 0 };
@@ -166,7 +166,7 @@ export class ErrorLoggerService {
 
   /** Get errors by severity for a tenant. */
   async getBySeverity(tenantId: string, severity: string, limit = 50) {
-    return this.prisma.errorLog.findMany({
+    return this.prisma.platform.errorLog.findMany({
       where: { tenantId, severity: severity as any },
       orderBy: { createdAt: 'desc' },
       take: limit,
@@ -175,7 +175,7 @@ export class ErrorLoggerService {
 
   /** Resolve an error log. */
   async resolve(id: string, data: { resolvedById: string; resolution: string }) {
-    return this.prisma.errorLog.update({
+    return this.prisma.platform.errorLog.update({
       where: { id },
       data: {
         status: 'RESOLVED',
@@ -188,7 +188,7 @@ export class ErrorLoggerService {
 
   /** Assign an error log to someone. */
   async assign(id: string, data: { assignedToId: string; assignedToName: string }) {
-    return this.prisma.errorLog.update({
+    return this.prisma.platform.errorLog.update({
       where: { id },
       data: {
         status: 'ASSIGNED',
@@ -200,7 +200,7 @@ export class ErrorLoggerService {
 
   /** Mark an error log as ignored. */
   async ignore(id: string) {
-    return this.prisma.errorLog.update({
+    return this.prisma.platform.errorLog.update({
       where: { id },
       data: { status: 'IGNORED' },
     });
@@ -215,7 +215,7 @@ export class ErrorLoggerService {
     const where: any = { createdAt: { gte: since } };
     if (options?.tenantId) where.tenantId = options.tenantId;
 
-    const logs = await this.prisma.errorLog.findMany({
+    const logs = await this.prisma.platform.errorLog.findMany({
       where,
       select: { createdAt: true, severity: true },
       orderBy: { createdAt: 'asc' },
@@ -268,7 +268,7 @@ export class ErrorLoggerService {
 
   private async persistAsync(entry: ErrorLogEntry): Promise<void> {
     try {
-      const created = await this.prisma.errorLog.create({
+      const created = await this.prisma.platform.errorLog.create({
         data: {
           requestId: entry.requestId,
           errorCode: entry.errorCode,

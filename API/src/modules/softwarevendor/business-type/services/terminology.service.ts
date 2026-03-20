@@ -13,13 +13,17 @@ export class TerminologyService {
   async getResolved(tenantId: string): Promise<Record<string, string>> {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
-      include: { businessType: true },
     });
     if (!tenant) throw new NotFoundException('Tenant not found');
 
+    // Fetch business type separately (cross-db: Tenant is in IdentityDB, BusinessTypeRegistry in PlatformDB)
+    const businessType = tenant.businessTypeId
+      ? await this.prisma.platform.businessTypeRegistry.findUnique({ where: { id: tenant.businessTypeId } })
+      : null;
+
     // Start with business type defaults
-    const result: Record<string, string> = tenant.businessType
-      ? { ...(tenant.businessType.terminologyMap as Record<string, string>) }
+    const result: Record<string, string> = businessType
+      ? { ...(businessType.terminologyMap as Record<string, string>) }
       : {};
 
     // Overlay tenant-specific overrides

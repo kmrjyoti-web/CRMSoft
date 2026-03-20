@@ -17,6 +17,7 @@ import { PermanentDeleteContactHandler } from './application/commands/permanent-
 // Queries
 import { GetContactByIdHandler } from './application/queries/get-contact-by-id/get-contact-by-id.handler';
 import { GetContactsListHandler } from './application/queries/get-contacts-list/get-contacts-list.handler';
+import { GetContactsDashboardHandler } from './application/queries/get-contacts-dashboard/get-contacts-dashboard.handler';
 
 // Events
 import { OnContactCreatedHandler } from './application/event-handlers/on-contact-created.handler';
@@ -27,7 +28,7 @@ const CommandHandlers = [
   DeactivateContactHandler, ReactivateContactHandler,
   SoftDeleteContactHandler, RestoreContactHandler, PermanentDeleteContactHandler,
 ];
-const QueryHandlers = [GetContactByIdHandler, GetContactsListHandler];
+const QueryHandlers = [GetContactByIdHandler, GetContactsListHandler, GetContactsDashboardHandler];
 const EventHandlers = [OnContactCreatedHandler, OnContactDeactivatedHandler];
 
 @Module({

@@ -25,7 +25,6 @@ export class ReminderProcessorService {
     // 2. Fetch PENDING reminders that are due
     const dueReminders = await this.prisma.working.reminder.findMany({
       where: { isActive: true, status: 'PENDING', scheduledAt: { lte: now } },
-      include: { recipient: { select: { id: true, email: true, firstName: true } } },
       take: 100,
     });
 
@@ -38,7 +37,7 @@ export class ReminderProcessorService {
             this.logger.log(`[IN_APP] Reminder "${reminder.title}" for user ${reminder.recipientId}`);
             break;
           case 'EMAIL':
-            this.logger.log(`[EMAIL] Would send to ${reminder.recipient.email}: ${reminder.title}`);
+            this.logger.log(`[EMAIL] Would send to user ${reminder.recipientId}: ${reminder.title}`);
             break;
           case 'SMS':
             this.logger.log(`[SMS] Would send to user ${reminder.recipientId}: ${reminder.title}`);

@@ -65,7 +65,7 @@ export class ErrorCatalogService implements OnModuleInit {
   /** Force refresh cache from DB. */
   async refreshCache(): Promise<number> {
     try {
-      const entries = await this.prisma.errorCatalog.findMany({
+      const entries = await this.prisma.platform.errorCatalog.findMany({
         where: { isActive: true },
       });
       this.cache.clear();

@@ -6,9 +6,15 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { KpiCard } from "@/features/dashboard/components/KpiCard";
 import { CHART_COLORS } from "@/features/dashboard/utils/chart-colors";
 import { Icon, Badge, TableFull } from "@/components/ui";
+import { StatCard } from "@/features/dashboard/components/StatCard";
+import { DashboardCard } from "@/features/dashboard/components/DashboardCard";
+import { HorizontalBarList } from "@/features/dashboard/components/HorizontalBarList";
+import { StackedProgress } from "@/features/dashboard/components/StackedProgress";
+import { SemiDonutChart } from "@/features/dashboard/components/SemiDonutChart";
+import { ActivityFeed } from "@/features/dashboard/components/ActivityFeed";
+import type { ActivityItem } from "@/features/dashboard/components/ActivityFeed";
 import { TableSkeleton } from "@/components/common/TableSkeleton";
 import { AICDatePicker } from "@/components/shared/AICDatePicker";
 import type { DateRange } from "@/components/shared/AICDatePicker";
@@ -82,8 +88,84 @@ function DatePickerAction({
 }
 
 // ══════════════════════════════════════════════════════════
+//  SKELETON COMPONENTS
+// ══════════════════════════════════════════════════════════
+
+function Shimmer({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`relative overflow-hidden bg-gray-200 rounded ${className}`}
+    >
+      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.4s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+    </div>
+  );
+}
+
+function StatCardSkeleton() {
+  return (
+    <div className="bg-white rounded-xl border border-gray-100 p-5 flex flex-col gap-3 shadow-sm">
+      <Shimmer className="w-12 h-12 rounded-full" />
+      <div className="space-y-1.5">
+        <Shimmer className="h-2.5 w-28" />
+        <Shimmer className="h-7 w-16" />
+      </div>
+      <Shimmer className="h-2.5 w-36" />
+      <Shimmer className="h-2.5 w-14" />
+    </div>
+  );
+}
+
+function CardSkeleton({ rows = 5, height }: { rows?: number; height?: string }) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col">
+      {/* header */}
+      <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-gray-50">
+        <Shimmer className="h-3.5 w-32" />
+        <Shimmer className="h-5 w-20 rounded-md" />
+      </div>
+      {/* body */}
+      <div className={`flex-1 p-5 space-y-3 ${height ?? ""}`}>
+        {Array.from({ length: rows }).map((_, i) => (
+          <Shimmer key={i} className={`h-3 ${i % 3 === 1 ? "w-3/4" : i % 3 === 2 ? "w-1/2" : "w-full"}`} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CRMDashboardSkeleton() {
+  return (
+    <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-gray-50">
+      {/* Row 1 — 8 stat cards, 4 col */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {Array.from({ length: 8 }).map((_, i) => <StatCardSkeleton key={i} />)}
+      </div>
+      {/* Row 2 — Dept + Status + Verification + Recent */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
+        <CardSkeleton rows={6} />
+        <CardSkeleton rows={5} />
+        <CardSkeleton rows={6} />
+        <CardSkeleton rows={5} />
+      </div>
+      {/* Row 3 — Industry + Source + Trend */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <CardSkeleton rows={6} />
+        <CardSkeleton rows={6} />
+        <CardSkeleton rows={4} height="h-48" />
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════
 //  PAGE 1 — DASHBOARD  (/contacts/dashboard)
 // ══════════════════════════════════════════════════════════
+
+// Avatar colour palette for contacts without photos
+const AVATAR_COLORS = [
+  "#f97316", "#3b82f6", "#10b981", "#8b5cf6", "#ec4899",
+  "#14b8a6", "#f59e0b", "#6366f1", "#ef4444", "#06b6d4",
+];
 
 export function CRMDashboardPage() {
   const { dateRange, handleRangeChange } = useDateRange();
@@ -107,16 +189,60 @@ export function CRMDashboardPage() {
   const departmentWise: DepartmentWiseData[] = Array.isArray(raw?.departmentWise) ? raw.departmentWise : [];
   const recentContacts: ContactListItem[] = Array.isArray(raw?.recentContacts) ? raw.recentContacts : [];
 
-  const verificationPie = [
-    { name: "Verified", value: stats.verifiedContacts, fill: "#10b981" },
-    { name: "Not Verified", value: stats.notVerifiedContacts, fill: "#ef4444" },
-  ];
-  const orgPie = [
-    { name: "Verified", value: stats.verifiedOrganizations, fill: "#3b82f6" },
-    { name: "Unverified", value: Math.max(0, stats.totalOrganizations - stats.verifiedOrganizations), fill: "#f59e0b" },
+  // ── Derived ──────────────────────────────────────────────
+  const contactStatusSegments = [
+    { label: "Active", value: stats.activeContacts, color: "#f59e0b" },
+    { label: "Verified", value: stats.verifiedContacts, color: "#0e7490" },
+    { label: "Inactive", value: stats.inactiveContacts, color: "#ef4444" },
+    { label: "Not Verified", value: stats.notVerifiedContacts, color: "#ec4899" },
   ];
 
-  if (isLoading) return <LoadingSpinner fullPage />;
+  const verificationDonut = [
+    { name: "Verified", value: stats.verifiedContacts, color: "#10b981" },
+    { name: "Not Verified", value: stats.notVerifiedContacts, color: "#f97316" },
+    { name: "Orgs Verified", value: stats.verifiedOrganizations, color: "#3b82f6" },
+    {
+      name: "Orgs Unverified",
+      value: Math.max(0, stats.totalOrganizations - stats.verifiedOrganizations),
+      color: "#fbbf24",
+    },
+  ];
+
+  const deptBarItems = departmentWise.map((d, i) => ({
+    label: d.department,
+    value: d.count,
+    color: CHART_COLORS[i % CHART_COLORS.length],
+  }));
+
+  const industryBarItems = industryWise.map((d, i) => ({
+    label: d.industry,
+    value: d.count,
+    color: CHART_COLORS[i % CHART_COLORS.length],
+  }));
+
+  // Recent contacts → ActivityFeed items
+  const recentFeedItems: ActivityItem[] = recentContacts.map((c, i) => {
+    const orgName = c.contactOrganizations?.[0]?.organization?.name;
+    const email = c.communications?.find((cm) => cm.type === "EMAIL")?.value;
+    const phone = c.communications?.find(
+      (cm) => cm.type === "PHONE" || cm.type === "MOBILE",
+    )?.value;
+    return {
+      id: c.id,
+      name: `${c.firstName} ${c.lastName}`.trim(),
+      subtitle: [c.designation, orgName].filter(Boolean).join(" · "),
+      initials: `${c.firstName?.[0] ?? ""}${c.lastName?.[0] ?? ""}`.toUpperCase(),
+      avatarBg: AVATAR_COLORS[i % AVATAR_COLORS.length],
+      badge: c.entityVerificationStatus === "VERIFIED" ? "Verified" : "Pending",
+      badgeColor: c.entityVerificationStatus === "VERIFIED" ? "green" : "orange",
+      meta1: email,
+      meta1Label: "Email",
+      meta2: phone,
+      meta2Label: "Phone",
+      meta3: c.createdAt ? new Date(c.createdAt).toLocaleDateString() : undefined,
+      meta3Label: "Added",
+    };
+  });
 
   return (
     <div className="h-full flex flex-col">
@@ -124,162 +250,222 @@ export function CRMDashboardPage() {
         title="Dashboard"
         actions={<DatePickerAction dateRange={dateRange} onRangeChange={handleRangeChange} />}
       />
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard title="Total Contacts" value={stats.totalContacts} icon="users" color="#3b82f6" variant="clean" />
-        <KpiCard title="Active Contacts" value={stats.activeContacts} icon="user-check" color="#10b981" variant="clean" />
-        <KpiCard title="Verified Contacts" value={stats.verifiedContacts} icon="shield-check" color="#06b6d4" variant="clean" />
-        <KpiCard title="Not Verified" value={stats.notVerifiedContacts} icon="shield-alert" color="#ef4444" variant="clean" />
-        <KpiCard title="Total Organizations" value={stats.totalOrganizations} icon="building" color="#8b5cf6" variant="clean" />
-        <KpiCard title="Verified Orgs" value={stats.verifiedOrganizations} icon="building-2" color="#14b8a6" variant="clean" />
-        <KpiCard title="Total Customers" value={stats.totalCustomers} icon="crown" color="#f59e0b" variant="clean" />
-        <KpiCard title="Inactive Contacts" value={stats.inactiveContacts} icon="user-x" color="#f97316" variant="clean" />
-      </div>
+      {isLoading ? (
+        <CRMDashboardSkeleton />
+      ) : (
+        <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-gray-50">
 
-      {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ChartCard title="Contact Verification Status">
-          <ResponsiveContainer width="100%" height={260}>
-            <PieChart>
-              <Pie data={verificationPie} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={95} innerRadius={48}
-                label={((p: any) => `${p.name}: ${p.value}`) as any}>
-                {verificationPie.map((e, i) => <Cell key={i} fill={e.fill} />)}
-              </Pie>
-              <Tooltip /><Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        <ChartCard title="Customers by Industry">
-          {industryWise.length > 0 ? (
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={industryWise} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" tick={{ fontSize: 12 }} />
-                <YAxis dataKey="industry" type="category" tick={{ fontSize: 11 }} width={120} />
-                <Tooltip />
-                <Bar dataKey="count" name="Customers">
-                  {industryWise.map((_e, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : <EmptyChart />}
-        </ChartCard>
-      </div>
-
-      {/* Charts Row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ChartCard title="Contacts by Source / Campaign">
-          {sourceWise.length > 0 ? (
-            <ResponsiveContainer width="100%" height={260}>
-              <PieChart>
-                <Pie data={sourceWise} dataKey="count" nameKey="source" cx="50%" cy="50%" outerRadius={95}
-                  label={((p: any) => `${p.source} (${p.percentage}%)`) as any}>
-                  {sourceWise.map((_e, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
-                </Pie>
-                <Tooltip /><Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : <EmptyChart />}
-        </ChartCard>
-
-        <ChartCard title="Verification Trend">
-          {verificationTrend.length > 0 ? (
-            <ResponsiveContainer width="100%" height={260}>
-              <AreaChart data={verificationTrend}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="period" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip /><Legend />
-                <Area type="monotone" dataKey="verified" stackId="1" stroke="#10b981" fill="#10b98140" name="Verified" />
-                <Area type="monotone" dataKey="unverified" stackId="1" stroke="#ef4444" fill="#ef444440" name="Unverified" />
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : <EmptyChart />}
-        </ChartCard>
-      </div>
-
-      {/* Charts Row 3 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ChartCard title="Organization Verification">
-          <ResponsiveContainer width="100%" height={260}>
-            <PieChart>
-              <Pie data={orgPie} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={95} innerRadius={48}
-                label={((p: any) => `${p.name}: ${p.value}`) as any}>
-                {orgPie.map((e, i) => <Cell key={i} fill={e.fill} />)}
-              </Pie>
-              <Tooltip /><Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        <ChartCard title="Contacts by Department">
-          {departmentWise.length > 0 ? (
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={departmentWise}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="department" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Bar dataKey="count" name="Contacts">
-                  {departmentWise.map((_e, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : <EmptyChart />}
-        </ChartCard>
-      </div>
-
-      {/* Recent Contacts */}
-      <div className="rounded-lg border border-gray-200 bg-white p-5">
-        <h3 className="text-base font-semibold text-gray-800 mb-4">Recent Contacts</h3>
-        {recentContacts.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-200 text-left text-gray-500">
-                  <th className="pb-3 font-medium">Name</th>
-                  <th className="pb-3 font-medium">Designation</th>
-                  <th className="pb-3 font-medium">Department</th>
-                  <th className="pb-3 font-medium">Organization</th>
-                  <th className="pb-3 font-medium">Verification</th>
-                  <th className="pb-3 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentContacts.slice(0, 10).map((c) => {
-                  const org = c.contactOrganizations?.[0]?.organization;
-                  return (
-                    <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-2.5 font-medium text-gray-800">{c.firstName} {c.lastName}</td>
-                      <td className="py-2.5 text-gray-600">{c.designation ?? "-"}</td>
-                      <td className="py-2.5 text-gray-600">{c.department ?? "-"}</td>
-                      <td className="py-2.5 text-gray-600">{org?.name ?? "-"}</td>
-                      <td className="py-2.5">
-                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                          c.entityVerificationStatus === "VERIFIED" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
-                        }`}>
-                          {c.entityVerificationStatus === "VERIFIED" ? "Verified" : "Not Verified"}
-                        </span>
-                      </td>
-                      <td className="py-2.5">
-                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                          c.isActive ? "bg-blue-50 text-blue-700" : "bg-gray-100 text-gray-500"
-                        }`}>
-                          {c.isActive ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          {/* ── Row 1: 8 Stat Cards — 4 columns ─────────────────── */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StatCard
+              title="Total No of Contacts"
+              value={stats.totalContacts}
+              icon="users"
+              iconBg="#f97316"
+              footnote="Active contacts in system"
+              linkLabel="View All"
+            />
+            <StatCard
+              title="Active Contacts"
+              value={stats.activeContacts}
+              total={stats.totalContacts}
+              icon="user-check"
+              iconBg="#0d9488"
+              footnote="of total contacts"
+              linkLabel="View All"
+            />
+            <StatCard
+              title="Verified Contacts"
+              value={stats.verifiedContacts}
+              total={stats.totalContacts}
+              icon="shield-check"
+              iconBg="#3b82f6"
+              linkLabel="View All"
+            />
+            <StatCard
+              title="Pending Verification"
+              value={stats.notVerifiedContacts}
+              total={stats.totalContacts}
+              icon="shield-alert"
+              iconBg="#ec4899"
+              linkLabel="View All"
+            />
+            <StatCard
+              title="Total Organizations"
+              value={stats.totalOrganizations}
+              icon="building"
+              iconBg="#8b5cf6"
+              linkLabel="View All"
+            />
+            <StatCard
+              title="Verified Orgs"
+              value={stats.verifiedOrganizations}
+              total={stats.totalOrganizations}
+              icon="building-2"
+              iconBg="#14b8a6"
+              linkLabel="View All"
+            />
+            <StatCard
+              title="Total Customers"
+              value={stats.totalCustomers}
+              icon="crown"
+              iconBg="#f59e0b"
+              linkLabel="View All"
+            />
+            <StatCard
+              title="Inactive Contacts"
+              value={stats.inactiveContacts}
+              total={stats.totalContacts}
+              icon="user-x"
+              iconBg="#64748b"
+              linkLabel="View All"
+            />
           </div>
-        ) : <EmptyChart />}
-      </div>
-      </div>
+
+          {/* ── Row 2: Dept + Status + Verification + Recent ────── */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
+
+            {/* Contacts by Department */}
+            <DashboardCard
+              title="Contacts by Department"
+              badge="This Period"
+              badgeIcon="calendar"
+            >
+              {deptBarItems.length > 0 ? (
+                <>
+                  <HorizontalBarList items={deptBarItems} barColor="#f97316" />
+                  {stats.totalContacts > 0 && (
+                    <p className="mt-4 text-xs text-gray-500">
+                      <span
+                        className="inline-block w-2 h-2 rounded-full mr-1"
+                        style={{ backgroundColor: "#10b981" }}
+                      />
+                      <span className="font-semibold text-emerald-600">
+                        {Math.round((stats.activeContacts / Math.max(stats.totalContacts, 1)) * 100)}%
+                      </span>{" "}
+                      active rate
+                    </p>
+                  )}
+                </>
+              ) : (
+                <EmptyChart />
+              )}
+            </DashboardCard>
+
+            {/* Contact Status — stacked progress */}
+            <DashboardCard
+              title="Contact Status"
+              badge="This Period"
+              badgeIcon="calendar"
+            >
+              <StackedProgress total={stats.totalContacts} segments={contactStatusSegments} />
+              {recentContacts[0] && (
+                <div className="mt-4">
+                  <p className="text-xs font-semibold text-gray-500 mb-2">Latest Added</p>
+                  <div className="flex items-center gap-3 bg-orange-50 border border-orange-100 rounded-lg px-3 py-2.5">
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                      style={{ backgroundColor: AVATAR_COLORS[0] }}
+                    >
+                      {recentContacts[0].firstName?.[0]}{recentContacts[0].lastName?.[0]}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-800 truncate">
+                        {`${recentContacts[0].firstName} ${recentContacts[0].lastName}`.trim()}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {recentContacts[0].designation ?? recentContacts[0].department ?? "Contact"}
+                      </p>
+                    </div>
+                    <span className="text-xs font-semibold text-orange-600 flex-shrink-0">
+                      {recentContacts[0].entityVerificationStatus === "VERIFIED" ? "Verified" : "Pending"}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </DashboardCard>
+
+            {/* Verification Overview — semi-donut */}
+            <DashboardCard
+              title="Verification Overview"
+              badge="Today"
+              badgeIcon="calendar"
+            >
+              <SemiDonutChart
+                segments={verificationDonut}
+                centerLabel="Total Verified"
+                centerValue={stats.verifiedContacts + stats.verifiedOrganizations}
+                semi
+                height={190}
+              />
+            </DashboardCard>
+
+            {/* Recent Contacts — activity feed */}
+            <DashboardCard
+              title="Recent Contacts"
+              badge="All Departments"
+              badgeIcon="users"
+            >
+              <ActivityFeed
+                items={recentFeedItems.slice(0, 5)}
+                emptyText="No contacts added yet"
+                viewAllLabel="View All Contacts"
+              />
+            </DashboardCard>
+          </div>
+
+          {/* ── Row 3: Industry + Source + Trend ─────────────────── */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+            <DashboardCard title="Customers by Industry" badge="This Period" badgeIcon="calendar">
+              {industryBarItems.length > 0 ? (
+                <HorizontalBarList items={industryBarItems} barColor="#3b82f6" />
+              ) : (
+                <EmptyChart />
+              )}
+            </DashboardCard>
+
+            <DashboardCard title="Contacts by Source" badge="This Period" badgeIcon="calendar">
+              {sourceWise.length > 0 ? (
+                <div className="space-y-3">
+                  {sourceWise.map((s, i) => (
+                    <div key={s.source} className="flex items-center gap-3">
+                      <div
+                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
+                      />
+                      <span className="flex-1 text-sm text-gray-700 truncate">{s.source}</span>
+                      <span className="text-sm font-semibold text-gray-900">{s.count}</span>
+                      <span className="w-10 text-right text-xs text-gray-400">{s.percentage}%</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyChart />
+              )}
+            </DashboardCard>
+
+            <DashboardCard title="Verification Trend" badge="6 Months" badgeIcon="calendar">
+              {verificationTrend.length > 0 ? (
+                <ResponsiveContainer width="100%" height={200}>
+                  <AreaChart data={verificationTrend} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="period" tick={{ fontSize: 10 }} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
+                    <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
+                    <Area type="monotone" dataKey="verified" stackId="1" stroke="#10b981" fill="#10b98130" name="Verified" />
+                    <Area type="monotone" dataKey="unverified" stackId="1" stroke="#f97316" fill="#f9731630" name="Unverified" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptyChart />
+              )}
+            </DashboardCard>
+          </div>
+
+        </div>
+      )}
     </div>
   );
 }
@@ -436,10 +622,10 @@ export function CRMStatisticsPage() {
 
       {/* Summary stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Verification Rate" value={`${verificationRate}%`} color="#10b981" icon="shield-check" />
-        <StatCard label="Active Rate" value={`${activeRate}%`} color="#3b82f6" icon="activity" />
-        <StatCard label="Org Verification Rate" value={`${orgVerifRate}%`} color="#8b5cf6" icon="building" />
-        <StatCard label="Total Customers" value={stats.totalCustomers.toString()} color="#f59e0b" icon="crown" />
+        <MetricCard label="Verification Rate" value={`${verificationRate}%`} color="#10b981" icon="shield-check" />
+        <MetricCard label="Active Rate" value={`${activeRate}%`} color="#3b82f6" icon="activity" />
+        <MetricCard label="Org Verification Rate" value={`${orgVerifRate}%`} color="#8b5cf6" icon="building" />
+        <MetricCard label="Total Customers" value={stats.totalCustomers.toString()} color="#f59e0b" icon="crown" />
       </div>
 
       {/* Verification splits */}
@@ -560,7 +746,7 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
   );
 }
 
-function StatCard({ label, value, color, icon }: { label: string; value: string; color: string; icon: string }) {
+function MetricCard({ label, value, color, icon }: { label: string; value: string; color: string; icon: string }) {
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-5 flex items-center gap-4">
       <div className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${color}18` }}>

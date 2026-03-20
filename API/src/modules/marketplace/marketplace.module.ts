@@ -33,6 +33,7 @@ import { FeedModule } from './feed/feed.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { EnquiriesModule } from './enquiries/enquiries.module';
 import { StorageModule } from './storage/storage.module';
+import { RequirementsModule } from './requirements/requirements.module';
 
 const SERVICES = [
   VendorService,
@@ -75,6 +76,7 @@ const CONTROLLERS = [
     AnalyticsModule,
     EnquiriesModule,
     StorageModule,
+    RequirementsModule,
   ],
   controllers: CONTROLLERS,
   providers: SERVICES,

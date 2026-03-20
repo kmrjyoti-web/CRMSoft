@@ -579,7 +579,7 @@ export class AuthService {
       );
     }
 
-    if (!allowedRoles.includes(user.role.name)) {
+    if (!user.role || !allowedRoles.includes(user.role.name)) {
       throw new UnauthorizedException(
         'This account does not have access to this portal',
       );

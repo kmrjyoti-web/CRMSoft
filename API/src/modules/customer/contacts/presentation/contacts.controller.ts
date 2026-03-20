@@ -13,6 +13,7 @@ import { RestoreContactCommand } from '../application/commands/restore-contact/r
 import { PermanentDeleteContactCommand } from '../application/commands/permanent-delete-contact/permanent-delete-contact.command';
 import { GetContactByIdQuery } from '../application/queries/get-contact-by-id/get-contact-by-id.query';
 import { GetContactsListQuery } from '../application/queries/get-contacts-list/get-contacts-list.query';
+import { GetContactsDashboardQuery } from '../application/queries/get-contacts-dashboard/get-contacts-dashboard.query';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import { ContactQueryDto } from './dto/contact-query.dto';
@@ -42,6 +43,19 @@ export class ContactsController {
     );
     const contact = await this.queryBus.execute(new GetContactByIdQuery(id));
     return ApiResponse.success(contact, 'Contact created');
+  }
+
+  @Get('dashboard')
+  @ApiOperation({ summary: 'CRM dashboard stats, charts, and recent contacts' })
+  async getDashboard(
+    @CurrentUser('tenantId') tenantId: string,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
+  ) {
+    const result = await this.queryBus.execute(
+      new GetContactsDashboardQuery(tenantId, dateFrom, dateTo),
+    );
+    return ApiResponse.success(result);
   }
 
   @Get()
