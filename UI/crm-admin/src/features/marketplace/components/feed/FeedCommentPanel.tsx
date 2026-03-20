@@ -17,7 +17,7 @@ interface FeedCommentPanelProps {
   onAddComment: (postId: string, content: string) => void;
 }
 
-const AVATAR_COLORS = ["#4f46e5", "#0891b2", "#059669", "#d97706", "#dc2626", "#7c3aed"];
+const AVATAR_COLORS = ["var(--color-primary, #1e5f74)", "#0891b2", "#059669", "#d97706", "#dc2626", "#7c3aed"];
 
 function getAvatarColor(name: string): string {
   let hash = 0;
@@ -61,7 +61,7 @@ export function FeedCommentPanel({ postId, comments, totalComments, onAddComment
           style={{
             background: "none",
             border: "none",
-            color: "#4f46e5",
+            color: "var(--color-primary, #1e5f74)",
             fontSize: 13,
             fontWeight: 500,
             cursor: "pointer",
@@ -119,7 +119,7 @@ export function FeedCommentPanel({ postId, comments, totalComments, onAddComment
             width: 32,
             height: 32,
             borderRadius: "50%",
-            backgroundColor: "#4f46e5",
+            backgroundColor: "var(--color-primary, #1e5f74)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -160,7 +160,7 @@ export function FeedCommentPanel({ postId, comments, totalComments, onAddComment
               position: "absolute",
               right: 8,
               bottom: 7,
-              background: commentText.trim() ? "#4f46e5" : "#e2e8f0",
+              background: commentText.trim() ? "var(--color-primary, #1e5f74)" : "#e2e8f0",
               border: "none",
               borderRadius: "50%",
               width: 28,

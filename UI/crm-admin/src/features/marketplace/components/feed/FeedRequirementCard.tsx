@@ -83,7 +83,9 @@ export function FeedRequirementCard({
           {requirement.buyerInitial}
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 600, fontSize: 14, color: "#1e293b" }}>{requirement.buyerName}</div>
+          <div style={{ fontWeight: 600, fontSize: 14, color: "#1e293b" }}>
+            {requirement.buyerName}
+          </div>
           <div style={{ fontSize: 11, color: "#64748b" }}>Buyer</div>
         </div>
         <span
@@ -135,12 +137,13 @@ export function FeedRequirementCard({
               fontWeight: 600,
               padding: "3px 10px",
               borderRadius: 20,
-              backgroundColor: "#eff6ff",
-              color: "#2563eb",
-              border: "1px solid #bfdbfe",
+              backgroundColor: "var(--color-primary-50, #eef7fa)",
+              color: "var(--color-primary, #1e5f74)",
+              border: "1px solid var(--color-primary-100, #cce8f0)",
             }}
           >
-            <Icon name="tag" size={10} color="#2563eb" /> {requirement.category}
+            <Icon name="tag" size={10} color="var(--color-primary, #1e5f74)" />{" "}
+            {requirement.category}
           </span>
           <span
             style={{
@@ -195,8 +198,8 @@ export function FeedRequirementCard({
             style={{
               fontSize: 12,
               fontWeight: 600,
-              color: isUrgent ? "#dc2626" : "#64748b",
-              backgroundColor: isUrgent ? "#fef2f2" : "#f8fafc",
+              color: isUrgent ? "var(--color-danger, #ef4444)" : "#64748b",
+              backgroundColor: isUrgent ? "var(--color-danger-light, #fee2e2)" : "#f8fafc",
               border: `1px solid ${isUrgent ? "#fecaca" : "#e2e8f0"}`,
               padding: "4px 10px",
               borderRadius: 20,
@@ -205,7 +208,11 @@ export function FeedRequirementCard({
               gap: 5,
             }}
           >
-            <Icon name="clock" size={11} color={isUrgent ? "#dc2626" : "#64748b"} />
+            <Icon
+              name="clock"
+              size={11}
+              color={isUrgent ? "var(--color-danger, #ef4444)" : "#64748b"}
+            />
             {daysLeft === 0
               ? "Closes today!"
               : `Closes in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`}
@@ -220,7 +227,7 @@ export function FeedRequirementCard({
           style={{
             flex: 1,
             padding: "10px 16px",
-            backgroundColor: "#4f46e5",
+            backgroundColor: "var(--color-primary, #1e5f74)",
             color: "#fff",
             border: "none",
             borderRadius: 8,
@@ -231,10 +238,10 @@ export function FeedRequirementCard({
             alignItems: "center",
             justifyContent: "center",
             gap: 6,
-            transition: "background 0.2s",
+            transition: "opacity 0.2s",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#4338ca")}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#4f46e5")}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
         >
           <Icon name="file-text" size={15} color="#fff" />
           Submit Quote
@@ -284,12 +291,16 @@ export function FeedRequirementCard({
               cursor: "pointer",
               fontSize: 13,
               fontWeight: liked ? 600 : 500,
-              color: liked ? "#2563eb" : "#64748b",
+              color: liked ? "var(--color-primary, #1e5f74)" : "#64748b",
             }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f8fafc")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
           >
-            <Icon name="thumbs-up" size={16} color={liked ? "#2563eb" : "#64748b"} />
+            <Icon
+              name="thumbs-up"
+              size={16}
+              color={liked ? "var(--color-primary, #1e5f74)" : "#64748b"}
+            />
             {requirement.likeCount + (liked ? 1 : 0)} Likes
           </button>
           <button

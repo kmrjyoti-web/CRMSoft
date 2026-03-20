@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { Icon, Button } from "@/components/ui";
+import { useState, useEffect } from "react";
+import { Icon } from "@/components/ui";
 
 export interface FeedOffer {
   id: string;
@@ -28,17 +28,60 @@ interface FeedOfferCardProps {
   onShare: (id: string) => void;
 }
 
-function getDaysUntil(dateStr: string): number {
-  const d = new Date(dateStr);
-  const now = new Date();
-  return Math.max(0, Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+interface CountdownResult {
+  display: string;
+  isUrgent: boolean;
+  expired: boolean;
+}
+
+function useCountdown(validUntil: string): CountdownResult {
+  const [result, setResult] = useState<CountdownResult>(() => computeCountdown(validUntil));
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setResult(computeCountdown(validUntil));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [validUntil]);
+
+  return result;
+}
+
+function computeCountdown(validUntil: string): CountdownResult {
+  const target = new Date(validUntil).getTime();
+  const now = Date.now();
+  const diff = target - now;
+
+  if (diff <= 0) {
+    return { display: "Expired", isUrgent: true, expired: true };
+  }
+
+  const totalSeconds = Math.floor(diff / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  // Show days + hours when >= 24h remain
+  if (days >= 1) {
+    const display = `${days}d ${hours}h`;
+    return { display, isUrgent: false, expired: false };
+  }
+
+  // Show HH:MM:SS for < 24h
+  const hh = String(hours).padStart(2, "0");
+  const mm = String(minutes).padStart(2, "0");
+  const ss = String(seconds).padStart(2, "0");
+  const display = `${hh}:${mm}:${ss}`;
+  const isUrgent = diff < 2 * 3600 * 1000; // < 2 hours
+  return { display, isUrgent, expired: false };
 }
 
 export function FeedOfferCard({ offer, onOrder, onEnquiry, onLike, onShare }: FeedOfferCardProps) {
   const [liked, setLiked] = useState(false);
-  const daysLeft = getDaysUntil(offer.validUntil);
-  const gradFrom = offer.gradientFrom ?? "#4f46e5";
-  const gradTo = offer.gradientTo ?? "#7c3aed";
+  const countdown = useCountdown(offer.validUntil);
+  const gradFrom = offer.gradientFrom ?? "var(--color-primary, #1e5f74)";
+  const gradTo = offer.gradientTo ?? "#0891b2";
 
   function handleLike() {
     setLiked((v) => !v);
@@ -62,7 +105,7 @@ export function FeedOfferCard({ offer, onOrder, onEnquiry, onLike, onShare }: Fe
             width: 40,
             height: 40,
             borderRadius: "50%",
-            backgroundColor: offer.vendorColor ?? "#059669",
+            backgroundColor: offer.vendorColor ?? "var(--color-success, #22c55e)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -109,22 +152,27 @@ export function FeedOfferCard({ offer, onOrder, onEnquiry, onLike, onShare }: Fe
             {offer.title}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            {daysLeft > 0 ? (
+            {!countdown.expired ? (
               <span
                 style={{
                   fontSize: 12,
-                  backgroundColor: "rgba(255,255,255,0.2)",
+                  backgroundColor: countdown.isUrgent
+                    ? "rgba(239,68,68,0.35)"
+                    : "rgba(255,255,255,0.2)",
                   color: "#fff",
                   padding: "2px 10px",
                   borderRadius: 20,
-                  fontWeight: 500,
+                  fontWeight: countdown.isUrgent ? 700 : 500,
                   display: "flex",
                   alignItems: "center",
                   gap: 4,
+                  fontVariantNumeric: "tabular-nums",
+                  letterSpacing: countdown.isUrgent ? "0.3px" : undefined,
                 }}
               >
                 <Icon name="clock" size={11} color="#fff" />
-                Ends in {daysLeft} day{daysLeft !== 1 ? "s" : ""}
+                {countdown.isUrgent ? "URGENT — " : "Ends in "}
+                {countdown.display}
               </span>
             ) : (
               <span
@@ -137,7 +185,7 @@ export function FeedOfferCard({ offer, onOrder, onEnquiry, onLike, onShare }: Fe
                   fontWeight: 500,
                 }}
               >
-                Expires today!
+                Offer Expired
               </span>
             )}
           </div>
@@ -155,7 +203,14 @@ export function FeedOfferCard({ offer, onOrder, onEnquiry, onLike, onShare }: Fe
             boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
           }}
         >
-          <span style={{ fontSize: 16, fontWeight: 800, color: gradFrom, lineHeight: 1 }}>
+          <span
+            style={{
+              fontSize: 16,
+              fontWeight: 800,
+              color: offer.gradientFrom ?? "var(--color-primary, #1e5f74)",
+              lineHeight: 1,
+            }}
+          >
             {offer.discountPercent}%
           </span>
           <span style={{ fontSize: 9, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>
@@ -194,7 +249,13 @@ export function FeedOfferCard({ offer, onOrder, onEnquiry, onLike, onShare }: Fe
             >
               ₹{offer.originalPrice.toLocaleString("en-IN")}
             </span>
-            <span style={{ fontSize: 18, fontWeight: 800, color: "#059669" }}>
+            <span
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                color: "var(--color-success, #22c55e)",
+              }}
+            >
               ₹{offer.offerPrice.toLocaleString("en-IN")}
             </span>
           </div>
@@ -203,14 +264,21 @@ export function FeedOfferCard({ offer, onOrder, onEnquiry, onLike, onShare }: Fe
               style={{
                 marginTop: 6,
                 fontSize: 11,
-                color: offer.remainingCount < 20 ? "#dc2626" : "#64748b",
+                color:
+                  offer.remainingCount < 20
+                    ? "var(--color-danger, #ef4444)"
+                    : "#64748b",
                 fontWeight: offer.remainingCount < 20 ? 600 : 400,
               }}
             >
               <Icon
                 name="alert-circle"
                 size={11}
-                color={offer.remainingCount < 20 ? "#dc2626" : "#94a3b8"}
+                color={
+                  offer.remainingCount < 20
+                    ? "var(--color-danger, #ef4444)"
+                    : "#94a3b8"
+                }
               />{" "}
               {offer.remainingCount} left
             </div>
@@ -225,7 +293,7 @@ export function FeedOfferCard({ offer, onOrder, onEnquiry, onLike, onShare }: Fe
           style={{
             flex: 1,
             padding: "10px 16px",
-            backgroundColor: "#059669",
+            backgroundColor: "var(--color-success, #22c55e)",
             color: "#fff",
             border: "none",
             borderRadius: 8,
@@ -236,10 +304,10 @@ export function FeedOfferCard({ offer, onOrder, onEnquiry, onLike, onShare }: Fe
             alignItems: "center",
             justifyContent: "center",
             gap: 6,
-            transition: "background 0.2s",
+            transition: "opacity 0.2s",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#047857")}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#059669")}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
         >
           <Icon name="shopping-cart" size={15} color="#fff" />
           Order Now
@@ -250,8 +318,8 @@ export function FeedOfferCard({ offer, onOrder, onEnquiry, onLike, onShare }: Fe
             flex: 1,
             padding: "10px 16px",
             backgroundColor: "#fff",
-            color: "#4f46e5",
-            border: "1.5px solid #4f46e5",
+            color: "var(--color-primary, #1e5f74)",
+            border: "1.5px solid var(--color-primary, #1e5f74)",
             borderRadius: 8,
             fontSize: 14,
             fontWeight: 600,
@@ -262,10 +330,12 @@ export function FeedOfferCard({ offer, onOrder, onEnquiry, onLike, onShare }: Fe
             gap: 6,
             transition: "background 0.2s",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#eff6ff")}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = "var(--color-primary-50, #eef7fa)")
+          }
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#fff")}
         >
-          <Icon name="mail" size={15} color="#4f46e5" />
+          <Icon name="mail" size={15} color="var(--color-primary, #1e5f74)" />
           Enquiry
         </button>
       </div>
@@ -290,12 +360,16 @@ export function FeedOfferCard({ offer, onOrder, onEnquiry, onLike, onShare }: Fe
             cursor: "pointer",
             fontSize: 13,
             fontWeight: liked ? 600 : 500,
-            color: liked ? "#2563eb" : "#64748b",
+            color: liked ? "var(--color-primary, #1e5f74)" : "#64748b",
           }}
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f8fafc")}
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
         >
-          <Icon name="thumbs-up" size={16} color={liked ? "#2563eb" : "#64748b"} />
+          <Icon
+            name="thumbs-up"
+            size={16}
+            color={liked ? "var(--color-primary, #1e5f74)" : "#64748b"}
+          />
           {offer.likeCount + (liked ? 1 : 0)} Likes
         </button>
         <button

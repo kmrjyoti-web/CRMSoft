@@ -1,6 +1,6 @@
 "use client";
-import { useState, useMemo } from "react";
-import { Icon, Button } from "@/components/ui";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { Icon } from "@/components/ui";
 import { useFeed, useToggleLike, useToggleSave, useAddComment } from "../hooks/useMarketplace";
 import type { MarketplacePost, PostType } from "../types/marketplace.types";
 import { FeedPostCard } from "./feed/FeedPostCard";
@@ -9,6 +9,18 @@ import type { FeedOffer } from "./feed/FeedOfferCard";
 import { FeedRequirementCard } from "./feed/FeedRequirementCard";
 import type { FeedRequirement } from "./feed/FeedRequirementCard";
 import { CreatePostModal } from "./feed/CreatePostModal";
+import { OrderFormModal } from "./feed/OrderFormModal";
+import { EnquiryFormModal } from "./feed/EnquiryFormModal";
+import type { EnquiryTarget } from "./feed/EnquiryFormModal";
+import { FeedItemSkeleton } from "./feed/FeedSkeletons";
+import type { SkeletonType } from "./feed/FeedSkeletons";
+
+// ── Extended post type for poll/feedback/launch metadata ─────────────────────
+
+interface ExtendedMarketplacePost extends MarketplacePost {
+  pollOptions?: { text: string; votes: number }[];
+  badgeText?: string;
+}
 
 // ── Mock data for offers/requirements not yet in feed API ─────────────────────
 
@@ -46,6 +58,40 @@ const MOCK_OFFERS: FeedOffer[] = [
     shareCount: 28,
     gradientFrom: "#7c3aed",
     gradientTo: "#c026d3",
+  },
+  {
+    id: "o3",
+    vendorName: "SpiceRoute Exports",
+    vendorInitial: "S",
+    vendorColor: "#dc2626",
+    title: "Harvest Season — Bulk Spices Offer",
+    productName: "Premium Turmeric Powder (500 kg lot)",
+    originalPrice: 85000,
+    offerPrice: 64000,
+    discountPercent: 25,
+    validUntil: new Date(Date.now() + 1 * 86400000 + 3600000).toISOString(),
+    remainingCount: 12,
+    likeCount: 41,
+    shareCount: 19,
+    gradientFrom: "#dc2626",
+    gradientTo: "#f97316",
+  },
+  {
+    id: "o4",
+    vendorName: "GreenFields Agro",
+    vendorInitial: "G",
+    vendorColor: "#16a34a",
+    title: "Pre-Monsoon Agricultural Produce",
+    productName: "Organic Basmati Rice — Export Grade (1 MT)",
+    originalPrice: 55000,
+    offerPrice: 44000,
+    discountPercent: 20,
+    validUntil: new Date(Date.now() + 8 * 86400000).toISOString(),
+    remainingCount: 30,
+    likeCount: 55,
+    shareCount: 22,
+    gradientFrom: "#16a34a",
+    gradientTo: "#0891b2",
   },
 ];
 
@@ -86,7 +132,317 @@ const MOCK_REQUIREMENTS: FeedRequirement[] = [
     shareCount: 5,
     tags: ["Construction", "200 MT", "Pune", "TMT Bars"],
   },
+  {
+    id: "r3",
+    buyerName: "NovaTech Solutions",
+    buyerInitial: "N",
+    buyerColor: "#6366f1",
+    title: "IT Hardware — Laptops & Peripherals",
+    description:
+      "Looking for bulk supply of 150 business laptops (i5/16GB/512GB SSD), monitors, and keyboards for our new Bengaluru office. OEM or authorized resellers preferred with on-site warranty.",
+    category: "IT Hardware",
+    quantity: "150 units",
+    budgetMin: 1200000,
+    budgetMax: 2000000,
+    deadline: new Date(Date.now() + 7 * 86400000).toISOString(),
+    quoteCount: 5,
+    likeCount: 18,
+    shareCount: 9,
+    tags: ["IT Hardware", "150 units", "Bengaluru", "Laptops"],
+  },
+  {
+    id: "r4",
+    buyerName: "FastMove Logistics",
+    buyerInitial: "F",
+    buyerColor: "#d97706",
+    title: "Transport Partner — Mumbai to Delhi Route",
+    description:
+      "Seeking a reliable logistics partner for weekly full-truck-load (FTL) shipments from Mumbai to Delhi and Noida. GPS-tracked, temperature-controlled vehicles preferred for pharmaceutical cargo.",
+    category: "Logistics",
+    quantity: "4 trucks/week",
+    budgetMin: 60000,
+    budgetMax: 120000,
+    deadline: new Date(Date.now() + 5 * 86400000).toISOString(),
+    quoteCount: 9,
+    likeCount: 27,
+    shareCount: 11,
+    tags: ["Logistics", "Mumbai-Delhi", "FTL", "Pharma Cargo"],
+  },
 ];
+
+// ── ALL feed items pool (used for infinite scroll) ────────────────────────────
+
+type FeedItem =
+  | { type: "post"; data: ExtendedMarketplacePost }
+  | { type: "offer"; data: FeedOffer }
+  | { type: "requirement"; data: FeedRequirement };
+
+// Extended mock posts covering all post types
+function buildMockPosts(): ExtendedMarketplacePost[] {
+  return [
+    {
+      id: "mp1",
+      tenantId: "t1",
+      authorId: "auth1",
+      postType: "TEXT",
+      content:
+        "Excited to announce our new bulk supply partnership with leading hospitals across Maharashtra! We now offer next-day delivery for all critical medicines. Reach out for exclusive pricing.",
+      mediaUrls: [],
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 3600000).toISOString(),
+      viewCount: 1240,
+      likeCount: 48,
+      commentCount: 12,
+      shareCount: 7,
+      saveCount: 5,
+      hashtags: ["pharma", "bulksupply", "Maharashtra"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 3600000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp2",
+      tenantId: "t1",
+      authorId: "auth2",
+      postType: "PRODUCT_SHARE",
+      content:
+        "Introducing our new range of eco-friendly packaging materials — 100% biodegradable, GMP-certified. Perfect for pharmaceutical and food industry applications.",
+      mediaUrls: [],
+      linkedListingId: "list1",
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 7200000).toISOString(),
+      viewCount: 890,
+      likeCount: 31,
+      commentCount: 8,
+      shareCount: 15,
+      saveCount: 11,
+      hashtags: ["packaging", "ecoFriendly", "GMP"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 7200000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp3",
+      tenantId: "t1",
+      authorId: "auth3",
+      postType: "ANNOUNCEMENT",
+      content:
+        "We are now ISO 9001:2015 certified! This milestone reflects our commitment to quality management and continuous improvement. Thank you to all our partners and customers for your trust.",
+      mediaUrls: [],
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 86400000).toISOString(),
+      viewCount: 2100,
+      likeCount: 120,
+      commentCount: 34,
+      shareCount: 56,
+      saveCount: 28,
+      hashtags: ["ISO9001", "QualityCertified", "Milestone"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 86400000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp4",
+      tenantId: "t1",
+      authorId: "auth4",
+      postType: "VIDEO",
+      content:
+        "Watch our 2-minute factory tour to see how we maintain stringent quality standards at every step of our manufacturing process.",
+      mediaUrls: [{ type: "VIDEO", url: "/placeholder.mp4" }],
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 172800000).toISOString(),
+      viewCount: 3400,
+      likeCount: 87,
+      commentCount: 22,
+      shareCount: 41,
+      saveCount: 16,
+      hashtags: ["factorytour", "manufacturing", "quality"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 172800000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp5",
+      tenantId: "t1",
+      authorId: "auth5",
+      postType: "IMAGE",
+      content:
+        "Proud to showcase our product display at PharmaTech Expo 2026 in Mumbai! Hundreds of distributors and buyers visited our stall. Grateful for the incredible response.",
+      mediaUrls: [{ type: "IMAGE", url: "/placeholder-expo.jpg" }],
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 43200000).toISOString(),
+      viewCount: 1870,
+      likeCount: 94,
+      commentCount: 18,
+      shareCount: 32,
+      saveCount: 14,
+      hashtags: ["PharmaTechExpo", "tradeshow", "networking"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 43200000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp6",
+      tenantId: "t1",
+      authorId: "auth6",
+      postType: "CUSTOMER_FEEDBACK",
+      content:
+        "The delivery was on time and packaging was excellent. Products matched the specifications exactly. Highly recommend this vendor for bulk pharmaceutical supplies. Will order again!",
+      mediaUrls: [],
+      rating: 5,
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 21600000).toISOString(),
+      viewCount: 640,
+      likeCount: 38,
+      commentCount: 5,
+      shareCount: 9,
+      saveCount: 4,
+      hashtags: ["customerreview", "verified", "5stars"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 21600000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp7",
+      tenantId: "t1",
+      authorId: "auth7",
+      postType: "PRODUCT_LAUNCH",
+      content:
+        "We are thrilled to launch our new BioCold Storage System — purpose-built for pharmaceutical and vaccine storage with IoT-enabled temperature monitoring and GSM alerts.",
+      mediaUrls: [],
+      badgeText: "🚀 PRODUCT LAUNCH — Now Available",
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 10800000).toISOString(),
+      viewCount: 2800,
+      likeCount: 156,
+      commentCount: 42,
+      shareCount: 78,
+      saveCount: 35,
+      hashtags: ["NewProduct", "ColdChain", "IoT", "Pharmaceutical"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 10800000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp8",
+      tenantId: "t1",
+      authorId: "auth8",
+      postType: "POLL",
+      content: "Which payment method do you prefer for bulk B2B orders? Cast your vote!",
+      mediaUrls: [],
+      pollOptions: [
+        { text: "Bank Transfer (NEFT/RTGS)", votes: 45 },
+        { text: "UPI / QR Code", votes: 82 },
+        { text: "Credit (30 days)", votes: 38 },
+        { text: "Cash on Delivery", votes: 15 },
+      ],
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 14400000).toISOString(),
+      viewCount: 1200,
+      likeCount: 22,
+      commentCount: 14,
+      shareCount: 6,
+      saveCount: 3,
+      hashtags: ["poll", "payment", "B2B"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 14400000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp9",
+      tenantId: "t1",
+      authorId: "auth9",
+      postType: "TEXT",
+      content:
+        "Market update: Active pharmaceutical ingredient (API) prices have stabilized after the Q1 fluctuation. This is a good window for bulk buyers to lock in long-term supply contracts. DM us for rate sheets.",
+      mediaUrls: [],
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 50400000).toISOString(),
+      viewCount: 980,
+      likeCount: 61,
+      commentCount: 9,
+      shareCount: 24,
+      saveCount: 18,
+      hashtags: ["MarketUpdate", "API", "pharma", "procurement"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 50400000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp10",
+      tenantId: "t1",
+      authorId: "auth10",
+      postType: "ANNOUNCEMENT",
+      content:
+        "IMPORTANT: GST e-invoicing is now mandatory for businesses with annual turnover above ₹5 crore. Ensure your ERP and billing software is IRP-integrated to avoid penalties. We can assist with compliance.",
+      mediaUrls: [],
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 259200000).toISOString(),
+      viewCount: 4200,
+      likeCount: 210,
+      commentCount: 58,
+      shareCount: 130,
+      saveCount: 67,
+      hashtags: ["GSTCompliance", "eInvoicing", "TaxAlert"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 259200000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp11",
+      tenantId: "t1",
+      authorId: "auth11",
+      postType: "IMAGE",
+      content:
+        "Big news! Our Aurangabad factory expansion is complete — doubling our production capacity to 10 million tablets/day. We can now accept larger order volumes with shorter lead times.",
+      mediaUrls: [{ type: "IMAGE", url: "/placeholder-factory.jpg" }],
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 345600000).toISOString(),
+      viewCount: 3100,
+      likeCount: 178,
+      commentCount: 45,
+      shareCount: 89,
+      saveCount: 40,
+      hashtags: ["expansion", "manufacturing", "capacity", "Aurangabad"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 345600000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp12",
+      tenantId: "t1",
+      authorId: "auth12",
+      postType: "PRODUCT_SHARE",
+      content:
+        "Featuring the HeavyLift 3000 — our flagship industrial pallet jack with 3-tonne capacity and CE certification. Trusted by over 200 warehouses across India.",
+      mediaUrls: [],
+      linkedListingId: "list2",
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 432000000).toISOString(),
+      viewCount: 760,
+      likeCount: 43,
+      commentCount: 11,
+      shareCount: 17,
+      saveCount: 8,
+      hashtags: ["industrial", "equipment", "warehousing", "logistics"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 432000000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+  ];
+}
 
 // ── Filter tabs ───────────────────────────────────────────────────────────────
 
@@ -112,50 +468,103 @@ const TRENDING_TOPICS = [
 ];
 
 const SUGGESTED_VENDORS = [
-  { name: "Cipla Pharma", initial: "C", color: "#4f46e5", category: "Pharmaceuticals", followers: "1.2K" },
-  { name: "Tata Projects", initial: "T", color: "#0891b2", category: "Construction & Infra", followers: "3.4K" },
-  { name: "Reliance Retail", initial: "R", color: "#dc2626", category: "FMCG & Retail", followers: "8.7K" },
+  {
+    name: "Cipla Pharma",
+    initial: "C",
+    color: "var(--color-primary, #1e5f74)",
+    category: "Pharmaceuticals",
+    followers: "1.2K",
+  },
+  {
+    name: "Tata Projects",
+    initial: "T",
+    color: "#0891b2",
+    category: "Construction & Infra",
+    followers: "3.4K",
+  },
+  {
+    name: "Reliance Retail",
+    initial: "R",
+    color: "#dc2626",
+    category: "FMCG & Retail",
+    followers: "8.7K",
+  },
 ];
 
 const MARKET_PULSE = [
-  { label: "Active Listings", value: "12,480", icon: "list", color: "#4f46e5", bg: "#eff6ff" },
-  { label: "Open Requirements", value: "3,210", icon: "search", color: "#f97316", bg: "#fff7ed" },
+  {
+    label: "Active Listings",
+    value: "12,480",
+    icon: "list",
+    color: "var(--color-primary, #1e5f74)",
+    bg: "var(--color-primary-50, #eef7fa)",
+  },
+  {
+    label: "Open Requirements",
+    value: "3,210",
+    icon: "search",
+    color: "#f97316",
+    bg: "#fff7ed",
+  },
   { label: "Live Offers", value: "847", icon: "tag", color: "#059669", bg: "#f0fdf4" },
 ];
 
-// ── Feed item type ────────────────────────────────────────────────────────────
-
-type FeedItem =
-  | { type: "post"; data: MarketplacePost }
-  | { type: "offer"; data: FeedOffer }
-  | { type: "requirement"; data: FeedRequirement };
+// Skeleton types cycling pattern for initial load
+const INITIAL_SKELETON_TYPES: SkeletonType[] = [
+  "TEXT",
+  "OFFER",
+  "IMAGE",
+  "REQUIREMENT",
+  "VIDEO",
+  "TEXT",
+];
 
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function MarketFeed() {
   const [activeFilter, setActiveFilter] = useState<FeedFilter>("ALL");
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [orderOffer, setOrderOffer] = useState<FeedOffer | null>(null);
+  const [enquiryTarget, setEnquiryTarget] = useState<EnquiryTarget | null>(null);
+  const [visibleCount, setVisibleCount] = useState(6);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const { data: feedData, isLoading } = useFeed({ page: 1, limit: 20 });
+  const { data: feedData } = useFeed({ page: 1, limit: 20 });
   const { mutate: toggleLike } = useToggleLike();
   const { mutate: toggleSave } = useToggleSave();
   const { mutate: addComment } = useAddComment();
 
-  const posts = useMemo<MarketplacePost[]>(() => {
-    const nested = (feedData as { data?: { data?: MarketplacePost[] } | MarketplacePost[] })?.data;
+  // Simulate initial load
+  useEffect(() => {
+    const timer = setTimeout(() => setInitialLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const posts = useMemo<ExtendedMarketplacePost[]>(() => {
+    const nested = (
+      feedData as { data?: { data?: MarketplacePost[] } | MarketplacePost[] }
+    )?.data;
     if (!nested) return [];
-    if (Array.isArray(nested)) return nested;
+    if (Array.isArray(nested)) return nested as ExtendedMarketplacePost[];
     const withData = nested as { data?: MarketplacePost[] };
-    return withData.data ?? [];
+    return (withData.data ?? []) as ExtendedMarketplacePost[];
   }, [feedData]);
 
-  // Build interleaved feed: posts + offers + requirements
-  const feedItems = useMemo<FeedItem[]>(() => {
-    const postItems: FeedItem[] = posts.map((p) => ({ type: "post", data: p }));
+  // All feed items with mock posts interleaved
+  const ALL_FEED_ITEMS = useMemo<FeedItem[]>(() => {
+    const mockPosts = buildMockPosts();
+    const postItems: FeedItem[] = (posts.length > 0 ? posts : mockPosts).map((p) => ({
+      type: "post",
+      data: p,
+    }));
 
     if (activeFilter === "POSTS") return postItems;
-    if (activeFilter === "OFFERS") return MOCK_OFFERS.map((o) => ({ type: "offer", data: o }));
-    if (activeFilter === "REQUIREMENTS") return MOCK_REQUIREMENTS.map((r) => ({ type: "requirement", data: r }));
+    if (activeFilter === "OFFERS")
+      return MOCK_OFFERS.map((o) => ({ type: "offer", data: o }));
+    if (activeFilter === "REQUIREMENTS")
+      return MOCK_REQUIREMENTS.map((r) => ({ type: "requirement", data: r }));
     if (activeFilter === "VIDEOS")
       return postItems.filter((i) => i.type === "post" && i.data.postType === "VIDEO");
     if (activeFilter === "IMAGES")
@@ -163,78 +572,62 @@ export function MarketFeed() {
 
     // ALL: interleave offers and requirements into the post stream
     const items: FeedItem[] = [];
-    const allPosts = [...postItems];
-
-    // If no real feed posts yet, add some placeholder mock posts
-    if (allPosts.length === 0) {
-      const mockPosts: MarketplacePost[] = [
-        {
-          id: "mp1", tenantId: "t1", authorId: "auth1", postType: "TEXT",
-          content: "Excited to announce our new bulk supply partnership with leading hospitals across Maharashtra! We now offer next-day delivery for all critical medicines. Reach out for exclusive pricing.",
-          mediaUrls: [], linkedListingId: undefined, linkedOfferId: undefined, rating: undefined,
-          visibility: "PUBLIC", status: "ACTIVE", publishAt: undefined, expiresAt: undefined,
-          publishedAt: new Date(Date.now() - 3600000).toISOString(), viewCount: 1240,
-          likeCount: 48, commentCount: 12, shareCount: 7, saveCount: 5,
-          hashtags: ["pharma", "bulksupply", "Maharashtra"], isActive: true,
-          createdAt: new Date(Date.now() - 3600000).toISOString(), updatedAt: new Date().toISOString(),
-        },
-        {
-          id: "mp2", tenantId: "t1", authorId: "auth2", postType: "PRODUCT_SHARE",
-          content: "Introducing our new range of eco-friendly packaging materials — 100% biodegradable, GMP-certified. Perfect for pharmaceutical and food industry applications.",
-          mediaUrls: [], linkedListingId: "list1", linkedOfferId: undefined, rating: undefined,
-          visibility: "PUBLIC", status: "ACTIVE", publishAt: undefined, expiresAt: undefined,
-          publishedAt: new Date(Date.now() - 7200000).toISOString(), viewCount: 890,
-          likeCount: 31, commentCount: 8, shareCount: 15, saveCount: 11,
-          hashtags: ["packaging", "ecoFriendly", "GMP"], isActive: true,
-          createdAt: new Date(Date.now() - 7200000).toISOString(), updatedAt: new Date().toISOString(),
-        },
-        {
-          id: "mp3", tenantId: "t1", authorId: "auth3", postType: "ANNOUNCEMENT",
-          content: "We are now ISO 9001:2015 certified! This milestone reflects our commitment to quality management and continuous improvement. Thank you to all our partners and customers for your trust.",
-          mediaUrls: [], visibility: "PUBLIC", status: "ACTIVE", publishAt: undefined, expiresAt: undefined,
-          publishedAt: new Date(Date.now() - 86400000).toISOString(), viewCount: 2100,
-          likeCount: 120, commentCount: 34, shareCount: 56, saveCount: 28,
-          hashtags: ["ISO9001", "QualityCertified", "Milestone"], isActive: true,
-          createdAt: new Date(Date.now() - 86400000).toISOString(), updatedAt: new Date().toISOString(),
-        },
-        {
-          id: "mp4", tenantId: "t1", authorId: "auth4", postType: "VIDEO",
-          content: "Watch our 2-minute factory tour to see how we maintain stringent quality standards at every step of our manufacturing process.",
-          mediaUrls: [{ type: "VIDEO", url: "/placeholder.mp4" }],
-          visibility: "PUBLIC", status: "ACTIVE", publishAt: undefined, expiresAt: undefined,
-          publishedAt: new Date(Date.now() - 172800000).toISOString(), viewCount: 3400,
-          likeCount: 87, commentCount: 22, shareCount: 41, saveCount: 16,
-          hashtags: ["factorytour", "manufacturing", "quality"], isActive: true,
-          createdAt: new Date(Date.now() - 172800000).toISOString(), updatedAt: new Date().toISOString(),
-        },
-      ];
-      mockPosts.forEach((p) => allPosts.push({ type: "post", data: p }));
-    }
-
-    // Interleave: offer after post[1], requirement after post[3]
-    allPosts.forEach((item, idx) => {
+    postItems.forEach((item, idx) => {
       items.push(item);
       if (idx === 1 && MOCK_OFFERS[0]) items.push({ type: "offer", data: MOCK_OFFERS[0] });
-      if (idx === 3 && MOCK_REQUIREMENTS[0]) items.push({ type: "requirement", data: MOCK_REQUIREMENTS[0] });
+      if (idx === 3 && MOCK_REQUIREMENTS[0])
+        items.push({ type: "requirement", data: MOCK_REQUIREMENTS[0] });
       if (idx === 5 && MOCK_OFFERS[1]) items.push({ type: "offer", data: MOCK_OFFERS[1] });
-      if (idx === 7 && MOCK_REQUIREMENTS[1]) items.push({ type: "requirement", data: MOCK_REQUIREMENTS[1] });
+      if (idx === 7 && MOCK_REQUIREMENTS[1])
+        items.push({ type: "requirement", data: MOCK_REQUIREMENTS[1] });
+      if (idx === 9 && MOCK_OFFERS[2]) items.push({ type: "offer", data: MOCK_OFFERS[2] });
+      if (idx === 11 && MOCK_REQUIREMENTS[2])
+        items.push({ type: "requirement", data: MOCK_REQUIREMENTS[2] });
     });
 
-    if (allPosts.length === 0) {
-      MOCK_OFFERS.forEach((o) => items.push({ type: "offer", data: o }));
-      MOCK_REQUIREMENTS.forEach((r) => items.push({ type: "requirement", data: r }));
+    // If post stream is very short, append remaining offers/requirements
+    if (postItems.length <= 2) {
+      MOCK_OFFERS.slice(2).forEach((o) => items.push({ type: "offer", data: o }));
+      MOCK_REQUIREMENTS.slice(2).forEach((r) => items.push({ type: "requirement", data: r }));
     }
 
     return items;
   }, [posts, activeFilter]);
 
+  // IntersectionObserver for infinite scroll
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          !isLoadingMore &&
+          visibleCount < ALL_FEED_ITEMS.length
+        ) {
+          setIsLoadingMore(true);
+          setTimeout(() => {
+            setVisibleCount((v) => Math.min(v + 4, ALL_FEED_ITEMS.length));
+            setIsLoadingMore(false);
+          }, 1200);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isLoadingMore, visibleCount, ALL_FEED_ITEMS.length]);
+
+  // Reset visible count when filter changes
+  useEffect(() => {
+    setVisibleCount(6);
+  }, [activeFilter]);
+
+  const visibleItems = ALL_FEED_ITEMS.slice(0, visibleCount);
+  const allCaughtUp = !initialLoading && visibleCount >= ALL_FEED_ITEMS.length;
+
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#f1f5f9",
-      }}
-    >
+    <div style={{ minHeight: "100vh", backgroundColor: "#f1f5f9", marginTop: -10 }}>
       {/* Top filter bar */}
       <div
         style={{
@@ -272,8 +665,8 @@ export function MarketFeed() {
                     padding: "14px 16px",
                     background: "none",
                     border: "none",
-                    borderBottom: `2px solid ${active ? "#4f46e5" : "transparent"}`,
-                    color: active ? "#4f46e5" : "#64748b",
+                    borderBottom: `2px solid ${active ? "var(--color-primary, #1e5f74)" : "transparent"}`,
+                    color: active ? "var(--color-primary, #1e5f74)" : "#64748b",
                     fontSize: 13,
                     fontWeight: active ? 600 : 500,
                     cursor: "pointer",
@@ -284,7 +677,7 @@ export function MarketFeed() {
                   <Icon
                     name={tab.icon as Parameters<typeof Icon>[0]["name"]}
                     size={14}
-                    color={active ? "#4f46e5" : "#94a3b8"}
+                    color={active ? "var(--color-primary, #1e5f74)" : "#94a3b8"}
                   />
                   {tab.label}
                 </button>
@@ -300,7 +693,7 @@ export function MarketFeed() {
               alignItems: "center",
               gap: 6,
               padding: "8px 18px",
-              backgroundColor: "#4f46e5",
+              backgroundColor: "var(--color-primary, #1e5f74)",
               color: "#fff",
               border: "none",
               borderRadius: 8,
@@ -309,10 +702,10 @@ export function MarketFeed() {
               cursor: "pointer",
               whiteSpace: "nowrap",
               flexShrink: 0,
-              transition: "background 0.2s",
+              transition: "opacity 0.2s",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#4338ca")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#4f46e5")}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
           >
             <Icon name="plus" size={15} color="#fff" />
             Create Post
@@ -356,7 +749,8 @@ export function MarketFeed() {
             <div
               style={{
                 height: 60,
-                background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+                background:
+                  "linear-gradient(135deg, var(--color-primary, #1e5f74), var(--color-primary-hover, #174d5f))",
               }}
             />
             <div style={{ padding: "0 16px 16px", textAlign: "center" }}>
@@ -365,7 +759,7 @@ export function MarketFeed() {
                   width: 52,
                   height: 52,
                   borderRadius: "50%",
-                  backgroundColor: "#4f46e5",
+                  backgroundColor: "var(--color-primary, #1e5f74)",
                   border: "3px solid #fff",
                   display: "flex",
                   alignItems: "center",
@@ -374,7 +768,7 @@ export function MarketFeed() {
                   fontSize: 20,
                   fontWeight: 700,
                   margin: "-26px auto 10px",
-                  boxShadow: "0 2px 8px rgba(79,70,229,0.3)",
+                  boxShadow: "0 2px 8px rgba(30,95,116,0.3)",
                 }}
               >
                 Y
@@ -393,11 +787,15 @@ export function MarketFeed() {
               >
                 <div style={{ textAlign: "center" }}>
                   <div style={{ fontWeight: 700, fontSize: 15, color: "#1e293b" }}>248</div>
-                  <div style={{ fontSize: 10, color: "#94a3b8", textTransform: "uppercase" }}>Followers</div>
+                  <div style={{ fontSize: 10, color: "#94a3b8", textTransform: "uppercase" }}>
+                    Followers
+                  </div>
                 </div>
                 <div style={{ textAlign: "center" }}>
                   <div style={{ fontWeight: 700, fontSize: 15, color: "#1e293b" }}>183</div>
-                  <div style={{ fontSize: 10, color: "#94a3b8", textTransform: "uppercase" }}>Following</div>
+                  <div style={{ fontSize: 10, color: "#94a3b8", textTransform: "uppercase" }}>
+                    Following
+                  </div>
                 </div>
               </div>
             </div>
@@ -413,7 +811,7 @@ export function MarketFeed() {
             }}
           >
             {[
-              { label: "My Posts", icon: "file-text", color: "#4f46e5" },
+              { label: "My Posts", icon: "file-text", color: "var(--color-primary, #1e5f74)" },
               { label: "My Offers", icon: "tag", color: "#059669" },
               { label: "Saved", icon: "bookmark", color: "#d97706" },
               { label: "Requirements", icon: "search", color: "#f97316" },
@@ -444,7 +842,7 @@ export function MarketFeed() {
                     width: 30,
                     height: 30,
                     borderRadius: 8,
-                    backgroundColor: `${color}15`,
+                    backgroundColor: `${color}18`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -463,8 +861,8 @@ export function MarketFeed() {
                   width: "100%",
                   padding: "9px 14px",
                   backgroundColor: "#fff",
-                  color: "#4f46e5",
-                  border: "1.5px solid #c7d2fe",
+                  color: "var(--color-primary, #1e5f74)",
+                  border: "1.5px solid var(--color-primary-100, #cce8f0)",
                   borderRadius: 8,
                   fontSize: 13,
                   fontWeight: 600,
@@ -475,10 +873,13 @@ export function MarketFeed() {
                   gap: 6,
                   transition: "background 0.2s",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#eff6ff")}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor =
+                    "var(--color-primary-50, #eef7fa)")
+                }
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#fff")}
               >
-                <Icon name="user-plus" size={14} color="#4f46e5" />
+                <Icon name="user-plus" size={14} color="var(--color-primary, #1e5f74)" />
                 Follow More
               </button>
             </div>
@@ -505,7 +906,7 @@ export function MarketFeed() {
                 width: 40,
                 height: 40,
                 borderRadius: "50%",
-                backgroundColor: "#4f46e5",
+                backgroundColor: "var(--color-primary, #1e5f74)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -532,7 +933,7 @@ export function MarketFeed() {
                 transition: "border-color 0.15s, background 0.15s",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "#4f46e5";
+                e.currentTarget.style.borderColor = "var(--color-primary, #1e5f74)";
                 e.currentTarget.style.backgroundColor = "#fff";
               }}
               onMouseLeave={(e) => {
@@ -544,9 +945,9 @@ export function MarketFeed() {
             </button>
             <div style={{ display: "flex", gap: 6 }}>
               {[
-                { icon: "image", color: "#059669", title: "Photo" },
-                { icon: "video", color: "#d97706", title: "Video" },
-                { icon: "tag", color: "#7c3aed", title: "Offer" },
+                { icon: "image", color: "var(--color-success, #22c55e)", title: "Photo" },
+                { icon: "video", color: "var(--color-warning, #f59e0b)", title: "Video" },
+                { icon: "tag", color: "var(--color-primary, #1e5f74)", title: "Offer" },
               ].map(({ icon, color, title }) => (
                 <button
                   key={title}
@@ -567,47 +968,27 @@ export function MarketFeed() {
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f8fafc")}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#fff")}
                 >
-                  <Icon name={icon as Parameters<typeof Icon>[0]["name"]} size={15} color={color} />
+                  <Icon
+                    name={icon as Parameters<typeof Icon>[0]["name"]}
+                    size={15}
+                    color={color}
+                  />
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Feed loading */}
-          {isLoading && (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 16,
-              }}
-            >
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  style={{
-                    backgroundColor: "#fff",
-                    borderRadius: 12,
-                    padding: 20,
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-                  }}
-                >
-                  <div className="animate-pulse" style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: "50%", backgroundColor: "#e2e8f0" }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ height: 14, backgroundColor: "#e2e8f0", borderRadius: 4, width: "60%", marginBottom: 8 }} />
-                      <div style={{ height: 12, backgroundColor: "#f1f5f9", borderRadius: 4, width: "40%" }} />
-                    </div>
-                  </div>
-                  <div style={{ height: 14, backgroundColor: "#e2e8f0", borderRadius: 4, marginBottom: 8 }} />
-                  <div style={{ height: 14, backgroundColor: "#f1f5f9", borderRadius: 4, width: "80%" }} />
-                </div>
+          {/* Initial loading skeletons */}
+          {initialLoading && (
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {INITIAL_SKELETON_TYPES.map((type, i) => (
+                <FeedItemSkeleton key={i} type={type} />
               ))}
             </div>
           )}
 
           {/* Feed items */}
-          {!isLoading && feedItems.length === 0 && (
+          {!initialLoading && ALL_FEED_ITEMS.length === 0 && (
             <div
               style={{
                 backgroundColor: "#fff",
@@ -629,7 +1010,7 @@ export function MarketFeed() {
                 style={{
                   marginTop: 16,
                   padding: "9px 20px",
-                  backgroundColor: "#4f46e5",
+                  backgroundColor: "var(--color-primary, #1e5f74)",
                   color: "#fff",
                   border: "none",
                   borderRadius: 8,
@@ -643,8 +1024,8 @@ export function MarketFeed() {
             </div>
           )}
 
-          {!isLoading &&
-            feedItems.map((item) => {
+          {!initialLoading &&
+            visibleItems.map((item) => {
               if (item.type === "post") {
                 return (
                   <FeedPostCard
@@ -662,8 +1043,20 @@ export function MarketFeed() {
                   <FeedOfferCard
                     key={`offer-${item.data.id}`}
                     offer={item.data}
-                    onOrder={(id) => console.log("order", id)}
-                    onEnquiry={(id) => console.log("enquiry", id)}
+                    onOrder={(id) => {
+                      const o = MOCK_OFFERS.find((x) => x.id === id);
+                      if (o) setOrderOffer(o);
+                    }}
+                    onEnquiry={(id) => {
+                      const o = MOCK_OFFERS.find((x) => x.id === id);
+                      if (o)
+                        setEnquiryTarget({
+                          id: o.id,
+                          name: o.productName,
+                          vendorOrBuyerName: o.vendorName,
+                          type: "offer",
+                        });
+                    }}
                     onLike={(id) => console.log("like offer", id)}
                     onShare={(id) => console.log("share offer", id)}
                   />
@@ -674,8 +1067,26 @@ export function MarketFeed() {
                   <FeedRequirementCard
                     key={`req-${item.data.id}`}
                     requirement={item.data}
-                    onQuote={(id) => console.log("quote", id)}
-                    onEnquire={(id) => console.log("enquire", id)}
+                    onQuote={(id) => {
+                      const r = MOCK_REQUIREMENTS.find((x) => x.id === id);
+                      if (r)
+                        setEnquiryTarget({
+                          id: r.id,
+                          name: r.title,
+                          vendorOrBuyerName: r.buyerName,
+                          type: "requirement",
+                        });
+                    }}
+                    onEnquire={(id) => {
+                      const r = MOCK_REQUIREMENTS.find((x) => x.id === id);
+                      if (r)
+                        setEnquiryTarget({
+                          id: r.id,
+                          name: r.title,
+                          vendorOrBuyerName: r.buyerName,
+                          type: "requirement",
+                        });
+                    }}
                     onLike={(id) => console.log("like req", id)}
                     onShare={(id) => console.log("share req", id)}
                   />
@@ -683,6 +1094,47 @@ export function MarketFeed() {
               }
               return null;
             })}
+
+          {/* Sentinel for IntersectionObserver */}
+          {!initialLoading && (
+            <div ref={sentinelRef} style={{ height: 20 }} />
+          )}
+
+          {/* Loading more skeletons */}
+          {isLoadingMore && (
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <FeedItemSkeleton type="TEXT" />
+              <FeedItemSkeleton type="OFFER" />
+            </div>
+          )}
+
+          {/* All caught up */}
+          {allCaughtUp && ALL_FEED_ITEMS.length > 0 && (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "24px 0 40px",
+                color: "#94a3b8",
+              }}
+            >
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  backgroundColor: "#fff",
+                  borderRadius: 24,
+                  padding: "10px 20px",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+                  fontSize: 13,
+                  fontWeight: 500,
+                }}
+              >
+                <Icon name="check-circle" size={15} color="#059669" />
+                You&apos;re all caught up!
+              </div>
+            </div>
+          )}
         </main>
 
         {/* ── Right panel ─────────────────────────────────────────────────── */}
@@ -706,15 +1158,8 @@ export function MarketFeed() {
               boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: 14,
-              }}
-            >
-              <Icon name="trending-up" size={16} color="#4f46e5" />
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+              <Icon name="trending-up" size={16} color="var(--color-primary, #1e5f74)" />
               <span style={{ fontSize: 14, fontWeight: 700, color: "#1e293b" }}>
                 Trending in your area
               </span>
@@ -733,11 +1178,22 @@ export function MarketFeed() {
                     cursor: "pointer",
                     transition: "background 0.15s",
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#eff6ff")}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#f8fafc")}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.backgroundColor =
+                      "var(--color-primary-50, #eef7fa)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.backgroundColor = "#f8fafc")
+                  }
                 >
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "#4f46e5" }}>
+                    <div
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: "var(--color-primary, #1e5f74)",
+                      }}
+                    >
                       {topic.label}
                     </div>
                     <div style={{ fontSize: 11, color: "#94a3b8" }}>{topic.count}</div>
@@ -745,8 +1201,8 @@ export function MarketFeed() {
                   <span
                     style={{
                       fontSize: 11,
-                      backgroundColor: "#eff6ff",
-                      color: "#4f46e5",
+                      backgroundColor: "var(--color-primary-50, #eef7fa)",
+                      color: "var(--color-primary, #1e5f74)",
                       padding: "2px 7px",
                       borderRadius: 20,
                       fontWeight: 600,
@@ -768,14 +1224,7 @@ export function MarketFeed() {
               boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: 14,
-              }}
-            >
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
               <Icon name="users" size={16} color="#059669" />
               <span style={{ fontSize: 14, fontWeight: 700, color: "#1e293b" }}>
                 Suggested Vendors
@@ -783,10 +1232,7 @@ export function MarketFeed() {
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {SUGGESTED_VENDORS.map((vendor) => (
-                <div
-                  key={vendor.name}
-                  style={{ display: "flex", alignItems: "center", gap: 10 }}
-                >
+                <div key={vendor.name} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div
                     style={{
                       width: 36,
@@ -805,7 +1251,16 @@ export function MarketFeed() {
                     {vendor.initial}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    <div
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: "#1e293b",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
                       {vendor.name}
                     </div>
                     <div style={{ fontSize: 11, color: "#64748b" }}>
@@ -815,17 +1270,20 @@ export function MarketFeed() {
                   <button
                     style={{
                       padding: "5px 12px",
-                      border: "1.5px solid #4f46e5",
+                      border: "1.5px solid var(--color-primary, #1e5f74)",
                       borderRadius: 20,
                       backgroundColor: "#fff",
-                      color: "#4f46e5",
+                      color: "var(--color-primary, #1e5f74)",
                       fontSize: 12,
                       fontWeight: 600,
                       cursor: "pointer",
                       flexShrink: 0,
                       transition: "background 0.15s",
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#eff6ff")}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor =
+                        "var(--color-primary-50, #eef7fa)")
+                    }
                     onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#fff")}
                   >
                     Follow
@@ -844,18 +1302,9 @@ export function MarketFeed() {
               boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: 14,
-              }}
-            >
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
               <Icon name="activity" size={16} color="#f97316" />
-              <span style={{ fontSize: 14, fontWeight: 700, color: "#1e293b" }}>
-                Market Pulse
-              </span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: "#1e293b" }}>Market Pulse</span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {MARKET_PULSE.map((stat) => (
@@ -881,13 +1330,26 @@ export function MarketFeed() {
                       justifyContent: "center",
                     }}
                   >
-                    <Icon name={stat.icon as Parameters<typeof Icon>[0]["name"]} size={14} color={stat.color} />
+                    <Icon
+                      name={stat.icon as Parameters<typeof Icon>[0]["name"]}
+                      size={14}
+                      color={stat.color}
+                    />
                   </div>
                   <div>
-                    <div style={{ fontSize: 16, fontWeight: 800, color: stat.color, lineHeight: 1 }}>
+                    <div
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 800,
+                        color: stat.color,
+                        lineHeight: 1,
+                      }}
+                    >
                       {stat.value}
                     </div>
-                    <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>{stat.label}</div>
+                    <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>
+                      {stat.label}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -902,6 +1364,12 @@ export function MarketFeed() {
         onClose={() => setCreateModalOpen(false)}
         onSuccess={() => setCreateModalOpen(false)}
       />
+
+      {/* Order Form Modal */}
+      <OrderFormModal offer={orderOffer} onClose={() => setOrderOffer(null)} />
+
+      {/* Enquiry Form Modal */}
+      <EnquiryFormModal target={enquiryTarget} onClose={() => setEnquiryTarget(null)} />
     </div>
   );
 }

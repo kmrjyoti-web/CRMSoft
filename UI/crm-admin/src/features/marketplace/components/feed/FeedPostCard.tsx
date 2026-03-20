@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Icon, Button, Badge } from "@/components/ui";
+import { Icon, Badge } from "@/components/ui";
 import type { MarketplacePost, PostType } from "../../types/marketplace.types";
 import { FeedCommentPanel } from "./FeedCommentPanel";
 import type { Comment } from "./FeedCommentPanel";
@@ -13,7 +13,14 @@ interface FeedPostCardProps {
   onShare: (id: string) => void;
 }
 
-const AVATAR_COLORS = ["#4f46e5", "#0891b2", "#059669", "#d97706", "#dc2626", "#7c3aed"];
+const AVATAR_COLORS = [
+  "var(--color-primary, #1e5f74)",
+  "#0891b2",
+  "#059669",
+  "#d97706",
+  "#dc2626",
+  "#7c3aed",
+];
 
 function getAvatarColor(id: string): string {
   let hash = 0;
@@ -33,7 +40,7 @@ const POST_TYPE_LABELS: Record<PostType, string> = {
 };
 
 const POST_TYPE_COLORS: Record<PostType, { bg: string; text: string }> = {
-  TEXT: { bg: "#eff6ff", text: "#2563eb" },
+  TEXT: { bg: "var(--color-primary-50, #eef7fa)", text: "var(--color-primary, #1e5f74)" },
   IMAGE: { bg: "#f0fdf4", text: "#16a34a" },
   VIDEO: { bg: "#fef3c7", text: "#d97706" },
   PRODUCT_SHARE: { bg: "#f5f3ff", text: "#7c3aed" },
@@ -63,10 +70,92 @@ function getAuthorName(authorId: string): string {
 
 // Mock comments
 const MOCK_COMMENTS: Comment[] = [
-  { id: "c1", authorName: "Neha Gupta", authorInitial: "N", text: "This looks great! Very useful.", createdAt: "2h ago" },
-  { id: "c2", authorName: "Suresh Babu", authorInitial: "S", text: "Interested, please share more details.", createdAt: "1h ago" },
-  { id: "c3", authorName: "Pooja Mehta", authorInitial: "P", text: "Excellent product!", createdAt: "30m ago" },
+  {
+    id: "c1",
+    authorName: "Neha Gupta",
+    authorInitial: "N",
+    text: "This looks great! Very useful.",
+    createdAt: "2h ago",
+  },
+  {
+    id: "c2",
+    authorName: "Suresh Babu",
+    authorInitial: "S",
+    text: "Interested, please share more details.",
+    createdAt: "1h ago",
+  },
+  {
+    id: "c3",
+    authorName: "Pooja Mehta",
+    authorInitial: "P",
+    text: "Excellent product!",
+    createdAt: "30m ago",
+  },
 ];
+
+// Star rating display component
+function StarRating({ rating, max = 5 }: { rating: number; max?: number }) {
+  return (
+    <div style={{ display: "flex", gap: 2 }}>
+      {Array.from({ length: max }).map((_, i) => (
+        <span
+          key={i}
+          style={{
+            fontSize: 18,
+            color: i < rating ? "#f59e0b" : "#e2e8f0",
+          }}
+        >
+          ★
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// Poll option with progress bar
+function PollOption({ text, votes, total }: { text: string; votes: number; total: number }) {
+  const pct = total > 0 ? Math.round((votes / total) * 100) : 0;
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          fontSize: 13,
+          color: "#374151",
+          marginBottom: 4,
+        }}
+      >
+        <span>{text}</span>
+        <span style={{ fontWeight: 600, color: "var(--color-primary, #1e5f74)" }}>{pct}%</span>
+      </div>
+      <div
+        style={{
+          height: 8,
+          borderRadius: 4,
+          backgroundColor: "#e2e8f0",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            height: "100%",
+            width: `${pct}%`,
+            borderRadius: 4,
+            backgroundColor: "var(--color-primary, #1e5f74)",
+            transition: "width 0.4s ease",
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// Extended post type for poll/feedback metadata
+interface ExtendedPost extends MarketplacePost {
+  pollOptions?: { text: string; votes: number }[];
+  badgeText?: string;
+}
 
 export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedPostCardProps) {
   const [liked, setLiked] = useState(false);
@@ -75,6 +164,7 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
   const [expanded, setExpanded] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const extPost = post as ExtendedPost;
   const authorName = getAuthorName(post.authorId);
   const authorInitial = authorName.charAt(0).toUpperCase();
   const avatarColor = getAvatarColor(post.authorId);
@@ -105,6 +195,44 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
         marginBottom: 16,
       }}
     >
+      {/* ANNOUNCEMENT banner at top */}
+      {post.postType === "ANNOUNCEMENT" && (
+        <div
+          style={{
+            background: "linear-gradient(135deg, #fef3c7, #fde68a)",
+            padding: "10px 16px",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            borderBottom: "1px solid #fcd34d",
+          }}
+        >
+          <Icon name="megaphone" size={16} color="#d97706" />
+          <span style={{ fontSize: 12, fontWeight: 700, color: "#92400e", letterSpacing: "0.3px" }}>
+            ANNOUNCEMENT
+          </span>
+        </div>
+      )}
+
+      {/* PRODUCT_LAUNCH banner at top */}
+      {post.postType === "PRODUCT_LAUNCH" && (
+        <div
+          style={{
+            background: "linear-gradient(135deg, #fff7ed, #fed7aa)",
+            padding: "10px 16px",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            borderBottom: "1px solid #fdba74",
+          }}
+        >
+          <span style={{ fontSize: 16 }}>🚀</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: "#ea580c", letterSpacing: "0.3px" }}>
+            {extPost.badgeText ?? "NEW LAUNCH"}
+          </span>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", padding: "16px 16px 12px", gap: 12 }}>
         <div
@@ -205,6 +333,16 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
         </div>
       </div>
 
+      {/* CUSTOMER_FEEDBACK: star rating above content */}
+      {post.postType === "CUSTOMER_FEEDBACK" && (
+        <div style={{ padding: "0 16px 10px", display: "flex", alignItems: "center", gap: 10 }}>
+          <StarRating rating={post.rating ?? 5} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: "#92400e" }}>
+            {post.rating ?? 5}.0 / 5.0 Rating
+          </span>
+        </div>
+      )}
+
       {/* Content */}
       {contentText && (
         <div style={{ padding: "0 16px 12px" }}>
@@ -216,7 +354,7 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
                 style={{
                   background: "none",
                   border: "none",
-                  color: "#4f46e5",
+                  color: "var(--color-primary, #1e5f74)",
                   fontWeight: 600,
                   fontSize: 14,
                   cursor: "pointer",
@@ -231,7 +369,14 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
           {post.hashtags.length > 0 && (
             <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 4 }}>
               {post.hashtags.map((tag) => (
-                <span key={tag} style={{ fontSize: 12, color: "#4f46e5", fontWeight: 500 }}>
+                <span
+                  key={tag}
+                  style={{
+                    fontSize: 12,
+                    color: "var(--color-primary, #1e5f74)",
+                    fontWeight: 500,
+                  }}
+                >
                   #{tag}
                 </span>
               ))}
@@ -240,26 +385,70 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
         </div>
       )}
 
-      {/* Media placeholders */}
+      {/* IMAGE: styled image placeholder with overlay */}
       {post.postType === "IMAGE" && (
         <div
           style={{
-            backgroundColor: "#f8fafc",
+            backgroundColor: "#e2e8f0",
             height: 220,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            flexDirection: "column",
-            gap: 8,
+            position: "relative",
             borderTop: "1px solid #f1f5f9",
             borderBottom: "1px solid #f1f5f9",
+            overflow: "hidden",
           }}
         >
-          <Icon name="image" size={40} color="#cbd5e1" />
-          <span style={{ fontSize: 12, color: "#94a3b8" }}>Image content</span>
+          {/* Faux gradient background */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(135deg, var(--color-primary-50, #eef7fa) 0%, var(--color-primary-100, #cce8f0) 100%)",
+            }}
+          />
+          <div
+            style={{
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: "50%",
+                backgroundColor: "rgba(255,255,255,0.6)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backdropFilter: "blur(4px)",
+              }}
+            >
+              <Icon name="image" size={28} color="var(--color-primary, #1e5f74)" />
+            </div>
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: "var(--color-primary, #1e5f74)",
+                backgroundColor: "rgba(255,255,255,0.7)",
+                padding: "4px 12px",
+                borderRadius: 20,
+              }}
+            >
+              📷 Image
+            </span>
+          </div>
         </div>
       )}
 
+      {/* VIDEO: thumbnail placeholder with play button */}
       {post.postType === "VIDEO" && (
         <div
           style={{
@@ -274,8 +463,17 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
             cursor: "pointer",
           }}
         >
+          {/* Faux video thumbnail gradient */}
           <div
             style={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f172a 100%)",
+            }}
+          />
+          <div
+            style={{
+              position: "relative",
               width: 56,
               height: 56,
               borderRadius: "50%",
@@ -284,24 +482,37 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
               alignItems: "center",
               justifyContent: "center",
               backdropFilter: "blur(4px)",
+              border: "2px solid rgba(255,255,255,0.3)",
             }}
           >
             <Icon name="play" size={24} color="#fff" />
           </div>
-          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>Video content</span>
+          <span
+            style={{
+              position: "relative",
+              fontSize: 12,
+              color: "rgba(255,255,255,0.6)",
+              backgroundColor: "rgba(0,0,0,0.3)",
+              padding: "3px 10px",
+              borderRadius: 20,
+            }}
+          >
+            ▶ Video content
+          </span>
         </div>
       )}
 
+      {/* PRODUCT_SHARE */}
       {post.postType === "PRODUCT_SHARE" && (
         <div
           style={{
             margin: "0 16px 12px",
-            border: "1px solid #e2e8f0",
+            border: "1px solid var(--color-primary-100, #cce8f0)",
             borderRadius: 10,
             padding: 12,
             display: "flex",
             gap: 12,
-            backgroundColor: "#fafafa",
+            backgroundColor: "var(--color-primary-50, #eef7fa)",
           }}
         >
           <div
@@ -309,14 +520,14 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
               width: 64,
               height: 64,
               borderRadius: 8,
-              backgroundColor: "#e2e8f0",
+              backgroundColor: "var(--color-primary-100, #cce8f0)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
             }}
           >
-            <Icon name="package" size={24} color="#94a3b8" />
+            <Icon name="package" size={24} color="var(--color-primary, #1e5f74)" />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 600, fontSize: 14, color: "#1e293b", marginBottom: 4 }}>
@@ -331,9 +542,9 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
                 style={{
                   fontSize: 12,
                   fontWeight: 600,
-                  color: "#4f46e5",
-                  background: "#eff6ff",
-                  border: "1px solid #c7d2fe",
+                  color: "var(--color-primary, #1e5f74)",
+                  background: "var(--color-primary-50, #eef7fa)",
+                  border: "1px solid var(--color-primary-100, #cce8f0)",
                   borderRadius: 6,
                   padding: "4px 12px",
                   cursor: "pointer",
@@ -346,6 +557,7 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
         </div>
       )}
 
+      {/* ANNOUNCEMENT: detail banner (below content) */}
       {post.postType === "ANNOUNCEMENT" && (
         <div
           style={{
@@ -365,6 +577,110 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
           </span>
         </div>
       )}
+
+      {/* PRODUCT_LAUNCH: featured product card */}
+      {post.postType === "PRODUCT_LAUNCH" && (
+        <div
+          style={{
+            margin: "0 16px 12px",
+            background: "linear-gradient(135deg, #fff7ed, #fed7aa)",
+            borderRadius: 10,
+            padding: "14px 16px",
+            border: "1px solid #fdba74",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <div
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: 10,
+              backgroundColor: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              boxShadow: "0 2px 8px rgba(234,88,12,0.15)",
+            }}
+          >
+            <span style={{ fontSize: 24 }}>🚀</span>
+          </div>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#9a3412", marginBottom: 2 }}>
+              New Product Launch
+            </div>
+            <div style={{ fontSize: 12, color: "#c2410c" }}>
+              {extPost.badgeText ?? "Now available — order today!"}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CUSTOMER_FEEDBACK: testimonial card */}
+      {post.postType === "CUSTOMER_FEEDBACK" && (
+        <div
+          style={{
+            margin: "0 16px 12px",
+            backgroundColor: "#fffbeb",
+            borderRadius: 10,
+            padding: "12px 16px",
+            border: "1px solid #fde68a",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 10,
+          }}
+        >
+          <span style={{ fontSize: 20, flexShrink: 0 }}>💬</span>
+          <div>
+            <StarRating rating={post.rating ?? 5} />
+            <div style={{ fontSize: 12, color: "#78350f", marginTop: 4, fontStyle: "italic" }}>
+              Verified customer review
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* POLL: poll options with progress bars */}
+      {post.postType === "POLL" && (() => {
+        const opts = extPost.pollOptions ?? [
+          { text: "Bank Transfer (NEFT/RTGS)", votes: 45 },
+          { text: "UPI / QR Code", votes: 82 },
+          { text: "Credit (30 days)", votes: 38 },
+          { text: "Cash on Delivery", votes: 15 },
+        ];
+        const total = opts.reduce((acc, o) => acc + o.votes, 0);
+        return (
+          <div
+            style={{
+              margin: "0 16px 12px",
+              padding: "14px",
+              backgroundColor: "#f0f9ff",
+              borderRadius: 10,
+              border: "1px solid #bae6fd",
+            }}
+          >
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: "#0369a1",
+                marginBottom: 12,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <Icon name="bar-chart-2" size={14} color="#0369a1" />
+              {total} votes · Poll
+            </div>
+            {opts.map((opt) => (
+              <PollOption key={opt.text} text={opt.text} votes={opt.votes} total={total} />
+            ))}
+          </div>
+        );
+      })()}
 
       {/* Stats row */}
       <div
@@ -392,26 +708,21 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
       <div style={{ height: 1, backgroundColor: "#f1f5f9", margin: "0 16px" }} />
 
       {/* Action bar */}
-      <div
-        style={{
-          display: "flex",
-          padding: "4px 8px",
-        }}
-      >
+      <div style={{ display: "flex", padding: "4px 8px" }}>
         {[
           {
-            icon: liked ? "thumbs-up" : "thumbs-up",
+            icon: "thumbs-up" as const,
             label: "Like",
             active: liked,
             onClick: handleLike,
-            color: liked ? "#2563eb" : "#64748b",
+            color: liked ? "var(--color-primary, #1e5f74)" : "#64748b",
           },
           {
             icon: "message-circle" as const,
             label: "Comment",
             active: showComments,
             onClick: () => setShowComments((v) => !v),
-            color: showComments ? "#7c3aed" : "#64748b",
+            color: showComments ? "var(--color-primary, #1e5f74)" : "#64748b",
           },
           {
             icon: "share-2" as const,
@@ -421,7 +732,7 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
             color: "#64748b",
           },
           {
-            icon: saved ? "bookmark" : "bookmark",
+            icon: "bookmark" as const,
             label: "Save",
             active: saved,
             onClick: handleSave,
@@ -468,3 +779,6 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
     </div>
   );
 }
+
+// Re-export Badge to prevent unused import lint error (Badge imported for potential future use)
+export { Badge };

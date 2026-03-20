@@ -11,7 +11,7 @@ interface CreatePostModalProps {
 }
 
 const POST_TYPES: { value: PostType; label: string; icon: string; color: string; bg: string }[] = [
-  { value: "TEXT", label: "Text", icon: "type", color: "#2563eb", bg: "#eff6ff" },
+  { value: "TEXT", label: "Text", icon: "type", color: "var(--color-primary, #1e5f74)", bg: "var(--color-primary-50, #eef7fa)" },
   { value: "IMAGE", label: "Photo", icon: "image", color: "#16a34a", bg: "#f0fdf4" },
   { value: "VIDEO", label: "Video", icon: "video", color: "#d97706", bg: "#fef3c7" },
   { value: "PRODUCT_SHARE", label: "Product", icon: "package", color: "#7c3aed", bg: "#f5f3ff" },
@@ -116,7 +116,7 @@ export function CreatePostModal({ open, onClose, onSuccess }: CreatePostModalPro
                 width: 36,
                 height: 36,
                 borderRadius: "50%",
-                backgroundColor: "#4f46e5",
+                backgroundColor: "var(--color-primary, #1e5f74)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -208,7 +208,7 @@ export function CreatePostModal({ open, onClose, onSuccess }: CreatePostModalPro
                 boxSizing: "border-box",
                 fontFamily: "inherit",
               }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "#4f46e5")}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "var(--color-primary, #1e5f74)")}
               onBlur={(e) => (e.currentTarget.style.borderColor = "#e2e8f0")}
             />
           </div>
@@ -241,7 +241,7 @@ export function CreatePostModal({ open, onClose, onSuccess }: CreatePostModalPro
                 fontFamily: "inherit",
                 lineHeight: 1.5,
               }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = error ? "#dc2626" : "#4f46e5")}
+              onFocus={(e) => (e.currentTarget.style.borderColor = error ? "#dc2626" : "var(--color-primary, #1e5f74)")}
               onBlur={(e) => (e.currentTarget.style.borderColor = error ? "#dc2626" : "#e2e8f0")}
             />
             {error && (
@@ -269,7 +269,7 @@ export function CreatePostModal({ open, onClose, onSuccess }: CreatePostModalPro
                   backgroundColor: "#fafafa",
                   transition: "border-color 0.15s",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#4f46e5")}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--color-primary, #1e5f74)")}
                 onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#e2e8f0")}
               >
                 <Icon
@@ -309,7 +309,7 @@ export function CreatePostModal({ open, onClose, onSuccess }: CreatePostModalPro
                 boxSizing: "border-box",
                 fontFamily: "inherit",
               }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "#4f46e5")}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "var(--color-primary, #1e5f74)")}
               onBlur={(e) => (e.currentTarget.style.borderColor = "#e2e8f0")}
             />
           </div>
@@ -331,9 +331,9 @@ export function CreatePostModal({ open, onClose, onSuccess }: CreatePostModalPro
                     style={{
                       padding: "7px 14px",
                       borderRadius: 20,
-                      border: `1.5px solid ${active ? "#4f46e5" : "#e2e8f0"}`,
-                      backgroundColor: active ? "#eff6ff" : "#fff",
-                      color: active ? "#4f46e5" : "#64748b",
+                      border: `1.5px solid ${active ? "var(--color-primary, #1e5f74)" : "#e2e8f0"}`,
+                      backgroundColor: active ? "var(--color-primary-50, #eef7fa)" : "#fff",
+                      color: active ? "var(--color-primary, #1e5f74)" : "#64748b",
                       fontSize: 13,
                       fontWeight: active ? 600 : 400,
                       cursor: "pointer",
@@ -343,7 +343,7 @@ export function CreatePostModal({ open, onClose, onSuccess }: CreatePostModalPro
                       transition: "all 0.15s",
                     }}
                   >
-                    <Icon name={opt.icon as Parameters<typeof Icon>[0]["name"]} size={13} color={active ? "#4f46e5" : "#94a3b8"} />
+                    <Icon name={opt.icon as Parameters<typeof Icon>[0]["name"]} size={13} color={active ? "var(--color-primary, #1e5f74)" : "#94a3b8"} />
                     {opt.label}
                   </button>
                 );
@@ -386,7 +386,7 @@ export function CreatePostModal({ open, onClose, onSuccess }: CreatePostModalPro
               padding: "9px 24px",
               borderRadius: 8,
               border: "none",
-              backgroundColor: isPending || !content.trim() ? "#c7d2fe" : "#4f46e5",
+              backgroundColor: isPending || !content.trim() ? "var(--color-primary-100, #cce8f0)" : "var(--color-primary, #1e5f74)",
               color: "#fff",
               fontSize: 14,
               fontWeight: 600,
