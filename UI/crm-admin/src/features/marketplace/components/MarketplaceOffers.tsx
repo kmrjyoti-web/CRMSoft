@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { TableFull, Badge, Button, Icon } from "@/components/ui";
+import { TableFull, Badge } from "@/components/ui";
 import { TableSkeleton } from "@/components/common/TableSkeleton";
 import { useOffers, useActivateOffer, usePauseOffer, useCloseOffer } from "../hooks/useMarketplace";
 import type { OfferListParams, MarketplaceOffer } from "../types/marketplace.types";

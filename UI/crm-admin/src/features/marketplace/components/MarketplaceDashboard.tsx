@@ -41,7 +41,7 @@ const EMPTY_STATS: MarketplaceDashboardStats = {
 export function MarketplaceDashboardPage() {
   const { data: dashData, isLoading } = useMarketplaceDashboard();
 
-  const stats: MarketplaceDashboardStats = (dashData as { data?: MarketplaceDashboardStats })?.data ?? EMPTY_STATS;
+  const stats: MarketplaceDashboardStats = dashData?.data ?? EMPTY_STATS;
 
   const revenueBarItems = useMemo(
     () =>

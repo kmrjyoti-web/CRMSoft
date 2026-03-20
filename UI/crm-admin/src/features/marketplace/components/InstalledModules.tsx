@@ -183,8 +183,8 @@ export function InstalledModules() {
                     </Badge>
                   </td>
                   <td style={tdStyle}>{formatDate(mod.installedAt)}</td>
-                  <td style={tdStyle}>{formatDate(mod.trialEndsAt)}</td>
-                  <td style={tdStyle}>{formatDate(mod.subscriptionEndsAt)}</td>
+                  <td style={tdStyle}>{mod.trialEndsAt ? formatDate(mod.trialEndsAt) : "—"}</td>
+                  <td style={tdStyle}>{mod.subscriptionEndsAt ? formatDate(mod.subscriptionEndsAt) : "—"}</td>
                   <td
                     style={{
                       ...tdStyle,

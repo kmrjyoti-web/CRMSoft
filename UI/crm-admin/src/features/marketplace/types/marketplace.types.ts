@@ -246,6 +246,7 @@ export interface MarketplaceEnquiry {
   id: string;
   tenantId: string;
   listingId: string;
+  /** New field — seller/admin view */
   enquirerId: string;
   message: string;
   quantity?: number;
@@ -257,6 +258,10 @@ export interface MarketplaceEnquiry {
   replies?: EnquiryReply[];
   createdAt: string;
   updatedAt: string;
+  /** Legacy compat fields used by EnquiryList */
+  buyerName?: string;
+  buyerEmail?: string;
+  listingTitle?: string;
 }
 
 // ── Analytics ──────────────────────────────────────────────────────────────
@@ -360,10 +365,13 @@ export interface CreateOfferDto {
 }
 
 export interface CreateReviewDto {
-  listingId: string;
+  /** Required for product listing reviews; omitted for module reviews */
+  listingId?: string;
   rating: number;
   title?: string;
   body?: string;
+  /** Legacy compat for module reviews */
+  comment?: string;
   orderId?: string;
 }
 
