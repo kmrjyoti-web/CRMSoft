@@ -1,7 +1,7 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
 import { Job } from 'bull';
-import { MktPrismaService } from '../../../infrastructure/mkt-prisma.service';
+import { MktPrismaService } from '../../infrastructure/mkt-prisma.service';
 
 export const OFFER_SCHEDULER_QUEUE = 'marketplace-offers';
 

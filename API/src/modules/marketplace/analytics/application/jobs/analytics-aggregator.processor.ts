@@ -2,7 +2,7 @@ import { Process, Processor } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
 import { Job } from 'bull';
 import { randomUUID } from 'crypto';
-import { MktPrismaService } from '../../../infrastructure/mkt-prisma.service';
+import { MktPrismaService } from '../../infrastructure/mkt-prisma.service';
 
 export const ANALYTICS_QUEUE = 'marketplace-analytics';
 
