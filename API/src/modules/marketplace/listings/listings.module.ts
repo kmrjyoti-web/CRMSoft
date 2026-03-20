@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ListingsController } from './presentation/listings.controller';
-import { MktPrismaService } from '../infrastructure/mkt-prisma.service';
+import { MktPrismaService } from './infrastructure/mkt-prisma.service';
 import { CreateListingHandler } from './application/commands/create-listing/create-listing.handler';
 import { UpdateListingHandler } from './application/commands/update-listing/update-listing.handler';
 import { PublishListingHandler } from './application/commands/publish-listing/publish-listing.handler';
