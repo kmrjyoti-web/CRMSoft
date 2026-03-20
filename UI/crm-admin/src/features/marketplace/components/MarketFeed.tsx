@@ -93,6 +93,74 @@ const MOCK_OFFERS: FeedOffer[] = [
     gradientFrom: "#16a34a",
     gradientTo: "#0891b2",
   },
+  {
+    id: "o5",
+    vendorName: "SolarMax Systems",
+    vendorInitial: "S",
+    vendorColor: "#d97706",
+    title: "Solar Season Sale — Installer Special",
+    productName: "400W Mono PERC Solar Panels (50-panel lot)",
+    originalPrice: 175000,
+    offerPrice: 129000,
+    discountPercent: 26,
+    validUntil: new Date(Date.now() + 3 * 86400000 + 7200000).toISOString(),
+    remainingCount: 6,
+    likeCount: 89,
+    shareCount: 41,
+    gradientFrom: "#d97706",
+    gradientTo: "#f59e0b",
+  },
+  {
+    id: "o6",
+    vendorName: "ChemBase Industries",
+    vendorInitial: "C",
+    vendorColor: "#0891b2",
+    title: "Year-End Chemical Stock Clearance",
+    productName: "Isopropyl Alcohol 99.9% — 200L Drum",
+    originalPrice: 28000,
+    offerPrice: 20500,
+    discountPercent: 27,
+    validUntil: new Date(Date.now() + 6 * 3600000).toISOString(),
+    remainingCount: 15,
+    likeCount: 33,
+    shareCount: 14,
+    gradientFrom: "#0891b2",
+    gradientTo: "#1e5f74",
+  },
+  {
+    id: "o7",
+    vendorName: "PrintPro Supplies",
+    vendorInitial: "P",
+    vendorColor: "#7c3aed",
+    title: "Printer Cartridge Combo Deal",
+    productName: "HP Compatible Ink Cartridge Set (Box of 50)",
+    originalPrice: 18000,
+    offerPrice: 11500,
+    discountPercent: 36,
+    validUntil: new Date(Date.now() + 12 * 86400000).toISOString(),
+    remainingCount: 80,
+    likeCount: 28,
+    shareCount: 9,
+    gradientFrom: "#7c3aed",
+    gradientTo: "#4f46e5",
+  },
+  {
+    id: "o8",
+    vendorName: "SafeGuard PPE",
+    vendorInitial: "S",
+    vendorColor: "#dc2626",
+    title: "Safety Gear Bulk Discount — Limited Stock",
+    productName: "N95 Masks + Safety Goggles Combo (500 units)",
+    originalPrice: 22000,
+    offerPrice: 15400,
+    discountPercent: 30,
+    validUntil: new Date(Date.now() + 1 * 86400000 + 14400000).toISOString(),
+    remainingCount: 22,
+    likeCount: 61,
+    shareCount: 26,
+    gradientFrom: "#dc2626",
+    gradientTo: "#b91c1c",
+  },
 ];
 
 const MOCK_REQUIREMENTS: FeedRequirement[] = [
@@ -167,6 +235,78 @@ const MOCK_REQUIREMENTS: FeedRequirement[] = [
     likeCount: 27,
     shareCount: 11,
     tags: ["Logistics", "Mumbai-Delhi", "FTL", "Pharma Cargo"],
+  },
+  {
+    id: "r5",
+    buyerName: "StyleCraft Garments",
+    buyerInitial: "S",
+    buyerColor: "#ec4899",
+    title: "Cotton Fabric Supplier — Knitwear Export Unit",
+    description:
+      "We are an export-oriented garment manufacturer seeking a reliable supplier of 100% combed cotton single jersey fabric (180 GSM) in natural and white shades. Quantity: 20,000 metres/month. GOTS or OCS certified preferred.",
+    category: "Textiles",
+    quantity: "20,000 metres/month",
+    budgetMin: 400000,
+    budgetMax: 700000,
+    deadline: new Date(Date.now() + 6 * 86400000).toISOString(),
+    quoteCount: 4,
+    likeCount: 19,
+    shareCount: 7,
+    tags: ["Cotton Fabric", "Knitwear", "Export", "GOTS", "Tirupur"],
+  },
+  {
+    id: "r6",
+    buyerName: "CityBakes Food Pvt Ltd",
+    buyerInitial: "C",
+    buyerColor: "#f97316",
+    title: "Refined Wheat Flour (Maida) — Bulk Monthly Supply",
+    description:
+      "Looking for a consistent supplier of refined wheat flour (Maida Grade 1) for our chain of 12 bakeries across Hyderabad and Bengaluru. FSSAI-compliant packaging, 50 kg bags. Delivery to multiple locations required.",
+    category: "Food Ingredients",
+    quantity: "30 MT/month",
+    budgetMin: 750000,
+    budgetMax: 1100000,
+    deadline: new Date(Date.now() + 9 * 86400000).toISOString(),
+    quoteCount: 11,
+    likeCount: 33,
+    shareCount: 14,
+    tags: ["Maida", "FSSAI", "Bakery", "Hyderabad", "Bengaluru"],
+  },
+  {
+    id: "r7",
+    buyerName: "PowerGrid EPC Solutions",
+    buyerInitial: "P",
+    buyerColor: "#059669",
+    title: "HT Cable Supplier for Solar Park Project",
+    description:
+      "EPC contractor inviting quotations for 11 KV XLPE armoured cables (630 sqmm, 3-core) for a 50 MW solar park in Rajasthan. Supply with testing certificates. Delivery schedule: phased over 8 months. ISI mark mandatory.",
+    category: "Electrical",
+    quantity: "12 km",
+    budgetMin: 4000000,
+    budgetMax: 6500000,
+    deadline: new Date(Date.now() + 14 * 86400000).toISOString(),
+    quoteCount: 3,
+    likeCount: 44,
+    shareCount: 18,
+    tags: ["HT Cable", "Solar", "EPC", "Rajasthan", "ISI"],
+  },
+  {
+    id: "r8",
+    buyerName: "AutoParts Hub",
+    buyerInitial: "A",
+    buyerColor: "#1e5f74",
+    title: "OEM Brake Pad Sets — Multi-Brand Fitment",
+    description:
+      "Auto parts distributor looking for an OEM-grade brake pad manufacturer capable of supplying multi-brand fitments (Maruti, Hyundai, Tata, Mahindra). Annual volume: 1 lakh sets. R&D compliance certificate required.",
+    category: "Automotive",
+    quantity: "1,00,000 sets/year",
+    budgetMin: 5000000,
+    budgetMax: 9000000,
+    deadline: new Date(Date.now() + 21 * 86400000).toISOString(),
+    quoteCount: 6,
+    likeCount: 51,
+    shareCount: 23,
+    tags: ["Brake Pads", "OEM", "Automotive", "Multi-brand", "Annual"],
   },
 ];
 
@@ -441,6 +581,274 @@ function buildMockPosts(): ExtendedMarketplacePost[] {
       createdAt: new Date(Date.now() - 432000000).toISOString(),
       updatedAt: new Date().toISOString(),
     },
+    // ── Additional seed posts ─────────────────────────────────────────────────
+    {
+      id: "mp13",
+      tenantId: "t1",
+      authorId: "auth13",
+      postType: "POLL",
+      content: "What is your biggest challenge in B2B procurement today? Help us understand your pain points!",
+      mediaUrls: [],
+      pollOptions: [
+        { text: "Finding reliable vendors", votes: 134 },
+        { text: "Delayed deliveries", votes: 98 },
+        { text: "Price fluctuations", votes: 76 },
+        { text: "GST / compliance issues", votes: 52 },
+      ],
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 5400000).toISOString(),
+      viewCount: 2400,
+      likeCount: 67,
+      commentCount: 31,
+      shareCount: 45,
+      saveCount: 12,
+      hashtags: ["poll", "procurement", "B2B", "supplychain"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 5400000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp14",
+      tenantId: "t1",
+      authorId: "auth14",
+      postType: "TEXT",
+      content:
+        "Steel prices have dropped 8% this week amid global inventory corrections. If you are a construction or manufacturing buyer, now is an ideal time to lock in forward contracts. We have Q2 allocations available — contact us today.",
+      mediaUrls: [],
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 9000000).toISOString(),
+      viewCount: 1560,
+      likeCount: 72,
+      commentCount: 19,
+      shareCount: 38,
+      saveCount: 22,
+      hashtags: ["steel", "metalmarket", "construction", "forwardcontract"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 9000000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp15",
+      tenantId: "t1",
+      authorId: "auth15",
+      postType: "PRODUCT_LAUNCH",
+      content:
+        "Introducing FreshTrack — India's first AI-powered cold chain monitoring solution for perishables. Real-time temperature alerts, route optimization, and compliance reports for FSSAI audits. Now available for dairy, horticulture, and pharma cold chains.",
+      mediaUrls: [],
+      badgeText: "🚀 NEW LAUNCH — AI Cold Chain",
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 16200000).toISOString(),
+      viewCount: 3800,
+      likeCount: 204,
+      commentCount: 63,
+      shareCount: 110,
+      saveCount: 58,
+      hashtags: ["FreshTrack", "coldchain", "AI", "FSSAI", "agritech"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 16200000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp16",
+      tenantId: "t1",
+      authorId: "auth16",
+      postType: "IMAGE",
+      content:
+        "Our new textile unit in Surat is operational! 500 looms running 24/7 producing premium polyester blends, cotton-lycra, and technical fabrics for apparel exporters. MOQ: 2000 metres. Samples available.",
+      mediaUrls: [{ type: "IMAGE", url: "/placeholder-textile.jpg" }],
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 28800000).toISOString(),
+      viewCount: 1230,
+      likeCount: 59,
+      commentCount: 16,
+      shareCount: 27,
+      saveCount: 11,
+      hashtags: ["textile", "Surat", "fabric", "apparel", "manufacturing"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 28800000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp17",
+      tenantId: "t1",
+      authorId: "auth17",
+      postType: "CUSTOMER_FEEDBACK",
+      content:
+        "We sourced 10 tonnes of organic jaggery from this vendor for our retail brand. The quality was consistently excellent across all batches, documentation was perfect, and they even arranged last-mile delivery to our 4 warehouses. 10/10 would recommend!",
+      mediaUrls: [],
+      rating: 5,
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 36000000).toISOString(),
+      viewCount: 820,
+      likeCount: 47,
+      commentCount: 8,
+      shareCount: 13,
+      saveCount: 6,
+      hashtags: ["organicfood", "jaggery", "verified", "5stars", "agri"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 36000000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp18",
+      tenantId: "t1",
+      authorId: "auth18",
+      postType: "ANNOUNCEMENT",
+      content:
+        "We have been awarded the GeM (Government e-Marketplace) Seller of the Year 2026 in the Industrial Equipment category! This recognition is a testament to our commitment to government procurement quality standards. Open to new tenders — reach out!",
+      mediaUrls: [],
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 108000000).toISOString(),
+      viewCount: 5100,
+      likeCount: 320,
+      commentCount: 74,
+      shareCount: 185,
+      saveCount: 92,
+      hashtags: ["GeM", "award", "government", "procurement", "excellence"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 108000000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp19",
+      tenantId: "t1",
+      authorId: "auth19",
+      postType: "VIDEO",
+      content:
+        "See how our automated pick-and-pack system processes 10,000 orders per day with 99.8% accuracy. Powered by conveyor-integrated barcode scanning and ERP sync. Zero manual errors since deployment!",
+      mediaUrls: [{ type: "VIDEO", url: "/placeholder-warehouse.mp4" }],
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 216000000).toISOString(),
+      viewCount: 4700,
+      likeCount: 231,
+      commentCount: 54,
+      shareCount: 98,
+      saveCount: 44,
+      hashtags: ["warehouse", "automation", "logistics", "ERP", "efficiency"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 216000000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp20",
+      tenantId: "t1",
+      authorId: "auth20",
+      postType: "PRODUCT_SHARE",
+      content:
+        "Our AquaPure Industrial RO Systems are now available in 500 LPH, 1000 LPH, and 2000 LPH configurations. BIS certified, with 2-year AMC packages. Ideal for food processing, pharma, and hotel industries.",
+      mediaUrls: [],
+      linkedListingId: "list3",
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 302400000).toISOString(),
+      viewCount: 980,
+      likeCount: 55,
+      commentCount: 14,
+      shareCount: 22,
+      saveCount: 10,
+      hashtags: ["watertreatment", "RO", "industrial", "BIS", "foodprocessing"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 302400000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp21",
+      tenantId: "t1",
+      authorId: "auth21",
+      postType: "TEXT",
+      content:
+        "Tip for MSME exporters: Apply for the RoDTEP (Remission of Duties and Taxes on Exported Products) scheme before March 31. Refund rates range from 0.3% to 4.3% of FOB value depending on your HS code. Our team can assist with the application. Drop a comment or DM!",
+      mediaUrls: [],
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 388800000).toISOString(),
+      viewCount: 2100,
+      likeCount: 143,
+      commentCount: 37,
+      shareCount: 88,
+      saveCount: 71,
+      hashtags: ["RoDTEP", "MSME", "export", "incentive", "trade"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 388800000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp22",
+      tenantId: "t1",
+      authorId: "auth22",
+      postType: "POLL",
+      content: "Which industry sector do you primarily source from on this marketplace?",
+      mediaUrls: [],
+      pollOptions: [
+        { text: "Pharmaceuticals & Healthcare", votes: 210 },
+        { text: "Construction & Infrastructure", votes: 165 },
+        { text: "Textiles & Apparel", votes: 98 },
+        { text: "Food & Agriculture", votes: 87 },
+        { text: "Electronics & IT", votes: 74 },
+      ],
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 475200000).toISOString(),
+      viewCount: 3200,
+      likeCount: 88,
+      commentCount: 42,
+      shareCount: 56,
+      saveCount: 19,
+      hashtags: ["poll", "marketplace", "industry", "sourcing"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 475200000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp23",
+      tenantId: "t1",
+      authorId: "auth23",
+      postType: "IMAGE",
+      content:
+        "Fresh from the fields — our organically grown Alphonso mangoes are ready for bulk orders! APEDA certified, exported to UAE, UK, and EU. Domestic bulk buyers welcome. Season ends in 6 weeks.",
+      mediaUrls: [{ type: "IMAGE", url: "/placeholder-mango.jpg" }],
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 561600000).toISOString(),
+      viewCount: 2450,
+      likeCount: 187,
+      commentCount: 52,
+      shareCount: 94,
+      saveCount: 38,
+      hashtags: ["Alphonso", "mango", "export", "organic", "APEDA", "agri"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 561600000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "mp24",
+      tenantId: "t1",
+      authorId: "auth24",
+      postType: "CUSTOMER_FEEDBACK",
+      content:
+        "Placed a bulk order for 500 units of solar charge controllers. Delivery was 3 days ahead of schedule! The product quality exceeded our expectations — CE & BIS certified. Our installation team in Rajasthan is very happy. Definitely ordering again next quarter.",
+      mediaUrls: [],
+      rating: 4,
+      visibility: "PUBLIC",
+      status: "ACTIVE",
+      publishedAt: new Date(Date.now() - 648000000).toISOString(),
+      viewCount: 710,
+      likeCount: 41,
+      commentCount: 7,
+      shareCount: 11,
+      saveCount: 5,
+      hashtags: ["solar", "renewable", "4stars", "verified", "Rajasthan"],
+      isActive: true,
+      createdAt: new Date(Date.now() - 648000000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
   ];
 }
 
@@ -465,6 +873,11 @@ const TRENDING_TOPICS = [
   { label: "#GSTinvoice", count: "1.2K posts" },
   { label: "#medicaldevices", count: "980 posts" },
   { label: "#MSMEsupplier", count: "760 posts" },
+  { label: "#solarenergy", count: "640 posts" },
+  { label: "#agriexport", count: "520 posts" },
+  { label: "#textileindia", count: "480 posts" },
+  { label: "#coldchain", count: "390 posts" },
+  { label: "#GeMseller", count: "310 posts" },
 ];
 
 const SUGGESTED_VENDORS = [
@@ -474,6 +887,7 @@ const SUGGESTED_VENDORS = [
     color: "var(--color-primary, #1e5f74)",
     category: "Pharmaceuticals",
     followers: "1.2K",
+    verified: true,
   },
   {
     name: "Tata Projects",
@@ -481,6 +895,7 @@ const SUGGESTED_VENDORS = [
     color: "#0891b2",
     category: "Construction & Infra",
     followers: "3.4K",
+    verified: true,
   },
   {
     name: "Reliance Retail",
@@ -488,25 +903,71 @@ const SUGGESTED_VENDORS = [
     color: "#dc2626",
     category: "FMCG & Retail",
     followers: "8.7K",
+    verified: true,
+  },
+  {
+    name: "SolarMax Systems",
+    initial: "S",
+    color: "#d97706",
+    category: "Renewable Energy",
+    followers: "890",
+    verified: false,
+  },
+  {
+    name: "GreenFields Agro",
+    initial: "G",
+    color: "#16a34a",
+    category: "Agriculture & Exports",
+    followers: "640",
+    verified: true,
+  },
+  {
+    name: "StyleCraft Garments",
+    initial: "S",
+    color: "#ec4899",
+    category: "Textiles & Apparel",
+    followers: "420",
+    verified: false,
+  },
+  {
+    name: "ChemBase Industries",
+    initial: "C",
+    color: "#0891b2",
+    category: "Industrial Chemicals",
+    followers: "710",
+    verified: true,
   },
 ];
 
 const MARKET_PULSE = [
   {
     label: "Active Listings",
-    value: "12,480",
+    value: "14,820",
     icon: "list",
     color: "var(--color-primary, #1e5f74)",
     bg: "var(--color-primary-50, #eef7fa)",
   },
   {
     label: "Open Requirements",
-    value: "3,210",
+    value: "4,630",
     icon: "search",
     color: "#f97316",
     bg: "#fff7ed",
   },
-  { label: "Live Offers", value: "847", icon: "tag", color: "#059669", bg: "#f0fdf4" },
+  {
+    label: "Live Offers",
+    value: "1,248",
+    icon: "tag",
+    color: "var(--color-success, #22c55e)",
+    bg: "var(--color-success-light, #dcfce7)",
+  },
+  {
+    label: "Verified Vendors",
+    value: "6,910",
+    icon: "shield",
+    color: "#0891b2",
+    bg: "#cffafe",
+  },
 ];
 
 // Skeleton types cycling pattern for initial load
@@ -570,19 +1031,16 @@ export function MarketFeed() {
     if (activeFilter === "IMAGES")
       return postItems.filter((i) => i.type === "post" && i.data.postType === "IMAGE");
 
-    // ALL: interleave offers and requirements into the post stream
+    // ALL: interleave offers and requirements every ~3 posts
     const items: FeedItem[] = [];
+    const offerInsertions: Record<number, number> = { 1: 0, 4: 1, 8: 2, 12: 3, 16: 4, 20: 5, 24: 6, 28: 7 };
+    const reqInsertions: Record<number, number>   = { 3: 0, 6: 1, 10: 2, 14: 3, 18: 4, 22: 5, 26: 6, 30: 7 };
     postItems.forEach((item, idx) => {
       items.push(item);
-      if (idx === 1 && MOCK_OFFERS[0]) items.push({ type: "offer", data: MOCK_OFFERS[0] });
-      if (idx === 3 && MOCK_REQUIREMENTS[0])
-        items.push({ type: "requirement", data: MOCK_REQUIREMENTS[0] });
-      if (idx === 5 && MOCK_OFFERS[1]) items.push({ type: "offer", data: MOCK_OFFERS[1] });
-      if (idx === 7 && MOCK_REQUIREMENTS[1])
-        items.push({ type: "requirement", data: MOCK_REQUIREMENTS[1] });
-      if (idx === 9 && MOCK_OFFERS[2]) items.push({ type: "offer", data: MOCK_OFFERS[2] });
-      if (idx === 11 && MOCK_REQUIREMENTS[2])
-        items.push({ type: "requirement", data: MOCK_REQUIREMENTS[2] });
+      if (offerInsertions[idx] !== undefined && MOCK_OFFERS[offerInsertions[idx]])
+        items.push({ type: "offer", data: MOCK_OFFERS[offerInsertions[idx]] });
+      if (reqInsertions[idx] !== undefined && MOCK_REQUIREMENTS[reqInsertions[idx]])
+        items.push({ type: "requirement", data: MOCK_REQUIREMENTS[reqInsertions[idx]] });
     });
 
     // If post stream is very short, append remaining offers/requirements
@@ -1251,17 +1709,22 @@ export function MarketFeed() {
                     {vendor.initial}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 13,
-                        fontWeight: 600,
-                        color: "#1e293b",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {vendor.name}
+                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <span
+                        style={{
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: "#1e293b",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {vendor.name}
+                      </span>
+                      {vendor.verified && (
+                        <Icon name="badge-check" size={13} color="var(--color-primary, #1e5f74)" />
+                      )}
                     </div>
                     <div style={{ fontSize: 11, color: "#64748b" }}>
                       {vendor.category} · {vendor.followers} followers
