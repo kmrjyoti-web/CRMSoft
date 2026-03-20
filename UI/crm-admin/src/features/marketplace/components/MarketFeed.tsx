@@ -980,6 +980,17 @@ const INITIAL_SKELETON_TYPES: SkeletonType[] = [
   "TEXT",
 ];
 
+// ── Scroll-parent finder ──────────────────────────────────────────────────────
+
+function getScrollParent(node: HTMLElement | null): HTMLElement | Window {
+  if (!node || node === document.documentElement) return window;
+  const { overflow, overflowY, overflowX } = getComputedStyle(node);
+  if (/auto|scroll/.test(overflow + overflowY + overflowX)) return node;
+  return getScrollParent(node.parentElement);
+}
+
+const PAGE_SIZE = 8;
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function MarketFeed() {
@@ -987,17 +998,18 @@ export function MarketFeed() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [orderOffer, setOrderOffer] = useState<FeedOffer | null>(null);
   const [enquiryTarget, setEnquiryTarget] = useState<EnquiryTarget | null>(null);
-  const [visibleCount, setVisibleCount] = useState(999);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const loadingRef = useRef(false); // ref to avoid stale closure in scroll handler
 
   const { data: feedData } = useFeed({ page: 1, limit: 20 });
   const { mutate: toggleLike } = useToggleLike();
   const { mutate: toggleSave } = useToggleSave();
   const { mutate: addComment } = useAddComment();
 
-  // Simulate initial load
+  // Simulate initial skeleton → content reveal
   useEffect(() => {
     const timer = setTimeout(() => setInitialLoading(false), 1500);
     return () => clearTimeout(timer);
@@ -1033,56 +1045,74 @@ export function MarketFeed() {
 
     // ALL: interleave offers and requirements every ~3 posts
     const items: FeedItem[] = [];
-    const offerInsertions: Record<number, number> = { 1: 0, 4: 1, 8: 2, 12: 3, 16: 4, 20: 5, 24: 6, 28: 7 };
-    const reqInsertions: Record<number, number>   = { 3: 0, 6: 1, 10: 2, 14: 3, 18: 4, 22: 5, 26: 6, 30: 7 };
+    const offerAt: Record<number, number> = { 1: 0, 4: 1, 8: 2, 12: 3, 16: 4, 20: 5, 24: 6, 28: 7 };
+    const reqAt: Record<number, number>   = { 3: 0, 6: 1, 10: 2, 14: 3, 18: 4, 22: 5, 26: 6, 30: 7 };
     postItems.forEach((item, idx) => {
       items.push(item);
-      if (offerInsertions[idx] !== undefined && MOCK_OFFERS[offerInsertions[idx]])
-        items.push({ type: "offer", data: MOCK_OFFERS[offerInsertions[idx]] });
-      if (reqInsertions[idx] !== undefined && MOCK_REQUIREMENTS[reqInsertions[idx]])
-        items.push({ type: "requirement", data: MOCK_REQUIREMENTS[reqInsertions[idx]] });
+      if (offerAt[idx] !== undefined && MOCK_OFFERS[offerAt[idx]])
+        items.push({ type: "offer", data: MOCK_OFFERS[offerAt[idx]] });
+      if (reqAt[idx] !== undefined && MOCK_REQUIREMENTS[reqAt[idx]])
+        items.push({ type: "requirement", data: MOCK_REQUIREMENTS[reqAt[idx]] });
     });
-
-    // If post stream is very short, append remaining offers/requirements
     if (postItems.length <= 2) {
       MOCK_OFFERS.slice(2).forEach((o) => items.push({ type: "offer", data: o }));
       MOCK_REQUIREMENTS.slice(2).forEach((r) => items.push({ type: "requirement", data: r }));
     }
-
     return items;
   }, [posts, activeFilter]);
 
-  // IntersectionObserver for infinite scroll
+  // ── Infinite scroll — scroll-parent detection (works inside any layout) ─────
   useEffect(() => {
-    const el = sentinelRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (
-          entries[0].isIntersecting &&
-          !isLoadingMore &&
-          visibleCount < ALL_FEED_ITEMS.length
-        ) {
-          setIsLoadingMore(true);
-          setTimeout(() => {
-            setVisibleCount((v) => Math.min(v + 12, ALL_FEED_ITEMS.length));
-            setIsLoadingMore(false);
-          }, 1200);
-        }
-      },
-      { threshold: 0.1 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [isLoadingMore, visibleCount, ALL_FEED_ITEMS.length]);
+    if (initialLoading) return;
 
-  // Reset visible count when filter changes
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const scrollEl = getScrollParent(sentinel.parentElement);
+
+    function tryLoadMore() {
+      if (loadingRef.current || visibleCount >= ALL_FEED_ITEMS.length) return;
+      const rect = sentinel!.getBoundingClientRect();
+      // Trigger when sentinel is within 400px below the visible area
+      const triggerY =
+        scrollEl instanceof Window
+          ? window.innerHeight + 400
+          : (scrollEl as HTMLElement).getBoundingClientRect().bottom + 400;
+      if (rect.top < triggerY) {
+        loadingRef.current = true;
+        setIsLoadingMore(true);
+        setTimeout(() => {
+          setVisibleCount((v) => Math.min(v + PAGE_SIZE, ALL_FEED_ITEMS.length));
+          setIsLoadingMore(false);
+          loadingRef.current = false;
+        }, 800);
+      }
+    }
+
+    // Attach to both the scroll parent and window as fallback
+    scrollEl.addEventListener("scroll", tryLoadMore, { passive: true });
+    if (scrollEl !== window) {
+      window.addEventListener("scroll", tryLoadMore, { passive: true });
+    }
+    tryLoadMore(); // check immediately in case sentinel already visible
+
+    return () => {
+      scrollEl.removeEventListener("scroll", tryLoadMore);
+      if (scrollEl !== window) {
+        window.removeEventListener("scroll", tryLoadMore);
+      }
+    };
+  }, [initialLoading, visibleCount, ALL_FEED_ITEMS.length]);
+
+  // Reset page on filter switch
   useEffect(() => {
-    setVisibleCount(999);
+    setVisibleCount(PAGE_SIZE);
+    loadingRef.current = false;
   }, [activeFilter]);
 
   const visibleItems = ALL_FEED_ITEMS.slice(0, visibleCount);
-  const allCaughtUp = !initialLoading && visibleCount >= ALL_FEED_ITEMS.length;
+  const hasMore = visibleCount < ALL_FEED_ITEMS.length;
+  const allCaughtUp = !initialLoading && !hasMore && ALL_FEED_ITEMS.length > 0;
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f1f5f9", marginTop: -10 }}>
