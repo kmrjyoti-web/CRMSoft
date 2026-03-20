@@ -7,11 +7,8 @@ import { useForm, Controller, useFieldArray } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
 
-import { Button, Icon, Input, NumberInput, CurrencyInput, Fieldset, Typography, Modal } from "@/components/ui";
-import { SmartDateInput } from "@/components/common/SmartDateInput";
+import { Button, Icon, Typography } from "@/components/ui";
 import { LookupSelect } from "@/components/common/LookupSelect";
-import { ProductSelect } from "@/components/common/ProductSelect";
-import type { ProductSelectOption } from "@/components/common/ProductSelect";
 import { LeadSelect } from "@/components/common/LeadSelect";
 import type { LeadSelectOption } from "@/components/common/LeadSelect";
 import { ContactSelect } from "@/components/common/ContactSelect";
@@ -20,11 +17,19 @@ import { FormErrors } from "@/components/common/FormErrors";
 import { DiscountInput } from "@/components/common/DiscountInput";
 import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { PageHeader } from "@/components/common/PageHeader";
 import { useSidePanelStore } from "@/stores/side-panel.store";
 import { useContentPanel } from "@/hooks/useEntityPanel";
 import { useQuotationLayoutStore, ROW_HEIGHT_PX, DEFAULT_COL_WIDTHS } from "@/stores/quotation-layout.store";
 import { QuotationConfigPanel } from "./QuotationConfigPanel";
+import {
+  QuotationSummaryModal,
+  QuotationTermsModal,
+  QuotationNotesModal,
+  QuotationErrorModal,
+  QuotationUnsavedDialog,
+} from "./QuotationModals";
+import type { ErrorModalState } from "./QuotationModals";
+import { QuotationLineItemsGrid } from "./QuotationLineItemsGrid";
 
 import { useQuotationDetail, useCreateQuotation, useUpdateQuotation } from "../hooks/useQuotations";
 import { calculateLineItem, calculateSummary } from "../utils/gst";
@@ -134,13 +139,7 @@ export function QuotationForm({ quotationId, leadId: defaultLeadId, mode = "page
   const pendingCloseRef = useRef<(() => void) | null>(null);
 
   // Error modal state
-  const [errorModal, setErrorModal] = useState<{
-    open: boolean;
-    title: string;
-    summary: string;
-    details: { field: string; message: string }[];
-    rawError?: string;
-  }>({ open: false, title: "", summary: "", details: [], rawError: undefined });
+  const [errorModal, setErrorModal] = useState<ErrorModalState>({ open: false, title: "", summary: "", details: [], rawError: undefined });
   const [showErrorRaw, setShowErrorRaw] = useState(false);
 
   // Open config panel
@@ -743,196 +742,19 @@ export function QuotationForm({ quotationId, leadId: defaultLeadId, mode = "page
         </div>
 
         {/* ── GRID — scrollable, fills remaining height ── */}
-        <div className="flex-1 flex flex-col min-h-0">
-          {/* Scrollable grid area */}
-          <div className="flex-1 overflow-y-auto overflow-x-auto">
-            {/* Grid wrapper — strips all input borders so controls look flat inside cells */}
-            <div className="quotation-grid border border-[var(--color-primary-100)]">
-            <table className="w-full text-sm table-fixed border-collapse">
-              <colgroup>
-                <col />{/* Product — fills remaining space */}
-                <col style={{ width: colWidths.qty }} />
-                <col style={{ width: colWidths.unit }} />
-                <col style={{ width: colWidths.unitPrice }} />
-                <col style={{ width: colWidths.discount }} />
-                <col style={{ width: colWidths.gst }} />
-                <col style={{ width: colWidths.lineTotal }} />
-              </colgroup>
-              <thead>
-                <tr className="bg-[var(--color-primary)] text-white text-xs font-semibold uppercase">
-                  <th className="py-1.5 px-2 text-left border-r border-[var(--color-primary-700)]">Product</th>
-                  <th className="py-1.5 px-2 text-right border-r border-[var(--color-primary-700)]">Qty</th>
-                  <th className="py-1.5 px-2 text-left border-r border-[var(--color-primary-700)]">Unit</th>
-                  <th className="py-1.5 px-2 text-right border-r border-[var(--color-primary-700)]">Rate</th>
-                  <th className="py-1.5 px-2 text-right border-r border-[var(--color-primary-700)]">Disc 1.%</th>
-                  <th className="py-1.5 px-2 text-right border-r border-[var(--color-primary-700)]">GST %</th>
-                  <th className="py-1.5 px-2 text-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {fields.map((fieldItem, index) => {
-                  const itemValues = watchedItems?.[index];
-                  const calc = calculateLineItem({
-                    quantity: itemValues?.quantity ?? 0,
-                    unitPrice: itemValues?.unitPrice ?? 0,
-                    discountType: itemValues?.discountType,
-                    discountValue: itemValues?.discountValue,
-                    gstRate: itemValues?.gstRate,
-                  });
-                  return (
-                    <tr
-                      key={fieldItem.id}
-                      data-row-index={index}
-                      className="align-middle border-b border-[var(--color-primary-100)] hover:bg-[var(--color-primary-50)] transition-colors"
-                      style={{ height: ROW_HEIGHT_PX[rowHeight] }}
-                    >
-                      <td className="p-0 border-r border-[var(--color-primary-100)]" onKeyDown={makeTabHandler("product", index, fields.length)}>
-                        <Controller
-                          name={`items.${index}.productId`}
-                          control={control}
-                          render={({ field: f }) => (
-                            <ProductSelect
-                              label=""
-                              inputMode={productSelectMode}
-                              value={f.value ?? null}
-                              onChange={(val) => f.onChange(val ?? "")}
-                              onProductSelect={(product: ProductSelectOption | null) => {
-                                if (product) {
-                                  setValue(`items.${index}.productName`, product.name);
-                                  if (product.salePrice) setValue(`items.${index}.unitPrice`, product.salePrice);
-                                  if (product.hsnCode) setValue(`items.${index}.hsnCode`, product.hsnCode);
-                                  if (product.primaryUnit) setValue(`items.${index}.unit`, product.primaryUnit);
-                                  if (product.gstRate != null) setValue(`items.${index}.gstRate`, product.gstRate);
-                                  if (product.cessRate != null) setValue(`items.${index}.cessRate`, product.cessRate);
-                                  if (product.shortDescription) setValue(`items.${index}.description`, product.shortDescription);
-                                }
-                              }}
-                              error={!!errors.items?.[index]?.productName}
-                            />
-                          )}
-                        />
-                      </td>
-                      <td className="p-0 border-r border-[var(--color-primary-100)]" onKeyDown={makeTabHandler("qty", index, fields.length)}>
-                        <Controller
-                          name={`items.${index}.quantity`}
-                          control={control}
-                          render={({ field: f }) => (
-                            <NumberInput
-                              label=""
-                              value={f.value}
-                              onChange={f.onChange}
-                              min={0.01}
-                              step={1}
-                              precision={2}
-                            />
-                          )}
-                        />
-                      </td>
-                      <td className="p-0 border-r border-[var(--color-primary-100)]" onKeyDown={makeTabHandler("unit", index, fields.length)}>
-                        <Controller
-                          name={`items.${index}.unit`}
-                          control={control}
-                          render={({ field: f }) => (
-                            <LookupSelect
-                              masterCode="UNIT_OF_MEASURE"
-                              value={f.value ?? ""}
-                              onChange={(v) => f.onChange(String(v ?? ""))}
-                            />
-                          )}
-                        />
-                      </td>
-                      <td className="p-0 border-r border-[var(--color-primary-100)]" onKeyDown={makeTabHandler("unitPrice", index, fields.length)}>
-                        <Controller
-                          name={`items.${index}.unitPrice`}
-                          control={control}
-                          render={({ field: f }) => (
-                            <CurrencyInput
-                              label=""
-                              value={f.value ?? undefined}
-                              onChange={f.onChange}
-                              currency="₹"
-                              decimals={2}
-                            />
-                          )}
-                        />
-                      </td>
-                      <td className="p-0 border-r border-[var(--color-primary-100)]" onKeyDown={makeTabHandler("discount", index, fields.length)}>
-                        <Controller
-                          name={`items.${index}.discountValue`}
-                          control={control}
-                          render={({ field: f }) => (
-                            <DiscountInput
-                              value={f.value ?? null}
-                              discountType={watchedItems?.[index]?.discountType ?? "PERCENTAGE"}
-                              onChange={f.onChange}
-                              onTypeChange={(type) => setValue(`items.${index}.discountType`, type)}
-                            />
-                          )}
-                        />
-                      </td>
-                      <td className="p-0 border-r border-[var(--color-primary-100)]" onKeyDown={makeTabHandler("gst", index, fields.length)}>
-                        <Controller
-                          name={`items.${index}.gstRate`}
-                          control={control}
-                          render={({ field: f }) => (
-                            <LookupSelect
-                              masterCode="GST_RATE"
-                              numericValue
-                              value={f.value ?? ""}
-                              onChange={(v) =>
-                                f.onChange(v === "" || v === null ? null : Number(v))
-                              }
-                            />
-                          )}
-                        />
-                      </td>
-                      <td className="p-0" onKeyDown={makeTabHandler("lineTotal", index, fields.length)}>
-                        <NumberInput
-                          label=""
-                          value={calc.lineTotal}
-                          onChange={() => {}}
-                          disabled
-                          precision={2}
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-                {/* Blank rows — full controls, empty values, non-interactive */}
-                {Array.from({ length: blankRowCount }).map((_, i) => (
-                  <tr
-                    key={`blank-${i}`}
-                    className="border-b border-[var(--color-primary-100)]"
-                    style={{ height: ROW_HEIGHT_PX[rowHeight] }}
-                  >
-                    <td className="p-0 border-r border-[var(--color-primary-100)]">
-                      <ProductSelect label="" inputMode={productSelectMode} value={null} onChange={() => {}} disabled />
-                    </td>
-                    <td className="p-0 border-r border-[var(--color-primary-100)]">
-                      <NumberInput label="" value={null} onChange={() => {}} disabled precision={2} />
-                    </td>
-                    <td className="p-0 border-r border-[var(--color-primary-100)]">
-                      <LookupSelect masterCode="UNIT_OF_MEASURE" value="" onChange={() => {}} disabled />
-                    </td>
-                    <td className="p-0 border-r border-[var(--color-primary-100)]">
-                      <CurrencyInput label="" value={null} onChange={() => {}} currency="₹" decimals={2} disabled />
-                    </td>
-                    <td className="p-0 border-r border-[var(--color-primary-100)]">
-                      <DiscountInput value={null} discountType="PERCENTAGE" onChange={() => {}} onTypeChange={() => {}} disabled />
-                    </td>
-                    <td className="p-0 border-r border-[var(--color-primary-100)]">
-                      <LookupSelect masterCode="GST_RATE" value="" onChange={() => {}} disabled />
-                    </td>
-                    <td className="p-0">
-                      <NumberInput label="" value={null} onChange={() => {}} disabled precision={2} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
-          </div>
-        </div>
+        <QuotationLineItemsGrid
+          fields={fields}
+          watchedItems={watchedItems}
+          colWidths={colWidths}
+          rowHeight={rowHeight}
+          blankRowCount={blankRowCount}
+          control={control}
+          errors={errors}
+          productSelectMode={productSelectMode}
+          makeTabHandler={makeTabHandler}
+          setValue={setValue}
+          calculateLineItem={calculateLineItem}
+        />
 
         {/* ── FOOTER — fixed, no scroll ── */}
         <div ref={footerRef} className="flex-none border-t border-gray-200 bg-white px-3 py-2">
@@ -1007,293 +829,45 @@ export function QuotationForm({ quotationId, leadId: defaultLeadId, mode = "page
         </div>
 
         {/* ── Summary Modal ── */}
-        <Modal
+        <QuotationSummaryModal
           open={showSummaryModal}
           onClose={() => setShowSummaryModal(false)}
-          title="Summary"
-          size="md"
-          footer={
-            <div className="flex justify-end">
-              <Button type="button" variant="primary" onClick={() => setShowSummaryModal(false)}>
-                Done
-              </Button>
-            </div>
-          }
-        >
-          <Controller
-            name="summary"
-            control={control}
-            render={({ field }) => (
-              <textarea
-                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                value={field.value ?? ""}
-                onChange={field.onChange}
-                rows={5}
-                placeholder="Brief summary of the quotation..."
-              />
-            )}
-          />
-        </Modal>
+          control={control}
+        />
 
         {/* ── Validity & Terms Modal ── */}
-        <Modal
+        <QuotationTermsModal
           open={showTermsModal}
           onClose={() => setShowTermsModal(false)}
-          title="Validity & Terms"
-          size="lg"
-          footer={
-            <div className="flex justify-end">
-              <Button type="button" variant="primary" onClick={() => setShowTermsModal(false)}>
-                Done
-              </Button>
-            </div>
-          }
-        >
-          <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-2">
-              <Controller
-                name="validFrom"
-                control={control}
-                render={({ field }) => (
-                  <SmartDateInput
-                    label="Valid From"
-                    value={field.value || null}
-                    onChange={(v) => field.onChange(v ?? "")}
-                  />
-                )}
-              />
-              <Controller
-                name="validUntil"
-                control={control}
-                render={({ field }) => (
-                  <SmartDateInput
-                    label="Valid Until"
-                    value={field.value || null}
-                    onChange={(v) => field.onChange(v ?? "")}
-                  />
-                )}
-              />
-            </div>
-
-            <Controller
-              name="paymentTerms"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Payment Terms</label>
-                  <textarea
-                    className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    rows={2}
-                  />
-                </div>
-              )}
-            />
-
-            <Controller
-              name="deliveryTerms"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Delivery Terms</label>
-                  <textarea
-                    className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    rows={2}
-                  />
-                </div>
-              )}
-            />
-
-            <Controller
-              name="warrantyTerms"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Warranty Terms</label>
-                  <textarea
-                    className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    rows={2}
-                  />
-                </div>
-              )}
-            />
-
-            <Controller
-              name="termsConditions"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Terms & Conditions</label>
-                  <textarea
-                    className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    rows={3}
-                  />
-                </div>
-              )}
-            />
-          </div>
-        </Modal>
+          control={control}
+        />
 
         {/* ── Internal Notes Modal ── */}
-        <Modal
+        <QuotationNotesModal
           open={showNotesModal}
           onClose={() => setShowNotesModal(false)}
-          title="Internal Notes"
-          size="md"
-          footer={
-            <div className="flex justify-end">
-              <Button type="button" variant="primary" onClick={() => setShowNotesModal(false)}>
-                Done
-              </Button>
-            </div>
-          }
-        >
-          <Controller
-            name="internalNotes"
-            control={control}
-            render={({ field }) => (
-              <textarea
-                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
-                value={field.value ?? ""}
-                onChange={field.onChange}
-                rows={5}
-                placeholder="Internal notes (not visible to customer)..."
-              />
-            )}
-          />
-        </Modal>
+          control={control}
+        />
 
         {/* ── Error Detail Modal ── */}
-        <Modal
-          open={errorModal.open}
+        <QuotationErrorModal
+          errorModal={errorModal}
+          showErrorRaw={showErrorRaw}
           onClose={() => setErrorModal((prev) => ({ ...prev, open: false }))}
-          title={errorModal.title}
-          size="md"
-          footer={
-            <div className="flex items-center justify-between w-full">
-              <button
-                type="button"
-                onClick={() => {
-                  const body = [
-                    `Error: ${errorModal.title}`,
-                    `Summary: ${errorModal.summary}`,
-                    "",
-                    "Details:",
-                    ...errorModal.details.map((d) => `  - ${d.field}: ${d.message}`),
-                    "",
-                    errorModal.rawError ? `Raw:\n${errorModal.rawError}` : "",
-                    "",
-                    `URL: ${window.location.href}`,
-                    `Time: ${new Date().toISOString()}`,
-                  ].join("\n");
-                  navigator.clipboard.writeText(body);
-                  toast.success("Error details copied to clipboard");
-                }}
-                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 transition-colors"
-              >
-                <Icon name="copy" size={14} />
-                Copy for Report
-              </button>
-              <Button type="button" variant="primary" onClick={() => setErrorModal((prev) => ({ ...prev, open: false }))}>
-                OK
-              </Button>
-            </div>
-          }
-        >
-          <div className="space-y-3">
-            {/* Summary */}
-            <div className="flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 p-3">
-              <Icon name="alert-circle" size={18} className="text-red-500 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-sm font-medium text-red-700">{errorModal.summary}</p>
-                <p className="text-xs text-red-500 mt-0.5">
-                  Fix the issues below and try saving again.
-                </p>
-              </div>
-            </div>
-
-            {/* Field-level details */}
-            {errorModal.details.length > 0 && (
-              <div className="rounded-lg border border-gray-200 divide-y divide-gray-100">
-                {errorModal.details.map((d, i) => (
-                  <div key={i} className="flex items-start gap-3 px-3 py-2.5">
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-[10px] font-bold mt-0.5">
-                      {i + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold text-gray-700">{d.field}</p>
-                      <p className="text-xs text-gray-500">{d.message}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Raw error toggle (for technical details / reporting) */}
-            {errorModal.rawError && (
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setShowErrorRaw((v) => !v)}
-                  className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <Icon name={showErrorRaw ? "chevron-down" : "chevron-right"} size={12} />
-                  Technical Details
-                </button>
-                {showErrorRaw && (
-                  <pre className="mt-1.5 rounded bg-gray-50 border border-gray-200 p-2 text-[11px] text-gray-600 overflow-x-auto max-h-40">
-                    {errorModal.rawError}
-                  </pre>
-                )}
-              </div>
-            )}
-          </div>
-        </Modal>
+          onToggleRaw={() => setShowErrorRaw((v) => !v)}
+        />
 
         {/* ── Unsaved Changes Dialog ── */}
-        <Modal
+        <QuotationUnsavedDialog
           open={showUnsavedDialog}
-          onClose={() => setShowUnsavedDialog(false)}
-          title=""
-          size="sm"
-        >
-          <div className="text-center py-2">
-            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
-              <Icon name="alert-triangle" size={28} className="text-amber-500" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-1">Unsaved Changes</h3>
-            <p className="text-sm text-gray-500 mb-6">
-              You have unsaved changes that will be lost.<br />
-              Do you want to discard them?
-            </p>
-            <div className="flex justify-center gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowUnsavedDialog(false)}
-              >
-                Keep Editing
-              </Button>
-              <Button
-                variant="danger"
-                onClick={() => {
-                  setShowUnsavedDialog(false);
-                  isDirtyRef.current = false;
-                  if (panelId) closePanel(panelId);
-                  if (onCancel) onCancel();
-                }}
-              >
-                Discard Changes
-              </Button>
-            </div>
-          </div>
-        </Modal>
+          onKeepEditing={() => setShowUnsavedDialog(false)}
+          onDiscard={() => {
+            setShowUnsavedDialog(false);
+            isDirtyRef.current = false;
+            if (panelId) closePanel(panelId);
+            if (onCancel) onCancel();
+          }}
+        />
 
       </form>
 

@@ -3,34 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, Controller, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
 
-import {
-  Button,
-  Icon,
-  Input,
-  NumberInput,
-  CurrencyInput,
-  Fieldset,
-  Typography,
-  Modal,
-  TextareaInput,
-} from "@/components/ui";
-import { SmartDateInput } from "@/components/common/SmartDateInput";
-import { LookupSelect } from "@/components/common/LookupSelect";
-import { ProductSelect } from "@/components/common/ProductSelect";
-import type { ProductSelectOption } from "@/components/common/ProductSelect";
-import { LeadSelect } from "@/components/common/LeadSelect";
-import type { LeadSelectOption } from "@/components/common/LeadSelect";
-import { ContactSelect } from "@/components/common/ContactSelect";
-import { OrganizationSelect } from "@/components/common/OrganizationSelect";
+import { Button, Icon, Fieldset } from "@/components/ui";
 import { FormErrors } from "@/components/common/FormErrors";
 import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PageHeader } from "@/components/common/PageHeader";
-import { AddressFields } from "@/components/common/AddressFields";
 import { useSidePanelStore } from "@/stores/side-panel.store";
 
 import {
@@ -38,8 +19,13 @@ import {
   useCreateProforma,
   useUpdateProforma,
 } from "../hooks/useProforma";
-import { calculateLineItem, calculateSummary } from "@/features/quotations/utils/gst";
+import { calculateSummary } from "@/features/quotations/utils/gst";
 import type { ProformaLineItem } from "../types/proforma.types";
+
+import { ProformaHeaderFields } from "./ProformaHeaderFields";
+import { ProformaLineItemsGrid } from "./ProformaLineItemsGrid";
+import { ProformaInvoiceSummary } from "./ProformaInvoiceSummary";
+import { ProformaModals } from "./ProformaModals";
 
 // ---------------------------------------------------------------------------
 // Zod Schemas
@@ -227,19 +213,19 @@ export function ProformaForm({
     });
   }, [isEdit, proformaData, reset]);
 
-  // -- Pre-fill leadId when opened from Lead Dashboard -------------------------
+  // -- Pre-fill leadId when opened from Lead Dashboard ----------------------
   useEffect(() => {
     if (isEdit || !defaultLeadId) return;
     setValue("leadId", defaultLeadId);
   }, [isEdit, defaultLeadId, setValue]);
 
-  // -- Pre-fill quotationId when opened from Quotation Detail --
+  // -- Pre-fill quotationId when opened from Quotation Detail ---------------
   useEffect(() => {
     if (isEdit || !defaultQuotationId) return;
     setValue("quotationId", defaultQuotationId);
   }, [isEdit, defaultQuotationId, setValue]);
 
-  // -- Sync isSubmitting → panel footer button --
+  // -- Sync isSubmitting → panel footer button ------------------------------
   useEffect(() => {
     if (!panelId) return;
     updatePanelConfig(panelId, {
@@ -373,623 +359,60 @@ export function ProformaForm({
         <FormErrors errors={errors} />
 
         {/* ----------------------------------------------------------------
-            Proforma Information
+            Proforma Information + Billing Address
         ---------------------------------------------------------------- */}
-        <Fieldset label="Proforma Information">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {/* Billing Name */}
-            <Controller
-              name="billingName"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  label="Billing Name"
-                  required
-                  leftIcon={<Icon name="user" size={16} />}
-                  placeholder="Billing name"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                  error={!!errors.billingName}
-                  errorMessage={errors.billingName?.message}
-                />
-              )}
-            />
-
-            {/* Proforma Date */}
-            <Controller
-              name="proformaDate"
-              control={control}
-              render={({ field }) => (
-                <SmartDateInput
-                  label="Proforma Date"
-                  value={field.value || null}
-                  onChange={(v) => field.onChange(v ?? "")}
-                />
-              )}
-            />
-
-            {/* Valid Until */}
-            <Controller
-              name="validUntil"
-              control={control}
-              render={({ field }) => (
-                <SmartDateInput
-                  label="Valid Until"
-                  value={field.value || null}
-                  onChange={(v) => field.onChange(v ?? "")}
-                />
-              )}
-            />
-
-            {/* Quotation ID */}
-            <Controller
-              name="quotationId"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  label="Quotation ID"
-                  leftIcon={<Icon name="file-text" size={16} />}
-                  placeholder="Quotation ID"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-
-            {/* Lead */}
-            <Controller
-              name="leadId"
-              control={control}
-              render={({ field }) => (
-                <LeadSelect
-                  label="Lead"
-                  value={field.value || null}
-                  onChange={(val) => field.onChange(String(val ?? ""))}
-                  onLeadSelect={(lead: LeadSelectOption | null) => {
-                    if (lead) {
-                      setValue("contactId", lead.contactId);
-                      setValue("organizationId", lead.organizationId ?? "");
-                      setValue(
-                        "billingName",
-                        `${lead.contactFirstName} ${lead.contactLastName}`.trim(),
-                      );
-                    }
-                  }}
-                  error={!!errors.leadId}
-                  errorMessage={errors.leadId?.message}
-                />
-              )}
-            />
-
-            {/* Contact */}
-            <Controller
-              name="contactId"
-              control={control}
-              render={({ field }) => (
-                <ContactSelect
-                  label="Contact"
-                  value={field.value || null}
-                  onChange={(val) => field.onChange(String(val ?? ""))}
-                />
-              )}
-            />
-
-            {/* Organization */}
-            <Controller
-              name="organizationId"
-              control={control}
-              render={({ field }) => (
-                <OrganizationSelect
-                  label="Organization"
-                  value={field.value || null}
-                  onChange={(val) => field.onChange(String(val ?? ""))}
-                />
-              )}
-            />
-          </div>
-        </Fieldset>
-
-        {/* ----------------------------------------------------------------
-            Billing Address
-        ---------------------------------------------------------------- */}
-        <Fieldset label="Billing Address">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <Controller
-              name="billingAddress"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  label="Address"
-                  leftIcon={<Icon name="map-pin" size={16} />}
-                  placeholder="Street address"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-
-            <div className="sm:col-span-3">
-              <AddressFields
-                stateCode={billingStateCode}
-                city={String(watch("billingCity") ?? "")}
-                pincode={String(watch("billingPincode") ?? "")}
-                showCountry={false}
-                columns={3}
-                onChange={(patch) => {
-                  if (patch.stateCode !== undefined) setBillingStateCode(patch.stateCode);
-                  if (patch.state !== undefined) setValue("billingState", patch.state);
-                  if (patch.city !== undefined) setValue("billingCity", patch.city);
-                  if (patch.pincode !== undefined) setValue("billingPincode", patch.pincode);
-                }}
-              />
-            </div>
-
-            <Controller
-              name="billingGstNumber"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  label="GST Number"
-                  leftIcon={<Icon name="receipt" size={16} />}
-                  placeholder="GST number"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-          </div>
-        </Fieldset>
+        <ProformaHeaderFields
+          control={control as any}
+          errors={errors as any}
+          watch={watch as any}
+          setValue={setValue as any}
+          billingStateCode={billingStateCode}
+          onBillingStateCodeChange={setBillingStateCode}
+        />
 
         {/* ----------------------------------------------------------------
             Line Items
         ---------------------------------------------------------------- */}
         <Fieldset label="Line Items">
-          {/* Tax Region toggle */}
-          <div className="mb-4 flex items-center gap-3">
-            <span className="text-sm font-medium text-gray-700">Tax Region:</span>
-            <Button
-              type="button"
-              size="sm"
-              variant={!isInterState ? "primary" : "outline"}
-              onClick={() => setIsInterState(false)}
-            >
-              Same State (CGST+SGST)
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant={isInterState ? "primary" : "outline"}
-              onClick={() => setIsInterState(true)}
-            >
-              Inter State (IGST)
-            </Button>
-          </div>
-
-          {/* Line items table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-200 text-left text-xs font-medium uppercase text-gray-500">
-                  <th className="pb-2 pr-2">Product *</th>
-                  <th className="pb-2 pr-2 w-24">Qty *</th>
-                  <th className="pb-2 pr-2 w-28">Unit</th>
-                  <th className="pb-2 pr-2 w-32">Unit Price *</th>
-                  <th className="pb-2 pr-2 w-40">Discount</th>
-                  <th className="pb-2 pr-2 w-24">GST %</th>
-                  <th className="pb-2 pr-2 w-28 text-right">Line Total</th>
-                  <th className="pb-2 w-20"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {fields.map((fieldItem, index) => {
-                  const itemValues = watchedLineItems?.[index];
-                  const lineCalc = calculateLineItem({
-                    quantity: itemValues?.quantity ?? 0,
-                    unitPrice: itemValues?.unitPrice ?? 0,
-                    discountType: itemValues?.discountType,
-                    discountValue: itemValues?.discountValue,
-                    gstRate: itemValues?.gstRate,
-                    cessRate: itemValues?.cessRate,
-                  });
-
-                  return (
-                    <tr key={fieldItem.id} className="align-top">
-                      {/* Product Name */}
-                      <td className="py-2 pr-2">
-                        <Controller
-                          name={`lineItems.${index}.productId`}
-                          control={control}
-                          render={({ field: f }) => (
-                            <ProductSelect
-                              label=""
-                              value={f.value ?? null}
-                              onChange={(val) => f.onChange(val ?? "")}
-                              onProductSelect={(product: ProductSelectOption | null) => {
-                                if (product) {
-                                  setValue(`lineItems.${index}.productName`, product.name);
-                                  if (product.salePrice)
-                                    setValue(`lineItems.${index}.unitPrice`, product.salePrice);
-                                  if (product.hsnCode)
-                                    setValue(`lineItems.${index}.hsnCode`, product.hsnCode);
-                                  if (product.primaryUnit)
-                                    setValue(`lineItems.${index}.unit`, product.primaryUnit);
-                                  if (product.gstRate != null)
-                                    setValue(`lineItems.${index}.gstRate`, product.gstRate);
-                                  if (product.cessRate != null)
-                                    setValue(`lineItems.${index}.cessRate`, product.cessRate);
-                                  if (product.shortDescription)
-                                    setValue(`lineItems.${index}.description`, product.shortDescription);
-                                }
-                              }}
-                              error={!!errors.lineItems?.[index]?.productName}
-                            />
-                          )}
-                        />
-                      </td>
-
-                      {/* Quantity */}
-                      <td className="py-2 pr-2">
-                        <Controller
-                          name={`lineItems.${index}.quantity`}
-                          control={control}
-                          render={({ field: f }) => (
-                            <NumberInput
-                              label=""
-                              value={f.value}
-                              onChange={(v) => f.onChange(v)}
-                              min={0.01}
-                              step={1}
-                              precision={2}
-                            />
-                          )}
-                        />
-                      </td>
-
-                      {/* Unit */}
-                      <td className="py-2 pr-2">
-                        <Controller
-                          name={`lineItems.${index}.unit`}
-                          control={control}
-                          render={({ field: f }) => (
-                            <LookupSelect
-                              masterCode="UNIT_OF_MEASURE"
-                              label=""
-                              value={f.value ?? ""}
-                              onChange={(v) => f.onChange(String(v ?? ""))}
-                            />
-                          )}
-                        />
-                      </td>
-
-                      {/* Unit Price */}
-                      <td className="py-2 pr-2">
-                        <Controller
-                          name={`lineItems.${index}.unitPrice`}
-                          control={control}
-                          render={({ field: f }) => (
-                            <CurrencyInput
-                              label=""
-                              value={f.value}
-                              onChange={(v) => f.onChange(v)}
-                              currency="\u20B9"
-                            />
-                          )}
-                        />
-                      </td>
-
-                      {/* Discount */}
-                      <td className="py-2 pr-2">
-                        <div className="flex gap-1">
-                          <Controller
-                            name={`lineItems.${index}.discountType`}
-                            control={control}
-                            render={({ field: f }) => (
-                              <div className="w-20">
-                                <LookupSelect
-                                  masterCode="DISCOUNT_TYPE"
-                                  label=""
-                                  value={f.value ?? ""}
-                                  onChange={(v) => f.onChange(String(v ?? ""))}
-                                />
-                              </div>
-                            )}
-                          />
-                          <Controller
-                            name={`lineItems.${index}.discountValue`}
-                            control={control}
-                            render={({ field: f }) => (
-                              <div className="w-20">
-                                <NumberInput
-                                  label=""
-                                  value={f.value ?? null}
-                                  onChange={(v) => f.onChange(v)}
-                                  min={0}
-                                />
-                              </div>
-                            )}
-                          />
-                        </div>
-                      </td>
-
-                      {/* GST % */}
-                      <td className="py-2 pr-2">
-                        <Controller
-                          name={`lineItems.${index}.gstRate`}
-                          control={control}
-                          render={({ field: f }) => (
-                            <LookupSelect
-                              masterCode="GST_RATE"
-                              numericValue
-                              label=""
-                              value={f.value ?? ""}
-                              onChange={(v) =>
-                                f.onChange(v === "" || v === null ? null : Number(v))
-                              }
-                            />
-                          )}
-                        />
-                      </td>
-
-                      {/* Line Total */}
-                      <td className="py-2 pr-2 text-right font-medium whitespace-nowrap">
-                        {fmt(lineCalc.lineTotal)}
-                      </td>
-
-                      {/* Remove */}
-                      <td className="py-2">
-                        <div className="flex gap-1">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => append(DEFAULT_LINE_ITEM)}
-                          >
-                            <Icon name="plus" size={14} />
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => remove(index)}
-                            disabled={fields.length <= 1}
-                          >
-                            <Icon name="trash" size={14} />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <ProformaLineItemsGrid
+            fields={fields as any}
+            watchedItems={watchedLineItems}
+            control={control as any}
+            errors={errors as any}
+            setValue={setValue as any}
+            isInterState={isInterState}
+            onSetIsInterState={setIsInterState}
+            append={append as any}
+            remove={remove}
+            defaultLineItem={DEFAULT_LINE_ITEM}
+          />
         </Fieldset>
 
         {/* ----------------------------------------------------------------
             Summary
         ---------------------------------------------------------------- */}
         <Fieldset label="Summary">
-          <div className="space-y-2">
-            {/* Global discount row */}
-            <div className="mb-3 flex items-center gap-3">
-              <span className="text-sm text-gray-600">Global Discount:</span>
-              <div className="w-24">
-                <Controller
-                  name="discountType"
-                  control={control}
-                  render={({ field }) => (
-                    <LookupSelect
-                      masterCode="DISCOUNT_TYPE"
-                      label=""
-                      value={field.value ?? ""}
-                      onChange={(v) => field.onChange(String(v ?? ""))}
-                    />
-                  )}
-                />
-              </div>
-              <div className="w-28">
-                <Controller
-                  name="discountValue"
-                  control={control}
-                  render={({ field }) => (
-                    <NumberInput
-                      label=""
-                      value={field.value ?? null}
-                      onChange={(v) => field.onChange(v)}
-                      min={0}
-                    />
-                  )}
-                />
-              </div>
-            </div>
-
-            <dl className="grid grid-cols-2 gap-y-1 text-sm">
-              <dt className="text-gray-500">Subtotal</dt>
-              <dd className="text-right font-medium">{fmt(summary.subtotal)}</dd>
-
-              <dt className="text-gray-500">Discount</dt>
-              <dd className="text-right text-red-500">-{fmt(summary.discountAmount)}</dd>
-
-              <dt className="text-gray-500">Taxable Amount</dt>
-              <dd className="text-right font-medium">{fmt(summary.taxableAmount)}</dd>
-
-              {!isInterState ? (
-                <>
-                  <dt className="text-gray-500">CGST</dt>
-                  <dd className="text-right">{fmt(summary.cgstTotal)}</dd>
-                  <dt className="text-gray-500">SGST</dt>
-                  <dd className="text-right">{fmt(summary.sgstTotal)}</dd>
-                </>
-              ) : (
-                <>
-                  <dt className="text-gray-500">IGST</dt>
-                  <dd className="text-right">{fmt(summary.igstTotal)}</dd>
-                </>
-              )}
-
-              {summary.cessTotal > 0 && (
-                <>
-                  <dt className="text-gray-500">Cess</dt>
-                  <dd className="text-right">{fmt(summary.cessTotal)}</dd>
-                </>
-              )}
-
-              <dt className="text-gray-500">Round Off</dt>
-              <dd className="text-right">{fmt(summary.roundOff)}</dd>
-
-              <dt className="border-t border-gray-200 pt-2">
-                <Typography variant="heading" level={4}>
-                  Total
-                </Typography>
-              </dt>
-              <dd className="border-t border-gray-200 pt-2 text-right">
-                <Typography variant="heading" level={4}>
-                  {fmt(summary.totalAmount)}
-                </Typography>
-              </dd>
-            </dl>
-          </div>
+          <ProformaInvoiceSummary
+            control={control as any}
+            summary={summary}
+            isInterState={isInterState}
+            fmt={fmt}
+          />
         </Fieldset>
 
         {/* ----------------------------------------------------------------
-            Notes & Terms — modal-based buttons
+            Notes, Terms & Conditions, Internal Notes — modal-based
         ---------------------------------------------------------------- */}
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => setShowNotesModal(true)}
-            className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors"
-          >
-            <Icon name="file-text" size={16} />
-            <span className="font-medium">Notes</span>
-            {watch("notes") && (
-              <span className="ml-auto text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded">
-                Added
-              </span>
-            )}
-            {!watch("notes") && (
-              <span className="ml-auto text-xs text-gray-400">+ Add</span>
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowTermsModal(true)}
-            className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors"
-          >
-            <Icon name="shield" size={16} />
-            <span className="font-medium">Terms &amp; Conditions</span>
-            {watch("termsAndConditions") && (
-              <span className="ml-2 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded">
-                Added
-              </span>
-            )}
-            {!watch("termsAndConditions") && (
-              <span className="ml-2 text-xs text-gray-400">+ Add</span>
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowInternalNotesModal(true)}
-            className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors"
-          >
-            <Icon name="message-square" size={16} />
-            <span className="font-medium">Internal Notes</span>
-            {watch("internalNotes") && (
-              <span className="ml-2 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded">
-                Added
-              </span>
-            )}
-            {!watch("internalNotes") && (
-              <span className="ml-2 text-xs text-gray-400">+ Add</span>
-            )}
-          </button>
-        </div>
-
-        {/* ── Notes Modal ── */}
-        <Modal
-          open={showNotesModal}
-          onClose={() => setShowNotesModal(false)}
-          title="Notes"
-          size="md"
-          footer={
-            <div className="flex justify-end">
-              <Button type="button" variant="primary" onClick={() => setShowNotesModal(false)}>
-                Done
-              </Button>
-            </div>
-          }
-        >
-          <Controller
-            name="notes"
-            control={control}
-            render={({ field }) => (
-              <TextareaInput
-                label="Notes"
-                value={field.value ?? ""}
-                onChange={field.onChange}
-                rows={5}
-              />
-            )}
-          />
-        </Modal>
-
-        {/* ── Terms & Conditions Modal ── */}
-        <Modal
-          open={showTermsModal}
-          onClose={() => setShowTermsModal(false)}
-          title="Terms & Conditions"
-          size="md"
-          footer={
-            <div className="flex justify-end">
-              <Button type="button" variant="primary" onClick={() => setShowTermsModal(false)}>
-                Done
-              </Button>
-            </div>
-          }
-        >
-          <Controller
-            name="termsAndConditions"
-            control={control}
-            render={({ field }) => (
-              <TextareaInput
-                label="Terms & Conditions"
-                value={field.value ?? ""}
-                onChange={field.onChange}
-                rows={5}
-              />
-            )}
-          />
-        </Modal>
-
-        {/* ── Internal Notes Modal ── */}
-        <Modal
-          open={showInternalNotesModal}
-          onClose={() => setShowInternalNotesModal(false)}
-          title="Internal Notes"
-          size="md"
-          footer={
-            <div className="flex justify-end">
-              <Button type="button" variant="primary" onClick={() => setShowInternalNotesModal(false)}>
-                Done
-              </Button>
-            </div>
-          }
-        >
-          <Controller
-            name="internalNotes"
-            control={control}
-            render={({ field }) => (
-              <TextareaInput
-                label="Internal Notes"
-                value={field.value ?? ""}
-                onChange={field.onChange}
-                rows={5}
-              />
-            )}
-          />
-        </Modal>
+        <ProformaModals
+          control={control as any}
+          watch={watch as any}
+          showNotesModal={showNotesModal}
+          showTermsModal={showTermsModal}
+          showInternalNotesModal={showInternalNotesModal}
+          onShowNotesModal={setShowNotesModal}
+          onShowTermsModal={setShowTermsModal}
+          onShowInternalNotesModal={setShowInternalNotesModal}
+        />
 
         {/* ----------------------------------------------------------------
             Actions — hidden in panel mode (footer handles it)

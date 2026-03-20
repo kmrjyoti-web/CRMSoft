@@ -3,11 +3,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Icon } from "@/components/ui";
 import { VerificationStatusBadge } from "./VerificationStatusBadge";
+import { OtpInput } from "./OtpInput";
+import { VerificationHistoryPanel } from "./VerificationHistoryPanel";
 import {
   useInitiateVerification,
   useVerifyOtp,
   useResendVerification,
-  useVerificationHistory,
   useResetVerification,
 } from "../hooks/useEntityVerification";
 import type {
@@ -51,102 +52,6 @@ export interface VerifyFlowModalProps {
   onVerified?: () => void;
   /** Called before sending verification — saves updated email/phone to DB first */
   onSaveBeforeVerify?: (data: { email?: string; phone?: string }) => Promise<void>;
-}
-
-// ── OTP Input (6 boxes) ─────────────────────────────────
-
-function OtpInput({
-  value,
-  onChange,
-  devOtp,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  devOtp?: string;
-}) {
-  const inputs = useRef<(HTMLInputElement | null)[]>([]);
-  const digits = value.padEnd(6, "").split("").slice(0, 6);
-
-  const handleChange = (i: number, v: string) => {
-    const d = v.replace(/\D/g, "").slice(-1);
-    const next = [...digits];
-    next[i] = d;
-    onChange(next.join("").trim());
-    if (d && i < 5) inputs.current[i + 1]?.focus();
-  };
-
-  const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !digits[i] && i > 0) {
-      inputs.current[i - 1]?.focus();
-    }
-  };
-
-  const handlePaste = (e: React.ClipboardEvent) => {
-    const text = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    if (text) {
-      onChange(text);
-      e.preventDefault();
-    }
-  };
-
-  // Dev mode: use actual OTP from API response
-  const devHint = devOtp || null;
-
-  return (
-    <div>
-      <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 8 }}>
-        {digits.map((d, i) => (
-          <input
-            key={i}
-            ref={(el) => {
-              inputs.current[i] = el;
-            }}
-            type="text"
-            inputMode="numeric"
-            maxLength={1}
-            value={d}
-            onChange={(e) => handleChange(i, e.target.value)}
-            onKeyDown={(e) => handleKeyDown(i, e)}
-            onPaste={handlePaste}
-            placeholder="·"
-            style={{
-              width: 44,
-              height: 52,
-              textAlign: "center",
-              fontSize: 22,
-              fontWeight: 600,
-              border: "2px solid #e5e7eb",
-              borderRadius: 8,
-              outline: "none",
-              caretColor: "transparent",
-              background: d ? "#f0f9ff" : "#fff",
-              borderColor: d ? "#0ea5e9" : "#e5e7eb",
-              transition: "border-color 0.15s",
-              boxSizing: "border-box",
-            }}
-            onFocus={(e) => (e.target.style.borderColor = "#0ea5e9")}
-            onBlur={(e) =>
-              (e.target.style.borderColor = digits[i] ? "#0ea5e9" : "#e5e7eb")
-            }
-          />
-        ))}
-      </div>
-      {devHint && (
-        <div style={{ textAlign: "center", marginTop: 6 }}>
-          <button
-            type="button"
-            onClick={() => onChange(devHint)}
-            style={{
-              fontSize: 10, color: "#9ca3af", background: "none", border: "none",
-              cursor: "pointer", textDecoration: "underline",
-            }}
-          >
-            DEV: Auto-fill {devHint}
-          </button>
-        </div>
-      )}
-    </div>
-  );
 }
 
 // ── Countdown Timer ─────────────────────────────────────
@@ -235,90 +140,6 @@ function LabeledField({
         onFocus={(e) => (e.target.style.borderColor = "#0ea5e9")}
         onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
       />
-    </div>
-  );
-}
-
-// ── Previous Attempts (collapsible) ─────────────────────
-
-function PreviousAttempts({
-  entityType,
-  entityId,
-}: {
-  entityType: string;
-  entityId: string;
-}) {
-  const [open, setOpen] = useState(false);
-  const { data: history } = useVerificationHistory(entityType, entityId);
-  const recent = history?.slice(0, 3) ?? [];
-
-  if (recent.length === 0) return null;
-
-  return (
-    <div
-      style={{
-        marginTop: 16,
-        borderTop: "1px solid #f3f4f6",
-        paddingTop: 12,
-      }}
-    >
-      <button
-        onClick={() => setOpen((o) => !o)}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          fontSize: 12,
-          fontWeight: 600,
-          color: "#6b7280",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: 0,
-          textTransform: "uppercase",
-          letterSpacing: 0.5,
-        }}
-      >
-        <Icon name={open ? "chevron-down" : "chevron-right"} size={13} />
-        Previous Attempts ({recent.length})
-      </button>
-      {open && (
-        <div style={{ marginTop: 8 }}>
-          {recent.map((r) => (
-            <div
-              key={r.id}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "5px 0",
-                fontSize: 12,
-                borderBottom: "1px solid #f9fafb",
-              }}
-            >
-              <span style={{ color: "#4b5563" }}>
-                {r.mode} via {r.channel}
-              </span>
-              <span
-                style={{
-                  color:
-                    r.status === "VERIFIED"
-                      ? "#15803d"
-                      : r.status === "FAILED" || r.status === "REJECTED"
-                      ? "#b91c1c"
-                      : "#92400e",
-                  fontWeight: 500,
-                }}
-              >
-                {r.status}
-              </span>
-              <span style={{ color: "#9ca3af" }}>
-                {new Date(r.createdAt).toLocaleDateString()}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
@@ -713,7 +534,7 @@ export function VerifyFlowModal({
               )}
 
               {/* Previous attempts */}
-              <PreviousAttempts entityType={entityType} entityId={entityId} />
+              <VerificationHistoryPanel entityType={entityType} entityId={entityId} />
 
               {/* Reset previous verifications */}
               {(currentStatus === "PENDING" || currentStatus === "VERIFIED" || currentStatus === "REJECTED") && (
