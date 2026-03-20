@@ -256,7 +256,27 @@ export const MENU_SEED_DATA: MenuSeedItem[] = [
   },
 
   // ─────────────────────────────────────────────────────────────
-  // 13. SETTINGS
+  // 13. MARKETPLACE (Social Commerce Hub)
+  // ─────────────────────────────────────────────────────────────
+  {
+    name: 'Market HUB', code: 'MARKETPLACE', icon: 'store', menuType: 'GROUP',
+    route: '/marketplace', permissionModule: 'marketplace', permissionAction: 'read',
+    children: [
+      { name: 'Dashboard', code: 'MP_DASHBOARD', icon: 'layout-dashboard', route: '/marketplace', permissionModule: 'marketplace', permissionAction: 'read' },
+      { name: 'Listings', code: 'MP_LISTINGS', icon: 'list', route: '/marketplace/listings', permissionModule: 'marketplace', permissionAction: 'read' },
+      { name: 'Posts & Feed', code: 'MP_POSTS', icon: 'rss', route: '/marketplace/posts', permissionModule: 'marketplace', permissionAction: 'read' },
+      { name: 'Offers', code: 'MP_OFFERS', icon: 'tag', route: '/marketplace/offers', permissionModule: 'marketplace', permissionAction: 'read' },
+      { name: 'Enquiries', code: 'MP_ENQUIRIES', icon: 'mail', route: '/marketplace/enquiries', permissionModule: 'marketplace', permissionAction: 'read' },
+      { name: 'Requirements', code: 'MP_REQUIREMENTS', icon: 'file-search', route: '/marketplace/requirements', permissionModule: 'marketplace', permissionAction: 'read' },
+      { name: 'Reviews', code: 'MP_REVIEWS', icon: 'star', route: '/marketplace/reviews', permissionModule: 'marketplace', permissionAction: 'read' },
+      { name: 'Analytics', code: 'MP_ANALYTICS', icon: 'bar-chart-2', route: '/marketplace/analytics', permissionModule: 'marketplace', permissionAction: 'read' },
+      { name: 'Installed Modules', code: 'MP_MODULES', icon: 'package', route: '/marketplace/modules', permissionModule: 'marketplace', permissionAction: 'read' },
+      { name: 'Vendor Portal', code: 'MP_VENDOR', icon: 'briefcase', route: '/marketplace/vendor', permissionModule: 'marketplace', permissionAction: 'read' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────
+  // 14. SETTINGS
   // ─────────────────────────────────────────────────────────────
   {
     name: 'Settings', code: 'SETTINGS', icon: 'settings', menuType: 'GROUP',
