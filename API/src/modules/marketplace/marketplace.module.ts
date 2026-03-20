@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bull';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaModule } from '../../core/prisma/prisma.module';
 import { VerificationModule } from '../softwarevendor/verification/verification.module';
 
@@ -23,6 +25,15 @@ import {
   OrderController,
 } from './presentation/marketplace-feed.controller';
 
+// ─── Social Commerce Sub-Modules ───
+import { ListingsModule } from './listings/listings.module';
+import { OffersModule } from './offers/offers.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { FeedModule } from './feed/feed.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { EnquiriesModule } from './enquiries/enquiries.module';
+import { StorageModule } from './storage/storage.module';
+
 const SERVICES = [
   VendorService,
   MarketplaceModuleService,
@@ -45,7 +56,26 @@ const CONTROLLERS = [
 ];
 
 @Module({
-  imports: [PrismaModule, VerificationModule],
+  imports: [
+    PrismaModule,
+    VerificationModule,
+    // Bull/Redis for offer scheduling and analytics aggregation
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        redis: config.get<string>('REDIS_URL', 'redis://localhost:6379'),
+      }),
+      inject: [ConfigService],
+    }),
+    // Social commerce sub-modules
+    ListingsModule,
+    OffersModule,
+    ReviewsModule,
+    FeedModule,
+    AnalyticsModule,
+    EnquiriesModule,
+    StorageModule,
+  ],
   controllers: CONTROLLERS,
   providers: SERVICES,
   exports: [
