@@ -987,7 +987,7 @@ export function MarketFeed() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [orderOffer, setOrderOffer] = useState<FeedOffer | null>(null);
   const [enquiryTarget, setEnquiryTarget] = useState<EnquiryTarget | null>(null);
-  const [visibleCount, setVisibleCount] = useState(6);
+  const [visibleCount, setVisibleCount] = useState(999);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -1065,7 +1065,7 @@ export function MarketFeed() {
         ) {
           setIsLoadingMore(true);
           setTimeout(() => {
-            setVisibleCount((v) => Math.min(v + 4, ALL_FEED_ITEMS.length));
+            setVisibleCount((v) => Math.min(v + 12, ALL_FEED_ITEMS.length));
             setIsLoadingMore(false);
           }, 1200);
         }
@@ -1078,7 +1078,7 @@ export function MarketFeed() {
 
   // Reset visible count when filter changes
   useEffect(() => {
-    setVisibleCount(6);
+    setVisibleCount(999);
   }, [activeFilter]);
 
   const visibleItems = ALL_FEED_ITEMS.slice(0, visibleCount);
