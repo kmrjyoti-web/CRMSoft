@@ -194,8 +194,19 @@ export class PlatformBootstrapService implements OnModuleInit {
         where: { tenantId: tenant.id, permissionAction: 'view' },
       });
 
-      if (menuCount < expectedCount || staleCount > 0) {
-        const reason = staleCount > 0
+      // Check for missing top-level menu codes (handles new menus added to seed)
+      const seedCodes = MENU_SEED_DATA.map((m) => m.code);
+      const existingCodes = await this.prisma.identity.menu.findMany({
+        where: { tenantId: tenant.id, parentId: null, code: { in: seedCodes } },
+        select: { code: true },
+      });
+      const existingCodeSet = new Set(existingCodes.map((m) => m.code));
+      const missingCodes = seedCodes.filter((c) => !existingCodeSet.has(c));
+
+      if (menuCount < expectedCount || staleCount > 0 || missingCodes.length > 0) {
+        const reason = missingCodes.length > 0
+          ? `missing menus: ${missingCodes.join(', ')}`
+          : staleCount > 0
           ? `${staleCount} menus with stale permissionAction='view'`
           : `${menuCount}/${expectedCount} menus`;
         this.logger.warn(
