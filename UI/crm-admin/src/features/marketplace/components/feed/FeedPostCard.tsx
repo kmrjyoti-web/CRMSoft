@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Icon, Badge } from "@/components/ui";
 import type { MarketplacePost, PostType } from "../../types/marketplace.types";
 import { FeedCommentPanel } from "./FeedCommentPanel";
@@ -11,6 +11,8 @@ interface FeedPostCardProps {
   onSave: (id: string) => void;
   onComment: (id: string, content: string) => void;
   onShare: (id: string) => void;
+  currentUserId?: string;
+  onEdit?: (post: MarketplacePost) => void;
 }
 
 const AVATAR_COLORS = [
@@ -151,20 +153,40 @@ function PollOption({ text, votes, total }: { text: string; votes: number; total
   );
 }
 
-// Extended post type for poll/feedback metadata
-interface ExtendedPost extends MarketplacePost {
-  pollOptions?: { text: string; votes: number }[];
-  badgeText?: string;
-}
-
-export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedPostCardProps) {
+export function FeedPostCard({ post, onLike, onSave, onComment, onShare, currentUserId, onEdit }: FeedPostCardProps) {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  const extPost = post as ExtendedPost;
+  const isOwnPost = !!currentUserId && post.authorId === currentUserId;
+  const hasVersion = (post.version ?? 1) > 1 || !!post.rootPostId;
+  const versionNum = post.version ?? 1;
+  const isTransactional = post.postCategory === "TRANSACTIONAL" || (post.postType === "PRODUCT_SHARE" || post.postType === "PRODUCT_LAUNCH");
+
+  // Close menu on outside click
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [menuOpen]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setMenuOpen(false);
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [menuOpen]);
   const authorName = getAuthorName(post.authorId);
   const authorInitial = authorName.charAt(0).toUpperCase();
   const avatarColor = getAvatarColor(post.authorId);
@@ -228,7 +250,7 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
         >
           <span style={{ fontSize: 16 }}>🚀</span>
           <span style={{ fontSize: 12, fontWeight: 700, color: "#ea580c", letterSpacing: "0.3px" }}>
-            {extPost.badgeText ?? "NEW LAUNCH"}
+            {post.badgeText ?? "NEW LAUNCH"}
           </span>
         </div>
       )}
@@ -258,18 +280,29 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
             <span style={{ fontWeight: 600, fontSize: 14, color: "#1e293b" }}>{authorName}</span>
             <span
               style={{
-                fontSize: 11,
-                fontWeight: 600,
-                padding: "2px 8px",
-                borderRadius: 20,
-                backgroundColor: typeStyle.bg,
-                color: typeStyle.text,
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
+                fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 20,
+                backgroundColor: typeStyle.bg, color: typeStyle.text,
+                textTransform: "uppercase", letterSpacing: "0.5px",
               }}
             >
               {POST_TYPE_LABELS[post.postType]}
             </span>
+            {/* Version badge for transactional posts */}
+            {isTransactional && (
+              <span
+                title={hasVersion ? `Version ${versionNum} of this post` : "Transactional post — versioned on edit"}
+                style={{
+                  fontSize: 10, fontWeight: 700, padding: "1px 7px", borderRadius: 20,
+                  backgroundColor: hasVersion ? "#fff7ed" : "#f5f3ff",
+                  color: hasVersion ? "#ea580c" : "#7c3aed",
+                  border: `1px solid ${hasVersion ? "#fed7aa" : "#ddd6fe"}`,
+                  letterSpacing: "0.3px",
+                  cursor: "default",
+                }}
+              >
+                v{versionNum}
+              </span>
+            )}
           </div>
           <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>
             {formatTimestamp(post.createdAt)}
@@ -278,54 +311,49 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
                 <Icon name="users" size={11} /> {post.visibility}
               </span>
             )}
+            {post.editedAt && (
+              <span style={{ marginLeft: 6, color: "#d97706" }}>· edited</span>
+            )}
           </div>
         </div>
 
-        <div style={{ position: "relative" }}>
+        <div ref={menuRef} style={{ position: "relative" }}>
           <button
             onClick={() => setMenuOpen((v) => !v)}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "4px 8px",
-              borderRadius: 6,
-              color: "#64748b",
-            }}
+            style={{ background: "none", border: "none", cursor: "pointer", padding: "4px 8px", borderRadius: 6, color: "#64748b" }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f1f5f9")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
           >
             <Icon name="more-horizontal" size={18} />
           </button>
           {menuOpen && (
-            <div
-              style={{
-                position: "absolute",
-                right: 0,
-                top: "100%",
-                backgroundColor: "#fff",
-                borderRadius: 8,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-                padding: "4px 0",
-                zIndex: 10,
-                minWidth: 140,
-              }}
-            >
-              {["Edit Post", "Hide", "Report", "Copy Link"].map((item) => (
+            <div style={{ position: "absolute", right: 0, top: "100%", backgroundColor: "#fff", borderRadius: 8, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", padding: "4px 0", zIndex: 10, minWidth: 160 }}>
+              {isOwnPost && (
                 <button
-                  key={item}
-                  onClick={() => setMenuOpen(false)}
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    textAlign: "left",
-                    padding: "8px 16px",
-                    background: "none",
-                    border: "none",
-                    fontSize: 13,
-                    color: "#374151",
-                    cursor: "pointer",
-                  }}
+                  onClick={() => { setMenuOpen(false); onEdit?.(post); }}
+                  style={{ display: "flex", width: "100%", textAlign: "left", padding: "9px 16px", background: "none", border: "none", fontSize: 13, color: "var(--color-primary, #1e5f74)", cursor: "pointer", alignItems: "center", gap: 8, fontWeight: 600 }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--color-primary-50, #eef7fa)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                 >
-                  {item}
+                  <Icon name="edit-2" size={13} color="var(--color-primary, #1e5f74)" />
+                  Edit Post
+                  {isTransactional && <span style={{ fontSize: 10, color: "#ea580c", marginLeft: "auto" }}>+v{versionNum + 1}</span>}
+                </button>
+              )}
+              {[
+                { label: "Hide", icon: "eye-off" },
+                { label: "Copy Link", icon: "link" },
+                { label: "Report", icon: "flag", danger: true },
+              ].map(({ label, icon, danger }) => (
+                <button
+                  key={label}
+                  onClick={() => setMenuOpen(false)}
+                  style={{ display: "flex", width: "100%", textAlign: "left", padding: "9px 16px", background: "none", border: "none", fontSize: 13, color: danger ? "#dc2626" : "#374151", cursor: "pointer", alignItems: "center", gap: 8 }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = danger ? "#fef2f2" : "#f8fafc")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                >
+                  <Icon name={icon as Parameters<typeof Icon>[0]["name"]} size={13} color={danger ? "#dc2626" : "#94a3b8"} />
+                  {label}
                 </button>
               ))}
             </div>
@@ -612,7 +640,7 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
               New Product Launch
             </div>
             <div style={{ fontSize: 12, color: "#c2410c" }}>
-              {extPost.badgeText ?? "Now available — order today!"}
+              {post.badgeText ?? "Now available — order today!"}
             </div>
           </div>
         </div>
@@ -644,7 +672,7 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare }: FeedP
 
       {/* POLL: poll options with progress bars */}
       {post.postType === "POLL" && (() => {
-        const opts = extPost.pollOptions ?? [
+        const opts = post.pollOptions ?? [
           { text: "Bank Transfer (NEFT/RTGS)", votes: 45 },
           { text: "UPI / QR Code", votes: 82 },
           { text: "Credit (30 days)", votes: 38 },

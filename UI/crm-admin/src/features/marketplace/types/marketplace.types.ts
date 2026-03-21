@@ -159,6 +159,18 @@ export interface MarketplacePost {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  /** Versioning fields (populated for transactional posts) */
+  postCategory?: PostCategory;
+  version?: number;
+  rootPostId?: string;
+  isLatestVersion?: boolean;
+  editedAt?: string;
+  editReason?: string;
+  /** Extended metadata (poll options, product info, badge) */
+  pollOptions?: { text: string; votes: number }[];
+  productName?: string;
+  productPrice?: number;
+  badgeText?: string;
 }
 
 // ── Offer conditions ────────────────────────────────────────────────────────
@@ -375,6 +387,19 @@ export interface CreateReviewDto {
   orderId?: string;
 }
 
+export type PostCategory = 'REGULAR' | 'TRANSACTIONAL';
+
+export interface PostVersionStats {
+  version: number;
+  views: number;
+  likes: number;
+  comments: number;
+  enquiries: number;
+  orders: number;
+  createdAt: string;
+  editReason?: string;
+}
+
 export interface CreatePostDto {
   postType: PostType;
   content?: string;
@@ -383,6 +408,29 @@ export interface CreatePostDto {
   visibility?: VisibilityType;
   hashtags?: string[];
   publishAt?: string;
+  /** Extra metadata for specific post types */
+  pollOptions?: { text: string }[];
+  productName?: string;
+  productPrice?: number;
+  badgeText?: string;
+  rating?: number;
+}
+
+export interface UpdatePostDto {
+  content?: string;
+  visibility?: VisibilityType;
+  hashtags?: string[];
+  pollOptions?: { text: string }[];
+  productName?: string;
+  productPrice?: number;
+  badgeText?: string;
+  rating?: number;
+  editReason?: string;
+}
+
+/** Creates a shadow-copy new version of a transactional post */
+export interface CreatePostVersionDto extends UpdatePostDto {
+  rootPostId: string;
 }
 
 export interface CreateOrderDto {

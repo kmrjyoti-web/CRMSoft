@@ -9,18 +9,12 @@ import type { FeedOffer } from "./feed/FeedOfferCard";
 import { FeedRequirementCard } from "./feed/FeedRequirementCard";
 import type { FeedRequirement } from "./feed/FeedRequirementCard";
 import { CreatePostModal } from "./feed/CreatePostModal";
+import { EditPostModal } from "./feed/EditPostModal";
 import { OrderFormModal } from "./feed/OrderFormModal";
 import { EnquiryFormModal } from "./feed/EnquiryFormModal";
 import type { EnquiryTarget } from "./feed/EnquiryFormModal";
 import { FeedItemSkeleton } from "./feed/FeedSkeletons";
 import type { SkeletonType } from "./feed/FeedSkeletons";
-
-// ── Extended post type for poll/feedback/launch metadata ─────────────────────
-
-interface ExtendedMarketplacePost extends MarketplacePost {
-  pollOptions?: { text: string; votes: number }[];
-  badgeText?: string;
-}
 
 // ── Mock data for offers/requirements not yet in feed API ─────────────────────
 
@@ -313,17 +307,20 @@ const MOCK_REQUIREMENTS: FeedRequirement[] = [
 // ── ALL feed items pool (used for infinite scroll) ────────────────────────────
 
 type FeedItem =
-  | { type: "post"; data: ExtendedMarketplacePost }
+  | { type: "post"; data: MarketplacePost }
   | { type: "offer"; data: FeedOffer }
   | { type: "requirement"; data: FeedRequirement };
 
+// Simulated current user — in production this comes from auth context
+const CURRENT_USER_ID = "current-user-1";
+
 // Extended mock posts covering all post types
-function buildMockPosts(): ExtendedMarketplacePost[] {
+function buildMockPosts(): MarketplacePost[] {
   return [
     {
       id: "mp1",
       tenantId: "t1",
-      authorId: "auth1",
+      authorId: CURRENT_USER_ID, // ← owned by current user
       postType: "TEXT",
       content:
         "Excited to announce our new bulk supply partnership with leading hospitals across Maharashtra! We now offer next-day delivery for all critical medicines. Reach out for exclusive pricing.",
@@ -344,12 +341,14 @@ function buildMockPosts(): ExtendedMarketplacePost[] {
     {
       id: "mp2",
       tenantId: "t1",
-      authorId: "auth2",
+      authorId: CURRENT_USER_ID, // ← owned by current user (transactional, v1)
       postType: "PRODUCT_SHARE",
       content:
         "Introducing our new range of eco-friendly packaging materials — 100% biodegradable, GMP-certified. Perfect for pharmaceutical and food industry applications.",
       mediaUrls: [],
       linkedListingId: "list1",
+      productName: "EcoPack Biodegradable Pouches (1000 pcs)",
+      productPrice: 4500,
       visibility: "PUBLIC",
       status: "ACTIVE",
       publishedAt: new Date(Date.now() - 7200000).toISOString(),
@@ -362,6 +361,10 @@ function buildMockPosts(): ExtendedMarketplacePost[] {
       isActive: true,
       createdAt: new Date(Date.now() - 7200000).toISOString(),
       updatedAt: new Date().toISOString(),
+      // Versioning — v1, no edits yet
+      postCategory: "TRANSACTIONAL",
+      version: 1,
+      isLatestVersion: true,
     },
     {
       id: "mp3",
@@ -451,12 +454,14 @@ function buildMockPosts(): ExtendedMarketplacePost[] {
     {
       id: "mp7",
       tenantId: "t1",
-      authorId: "auth7",
+      authorId: CURRENT_USER_ID, // ← owned by current user (transactional, v2)
       postType: "PRODUCT_LAUNCH",
       content:
-        "We are thrilled to launch our new BioCold Storage System — purpose-built for pharmaceutical and vaccine storage with IoT-enabled temperature monitoring and GSM alerts.",
+        "We are thrilled to launch our new BioCold Storage System — purpose-built for pharmaceutical and vaccine storage with IoT-enabled temperature monitoring and GSM alerts. Updated pricing: ₹1,89,000.",
       mediaUrls: [],
       badgeText: "🚀 PRODUCT LAUNCH — Now Available",
+      productName: "BioCold Storage System 500L",
+      productPrice: 189000,
       visibility: "PUBLIC",
       status: "ACTIVE",
       publishedAt: new Date(Date.now() - 10800000).toISOString(),
@@ -469,6 +474,13 @@ function buildMockPosts(): ExtendedMarketplacePost[] {
       isActive: true,
       createdAt: new Date(Date.now() - 10800000).toISOString(),
       updatedAt: new Date().toISOString(),
+      // Versioning
+      postCategory: "TRANSACTIONAL",
+      version: 2,
+      rootPostId: "mp7-root",
+      isLatestVersion: true,
+      editedAt: new Date(Date.now() - 3600000).toISOString(),
+      editReason: "Price updated from ₹1,75,000 to ₹1,89,000 — revised BOM costs",
     },
     {
       id: "mp8",
@@ -996,6 +1008,7 @@ const PAGE_SIZE = 8;
 export function MarketFeed() {
   const [activeFilter, setActiveFilter] = useState<FeedFilter>("ALL");
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editPost, setEditPost] = useState<MarketplacePost | null>(null);
   const [orderOffer, setOrderOffer] = useState<FeedOffer | null>(null);
   const [enquiryTarget, setEnquiryTarget] = useState<EnquiryTarget | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -1015,14 +1028,14 @@ export function MarketFeed() {
     return () => clearTimeout(timer);
   }, []);
 
-  const posts = useMemo<ExtendedMarketplacePost[]>(() => {
+  const posts = useMemo<MarketplacePost[]>(() => {
     const nested = (
       feedData as { data?: { data?: MarketplacePost[] } | MarketplacePost[] }
     )?.data;
     if (!nested) return [];
-    if (Array.isArray(nested)) return nested as ExtendedMarketplacePost[];
+    if (Array.isArray(nested)) return nested as MarketplacePost[];
     const withData = nested as { data?: MarketplacePost[] };
-    return (withData.data ?? []) as ExtendedMarketplacePost[];
+    return (withData.data ?? []) as MarketplacePost[];
   }, [feedData]);
 
   // All feed items with mock posts interleaved
@@ -1523,6 +1536,8 @@ export function MarketFeed() {
                     onSave={(id) => toggleSave(id)}
                     onComment={(id, content) => addComment({ id, content })}
                     onShare={(id) => console.log("share", id)}
+                    currentUserId={CURRENT_USER_ID}
+                    onEdit={(p) => setEditPost(p)}
                   />
                 );
               }
@@ -1856,6 +1871,16 @@ export function MarketFeed() {
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
         onSuccess={() => setCreateModalOpen(false)}
+      />
+
+      {/* Edit Post Modal */}
+      <EditPostModal
+        post={editPost}
+        onClose={() => setEditPost(null)}
+        onSaved={(updated) => {
+          // In production: invalidate feed query; here just close
+          setEditPost(null);
+        }}
       />
 
       {/* Order Form Modal */}
