@@ -9,7 +9,7 @@ interface EditPostModalProps {
   onSaved?: (updatedPost: MarketplacePost) => void;
 }
 
-const TRANSACTIONAL_TYPES = new Set(["PRODUCT_SHARE", "PRODUCT_LAUNCH"]);
+const TRANSACTIONAL_TYPES = new Set(["PRODUCT_SHARE", "PRODUCT_LAUNCH", "REQUIREMENT"]);
 
 const VISIBILITY_OPTIONS: { value: VisibilityType; label: string; icon: string }[] = [
   { value: "PUBLIC", label: "Public", icon: "globe" },
@@ -150,6 +150,11 @@ export function EditPostModal({ post, onClose, onSaved }: EditPostModalProps) {
   const [badgeText, setBadgeText] = useState("");
   const [rating, setRating] = useState(5);
   const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
+  const [reqCategory, setReqCategory] = useState("");
+  const [reqQuantity, setReqQuantity] = useState("");
+  const [budgetMin, setBudgetMin] = useState("");
+  const [budgetMax, setBudgetMax] = useState("");
+  const [deadline, setDeadline] = useState("");
   const [editReason, setEditReason] = useState("");
   const [showHistory, setShowHistory] = useState(false);
   const [error, setError] = useState("");
@@ -169,6 +174,11 @@ export function EditPostModal({ post, onClose, onSaved }: EditPostModalProps) {
     setBadgeText(post.badgeText ?? "");
     setRating(post.rating ?? 5);
     setPollOptions(post.pollOptions?.length ? post.pollOptions.map((o) => o.text) : ["", ""]);
+    setReqCategory(post.reqCategory ?? "");
+    setReqQuantity(post.reqQuantity ?? "");
+    setBudgetMin(post.budgetMin != null ? String(post.budgetMin) : "");
+    setBudgetMax(post.budgetMax != null ? String(post.budgetMax) : "");
+    setDeadline(post.deadline ? post.deadline.substring(0, 10) : "");
     setEditReason("");
     setError("");
     setShowHistory(false);
@@ -307,7 +317,7 @@ export function EditPostModal({ post, onClose, onSaved }: EditPostModalProps) {
           }}>
             <Icon name="alert-triangle" size={16} color="#ea580c" />
             <div style={{ fontSize: 12, color: "#7c2d12", lineHeight: 1.5 }}>
-              <strong>Versioning enabled:</strong> Editing this {post.postType === "PRODUCT_SHARE" ? "product" : "launch"} post will create a new version (v{currentVersion + 1}).
+              <strong>Versioning enabled:</strong> Editing this {post.postType === "PRODUCT_SHARE" ? "product" : post.postType === "REQUIREMENT" ? "requirement" : "launch"} post will create a new version (v{currentVersion + 1}).
               The old version (v{currentVersion}) is preserved — customers who placed orders on v{currentVersion} will still see the price they ordered at.
             </div>
           </div>
@@ -400,6 +410,34 @@ export function EditPostModal({ post, onClose, onSaved }: EditPostModalProps) {
                     <input value={badgeText} onChange={(e) => setBadgeText(e.target.value)} placeholder="NEW LAUNCH" style={inputStyle()} onFocus={(e) => (e.currentTarget.style.borderColor = typeColor)} onBlur={(e) => (e.currentTarget.style.borderColor = "#e2e8f0")} />
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* REQUIREMENT fields */}
+          {post.postType === "REQUIREMENT" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div>
+                  <FieldLabel>Category</FieldLabel>
+                  <input value={reqCategory} onChange={(e) => setReqCategory(e.target.value)} placeholder="e.g. Medical Supplies" style={inputStyle()} onFocus={(e) => (e.currentTarget.style.borderColor = "#f97316")} onBlur={(e) => (e.currentTarget.style.borderColor = "#e2e8f0")} />
+                </div>
+                <div>
+                  <FieldLabel>Quantity</FieldLabel>
+                  <input value={reqQuantity} onChange={(e) => setReqQuantity(e.target.value)} placeholder="e.g. 5000 units/month" style={inputStyle()} onFocus={(e) => (e.currentTarget.style.borderColor = "#f97316")} onBlur={(e) => (e.currentTarget.style.borderColor = "#e2e8f0")} />
+                </div>
+              </div>
+              <div>
+                <FieldLabel>Budget Range (₹)</FieldLabel>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 8, alignItems: "center" }}>
+                  <input type="number" min="0" value={budgetMin} onChange={(e) => setBudgetMin(e.target.value)} placeholder="Min" style={inputStyle()} onFocus={(e) => (e.currentTarget.style.borderColor = "#f97316")} onBlur={(e) => (e.currentTarget.style.borderColor = "#e2e8f0")} />
+                  <span style={{ fontSize: 13, color: "#94a3b8", textAlign: "center" }}>to</span>
+                  <input type="number" min="0" value={budgetMax} onChange={(e) => setBudgetMax(e.target.value)} placeholder="Max" style={inputStyle()} onFocus={(e) => (e.currentTarget.style.borderColor = "#f97316")} onBlur={(e) => (e.currentTarget.style.borderColor = "#e2e8f0")} />
+                </div>
+              </div>
+              <div>
+                <FieldLabel>Deadline</FieldLabel>
+                <input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} style={inputStyle()} onFocus={(e) => (e.currentTarget.style.borderColor = "#f97316")} onBlur={(e) => (e.currentTarget.style.borderColor = "#e2e8f0")} />
               </div>
             </div>
           )}

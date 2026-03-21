@@ -84,7 +84,7 @@ export interface EnquiryReply {
 
 export type ListingType = 'PRODUCT' | 'SERVICE' | 'REQUIREMENT' | 'JOB';
 export type ListingStatus = 'DRAFT' | 'SCHEDULED' | 'ACTIVE' | 'PAUSED' | 'SOLD_OUT' | 'EXPIRED' | 'ARCHIVED' | 'REJECTED';
-export type PostType = 'TEXT' | 'IMAGE' | 'VIDEO' | 'PRODUCT_SHARE' | 'CUSTOMER_FEEDBACK' | 'PRODUCT_LAUNCH' | 'POLL' | 'ANNOUNCEMENT';
+export type PostType = 'TEXT' | 'IMAGE' | 'VIDEO' | 'PRODUCT_SHARE' | 'CUSTOMER_FEEDBACK' | 'PRODUCT_LAUNCH' | 'POLL' | 'ANNOUNCEMENT' | 'REQUIREMENT';
 export type PostStatus = 'DRAFT' | 'SCHEDULED' | 'ACTIVE' | 'HIDDEN' | 'ARCHIVED' | 'DELETED';
 export type OfferType = 'ONE_TIME' | 'DAILY_RECURRING' | 'WEEKLY_RECURRING' | 'FIRST_N_ORDERS' | 'LAUNCH' | 'CUSTOM';
 export type DiscountType = 'PERCENTAGE' | 'FLAT_AMOUNT' | 'FREE_SHIPPING' | 'BUY_X_GET_Y' | 'BUNDLE_PRICE';
@@ -171,6 +171,12 @@ export interface MarketplacePost {
   productName?: string;
   productPrice?: number;
   badgeText?: string;
+  /** Requirement-specific fields */
+  reqCategory?: string;
+  reqQuantity?: string;
+  budgetMin?: number;
+  budgetMax?: number;
+  deadline?: string;
 }
 
 // ── Offer conditions ────────────────────────────────────────────────────────
@@ -414,6 +420,12 @@ export interface CreatePostDto {
   productPrice?: number;
   badgeText?: string;
   rating?: number;
+  /** Requirement post fields */
+  reqCategory?: string;
+  reqQuantity?: string;
+  budgetMin?: number;
+  budgetMax?: number;
+  deadline?: string;
 }
 
 export interface UpdatePostDto {

@@ -16,6 +16,7 @@ const POST_TYPES: { value: PostType; label: string; icon: string; color: string;
   { value: "VIDEO", label: "Video", icon: "video", color: "#d97706", bg: "#fef3c7" },
   { value: "PRODUCT_SHARE", label: "Product", icon: "package", color: "#7c3aed", bg: "#f5f3ff" },
   { value: "PRODUCT_LAUNCH", label: "Launch", icon: "rocket", color: "#ea580c", bg: "#fff7ed" },
+  { value: "REQUIREMENT", label: "Looking For", icon: "search", color: "#f97316", bg: "#fff7ed" },
   { value: "ANNOUNCEMENT", label: "Announce", icon: "megaphone", color: "#dc2626", bg: "#fef2f2" },
   { value: "CUSTOMER_FEEDBACK", label: "Review", icon: "star", color: "#9d174d", bg: "#fdf2f8" },
   { value: "POLL", label: "Poll", icon: "bar-chart-2", color: "#0369a1", bg: "#f0f9ff" },
@@ -101,6 +102,13 @@ export function CreatePostModal({ open, onClose, onSuccess }: CreatePostModalPro
   const [productPrice, setProductPrice] = useState("");
   const [badgeText, setBadgeText] = useState("");
 
+  // REQUIREMENT extras
+  const [reqCategory, setReqCategory] = useState("");
+  const [reqQuantity, setReqQuantity] = useState("");
+  const [budgetMin, setBudgetMin] = useState("");
+  const [budgetMax, setBudgetMax] = useState("");
+  const [deadline, setDeadline] = useState("");
+
   // CUSTOMER_FEEDBACK
   const [rating, setRating] = useState(5);
 
@@ -131,6 +139,10 @@ export function CreatePostModal({ open, onClose, onSuccess }: CreatePostModalPro
         return;
       }
     }
+    if (postType === "REQUIREMENT" && !reqCategory.trim()) {
+      setError("Category is required for a requirement post.");
+      return;
+    }
     setError("");
 
     const dto: CreatePostDto = {
@@ -150,6 +162,11 @@ export function CreatePostModal({ open, onClose, onSuccess }: CreatePostModalPro
         : undefined,
       badgeText: postType === "PRODUCT_LAUNCH" ? badgeText || undefined : undefined,
       rating: postType === "CUSTOMER_FEEDBACK" ? rating : undefined,
+      reqCategory: postType === "REQUIREMENT" ? reqCategory || undefined : undefined,
+      reqQuantity: postType === "REQUIREMENT" ? reqQuantity || undefined : undefined,
+      budgetMin: postType === "REQUIREMENT" && budgetMin ? parseFloat(budgetMin) : undefined,
+      budgetMax: postType === "REQUIREMENT" && budgetMax ? parseFloat(budgetMax) : undefined,
+      deadline: postType === "REQUIREMENT" ? deadline || undefined : undefined,
     };
 
     createPost(dto, {
@@ -168,6 +185,7 @@ export function CreatePostModal({ open, onClose, onSuccess }: CreatePostModalPro
     setContent(""); setTitle(""); setHashtags(""); setPostType("TEXT"); setVisibility("PUBLIC");
     setProductName(""); setProductPrice(""); setBadgeText(""); setRating(5);
     setPollOptions(["", ""]);
+    setReqCategory(""); setReqQuantity(""); setBudgetMin(""); setBudgetMax(""); setDeadline("");
   }
 
   function handleBackdropClick(e: React.MouseEvent<HTMLDivElement>) {
@@ -261,7 +279,7 @@ export function CreatePostModal({ open, onClose, onSuccess }: CreatePostModalPro
           {/* Content */}
           <div>
             <FieldLabel>
-              {postType === "POLL" ? "Poll Question" : "Content"}{" "}
+              {postType === "POLL" ? "Poll Question" : postType === "REQUIREMENT" ? "Describe Your Requirement" : "Content"}{" "}
               <span style={{ color: "#dc2626" }}>*</span>
             </FieldLabel>
             <textarea
@@ -272,6 +290,7 @@ export function CreatePostModal({ open, onClose, onSuccess }: CreatePostModalPro
                 : postType === "PRODUCT_LAUNCH" ? "Describe your new product launch..."
                 : postType === "CUSTOMER_FEEDBACK" ? "Share your experience or customer testimonial..."
                 : postType === "ANNOUNCEMENT" ? "Write your announcement here..."
+                : postType === "REQUIREMENT" ? "Describe what you need — specs, certifications, delivery terms, preferred vendors..."
                 : "What's on your mind? Share an update, product, or announcement..."
               }
               rows={postType === "POLL" ? 2 : 5}
@@ -376,6 +395,73 @@ export function CreatePostModal({ open, onClose, onSuccess }: CreatePostModalPro
                     />
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* ── REQUIREMENT: category, quantity, budget, deadline ─────────── */}
+          {postType === "REQUIREMENT" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {/* Category + Quantity */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div>
+                  <FieldLabel>Category <span style={{ color: "#dc2626" }}>*</span></FieldLabel>
+                  <input
+                    value={reqCategory} onChange={(e) => setReqCategory(e.target.value)}
+                    placeholder="e.g. Medical Supplies"
+                    style={inputStyle()}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = "#f97316")}
+                    onBlur={(e) => (e.currentTarget.style.borderColor = "#e2e8f0")}
+                  />
+                </div>
+                <div>
+                  <FieldLabel>Quantity <span style={{ color: "#94a3b8", textTransform: "none", fontWeight: 400 }}>(optional)</span></FieldLabel>
+                  <input
+                    value={reqQuantity} onChange={(e) => setReqQuantity(e.target.value)}
+                    placeholder="e.g. 5000 units/month"
+                    style={inputStyle()}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = "#f97316")}
+                    onBlur={(e) => (e.currentTarget.style.borderColor = "#e2e8f0")}
+                  />
+                </div>
+              </div>
+              {/* Budget range */}
+              <div>
+                <FieldLabel>Budget Range (₹) <span style={{ color: "#94a3b8", textTransform: "none", fontWeight: 400 }}>(optional)</span></FieldLabel>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 8, alignItems: "center" }}>
+                  <input
+                    type="number" min="0" value={budgetMin} onChange={(e) => setBudgetMin(e.target.value)}
+                    placeholder="Min (e.g. 80000)"
+                    style={inputStyle()}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = "#f97316")}
+                    onBlur={(e) => (e.currentTarget.style.borderColor = "#e2e8f0")}
+                  />
+                  <span style={{ fontSize: 13, color: "#94a3b8", textAlign: "center" }}>to</span>
+                  <input
+                    type="number" min="0" value={budgetMax} onChange={(e) => setBudgetMax(e.target.value)}
+                    placeholder="Max (e.g. 150000)"
+                    style={inputStyle()}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = "#f97316")}
+                    onBlur={(e) => (e.currentTarget.style.borderColor = "#e2e8f0")}
+                  />
+                </div>
+              </div>
+              {/* Deadline */}
+              <div>
+                <FieldLabel>Deadline <span style={{ color: "#94a3b8", textTransform: "none", fontWeight: 400 }}>(optional)</span></FieldLabel>
+                <input
+                  type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)}
+                  style={inputStyle()}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = "#f97316")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = "#e2e8f0")}
+                />
+              </div>
+              {/* Info banner */}
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 8, backgroundColor: "#fff7ed", borderRadius: 8, padding: "10px 12px", border: "1px solid #fed7aa" }}>
+                <Icon name="info" size={14} color="#f97316" />
+                <span style={{ fontSize: 12, color: "#7c2d12", lineHeight: 1.5 }}>
+                  Your requirement will appear as a <strong>"Looking For"</strong> card in the feed. Vendors can submit quotes or enquiries directly.
+                </span>
               </div>
             </div>
           )}

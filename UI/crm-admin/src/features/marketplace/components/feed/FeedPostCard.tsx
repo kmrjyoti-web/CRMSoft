@@ -39,6 +39,7 @@ const POST_TYPE_LABELS: Record<PostType, string> = {
   PRODUCT_LAUNCH: "Launch",
   POLL: "Poll",
   ANNOUNCEMENT: "Announcement",
+  REQUIREMENT: "Looking For",
 };
 
 const POST_TYPE_COLORS: Record<PostType, { bg: string; text: string }> = {
@@ -50,6 +51,7 @@ const POST_TYPE_COLORS: Record<PostType, { bg: string; text: string }> = {
   PRODUCT_LAUNCH: { bg: "#fff7ed", text: "#ea580c" },
   POLL: { bg: "#f0f9ff", text: "#0369a1" },
   ANNOUNCEMENT: { bg: "#fef2f2", text: "#dc2626" },
+  REQUIREMENT: { bg: "#fff7ed", text: "#f97316" },
 };
 
 function formatTimestamp(dateStr: string): string {
@@ -709,6 +711,52 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare, current
           </div>
         );
       })()}
+
+      {/* REQUIREMENT: detail card */}
+      {post.postType === "REQUIREMENT" && (post.reqCategory || post.reqQuantity || post.budgetMin || post.deadline) && (
+        <div
+          style={{
+            margin: "0 16px 12px",
+            border: "1.5px solid #fed7aa",
+            borderRadius: 10,
+            overflow: "hidden",
+          }}
+        >
+          {/* Orange header bar */}
+          <div style={{ backgroundColor: "#fff7ed", padding: "8px 14px", borderBottom: "1px solid #fed7aa", display: "flex", alignItems: "center", gap: 6 }}>
+            <Icon name="search" size={13} color="#f97316" />
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#f97316", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              Looking For
+            </span>
+          </div>
+          {/* Detail chips */}
+          <div style={{ backgroundColor: "#fff", padding: "10px 14px", display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {post.reqCategory && (
+              <span style={{ fontSize: 12, padding: "4px 10px", borderRadius: 20, backgroundColor: "#f1f5f9", color: "#475569", fontWeight: 500 }}>
+                {post.reqCategory}
+              </span>
+            )}
+            {post.reqQuantity && (
+              <span style={{ fontSize: 12, padding: "4px 10px", borderRadius: 20, backgroundColor: "#dcfce7", color: "#15803d", fontWeight: 600 }}>
+                Qty: {post.reqQuantity}
+              </span>
+            )}
+            {(post.budgetMin || post.budgetMax) && (
+              <span style={{ fontSize: 12, padding: "4px 10px", borderRadius: 20, backgroundColor: "#fdf4ff", color: "#9333ea", fontWeight: 600 }}>
+                Budget: {post.budgetMin ? `₹${post.budgetMin.toLocaleString("en-IN")}` : ""}
+                {post.budgetMin && post.budgetMax ? " – " : ""}
+                {post.budgetMax ? `₹${post.budgetMax.toLocaleString("en-IN")}` : ""}
+              </span>
+            )}
+            {post.deadline && (
+              <span style={{ fontSize: 12, padding: "4px 10px", borderRadius: 20, backgroundColor: "#fef3c7", color: "#b45309", fontWeight: 500, display: "flex", alignItems: "center", gap: 4 }}>
+                <Icon name="clock" size={11} color="#b45309" />
+                Due: {new Date(post.deadline).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Stats row */}
       <div
