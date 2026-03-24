@@ -61,11 +61,13 @@ export const AICTableFull = forwardRef<HTMLDivElement, AICTableFullProps>(functi
     headerActions,
     kanbanCategoryOptions,
     defaultCalendarSettings,
+    defaultSidebarOpen = true,
+    enabledViews,
   },
   ref,
 ) {
   const [viewMode, setViewMode] = useState<AICTableFullViewMode>(defaultViewMode);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(defaultSidebarOpen);
   const [density, setDensity] = useState<AICTableFullDensity>(defaultDensity);
   const [densityMenuOpen, setDensityMenuOpen] = useState(false);
 
@@ -81,6 +83,10 @@ export const AICTableFull = forwardRef<HTMLDivElement, AICTableFullProps>(functi
   const [isBiModalOpen, setIsBiModalOpen] = useState(false);
   const [validationRules, setValidationRules] = useState<ValidationRule[]>([]);
   const [showOnlyErrors, setShowOnlyErrors] = useState(false);
+
+  // Returns true when the view button should be shown (no restriction, or explicitly allowed)
+  const isViewEnabled = (mode: AICTableFullViewMode) =>
+    !enabledViews || enabledViews.length === 0 || enabledViews.includes(mode);
   const [isValidationModalOpen, setIsValidationModalOpen] = useState(false);
   const [columns, setColumns] = useState<ColumnDef[]>(columnsProp || defaultColumns);
   const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
@@ -230,30 +236,30 @@ export const AICTableFull = forwardRef<HTMLDivElement, AICTableFullProps>(functi
 
           {/* View Mode Toggles */}
           <div className="flex items-center space-x-0.5 bg-gray-100 p-0.5 rounded-md border border-gray-200">
-            <ViewToggleButton icon={<TableIcon size={14} />} mode="table" currentMode={viewMode} setMode={setViewMode} title="Table View" />
-            <ViewToggleButton icon={<List size={14} />} mode="list" currentMode={viewMode} setMode={setViewMode} title="List View" />
-            <ViewToggleButton icon={<LayoutGrid size={14} />} mode="card" currentMode={viewMode} setMode={setViewMode} title="Card View" />
-            <ViewToggleButton icon={<Calendar size={14} />} mode="calendar" currentMode={viewMode} setMode={setViewMode} title="Calendar View" />
-            <ViewToggleButton icon={<Map size={14} />} mode="map" currentMode={viewMode} setMode={setViewMode} title="Map View" />
-            <ViewToggleButton icon={<BarChart3 size={14} />} mode="bi" currentMode={viewMode} setMode={setViewMode} title="BI Dashboard" />
-            <ViewToggleButton icon={<Clock size={14} />} mode="timeline" currentMode={viewMode} setMode={setViewMode} title="Timeline View" />
-            <ViewToggleButton icon={<PieChart size={14} />} mode="chart" currentMode={viewMode} setMode={setViewMode} title="Chart View" />
-            <ViewToggleButton icon={<Network size={14} />} mode="tree" currentMode={viewMode} setMode={setViewMode} title="Tree View" />
-            <ViewToggleButton
-              icon={<KanbanSquare size={14} />}
-              mode="kanban"
-              currentMode={viewMode}
-              setMode={(m) => {
-                if (m === 'kanban' && viewMode === 'kanban') {
-                  // Already on kanban — re-open settings
-                  setIsKanbanModalOpen(true);
-                } else {
-                  setViewMode(m);
-                  // useEffect handles auto-open when no settings yet
-                }
-              }}
-              title="Kanban View"
-            />
+            {isViewEnabled('table') && <ViewToggleButton icon={<TableIcon size={14} />} mode="table" currentMode={viewMode} setMode={setViewMode} title="Table View" />}
+            {isViewEnabled('list') && <ViewToggleButton icon={<List size={14} />} mode="list" currentMode={viewMode} setMode={setViewMode} title="List View" />}
+            {isViewEnabled('card') && <ViewToggleButton icon={<LayoutGrid size={14} />} mode="card" currentMode={viewMode} setMode={setViewMode} title="Card View" />}
+            {isViewEnabled('calendar') && <ViewToggleButton icon={<Calendar size={14} />} mode="calendar" currentMode={viewMode} setMode={setViewMode} title="Calendar View" />}
+            {isViewEnabled('map') && <ViewToggleButton icon={<Map size={14} />} mode="map" currentMode={viewMode} setMode={setViewMode} title="Map View" />}
+            {isViewEnabled('bi') && <ViewToggleButton icon={<BarChart3 size={14} />} mode="bi" currentMode={viewMode} setMode={setViewMode} title="BI Dashboard" />}
+            {isViewEnabled('timeline') && <ViewToggleButton icon={<Clock size={14} />} mode="timeline" currentMode={viewMode} setMode={setViewMode} title="Timeline View" />}
+            {isViewEnabled('chart') && <ViewToggleButton icon={<PieChart size={14} />} mode="chart" currentMode={viewMode} setMode={setViewMode} title="Chart View" />}
+            {isViewEnabled('tree') && <ViewToggleButton icon={<Network size={14} />} mode="tree" currentMode={viewMode} setMode={setViewMode} title="Tree View" />}
+            {isViewEnabled('kanban') && (
+              <ViewToggleButton
+                icon={<KanbanSquare size={14} />}
+                mode="kanban"
+                currentMode={viewMode}
+                setMode={(m) => {
+                  if (m === 'kanban' && viewMode === 'kanban') {
+                    setIsKanbanModalOpen(true);
+                  } else {
+                    setViewMode(m);
+                  }
+                }}
+                title="Kanban View"
+              />
+            )}
           </div>
 
           {viewMode === 'table' && (

@@ -5,6 +5,7 @@ import { useState, useMemo, useCallback, useId, createElement, useEffect } from 
 import { AICTableFull } from '@coreui/ui-react';
 
 import { useTableConfig } from '@/features/table-config/hooks/useTableConfig';
+import { useGlobalUISettings, getEnabledViews } from '@/hooks/useGlobalUISettings';
 import { useDataMasking } from '@/features/table-config/hooks/useDataMasking';
 import { TableConfigDrawer } from '@/features/table-config/components/TableConfigDrawer';
 import { UnmaskButton } from '@/features/table-config/components/UnmaskButton';
@@ -42,6 +43,8 @@ export function TableFull({ tableKey, columns: staticColumns, data, headerAction
   const enabled = !!tableKey;
   const config = useTableConfig(tableKey);
   const { rules, unmask } = useDataMasking(tableKey);
+  const { settings: globalUI } = useGlobalUISettings();
+  const enabledViews = getEnabledViews(globalUI);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [unmaskedValues, setUnmaskedValues] = useState<Record<string, string>>({});
   const scopeId = useId().replace(/:/g, '');
@@ -306,12 +309,13 @@ export function TableFull({ tableKey, columns: staticColumns, data, headerAction
   );
 
   // Key changes when ANY config value changes, forcing AICTableFull to re-mount
-  // (AICTableFull reads density/viewMode/columns on mount only — uncontrolled)
+  // (AICTableFull reads density/viewMode/columns/sidebarOpen on mount only — uncontrolled)
+  const viewsFingerprint = enabledViews ? enabledViews.join(',') : 'all';
   const configKey = useMemo(
     () => enabled
-      ? `${tableKey}-${config.density ?? 'c'}-${isMobile ? 'card' : config.defaultViewMode ?? 't'}-${showActions}-${colFingerprint}`
-      : `static-${isMobile ? 'card' : 'desk'}`,
-    [enabled, tableKey, config.density, config.defaultViewMode, showActions, colFingerprint, isMobile],
+      ? `${tableKey}-${config.density ?? 'c'}-${isMobile ? 'card' : config.defaultViewMode ?? 't'}-${showActions}-${colFingerprint}-sb${config.defaultSidebarOpen ? '1' : '0'}-v${viewsFingerprint}`
+      : `static-${isMobile ? 'card' : 'desk'}-v${viewsFingerprint}`,
+    [enabled, tableKey, config.density, config.defaultViewMode, showActions, colFingerprint, isMobile, config.defaultSidebarOpen, viewsFingerprint],
   );
 
   const wrapperClass = `table-full-${scopeId}`;
@@ -330,6 +334,7 @@ export function TableFull({ tableKey, columns: staticColumns, data, headerAction
         columns={effectiveColumns}
         defaultDensity={(enabled ? config.density : rest.defaultDensity) as AICTableFullProps['defaultDensity']}
         defaultViewMode={(isMobile ? 'card' : (enabled ? config.defaultViewMode : undefined) ?? rest.defaultViewMode) as AICTableFullProps['defaultViewMode']}
+        defaultSidebarOpen={enabled ? config.defaultSidebarOpen : rest.defaultSidebarOpen}
         headerActions={combinedHeaderActions}
         onRowEdit={showActions ? onRowEdit : undefined}
         onRowDelete={showActions ? onRowDelete : undefined}
@@ -337,6 +342,7 @@ export function TableFull({ tableKey, columns: staticColumns, data, headerAction
         onRowArchive={showActions ? onRowArchive : undefined}
         kanbanCategoryOptions={kanbanCategoryOptions}
         defaultCalendarSettings={defaultCalendarSettings}
+        enabledViews={enabledViews as AICTableFullProps['enabledViews']}
       />
       {enabled && (
         <TableConfigDrawer

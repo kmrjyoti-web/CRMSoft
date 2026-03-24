@@ -153,4 +153,8 @@ export interface AICTableFullProps {
   kanbanCategoryOptions?: Record<string, string[]>;
   /** Pre-configured calendar settings so calendar view opens without modal */
   defaultCalendarSettings?: CalendarSettings;
+  /** Whether the filter sidebar is open on initial render (default: true) */
+  defaultSidebarOpen?: boolean;
+  /** Restrict which view-mode toggle buttons are shown. Omit (or pass undefined) to show all. */
+  enabledViews?: AICTableFullViewMode[];
 }
