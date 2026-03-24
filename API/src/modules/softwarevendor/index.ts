@@ -19,3 +19,4 @@ export * from './verification/verification.module';
 export * from './workflows/workflows.module';
 export * from './departments/departments.module';
 export * from './designations/designations.module';
+export * from './customer-portal/customer-portal.module';

@@ -92,6 +92,7 @@ import { SelfHostedAiModule } from './modules/softwarevendor/self-hosted-ai/self
 import { CalendarHighlightsModule } from './modules/customer/calendar-highlights/calendar-highlights.module';
 import { ControlRoomModule } from './modules/softwarevendor/control-room/control-room.module';
 import { CrossServiceModule } from './common/cross-service/cross-service.module';
+import { CustomerPortalModule } from './modules/softwarevendor/customer-portal/customer-portal.module';
 import { TenantAuditMiddleware } from './modules/core/identity/tenant/infrastructure/tenant-audit.middleware';
 
 @Module({
@@ -182,6 +183,7 @@ import { TenantAuditMiddleware } from './modules/core/identity/tenant/infrastruc
     CalendarHighlightsModule,
     ControlRoomModule,
     CrossServiceModule,
+    CustomerPortalModule,
     ErrorsModule,
   ],
   controllers: [],

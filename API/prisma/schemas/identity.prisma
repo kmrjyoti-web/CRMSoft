@@ -1770,3 +1770,104 @@ model VersionBackup {
   @@index([backupType])
   @@map("version_backups")
 }
+// ═══════════════════════════════════════════════════════
+// CUSTOMER PORTAL
+// ═══════════════════════════════════════════════════════
+
+model CustomerUser {
+  id                  String    @id @default(uuid())
+  tenantId            String    @map("tenant_id")
+
+  // ─── Credentials ───
+  email               String
+  phone               String?
+  passwordHash        String    @map("password_hash")
+
+  // ─── Linked Entity (WorkingDB cross-DB ref by ID) ───
+  linkedEntityType    String    @map("linked_entity_type")  // CONTACT, ORGANIZATION, LEDGER
+  linkedEntityId      String    @map("linked_entity_id")
+  linkedEntityName    String    @map("linked_entity_name")
+
+  // ─── Profile ───
+  displayName         String    @map("display_name")
+  avatarUrl           String?   @map("avatar_url")
+  companyName         String?   @map("company_name")
+  gstin               String?
+
+  // ─── Portal Config ───
+  menuCategoryId      String?   @map("menu_category_id")
+  menuCategory        CustomerMenuCategory? @relation(fields: [menuCategoryId], references: [id])
+  pageOverrides       Json      @default("{}") @map("page_overrides")
+
+  // ─── Auth State ───
+  isActive            Boolean   @default(true) @map("is_active")
+  isFirstLogin        Boolean   @default(true) @map("is_first_login")
+  lastLoginAt         DateTime? @map("last_login_at")
+  loginCount          Int       @default(0) @map("login_count")
+  failedAttempts      Int       @default(0) @map("failed_attempts")
+  lockedUntil         DateTime? @map("locked_until")
+
+  // ─── Token Management ───
+  refreshToken        String?   @map("refresh_token")
+  refreshTokenExp     DateTime? @map("refresh_token_exp")
+  passwordResetToken  String?   @map("password_reset_token")
+  passwordResetExp    DateTime? @map("password_reset_exp")
+
+  // ─── Soft Delete + Audit ───
+  isDeleted           Boolean   @default(false) @map("is_deleted")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  createdById         String    @map("created_by_id")
+
+  @@unique([tenantId, email])
+  @@unique([tenantId, linkedEntityType, linkedEntityId])
+  @@index([tenantId])
+  @@index([tenantId, isActive])
+  @@map("customer_users")
+}
+
+model CustomerMenuCategory {
+  id          String    @id @default(uuid())
+  tenantId    String    @map("tenant_id")
+
+  name        String
+  nameHi      String?   @map("name_hi")
+  description String?
+  icon        String?
+  color       String?
+
+  enabledRoutes Json    @default("[]") @map("enabled_routes")
+
+  isDefault   Boolean   @default(false) @map("is_default")
+  isActive    Boolean   @default(true) @map("is_active")
+  sortOrder   Int       @default(0) @map("sort_order")
+
+  isDeleted   Boolean   @default(false) @map("is_deleted")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdById String    @map("created_by_id")
+
+  users       CustomerUser[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("customer_menu_categories")
+}
+
+model CustomerPortalLog {
+  id               String   @id @default(uuid())
+  tenantId         String   @map("tenant_id")
+  customerUserId   String   @map("customer_user_id")
+
+  action           String
+  route            String?
+  metadata         Json?    @default("{}")
+  ipAddress        String?  @map("ip_address")
+  userAgent        String?  @map("user_agent")
+
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@index([tenantId, customerUserId])
+  @@index([tenantId, createdAt])
+  @@map("customer_portal_logs")
+}
