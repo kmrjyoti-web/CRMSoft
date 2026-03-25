@@ -77,6 +77,12 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
         icon: "hash",
         path: "/settings/auto-numbering",
       },
+      {
+        label: "Religious / Spiritual Mode",
+        description: "Show a daily puja/prayer overlay on app load — configurable per religion and deity",
+        icon: "sparkles",
+        path: "/settings/religious-mode",
+      },
     ],
   },
   {

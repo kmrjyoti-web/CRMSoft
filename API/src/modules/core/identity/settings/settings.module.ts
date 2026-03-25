@@ -17,8 +17,10 @@ import { DataRetentionService } from './services/data-retention.service';
 import { EmailFooterService } from './services/email-footer.service';
 import { SettingsSeederService } from './services/settings-seeder.service';
 import { NotionSyncService } from './services/notion-sync.service';
+import { ReligiousModeService } from './services/religious-mode.service';
 
 // Controllers
+import { ReligiousModeController } from './presentation/religious-mode.controller';
 import { BrandingController } from './presentation/branding.controller';
 import { BusinessHoursController } from './presentation/business-hours.controller';
 import { HolidayController } from './presentation/holiday.controller';
@@ -46,6 +48,7 @@ import { GetRoleHandler } from './application/queries/get-role/get-role.handler'
 import { ListPermissionsHandler } from './application/queries/list-permissions/list-permissions.handler';
 
 const SERVICES = [
+  ReligiousModeService,
   AutoNumberService,
   BusinessHoursService,
   HolidayService,
@@ -75,6 +78,7 @@ const UserQueryHandlers = [
 ];
 
 const CONTROLLERS = [
+  ReligiousModeController,
   BrandingController,
   BusinessHoursController,
   HolidayController,

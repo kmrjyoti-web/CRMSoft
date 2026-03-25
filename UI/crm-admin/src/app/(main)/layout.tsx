@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback, type ReactNode } from "react";
+import { useEffect, useRef, useCallback, useState, type ReactNode } from "react";
 
 import { useRouter, usePathname } from "next/navigation";
 
@@ -36,6 +36,10 @@ import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { useControlRoomSync } from "@/hooks/useControlRoomSync";
 import { CRMHeader } from "./_components/CRMHeader";
 import { CRMSidebar } from "./_components/CRMSidebar";
+import { PujaOverlay } from "@/features/puja/components/PujaOverlay";
+import { pujaService } from "@/features/puja/services/puja.service";
+import { PUJA_SESSION_KEY } from "@/features/puja/types/puja.types";
+import type { ReligiousModeConfig } from "@/features/puja/types/puja.types";
 
 // ── Transform API menu tree → CoreUI MenuItem[] ────────
 
@@ -110,6 +114,10 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const fetchedRef = useRef(false);
+  const pujaFetchedRef = useRef(false);
+
+  // Puja overlay state
+  const [pujaConfig, setPujaConfig] = useState<ReligiousModeConfig | null>(null);
 
   // Control Room cache sync — auto-logout if rules change
   useControlRoomSync();
@@ -185,6 +193,23 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     setActiveItem(pathname);
   }, [pathname, setActiveItem]);
+
+  // Puja overlay — check status once per session/day
+  useEffect(() => {
+    if (pujaFetchedRef.current) return;
+    pujaFetchedRef.current = true;
+
+    // showOncePerDay: skip if already shown today
+    const today = new Date().toISOString().split("T")[0];
+    const lastShown = localStorage.getItem(PUJA_SESSION_KEY);
+    if (lastShown === today) return;
+
+    pujaService.getStatus().then((status) => {
+      if (status.show && status.config) {
+        setPujaConfig(status.config);
+      }
+    }).catch(() => {});
+  }, []);
 
   // Close all side panels on navigation
   const closeAllPanels = useSidePanelStore((s) => s.closeAllPanels);
@@ -278,6 +303,18 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
 
       {/* AI Chat Widget (floats over content) */}
       <AiChatWidget />
+
+      {/* Puja / Prayer Overlay — shown once per day when religious mode is enabled */}
+      {pujaConfig && (
+        <PujaOverlay
+          config={pujaConfig}
+          onClose={() => {
+            const today = new Date().toISOString().split("T")[0];
+            localStorage.setItem(PUJA_SESSION_KEY, today);
+            setPujaConfig(null);
+          }}
+        />
+      )}
     </div>
   );
 }

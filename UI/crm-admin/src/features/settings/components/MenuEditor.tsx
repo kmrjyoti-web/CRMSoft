@@ -29,6 +29,7 @@ import {
   useMenuTree,
   useUpdateMenu,
   useReorderMenus,
+  useResetMenuDefaults,
 } from "../hooks/useMenus";
 
 import type { MenuAdminItem } from "../types/settings.types";
@@ -167,6 +168,7 @@ export function MenuEditor() {
   const { data: treeData, isLoading } = useMenuTree();
   const updateMutation = useUpdateMenu();
   const reorderMutation = useReorderMenus();
+  const resetMutation = useResetMenuDefaults();
 
   // ── State ──
 
@@ -304,6 +306,24 @@ export function MenuEditor() {
       <PageHeader
         title="Menu Preferences"
         subtitle="Customize menu order and visibility for your team. Contact your vendor to add or modify menu items."
+        actions={
+          <Button
+            variant="outline"
+            onClick={async () => {
+              if (!confirm("Reset all menus to system defaults? This will restore all 164 menu items.")) return;
+              try {
+                await resetMutation.mutateAsync();
+                toast.success("Menus reset to defaults");
+              } catch {
+                toast.error("Failed to reset menus");
+              }
+            }}
+            disabled={resetMutation.isPending}
+          >
+            <Icon name="rotate-ccw" size={14} />
+            {resetMutation.isPending ? "Resetting..." : "Reset Defaults"}
+          </Button>
+        }
       />
 
       {/* Tree view */}
