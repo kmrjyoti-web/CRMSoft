@@ -1844,3 +1844,159 @@ model IndustryPatch {
   @@index([status])
   @@map("industry_patches")
 }
+// ═══════════════════════════════════════════════════════
+// TEST ENVIRONMENT MANAGER  (OPS-1)
+// ═══════════════════════════════════════════════════════
+
+enum TestEnvSourceType {
+  SEED_DATA
+  LIVE_CLONE
+  BACKUP_RESTORE
+}
+
+enum TestEnvStatus {
+  QUEUED
+  CREATING
+  SEEDING
+  READY
+  TESTING
+  COMPLETED
+  FAILED
+  CLEANING
+  CLEANED
+}
+
+model TestEnvironment {
+  id          String @id @default(uuid())
+  tenantId    String @map("tenant_id")
+
+  name        String
+  displayName String @map("display_name")
+
+  sourceType  TestEnvSourceType @map("source_type")
+  sourceDbUrl String?           @map("source_db_url")
+  backupId    String?           @map("backup_id")
+
+  testDbName  String  @map("test_db_name")
+  testDbUrl   String? @map("test_db_url")
+
+  status          TestEnvStatus @default(QUEUED)
+  statusMessage   String?       @map("status_message")
+  progressPercent Int           @default(0) @map("progress_percent")
+
+  dbSizeBytes  BigInt? @map("db_size_bytes")
+  tablesCreated Int?   @map("tables_created")
+  seedRecords   Int?   @map("seed_records")
+
+  ttlHours  Int       @default(24) @map("ttl_hours")
+  expiresAt DateTime? @map("expires_at")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdById String    @map("created_by_id")
+  completedAt DateTime? @map("completed_at")
+  cleanedAt   DateTime? @map("cleaned_at")
+
+  errorMessage String? @map("error_message") @db.Text
+  errorStack   String? @map("error_stack") @db.Text
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("test_environments")
+}
+
+// ═══════════════════════════════════════════════════════
+// TEST RUNNER  (OPS-2)
+// ═══════════════════════════════════════════════════════
+
+enum TestRunStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum TestType {
+  UNIT
+  FUNCTIONAL
+  SMOKE
+  INTEGRATION
+  ARCHITECTURE
+  PENETRATION
+}
+
+enum TestResultStatus {
+  PASS
+  FAIL
+  SKIP
+  ERROR
+  TIMEOUT
+}
+
+model TestRun {
+  id             String        @id @default(uuid())
+  tenantId       String        @map("tenant_id")
+  testEnvId      String?       @map("test_env_id")
+
+  runType        String        @map("run_type")
+  testTypes      String[]      @map("test_types")
+  targetModules  String[]      @map("target_modules")
+
+  status          TestRunStatus @default(QUEUED)
+  progressPercent Int           @default(0) @map("progress_percent")
+  currentPhase    String?       @map("current_phase")
+
+  totalTests Int @default(0) @map("total_tests")
+  passed     Int @default(0)
+  failed     Int @default(0)
+  skipped    Int @default(0)
+  errors     Int @default(0)
+  duration   Int @default(0)
+
+  summary         Json  @default("{}")
+  coveragePercent Float? @map("coverage_percent")
+  coverageReport  Json?  @map("coverage_report")
+
+  startedAt   DateTime? @map("started_at")
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  createdById String    @map("created_by_id")
+
+  results TestResult[]
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([testEnvId])
+  @@map("test_runs")
+}
+
+model TestResult {
+  id        String  @id @default(uuid())
+  testRunId String  @map("test_run_id")
+  testRun   TestRun @relation(fields: [testRunId], references: [id], onDelete: Cascade)
+
+  testType  TestType @map("test_type")
+  suiteName String   @map("suite_name")
+  testName  String   @map("test_name")
+  filePath  String?  @map("file_path")
+  module    String?
+
+  status   TestResultStatus
+  duration Int              @default(0)
+
+  errorMessage  String? @map("error_message") @db.Text
+  errorStack    String? @map("error_stack") @db.Text
+  expectedValue String? @map("expected_value") @db.Text
+  actualValue   String? @map("actual_value") @db.Text
+
+  metadata  Json?    @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([testRunId])
+  @@index([testRunId, testType])
+  @@index([testRunId, status])
+  @@index([module])
+  @@map("test_results")
+}
