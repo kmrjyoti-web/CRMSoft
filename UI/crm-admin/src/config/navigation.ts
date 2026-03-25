@@ -264,6 +264,15 @@ export const DEFAULT_NAV: NavItem[] = [
       { label: 'Menus', path: '/settings/menus', icon: 'menu' },
       { label: 'Notification Config', path: '/settings/notification-config', icon: 'bell' },
       { label: 'Data Masking', path: '/settings/data-masking', icon: 'eye-off' },
+      {
+        label: 'Customer Portal', path: '/settings/customer-portal', icon: 'globe',
+        children: [
+          { label: 'Dashboard', path: '/settings/customer-portal', icon: 'layout-dashboard' },
+          { label: 'Activation', path: '/settings/customer-portal/activation', icon: 'unlock' },
+          { label: 'Users', path: '/settings/customer-portal/users', icon: 'users' },
+          { label: 'Menu Categories', path: '/settings/customer-portal/menu-categories', icon: 'layout-list' },
+        ],
+      },
       { label: 'Keyboard Shortcuts', path: '/settings/shortcuts', icon: 'keyboard' },
       { label: 'Business Types', path: '/settings/business-types', icon: 'briefcase' },
       { label: 'AI Models', path: '/settings/ai', icon: 'cpu' },

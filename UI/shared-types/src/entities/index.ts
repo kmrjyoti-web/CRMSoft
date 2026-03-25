@@ -396,3 +396,5 @@ export interface SupportTicket {
   createdAt: string;
   updatedAt: string;
 }
+
+export * from './customer-portal.types';

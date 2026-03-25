@@ -39,6 +39,16 @@ export type {
   Demo,
   TourPlan,
   SupportTicket,
+  CustomerUser,
+  CustomerMenuCategory,
+  PortalRoute,
+  EligibleEntity,
+  PortalAnalytics,
+  PortalLog,
+  ActivatePortalDto,
+  CreateMenuCategoryDto,
+  UpdateMenuCategoryDto,
+  UpdatePortalUserDto,
 } from './entities';
 
 // Request DTO interfaces

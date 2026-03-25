@@ -93,6 +93,7 @@ import { CalendarHighlightsModule } from './modules/customer/calendar-highlights
 import { ControlRoomModule } from './modules/softwarevendor/control-room/control-room.module';
 import { CrossServiceModule } from './common/cross-service/cross-service.module';
 import { CustomerPortalModule } from './modules/softwarevendor/customer-portal/customer-portal.module';
+import { CustomerPortalModule as CustomerPortalAuthModule } from './modules/customer-portal/customer-portal.module';
 import { TenantAuditMiddleware } from './modules/core/identity/tenant/infrastructure/tenant-audit.middleware';
 
 @Module({
@@ -184,6 +185,7 @@ import { TenantAuditMiddleware } from './modules/core/identity/tenant/infrastruc
     ControlRoomModule,
     CrossServiceModule,
     CustomerPortalModule,
+    CustomerPortalAuthModule,
     ErrorsModule,
   ],
   controllers: [],
