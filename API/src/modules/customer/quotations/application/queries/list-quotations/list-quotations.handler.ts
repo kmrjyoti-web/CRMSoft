@@ -35,7 +35,7 @@ export class ListQuotationsHandler implements IQueryHandler<ListQuotationsQuery>
         include: {
           lineItems: { select: { id: true, productName: true, lineTotal: true } },
           lead: { select: { id: true, leadNumber: true, contact: { select: { firstName: true, lastName: true } } } },
-          createdByUser: { select: { id: true, firstName: true, lastName: true } },
+          // createdByUser is in identity DB — use createdById only
         },
       }),
       this.prisma.working.quotation.count({ where }),

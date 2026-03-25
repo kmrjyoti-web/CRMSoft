@@ -132,12 +132,13 @@ export class UnifiedCalendarService {
       ],
     };
     const items = await this.prisma.working.activity.findMany({
-      where, select: { id: true, subject: true, description: true, scheduledAt: true, endTime: true, type: true, createdById: true, createdByUser: { select: { firstName: true, lastName: true } }, locationName: true, createdAt: true },
+      // createdByUser is in identity DB — fetch only createdById
+      where, select: { id: true, subject: true, description: true, scheduledAt: true, endTime: true, type: true, createdById: true, locationName: true, createdAt: true },
     });
     return items.filter((a) => a.scheduledAt || a.endTime).map((a) => ({
       id: `activity-${a.id}`, source: 'ACTIVITY', sourceId: a.id, title: a.subject, description: a.description ?? undefined,
       startTime: a.scheduledAt ?? a.endTime ?? a.createdAt, endTime: a.endTime ?? undefined, allDay: false, color: SOURCE_COLORS.ACTIVITY,
-      userId: a.createdById, userName: `${a.createdByUser.firstName} ${a.createdByUser.lastName}`,
+      userId: a.createdById, userName: a.createdById,
       location: a.locationName ?? undefined, status: a.type, editable: false,
     }));
   }

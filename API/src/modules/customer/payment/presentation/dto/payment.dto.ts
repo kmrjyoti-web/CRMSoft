@@ -31,6 +31,7 @@ export class VerifyGatewayPaymentDto {
 
 export class PaymentQueryDto {
   @IsOptional() @IsString() invoiceId?: string;
+  @IsOptional() @IsString() leadId?: string;
   @IsOptional() @IsEnum(PaymentStatus) status?: PaymentStatus;
   @IsOptional() @IsDateString() fromDate?: string;
   @IsOptional() @IsDateString() toDate?: string;

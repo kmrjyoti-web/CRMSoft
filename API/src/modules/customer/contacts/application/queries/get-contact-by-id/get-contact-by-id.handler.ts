@@ -54,7 +54,7 @@ export class GetContactByIdHandler implements IQueryHandler<GetContactByIdQuery>
           },
           orderBy: { createdAt: 'desc' },
         },
-        createdByUser: { select: { id: true, firstName: true, lastName: true } },
+        // createdByUser is in identity DB — use createdById only
         _count: {
           select: { leads: true, communications: true, activities: true },
         },

@@ -22,8 +22,15 @@ export class MktPrismaService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    await this._client.$connect();
-    this.logger.log('MarketplaceDB connected');
+    try {
+      await this._client.$connect();
+      this.logger.log('MarketplaceDB connected');
+    } catch (err) {
+      this.logger.warn(
+        `MarketplaceDB could not connect at startup — will retry on first query. ` +
+        `Reason: ${(err as Error)?.message ?? err}`,
+      );
+    }
   }
 
   async onModuleDestroy() {
@@ -35,3 +42,4 @@ export class MktPrismaService implements OnModuleInit, OnModuleDestroy {
     return this._client;
   }
 }
+

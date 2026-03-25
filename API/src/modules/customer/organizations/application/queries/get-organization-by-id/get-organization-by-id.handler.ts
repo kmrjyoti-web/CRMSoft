@@ -39,7 +39,7 @@ export class GetOrganizationByIdHandler implements IQueryHandler<GetOrganization
             },
           },
         },
-        createdByUser: { select: { id: true, firstName: true, lastName: true } },
+        // createdByUser is in identity DB — use createdById only
         _count: { select: { contacts: true, leads: true } },
       },
     });

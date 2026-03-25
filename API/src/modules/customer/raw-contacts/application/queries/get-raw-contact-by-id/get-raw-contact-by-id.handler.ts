@@ -25,8 +25,7 @@ export class GetRawContactByIdHandler implements IQueryHandler<GetRawContactById
           },
         },
         contact: { select: { id: true, firstName: true, lastName: true } },
-        verifiedBy: { select: { id: true, firstName: true, lastName: true } },
-        createdByUser: { select: { id: true, firstName: true, lastName: true } },
+        // verifiedBy / createdByUser are in identity DB — use IDs only
       },
     });
     if (!rc) throw new NotFoundException(`RawContact ${query.rawContactId} not found`);

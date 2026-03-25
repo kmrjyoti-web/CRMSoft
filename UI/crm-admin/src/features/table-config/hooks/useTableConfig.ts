@@ -9,6 +9,7 @@ import { tableConfigService } from "../services/table-config.service";
 import { mergeConfig } from "../utils/merge-config";
 
 import type { TableConfigData, ColumnConfig, SaveTableConfigPayload } from "../types/table-config.types";
+import { useGlobalUISettings } from "@/hooks/useGlobalUISettings";
 
 const KEY = "table-config";
 
@@ -21,6 +22,7 @@ const EMPTY_COLUMNS: ColumnConfig[] = [];
 export function useTableConfig(tableKey: string | undefined) {
   const qc = useQueryClient();
   const enabled = !!tableKey;
+  const { settings: globalUI } = useGlobalUISettings();
 
   const { data, isLoading } = useQuery({
     queryKey: [KEY, tableKey],
@@ -80,6 +82,8 @@ export function useTableConfig(tableKey: string | undefined) {
     showRowActions: merged?.showRowActions ?? true,
     filterVisibility: merged?.filterVisibility,
     filterLayout: merged?.filterLayout,
+    /** Global default: false = sidebar closed on load. Per-table config overrides this. */
+    defaultSidebarOpen: globalUI.tableSidebarFilterDefault,
     isLoading: enabled ? isLoading : false,
     isSaving: saveMutation.isPending,
     saveConfig,

@@ -14,6 +14,7 @@ import {
   useSaveControlRoomDraft, usePendingDrafts, useDiscardDraft, useDiscardAllDrafts, useApplyAllDrafts,
 } from "../hooks/useControlRoom";
 import type { ControlRoomRule, ControlRoomAuditEntry } from "../types/control-room.types";
+import { GlobalUISettings } from "./GlobalUISettings";
 
 // ── Category sidebar config ─────────────────────────────
 
@@ -30,7 +31,11 @@ const CATEGORY_META: Record<string, { label: string; icon: string }> = {
   INTEGRATION: { label: "Integration",   icon: "link" },
   WORKFLOW:    { label: "Workflow",       icon: "git-branch" },
   ADDITIONAL:  { label: "Additional",    icon: "plus-circle" },
+  UI:          { label: "Global UI",     icon: "monitor" },
 };
+
+/** Categories rendered with a custom frontend panel instead of backend rules */
+const FRONTEND_CATEGORIES = new Set(["UI"]);
 
 // ── Parse JSON value safely ─────────────────────────────
 
@@ -181,7 +186,14 @@ export function ControlRoomPage() {
     return {};
   }, [data]);
 
-  const categories = useMemo(() => Object.keys(grouped), [grouped]);
+  // Merge backend categories with always-present frontend-only categories
+  const categories = useMemo(() => {
+    const backendCats = Object.keys(grouped);
+    const frontendCats = ["UI"];
+    const all = [...backendCats];
+    frontendCats.forEach((c) => { if (!all.includes(c)) all.push(c); });
+    return all;
+  }, [grouped]);
 
   // Default to first category
   const selectedCategory = activeCategory ?? categories[0] ?? null;
@@ -279,9 +291,11 @@ export function ControlRoomPage() {
               >
                 <Icon name={meta.icon as any} size={16} />
                 <span style={{ flex: 1, textAlign: "left" }}>{meta.label}</span>
-                <span style={{ fontSize: 11, color: "#9ca3af", background: "#f3f4f6", borderRadius: 10, padding: "1px 7px" }}>
-                  {grouped[cat]?.length ?? 0}
-                </span>
+                {!FRONTEND_CATEGORIES.has(cat) && (
+                  <span style={{ fontSize: 11, color: "#9ca3af", background: "#f3f4f6", borderRadius: 10, padding: "1px 7px" }}>
+                    {grouped[cat]?.length ?? 0}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -301,88 +315,95 @@ export function ControlRoomPage() {
             {CATEGORY_META[selectedCategory ?? ""]?.label ?? selectedCategory} Settings
           </h2>
           <div style={{ flex: 1 }} />
-          <div style={{ position: "relative", width: 240 }}>
-            <span style={{ position: "absolute", left: 10, top: 9, color: "#9ca3af" }}><Icon name="search" size={14} /></span>
-            <input
-              type="text"
-              placeholder="Search rules..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{
-                width: "100%", padding: "7px 10px 7px 32px", border: "1px solid #e5e7eb",
-                borderRadius: 6, fontSize: 13, outline: "none", background: "#fafbfc",
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Rules Table */}
-        <div style={{ flex: 1, overflowY: "auto" }}>
-          {filteredRules.length === 0 ? (
-            <div style={{ padding: 48, textAlign: "center", color: "#9ca3af" }}>
-              <Icon name="search" size={32} />
-              <p style={{ marginTop: 8 }}>No rules found.</p>
+          {!FRONTEND_CATEGORIES.has(selectedCategory ?? "") && (
+            <div style={{ position: "relative", width: 240 }}>
+              <span style={{ position: "absolute", left: 10, top: 9, color: "#9ca3af" }}><Icon name="search" size={14} /></span>
+              <input
+                type="text"
+                placeholder="Search rules..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                style={{
+                  width: "100%", padding: "7px 10px 7px 32px", border: "1px solid #e5e7eb",
+                  borderRadius: 6, fontSize: 13, outline: "none", background: "#fafbfc",
+                }}
+              />
             </div>
-          ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ borderBottom: "2px solid #e5e7eb", background: "#f9fafb" }}>
-                  <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", width: 50 }}>SN</th>
-                  <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#6b7280", textTransform: "uppercase" }}>Particulars</th>
-                  <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", width: 250 }}>Action</th>
-                  <th style={{ padding: "10px 16px", textAlign: "center", fontSize: 11, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", width: 80 }}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRules.map((rule, idx) => (
-                  <tr key={rule.ruleCode} style={{ borderBottom: "1px solid #f3f4f6" }}>
-                    <td style={{ padding: "12px 16px", fontSize: 13, color: "#9ca3af" }}>{idx + 1}</td>
-                    <td style={{ padding: "12px 16px" }}>
-                      <div style={{ fontSize: 13, fontWeight: 500, color: "#111827" }}>{rule.label}</div>
-                      {rule.description && (
-                        <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>{rule.description}</div>
-                      )}
-                      {rule.effectiveLevel !== "DEFAULT" && (
-                        <span style={{
-                          display: "inline-block", marginTop: 3, fontSize: 10, padding: "1px 6px",
-                          borderRadius: 4, background: "#dbeafe", color: "#1d4ed8",
-                        }}>
-                          Set at {rule.effectiveLevel}
-                        </span>
-                      )}
-                    </td>
-                    <td style={{ padding: "12px 16px" }}>
-                      <RuleValueEditor
-                        rule={rule}
-                        onUpdate={(val) => handleUpdate(rule, val)}
-                        updating={updatingCode === rule.ruleCode}
-                      />
-                    </td>
-                    <td style={{ padding: "12px 16px", textAlign: "center" }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2 }}>
-                        {rule.description && (
-                          <button
-                            title={rule.description}
-                            style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: 4, borderRadius: 4 }}
-                          >
-                            <Icon name="help-circle" size={15} />
-                          </button>
-                        )}
-                        <button
-                          onClick={() => openAudit(rule)}
-                          title="View change history"
-                          style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: 4, borderRadius: 4 }}
-                        >
-                          <Icon name="clock" size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           )}
         </div>
+
+        {/* ── Frontend-only panel (UI category) ── */}
+        {FRONTEND_CATEGORIES.has(selectedCategory ?? "") ? (
+          <GlobalUISettings />
+        ) : (
+          /* ── Backend Rules Table ── */
+          <div style={{ flex: 1, overflowY: "auto" }}>
+            {filteredRules.length === 0 ? (
+              <div style={{ padding: 48, textAlign: "center", color: "#9ca3af" }}>
+                <Icon name="search" size={32} />
+                <p style={{ marginTop: 8 }}>No rules found.</p>
+              </div>
+            ) : (
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ borderBottom: "2px solid #e5e7eb", background: "#f9fafb" }}>
+                    <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", width: 50 }}>SN</th>
+                    <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#6b7280", textTransform: "uppercase" }}>Particulars</th>
+                    <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", width: 250 }}>Action</th>
+                    <th style={{ padding: "10px 16px", textAlign: "center", fontSize: 11, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", width: 80 }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredRules.map((rule, idx) => (
+                    <tr key={rule.ruleCode} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                      <td style={{ padding: "12px 16px", fontSize: 13, color: "#9ca3af" }}>{idx + 1}</td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <div style={{ fontSize: 13, fontWeight: 500, color: "#111827" }}>{rule.label}</div>
+                        {rule.description && (
+                          <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>{rule.description}</div>
+                        )}
+                        {rule.effectiveLevel !== "DEFAULT" && (
+                          <span style={{
+                            display: "inline-block", marginTop: 3, fontSize: 10, padding: "1px 6px",
+                            borderRadius: 4, background: "#dbeafe", color: "#1d4ed8",
+                          }}>
+                            Set at {rule.effectiveLevel}
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <RuleValueEditor
+                          rule={rule}
+                          onUpdate={(val) => handleUpdate(rule, val)}
+                          updating={updatingCode === rule.ruleCode}
+                        />
+                      </td>
+                      <td style={{ padding: "12px 16px", textAlign: "center" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2 }}>
+                          {rule.description && (
+                            <button
+                              title={rule.description}
+                              style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: 4, borderRadius: 4 }}
+                            >
+                              <Icon name="help-circle" size={15} />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => openAudit(rule)}
+                            title="View change history"
+                            style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: 4, borderRadius: 4 }}
+                          >
+                            <Icon name="clock" size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
       </div>
       </div>{/* end sidebar+content row */}
 

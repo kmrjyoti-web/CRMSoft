@@ -78,6 +78,7 @@ export class UpdateInvoiceDto {
 
 export class InvoiceQueryDto {
   @IsOptional() @IsEnum(InvoiceStatus) status?: InvoiceStatus;
+  @IsOptional() @IsString() leadId?: string;
   @IsOptional() @IsString() contactId?: string;
   @IsOptional() @IsString() organizationId?: string;
   @IsOptional() @IsDateString() fromDate?: string;

@@ -13,6 +13,9 @@ interface FeedPostCardProps {
   onShare: (id: string) => void;
   currentUserId?: string;
   onEdit?: (post: MarketplacePost) => void;
+  onViewProfile?: (authorId: string) => void;
+  onHashtagClick?: (tag: string) => void;
+  activeHashtag?: string;
 }
 
 const AVATAR_COLORS = [
@@ -155,7 +158,7 @@ function PollOption({ text, votes, total }: { text: string; votes: number; total
   );
 }
 
-export function FeedPostCard({ post, onLike, onSave, onComment, onShare, currentUserId, onEdit }: FeedPostCardProps) {
+export function FeedPostCard({ post, onLike, onSave, onComment, onShare, currentUserId, onEdit, onViewProfile, onHashtagClick, activeHashtag }: FeedPostCardProps) {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -259,7 +262,8 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare, current
 
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", padding: "16px 16px 12px", gap: 12 }}>
-        <div
+        <button
+          onClick={() => onViewProfile?.(post.authorId)}
           style={{
             width: 44,
             height: 44,
@@ -272,14 +276,36 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare, current
             fontSize: 16,
             fontWeight: 700,
             flexShrink: 0,
+            border: "none",
+            cursor: onViewProfile ? "pointer" : "default",
+            padding: 0,
+            transition: "opacity 0.15s",
           }}
+          onMouseEnter={(e) => { if (onViewProfile) e.currentTarget.style.opacity = "0.85"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
         >
           {authorInitial}
-        </div>
+        </button>
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <span style={{ fontWeight: 600, fontSize: 14, color: "#1e293b" }}>{authorName}</span>
+            <button
+              onClick={() => onViewProfile?.(post.authorId)}
+              style={{
+                fontWeight: 600,
+                fontSize: 14,
+                color: "#1e293b",
+                background: "none",
+                border: "none",
+                padding: 0,
+                cursor: onViewProfile ? "pointer" : "default",
+                textDecoration: "none",
+              }}
+              onMouseEnter={(e) => { if (onViewProfile) e.currentTarget.style.color = "var(--color-primary, #1e5f74)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "#1e293b"; }}
+            >
+              {authorName}
+            </button>
             <span
               style={{
                 fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 20,
@@ -398,18 +424,36 @@ export function FeedPostCard({ post, onLike, onSave, onComment, onShare, current
           </p>
           {post.hashtags.length > 0 && (
             <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 4 }}>
-              {post.hashtags.map((tag) => (
-                <span
-                  key={tag}
-                  style={{
-                    fontSize: 12,
-                    color: "var(--color-primary, #1e5f74)",
-                    fontWeight: 500,
-                  }}
-                >
-                  #{tag}
-                </span>
-              ))}
+              {post.hashtags.map((tag) => {
+                const isActive = activeHashtag === tag;
+                return (
+                  <button
+                    key={tag}
+                    onClick={() => onHashtagClick?.(tag)}
+                    style={{
+                      fontSize: 12,
+                      color: isActive ? "#fff" : "var(--color-primary, #1e5f74)",
+                      fontWeight: 600,
+                      background: isActive
+                        ? "var(--color-primary, #1e5f74)"
+                        : "var(--color-primary-50, #eef7fa)",
+                      border: "none",
+                      borderRadius: 20,
+                      padding: "2px 10px",
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) e.currentTarget.style.background = "var(--color-primary-100, #cce8f0)";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) e.currentTarget.style.background = "var(--color-primary-50, #eef7fa)";
+                    }}
+                  >
+                    #{tag}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>

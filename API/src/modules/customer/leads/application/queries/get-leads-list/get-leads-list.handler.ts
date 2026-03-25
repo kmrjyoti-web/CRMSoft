@@ -73,9 +73,7 @@ export class GetLeadsListHandler implements IQueryHandler<GetLeadsListQuery> {
           organization: {
             select: { id: true, name: true },
           },
-          allocatedTo: {
-            select: { id: true, firstName: true, lastName: true },
-          },
+          allocatedToId: true,
         },
       }),
       this.prisma.working.lead.count({ where }),

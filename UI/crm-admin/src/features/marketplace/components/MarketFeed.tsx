@@ -1,6 +1,6 @@
 "use client";
 import { useState, useMemo, useEffect, useRef } from "react";
-import { Icon } from "@/components/ui";
+import { Icon, ToolbarButton, ToolbarButtonGroup } from "@/components/ui";
 import { useFeed, useToggleLike, useToggleSave, useAddComment } from "../hooks/useMarketplace";
 import type { MarketplacePost, PostType } from "../types/marketplace.types";
 import { FeedPostCard } from "./feed/FeedPostCard";
@@ -10,6 +10,7 @@ import { FeedRequirementCard } from "./feed/FeedRequirementCard";
 import type { FeedRequirement } from "./feed/FeedRequirementCard";
 import { CreatePostModal } from "./feed/CreatePostModal";
 import { EditPostModal } from "./feed/EditPostModal";
+import { UserProfileModal } from "./profile/UserProfileModal";
 import { OrderFormModal } from "./feed/OrderFormModal";
 import { EnquiryFormModal } from "./feed/EnquiryFormModal";
 import type { EnquiryTarget } from "./feed/EnquiryFormModal";
@@ -880,16 +881,16 @@ const FILTER_TABS: { value: FeedFilter; label: string; icon: string }[] = [
 // ── Trending topics & suggested vendors ──────────────────────────────────────
 
 const TRENDING_TOPICS = [
-  { label: "#pharma2026", count: "2.4K posts" },
-  { label: "#bulkprocurement", count: "1.8K posts" },
-  { label: "#GSTinvoice", count: "1.2K posts" },
-  { label: "#medicaldevices", count: "980 posts" },
-  { label: "#MSMEsupplier", count: "760 posts" },
-  { label: "#solarenergy", count: "640 posts" },
-  { label: "#agriexport", count: "520 posts" },
-  { label: "#textileindia", count: "480 posts" },
+  { label: "#pharma", count: "2.4K posts" },
+  { label: "#procurement", count: "1.8K posts" },
+  { label: "#GSTCompliance", count: "1.2K posts" },
+  { label: "#manufacturing", count: "980 posts" },
+  { label: "#MSME", count: "760 posts" },
+  { label: "#solar", count: "640 posts" },
+  { label: "#export", count: "520 posts" },
+  { label: "#textile", count: "480 posts" },
   { label: "#coldchain", count: "390 posts" },
-  { label: "#GeMseller", count: "310 posts" },
+  { label: "#GeM", count: "310 posts" },
 ];
 
 const SUGGESTED_VENDORS = [
@@ -1007,8 +1008,10 @@ const PAGE_SIZE = 8;
 
 export function MarketFeed() {
   const [activeFilter, setActiveFilter] = useState<FeedFilter>("ALL");
+  const [activeHashtag, setActiveHashtag] = useState<string | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editPost, setEditPost] = useState<MarketplacePost | null>(null);
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [orderOffer, setOrderOffer] = useState<FeedOffer | null>(null);
   const [enquiryTarget, setEnquiryTarget] = useState<EnquiryTarget | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -1117,112 +1120,129 @@ export function MarketFeed() {
     };
   }, [initialLoading, visibleCount, ALL_FEED_ITEMS.length]);
 
-  // Reset page on filter switch
+  // Reset page and hashtag filter on tab switch
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
+    setActiveHashtag(null);
     loadingRef.current = false;
   }, [activeFilter]);
 
-  const visibleItems = ALL_FEED_ITEMS.slice(0, visibleCount);
-  const hasMore = visibleCount < ALL_FEED_ITEMS.length;
-  const allCaughtUp = !initialLoading && !hasMore && ALL_FEED_ITEMS.length > 0;
+  // Apply hashtag filter on top of tab filter
+  const hashtagFilteredItems = activeHashtag
+    ? ALL_FEED_ITEMS.filter(
+        (item) =>
+          item.type === "post" &&
+          item.data.hashtags?.some((t) => t.toLowerCase() === activeHashtag.toLowerCase()),
+      )
+    : ALL_FEED_ITEMS;
+
+  const visibleItems = hashtagFilteredItems.slice(0, visibleCount);
+  const hasMore = visibleCount < hashtagFilteredItems.length;
+  const allCaughtUp = !initialLoading && !hasMore && hashtagFilteredItems.length > 0;
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#f1f5f9", marginTop: -10 }}>
-      {/* Top filter bar */}
+    <div style={{ minHeight: "100%", backgroundColor: "#f1f5f9", margin: "-10px -15px -15px" }}>
+      {/* ── Single combined sticky header: title + filter tabs + create ── */}
       <div
         style={{
+          position: "sticky",
+          top: -10,
+          zIndex: 100,
           backgroundColor: "#fff",
           borderBottom: "1px solid #e2e8f0",
-          position: "sticky",
-          top: 0,
-          zIndex: 100,
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          padding: "8px 16px",
         }}
       >
+        {/* Title */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+          <Icon name="radio" size={18} color="var(--color-primary, #1e5f74)" />
+          <span style={{ fontSize: 16, fontWeight: 700, color: "#1e293b" }}>Market Feed</span>
+        </div>
+
+        {/* Filter tabs */}
+        <div style={{ overflowX: "auto", flex: 1, display: "flex", justifyContent: "center" }}>
+          <ToolbarButtonGroup
+            buttons={FILTER_TABS.map((tab) => ({
+              id: tab.value,
+              label: tab.label,
+              iconName: tab.icon,
+              showLabel: true,
+            }))}
+            activeId={activeFilter}
+            size="sm"
+            onButtonClick={(id) => {
+              setActiveFilter(id as FeedFilter);
+              setVisibleCount(PAGE_SIZE);
+            }}
+          />
+        </div>
+
+        {/* Create Post */}
+        <ToolbarButton
+          icon="plus"
+          label="Create Post"
+          showLabel
+          color="primary"
+          size="md"
+          onClick={() => setCreateModalOpen(true)}
+        />
+      </div>
+
+      {/* ── Active hashtag banner ───────────────────────────────────────── */}
+      {activeHashtag && (
         <div
           style={{
-            maxWidth: 1280,
-            margin: "0 auto",
-            padding: "0 24px",
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
-            gap: 16,
+            gap: 10,
+            padding: "8px 20px",
+            backgroundColor: "var(--color-primary-50, #eef7fa)",
+            borderBottom: "1px solid var(--color-primary-100, #cce8f0)",
           }}
         >
-          {/* Filter tabs */}
-          <div style={{ display: "flex", alignItems: "center", gap: 2, overflowX: "auto" }}>
-            {FILTER_TABS.map((tab) => {
-              const active = activeFilter === tab.value;
-              return (
-                <button
-                  key={tab.value}
-                  onClick={() => setActiveFilter(tab.value)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "14px 16px",
-                    background: "none",
-                    border: "none",
-                    borderBottom: `2px solid ${active ? "var(--color-primary, #1e5f74)" : "transparent"}`,
-                    color: active ? "var(--color-primary, #1e5f74)" : "#64748b",
-                    fontSize: 13,
-                    fontWeight: active ? 600 : 500,
-                    cursor: "pointer",
-                    whiteSpace: "nowrap",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  <Icon
-                    name={tab.icon as Parameters<typeof Icon>[0]["name"]}
-                    size={14}
-                    color={active ? "var(--color-primary, #1e5f74)" : "#94a3b8"}
-                  />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Create post button */}
+          <Icon name="at-sign" size={14} color="var(--color-primary, #1e5f74)" />
+          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--color-primary, #1e5f74)" }}>
+            #{activeHashtag}
+          </span>
+          <span style={{ fontSize: 12, color: "#64748b" }}>
+            — {hashtagFilteredItems.length} post{hashtagFilteredItems.length !== 1 ? "s" : ""}
+          </span>
           <button
-            onClick={() => setCreateModalOpen(true)}
+            onClick={() => { setActiveHashtag(null); setVisibleCount(PAGE_SIZE); }}
             style={{
+              marginLeft: "auto",
               display: "flex",
               alignItems: "center",
-              gap: 6,
-              padding: "8px 18px",
-              backgroundColor: "var(--color-primary, #1e5f74)",
-              color: "#fff",
+              gap: 4,
+              fontSize: 12,
+              color: "#64748b",
+              background: "none",
               border: "none",
-              borderRadius: 8,
-              fontSize: 13,
-              fontWeight: 600,
               cursor: "pointer",
-              whiteSpace: "nowrap",
-              flexShrink: 0,
-              transition: "opacity 0.2s",
+              padding: "2px 8px",
+              borderRadius: 6,
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e2e8f0")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
           >
-            <Icon name="plus" size={15} color="#fff" />
-            Create Post
+            <Icon name="x" size={13} />
+            Clear filter
           </button>
         </div>
-      </div>
+      )}
 
       {/* 3-column layout */}
       <div
         style={{
-          maxWidth: 1280,
-          margin: "0 auto",
-          padding: "24px",
           display: "flex",
-          gap: 24,
+          gap: 20,
           alignItems: "flex-start",
+          padding: "20px",
         }}
       >
         {/* ── Left panel ──────────────────────────────────────────────────── */}
@@ -1234,7 +1254,7 @@ export function MarketFeed() {
             flexDirection: "column",
             gap: 16,
             position: "sticky",
-            top: 60,
+            top: 10,
           }}
         >
           {/* Profile card */}
@@ -1499,7 +1519,7 @@ export function MarketFeed() {
                 boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
               }}
             >
-              <Icon name="rss" size={40} color="#cbd5e1" />
+              <Icon name="radio" size={40} color="#cbd5e1" />
               <div style={{ fontSize: 16, fontWeight: 600, color: "#475569", marginTop: 12 }}>
                 No posts yet
               </div>
@@ -1538,6 +1558,12 @@ export function MarketFeed() {
                     onShare={(id) => console.log("share", id)}
                     currentUserId={CURRENT_USER_ID}
                     onEdit={(p) => setEditPost(p)}
+                    onViewProfile={(id) => setSelectedProfileId(id)}
+                    activeHashtag={activeHashtag ?? undefined}
+                    onHashtagClick={(tag) => {
+                      setActiveHashtag((prev) => (prev === tag ? null : tag));
+                      setVisibleCount(PAGE_SIZE);
+                    }}
                   />
                 );
               }
@@ -1649,7 +1675,7 @@ export function MarketFeed() {
             flexDirection: "column",
             gap: 16,
             position: "sticky",
-            top: 60,
+            top: 10,
           }}
         >
           {/* Trending */}
@@ -1668,25 +1694,43 @@ export function MarketFeed() {
               </span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {TRENDING_TOPICS.map((topic, idx) => (
+              {TRENDING_TOPICS.map((topic, idx) => {
+              // Strip leading # and extract raw tag for filtering
+              const rawTag = topic.label.replace(/^#/, "");
+              const isActiveTrending = activeHashtag?.toLowerCase() === rawTag.toLowerCase();
+              return (
                 <div
                   key={topic.label}
+                  onClick={() => {
+                    setActiveHashtag((prev) =>
+                      prev?.toLowerCase() === rawTag.toLowerCase() ? null : rawTag,
+                    );
+                    setVisibleCount(PAGE_SIZE);
+                    setActiveFilter("ALL");
+                  }}
                   style={{
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
                     padding: "8px 12px",
                     borderRadius: 8,
-                    backgroundColor: "#f8fafc",
+                    backgroundColor: isActiveTrending
+                      ? "var(--color-primary-50, #eef7fa)"
+                      : "#f8fafc",
                     cursor: "pointer",
                     transition: "background 0.15s",
+                    outline: isActiveTrending
+                      ? "1.5px solid var(--color-primary, #1e5f74)"
+                      : "none",
                   }}
                   onMouseEnter={(e) =>
                     (e.currentTarget.style.backgroundColor =
                       "var(--color-primary-50, #eef7fa)")
                   }
                   onMouseLeave={(e) =>
-                    (e.currentTarget.style.backgroundColor = "#f8fafc")
+                    (e.currentTarget.style.backgroundColor = isActiveTrending
+                      ? "var(--color-primary-50, #eef7fa)"
+                      : "#f8fafc")
                   }
                 >
                   <div>
@@ -1704,8 +1748,10 @@ export function MarketFeed() {
                   <span
                     style={{
                       fontSize: 11,
-                      backgroundColor: "var(--color-primary-50, #eef7fa)",
-                      color: "var(--color-primary, #1e5f74)",
+                      backgroundColor: isActiveTrending
+                        ? "var(--color-primary, #1e5f74)"
+                        : "var(--color-primary-50, #eef7fa)",
+                      color: isActiveTrending ? "#fff" : "var(--color-primary, #1e5f74)",
                       padding: "2px 7px",
                       borderRadius: 20,
                       fontWeight: 600,
@@ -1714,7 +1760,8 @@ export function MarketFeed() {
                     #{idx + 1}
                   </span>
                 </div>
-              ))}
+              );
+            })}
             </div>
           </div>
 
@@ -1768,7 +1815,7 @@ export function MarketFeed() {
                         {vendor.name}
                       </span>
                       {vendor.verified && (
-                        <Icon name="badge-check" size={13} color="var(--color-primary, #1e5f74)" />
+                        <Icon name="shield-check" size={13} color="var(--color-primary, #1e5f74)" />
                       )}
                     </div>
                     <div style={{ fontSize: 11, color: "#64748b" }}>
@@ -1865,6 +1912,12 @@ export function MarketFeed() {
           </div>
         </aside>
       </div>
+
+      {/* User Profile Modal */}
+      <UserProfileModal
+        authorId={selectedProfileId}
+        onClose={() => setSelectedProfileId(null)}
+      />
 
       {/* Create Post Modal */}
       <CreatePostModal

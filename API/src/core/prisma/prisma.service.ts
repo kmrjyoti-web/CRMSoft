@@ -64,13 +64,27 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     // Register soft-delete middleware on the WorkingDB client (business data)
     (this._globalWorking as any).$use(createSoftDeleteMiddleware());
 
-    await Promise.all([
+    // Connect each DB independently — a single unreachable DB must not crash the app.
+    // Prisma lazy-connects on the first query anyway; $connect() here is just an eager
+    // health check. Failed DBs will surface as errors on the first actual query.
+    const results = await Promise.allSettled([
       this._identity.$connect(),
       this._platform.$connect(),
       this._globalWorking.$connect(),
     ]);
 
-    this.logger.log('All 3 database clients connected (identity, platform, working)');
+    const names = ['identity', 'platform', 'working'];
+    results.forEach((r, i) => {
+      if (r.status === 'rejected') {
+        this.logger.warn(
+          `[DB:${names[i]}] Could not connect at startup — will retry on first query. ` +
+          `Reason: ${(r.reason as Error)?.message ?? r.reason}`,
+        );
+      }
+    });
+
+    const ok = results.filter((r) => r.status === 'fulfilled').length;
+    this.logger.log(`Database clients ready: ${ok}/3 connected at startup`);
   }
 
   async onModuleDestroy() {

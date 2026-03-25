@@ -2000,3 +2000,111 @@ model TestResult {
   @@index([module])
   @@map("test_results")
 }
+
+// ═══════════════════════════════════════════════════════
+// TEST GROUPS + MANUAL TESTING  (OPS-3)
+// ═══════════════════════════════════════════════════════
+
+enum TestGroupStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model TestGroup {
+  id          String          @id @default(uuid())
+  tenantId    String          @map("tenant_id")
+
+  name        String
+  nameHi      String?         @map("name_hi")
+  description String?         @db.Text
+  icon        String?
+  color       String?
+
+  modules     String[]
+  steps       Json            @default("[]")
+
+  status            TestGroupStatus @default(ACTIVE)
+  isSystem          Boolean         @default(false) @map("is_system")
+  estimatedDuration Int?            @map("estimated_duration")
+
+  runCount      Int       @default(0) @map("run_count")
+  lastRunAt     DateTime? @map("last_run_at")
+  lastRunStatus String?   @map("last_run_status")
+
+  isDeleted   Boolean  @default(false) @map("is_deleted")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdById String   @map("created_by_id")
+
+  executions TestGroupExecution[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("test_groups")
+}
+
+model TestGroupExecution {
+  id          String    @id @default(uuid())
+  testGroupId String    @map("test_group_id")
+  testGroup   TestGroup @relation(fields: [testGroupId], references: [id])
+  testRunId   String?   @map("test_run_id")
+  testEnvId   String?   @map("test_env_id")
+  tenantId    String    @map("tenant_id")
+
+  status      String @default("RUNNING")
+  currentStep Int    @default(0) @map("current_step")
+  totalSteps  Int    @map("total_steps")
+
+  stepResults  Json @default("[]") @map("step_results")
+
+  totalPassed Int @default(0) @map("total_passed")
+  totalFailed Int @default(0) @map("total_failed")
+  totalErrors Int @default(0) @map("total_errors")
+  duration    Int @default(0)
+
+  startedAt    DateTime  @default(now()) @map("started_at")
+  completedAt  DateTime? @map("completed_at")
+  executedById String    @map("executed_by_id")
+
+  @@index([testGroupId])
+  @@index([tenantId])
+  @@map("test_group_executions")
+}
+
+model ManualTestLog {
+  id          String  @id @default(uuid())
+  testRunId   String? @map("test_run_id")
+  testGroupId String? @map("test_group_id")
+  tenantId    String  @map("tenant_id")
+  userId      String  @map("user_id")
+
+  module     String
+  pageName   String @map("page_name")
+  action     String
+
+  expectedResult String @map("expected_result") @db.Text
+  actualResult   String @map("actual_result") @db.Text
+  status         String @default("PASS")
+  severity       String?
+
+  screenshotUrls Json    @default("[]") @map("screenshot_urls")
+  videoUrl       String? @map("video_url")
+  notes          String? @db.Text
+
+  browser          String?
+  os               String?
+  screenResolution String? @map("screen_resolution")
+
+  bugReported Boolean @default(false) @map("bug_reported")
+  bugId       String? @map("bug_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([tenantId])
+  @@index([testRunId])
+  @@index([module])
+  @@index([status])
+  @@map("manual_test_logs")
+}

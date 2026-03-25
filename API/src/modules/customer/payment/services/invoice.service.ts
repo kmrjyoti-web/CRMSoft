@@ -265,6 +265,7 @@ export class InvoiceService {
   async list(tenantId: string, query: InvoiceQueryDto) {
     const where: any = { tenantId };
     if (query.status) where.status = query.status;
+    if (query.leadId) where.leadId = query.leadId;
     if (query.contactId) where.contactId = query.contactId;
     if (query.organizationId) where.organizationId = query.organizationId;
     if (query.fromDate || query.toDate) {

@@ -256,12 +256,17 @@ export class PlatformBootstrapService implements OnModuleInit {
     }
   }
 
-  /** Count how many menu items MENU_SEED_DATA produces (parents + children). */
+  /** Count how many menu items MENU_SEED_DATA produces (all 3 levels). */
   private countExpectedMenus(): number {
     let count = 0;
     for (const item of MENU_SEED_DATA) {
-      count++; // parent
-      if (item.children) count += item.children.length;
+      count++;
+      if (item.children) {
+        count += item.children.length;
+        for (const child of item.children) {
+          if (child.children) count += child.children.length;
+        }
+      }
     }
     return count;
   }
@@ -316,17 +321,33 @@ export class PlatformBootstrapService implements OnModuleInit {
   }
 
   /**
-   * Delete all menus for a tenant and re-seed from scratch.
-   * Using delete+create is simpler and avoids orphaned parent references.
+   * Delete all menus for a tenant and re-seed from scratch (3 levels deep).
+   * Deletes grandchildren → children → parents to respect FK self-reference.
    */
   private async repairMenusForTenant(tenantId: string) {
-    // Delete children first (parentId not null), then parents
+    // Step 1: find all level-2 ids (have a parent) — their children are level-3
+    const level2 = await this.prisma.identity.menu.findMany({
+      where: { tenantId, parentId: { not: null } },
+      select: { id: true },
+    });
+    const level2Ids = level2.map((m) => m.id);
+
+    // Step 2: delete level-3 grandchildren first
+    if (level2Ids.length > 0) {
+      await this.prisma.identity.menu.deleteMany({
+        where: { tenantId, parentId: { in: level2Ids } },
+      });
+    }
+
+    // Step 3: delete level-2 children
     await this.prisma.identity.menu.deleteMany({
       where: { tenantId, parentId: { not: null } },
     });
+
+    // Step 4: delete level-1 roots
     await this.prisma.identity.menu.deleteMany({ where: { tenantId } });
 
-    // Re-create from seed data
+    // Re-create all 3 levels from seed data
     let sortOrder = 0;
     for (const item of MENU_SEED_DATA) {
       const parent = await this.prisma.identity.menu.create({
@@ -338,9 +359,10 @@ export class PlatformBootstrapService implements OnModuleInit {
           route: item.route ?? null,
           menuType: item.menuType ?? 'ITEM',
           permissionModule: item.permissionModule ?? null,
-          permissionAction: item.permissionAction ?? null,
+          permissionAction: item.permissionAction ?? (item.permissionModule ? 'read' : null),
           badgeText: item.badgeText ?? null,
           badgeColor: item.badgeColor ?? null,
+          isAdminOnly: item.isAdminOnly ?? false,
           sortOrder: sortOrder++,
         },
       });
@@ -348,7 +370,7 @@ export class PlatformBootstrapService implements OnModuleInit {
       if (item.children) {
         let childOrder = 0;
         for (const child of item.children) {
-          await this.prisma.identity.menu.create({
+          const childMenu = await this.prisma.identity.menu.create({
             data: {
               tenantId,
               parentId: parent.id,
@@ -358,12 +380,37 @@ export class PlatformBootstrapService implements OnModuleInit {
               route: child.route ?? null,
               menuType: child.menuType ?? 'ITEM',
               permissionModule: child.permissionModule ?? null,
-              permissionAction: child.permissionAction ?? null,
+              permissionAction: child.permissionAction ?? (child.permissionModule ? 'read' : null),
               badgeText: child.badgeText ?? null,
               badgeColor: child.badgeColor ?? null,
+              isAdminOnly: child.isAdminOnly ?? false,
               sortOrder: childOrder++,
             },
           });
+
+          // Level 3 — grandchildren
+          if (child.children) {
+            let grandOrder = 0;
+            for (const grandchild of child.children) {
+              await this.prisma.identity.menu.create({
+                data: {
+                  tenantId,
+                  parentId: childMenu.id,
+                  name: grandchild.name,
+                  code: grandchild.code,
+                  icon: grandchild.icon ?? null,
+                  route: grandchild.route ?? null,
+                  menuType: grandchild.menuType ?? 'ITEM',
+                  permissionModule: grandchild.permissionModule ?? null,
+                  permissionAction: grandchild.permissionAction ?? (grandchild.permissionModule ? 'read' : null),
+                  badgeText: grandchild.badgeText ?? null,
+                  badgeColor: grandchild.badgeColor ?? null,
+                  isAdminOnly: grandchild.isAdminOnly ?? false,
+                  sortOrder: grandOrder++,
+                },
+              });
+            }
+          }
         }
       }
     }

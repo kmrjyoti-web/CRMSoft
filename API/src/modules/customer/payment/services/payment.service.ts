@@ -159,6 +159,7 @@ export class PaymentService {
   async list(tenantId: string, query: PaymentQueryDto) {
     const where: any = { tenantId };
     if (query.invoiceId) where.invoiceId = query.invoiceId;
+    if (query.leadId) where.invoice = { leadId: query.leadId };
     if (query.status) where.status = query.status;
     if (query.fromDate || query.toDate) {
       where.createdAt = {};

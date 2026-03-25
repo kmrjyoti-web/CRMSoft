@@ -28,20 +28,12 @@ export class GetLeadByIdHandler implements IQueryHandler<GetLeadByIdQuery> {
             id: true, name: true, city: true, industry: true,
           },
         },
-        allocatedTo: {
-          select: { id: true, firstName: true, lastName: true, email: true },
-        },
-        createdByUser: {
-          select: { id: true, firstName: true, lastName: true },
-        },
+        // allocatedTo / createdByUser are in identity DB — use IDs only
+        // lookupValue is in platform DB — use IDs only
         filters: {
-          include: {
-            lookupValue: {
-              select: {
-                id: true, value: true, label: true,
-                lookup: { select: { category: true } },
-              },
-            },
+          select: {
+            id: true,
+            lookupValueId: true,
           },
         },
         activities: {

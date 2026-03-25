@@ -1,5 +1,5 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_INTERCEPTOR } from '@nestjs/core';
@@ -94,6 +94,8 @@ import { ControlRoomModule } from './modules/softwarevendor/control-room/control
 import { CrossServiceModule } from './common/cross-service/cross-service.module';
 import { CustomerPortalModule } from './modules/softwarevendor/customer-portal/customer-portal.module';
 import { CustomerPortalModule as CustomerPortalAuthModule } from './modules/customer-portal/customer-portal.module';
+import { OpsModule } from './modules/ops/ops.module';
+import { BullModule } from '@nestjs/bull';
 import { TenantAuditMiddleware } from './modules/core/identity/tenant/infrastructure/tenant-audit.middleware';
 
 @Module({
@@ -101,6 +103,13 @@ import { TenantAuditMiddleware } from './modules/core/identity/tenant/infrastruc
     ConfigModule.forRoot({ isGlobal: true }),
     CqrsModule.forRoot(),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        redis: config.get<string>('REDIS_URL', 'redis://localhost:6379'),
+      }),
+      inject: [ConfigService],
+    }),
     PrismaModule,
     AuthModule,
     PermissionsCoreModule,
@@ -186,6 +195,7 @@ import { TenantAuditMiddleware } from './modules/core/identity/tenant/infrastruc
     CrossServiceModule,
     CustomerPortalModule,
     CustomerPortalAuthModule,
+    OpsModule,
     ErrorsModule,
   ],
   controllers: [],
