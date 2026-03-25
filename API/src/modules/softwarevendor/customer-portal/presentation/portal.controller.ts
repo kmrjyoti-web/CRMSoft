@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Body, HttpCode, HttpStatus,
+  Controller, Get, Post, Patch, Body, HttpCode, HttpStatus,
 } from '@nestjs/common';
 import { CustomerPortalService, PORTAL_DEFAULT_ROUTES } from '../customer-portal.service';
 import { ApiResponse } from '../../../../common/utils/api-response';
@@ -62,5 +62,40 @@ export class PortalController {
   @Get('routes')
   getRoutes() {
     return ApiResponse.success(PORTAL_DEFAULT_ROUTES);
+  }
+
+  // ── Authenticated (portal JWT) ─────────────────────────────────────────────
+
+  /** GET /portal/me — current user profile + available routes */
+  @Get('me')
+  async getMe(
+    @CurrentUser('tenantId') tenantId: string,
+    @CurrentUser('sub') userId: string,
+  ) {
+    const data = await this.service.getMe(tenantId, userId);
+    return ApiResponse.success(data);
+  }
+
+  /** PATCH /portal/me — update own profile */
+  @Patch('me')
+  async updateMe(
+    @CurrentUser('tenantId') tenantId: string,
+    @CurrentUser('sub') userId: string,
+    @Body() dto: { displayName?: string; phone?: string },
+  ) {
+    const data = await this.service.updateMe(tenantId, userId, dto);
+    return ApiResponse.success(data);
+  }
+
+  /** POST /portal/me/change-password — change own password */
+  @Post('me/change-password')
+  @HttpCode(HttpStatus.OK)
+  async changeMyPassword(
+    @CurrentUser('tenantId') tenantId: string,
+    @CurrentUser('sub') userId: string,
+    @Body() dto: { currentPassword: string; newPassword: string },
+  ) {
+    const data = await this.service.changeMyPassword(tenantId, userId, dto.currentPassword, dto.newPassword);
+    return ApiResponse.success(data);
   }
 }

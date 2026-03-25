@@ -422,6 +422,59 @@ export class CustomerPortalService {
     return { seeded: true };
   }
 
+  // ── Self-service ──────────────────────────────────────────────────────────
+
+  /** Returns the currently authenticated portal user's profile + available routes */
+  async getMe(tenantId: string, userId: string) {
+    const cu = await this.prisma.identity.customerUser.findFirst({
+      where: { id: userId, tenantId, isDeleted: false },
+      include: { menuCategory: true },
+    });
+    if (!cu) throw new NotFoundException('User not found');
+
+    return {
+      ...this.mapCustomerUser(cu),
+      availableRoutes: this.resolveRoutes(
+        cu.menuCategory?.enabledRoutes as string[] | null,
+        cu.pageOverrides as Record<string, boolean> | null,
+      ),
+    };
+  }
+
+  /** Update portal user's own profile */
+  async updateMe(tenantId: string, userId: string, data: { displayName?: string; phone?: string }) {
+    const cu = await this.prisma.identity.customerUser.findFirst({
+      where: { id: userId, tenantId, isDeleted: false },
+    });
+    if (!cu) throw new NotFoundException('User not found');
+
+    const updated = await this.prisma.identity.customerUser.update({
+      where: { id: userId },
+      data: {
+        ...(data.displayName && { displayName: data.displayName }),
+      },
+    });
+    return this.mapCustomerUser(updated);
+  }
+
+  /** Change own password */
+  async changeMyPassword(tenantId: string, userId: string, currentPassword: string, newPassword: string) {
+    const cu = await this.prisma.identity.customerUser.findFirst({
+      where: { id: userId, tenantId, isDeleted: false },
+    });
+    if (!cu) throw new NotFoundException('User not found');
+
+    const valid = await bcrypt.compare(currentPassword, cu.passwordHash);
+    if (!valid) throw new UnauthorizedException('Current password is incorrect');
+
+    const newHash = await bcrypt.hash(newPassword, 12);
+    await this.prisma.identity.customerUser.update({
+      where: { id: userId },
+      data: { passwordHash: newHash, isFirstLogin: false },
+    });
+    return { message: 'Password changed successfully' };
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   private mapCustomerUser(cu: any) {
