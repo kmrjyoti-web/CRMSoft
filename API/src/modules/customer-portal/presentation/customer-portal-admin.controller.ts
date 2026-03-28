@@ -192,7 +192,12 @@ export class CustomerPortalAdminController {
   @Get('available-routes')
   @ApiOperation({ summary: 'Get all available customer portal pages (for menu builder UI)' })
   getAvailableRoutes() {
-    return { routes: CUSTOMER_PORTAL_ROUTES };
+    return CUSTOMER_PORTAL_ROUTES.map((r) => ({
+      key: r.route,
+      label: r.name,
+      icon: r.icon,
+      path: r.route,
+    }));
   }
 
   // ═══ ANALYTICS ════════════════════════════════════════

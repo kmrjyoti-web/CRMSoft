@@ -23,6 +23,15 @@ export class ArchitectureTestRunner implements ITestTypeRunner {
     // 4. Cross-module direct DB access
     results.push(...(await this.checkDbClientIsolation()));
 
+    // 5. Naming conventions (kebab-case files, PascalCase classes)
+    results.push(...(await this.checkNamingConventions()));
+
+    // 6. Illegal implementation patterns (console.log, hardcoded, TODO/FIXME)
+    results.push(...(await this.checkIllegalImplementations()));
+
+    // 7. Unsafe code patterns (any casts, eval, SQL string concat)
+    results.push(...(await this.checkUnsafePatterns()));
+
     return {
       type: TestType.ARCHITECTURE,
       total: results.length,
@@ -188,6 +197,144 @@ export class ArchitectureTestRunner implements ITestTypeRunner {
         });
       }
     }
+    return results;
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // NAMING CONVENTIONS
+  // ─────────────────────────────────────────────────────────
+
+  private async checkNamingConventions(): Promise<SingleTestResult[]> {
+    const results: SingleTestResult[] = [];
+
+    // Check for PascalCase violations in class names
+    try {
+      const output = execSync(
+        `grep -rn "^export class [a-z]" src/modules --include="*.ts" 2>/dev/null | grep -v "spec\\|__tests__" | head -20 || true`,
+        { encoding: 'utf-8', timeout: 15_000 },
+      );
+      const violations = output.trim() ? output.trim().split('\n').filter(Boolean) : [];
+      results.push({
+        suiteName: 'Naming Conventions',
+        testName: 'Classes use PascalCase',
+        status: violations.length === 0 ? 'PASS' : 'FAIL',
+        duration: 0,
+        errorMessage: violations.length > 0 ? `${violations.length} class(es) do not use PascalCase:\n${violations.slice(0, 5).join('\n')}` : undefined,
+      });
+    } catch (err: any) {
+      results.push({ suiteName: 'Naming Conventions', testName: 'PascalCase class check', status: 'ERROR', duration: 0, errorMessage: err.message });
+    }
+
+    // Check for camelCase or PascalCase filenames (should be kebab-case)
+    try {
+      const output = execSync(
+        `find src/modules -name "*.ts" | grep -v "spec\\|__tests__\\|node_modules" | grep -E "[A-Z]" | grep -v "index.ts\\|MEMORY" | head -20 || true`,
+        { encoding: 'utf-8', timeout: 15_000 },
+      );
+      const violations = output.trim() ? output.trim().split('\n').filter(Boolean) : [];
+      results.push({
+        suiteName: 'Naming Conventions',
+        testName: 'Files use kebab-case',
+        status: violations.length === 0 ? 'PASS' : 'WARN' as any,
+        duration: 0,
+        errorMessage: violations.length > 0 ? `${violations.length} file(s) are not kebab-case` : undefined,
+      });
+    } catch (err: any) {
+      results.push({ suiteName: 'Naming Conventions', testName: 'Kebab-case file check', status: 'ERROR', duration: 0, errorMessage: err.message });
+    }
+
+    return results;
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // ILLEGAL IMPLEMENTATIONS
+  // ─────────────────────────────────────────────────────────
+
+  private async checkIllegalImplementations(): Promise<SingleTestResult[]> {
+    const results: SingleTestResult[] = [];
+
+    const patterns: Array<{ name: string; pattern: string; severity: 'FAIL' | 'SKIP' }> = [
+      { name: 'No console.log/warn/error in production code', pattern: `console\\.log\\|console\\.warn\\|console\\.error`, severity: 'SKIP' },
+      { name: 'No hardcoded localhost URLs', pattern: `localhost:[0-9]\\{4,5\\}`, severity: 'FAIL' },
+      { name: 'No TODO/FIXME/HACK comments', pattern: `TODO\\|FIXME\\|HACK\\|XXX`, severity: 'SKIP' },
+      { name: 'No plaintext passwords/secrets', pattern: `password\\s*=\\s*[\'"][^\'"]\\{4\\}`, severity: 'FAIL' },
+      { name: 'No unpaginated queries (limit > 10000)', pattern: `take:\\s*1000[0-9]\\|limit:\\s*1000[0-9]`, severity: 'FAIL' },
+    ];
+
+    for (const p of patterns) {
+      try {
+        const output = execSync(
+          `grep -rn "${p.pattern}" src/modules --include="*.ts" 2>/dev/null | grep -v "spec\\|__tests__\\|\\.d\\.ts" | wc -l`,
+          { encoding: 'utf-8', timeout: 10_000 },
+        );
+        const count = parseInt(output.trim(), 10);
+        results.push({
+          suiteName: 'Illegal Implementations',
+          testName: p.name,
+          status: count === 0 ? 'PASS' : p.severity,
+          duration: 0,
+          errorMessage: count > 0 ? `${count} instance(s) found` : undefined,
+          actualValue: count > 0 ? String(count) : undefined,
+        });
+      } catch (err: any) {
+        results.push({ suiteName: 'Illegal Implementations', testName: p.name, status: 'ERROR', duration: 0, errorMessage: err.message });
+      }
+    }
+
+    return results;
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // UNSAFE PATTERNS
+  // ─────────────────────────────────────────────────────────
+
+  private async checkUnsafePatterns(): Promise<SingleTestResult[]> {
+    const results: SingleTestResult[] = [];
+
+    const patterns: Array<{ name: string; pattern: string }> = [
+      { name: 'No eval() usage', pattern: `\\beval\\s*(` },
+      { name: 'No SQL string concatenation', pattern: `\\$\`.*WHERE\\|"SELECT.*" \\+\\|"INSERT.*" \\+` },
+      { name: 'No dangerouslySetInnerHTML equivalent in API', pattern: `dangerouslySet\\|innerHTML\\s*=` },
+      { name: 'No untyped JSON.parse without try-catch context', pattern: `JSON\\.parse\\s*(.*)\\.trim\\|JSON\\.parse\\s*(.*);$` },
+    ];
+
+    for (const p of patterns) {
+      try {
+        const output = execSync(
+          `grep -rEn "${p.pattern}" src/modules --include="*.ts" 2>/dev/null | grep -v "spec\\|__tests__\\|\\.d\\.ts" | wc -l`,
+          { encoding: 'utf-8', timeout: 10_000 },
+        );
+        const count = parseInt(output.trim(), 10);
+        results.push({
+          suiteName: 'Unsafe Patterns',
+          testName: p.name,
+          status: count === 0 ? 'PASS' : 'FAIL',
+          duration: 0,
+          errorMessage: count > 0 ? `${count} unsafe instance(s) found` : undefined,
+          actualValue: count > 0 ? String(count) : undefined,
+        });
+      } catch (err: any) {
+        results.push({ suiteName: 'Unsafe Patterns', testName: p.name, status: 'ERROR', duration: 0, errorMessage: err.message });
+      }
+    }
+
+    // Type-safety: count `as any` casts (warn only)
+    try {
+      const output = execSync(
+        `grep -rn " as any" src/modules --include="*.ts" 2>/dev/null | grep -v "spec\\|__tests__" | wc -l`,
+        { encoding: 'utf-8', timeout: 10_000 },
+      );
+      const count = parseInt(output.trim(), 10);
+      results.push({
+        suiteName: 'Unsafe Patterns',
+        testName: '`as any` casts are minimal',
+        status: count < 20 ? 'PASS' : 'SKIP',
+        duration: 0,
+        errorMessage: count >= 20 ? `${count} "as any" casts — consider adding proper types` : undefined,
+        actualValue: String(count),
+      });
+    } catch { /* skip */ }
+
     return results;
   }
 

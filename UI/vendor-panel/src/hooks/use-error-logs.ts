@@ -85,3 +85,15 @@ export function useAutoReportRules() {
     queryFn: () => errorLogsApi.listRules(),
   });
 }
+
+export function useReportToProvider() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => errorLogsApi.reportToProvider(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['error-log'] });
+      qc.invalidateQueries({ queryKey: ['error-logs'] });
+      qc.invalidateQueries({ queryKey: ['error-log-detail'] });
+    },
+  });
+}

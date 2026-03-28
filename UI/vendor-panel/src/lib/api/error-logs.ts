@@ -38,4 +38,7 @@ export const errorLogsApi = {
 
   deleteRule: (id: string) =>
     apiClient.delete(`/admin/error-logs/auto-report-rules/${id}`).then((r) => r.data),
+
+  reportToProvider: (id: string) =>
+    apiClient.post(`/admin/errors/logs/${id}/report-to-provider`).then((r) => r.data),
 };

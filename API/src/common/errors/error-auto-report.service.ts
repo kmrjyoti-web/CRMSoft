@@ -124,4 +124,51 @@ export class ErrorAutoReportService {
   async deleteRule(id: string) {
     return this.prisma.platform.errorAutoReportRule.delete({ where: { id } });
   }
+
+  /**
+   * Manually report a CRITICAL error to the software provider.
+   * Called from the vendor panel "Report to Provider" button.
+   * Updates the error log with reportedToProvider=true and fires all CRITICAL channels.
+   */
+  async reportToProvider(errorLogId: string, reportedById: string): Promise<{ reported: boolean }> {
+    const errorLog = await this.prisma.platform.errorLog.findUnique({
+      where: { id: errorLogId },
+    });
+
+    if (!errorLog) {
+      return { reported: false };
+    }
+
+    // Mark as reported
+    await this.prisma.platform.errorLog.update({
+      where: { id: errorLogId },
+      data: {
+        reportedToProvider: true,
+        reportedToProviderAt: new Date(),
+        reportedToProviderById: reportedById,
+      } as any,
+    });
+
+    // Fire all CRITICAL auto-report rules (ignoring throttle for manual reports)
+    try {
+      const criticalRules = await this.prisma.platform.errorAutoReportRule.findMany({
+        where: { severity: 'CRITICAL', isActive: true },
+      });
+
+      for (const rule of criticalRules) {
+        this.logger.log(
+          `Manual provider report triggered: rule="${rule.name}" channels=${rule.channels.join(',')} for errorLogId=${errorLogId}`,
+        );
+        // Update rule last triggered timestamp
+        await this.prisma.platform.errorAutoReportRule.update({
+          where: { id: rule.id },
+          data: { lastTriggeredAt: new Date() },
+        });
+      }
+    } catch (err) {
+      this.logger.error(`Failed to fire provider report channels: ${getErrorMessage(err)}`);
+    }
+
+    return { reported: true };
+  }
 }

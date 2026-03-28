@@ -11,8 +11,11 @@ import {
   HttpCode,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { RequirePermissions } from '../../../core/permissions/decorators/require-permissions.decorator';
+import { CurrentUser } from '../../decorators/current-user.decorator';
 import { ErrorCatalogService } from '../error-catalog.service';
 import { ErrorLoggerService } from '../error-logger.service';
+import { ErrorAutoReportService } from '../error-auto-report.service';
 import { ERROR_CODES, TOTAL_ERROR_CODES } from '../error-codes';
 import { generateErrorReference } from '../error-docs-generator';
 import { PrismaService } from '../../../core/prisma/prisma.service';
@@ -23,6 +26,7 @@ export class ErrorAdminController {
   constructor(
     private readonly catalogService: ErrorCatalogService,
     private readonly loggerService: ErrorLoggerService,
+    private readonly autoReportService: ErrorAutoReportService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -199,6 +203,30 @@ export class ErrorAdminController {
   async getByTraceId(@Param('traceId') traceId: string) {
     const logs = await this.loggerService.getByTraceId(traceId);
     return { traceId, count: logs.length, logs };
+  }
+
+  // ═══════════════════════════════════════════════════
+  // REPORT TO PROVIDER
+  // ═══════════════════════════════════════════════════
+
+  /**
+   * POST /admin/errors/logs/:id/report-to-provider
+   * Manually report a CRITICAL error to the software provider.
+   * Vendor panel "Report to Provider" button calls this endpoint.
+   */
+  @Post('logs/:id/report-to-provider')
+  @RequirePermissions('ops:manage')
+  async reportToProvider(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+  ) {
+    const result = await this.autoReportService.reportToProvider(id, userId);
+    return {
+      success: result.reported,
+      message: result.reported
+        ? 'Error reported to software provider successfully.'
+        : 'Error log not found.',
+    };
   }
 
   // ═══════════════════════════════════════════════════

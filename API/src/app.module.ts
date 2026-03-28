@@ -84,6 +84,9 @@ import { InventoryModule } from './modules/customer/inventory/inventory.module';
 import { ProcurementModule } from './modules/customer/procurement/procurement.module';
 import { AccountsModule } from './modules/customer/accounts/accounts.module';
 import { SalesModule } from './modules/customer/sales/sales.module';
+import { PriceListsModule } from './modules/customer/price-lists/price-lists.module';
+import { PerformanceModule } from './modules/customer/performance/performance.module';
+import { SavedFiltersModule } from './modules/customer/saved-filters/saved-filters.module';
 import { KeyboardShortcutsModule } from './modules/softwarevendor/keyboard-shortcuts/keyboard-shortcuts.module';
 import { EntityVerificationModule } from './modules/customer/entity-verification/entity-verification.module';
 import { SmartSearchModule } from './modules/core/work/search/smart-search.module';
@@ -95,6 +98,8 @@ import { CrossServiceModule } from './common/cross-service/cross-service.module'
 import { CustomerPortalModule } from './modules/softwarevendor/customer-portal/customer-portal.module';
 import { CustomerPortalModule as CustomerPortalAuthModule } from './modules/customer-portal/customer-portal.module';
 import { OpsModule } from './modules/ops/ops.module';
+import { VersionControlModule } from './modules/softwarevendor/version-control/version-control.module';
+import { HealthModule } from './modules/core/health/health.module';
 import { BullModule } from '@nestjs/bull';
 import { TenantAuditMiddleware } from './modules/core/identity/tenant/infrastructure/tenant-audit.middleware';
 
@@ -185,6 +190,9 @@ import { TenantAuditMiddleware } from './modules/core/identity/tenant/infrastruc
     ProcurementModule,
     AccountsModule,
     SalesModule,
+    PriceListsModule,
+    PerformanceModule,
+    SavedFiltersModule,
     KeyboardShortcutsModule,
     EntityVerificationModule,
     SmartSearchModule,
@@ -196,6 +204,8 @@ import { TenantAuditMiddleware } from './modules/core/identity/tenant/infrastruc
     CustomerPortalModule,
     CustomerPortalAuthModule,
     OpsModule,
+    VersionControlModule,
+    HealthModule,
     ErrorsModule,
   ],
   controllers: [],

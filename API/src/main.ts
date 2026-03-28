@@ -4,6 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { validateEnv } from './common/config/env-validator';
 import { GlobalExceptionFilter } from './common/errors/global-exception.filter';
 import { ErrorLoggerService } from './common/errors/error-logger.service';
 import { ErrorCatalogService } from './common/errors/error-catalog.service';
@@ -11,6 +12,7 @@ import { ResponseMapperInterceptor } from './common/response/response-mapper.int
 import { RequestIdMiddleware } from './common/request/request-id.middleware';
 
 async function bootstrap() {
+  if (process.env.NODE_ENV !== 'test') validateEnv();
   const isProd = process.env.NODE_ENV === 'production';
   const app = await NestFactory.create(AppModule, {
     logger: isProd ? ['error', 'warn'] : ['error', 'warn', 'log', 'debug', 'verbose'],

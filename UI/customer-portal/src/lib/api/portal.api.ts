@@ -12,27 +12,29 @@ import type {
   PortalUser,
 } from '@/types/portal';
 
+const DEFAULT_TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? '07f09c53-5073-4328-a6fb-f64844d6cae4';
+
 export const portalAuthApi = {
-  login: (email: string, password: string) =>
+  login: (email: string, password: string, tenantId = DEFAULT_TENANT_ID) =>
     apiClient
-      .post<ApiResponse<LoginResponse>>('/portal/login', { email, password })
+      .post<ApiResponse<LoginResponse>>('/customer/auth/login', { email, password, tenantId })
       .then((r) => r.data),
 
-  forgotPassword: (email: string) =>
+  forgotPassword: (email: string, tenantId = DEFAULT_TENANT_ID) =>
     apiClient
-      .post<ApiResponse<{ message: string }>>('/portal/forgot-password', { email })
+      .post<ApiResponse<{ message: string }>>('/customer/auth/forgot-password', { email, tenantId })
       .then((r) => r.data),
 
   resetPassword: (token: string, newPassword: string) =>
     apiClient
-      .post<ApiResponse<{ message: string }>>('/portal/reset-password', { token, newPassword })
+      .post<ApiResponse<{ message: string }>>('/customer/auth/reset-password', { token, newPassword })
       .then((r) => r.data),
 
   getMe: () =>
-    apiClient.get<ApiResponse<PortalUser>>('/portal/me').then((r) => r.data),
+    apiClient.get<ApiResponse<PortalUser>>('/customer/auth/profile').then((r) => r.data),
 
   getRoutes: () =>
-    apiClient.get<ApiResponse<PortalRoute[]>>('/portal/routes').then((r) => r.data),
+    apiClient.get<ApiResponse<PortalRoute[]>>('/customer/auth/menu').then((r) => r.data),
 };
 
 export const portalDataApi = {

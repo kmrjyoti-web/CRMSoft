@@ -291,6 +291,15 @@ export const MENU_SEED_DATA: MenuSeedItem[] = [
       { name: 'Menus', code: 'SET_MENUS', icon: 'menu', route: '/settings/menus', permissionModule: 'settings', permissionAction: 'read' },
       { name: 'Notification Config', code: 'SET_NOTIF', icon: 'bell', route: '/settings/notification-config', permissionModule: 'settings', permissionAction: 'read' },
       { name: 'Data Masking', code: 'SET_MASKING', icon: 'eye-off', route: '/settings/data-masking', permissionModule: 'settings', permissionAction: 'read' },
+      {
+        name: 'Customer Portal', code: 'SET_CUSTOMER_PORTAL', icon: 'globe', route: '/settings/customer-portal', permissionModule: 'settings', permissionAction: 'read',
+        children: [
+          { name: 'Dashboard',       code: 'SET_CP_DASHBOARD',  icon: 'layout-dashboard', route: '/settings/customer-portal',                permissionModule: 'settings', permissionAction: 'read' },
+          { name: 'Activation',      code: 'SET_CP_ACTIVATION', icon: 'unlock',           route: '/settings/customer-portal/activation',      permissionModule: 'settings', permissionAction: 'read' },
+          { name: 'Users',           code: 'SET_CP_USERS',      icon: 'users',            route: '/settings/customer-portal/users',            permissionModule: 'settings', permissionAction: 'read' },
+          { name: 'Menu Categories', code: 'SET_CP_MENUS',      icon: 'layout-list',      route: '/settings/customer-portal/menu-categories',  permissionModule: 'settings', permissionAction: 'read' },
+        ],
+      },
       { name: 'Business Types', code: 'SET_BIZ_TYPES', icon: 'briefcase', route: '/settings/business-types', permissionModule: 'settings', permissionAction: 'read' },
       { name: 'AI Models', code: 'SET_AI', icon: 'cpu', route: '/settings/ai', permissionModule: 'settings', permissionAction: 'read' },
       { name: 'Google', code: 'SET_GOOGLE', icon: 'globe', route: '/settings/google', permissionModule: 'settings', permissionAction: 'read' },

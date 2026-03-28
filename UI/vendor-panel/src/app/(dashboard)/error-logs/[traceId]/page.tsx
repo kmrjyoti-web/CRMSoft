@@ -4,13 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft, Clock, Globe, User, Shield, Bell,
-  CheckCircle, XCircle, UserPlus, Timer, Building2,
+  CheckCircle, XCircle, UserPlus, Timer, Building2, AlertOctagon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
-import { useErrorLog, useResolveError, useIgnoreError } from '@/hooks/use-error-logs';
+import { useErrorLog, useResolveError, useIgnoreError, useReportToProvider } from '@/hooks/use-error-logs';
+import { toast } from 'sonner';
 import { formatDateTime } from '@/lib/utils';
 import type { ErrorSeverity } from '@/types/error-log';
 
@@ -59,6 +60,15 @@ export default function ErrorLogDetailPage({ params }: { params: { traceId: stri
 
   const resolveError = useResolveError();
   const ignoreError = useIgnoreError();
+  const reportToProvider = useReportToProvider();
+
+  const handleReportToProvider = () => {
+    if (!confirm('This will notify the software provider about this critical error. Continue?')) return;
+    reportToProvider.mutate(log.id, {
+      onSuccess: () => toast.success('Error reported to software provider'),
+      onError: () => toast.error('Failed to report error'),
+    });
+  };
 
   if (isLoading) return <LoadingSpinner />;
   if (!log) return <div className="text-center py-16 text-gray-500">Error log not found</div>;
@@ -116,6 +126,24 @@ export default function ErrorLogDetailPage({ params }: { params: { traceId: stri
                 Ignore
               </Button>
             </>
+          )}
+          {/* Report to Provider — only for CRITICAL errors */}
+          {log.severity === 'CRITICAL' && !log.reportedToProvider && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleReportToProvider}
+              disabled={reportToProvider.isPending}
+            >
+              <AlertOctagon className="h-4 w-4 mr-1" />
+              {reportToProvider.isPending ? 'Reporting...' : 'Report to Provider'}
+            </Button>
+          )}
+          {log.severity === 'CRITICAL' && log.reportedToProvider && (
+            <span className="text-xs text-purple-700 font-medium flex items-center gap-1">
+              <AlertOctagon className="h-3 w-3" />
+              Reported to Provider
+            </span>
           )}
         </div>
       </div>

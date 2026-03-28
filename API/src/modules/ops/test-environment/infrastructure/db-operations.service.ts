@@ -3,6 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { execSync } from 'child_process';
 import { Client as PgClient } from 'pg';
 import * as path from 'path';
+import * as fs from 'fs';
+import * as crypto from 'crypto';
+import * as os from 'os';
 
 @Injectable()
 export class DbOperationsService {
@@ -102,6 +105,64 @@ export class DbOperationsService {
       await this.runMigrations(testDbUrl, schema);
     }
     return schemas.length;
+  }
+
+  /**
+   * Create a pg_dump backup of a database (custom format, compressed).
+   * Returns the backup file path, file size in bytes, and SHA-256 checksum.
+   * The caller is responsible for moving/uploading the file afterwards.
+   */
+  async createBackup(
+    sourceDbUrl: string,
+    outputPath?: string,
+  ): Promise<{ filePath: string; sizeBytes: number; checksum: string; tableCount: number }> {
+    this.assertPgDumpAvailable();
+
+    const src = this.parseDbUrl(sourceDbUrl);
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, 19);
+    const fileName = `backup_${src.database}_${timestamp}.dump`;
+    const filePath = outputPath ?? path.join(os.tmpdir(), fileName);
+
+    try {
+      execSync(
+        `PGPASSWORD="${src.password}" pg_dump -h ${src.host} -p ${src.port} -U ${src.user} -Fc "${src.database}" -f "${filePath}"`,
+        { timeout: 600_000, stdio: 'pipe' },
+      );
+
+      const stat = fs.statSync(filePath);
+      const sizeBytes = stat.size;
+
+      // Compute SHA-256 checksum
+      const fileBuffer = fs.readFileSync(filePath);
+      const checksum = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+
+      // Get rough table count from backup listing
+      let tableCount = 0;
+      try {
+        const listing = execSync(
+          `PGPASSWORD="${src.password}" pg_restore --list "${filePath}" 2>/dev/null || true`,
+          { encoding: 'utf-8', timeout: 30_000, stdio: 'pipe' },
+        );
+        tableCount = (listing.match(/TABLE DATA/g) ?? []).length;
+      } catch {
+        tableCount = 0;
+      }
+
+      this.logger.log(`Backup created: ${filePath} (${sizeBytes} bytes, tables=${tableCount})`);
+      return { filePath, sizeBytes, checksum, tableCount };
+    } catch (err: any) {
+      // Clean up partial file
+      try { fs.unlinkSync(filePath); } catch {}
+      throw new Error(`Backup failed for ${src.database}: ${err.stderr?.toString() ?? err.message}`);
+    }
+  }
+
+  /**
+   * Compute SHA-256 checksum of a local file.
+   */
+  computeFileChecksum(filePath: string): string {
+    const buffer = fs.readFileSync(filePath);
+    return crypto.createHash('sha256').update(buffer).digest('hex');
   }
 
   /**

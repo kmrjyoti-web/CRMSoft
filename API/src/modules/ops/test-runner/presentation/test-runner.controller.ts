@@ -24,6 +24,7 @@ import { GetTestRunQuery } from '../application/queries/get-test-run/get-test-ru
 import { GetTestResultsQuery } from '../application/queries/get-test-results/get-test-results.query';
 import { GetTestResultsTreeQuery } from '../application/queries/get-test-results-tree/get-test-results-tree.query';
 import { CompareTestRunsQuery } from '../application/queries/compare-test-runs/compare-test-runs.query';
+import { GetTestDashboardQuery } from '../application/queries/get-test-dashboard/get-test-dashboard.query';
 
 @Controller('ops/test-run')
 @UseGuards(JwtAuthGuard)
@@ -33,6 +34,16 @@ export class TestRunnerController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
+
+  /** GET /ops/test-run/dashboard — Aggregated test statistics */
+  @Get('dashboard')
+  async getDashboard(
+    @CurrentUser('tenantId') tenantId: string,
+    @Query('days', new DefaultValuePipe(30), ParseIntPipe) days: number = 30,
+  ) {
+    const data = await this.queryBus.execute(new GetTestDashboardQuery(tenantId, days));
+    return ApiResponse.success(data);
+  }
 
   /** POST /ops/test-run/auto — Start a full automated test run */
   @Post('auto')

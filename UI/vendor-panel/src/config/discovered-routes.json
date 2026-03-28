@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-03-19T03:53:48.111Z",
-  "totalRoutes": 34,
+  "generatedAt": "2026-03-28T11:20:16.685Z",
+  "totalRoutes": 44,
   "routes": [
     {
       "key": "dashboard",
@@ -107,12 +107,20 @@
       "displayOrder": 13
     },
     {
+      "key": "notion-test-log",
+      "label": "Notion Test Log",
+      "path": "/notion-test-log",
+      "icon": "Circle",
+      "section": "OTHER",
+      "displayOrder": 14
+    },
+    {
       "key": "offers",
       "label": "Offers",
       "path": "/offers",
       "icon": "Gift",
       "section": "SOFTWARE_VENDOR",
-      "displayOrder": 14
+      "displayOrder": 15
     },
     {
       "key": "packages",
@@ -120,7 +128,7 @@
       "path": "/packages",
       "icon": "Package",
       "section": "SOFTWARE_VENDOR",
-      "displayOrder": 15
+      "displayOrder": 16
     },
     {
       "key": "page-registry",
@@ -128,7 +136,7 @@
       "path": "/page-registry",
       "icon": "Circle",
       "section": "OTHER",
-      "displayOrder": 16
+      "displayOrder": 17
     },
     {
       "key": "partners",
@@ -136,7 +144,7 @@
       "path": "/partners",
       "icon": "Users",
       "section": "SOFTWARE_VENDOR",
-      "displayOrder": 17
+      "displayOrder": 18
     },
     {
       "key": "plans",
@@ -144,7 +152,7 @@
       "path": "/plans",
       "icon": "CreditCard",
       "section": "SOFTWARE_VENDOR",
-      "displayOrder": 18
+      "displayOrder": 19
     },
     {
       "key": "profile",
@@ -152,7 +160,7 @@
       "path": "/profile",
       "icon": "User",
       "section": "OTHER",
-      "displayOrder": 19
+      "displayOrder": 20
     },
     {
       "key": "recharge-plans",
@@ -160,7 +168,7 @@
       "path": "/recharge-plans",
       "icon": "Zap",
       "section": "SOFTWARE_VENDOR",
-      "displayOrder": 20
+      "displayOrder": 21
     },
     {
       "key": "service-rates",
@@ -168,7 +176,7 @@
       "path": "/service-rates",
       "icon": "Receipt",
       "section": "SOFTWARE_VENDOR",
-      "displayOrder": 21
+      "displayOrder": 22
     },
     {
       "key": "settings",
@@ -176,7 +184,7 @@
       "path": "/settings",
       "icon": "Settings",
       "section": "OTHER",
-      "displayOrder": 22
+      "displayOrder": 23
     },
     {
       "key": "subscription-analytics",
@@ -184,7 +192,7 @@
       "path": "/subscription-analytics",
       "icon": "TrendingUp",
       "section": "SOFTWARE_VENDOR",
-      "displayOrder": 23
+      "displayOrder": 24
     },
     {
       "key": "support",
@@ -192,7 +200,7 @@
       "path": "/support",
       "icon": "Circle",
       "section": "OTHER",
-      "displayOrder": 24
+      "displayOrder": 25
     },
     {
       "key": "system-health",
@@ -200,7 +208,7 @@
       "path": "/system-health",
       "icon": "Activity",
       "section": "DEV_OPS",
-      "displayOrder": 25
+      "displayOrder": 26
     },
     {
       "key": "templates",
@@ -208,7 +216,7 @@
       "path": "/templates",
       "icon": "Circle",
       "section": "OTHER",
-      "displayOrder": 26
+      "displayOrder": 27
     },
     {
       "key": "tenants",
@@ -216,7 +224,15 @@
       "path": "/tenants",
       "icon": "Building",
       "section": "SOFTWARE_VENDOR",
-      "displayOrder": 27
+      "displayOrder": 28
+    },
+    {
+      "key": "test-center",
+      "label": "Test Center",
+      "path": "/test-center",
+      "icon": "Circle",
+      "section": "OTHER",
+      "displayOrder": 29
     },
     {
       "key": "vendor-dashboard",
@@ -224,7 +240,7 @@
       "path": "/vendor-dashboard",
       "icon": "BarChart3",
       "section": "SOFTWARE_VENDOR",
-      "displayOrder": 28
+      "displayOrder": 30
     },
     {
       "key": "versions",
@@ -232,7 +248,7 @@
       "path": "/versions",
       "icon": "Circle",
       "section": "OTHER",
-      "displayOrder": 29
+      "displayOrder": 31
     },
     {
       "key": "wallet",
@@ -240,7 +256,7 @@
       "path": "/wallet",
       "icon": "Wallet",
       "section": "SOFTWARE_VENDOR",
-      "displayOrder": 30
+      "displayOrder": 32
     },
     {
       "key": "wallet-analytics",
@@ -248,7 +264,7 @@
       "path": "/wallet-analytics",
       "icon": "PieChart",
       "section": "SOFTWARE_VENDOR",
-      "displayOrder": 31
+      "displayOrder": 33
     },
     {
       "key": "webhooks",
@@ -256,7 +272,7 @@
       "path": "/webhooks",
       "icon": "Webhook",
       "section": "DEV_OPS",
-      "displayOrder": 32
+      "displayOrder": 34
     },
     {
       "key": "dev-tools.api-docs",
@@ -265,7 +281,7 @@
       "icon": "BookOpen",
       "parentKey": "dev-tools",
       "section": "OTHER",
-      "displayOrder": 33
+      "displayOrder": 35
     },
     {
       "key": "dev-tools.ui-kit",
@@ -274,7 +290,79 @@
       "icon": "Palette",
       "parentKey": "dev-tools",
       "section": "OTHER",
-      "displayOrder": 34
+      "displayOrder": 36
+    },
+    {
+      "key": "test-center.automated",
+      "label": "Automated",
+      "path": "/test-center/automated",
+      "icon": "Circle",
+      "parentKey": "test-center",
+      "section": "OTHER",
+      "displayOrder": 37
+    },
+    {
+      "key": "test-center.database",
+      "label": "Database",
+      "path": "/test-center/database",
+      "icon": "Circle",
+      "parentKey": "test-center",
+      "section": "OTHER",
+      "displayOrder": 38
+    },
+    {
+      "key": "test-center.dev-qa",
+      "label": "Dev Qa",
+      "path": "/test-center/dev-qa",
+      "icon": "Circle",
+      "parentKey": "test-center",
+      "section": "OTHER",
+      "displayOrder": 39
+    },
+    {
+      "key": "test-center.errors",
+      "label": "Errors",
+      "path": "/test-center/errors",
+      "icon": "Circle",
+      "parentKey": "test-center",
+      "section": "OTHER",
+      "displayOrder": 40
+    },
+    {
+      "key": "test-center.manual",
+      "label": "Manual",
+      "path": "/test-center/manual",
+      "icon": "Circle",
+      "parentKey": "test-center",
+      "section": "OTHER",
+      "displayOrder": 41
+    },
+    {
+      "key": "test-center.reports",
+      "label": "Reports",
+      "path": "/test-center/reports",
+      "icon": "Circle",
+      "parentKey": "test-center",
+      "section": "OTHER",
+      "displayOrder": 42
+    },
+    {
+      "key": "test-center.scheduled",
+      "label": "Scheduled",
+      "path": "/test-center/scheduled",
+      "icon": "Circle",
+      "parentKey": "test-center",
+      "section": "OTHER",
+      "displayOrder": 43
+    },
+    {
+      "key": "test-center.test-plans",
+      "label": "Test Plans",
+      "path": "/test-center/test-plans",
+      "icon": "Circle",
+      "parentKey": "test-center",
+      "section": "OTHER",
+      "displayOrder": 44
     }
   ]
 }

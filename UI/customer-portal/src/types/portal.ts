@@ -20,8 +20,10 @@ export interface PortalRoute {
 
 export interface LoginResponse {
   accessToken: string;
+  refreshToken: string;
   user: PortalUser;
-  availableRoutes: string[];
+  menu: string[];
+  isFirstLogin: boolean;
 }
 
 export interface PortalInvoice {

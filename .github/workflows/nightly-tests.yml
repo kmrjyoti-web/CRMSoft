@@ -1,0 +1,119 @@
+name: Nightly Full Test Suite
+
+on:
+  schedule:
+    - cron: '30 20 * * *'   # 2:00 AM IST (8:30 PM UTC)
+  workflow_dispatch:          # Allow manual trigger
+
+jobs:
+  api-full-test:
+    name: API — Full Test Suite
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./API
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: crmsoft_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: './API/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma clients
+        run: |
+          npx prisma generate \
+          && npx prisma generate --schema=prisma/schemas/identity.prisma \
+          && npx prisma generate --schema=prisma/schemas/platform.prisma \
+          && npx prisma generate --schema=prisma/schemas/working.prisma \
+          || npx prisma generate
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/crmsoft_test
+          IDENTITY_DATABASE_URL: postgresql://test:test@localhost:5432/crmsoft_test
+          PLATFORM_DATABASE_URL: postgresql://test:test@localhost:5432/crmsoft_test
+          GLOBAL_WORKING_DATABASE_URL: postgresql://test:test@localhost:5432/crmsoft_test
+
+      - name: Run full test suite with coverage
+        run: npm run test -- --coverage --passWithNoTests
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/crmsoft_test
+          IDENTITY_DATABASE_URL: postgresql://test:test@localhost:5432/crmsoft_test
+          PLATFORM_DATABASE_URL: postgresql://test:test@localhost:5432/crmsoft_test
+          GLOBAL_WORKING_DATABASE_URL: postgresql://test:test@localhost:5432/crmsoft_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: nightly-test-secret
+          NODE_ENV: test
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-coverage-${{ github.run_number }}
+          path: ./API/coverage
+          retention-days: 7
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error title=Nightly Tests Failed::API test suite failed at $(date -u '+%Y-%m-%d %H:%M UTC')"
+          echo "Check the coverage report artifact for details."
+
+  crm-admin-build:
+    name: CRM Admin — Nightly Build Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./UI/crm-admin
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: './UI/crm-admin/package-lock.json'
+      - run: npm ci
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://api.crmsoft.in/api/v1
+
+  vendor-panel-build:
+    name: Vendor Panel — Nightly Build Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./UI/vendor-panel
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: './UI/vendor-panel/package-lock.json'
+      - run: npm ci
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://api.crmsoft.in/api/v1

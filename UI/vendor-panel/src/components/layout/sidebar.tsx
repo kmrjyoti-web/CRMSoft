@@ -8,7 +8,7 @@ import {
   User, Lock, Sparkles, Circle, Layers, Key, Users, Wallet,
   AlertTriangle, FileSearch, Activity, Hammer, BarChart3, Building,
   Brain, Webhook, ClipboardList, Database,
-  CreditCard, Gift, Ticket, Zap, Receipt, PieChart, TrendingUp, Code, Palette, BookOpen,
+  CreditCard, Gift, Ticket, Zap, Receipt, PieChart, TrendingUp, Code, Palette, BookOpen, FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/ui-store';
@@ -24,7 +24,7 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Layers, Key, Users, Wallet,
   AlertTriangle, FileSearch, Activity, Hammer, BarChart3, Building,
   Brain, Webhook, ClipboardList, Database,
-  CreditCard, Gift, Ticket, Zap, Receipt, PieChart, TrendingUp, Code, Palette, BookOpen,
+  CreditCard, Gift, Ticket, Zap, Receipt, PieChart, TrendingUp, Code, Palette, BookOpen, FileText,
 };
 
 const SECTION_LABELS: Record<string, string> = {

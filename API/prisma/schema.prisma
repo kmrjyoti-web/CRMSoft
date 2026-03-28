@@ -6772,6 +6772,11 @@ model ErrorLog {
   autoReportedAt DateTime? @map("auto_reported_at")
   autoReportedTo String[]  @default([]) @map("auto_reported_to")
 
+  // ─── ENHANCED: Report to Provider ───
+  reportedToProvider Boolean   @default(false) @map("reported_to_provider")
+  reportedToProviderAt DateTime? @map("reported_to_provider_at")
+  reportedToProviderById String? @map("reported_to_provider_by_id")
+
   // ─── ENHANCED: Resolution workflow ───
   status         String    @default("OPEN")
   resolvedAt     DateTime? @map("resolved_at")

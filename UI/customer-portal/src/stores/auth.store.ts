@@ -5,13 +5,13 @@ import type { PortalUser } from '@/types/portal';
 
 // All available portal routes with metadata
 export const ALL_PORTAL_ROUTES = [
-  { key: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard', path: '/' },
-  { key: 'orders', label: 'Orders', icon: 'ShoppingCart', path: '/orders' },
-  { key: 'invoices', label: 'Invoices', icon: 'FileText', path: '/invoices' },
-  { key: 'payments', label: 'Payments', icon: 'CreditCard', path: '/payments' },
-  { key: 'support', label: 'Support', icon: 'MessageSquare', path: '/support' },
-  { key: 'documents', label: 'Documents', icon: 'FolderOpen', path: '/documents' },
-  { key: 'profile', label: 'Profile', icon: 'User', path: '/profile' },
+  { key: '/', label: 'Dashboard', icon: 'LayoutDashboard', path: '/' },
+  { key: '/orders', label: 'Orders', icon: 'ShoppingCart', path: '/orders' },
+  { key: '/invoices', label: 'Invoices', icon: 'FileText', path: '/invoices' },
+  { key: '/payments', label: 'Payments', icon: 'CreditCard', path: '/payments' },
+  { key: '/support', label: 'Support', icon: 'MessageSquare', path: '/support' },
+  { key: '/documents', label: 'Documents', icon: 'FolderOpen', path: '/documents' },
+  { key: '/profile', label: 'Profile', icon: 'User', path: '/profile' },
 ] as const;
 
 interface AuthState {
@@ -39,7 +39,7 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const res = await portalAuthApi.login(email, password);
-          const { accessToken, user, availableRoutes } = res.data;
+          const { accessToken, user, menu: availableRoutes } = res.data;
 
           localStorage.setItem('portal_token', accessToken);
           document.cookie = `portal_token=${accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;

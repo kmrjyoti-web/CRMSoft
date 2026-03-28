@@ -8,7 +8,7 @@ export interface PortalRoute {
 }
 
 export const CUSTOMER_PORTAL_ROUTES: PortalRoute[] = [
-  { route: '/dashboard',      name: 'Dashboard',              nameHi: 'डैशबोर्ड',          icon: 'layout-dashboard', group: 'Main',        isDefault: true },
+  { route: '/',               name: 'Dashboard',              nameHi: 'डैशबोर्ड',          icon: 'layout-dashboard', group: 'Main',        isDefault: true },
   { route: '/profile',        name: 'My Profile',             nameHi: 'मेरी प्रोफ़ाइल',      icon: 'user',             group: 'Main',        isDefault: true },
   { route: '/products',       name: 'My Products / Services', nameHi: 'मेरे उत्पाद / सेवाएं', icon: 'package',          group: 'Business' },
   { route: '/invoices',       name: 'Invoices',               nameHi: 'चालान',              icon: 'file-text',        group: 'Finance',     isDefault: true },

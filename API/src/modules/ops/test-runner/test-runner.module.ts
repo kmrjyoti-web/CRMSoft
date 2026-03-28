@@ -2,7 +2,10 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { BullModule } from '@nestjs/bull';
 import { TestRunnerController } from './presentation/test-runner.controller';
+import { TestErrorController } from './presentation/test-error.controller';
+import { TestReportController } from './presentation/test-report.controller';
 import { TestOrchestratorService } from './application/services/test-orchestrator.service';
+import { TestErrorAnalyzerService } from './infrastructure/services/test-error-analyzer.service';
 import { TestRunProcessor, TEST_RUNNER_QUEUE } from './application/jobs/test-run.processor';
 import { UnitTestRunner } from './infrastructure/runners/unit-test.runner';
 import { FunctionalTestRunner } from './infrastructure/runners/functional-test.runner';
@@ -19,18 +22,20 @@ import { GetTestRunHandler } from './application/queries/get-test-run/get-test-r
 import { GetTestResultsHandler } from './application/queries/get-test-results/get-test-results.handler';
 import { GetTestResultsTreeHandler } from './application/queries/get-test-results-tree/get-test-results-tree.handler';
 import { CompareTestRunsHandler } from './application/queries/compare-test-runs/compare-test-runs.handler';
+import { GetTestDashboardHandler } from './application/queries/get-test-dashboard/get-test-dashboard.handler';
 
 const CommandHandlers = [CreateTestRunHandler, RerunFailedTestsHandler, CancelTestRunHandler];
-const QueryHandlers = [ListTestRunsHandler, GetTestRunHandler, GetTestResultsHandler, GetTestResultsTreeHandler, CompareTestRunsHandler];
+const QueryHandlers = [ListTestRunsHandler, GetTestRunHandler, GetTestResultsHandler, GetTestResultsTreeHandler, CompareTestRunsHandler, GetTestDashboardHandler];
 
 @Module({
   imports: [
     CqrsModule,
     BullModule.registerQueue({ name: TEST_RUNNER_QUEUE }),
   ],
-  controllers: [TestRunnerController],
+  controllers: [TestRunnerController, TestErrorController, TestReportController],
   providers: [
     TestOrchestratorService,
+    TestErrorAnalyzerService,
     TestRunProcessor,
     UnitTestRunner,
     FunctionalTestRunner,
@@ -42,6 +47,6 @@ const QueryHandlers = [ListTestRunsHandler, GetTestRunHandler, GetTestResultsHan
     ...QueryHandlers,
     { provide: TEST_RUN_REPOSITORY, useClass: PrismaTestRunRepository },
   ],
-  exports: [TestOrchestratorService],
+  exports: [TestOrchestratorService, TestErrorAnalyzerService],
 })
 export class TestRunnerModule {}
