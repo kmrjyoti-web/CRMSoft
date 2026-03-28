@@ -21,6 +21,7 @@ const withPWA = withPWAInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  basePath: '/marketplace',
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'pub-c8f7f8134f02427ea1e58cd11b27ebf2.r2.dev' },
