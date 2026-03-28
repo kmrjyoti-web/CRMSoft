@@ -1,19 +1,8 @@
 const path = require('path');
 
 /** @type {import('next').NextConfig} */
-const MARKETPLACE_URL = process.env.MARKETPLACE_URL || 'https://crm-soft-ui.vercel.app';
-
 module.exports = {
   output: 'standalone',
-  async rewrites() {
-    return [
-      // Proxy all /marketplace/* requests to the marketplace Next.js deployment
-      {
-        source: '/marketplace/:path*',
-        destination: `${MARKETPLACE_URL}/marketplace/:path*`,
-      },
-    ];
-  },
   // Prevent browser from caching HTML pages so stale chunk URLs never cause 404s
   async headers() {
     return [
