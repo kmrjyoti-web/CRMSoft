@@ -36,17 +36,30 @@ API/tmp/
 *.csv
 *.xlsx
 
-# Sensitive files
-password.txt
+# ═══ Security — NEVER commit ═══
+RAW/credentials/
+password*
+*apikey*
+*APIKey*
 *.pem
 *.key
 
-# Embedded repos
-CRMSoft/
+# ═══ RAW data ═══
+RAW/backups/
+RAW/exports/
+RAW/CRMSoft/
+
+# ═══ Build outputs ═══
+**/dist/
+**/.next/
+**/node_modules/
+**/out/
+
+# ═══ Environment ═══
+**/.env
+**/.env.local
+**/.env.production
+!**/.env.example
 
 # Test artifacts
 playwright-report/
-e2e/
-# Keep API E2E source tests (not Playwright output)
-!API/test/e2e/
-importaintAPIKey.txt

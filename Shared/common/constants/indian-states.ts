@@ -1,0 +1,17 @@
+export const INDIAN_STATES = [
+  { code: 'MH', name: 'Maharashtra', gstCode: '27' },
+  { code: 'DL', name: 'Delhi', gstCode: '07' },
+  { code: 'KA', name: 'Karnataka', gstCode: '29' },
+  { code: 'GJ', name: 'Gujarat', gstCode: '24' },
+  { code: 'TN', name: 'Tamil Nadu', gstCode: '33' },
+  { code: 'TG', name: 'Telangana', gstCode: '36' },
+  { code: 'UP', name: 'Uttar Pradesh', gstCode: '09' },
+  { code: 'WB', name: 'West Bengal', gstCode: '19' },
+  { code: 'RJ', name: 'Rajasthan', gstCode: '08' },
+  { code: 'HR', name: 'Haryana', gstCode: '06' },
+  { code: 'PB', name: 'Punjab', gstCode: '03' },
+  { code: 'MP', name: 'Madhya Pradesh', gstCode: '23' },
+  { code: 'KL', name: 'Kerala', gstCode: '32' },
+  { code: 'AP', name: 'Andhra Pradesh', gstCode: '37' },
+  { code: 'BR', name: 'Bihar', gstCode: '10' },
+];
