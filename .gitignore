@@ -1,1 +1,40 @@
 node_modules
+
+# ────────────────────────────────────────────────────────────
+# OS artifacts
+# ────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+
+# ────────────────────────────────────────────────────────────
+# Build artifacts (should never be committed)
+# ────────────────────────────────────────────────────────────
+dist/
+build/
+*.tsbuildinfo
+
+# ────────────────────────────────────────────────────────────
+# Runtime / generated reports (per-run artifacts)
+# ────────────────────────────────────────────────────────────
+Application/backend/tmp/reports/
+Application/backend/uploads/exports/
+Application/backend/docs/health-reports/audit-runs/
+Application/backend/docs/health-reports/latest-audit.json
+
+# ────────────────────────────────────────────────────────────
+# Env files & secrets
+# ────────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ────────────────────────────────────────────────────────────
+# IDE
+# ────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
