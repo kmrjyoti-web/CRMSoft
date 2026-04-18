@@ -39,11 +39,10 @@ jobs:
       - name: Generate Prisma clients (7 modules × v1)
         working-directory: ${{ env.BACKEND_DIR }}
         run: |
-          for module in identity platform working marketplace platform-console global demo; do
-            for schema in prisma/$module/v1/*.prisma; do
-              [ -f "$schema" ] && npx prisma generate --schema="$schema" || true
-            done
-          done
+          # Uses prismaSchemaFolder preview feature — must generate per-folder,
+          # not per-file. package.json's prisma:generate runs the 7 module folders
+          # in sequence with the correct `--schema=prisma/<module>/v1` invocation.
+          npm run prisma:generate
       - name: tsc --noEmit
         working-directory: ${{ env.BACKEND_DIR }}
         run: npm run typecheck
@@ -92,11 +91,10 @@ jobs:
       - name: Generate Prisma clients
         working-directory: ${{ env.BACKEND_DIR }}
         run: |
-          for module in identity platform working marketplace platform-console global demo; do
-            for schema in prisma/$module/v1/*.prisma; do
-              [ -f "$schema" ] && npx prisma generate --schema="$schema" || true
-            done
-          done
+          # Uses prismaSchemaFolder preview feature — must generate per-folder,
+          # not per-file. package.json's prisma:generate runs the 7 module folders
+          # in sequence with the correct `--schema=prisma/<module>/v1` invocation.
+          npm run prisma:generate
       - name: Run audit
         working-directory: ${{ env.BACKEND_DIR }}
         run: |
@@ -137,11 +135,10 @@ jobs:
       - name: Generate Prisma clients
         working-directory: ${{ env.BACKEND_DIR }}
         run: |
-          for module in identity platform working marketplace platform-console global demo; do
-            for schema in prisma/$module/v1/*.prisma; do
-              [ -f "$schema" ] && npx prisma generate --schema="$schema" || true
-            done
-          done
+          # Uses prismaSchemaFolder preview feature — must generate per-folder,
+          # not per-file. package.json's prisma:generate runs the 7 module folders
+          # in sequence with the correct `--schema=prisma/<module>/v1` invocation.
+          npm run prisma:generate
       - name: Jest (changed since base)
         working-directory: ${{ env.BACKEND_DIR }}
         run: |
