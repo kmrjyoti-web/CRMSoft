@@ -24,6 +24,7 @@ export interface ErrorLog {
   isAutoReported?: boolean;
   autoReportedAt?: string;
   autoReportedTo?: string[];
+  reportedToProvider?: boolean;
   status?: ErrorStatus;
   resolvedAt?: string;
   resolution?: string;
@@ -43,9 +44,12 @@ export interface ErrorLogFilters {
   limit?: number;
 }
 
+export type ErrorLayer = 'DB' | 'BE' | 'FE' | 'MOB';
+
 export interface ErrorStats {
   total24h: number;
   bySeverity: Record<ErrorSeverity, number>;
+  byLayer?: Partial<Record<ErrorLayer, number>>;
   errorRate: number;
   trend: number;
 }

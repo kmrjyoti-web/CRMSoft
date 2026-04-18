@@ -51,10 +51,11 @@ export default function ScheduledTestsPage() {
         </div>
       ) : tests.length === 0 ? (
         <EmptyState
-          icon={<Calendar className="h-10 w-10" />}
+          icon={Calendar}
           title="No scheduled tests"
           description="Create a scheduled test to automatically run tests on a cron schedule."
-          action={<Button onClick={() => router.push('/test-center/scheduled/new')}>Create Schedule</Button>}
+          actionLabel="Create Schedule"
+          onAction={() => router.push('/test-center/scheduled/new')}
         />
       ) : (
         <div className="grid gap-4">
