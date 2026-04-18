@@ -1,0 +1,1 @@
+{"version":3,"file":"get-audit-log-detail.query.js","sourceRoot":"","sources":["../../../../../../../../../src/modules/core/identity/audit/application/queries/get-audit-log-detail/get-audit-log-detail.query.ts"],"names":[],"mappings":";;;AAAA,MAAa,sBAAsB;IACjC,YAA4B,EAAU;QAAV,OAAE,GAAF,EAAE,CAAQ;IAAG,CAAC;CAC3C;AAFD,wDAEC"}

@@ -1,0 +1,32 @@
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { ApiResponse } from '../../../../common/utils/api-response';
+import { CreateQuotationDto } from './dto/create-quotation.dto';
+import { UpdateQuotationDto } from './dto/update-quotation.dto';
+import { AddLineItemDto } from './dto/add-line-item.dto';
+import { SendQuotationDto } from './dto/send-quotation.dto';
+import { LogNegotiationDto } from './dto/log-negotiation.dto';
+import { QuotationQueryDto } from './dto/quotation-query.dto';
+export declare class QuotationsController {
+    private readonly commandBus;
+    private readonly queryBus;
+    constructor(commandBus: CommandBus, queryBus: QueryBus);
+    create(dto: CreateQuotationDto, user: any): Promise<ApiResponse<any>>;
+    list(query: QuotationQueryDto): Promise<ApiResponse<unknown[]>>;
+    getById(id: string): Promise<ApiResponse<any>>;
+    update(id: string, dto: UpdateQuotationDto, user: any): Promise<ApiResponse<any>>;
+    cancel(id: string, user: any, reason?: string): Promise<ApiResponse<any>>;
+    addItem(id: string, dto: AddLineItemDto, user: any): Promise<ApiResponse<any>>;
+    updateItem(id: string, itemId: string, dto: AddLineItemDto, user: any): Promise<ApiResponse<any>>;
+    removeItem(id: string, itemId: string, user: any): Promise<ApiResponse<any>>;
+    recalculate(id: string, user: any): Promise<ApiResponse<any>>;
+    send(id: string, dto: SendQuotationDto, user: any): Promise<ApiResponse<any>>;
+    markViewed(id: string, sendLogId?: string): Promise<ApiResponse<any>>;
+    accept(id: string, user: any, note?: string): Promise<ApiResponse<any>>;
+    reject(id: string, user: any, reason?: string): Promise<ApiResponse<any>>;
+    revise(id: string, user: any): Promise<ApiResponse<any>>;
+    clone(id: string, user: any, leadId?: string): Promise<ApiResponse<any>>;
+    logNegotiation(id: string, dto: LogNegotiationDto, user: any): Promise<ApiResponse<any>>;
+    getNegotiations(id: string): Promise<ApiResponse<any>>;
+    getTimeline(id: string): Promise<ApiResponse<any>>;
+    getVersions(id: string): Promise<ApiResponse<any>>;
+}

@@ -1,0 +1,114 @@
+import { PrismaService } from '../../../../core/prisma/prisma.service';
+export declare class WalletService {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    getOrCreate(tenantId: string): Promise<{
+        id: string;
+        tenantId: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        currency: string;
+        balance: number;
+        promoBalance: number;
+        lifetimeCredit: number;
+        lifetimeDebit: number;
+        tokenRate: number;
+    }>;
+    getBalance(tenantId: string): Promise<{
+        id: string;
+        balance: number;
+        promoBalance: number;
+        totalAvailable: number;
+        lifetimeCredit: number;
+        lifetimeDebit: number;
+        currency: string;
+        tokenRate: number;
+        isActive: boolean;
+    }>;
+    ensureSufficientBalance(tenantId: string, tokens: number): Promise<{
+        id: string;
+        tenantId: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        currency: string;
+        balance: number;
+        promoBalance: number;
+        lifetimeCredit: number;
+        lifetimeDebit: number;
+        tokenRate: number;
+    }>;
+    activate(tenantId: string): Promise<{
+        id: string;
+        tenantId: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        currency: string;
+        balance: number;
+        promoBalance: number;
+        lifetimeCredit: number;
+        lifetimeDebit: number;
+        tokenRate: number;
+    }>;
+    deactivate(tenantId: string): Promise<{
+        id: string;
+        tenantId: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        currency: string;
+        balance: number;
+        promoBalance: number;
+        lifetimeCredit: number;
+        lifetimeDebit: number;
+        tokenRate: number;
+    }>;
+    findAll(params?: {
+        page?: number;
+        limit?: number;
+    }): Promise<{
+        data: {
+            id: string;
+            tenantId: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isDeleted: boolean;
+            deletedAt: Date | null;
+            deletedById: string | null;
+            updatedById: string | null;
+            updatedByName: string | null;
+            currency: string;
+            balance: number;
+            promoBalance: number;
+            lifetimeCredit: number;
+            lifetimeDebit: number;
+            tokenRate: number;
+        }[];
+        total: number;
+        page: number;
+        limit: number;
+    }>;
+}

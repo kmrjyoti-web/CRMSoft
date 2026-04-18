@@ -1,0 +1,88 @@
+import { PrismaService } from '../../../../core/prisma/prisma.service';
+import { ApiResponse } from '../../../../common/utils/api-response';
+import { CreatePackageDto } from './dto/create-package.dto';
+import { UpdatePackageDto } from './dto/update-package.dto';
+export declare class PackagesController {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    create(dto: CreatePackageDto): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        name: string;
+        code: string;
+        description: string | null;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        type: string | null;
+    }>>;
+    findAll(page?: string, limit?: string, search?: string): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        name: string;
+        code: string;
+        description: string | null;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        type: string | null;
+    }[]>>;
+    findOne(id: string): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        name: string;
+        code: string;
+        description: string | null;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        type: string | null;
+    }>>;
+    update(id: string, dto: UpdatePackageDto): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        name: string;
+        code: string;
+        description: string | null;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        type: string | null;
+    }>>;
+    deactivate(id: string): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        name: string;
+        code: string;
+        description: string | null;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        type: string | null;
+    }>>;
+}

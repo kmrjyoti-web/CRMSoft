@@ -1,0 +1,267 @@
+import { PrismaService } from '../../../../core/prisma/prisma.service';
+import { VectorStoreService } from './vector-store.service';
+import { OllamaService } from './ollama.service';
+export declare class AiTrainingService {
+    private readonly prisma;
+    private readonly vectorStore;
+    private readonly ollama;
+    private readonly logger;
+    constructor(prisma: PrismaService, vectorStore: VectorStoreService, ollama: OllamaService);
+    createDataset(tenantId: string, data: {
+        name: string;
+        description?: string;
+        sourceType?: string;
+        entityType?: string;
+        createdBy?: string;
+    }): Promise<{
+        id: string;
+        tenantId: string;
+        name: string;
+        entityType: string | null;
+        description: string | null;
+        configJson: import("@prisma/working-client/runtime/library").JsonValue | null;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        createdBy: string | null;
+        status: import("@prisma/working-client").$Enums.AiDatasetStatus;
+        totalTokens: number;
+        sourceType: string;
+        documentCount: number;
+        totalChunks: number;
+    }>;
+    listDatasets(tenantId: string, status?: string): Promise<({
+        _count: {
+            documents: number;
+            trainingJobs: number;
+        };
+    } & {
+        id: string;
+        tenantId: string;
+        name: string;
+        entityType: string | null;
+        description: string | null;
+        configJson: import("@prisma/working-client/runtime/library").JsonValue | null;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        createdBy: string | null;
+        status: import("@prisma/working-client").$Enums.AiDatasetStatus;
+        totalTokens: number;
+        sourceType: string;
+        documentCount: number;
+        totalChunks: number;
+    })[]>;
+    getDataset(tenantId: string, id: string): Promise<{
+        documents: {
+            id: string;
+            tenantId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            isDeleted: boolean;
+            deletedAt: Date | null;
+            deletedById: string | null;
+            updatedById: string | null;
+            updatedByName: string | null;
+            metadata: import("@prisma/working-client/runtime/library").JsonValue | null;
+            title: string;
+            content: string;
+            contentType: string;
+            tokenCount: number;
+            datasetId: string;
+            sourceUrl: string | null;
+            chunkCount: number;
+            isProcessed: boolean;
+        }[];
+        trainingJobs: {
+            id: string;
+            tenantId: string;
+            configJson: import("@prisma/working-client/runtime/library").JsonValue | null;
+            createdAt: Date;
+            isDeleted: boolean;
+            deletedAt: Date | null;
+            deletedById: string | null;
+            updatedById: string | null;
+            updatedByName: string | null;
+            createdBy: string | null;
+            status: import("@prisma/working-client").$Enums.AiTrainingJobStatus;
+            modelId: string;
+            errorMessage: string | null;
+            completedAt: Date | null;
+            startedAt: Date | null;
+            datasetId: string;
+            progress: number;
+            totalSteps: number;
+            completedSteps: number;
+            resultJson: import("@prisma/working-client/runtime/library").JsonValue | null;
+        }[];
+    } & {
+        id: string;
+        tenantId: string;
+        name: string;
+        entityType: string | null;
+        description: string | null;
+        configJson: import("@prisma/working-client/runtime/library").JsonValue | null;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        createdBy: string | null;
+        status: import("@prisma/working-client").$Enums.AiDatasetStatus;
+        totalTokens: number;
+        sourceType: string;
+        documentCount: number;
+        totalChunks: number;
+    }>;
+    updateDataset(tenantId: string, id: string, data: {
+        name?: string;
+        description?: string;
+    }): Promise<import("@prisma/working-client").Prisma.BatchPayload>;
+    deleteDataset(tenantId: string, id: string): Promise<import("@prisma/working-client").Prisma.BatchPayload>;
+    addDocument(tenantId: string, datasetId: string, data: {
+        title: string;
+        content: string;
+        contentType?: string;
+        sourceUrl?: string;
+        metadata?: Record<string, unknown>;
+    }): Promise<{
+        id: string;
+        tenantId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        metadata: import("@prisma/working-client/runtime/library").JsonValue | null;
+        title: string;
+        content: string;
+        contentType: string;
+        tokenCount: number;
+        datasetId: string;
+        sourceUrl: string | null;
+        chunkCount: number;
+        isProcessed: boolean;
+    }>;
+    getDocument(tenantId: string, documentId: string): Promise<{
+        id: string;
+        tenantId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        metadata: import("@prisma/working-client/runtime/library").JsonValue | null;
+        title: string;
+        content: string;
+        contentType: string;
+        tokenCount: number;
+        datasetId: string;
+        sourceUrl: string | null;
+        chunkCount: number;
+        isProcessed: boolean;
+    }>;
+    updateDocument(tenantId: string, documentId: string, data: {
+        title?: string;
+        content?: string;
+    }): Promise<void>;
+    deleteDocument(tenantId: string, documentId: string): Promise<void>;
+    startTrainingJob(tenantId: string, data: {
+        datasetId: string;
+        modelId: string;
+        createdBy?: string;
+        config?: Record<string, unknown>;
+    }): Promise<{
+        id: string;
+        tenantId: string;
+        configJson: import("@prisma/working-client/runtime/library").JsonValue | null;
+        createdAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        createdBy: string | null;
+        status: import("@prisma/working-client").$Enums.AiTrainingJobStatus;
+        modelId: string;
+        errorMessage: string | null;
+        completedAt: Date | null;
+        startedAt: Date | null;
+        datasetId: string;
+        progress: number;
+        totalSteps: number;
+        completedSteps: number;
+        resultJson: import("@prisma/working-client/runtime/library").JsonValue | null;
+    }>;
+    private processTrainingJob;
+    getTrainingJob(tenantId: string, jobId: string): Promise<{
+        dataset: {
+            name: string;
+        };
+    } & {
+        id: string;
+        tenantId: string;
+        configJson: import("@prisma/working-client/runtime/library").JsonValue | null;
+        createdAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        createdBy: string | null;
+        status: import("@prisma/working-client").$Enums.AiTrainingJobStatus;
+        modelId: string;
+        errorMessage: string | null;
+        completedAt: Date | null;
+        startedAt: Date | null;
+        datasetId: string;
+        progress: number;
+        totalSteps: number;
+        completedSteps: number;
+        resultJson: import("@prisma/working-client/runtime/library").JsonValue | null;
+    }>;
+    listTrainingJobs(tenantId: string, datasetId?: string): Promise<({
+        dataset: {
+            name: string;
+        };
+    } & {
+        id: string;
+        tenantId: string;
+        configJson: import("@prisma/working-client/runtime/library").JsonValue | null;
+        createdAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        createdBy: string | null;
+        status: import("@prisma/working-client").$Enums.AiTrainingJobStatus;
+        modelId: string;
+        errorMessage: string | null;
+        completedAt: Date | null;
+        startedAt: Date | null;
+        datasetId: string;
+        progress: number;
+        totalSteps: number;
+        completedSteps: number;
+        resultJson: import("@prisma/working-client/runtime/library").JsonValue | null;
+    })[]>;
+    cancelTrainingJob(tenantId: string, jobId: string): Promise<import("@prisma/working-client").Prisma.BatchPayload>;
+    importCrmData(tenantId: string, datasetId: string, entityType: string): Promise<{
+        imported: number;
+    }>;
+}

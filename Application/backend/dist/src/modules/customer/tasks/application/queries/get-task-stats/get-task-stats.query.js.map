@@ -1,0 +1,1 @@
+{"version":3,"file":"get-task-stats.query.js","sourceRoot":"","sources":["../../../../../../../../src/modules/customer/tasks/application/queries/get-task-stats/get-task-stats.query.ts"],"names":[],"mappings":";;;AAAA,MAAa,iBAAiB;IAC5B,YACkB,MAAc,EACd,SAAiB,EACjB,QAAgB;QAFhB,WAAM,GAAN,MAAM,CAAQ;QACd,cAAS,GAAT,SAAS,CAAQ;QACjB,aAAQ,GAAR,QAAQ,CAAQ;IAC/B,CAAC;CACL;AAND,8CAMC"}

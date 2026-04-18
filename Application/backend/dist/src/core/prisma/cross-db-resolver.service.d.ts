@@ -1,0 +1,40 @@
+import { PrismaService } from './prisma.service';
+export declare class CrossDbResolverService {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    resolveUsers<T extends Record<string, any>>(records: T[], fkFields: string[], userSelect?: Record<string, boolean>): Promise<T[]>;
+    resolveUser(userId: string | null | undefined): Promise<{
+        id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+    } | null>;
+    resolveRoles<T extends Record<string, any>>(records: T[], fkField?: string, roleSelect?: Record<string, boolean>): Promise<T[]>;
+    resolveLookupValues<T extends Record<string, any>>(records: T[], fkField?: string, includeCategory?: boolean): Promise<T[]>;
+    resolveCountries(ids: string[]): Promise<any[]>;
+    resolveCountry(id: string | null | undefined): Promise<any | null>;
+    resolveStates(ids: string[]): Promise<any[]>;
+    resolveState(id: string | null | undefined): Promise<any | null>;
+    resolveCities(ids: string[]): Promise<any[]>;
+    resolveCity(id: string | null | undefined): Promise<any | null>;
+    resolveGlobalLookupValues(ids: string[]): Promise<any[]>;
+    resolveGlobalLookupValuesByType(typeCode: string): Promise<any[]>;
+    resolvePincodes(pincodes: string[]): Promise<any[]>;
+    resolvePincode(pincode: string | null | undefined): Promise<any | null>;
+    resolveGstRates(ids: string[]): Promise<any[]>;
+    resolveGstRate(id: string | null | undefined): Promise<any | null>;
+    resolveAllGstRates(): Promise<any[]>;
+    resolveHsnCode(code: string | null | undefined): Promise<any | null>;
+    resolveHsnCodes(codes: string[]): Promise<any[]>;
+    resolveCurrency(code: string | null | undefined): Promise<any | null>;
+    resolveAllCurrencies(): Promise<any[]>;
+    resolveDefaultCurrency(): Promise<any | null>;
+    resolveTimezone(tzIdentifier: string | null | undefined): Promise<any | null>;
+    resolveAllTimezones(): Promise<any[]>;
+    resolveDefaultTimezone(): Promise<any | null>;
+    resolveIndustryType(code: string | null | undefined): Promise<any | null>;
+    resolveAllIndustryTypes(): Promise<any[]>;
+    resolveLanguage(code: string | null | undefined): Promise<any | null>;
+    resolveAllLanguages(indianOnly?: boolean): Promise<any[]>;
+    resolveDefaultLanguage(): Promise<any | null>;
+}

@@ -1,0 +1,71 @@
+import { ApiResponse } from '../../../../common/utils/api-response';
+import { CalendarSyncService } from '../calendar-sync.service';
+export declare class CalendarSyncController {
+    private readonly syncService;
+    constructor(syncService: CalendarSyncService);
+    connect(userId: string, tenantId: string, body: {
+        provider: 'GOOGLE' | 'OUTLOOK';
+        accessToken: string;
+        refreshToken: string;
+        expiresAt: string;
+        calendarId: string;
+        externalEmail: string;
+    }): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        status: import("@prisma/working-client").$Enums.CalendarSyncStatus;
+        userId: string;
+        accessToken: string | null;
+        direction: import("@prisma/working-client").$Enums.CalendarSyncDirection;
+        errorMessage: string | null;
+        refreshToken: string | null;
+        webhookId: string | null;
+        provider: import("@prisma/working-client").$Enums.CalendarSyncProvider;
+        tokenExpiresAt: Date | null;
+        calendarId: string | null;
+        externalEmail: string | null;
+        webhookExpiry: Date | null;
+        lastSyncAt: Date | null;
+        syncToken: string | null;
+    }>>;
+    disconnect(userId: string, tenantId: string, provider: 'GOOGLE' | 'OUTLOOK'): Promise<ApiResponse<null>>;
+    triggerSync(userId: string, tenantId: string, provider: 'GOOGLE' | 'OUTLOOK'): Promise<ApiResponse<{
+        inbound: number;
+        outbound: number;
+    }>>;
+    getSyncStatus(userId: string, tenantId: string): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        status: import("@prisma/working-client").$Enums.CalendarSyncStatus;
+        userId: string;
+        accessToken: string | null;
+        direction: import("@prisma/working-client").$Enums.CalendarSyncDirection;
+        errorMessage: string | null;
+        refreshToken: string | null;
+        webhookId: string | null;
+        provider: import("@prisma/working-client").$Enums.CalendarSyncProvider;
+        tokenExpiresAt: Date | null;
+        calendarId: string | null;
+        externalEmail: string | null;
+        webhookExpiry: Date | null;
+        lastSyncAt: Date | null;
+        syncToken: string | null;
+    }[]>>;
+    webhook(provider: string, payload: Record<string, any>): Promise<ApiResponse<null>>;
+}

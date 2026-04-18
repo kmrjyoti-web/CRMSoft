@@ -1,0 +1,73 @@
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { SubscribeDto } from './dto/subscribe.dto';
+import { ChangePlanDto } from './dto/change-plan.dto';
+import { UpsertTenantProfileDto } from './dto/upsert-tenant-profile.dto';
+import { ApiResponse } from '../../../../../common/utils/api-response';
+import { LimitCheckerService } from '../services/limit-checker.service';
+import { UsageTrackerService } from '../services/usage-tracker.service';
+import { TenantProfileService } from '../services/tenant-profile.service';
+export declare class SubscriptionController {
+    private readonly commandBus;
+    private readonly queryBus;
+    private readonly limitChecker;
+    private readonly usageTracker;
+    private readonly tenantProfileService;
+    constructor(commandBus: CommandBus, queryBus: QueryBus, limitChecker: LimitCheckerService, usageTracker: UsageTrackerService, tenantProfileService: TenantProfileService);
+    getCurrent(tenantId: string): Promise<ApiResponse<any>>;
+    subscribe(dto: SubscribeDto, tenantId: string): Promise<ApiResponse<any>>;
+    changePlan(dto: ChangePlanDto, tenantId: string): Promise<ApiResponse<any>>;
+    cancel(tenantId: string): Promise<ApiResponse<any>>;
+    getUsage(tenantId: string): Promise<ApiResponse<any>>;
+    completeOnboardingStep(step: string, tenantId: string): Promise<ApiResponse<any>>;
+    getLimitsWithUsage(tenantId: string): Promise<ApiResponse<{
+        planName: string;
+        limits: Array<import("../services/limit-checker.service").ResourceCheckResult & {
+            resourceKey: string;
+        }>;
+    }>>;
+    getUsageDetail(tenantId: string): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        resourceKey: string;
+        currentCount: number;
+        monthlyCount: number;
+        monthYear: string | null;
+        lastUpdated: Date;
+    }[]>>;
+    updateProfile(tenantId: string, body: UpsertTenantProfileDto): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        notes: string | null;
+        website: string | null;
+        companyLegalName: string | null;
+        industry: string | null;
+        supportEmail: string | null;
+        dbStrategy: import("@prisma/identity-client").$Enums.DbStrategy;
+        dbConnectionString: string | null;
+        primaryContactName: string | null;
+        primaryContactEmail: string | null;
+        primaryContactPhone: string | null;
+        billingAddress: import("@prisma/identity-client/runtime/library").JsonValue | null;
+        gstin: string | null;
+        pan: string | null;
+        accountManagerId: string | null;
+        tags: string[];
+        maxDiskQuotaMb: number;
+        currentDiskUsageMb: number;
+    }>>;
+    listPlans(): Promise<ApiResponse<any>>;
+}

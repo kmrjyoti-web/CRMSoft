@@ -1,0 +1,1 @@
+{"version":3,"file":"get-mapping-suggestions.query.js","sourceRoot":"","sources":["../../../../../../../../src/modules/customer/bulk-import/application/queries/get-mapping-suggestions/get-mapping-suggestions.query.ts"],"names":[],"mappings":";;;AAAA,MAAa,0BAA0B;IACrC,YACkB,YAAoB,EACpB,WAAsB;QADtB,iBAAY,GAAZ,YAAY,CAAQ;QACpB,gBAAW,GAAX,WAAW,CAAW;IACrC,CAAC;CACL;AALD,gEAKC"}

@@ -1,0 +1,94 @@
+import { PrismaService } from '../../../../core/prisma/prisma.service';
+import { CrossDbResolverService } from '../../../../core/prisma/cross-db-resolver.service';
+import { RoundRobinService } from './round-robin.service';
+import { OwnershipCoreService } from './ownership-core.service';
+export declare class RuleEngineService {
+    private readonly prisma;
+    private readonly resolver;
+    private readonly roundRobin;
+    private readonly ownershipCore;
+    private readonly logger;
+    constructor(prisma: PrismaService, resolver: CrossDbResolverService, roundRobin: RoundRobinService, ownershipCore: OwnershipCoreService);
+    evaluate(params: {
+        entityType: string;
+        entityId: string;
+        triggerEvent: string;
+    }): Promise<{
+        id: string;
+        tenantId: string;
+        name: string;
+        entityType: import("@prisma/working-client").$Enums.EntityType;
+        description: string | null;
+        isActive: boolean;
+        createdById: string;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        conditions: import("@prisma/working-client/runtime/library").JsonValue;
+        status: import("@prisma/working-client").$Enums.AssignmentRuleStatus;
+        priority: number;
+        lastAssignedIndex: number;
+        triggerEvent: string;
+        assignmentMethod: import("@prisma/working-client").$Enums.AssignmentMethod;
+        assignToUserId: string | null;
+        assignToTeamIds: string[];
+        assignToRoleId: string | null;
+        ownerType: import("@prisma/working-client").$Enums.OwnerType;
+        maxPerUser: number | null;
+        respectWorkload: boolean;
+        escalateAfterHours: number | null;
+        escalateToUserId: string | null;
+        escalateToRoleId: string | null;
+        executionCount: number;
+        lastExecutedAt: Date | null;
+    } | null>;
+    executeRule(rule: any, entityType: string, entityId: string, performedById: string): Promise<{
+        id: string;
+        tenantId: string;
+        entityType: import("@prisma/working-client").$Enums.EntityType;
+        isActive: boolean;
+        configJson: import("@prisma/working-client/runtime/library").JsonValue | null;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        userId: string | null;
+        priority: number;
+        entityId: string;
+        validFrom: Date;
+        validTo: Date | null;
+        ownerType: import("@prisma/working-client").$Enums.OwnerType;
+        teamId: string | null;
+        assignedById: string;
+        assignmentReason: string | null;
+    } | null>;
+    testRule(ruleId: string, entityType: string, entityId: string): Promise<{
+        ruleMatches: boolean;
+        reason: string;
+        conditionResults: never[];
+        wouldAssignTo?: undefined;
+    } | {
+        ruleMatches: boolean;
+        conditionResults: {
+            field: any;
+            operator: any;
+            expected: any;
+            actual: Record<string, unknown>;
+            passed: boolean;
+        }[];
+        wouldAssignTo: any;
+        reason: string;
+    }>;
+    extractFieldValue(entity: Record<string, unknown>, fieldPath: string): Record<string, unknown>;
+    private evaluateCondition;
+    private applyOperator;
+    private loadEntityData;
+    private getLowestLoadUser;
+}

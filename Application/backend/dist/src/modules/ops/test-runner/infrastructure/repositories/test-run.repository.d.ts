@@ -1,0 +1,183 @@
+import { PrismaService } from "../../../../../core/prisma/prisma.service";
+import type { TestRunStatus, Prisma } from '@prisma/platform-client';
+export declare const TEST_RUN_REPOSITORY: unique symbol;
+export interface ITestRunRepository {
+    create(data: CreateTestRunData): Promise<any>;
+    findById(id: string): Promise<any | null>;
+    findByTenantId(tenantId: string, filters?: ListFilters): Promise<any[]>;
+    update(id: string, data: UpdateTestRunData): Promise<any>;
+    countRunning(tenantId: string): Promise<number>;
+    findWithResults(id: string): Promise<any | null>;
+}
+export interface CreateTestRunData {
+    tenantId: string;
+    testEnvId?: string;
+    runType: string;
+    testTypes: string[];
+    targetModules: string[];
+    createdById: string;
+}
+export interface UpdateTestRunData {
+    status?: TestRunStatus;
+    progressPercent?: number;
+    currentPhase?: string;
+    totalTests?: number;
+    passed?: number;
+    failed?: number;
+    skipped?: number;
+    errors?: number;
+    duration?: number;
+    summary?: Record<string, any>;
+    coveragePercent?: number;
+    coverageReport?: Record<string, any>;
+    startedAt?: Date;
+    completedAt?: Date;
+}
+export interface ListFilters {
+    status?: string;
+    page?: number;
+    limit?: number;
+}
+export declare class PrismaTestRunRepository implements ITestRunRepository {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    create(data: CreateTestRunData): Promise<{
+        id: string;
+        tenantId: string;
+        createdById: string;
+        createdAt: Date;
+        status: import("@prisma/platform-client").$Enums.TestRunStatus;
+        duration: number;
+        completedAt: Date | null;
+        startedAt: Date | null;
+        passed: number;
+        errors: number;
+        summary: Prisma.JsonValue;
+        skipped: number;
+        failed: number;
+        progressPercent: number;
+        testEnvId: string | null;
+        testTypes: string[];
+        targetModules: string[];
+        runType: string;
+        currentPhase: string | null;
+        totalTests: number;
+        coveragePercent: number | null;
+        coverageReport: Prisma.JsonValue | null;
+    }>;
+    findById(id: string): Promise<{
+        id: string;
+        tenantId: string;
+        createdById: string;
+        createdAt: Date;
+        status: import("@prisma/platform-client").$Enums.TestRunStatus;
+        duration: number;
+        completedAt: Date | null;
+        startedAt: Date | null;
+        passed: number;
+        errors: number;
+        summary: Prisma.JsonValue;
+        skipped: number;
+        failed: number;
+        progressPercent: number;
+        testEnvId: string | null;
+        testTypes: string[];
+        targetModules: string[];
+        runType: string;
+        currentPhase: string | null;
+        totalTests: number;
+        coveragePercent: number | null;
+        coverageReport: Prisma.JsonValue | null;
+    } | null>;
+    findByTenantId(tenantId: string, filters?: ListFilters): Promise<{
+        id: string;
+        tenantId: string;
+        createdById: string;
+        createdAt: Date;
+        status: import("@prisma/platform-client").$Enums.TestRunStatus;
+        duration: number;
+        completedAt: Date | null;
+        startedAt: Date | null;
+        passed: number;
+        errors: number;
+        summary: Prisma.JsonValue;
+        skipped: number;
+        failed: number;
+        progressPercent: number;
+        testEnvId: string | null;
+        testTypes: string[];
+        targetModules: string[];
+        runType: string;
+        currentPhase: string | null;
+        totalTests: number;
+        coveragePercent: number | null;
+        coverageReport: Prisma.JsonValue | null;
+    }[]>;
+    update(id: string, data: UpdateTestRunData): Promise<{
+        id: string;
+        tenantId: string;
+        createdById: string;
+        createdAt: Date;
+        status: import("@prisma/platform-client").$Enums.TestRunStatus;
+        duration: number;
+        completedAt: Date | null;
+        startedAt: Date | null;
+        passed: number;
+        errors: number;
+        summary: Prisma.JsonValue;
+        skipped: number;
+        failed: number;
+        progressPercent: number;
+        testEnvId: string | null;
+        testTypes: string[];
+        targetModules: string[];
+        runType: string;
+        currentPhase: string | null;
+        totalTests: number;
+        coveragePercent: number | null;
+        coverageReport: Prisma.JsonValue | null;
+    }>;
+    countRunning(tenantId: string): Promise<number>;
+    findWithResults(id: string): Promise<({
+        results: {
+            id: string;
+            createdAt: Date;
+            metadata: Prisma.JsonValue | null;
+            status: import("@prisma/platform-client").$Enums.TestResultStatus;
+            module: string | null;
+            duration: number;
+            filePath: string | null;
+            errorMessage: string | null;
+            expectedValue: string | null;
+            errorStack: string | null;
+            testType: import("@prisma/platform-client").$Enums.TestType;
+            testRunId: string;
+            suiteName: string;
+            testName: string;
+            actualValue: string | null;
+        }[];
+    } & {
+        id: string;
+        tenantId: string;
+        createdById: string;
+        createdAt: Date;
+        status: import("@prisma/platform-client").$Enums.TestRunStatus;
+        duration: number;
+        completedAt: Date | null;
+        startedAt: Date | null;
+        passed: number;
+        errors: number;
+        summary: Prisma.JsonValue;
+        skipped: number;
+        failed: number;
+        progressPercent: number;
+        testEnvId: string | null;
+        testTypes: string[];
+        targetModules: string[];
+        runType: string;
+        currentPhase: string | null;
+        totalTests: number;
+        coveragePercent: number | null;
+        coverageReport: Prisma.JsonValue | null;
+    }) | null>;
+}

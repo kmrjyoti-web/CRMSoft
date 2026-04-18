@@ -1,0 +1,214 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CouponEngineService = void 0;
+const common_1 = require("@nestjs/common");
+const prisma_service_1 = require("../../../../core/prisma/prisma.service");
+let CouponEngineService = class CouponEngineService {
+    constructor(prisma) {
+        this.prisma = prisma;
+    }
+    async validate(couponCode, tenantId, userId, packageCode, amount) {
+        const coupon = await this.prisma.platform.coupon.findUnique({
+            where: { code: couponCode.toUpperCase() },
+            include: { redemptions: true },
+        });
+        const fail = (message) => ({
+            valid: false,
+            couponId: null,
+            couponCode,
+            discountType: null,
+            discountValue: 0,
+            calculatedDiscount: 0,
+            maxDiscountInr: null,
+            finalDiscount: 0,
+            message,
+        });
+        if (!coupon)
+            return fail('Invalid coupon code');
+        if (!coupon.isActive)
+            return fail('Coupon is inactive');
+        if (coupon.expiresAt && coupon.expiresAt < new Date()) {
+            return fail('Coupon has expired');
+        }
+        const now = new Date();
+        if (coupon.validFrom && now < coupon.validFrom) {
+            return fail('Coupon is not yet valid');
+        }
+        if (coupon.validUntil && now > coupon.validUntil) {
+            return fail('Coupon validity period has ended');
+        }
+        if (coupon.usedCount >= coupon.maxUses) {
+            return fail('Coupon usage limit reached');
+        }
+        const userRedemptions = coupon.redemptions.filter((r) => r.userId === userId && r.tenantId === tenantId);
+        if (userRedemptions.length >= coupon.perUserLimit) {
+            return fail('You have already used this coupon the maximum number of times');
+        }
+        if (coupon.firstTimeOnly) {
+            const anyPriorRedemption = await this.prisma.platform.couponRedemption.findFirst({
+                where: { tenantId, userId },
+            });
+            if (anyPriorRedemption) {
+                return fail('This coupon is valid for first-time users only');
+            }
+        }
+        const applicablePackages = coupon.applicablePackages ?? ['ALL'];
+        if (packageCode &&
+            !applicablePackages.includes('ALL') &&
+            !applicablePackages.includes(packageCode)) {
+            return fail('Coupon is not applicable for this package');
+        }
+        const applicableTypes = coupon.applicableTypes ?? ['ALL'];
+        if (!applicableTypes.includes('ALL')) {
+        }
+        if (coupon.minRecharge && amount && amount < Number(coupon.minRecharge)) {
+            return fail(`Minimum amount of INR ${coupon.minRecharge} required`);
+        }
+        let calculatedDiscount = 0;
+        const discountType = coupon.discountType;
+        const discountValue = coupon.discountValue ? Number(coupon.discountValue) : 0;
+        const maxDiscountInr = coupon.maxDiscountInr ? Number(coupon.maxDiscountInr) : null;
+        if (discountType === 'PERCENT' && amount) {
+            calculatedDiscount = (amount * discountValue) / 100;
+        }
+        else if (discountType === 'FLAT_INR') {
+            calculatedDiscount = discountValue;
+        }
+        else if (!discountType) {
+            if (coupon.type === 'FIXED_TOKENS') {
+                calculatedDiscount = coupon.value;
+            }
+            else if (coupon.type === 'PERCENTAGE' && amount) {
+                calculatedDiscount = (amount * coupon.value) / 100;
+            }
+        }
+        let finalDiscount = calculatedDiscount;
+        if (maxDiscountInr !== null && calculatedDiscount > maxDiscountInr) {
+            finalDiscount = maxDiscountInr;
+        }
+        return {
+            valid: true,
+            couponId: coupon.id,
+            couponCode: coupon.code,
+            discountType: discountType ?? coupon.type,
+            discountValue,
+            calculatedDiscount,
+            maxDiscountInr,
+            finalDiscount,
+            message: 'Coupon is valid',
+        };
+    }
+    async redeem(couponCode, tenantId, userId, discountApplied) {
+        const coupon = await this.prisma.platform.coupon.findUnique({
+            where: { code: couponCode.toUpperCase() },
+        });
+        if (!coupon)
+            throw new common_1.NotFoundException('Coupon not found');
+        return this.prisma.$transaction(async (tx) => {
+            const redemption = await tx.couponRedemption.create({
+                data: {
+                    couponId: coupon.id,
+                    tenantId,
+                    userId,
+                    discountApplied,
+                },
+            });
+            await tx.coupon.update({
+                where: { id: coupon.id },
+                data: { usedCount: { increment: 1 } },
+            });
+            return redemption;
+        });
+    }
+    async create(data) {
+        return this.prisma.platform.coupon.create({
+            data: {
+                code: data.code.toUpperCase(),
+                type: data.type,
+                value: data.value,
+                maxUses: data.maxUses ?? 1,
+                minRecharge: data.minRecharge,
+                expiresAt: data.expiresAt ? new Date(data.expiresAt) : null,
+                isActive: data.isActive ?? true,
+                description: data.description,
+                discountType: data.discountType,
+                discountValue: data.discountValue,
+                maxDiscountInr: data.maxDiscountInr,
+                applicablePackages: data.applicablePackages ?? ['ALL'],
+                applicableTypes: data.applicableTypes ?? ['ALL'],
+                validFrom: data.validFrom ? new Date(data.validFrom) : null,
+                validUntil: data.validUntil ? new Date(data.validUntil) : null,
+                perUserLimit: data.perUserLimit ?? 1,
+                firstTimeOnly: data.firstTimeOnly ?? false,
+                packageId: data.packageId,
+            },
+        });
+    }
+    async update(id, data) {
+        const existing = await this.prisma.platform.coupon.findUnique({ where: { id } });
+        if (!existing)
+            throw new common_1.NotFoundException('Coupon not found');
+        const updateData = { ...data };
+        if (data.code)
+            updateData.code = data.code.toUpperCase();
+        if (data.expiresAt)
+            updateData.expiresAt = new Date(data.expiresAt);
+        if (data.validFrom)
+            updateData.validFrom = new Date(data.validFrom);
+        if (data.validUntil)
+            updateData.validUntil = new Date(data.validUntil);
+        return this.prisma.platform.coupon.update({ where: { id }, data: updateData });
+    }
+    async listAll(query) {
+        const page = query?.page ?? 1;
+        const limit = query?.limit ?? 20;
+        const skip = (page - 1) * limit;
+        const where = {};
+        if (query?.isActive !== undefined)
+            where.isActive = query.isActive;
+        if (query?.search) {
+            where.OR = [
+                { code: { contains: query.search, mode: 'insensitive' } },
+                { description: { contains: query.search, mode: 'insensitive' } },
+            ];
+        }
+        const [data, total] = await Promise.all([
+            this.prisma.platform.coupon.findMany({
+                where,
+                skip,
+                take: limit,
+                orderBy: { createdAt: 'desc' },
+                include: { package: { select: { id: true, packageCode: true, packageName: true } } },
+            }),
+            this.prisma.platform.coupon.count({ where }),
+        ]);
+        return { data, total, page, limit };
+    }
+    async getByCode(code) {
+        const coupon = await this.prisma.platform.coupon.findUnique({
+            where: { code: code.toUpperCase() },
+            include: {
+                package: true,
+                redemptions: { orderBy: { redeemedAt: 'desc' }, take: 50 },
+            },
+        });
+        if (!coupon)
+            throw new common_1.NotFoundException(`Coupon "${code}" not found`);
+        return coupon;
+    }
+};
+exports.CouponEngineService = CouponEngineService;
+exports.CouponEngineService = CouponEngineService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+], CouponEngineService);
+//# sourceMappingURL=coupon-engine.service.js.map

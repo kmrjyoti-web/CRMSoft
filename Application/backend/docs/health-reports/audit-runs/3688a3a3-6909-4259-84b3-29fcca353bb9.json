@@ -1,0 +1,18 @@
+{
+  "runId": "3688a3a3-6909-4259-84b3-29fcca353bb9",
+  "startedAt": "2026-04-17T10:57:58.706Z",
+  "finishedAt": "2026-04-17T10:57:58.706Z",
+  "durationMs": 0,
+  "summary": {
+    "totalFindings": 0,
+    "errors": 0,
+    "warnings": 0,
+    "byCheck": {
+      "naming": 0,
+      "crossDbInclude": 0,
+      "fkOrphan": 0
+    },
+    "byDb": {}
+  },
+  "findings": []
+}

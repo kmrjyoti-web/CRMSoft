@@ -1,0 +1,42 @@
+name = "crmsoft"
+compatibility_date = "2026-04-01"
+
+# ─── R2 Buckets ────────────────────────────────────────────────────────────────
+# Tenant file uploads (invoices, attachments, documents)
+[[r2_buckets]]
+binding = "UPLOADS"
+bucket_name = "crmsoft-uploads-prod"
+preview_bucket_name = "crmsoft-uploads-dev"
+
+# Database backups (pg_dump → gzip, 30-day lifecycle)
+[[r2_buckets]]
+binding = "BACKUPS"
+bucket_name = "crmsoft-backups-prod"
+preview_bucket_name = "crmsoft-backups-dev"
+
+# Public assets (logos, avatars — CDN-served, no signed URLs)
+[[r2_buckets]]
+binding = "PUBLIC"
+bucket_name = "crmsoft-public-prod"
+preview_bucket_name = "crmsoft-public-dev"
+
+# ─── Environment Variables ─────────────────────────────────────────────────────
+[vars]
+ENVIRONMENT = "production"
+APP_NAME = "CRMSoft"
+TIMEZONE = "Asia/Kolkata"
+
+[env.staging]
+vars = { ENVIRONMENT = "staging" }
+
+[[env.staging.r2_buckets]]
+binding = "UPLOADS"
+bucket_name = "crmsoft-uploads-dev"
+
+[[env.staging.r2_buckets]]
+binding = "BACKUPS"
+bucket_name = "crmsoft-backups-dev"
+
+[[env.staging.r2_buckets]]
+binding = "PUBLIC"
+bucket_name = "crmsoft-public-dev"

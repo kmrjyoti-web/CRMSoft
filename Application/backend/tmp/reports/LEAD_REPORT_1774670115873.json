@@ -1,0 +1,12 @@
+[
+  {
+    "leadNumber": "L-001",
+    "contactName": "John Doe",
+    "organizationName": "Acme Corp",
+    "status": "NEW",
+    "priority": "HIGH",
+    "expectedValue": 50000,
+    "allocatedTo": "Alice Smith",
+    "createdAt": "2026-03-28T03:55:15.873Z"
+  }
+]

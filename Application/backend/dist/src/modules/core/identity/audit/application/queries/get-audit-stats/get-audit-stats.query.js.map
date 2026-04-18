@@ -1,0 +1,1 @@
+{"version":3,"file":"get-audit-stats.query.js","sourceRoot":"","sources":["../../../../../../../../../src/modules/core/identity/audit/application/queries/get-audit-stats/get-audit-stats.query.ts"],"names":[],"mappings":";;;AAAA,MAAa,kBAAkB;IAC7B,YACkB,QAAe,EACf,MAAa,EACb,MAAe;QAFf,aAAQ,GAAR,QAAQ,CAAO;QACf,WAAM,GAAN,MAAM,CAAO;QACb,WAAM,GAAN,MAAM,CAAS;IAC9B,CAAC;CACL;AAND,gDAMC"}

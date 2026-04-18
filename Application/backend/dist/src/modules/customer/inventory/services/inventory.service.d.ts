@@ -1,0 +1,115 @@
+import { PrismaService } from '../../../../core/prisma/prisma.service';
+import type { Prisma } from '@prisma/working-client';
+export declare class InventoryService {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    getOrCreateItem(tenantId: string, productId: string, inventoryType?: string): Promise<{
+        id: string;
+        tenantId: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        industryCode: string | null;
+        taxType: import("@prisma/working-client").$Enums.InventoryTaxType | null;
+        hsnCode: string | null;
+        productId: string;
+        inventoryType: import("@prisma/working-client").$Enums.InventoryType;
+        currentStock: number;
+        reservedStock: number;
+        minStockLevel: number | null;
+        reorderLevel: number | null;
+        maxStockLevel: number | null;
+        avgCostPrice: Prisma.Decimal | null;
+        lastPurchasePrice: Prisma.Decimal | null;
+        sellingPrice: Prisma.Decimal | null;
+        taxRate: Prisma.Decimal | null;
+        isRawMaterial: boolean;
+        isFinishedProduct: boolean;
+        isScrap: boolean;
+        defaultUnit: string | null;
+        purchaseUnitId: string | null;
+        saleUnitId: string | null;
+        stockUnitId: string | null;
+        defaultLocationId: string | null;
+    }>;
+    getStockSummary(tenantId: string, filters: {
+        productId?: string;
+        locationId?: string;
+    }): Promise<({
+        inventoryItem: {
+            id: string;
+            tenantId: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isDeleted: boolean;
+            deletedAt: Date | null;
+            deletedById: string | null;
+            updatedById: string | null;
+            updatedByName: string | null;
+            industryCode: string | null;
+            taxType: import("@prisma/working-client").$Enums.InventoryTaxType | null;
+            hsnCode: string | null;
+            productId: string;
+            inventoryType: import("@prisma/working-client").$Enums.InventoryType;
+            currentStock: number;
+            reservedStock: number;
+            minStockLevel: number | null;
+            reorderLevel: number | null;
+            maxStockLevel: number | null;
+            avgCostPrice: Prisma.Decimal | null;
+            lastPurchasePrice: Prisma.Decimal | null;
+            sellingPrice: Prisma.Decimal | null;
+            taxRate: Prisma.Decimal | null;
+            isRawMaterial: boolean;
+            isFinishedProduct: boolean;
+            isScrap: boolean;
+            defaultUnit: string | null;
+            purchaseUnitId: string | null;
+            saleUnitId: string | null;
+            stockUnitId: string | null;
+            defaultLocationId: string | null;
+        };
+    } & {
+        id: string;
+        tenantId: string;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        productId: string;
+        currentStock: number;
+        reservedStock: number;
+        avgCostPrice: Prisma.Decimal | null;
+        inventoryItemId: string;
+        locationId: string;
+        openingBalance: number;
+        totalIn: number;
+        totalOut: number;
+        lastUpdatedAt: Date;
+    })[]>;
+    getOpeningBalance(tenantId: string, productId: string, date: Date): Promise<{
+        productId: string;
+        date: Date;
+        openingBalance: number;
+    }>;
+    recalculateStock(tenantId: string, productId: string): Promise<{
+        productId: string;
+        totalStock: number;
+        locations: number;
+    }>;
+    getDashboard(tenantId: string): Promise<{
+        totalStock: number;
+        totalProducts: number;
+        totalSerials: number;
+        stockValue: number;
+        expiringSoon: number;
+        lowStockAlerts: number;
+    }>;
+}

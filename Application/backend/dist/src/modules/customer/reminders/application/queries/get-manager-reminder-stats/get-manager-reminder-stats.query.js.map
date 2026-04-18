@@ -1,0 +1,1 @@
+{"version":3,"file":"get-manager-reminder-stats.query.js","sourceRoot":"","sources":["../../../../../../../../src/modules/customer/reminders/application/queries/get-manager-reminder-stats/get-manager-reminder-stats.query.ts"],"names":[],"mappings":";;;AAAA,MAAa,4BAA4B;IACvC,YACkB,MAAc,EACd,SAAiB;QADjB,WAAM,GAAN,MAAM,CAAQ;QACd,cAAS,GAAT,SAAS,CAAQ;IAChC,CAAC;CACL;AALD,oEAKC"}

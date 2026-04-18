@@ -1,0 +1,82 @@
+import { IQueryHandler } from '@nestjs/cqrs';
+import { GetUserWorkloadQuery } from './get-user-workload.query';
+import { WorkloadService } from '../../../services/workload.service';
+export declare class GetUserWorkloadHandler implements IQueryHandler<GetUserWorkloadQuery> {
+    private readonly workload;
+    private readonly logger;
+    constructor(workload: WorkloadService);
+    execute(query: GetUserWorkloadQuery): Promise<{
+        user: {
+            id: string;
+            firstName: string;
+            lastName: string;
+            email: string;
+        } | null;
+        capacity: {
+            id: string;
+            tenantId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            isDeleted: boolean;
+            deletedAt: Date | null;
+            deletedById: string | null;
+            updatedById: string | null;
+            updatedByName: string | null;
+            maxContacts: number;
+            maxLeads: number;
+            userId: string;
+            conversionRate: import("@prisma/identity-client/runtime/library").Decimal | null;
+            maxOrganizations: number;
+            maxQuotations: number;
+            maxTotal: number;
+            activeLeads: number;
+            activeContacts: number;
+            activeOrganizations: number;
+            activeQuotations: number;
+            activeTotal: number;
+            isAvailable: boolean;
+            unavailableFrom: Date | null;
+            unavailableTo: Date | null;
+            delegateToId: string | null;
+            avgResponseHours: import("@prisma/identity-client/runtime/library").Decimal | null;
+            lastActivityAt: Date | null;
+        };
+        current: {
+            total: number;
+            leads: number;
+            contacts: number;
+            organizations: number;
+            quotations: number;
+        };
+        loadPercent: number;
+        status: string;
+        recentActivity: {
+            id: string;
+            tenantId: string;
+            entityType: import("@prisma/working-client").$Enums.EntityType;
+            createdAt: Date;
+            isDeleted: boolean;
+            deletedAt: Date | null;
+            deletedById: string | null;
+            updatedById: string | null;
+            updatedByName: string | null;
+            action: import("@prisma/working-client").$Enums.OwnershipAction;
+            entityId: string;
+            changedById: string;
+            ownerType: import("@prisma/working-client").$Enums.OwnerType;
+            fromUserId: string | null;
+            fromUserName: string | null;
+            toUserId: string | null;
+            toUserName: string | null;
+            reasonCode: string;
+            reasonDetail: string | null;
+            changedByName: string;
+            isAutomated: boolean;
+            ownershipDurationDays: number | null;
+            entitySnapshot: import("@prisma/working-client/runtime/library").JsonValue | null;
+        }[];
+        delegatedFrom: number;
+        isOnLeave: boolean;
+        leaveEndDate: Date | null;
+    }>;
+}

@@ -1,0 +1,68 @@
+import { AggregateRoot } from '../../../../../shared/domain/aggregate-root';
+export interface CreateActivityProps {
+    type: string;
+    subject: string;
+    description?: string;
+    scheduledAt?: Date;
+    endTime?: Date;
+    duration?: number;
+    leadId?: string;
+    contactId?: string;
+    locationName?: string;
+    latitude?: number;
+    longitude?: number;
+    createdById: string;
+}
+export declare class ActivityEntity extends AggregateRoot {
+    private _type;
+    private _subject;
+    private _description?;
+    private _outcome?;
+    private _duration?;
+    private _scheduledAt?;
+    private _endTime?;
+    private _completedAt?;
+    private _latitude?;
+    private _longitude?;
+    private _locationName?;
+    private _leadId?;
+    private _contactId?;
+    private _isActive;
+    private _isDeleted;
+    private _deletedAt;
+    private _deletedById;
+    private _createdById;
+    static create(id: string, props: CreateActivityProps): ActivityEntity;
+    static fromPersistence(data: any): ActivityEntity;
+    complete(outcome: string): void;
+    updateDetails(data: {
+        subject?: string;
+        description?: string;
+        scheduledAt?: Date;
+        endTime?: Date;
+        duration?: number;
+        locationName?: string;
+        latitude?: number;
+        longitude?: number;
+    }): void;
+    softDelete(deletedById: string): void;
+    restore(): void;
+    get type(): string;
+    get subject(): string;
+    get description(): string | undefined;
+    get outcome(): string | undefined;
+    get duration(): number | undefined;
+    get scheduledAt(): Date | undefined;
+    get endTime(): Date | undefined;
+    get completedAt(): Date | undefined;
+    get latitude(): number | undefined;
+    get longitude(): number | undefined;
+    get locationName(): string | undefined;
+    get leadId(): string | undefined;
+    get contactId(): string | undefined;
+    get isActive(): boolean;
+    get isDeleted(): boolean;
+    get deletedAt(): Date | null;
+    get deletedById(): string | null;
+    get createdById(): string;
+}

@@ -1,0 +1,860 @@
+-- WorkingDB SAFE_DROP table DDL backup — 2026-04-13
+-- Generated via information_schema (pg_dump v16/server v18 mismatch)
+-- All 44 tables are empty (0 rows) — DDL-only backup is complete
+
+CREATE TABLE IF NOT EXISTS "audit_field_changes" (
+  "id" text NOT NULL,
+  "tenant_id" text DEFAULT ''::text NOT NULL,
+  "audit_log_id" text NOT NULL,
+  "field_name" text NOT NULL,
+  "field_label" text,
+  "field_type" text,
+  "old_value" text,
+  "new_value" text,
+  "old_display_value" text,
+  "new_display_value" text,
+  "is_sensitive" boolean DEFAULT false NOT NULL,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "audit_retention_policies" (
+  "id" text NOT NULL,
+  "tenant_id" text DEFAULT ''::text NOT NULL,
+  "entity_type" USER-DEFINED NOT NULL,
+  "retention_days" integer NOT NULL,
+  "archive_enabled" boolean DEFAULT false NOT NULL,
+  "is_active" boolean DEFAULT true NOT NULL,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "bank_branches" (
+  "id" uuid DEFAULT gen_random_uuid() NOT NULL,
+  "bank_id" uuid NOT NULL,
+  "ifsc_code" text NOT NULL,
+  "micr_code" text,
+  "branch_name" text NOT NULL,
+  "city" text,
+  "state_name" text,
+  "district" text,
+  "address" text,
+  "phone" text,
+  "is_active" boolean DEFAULT true NOT NULL,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "coupon_redemptions" (
+  "id" text NOT NULL,
+  "coupon_id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "user_id" text NOT NULL,
+  "discount_applied" numeric NOT NULL,
+  "redeemed_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "credential_access_logs" (
+  "id" text NOT NULL,
+  "tenant_id" text DEFAULT ''::text NOT NULL,
+  "credential_id" text NOT NULL,
+  "action" text NOT NULL,
+  "accessed_by_id" text NOT NULL,
+  "accessed_by_name" text NOT NULL,
+  "accessed_by_ip" text,
+  "provider" text NOT NULL,
+  "details" text,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "data_retention_policies" (
+  "id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "entity_name" text NOT NULL,
+  "display_name" text NOT NULL,
+  "retention_days" integer NOT NULL,
+  "action" USER-DEFINED NOT NULL,
+  "scope_filter" jsonb,
+  "is_enabled" boolean DEFAULT true NOT NULL,
+  "last_executed_at" timestamp without time zone,
+  "last_records_affected" integer,
+  "require_approval" boolean DEFAULT false NOT NULL,
+  "notify_before_days" integer,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "delegation_records" (
+  "id" text NOT NULL,
+  "tenant_id" text DEFAULT ''::text NOT NULL,
+  "from_user_id" text NOT NULL,
+  "to_user_id" text NOT NULL,
+  "entity_type" USER-DEFINED,
+  "start_date" timestamp without time zone NOT NULL,
+  "end_date" timestamp without time zone NOT NULL,
+  "is_active" boolean DEFAULT true NOT NULL,
+  "is_reverted" boolean DEFAULT false NOT NULL,
+  "reverted_at" timestamp without time zone,
+  "reason" text NOT NULL,
+  "created_by_id" text NOT NULL,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "error_catalog" (
+  "id" text NOT NULL,
+  "code" text NOT NULL,
+  "layer" USER-DEFINED DEFAULT 'BE'::"ErrorLayer" NOT NULL,
+  "module" character varying(100) NOT NULL,
+  "severity" USER-DEFINED DEFAULT 'ERROR'::"ErrorSeverity" NOT NULL,
+  "http_status" integer NOT NULL,
+  "message_en" text NOT NULL,
+  "message_hi" text,
+  "solution_en" text,
+  "solution_hi" text,
+  "technical_info" text,
+  "help_url" text,
+  "is_retryable" boolean DEFAULT false NOT NULL,
+  "retry_after_ms" integer,
+  "is_active" boolean DEFAULT true NOT NULL,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "global_default_credentials" (
+  "id" text NOT NULL,
+  "provider" USER-DEFINED NOT NULL,
+  "encrypted_data" text NOT NULL,
+  "encryption_version" integer DEFAULT 1 NOT NULL,
+  "status" USER-DEFINED DEFAULT 'ACTIVE'::"CredentialStatus" NOT NULL,
+  "description" text,
+  "is_enabled" boolean DEFAULT false NOT NULL,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "global_lookups" (
+  "id" uuid DEFAULT gen_random_uuid() NOT NULL,
+  "category" text NOT NULL,
+  "code" text NOT NULL,
+  "label" text NOT NULL,
+  "metadata" jsonb,
+  "is_active" boolean DEFAULT true NOT NULL,
+  "sort_order" integer DEFAULT 999 NOT NULL,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "help_articles" (
+  "id" text NOT NULL,
+  "article_code" text NOT NULL,
+  "title" text NOT NULL,
+  "content" text NOT NULL,
+  "summary" text NOT NULL,
+  "help_type" USER-DEFINED NOT NULL,
+  "module_code" text,
+  "screen_code" text,
+  "field_code" text,
+  "applicable_types" jsonb DEFAULT '["ALL"]'::jsonb NOT NULL,
+  "uses_terminology" boolean DEFAULT false NOT NULL,
+  "video_url" text,
+  "video_thumbnail" text,
+  "related_articles" jsonb DEFAULT '[]'::jsonb NOT NULL,
+  "visible_to_roles" jsonb DEFAULT '["ALL"]'::jsonb NOT NULL,
+  "tags" jsonb DEFAULT '[]'::jsonb NOT NULL,
+  "is_published" boolean DEFAULT false NOT NULL,
+  "view_count" integer DEFAULT 0 NOT NULL,
+  "helpful_count" integer DEFAULT 0 NOT NULL,
+  "not_helpful_count" integer DEFAULT 0 NOT NULL,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "hsn_sac_codes" (
+  "id" uuid DEFAULT gen_random_uuid() NOT NULL,
+  "code" text NOT NULL,
+  "type" USER-DEFINED NOT NULL,
+  "description" text NOT NULL,
+  "chapter" text,
+  "default_gst_rate" numeric,
+  "is_active" boolean DEFAULT true NOT NULL,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "industry_packages" (
+  "id" text NOT NULL,
+  "industry_id" text NOT NULL,
+  "package_id" text NOT NULL,
+  "is_recommended" boolean DEFAULT false NOT NULL,
+  "sort_order" integer DEFAULT 0 NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "industry_patches" (
+  "id" text NOT NULL,
+  "version_id" text NOT NULL,
+  "industry_code" text NOT NULL,
+  "patch_name" text NOT NULL,
+  "description" text,
+  "status" USER-DEFINED DEFAULT 'PENDING'::"PatchStatus" NOT NULL,
+  "schema_changes" jsonb,
+  "seed_data" jsonb,
+  "config_overrides" jsonb,
+  "menu_overrides" jsonb,
+  "applied_at" timestamp without time zone,
+  "applied_by" text,
+  "error_log" text,
+  "rollback_data" jsonb,
+  "force_update" boolean DEFAULT false NOT NULL,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "ip_access_rules" (
+  "id" text NOT NULL,
+  "security_policy_id" text NOT NULL,
+  "ruleType" USER-DEFINED NOT NULL,
+  "ip_address" text NOT NULL,
+  "description" text,
+  "is_active" boolean DEFAULT true NOT NULL,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "license_keys" (
+  "id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "license_key" text NOT NULL,
+  "plan_id" text NOT NULL,
+  "status" USER-DEFINED DEFAULT 'LIC_ACTIVE'::"LicenseStatus" NOT NULL,
+  "activated_at" timestamp without time zone,
+  "expires_at" timestamp without time zone,
+  "max_users" integer DEFAULT 5 NOT NULL,
+  "allowed_modules" jsonb,
+  "hardware_fingerprint" text,
+  "last_validated_at" timestamp without time zone,
+  "notes" text,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "listing_analytics" (
+  "id" text NOT NULL,
+  "listing_id" text NOT NULL,
+  "total_views" integer DEFAULT 0 NOT NULL,
+  "unique_views" integer DEFAULT 0 NOT NULL,
+  "total_enquiries" integer DEFAULT 0 NOT NULL,
+  "total_orders" integer DEFAULT 0 NOT NULL,
+  "total_revenue" numeric DEFAULT 0 NOT NULL,
+  "view_to_enquiry" numeric DEFAULT 0 NOT NULL,
+  "enquiry_to_order" numeric DEFAULT 0 NOT NULL,
+  "daily_stats" jsonb DEFAULT '[]'::jsonb NOT NULL,
+  "geo_stats" jsonb DEFAULT '{}'::jsonb NOT NULL,
+  "mobile_views" integer DEFAULT 0 NOT NULL,
+  "desktop_views" integer DEFAULT 0 NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "listing_price_tiers" (
+  "id" text NOT NULL,
+  "listing_id" text NOT NULL,
+  "min_qty" integer NOT NULL,
+  "max_qty" integer,
+  "price_per_unit" numeric NOT NULL,
+  "customer_grade" text,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "marketplace_enquiries" (
+  "id" text NOT NULL,
+  "enquiry_number" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "vendor_id" text NOT NULL,
+  "listing_id" text NOT NULL,
+  "listing_title" text NOT NULL,
+  "buyer_id" text NOT NULL,
+  "buyer_name" text NOT NULL,
+  "buyer_email" text,
+  "buyer_phone" text,
+  "buyer_company" text,
+  "buyer_verified" boolean DEFAULT false NOT NULL,
+  "quantity" integer,
+  "budget" numeric,
+  "timeline" text,
+  "message" text,
+  "specifications" jsonb,
+  "status" USER-DEFINED DEFAULT 'ENQ_NEW'::"EnquiryStatus" NOT NULL,
+  "messages" jsonb DEFAULT '[]'::jsonb NOT NULL,
+  "unread_count_buyer" integer DEFAULT 0 NOT NULL,
+  "unread_count_vendor" integer DEFAULT 0 NOT NULL,
+  "last_message_at" timestamp without time zone,
+  "lead_id" text,
+  "lead_created_at" timestamp without time zone,
+  "quotation_id" text,
+  "quoted_price" numeric,
+  "quoted_at" timestamp without time zone,
+  "converted_to_order_id" text,
+  "converted_at" timestamp without time zone,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "marketplace_order_items" (
+  "id" text NOT NULL,
+  "order_id" text NOT NULL,
+  "listing_id" text NOT NULL,
+  "title" text NOT NULL,
+  "sku" text,
+  "attributes" jsonb,
+  "quantity" integer NOT NULL,
+  "unit_price" numeric NOT NULL,
+  "total_price" numeric NOT NULL,
+  "tax_rate" numeric,
+  "tax_amount" numeric,
+  "applied_tier" text
+);
+
+CREATE TABLE IF NOT EXISTS "marketplace_reviews" (
+  "id" text NOT NULL,
+  "module_id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "rating" integer NOT NULL,
+  "title" text,
+  "comment" text,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "plan_limits" (
+  "id" text NOT NULL,
+  "plan_id" text NOT NULL,
+  "resource_key" text NOT NULL,
+  "limit_type" USER-DEFINED DEFAULT 'TOTAL'::"LimitType" NOT NULL,
+  "limit_value" integer DEFAULT 0 NOT NULL,
+  "is_chargeable" boolean DEFAULT false NOT NULL,
+  "charge_tokens" integer DEFAULT 0 NOT NULL,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "plan_module_access" (
+  "id" text NOT NULL,
+  "plan_id" text NOT NULL,
+  "module_code" text NOT NULL,
+  "access_level" USER-DEFINED DEFAULT 'MOD_FULL'::"ModuleAccessLevel" NOT NULL,
+  "custom_config" jsonb,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "plugin_hook_logs" (
+  "id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "plugin_id" text NOT NULL,
+  "hook_point" text NOT NULL,
+  "entity_type" text,
+  "entity_id" text,
+  "status" text NOT NULL,
+  "duration_ms" integer,
+  "request_payload" jsonb,
+  "response_payload" jsonb,
+  "error_message" text,
+  "executed_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "post_analytics" (
+  "id" text NOT NULL,
+  "post_id" text NOT NULL,
+  "total_views" integer DEFAULT 0 NOT NULL,
+  "unique_views" integer DEFAULT 0 NOT NULL,
+  "total_likes" integer DEFAULT 0 NOT NULL,
+  "total_comments" integer DEFAULT 0 NOT NULL,
+  "total_shares" integer DEFAULT 0 NOT NULL,
+  "total_saves" integer DEFAULT 0 NOT NULL,
+  "engagement_rate" numeric DEFAULT 0 NOT NULL,
+  "daily_stats" jsonb DEFAULT '[]'::jsonb NOT NULL,
+  "geo_stats" jsonb DEFAULT '{}'::jsonb NOT NULL,
+  "mobile_views" integer DEFAULT 0 NOT NULL,
+  "desktop_views" integer DEFAULT 0 NOT NULL,
+  "top_engagers" jsonb DEFAULT '[]'::jsonb NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "post_engagements" (
+  "id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "post_id" text NOT NULL,
+  "user_id" text NOT NULL,
+  "action" USER-DEFINED NOT NULL,
+  "shared_to" text,
+  "city" text,
+  "state" text,
+  "pincode" text,
+  "device_type" text,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "recharge_plans" (
+  "id" text NOT NULL,
+  "name" text NOT NULL,
+  "amount" numeric NOT NULL,
+  "tokens" integer NOT NULL,
+  "bonus_tokens" integer DEFAULT 0 NOT NULL,
+  "industry_code" text,
+  "is_active" boolean DEFAULT true NOT NULL,
+  "sort_order" integer DEFAULT 0 NOT NULL,
+  "description" text,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "role_menu_permissions" (
+  "id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "role_id" text NOT NULL,
+  "menu_id" text NOT NULL,
+  "can_view" boolean DEFAULT false NOT NULL,
+  "can_create" boolean DEFAULT false NOT NULL,
+  "can_edit" boolean DEFAULT false NOT NULL,
+  "can_delete" boolean DEFAULT false NOT NULL,
+  "can_export" boolean DEFAULT false NOT NULL,
+  "can_import" boolean DEFAULT false NOT NULL,
+  "can_bulk_update" boolean DEFAULT false NOT NULL,
+  "can_bulk_delete" boolean DEFAULT false NOT NULL,
+  "can_approve" boolean DEFAULT false NOT NULL,
+  "can_assign" boolean DEFAULT false NOT NULL,
+  "can_transfer" boolean DEFAULT false NOT NULL,
+  "can_view_all" boolean DEFAULT false NOT NULL,
+  "can_edit_all" boolean DEFAULT false NOT NULL,
+  "can_delete_all" boolean DEFAULT false NOT NULL,
+  "restricted_fields" jsonb,
+  "inherit_from_parent" boolean DEFAULT true NOT NULL,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL,
+  "created_by_id" text,
+  "updated_by_id" text,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text
+);
+
+CREATE TABLE IF NOT EXISTS "software_offers" (
+  "id" text NOT NULL,
+  "name" text NOT NULL,
+  "code" text NOT NULL,
+  "description" text,
+  "offer_type" USER-DEFINED NOT NULL,
+  "value" integer NOT NULL,
+  "applicable_plan_ids" ARRAY DEFAULT ARRAY[]::text[],
+  "valid_from" timestamp without time zone NOT NULL,
+  "valid_to" timestamp without time zone NOT NULL,
+  "max_redemptions" integer DEFAULT 0 NOT NULL,
+  "current_redemptions" integer DEFAULT 0 NOT NULL,
+  "industry_code" text,
+  "is_active" boolean DEFAULT true NOT NULL,
+  "auto_apply" boolean DEFAULT false NOT NULL,
+  "terms" text,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "tenant_activity_logs" (
+  "id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "action" text NOT NULL,
+  "category" text NOT NULL,
+  "details" text,
+  "metadata" jsonb,
+  "performed_by_id" text,
+  "ip_address" text,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "tenant_audit_logs" (
+  "id" text NOT NULL,
+  "session_id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "user_id" text NOT NULL,
+  "user_name" text,
+  "user_role" text,
+  "action_type" USER-DEFINED NOT NULL,
+  "entity_type" text,
+  "entity_id" text,
+  "description" text NOT NULL,
+  "metadata" jsonb,
+  "page_url" text,
+  "duration_ms" integer,
+  "ip_address" text,
+  "user_agent" text,
+  "device_type" text,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "tenant_brandings" (
+  "id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "logo_url" text,
+  "logo_light_url" text,
+  "favicon_url" text,
+  "login_banner_url" text,
+  "email_header_logo_url" text,
+  "primary_color" text DEFAULT '#1976D2'::text NOT NULL,
+  "secondary_color" text DEFAULT '#424242'::text NOT NULL,
+  "accent_color" text DEFAULT '#FF5722'::text NOT NULL,
+  "sidebar_color" text DEFAULT '#263238'::text NOT NULL,
+  "sidebar_text_color" text DEFAULT '#FFFFFF'::text NOT NULL,
+  "header_color" text DEFAULT '#FFFFFF'::text NOT NULL,
+  "header_text_color" text DEFAULT '#333333'::text NOT NULL,
+  "button_color" text DEFAULT '#1976D2'::text NOT NULL,
+  "button_text_color" text DEFAULT '#FFFFFF'::text NOT NULL,
+  "link_color" text DEFAULT '#1976D2'::text NOT NULL,
+  "danger_color" text DEFAULT '#D32F2F'::text NOT NULL,
+  "success_color" text DEFAULT '#388E3C'::text NOT NULL,
+  "warning_color" text DEFAULT '#F57C00'::text NOT NULL,
+  "font_family" text DEFAULT 'Inter, sans-serif'::text NOT NULL,
+  "heading_font_family" text,
+  "font_size" text DEFAULT '14px'::text NOT NULL,
+  "custom_domain" text,
+  "domain_verified" boolean DEFAULT false NOT NULL,
+  "domain_verify_token" text,
+  "domain_verify_method" text,
+  "ssl_enabled" boolean DEFAULT false NOT NULL,
+  "ssl_expires_at" timestamp without time zone,
+  "login_page_title" text,
+  "login_page_subtitle" text,
+  "show_powered_by" boolean DEFAULT true NOT NULL,
+  "custom_css" text,
+  "updated_by_id" text,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text
+);
+
+CREATE TABLE IF NOT EXISTS "tenant_invoices" (
+  "id" text NOT NULL,
+  "tenant_id" text DEFAULT ''::text NOT NULL,
+  "invoice_number" text NOT NULL,
+  "amount" numeric NOT NULL,
+  "tax" numeric DEFAULT 0 NOT NULL,
+  "total" numeric NOT NULL,
+  "status" USER-DEFINED DEFAULT 'PENDING'::"PaymentStatus" NOT NULL,
+  "paid_at" timestamp without time zone,
+  "gateway_payment_id" text,
+  "period_start" timestamp without time zone NOT NULL,
+  "period_end" timestamp without time zone NOT NULL,
+  "pdf_url" text,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "tenant_marketplace_modules" (
+  "id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "module_id" text NOT NULL,
+  "plan_id" text,
+  "status" USER-DEFINED DEFAULT 'TRIAL'::"MarketplaceInstallStatus" NOT NULL,
+  "trial_ends_at" timestamp without time zone,
+  "subscription_id" text,
+  "installed_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "tenant_modules" (
+  "id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "module_id" text NOT NULL,
+  "status" USER-DEFINED DEFAULT 'ACTIVE'::"TenantModuleStatus" NOT NULL,
+  "is_enabled" boolean DEFAULT true NOT NULL,
+  "is_trial" boolean DEFAULT false NOT NULL,
+  "enabled_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "trial_ends_at" timestamp without time zone,
+  "expires_at" timestamp without time zone,
+  "enabled_features" ARRAY DEFAULT ARRAY[]::text[],
+  "current_usage" jsonb,
+  "credentials_enc" text,
+  "credentials_validated_at" timestamp without time zone,
+  "credentials_status" USER-DEFINED DEFAULT 'NOT_SET'::"CredentialValidationStatus" NOT NULL,
+  "enabled_by" text DEFAULT ''::text NOT NULL,
+  "usage_count" integer DEFAULT 0 NOT NULL,
+  "last_used_at" timestamp without time zone,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "tenant_plugins" (
+  "id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "plugin_id" text NOT NULL,
+  "status" USER-DEFINED DEFAULT 'TP_PENDING_SETUP'::"TenantPluginStatus" NOT NULL,
+  "is_enabled" boolean DEFAULT false NOT NULL,
+  "enabled_at" timestamp without time zone,
+  "disabled_at" timestamp without time zone,
+  "credentials" text,
+  "settings" jsonb,
+  "access_token" text,
+  "refresh_token" text,
+  "token_expires_at" timestamp without time zone,
+  "token_scopes" ARRAY DEFAULT ARRAY[]::text[],
+  "webhook_url" text,
+  "webhook_secret" text,
+  "last_used_at" timestamp without time zone,
+  "last_sync_at" timestamp without time zone,
+  "last_error_at" timestamp without time zone,
+  "last_error" text,
+  "error_count" integer DEFAULT 0 NOT NULL,
+  "consecutive_errors" integer DEFAULT 0 NOT NULL,
+  "monthly_usage" integer DEFAULT 0 NOT NULL,
+  "monthly_limit" integer,
+  "usage_reset_at" timestamp without time zone,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL,
+  "created_by_id" text,
+  "updated_by_id" text,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text
+);
+
+CREATE TABLE IF NOT EXISTS "tenant_usage_details" (
+  "id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "resource_key" text NOT NULL,
+  "current_count" integer DEFAULT 0 NOT NULL,
+  "monthly_count" integer DEFAULT 0 NOT NULL,
+  "month_year" text,
+  "last_updated" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "tenant_versions" (
+  "id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "version_id" text NOT NULL,
+  "current_version" text NOT NULL,
+  "previous_version" text,
+  "updated_at_time" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_by" text,
+  "update_method" text DEFAULT 'AUTO'::text NOT NULL,
+  "is_active" boolean DEFAULT true NOT NULL,
+  "patches_applied" ARRAY DEFAULT ARRAY[]::text[],
+  "force_update_pending" boolean DEFAULT false NOT NULL,
+  "force_update_message" text,
+  "force_update_deadline" timestamp without time zone,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "terminology_overrides" (
+  "id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "business_type_id" text,
+  "term_key" text NOT NULL,
+  "default_label" text NOT NULL,
+  "custom_label" text NOT NULL,
+  "regional_label" text,
+  "user_help_text" text,
+  "scope" text DEFAULT 'GLOBAL'::text NOT NULL,
+  "is_active" boolean DEFAULT true NOT NULL,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "user_capacities" (
+  "id" text NOT NULL,
+  "tenant_id" text DEFAULT ''::text NOT NULL,
+  "user_id" text NOT NULL,
+  "max_leads" integer DEFAULT 50 NOT NULL,
+  "max_contacts" integer DEFAULT 100 NOT NULL,
+  "max_organizations" integer DEFAULT 30 NOT NULL,
+  "max_quotations" integer DEFAULT 20 NOT NULL,
+  "max_total" integer DEFAULT 200 NOT NULL,
+  "active_leads" integer DEFAULT 0 NOT NULL,
+  "active_contacts" integer DEFAULT 0 NOT NULL,
+  "active_organizations" integer DEFAULT 0 NOT NULL,
+  "active_quotations" integer DEFAULT 0 NOT NULL,
+  "active_total" integer DEFAULT 0 NOT NULL,
+  "is_available" boolean DEFAULT true NOT NULL,
+  "unavailable_from" timestamp without time zone,
+  "unavailable_to" timestamp without time zone,
+  "delegate_to_id" text,
+  "avg_response_hours" numeric,
+  "conversion_rate" numeric,
+  "last_activity_at" timestamp without time zone,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updated_at" timestamp without time zone NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "user_permission_overrides" (
+  "id" text NOT NULL,
+  "tenant_id" text DEFAULT ''::text NOT NULL,
+  "user_id" text NOT NULL,
+  "action" text NOT NULL,
+  "effect" text DEFAULT 'grant'::text NOT NULL,
+  "reason" text,
+  "expires_at" timestamp without time zone,
+  "created_by" text,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "verification_otps" (
+  "id" text NOT NULL,
+  "tenant_id" text,
+  "user_id" text,
+  "target" text NOT NULL,
+  "target_type" text NOT NULL,
+  "otp" text NOT NULL,
+  "purpose" USER-DEFINED NOT NULL,
+  "status" USER-DEFINED DEFAULT 'OTP_PENDING'::"OtpStatus" NOT NULL,
+  "attempts" integer DEFAULT 0 NOT NULL,
+  "max_attempts" integer DEFAULT 3 NOT NULL,
+  "expires_at" timestamp without time zone NOT NULL,
+  "verified_at" timestamp without time zone,
+  "ip_address" text,
+  "user_agent" text,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
+
+CREATE TABLE IF NOT EXISTS "version_backups" (
+  "id" text NOT NULL,
+  "version_id" text NOT NULL,
+  "backup_type" text DEFAULT 'PRE_DEPLOY'::text NOT NULL,
+  "db_dump_path" text,
+  "git_tag" text,
+  "config_snapshot" jsonb,
+  "schema_snapshot" text,
+  "status" text DEFAULT 'COMPLETED'::text NOT NULL,
+  "size_bytes" bigint,
+  "restored_at" timestamp without time zone,
+  "restored_by" text,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "wallet_transactions" (
+  "id" text NOT NULL,
+  "wallet_id" text NOT NULL,
+  "tenant_id" text NOT NULL,
+  "type" USER-DEFINED NOT NULL,
+  "status" USER-DEFINED DEFAULT 'WTX_COMPLETED'::"WalletTxnStatus" NOT NULL,
+  "tokens" integer NOT NULL,
+  "balance_before" integer NOT NULL,
+  "balance_after" integer NOT NULL,
+  "description" text NOT NULL,
+  "reference_type" text,
+  "reference_id" text,
+  "service_key" text,
+  "metadata" jsonb,
+  "created_by_id" text,
+  "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "is_deleted" boolean DEFAULT false NOT NULL,
+  "deleted_at" timestamp without time zone,
+  "deleted_by_id" text,
+  "updated_by_id" text,
+  "updated_by_name" text
+);
