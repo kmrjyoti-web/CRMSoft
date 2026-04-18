@@ -519,10 +519,11 @@ export async function seedDemoData(prisma: PrismaClient) {
   // ─── STEP 2.5: Assign Permissions to Roles ───
   console.log('\n  📋 Assigning permissions to roles...');
 
-  const allPermissions = await prisma.permission.findMany();
+  type PermRow = { id: string; module: string; action: string };
+  const allPermissions = (await prisma.permission.findMany()) as PermRow[];
 
   // Define which modules each role type can access
-  const ADMIN_MODULES = allPermissions.map(p => p.id); // ADMIN gets all permissions
+  const ADMIN_MODULES = allPermissions.map((p: PermRow) => p.id); // ADMIN gets all permissions
 
   const MANAGER_MODULES = ['contacts','raw_contacts','organizations','leads','activities','demos',
     'tour-plans','quotations','invoices','payments','installations','trainings','support-tickets',

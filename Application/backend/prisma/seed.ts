@@ -296,9 +296,10 @@ async function main() {
   const SUPPORT_MODULES = ['contacts','organizations','support-tickets','communications',
     'installations','trainings','dashboard','calendar','notifications'];
 
-  const mgrPerms = allPerms.filter(p => MANAGER_MODULES.includes(p.module));
-  const salesPerms = allPerms.filter(p => SALES_MODULES.includes(p.module));
-  const supportPerms = allPerms.filter(p => SUPPORT_MODULES.includes(p.module));
+  type PermRow = { id: string; module: string; action: string };
+  const mgrPerms = (allPerms as PermRow[]).filter(p => MANAGER_MODULES.includes(p.module));
+  const salesPerms = (allPerms as PermRow[]).filter(p => SALES_MODULES.includes(p.module));
+  const supportPerms = (allPerms as PermRow[]).filter(p => SUPPORT_MODULES.includes(p.module));
 
   for (const p of mgrPerms) {
     await prisma.rolePermission.upsert({
