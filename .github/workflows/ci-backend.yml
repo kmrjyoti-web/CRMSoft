@@ -1,0 +1,152 @@
+name: CI — backend
+
+on:
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - 'Application/backend/**'
+      - '.github/workflows/ci-backend.yml'
+  push:
+    branches: [develop]
+    paths:
+      - 'Application/backend/**'
+
+concurrency:
+  group: ci-backend-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '24'
+  NODE_OPTIONS: '--max-old-space-size=4096'
+  BACKEND_DIR: 'Application/backend'
+
+jobs:
+  # ─────────────────────────────────────────────
+  typecheck:
+    name: Type check (tsc)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'Application/backend/package-lock.json'
+      - name: Install
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: npm ci
+      - name: Generate Prisma clients (7 modules × v1)
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: |
+          for module in identity platform working marketplace platform-console global demo; do
+            for schema in prisma/$module/v1/*.prisma; do
+              [ -f "$schema" ] && npx prisma generate --schema="$schema" || true
+            done
+          done
+      - name: tsc --noEmit
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: npm run typecheck
+
+  # ─────────────────────────────────────────────
+  # ⚠️ Lint is non-blocking in v1 — tighten in follow-up sprint.
+  # Current local state: 245 errors + 2588 warnings.
+  # ─────────────────────────────────────────────
+  lint:
+    name: Lint (eslint + prisma) — non-blocking v1
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'Application/backend/package-lock.json'
+      - name: Install
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: npm ci
+      - name: eslint
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: npm run lint
+        continue-on-error: true
+      - name: prisma structure lint
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: npm run lint:prisma
+
+  # ─────────────────────────────────────────────
+  audit:
+    name: DB schema audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'Application/backend/package-lock.json'
+      - name: Install
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: npm ci
+      - name: Generate Prisma clients
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: |
+          for module in identity platform working marketplace platform-console global demo; do
+            for schema in prisma/$module/v1/*.prisma; do
+              [ -f "$schema" ] && npx prisma generate --schema="$schema" || true
+            done
+          done
+      - name: Run audit
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: |
+          npm run audit:db --silent -- --format=json > /tmp/audit.json
+          ERRORS=$(jq '.summary.errors // 0' /tmp/audit.json)
+          echo "Audit errors: $ERRORS"
+          if [ "$ERRORS" != "0" ]; then
+            echo "❌ DB schema audit found errors"
+            jq '.findings[]? | select(.severity == "error")' /tmp/audit.json
+            exit 1
+          fi
+          echo "✅ DB schema audit clean"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-audit-report
+          path: /tmp/audit.json
+          retention-days: 7
+
+  # ─────────────────────────────────────────────
+  test-affected:
+    name: Tests (affected since base)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: typecheck
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'Application/backend/package-lock.json'
+      - name: Install
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: npm ci
+      - name: Generate Prisma clients
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: |
+          for module in identity platform working marketplace platform-console global demo; do
+            for schema in prisma/$module/v1/*.prisma; do
+              [ -f "$schema" ] && npx prisma generate --schema="$schema" || true
+            done
+          done
+      - name: Jest (changed since base)
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: |
+          npx jest \
+            --changedSince=origin/${{ github.base_ref || 'develop' }} \
+            --passWithNoTests \
+            --maxWorkers=2 \
+            --forceExit
