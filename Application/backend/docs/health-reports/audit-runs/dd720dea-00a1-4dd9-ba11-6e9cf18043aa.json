@@ -1,0 +1,18 @@
+{
+  "runId": "dd720dea-00a1-4dd9-ba11-6e9cf18043aa",
+  "startedAt": "2026-04-17T11:36:48.521Z",
+  "finishedAt": "2026-04-17T11:36:48.521Z",
+  "durationMs": 0,
+  "summary": {
+    "totalFindings": 0,
+    "errors": 0,
+    "warnings": 0,
+    "byCheck": {
+      "naming": 0,
+      "crossDbInclude": 0,
+      "fkOrphan": 0
+    },
+    "byDb": {}
+  },
+  "findings": []
+}

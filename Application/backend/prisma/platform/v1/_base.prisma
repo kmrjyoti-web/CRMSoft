@@ -1,0 +1,583 @@
+// ─── Generator + Datasource ─────────────────────────────────────────────────
+// This file is read by Prisma's prismaSchemaFolder feature.
+// It declares the generator, datasource, and all shared enums for PlatformDB.
+// Models live in the sibling domain files.
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../../../node_modules/@prisma/platform-client"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PLATFORM_DATABASE_URL")
+}
+
+// ─── Enums ─────────────────────────────────────────────────────────────────
+
+enum ContactType {
+  RAW
+  VALIDATED
+}
+
+enum ContactSource {
+  MANUAL
+  BULK_IMPORT
+  WEB_FORM
+  REFERRAL
+  API
+}
+
+enum RuleConditionOperator {
+  EQUALS
+  NOT_EQUALS
+  CONTAINS
+  GREATER_THAN
+  LESS_THAN
+  IN
+  NOT_IN
+  IS_EMPTY
+  IS_NOT_EMPTY
+}
+
+enum CalendarSourceType {
+  TASK
+  ACTIVITY
+  DEMO
+  TOUR_PLAN
+  REMINDER
+  FOLLOW_UP
+  SCHEDULED_EVENT
+  EXTERNAL_GOOGLE
+  EXTERNAL_OUTLOOK
+}
+
+enum DuplicateConfidence {
+  EXACT
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum ValidatorType {
+  REQUIRED
+  EMAIL
+  INDIAN_MOBILE
+  PHONE
+  GST_NUMBER
+  PAN_NUMBER
+  TAN_NUMBER
+  AADHAAR
+  IFSC_CODE
+  PINCODE
+  WEBSITE
+  URL
+  NUMERIC
+  DECIMAL
+  DATE
+  ENUM
+  CUSTOM_REGEX
+  MIN_LENGTH
+  MAX_LENGTH
+}
+
+enum WaChatbotNodeType {
+  WELCOME
+  KEYWORD_TRIGGER
+  MENU
+  TEXT_REPLY
+  MEDIA_REPLY
+  QUICK_BUTTONS
+  COLLECT_INPUT
+  CONDITION
+  API_CALL
+  ASSIGN_AGENT
+  DELAY
+  TAG_CONTACT
+  LINK_LEAD
+}
+
+enum SyncWarningLevel {
+  INFO
+  WARNING
+  URGENT
+  BLOCK
+}
+
+enum ErrorLayer {
+  BE
+  FE
+  DB
+  MOB
+}
+
+enum ErrorSeverity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+enum WalletTxnType {
+  CREDIT
+  DEBIT
+  REFUND
+  PROMO
+  ADJUSTMENT
+  EXPIRY
+  SUBSCRIPTION_CHARGE
+}
+
+enum BillingInterval {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum PlanType {
+  SUBSCRIPTION
+  ONE_TIME
+  USAGE_BASED
+}
+
+enum SubscriptionStatus {
+  CREATED
+  AUTHENTICATED
+  ACTIVE
+  PAUSED
+  PENDING
+  HALTED
+  CANCELLED
+  COMPLETED
+  EXPIRED
+  TRIALING
+}
+
+enum WalletTxnStatus {
+  WTX_PENDING
+  WTX_COMPLETED
+  WTX_FAILED
+  WTX_REVERSED
+}
+
+enum CouponType {
+  FIXED_TOKENS
+  PERCENTAGE
+}
+
+enum OfferType {
+  TRIAL_EXTENSION
+  DISCOUNT_PERCENTAGE
+  DISCOUNT_FLAT
+  BONUS_TOKENS
+  FREE_UPGRADE
+}
+
+enum LicenseStatus {
+  LIC_ACTIVE
+  LIC_EXPIRED
+  LIC_SUSPENDED
+  LIC_REVOKED
+}
+
+enum ModuleCategory {
+  CORE
+  CRM
+  SALES
+  FINANCE
+  POST_SALES
+  COMMUNICATION
+  AI
+  REPORTS
+  DEVELOPER
+  WORKFLOW
+  MARKETING
+  OPERATIONS
+  INTEGRATIONS
+  MARKETPLACE
+  ADDON
+  ANALYTICS
+}
+
+enum FeatureType {
+  PAGE
+  WIDGET
+  REPORT
+  ACTION
+  INTEGRATION
+}
+
+enum ModulePricingType {
+  FREE
+  INCLUDED
+  ADDON
+  ONE_TIME
+  PER_USAGE
+}
+
+enum ModuleStatus {
+  ACTIVE
+  BETA
+  DEPRECATED
+  COMING_SOON
+}
+
+enum EntityLimitType {
+  CONTACTS
+  ORGANIZATIONS
+  LEADS
+  QUOTATIONS
+  INVOICES
+  PRODUCTS
+  USERS
+  FILE_STORAGE_MB
+  DB_SIZE_MB
+  MARKETPLACE_PROMOTIONS
+  EMAIL_PER_MONTH
+  WHATSAPP_PER_MONTH
+  SMS_PER_MONTH
+  API_CALLS_PER_DAY
+  REPORTS_COUNT
+  WORKFLOWS_COUNT
+  CUSTOM_FIELDS_COUNT
+}
+
+enum IndustryCategory {
+  SERVICES
+  MANUFACTURING
+  RETAIL
+  HEALTHCARE
+  EDUCATION
+  FINANCE
+  REAL_ESTATE
+  FOOD_BEVERAGE
+  TRAVEL
+  CONSTRUCTION
+  ECOMMERCE
+  EVENTS
+  AUTOMOTIVE
+  OTHER
+}
+
+enum TenantModuleStatus {
+  ACTIVE
+  TRIAL
+  EXPIRED
+  SUSPENDED
+}
+
+enum CredentialValidationStatus {
+  NOT_SET
+  VALID
+  INVALID
+}
+
+enum VendorStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+}
+
+enum MarketplaceModuleStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+  SUSPENDED
+}
+
+enum MarketplaceInstallStatus {
+  TRIAL
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum ModuleType {
+  AI_PLUGIN
+  INTEGRATION
+  TEMPLATE
+  BUNDLE
+}
+
+enum AiHandlerType {
+  GENERIC
+  CUSTOM
+}
+
+enum ContentRating {
+  GENERAL
+  BUSINESS
+  PROFESSIONAL
+}
+
+enum PaymentMode {
+  WALLET_DEDUCT
+  RAZORPAY_SUBSCRIPTION
+  TRIAL
+  FREE
+}
+
+enum VendorType {
+  PLATFORM_OWNER
+  THIRD_PARTY
+  PARTNER
+}
+
+enum ListingType {
+  PRODUCT
+  SERVICE
+  NEW_LAUNCH
+  LAUNCHING_OFFER
+  REQUIREMENT
+  JOB
+  OTHER
+}
+
+enum ListingStatus {
+  LST_DRAFT
+  LST_SCHEDULED
+  LST_ACTIVE
+  LST_EXPIRED
+  LST_SOLD_OUT
+  LST_DEACTIVATED
+  LST_ARCHIVED
+}
+
+enum VisibilityType {
+  VIS_PUBLIC
+  VIS_GEO_TARGETED
+  VIS_VERIFIED_ONLY
+  VIS_MY_CONTACTS
+  VIS_SELECTED_CONTACTS
+  VIS_CATEGORY_BASED
+  VIS_GRADE_BASED
+}
+
+enum ExpiryAction {
+  EXP_DEACTIVATE
+  EXP_ARCHIVE
+  EXP_DELETE
+  EXP_NOTIFY_OWNER
+}
+
+enum PostType {
+  PT_TEXT
+  PT_IMAGE
+  PT_VIDEO
+  PT_PRODUCT_SHARE
+  PT_JOB_POSTING
+  PT_NEWS
+  PT_ANNOUNCEMENT
+  PT_POLL
+}
+
+enum PostStatus {
+  PS_DRAFT
+  PS_SCHEDULED
+  PS_ACTIVE
+  PS_EXPIRED
+  PS_HIDDEN
+  PS_DELETED
+}
+
+enum EngagementAction {
+  EA_VIEW
+  EA_LIKE
+  EA_UNLIKE
+  EA_COMMENT
+  EA_REPLY
+  EA_SHARE
+  EA_SAVE
+  EA_UNSAVE
+  EA_CLICK
+  EA_ENQUIRY
+}
+
+enum MktOrderStatus {
+  MKT_PENDING
+  MKT_CONFIRMED
+  MKT_PROCESSING
+  MKT_SHIPPED
+  MKT_DELIVERED
+  MKT_CANCELLED
+  MKT_RETURNED
+  MKT_REFUNDED
+}
+
+enum MktPaymentStatus {
+  MPAY_PENDING
+  MPAY_PAID
+  MPAY_FAILED
+  MPAY_REFUNDED
+  MPAY_PARTIALLY_REFUNDED
+}
+
+enum EnquiryStatus {
+  ENQ_NEW
+  ENQ_RESPONDED
+  ENQ_QUOTED
+  ENQ_NEGOTIATING
+  ENQ_CONVERTED
+  ENQ_CLOSED
+  ENQ_SPAM
+}
+
+enum DiscountType {
+  PERCENT
+  FLAT_INR
+}
+
+enum HelpType {
+  DEVELOPER
+  USER
+}
+
+enum PluginCategory {
+  COMMUNICATION
+  PAYMENT
+  CALENDAR
+  TELEPHONY
+  STORAGE
+  AI
+  MARKETING
+  ANALYTICS
+}
+
+enum PluginStatus {
+  PLUGIN_ACTIVE
+  PLUGIN_INACTIVE
+  PLUGIN_DEPRECATED
+  PLUGIN_BETA
+}
+
+enum TenantPluginStatus {
+  TP_ACTIVE
+  TP_INACTIVE
+  TP_ERROR
+  TP_PENDING_SETUP
+}
+
+enum VersionStatus {
+  DRAFT
+  TESTING
+  STAGED
+  PUBLISHED
+  ROLLED_BACK
+  DEPRECATED
+}
+
+enum PatchStatus {
+  PENDING
+  APPLIED
+  FAILED
+  ROLLED_BACK
+}
+
+enum TestEnvSourceType {
+  SEED_DATA
+  LIVE_CLONE
+  BACKUP_RESTORE
+}
+
+enum TestEnvStatus {
+  QUEUED
+  CREATING
+  SEEDING
+  READY
+  TESTING
+  COMPLETED
+  FAILED
+  CLEANING
+  CLEANED
+}
+
+enum TestRunStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum TestType {
+  UNIT
+  FUNCTIONAL
+  SMOKE
+  INTEGRATION
+  ARCHITECTURE
+  PENETRATION
+}
+
+enum TestResultStatus {
+  PASS
+  FAIL
+  SKIP
+  ERROR
+  TIMEOUT
+}
+
+enum TestGroupStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum BackupJobStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+  PARTIAL
+}
+
+enum RestoreJobStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+enum TestPlanStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum TestPlanItemStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  PASSED
+  FAILED
+  PARTIAL
+  BLOCKED
+  SKIPPED
+}
+
+enum TestPlanItemPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TestErrorCategory {
+  FUNCTIONAL
+  VALIDATION
+  DATABASE
+  UI_RENDER
+  API_CONTRACT
+  ARCHITECTURE
+  SECURITY
+  PERFORMANCE
+  CONFIGURATION
+  OTHER
+}
+
+enum TestSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}

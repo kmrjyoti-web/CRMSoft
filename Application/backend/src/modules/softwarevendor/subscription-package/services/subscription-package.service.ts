@@ -1,0 +1,117 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../../../core/prisma/prisma.service';
+import { industryFilter } from '../../../../common/utils/industry-filter.util';
+
+@Injectable()
+export class SubscriptionPackageService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  /** List all packages ordered by planLevel */
+  async listAll(activeOnly?: boolean, industryCode?: string) {
+    const where: any = { ...industryFilter(industryCode) };
+    if (activeOnly) where.isActive = true;
+
+    return this.prisma.platform.subscriptionPackage.findMany({
+      where,
+      orderBy: { planLevel: 'asc' },
+      include: { coupons: { where: { isActive: true }, select: { id: true, code: true } } },
+    });
+  }
+
+  /** Get a single package by its unique code */
+  async getByCode(code: string) {
+    const pkg = await this.prisma.platform.subscriptionPackage.findUnique({
+      where: { packageCode: code },
+      include: { coupons: true },
+    });
+    if (!pkg) throw new NotFoundException(`Package with code "${code}" not found`);
+    return pkg;
+  }
+
+  /** Create a new subscription package */
+  async create(data: {
+    packageCode: string;
+    packageName: string;
+    tagline?: string;
+    applicableTypes?: Record<string, unknown>;
+    includedModules?: Record<string, unknown>;
+    limits?: Record<string, unknown>;
+    priceMonthlyInr: number;
+    priceYearlyInr: number;
+    yearlyDiscountPct?: number;
+    trialDays?: number;
+    featureFlags?: Record<string, unknown>;
+    planLevel: number;
+    isActive?: boolean;
+    isFeatured?: boolean;
+    sortOrder?: number;
+  }) {
+    return this.prisma.platform.subscriptionPackage.create({
+      data: {
+        packageCode: data.packageCode.toUpperCase(),
+        packageName: data.packageName,
+        tagline: data.tagline,
+        applicableTypes: data.applicableTypes ?? ['ALL'] as any,
+        includedModules: data.includedModules ?? [] as any,
+        limits: data.limits ?? {} as any,
+        priceMonthlyInr: data.priceMonthlyInr,
+        priceYearlyInr: data.priceYearlyInr,
+        yearlyDiscountPct: data.yearlyDiscountPct ?? 20,
+        trialDays: data.trialDays ?? 14,
+        featureFlags: data.featureFlags ?? {} as any,
+        planLevel: data.planLevel,
+        isActive: data.isActive ?? true,
+        isFeatured: data.isFeatured ?? false,
+        sortOrder: data.sortOrder ?? 0,
+      },
+    });
+  }
+
+  /** Update a subscription package */
+  async update(
+    id: string,
+    data: Partial<{
+      packageName: string;
+      tagline: string;
+      applicableTypes: Record<string, unknown>;
+      includedModules: Record<string, unknown>;
+      limits: Record<string, unknown>;
+      priceMonthlyInr: number;
+      priceYearlyInr: number;
+      yearlyDiscountPct: number;
+      trialDays: number;
+      featureFlags: Record<string, unknown>;
+      planLevel: number;
+      isActive: boolean;
+      isFeatured: boolean;
+      sortOrder: number;
+    }>,
+  ) {
+    const existing = await this.prisma.platform.subscriptionPackage.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException(`Package "${id}" not found`);
+
+    return this.prisma.platform.subscriptionPackage.update({
+      where: { id },
+      data: data as any,
+    });
+  }
+
+  /** Soft-deactivate a package (set isActive = false) */
+  async deactivate(id: string) {
+    const existing = await this.prisma.platform.subscriptionPackage.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException(`Package "${id}" not found`);
+
+    return this.prisma.platform.subscriptionPackage.update({
+      where: { id },
+      data: { isActive: false },
+    });
+  }
+
+  /** List featured active packages */
+  async getFeatured(industryCode?: string) {
+    return this.prisma.platform.subscriptionPackage.findMany({
+      where: { isActive: true, isFeatured: true, ...industryFilter(industryCode) } as any,
+      orderBy: { sortOrder: 'asc' },
+    });
+  }
+}

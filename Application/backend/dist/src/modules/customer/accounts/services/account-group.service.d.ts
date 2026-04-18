@@ -1,0 +1,133 @@
+import { PrismaService } from '../../../../core/prisma/prisma.service';
+export declare class AccountGroupService {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    getTree(tenantId: string): Promise<any[]>;
+    getAll(tenantId: string): Promise<{
+        id: string;
+        tenantId: string;
+        name: string;
+        code: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        isSystem: boolean;
+        parentId: string | null;
+        primaryGroup: string;
+        nature: string;
+        isProhibited: boolean;
+    }[]>;
+    getById(tenantId: string, id: string): Promise<{
+        children: {
+            id: string;
+            tenantId: string;
+            name: string;
+            code: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isDeleted: boolean;
+            deletedAt: Date | null;
+            updatedById: string | null;
+            updatedByName: string | null;
+            isSystem: boolean;
+            parentId: string | null;
+            primaryGroup: string;
+            nature: string;
+            isProhibited: boolean;
+        }[];
+        ledgers: {
+            id: string;
+            name: string;
+            code: string;
+            currentBalance: import("@prisma/working-client/runtime/library").Decimal;
+        }[];
+    } & {
+        id: string;
+        tenantId: string;
+        name: string;
+        code: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        isSystem: boolean;
+        parentId: string | null;
+        primaryGroup: string;
+        nature: string;
+        isProhibited: boolean;
+    }>;
+    create(tenantId: string, data: {
+        name: string;
+        code: string;
+        parentId?: string;
+        primaryGroup: string;
+        nature?: string;
+        isProhibited?: boolean;
+    }): Promise<{
+        id: string;
+        tenantId: string;
+        name: string;
+        code: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        isSystem: boolean;
+        parentId: string | null;
+        primaryGroup: string;
+        nature: string;
+        isProhibited: boolean;
+    }>;
+    update(tenantId: string, id: string, data: Partial<{
+        name: string;
+        parentId: string;
+        isProhibited: boolean;
+        isActive: boolean;
+    }>): Promise<{
+        id: string;
+        tenantId: string;
+        name: string;
+        code: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        isSystem: boolean;
+        parentId: string | null;
+        primaryGroup: string;
+        nature: string;
+        isProhibited: boolean;
+    }>;
+    delete(tenantId: string, id: string): Promise<{
+        id: string;
+        tenantId: string;
+        name: string;
+        code: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        isSystem: boolean;
+        parentId: string | null;
+        primaryGroup: string;
+        nature: string;
+        isProhibited: boolean;
+    }>;
+}

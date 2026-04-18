@@ -1,0 +1,36 @@
+{
+  "runId": "a8facc7d-e0c5-4576-bfac-b47af3409cbc",
+  "startedAt": "2026-04-17T12:35:43.130Z",
+  "finishedAt": "2026-04-17T12:35:43.130Z",
+  "durationMs": 0,
+  "summary": {
+    "totalFindings": 2,
+    "errors": 1,
+    "warnings": 1,
+    "byCheck": {
+      "naming": 1,
+      "crossDbInclude": 1,
+      "fkOrphan": 0
+    },
+    "byDb": {
+      "PlatformDB": 1,
+      "WorkingDB": 1
+    }
+  },
+  "findings": [
+    {
+      "severity": "error",
+      "check": "naming",
+      "db": "PlatformDB",
+      "rule": "test",
+      "message": "test finding"
+    },
+    {
+      "severity": "warn",
+      "check": "crossDbInclude",
+      "db": "WorkingDB",
+      "rule": "test",
+      "message": "test warn"
+    }
+  ]
+}

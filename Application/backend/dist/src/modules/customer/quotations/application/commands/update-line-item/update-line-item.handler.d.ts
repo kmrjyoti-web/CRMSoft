@@ -1,0 +1,46 @@
+import { ICommandHandler } from '@nestjs/cqrs';
+import { UpdateLineItemCommand } from './update-line-item.command';
+import { PrismaService } from '../../../../../../core/prisma/prisma.service';
+import { QuotationCalculatorService } from '../../../services/quotation-calculator.service';
+export declare class UpdateLineItemHandler implements ICommandHandler<UpdateLineItemCommand> {
+    private readonly prisma;
+    private readonly calculator;
+    private readonly logger;
+    constructor(prisma: PrismaService, calculator: QuotationCalculatorService);
+    execute(cmd: UpdateLineItemCommand): Promise<{
+        id: string;
+        tenantId: string;
+        description: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        sortOrder: number;
+        notes: string | null;
+        mrp: import("@prisma/working-client/runtime/library").Decimal | null;
+        hsnCode: string | null;
+        gstRate: import("@prisma/working-client/runtime/library").Decimal | null;
+        cessRate: import("@prisma/working-client/runtime/library").Decimal | null;
+        productId: string | null;
+        quantity: import("@prisma/working-client/runtime/library").Decimal;
+        unitPrice: import("@prisma/working-client/runtime/library").Decimal;
+        discountAmount: import("@prisma/working-client/runtime/library").Decimal;
+        cgstAmount: import("@prisma/working-client/runtime/library").Decimal;
+        sgstAmount: import("@prisma/working-client/runtime/library").Decimal;
+        igstAmount: import("@prisma/working-client/runtime/library").Decimal;
+        cessAmount: import("@prisma/working-client/runtime/library").Decimal;
+        quotationId: string;
+        discountType: string | null;
+        discountValue: import("@prisma/working-client/runtime/library").Decimal | null;
+        productCode: string | null;
+        productName: string;
+        unit: string | null;
+        lineTotal: import("@prisma/working-client/runtime/library").Decimal;
+        taxAmount: import("@prisma/working-client/runtime/library").Decimal;
+        totalWithTax: import("@prisma/working-client/runtime/library").Decimal;
+        isOptional: boolean;
+    }>;
+}

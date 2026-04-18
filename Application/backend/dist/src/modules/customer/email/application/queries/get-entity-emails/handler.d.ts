@@ -1,0 +1,81 @@
+import { IQueryHandler } from '@nestjs/cqrs';
+import { PrismaService } from '../../../../../../core/prisma/prisma.service';
+import { GetEntityEmailsQuery } from './query';
+export declare class GetEntityEmailsHandler implements IQueryHandler<GetEntityEmailsQuery> {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    execute(query: GetEntityEmailsQuery): Promise<{
+        data: ({
+            attachments: {
+                id: string;
+                fileSize: number | null;
+                fileName: string;
+            }[];
+            account: {
+                id: string;
+                emailAddress: string;
+            };
+        } & {
+            id: string;
+            tenantId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            isDeleted: boolean;
+            deletedAt: Date | null;
+            deletedById: string | null;
+            updatedById: string | null;
+            updatedByName: string | null;
+            status: import("@prisma/working-client").$Enums.EmailStatus;
+            templateId: string | null;
+            subject: string;
+            bodyHtml: string | null;
+            priority: import("@prisma/working-client").$Enums.EmailPriority;
+            fromEmail: string;
+            fromName: string | null;
+            direction: import("@prisma/working-client").$Enums.EmailDirection;
+            errorMessage: string | null;
+            sentAt: Date | null;
+            scheduledAt: Date | null;
+            activityId: string | null;
+            providerMessageId: string | null;
+            threadId: string | null;
+            bodyText: string | null;
+            accountId: string;
+            toEmails: import("@prisma/working-client/runtime/library").JsonValue;
+            ccEmails: import("@prisma/working-client/runtime/library").JsonValue | null;
+            bccEmails: import("@prisma/working-client/runtime/library").JsonValue | null;
+            replyToEmail: string | null;
+            snippet: string | null;
+            inReplyToMessageId: string | null;
+            references: string[];
+            providerThreadId: string | null;
+            internetMessageId: string | null;
+            trackingEnabled: boolean;
+            trackingPixelId: string | null;
+            openCount: number;
+            firstOpenedAt: Date | null;
+            lastOpenedAt: Date | null;
+            clickCount: number;
+            firstClickedAt: Date | null;
+            isReplied: boolean;
+            repliedAt: Date | null;
+            isBounced: boolean;
+            bounceReason: string | null;
+            linkedEntityType: string | null;
+            linkedEntityId: string | null;
+            autoLinked: boolean;
+            campaignId: string | null;
+            campaignRecipientId: string | null;
+            hasAttachments: boolean;
+            attachmentCount: number;
+            isStarred: boolean;
+            isRead: boolean;
+            labels: string[];
+            retryCount: number;
+        })[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    }>;
+}

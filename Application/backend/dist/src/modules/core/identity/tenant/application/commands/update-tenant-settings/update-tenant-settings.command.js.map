@@ -1,0 +1,1 @@
+{"version":3,"file":"update-tenant-settings.command.js","sourceRoot":"","sources":["../../../../../../../../../src/modules/core/identity/tenant/application/commands/update-tenant-settings/update-tenant-settings.command.ts"],"names":[],"mappings":";;;AAAA,MAAa,2BAA2B;IACtC,YACkB,QAAgB,EAChB,QAA6B;QAD7B,aAAQ,GAAR,QAAQ,CAAQ;QAChB,aAAQ,GAAR,QAAQ,CAAqB;IAC5C,CAAC;CACL;AALD,kEAKC"}

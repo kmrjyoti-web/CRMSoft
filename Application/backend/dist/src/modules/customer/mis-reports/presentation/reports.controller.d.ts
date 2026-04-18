@@ -1,0 +1,46 @@
+import { Response } from 'express';
+import { ApiResponse } from '../../../../common/utils/api-response';
+import { PrismaService } from '../../../../core/prisma/prisma.service';
+import { ReportEngineService } from '../infrastructure/report-engine.service';
+import { GenerateReportDto } from './dto/generate-report.dto';
+import { ExportReportDto } from './dto/export-report.dto';
+import { DrillDownDto } from './dto/drill-down.dto';
+import { QueryExportsDto } from './dto/query-exports.dto';
+export declare class MisReportsController {
+    private readonly reportEngine;
+    private readonly prisma;
+    constructor(reportEngine: ReportEngineService, prisma: PrismaService);
+    listDefinitions(category?: string): Promise<ApiResponse<import("../infrastructure/report-engine.service").ReportDefinitionMeta[]>>;
+    getDefinition(code: string): Promise<ApiResponse<import("../infrastructure/report-engine.service").ReportDefinitionMeta>>;
+    generate(code: string, dto: GenerateReportDto, user: any): Promise<ApiResponse<import("../interfaces").ReportData>>;
+    exportReport(code: string, dto: ExportReportDto, user: any): Promise<ApiResponse<import("../interfaces").ExportResult>>;
+    drillDown(code: string, dto: DrillDownDto): Promise<ApiResponse<import("../interfaces").DrillDownResult>>;
+    getExports(dto: QueryExportsDto, userId: string): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        createdAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        status: string;
+        filters: import("@prisma/working-client/runtime/library").JsonValue | null;
+        duration: number | null;
+        errorMessage: string | null;
+        format: import("@prisma/working-client").$Enums.ReportFormat;
+        reportType: import("@prisma/working-client").$Enums.ReportType;
+        recordCount: number;
+        fileUrl: string | null;
+        fileSize: number | null;
+        generatedAt: Date;
+        exportedById: string;
+        exportedByName: string;
+        reportCode: string | null;
+        reportName: string | null;
+        exportSource: string | null;
+        scheduledReportId: string | null;
+        generationTimeMs: number | null;
+    }[]>>;
+    download(id: string, res: Response): Promise<Response<any, Record<string, any>>>;
+}

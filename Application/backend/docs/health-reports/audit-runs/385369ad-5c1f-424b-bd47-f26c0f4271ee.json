@@ -1,0 +1,131 @@
+{
+  "runId": "385369ad-5c1f-424b-bd47-f26c0f4271ee",
+  "startedAt": "2026-04-13T09:32:06.162Z",
+  "finishedAt": "2026-04-13T09:32:06.856Z",
+  "durationMs": 694,
+  "summary": {
+    "totalFindings": 11,
+    "errors": 11,
+    "warnings": 0,
+    "byCheck": {
+      "naming": 0,
+      "crossDbInclude": 11,
+      "fkOrphan": 0
+    },
+    "byDb": {
+      "WorkingDB": 11
+    }
+  },
+  "findings": [
+    {
+      "severity": "error",
+      "check": "crossDbInclude",
+      "db": "WorkingDB",
+      "model": "createdByUser",
+      "rule": "cross-db-include",
+      "message": "Cross-DB include detected: 'createdByUser' is in IdentityDB/PlatformDB but included via WorkingDB client. Use CrossDbResolverService.resolveUsers() instead.",
+      "file": "src/modules/customer/activities/application/commands/complete-activity/complete-activity.handler.ts",
+      "line": 24
+    },
+    {
+      "severity": "error",
+      "check": "crossDbInclude",
+      "db": "WorkingDB",
+      "model": "createdByUser",
+      "rule": "cross-db-include",
+      "message": "Cross-DB include detected: 'createdByUser' is in IdentityDB/PlatformDB but included via WorkingDB client. Use CrossDbResolverService.resolveUsers() instead.",
+      "file": "src/modules/customer/activities/application/commands/update-activity/update-activity.handler.ts",
+      "line": 22
+    },
+    {
+      "severity": "error",
+      "check": "crossDbInclude",
+      "db": "WorkingDB",
+      "model": "user",
+      "rule": "cross-db-include",
+      "message": "Cross-DB include detected: 'user' is in IdentityDB/PlatformDB but included via WorkingDB client. Use CrossDbResolverService.resolveUsers() instead.",
+      "file": "src/modules/customer/calendar/services/scheduling.service.ts",
+      "line": 197
+    },
+    {
+      "severity": "error",
+      "check": "crossDbInclude",
+      "db": "WorkingDB",
+      "model": "lookupValue",
+      "rule": "cross-db-include",
+      "message": "Cross-DB include detected: 'lookupValue' is in IdentityDB/PlatformDB but included via WorkingDB client. Use CrossDbResolverService.resolveUsers() instead.",
+      "file": "src/modules/customer/mis-reports/reports/leads/lead-funnel.report.ts",
+      "line": 45
+    },
+    {
+      "severity": "error",
+      "check": "crossDbInclude",
+      "db": "WorkingDB",
+      "model": "lookupValue",
+      "rule": "cross-db-include",
+      "message": "Cross-DB include detected: 'lookupValue' is in IdentityDB/PlatformDB but included via WorkingDB client. Use CrossDbResolverService.resolveUsers() instead.",
+      "file": "src/modules/customer/mis-reports/reports/leads/lead-source-analysis.report.ts",
+      "line": 45
+    },
+    {
+      "severity": "error",
+      "check": "crossDbInclude",
+      "db": "WorkingDB",
+      "model": "createdByUser",
+      "rule": "cross-db-include",
+      "message": "Cross-DB include detected: 'createdByUser' is in IdentityDB/PlatformDB but included via WorkingDB client. Use CrossDbResolverService.resolveUsers() instead.",
+      "file": "src/modules/customer/mis-reports/reports/quotations/quotation-summary.report.ts",
+      "line": 145
+    },
+    {
+      "severity": "error",
+      "check": "crossDbInclude",
+      "db": "WorkingDB",
+      "model": "lookupValue",
+      "rule": "cross-db-include",
+      "message": "Cross-DB include detected: 'lookupValue' is in IdentityDB/PlatformDB but included via WorkingDB client. Use CrossDbResolverService.resolveUsers() instead.",
+      "file": "src/modules/customer/mis-reports/reports/sales/revenue.report.ts",
+      "line": 47
+    },
+    {
+      "severity": "error",
+      "check": "crossDbInclude",
+      "db": "WorkingDB",
+      "model": "lookupValue",
+      "rule": "cross-db-include",
+      "message": "Cross-DB include detected: 'lookupValue' is in IdentityDB/PlatformDB but included via WorkingDB client. Use CrossDbResolverService.resolveUsers() instead.",
+      "file": "src/modules/customer/mis-reports/reports/sales/win-loss-analysis.report.ts",
+      "line": 50
+    },
+    {
+      "severity": "error",
+      "check": "crossDbInclude",
+      "db": "WorkingDB",
+      "model": "lookupValue",
+      "rule": "cross-db-include",
+      "message": "Cross-DB include detected: 'lookupValue' is in IdentityDB/PlatformDB but included via WorkingDB client. Use CrossDbResolverService.resolveUsers() instead.",
+      "file": "src/modules/customer/ownership/services/rule-engine.service.ts",
+      "line": 142
+    },
+    {
+      "severity": "error",
+      "check": "crossDbInclude",
+      "db": "WorkingDB",
+      "model": "lookupValue",
+      "rule": "cross-db-include",
+      "message": "Cross-DB include detected: 'lookupValue' is in IdentityDB/PlatformDB but included via WorkingDB client. Use CrossDbResolverService.resolveUsers() instead.",
+      "file": "src/modules/customer/quotations/services/quotation-prediction.service.ts",
+      "line": 33
+    },
+    {
+      "severity": "error",
+      "check": "crossDbInclude",
+      "db": "WorkingDB",
+      "model": "user",
+      "rule": "cross-db-include",
+      "message": "Cross-DB include detected: 'user' is in IdentityDB/PlatformDB but included via WorkingDB client. Use CrossDbResolverService.resolveUsers() instead.",
+      "file": "src/modules/customer/tasks/application/queries/get-task-by-id/get-task-by-id.handler.ts",
+      "line": 20
+    }
+  ]
+}

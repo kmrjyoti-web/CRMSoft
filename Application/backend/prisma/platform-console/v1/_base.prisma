@@ -1,0 +1,15 @@
+// ─── Generator + Datasource ─────────────────────────────────────────────────
+// This file is read by Prisma's prismaSchemaFolder feature.
+// It declares the generator, datasource, and all shared enums for PlatformConsoleDB.
+// Models live in the sibling domain files.
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../../../node_modules/.prisma/platform-console-client"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PLATFORM_CONSOLE_DATABASE_URL")
+}

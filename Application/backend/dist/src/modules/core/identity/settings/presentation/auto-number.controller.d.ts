@@ -1,0 +1,76 @@
+import { AutoNumberService } from '../services/auto-number.service';
+import { UpdateAutoNumberDto, ResetSequenceDto } from './dto/update-auto-number.dto';
+export declare class AutoNumberController {
+    private readonly service;
+    constructor(service: AutoNumberService);
+    getAll(req: any): Promise<{
+        id: string;
+        tenantId: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        entityName: string;
+        prefix: string;
+        formatPattern: string;
+        currentSequence: number;
+        seqPadding: number;
+        startFrom: number;
+        incrementBy: number;
+        resetPolicy: import("@prisma/working-client").$Enums.SequenceResetPolicy;
+        lastResetAt: Date | null;
+        lastResetSequence: number | null;
+        sampleNumber: string | null;
+    }[]>;
+    getOne(req: any, entity: string): Promise<{
+        id: string;
+        tenantId: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        entityName: string;
+        prefix: string;
+        formatPattern: string;
+        currentSequence: number;
+        seqPadding: number;
+        startFrom: number;
+        incrementBy: number;
+        resetPolicy: import("@prisma/working-client").$Enums.SequenceResetPolicy;
+        lastResetAt: Date | null;
+        lastResetSequence: number | null;
+        sampleNumber: string | null;
+    }>;
+    update(req: any, entity: string, dto: UpdateAutoNumberDto): Promise<{
+        id: string;
+        tenantId: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        entityName: string;
+        prefix: string;
+        formatPattern: string;
+        currentSequence: number;
+        seqPadding: number;
+        startFrom: number;
+        incrementBy: number;
+        resetPolicy: import("@prisma/working-client").$Enums.SequenceResetPolicy;
+        lastResetAt: Date | null;
+        lastResetSequence: number | null;
+        sampleNumber: string | null;
+    }>;
+    preview(req: any, entity: string): Promise<{
+        number: string;
+    }>;
+    reset(req: any, entity: string, dto: ResetSequenceDto): Promise<void>;
+}

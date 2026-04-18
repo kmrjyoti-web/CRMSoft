@@ -1,0 +1,42 @@
+import { ICommandHandler } from '@nestjs/cqrs';
+import { UploadVersionCommand } from './upload-version.command';
+import { StorageLocalService } from '../../../services/storage-local.service';
+import { DocumentService } from '../../../services/document.service';
+import { DocumentActivityService } from '../../../services/document-activity.service';
+export declare class UploadVersionHandler implements ICommandHandler<UploadVersionCommand> {
+    private readonly storage;
+    private readonly documentService;
+    private readonly activityService;
+    private readonly logger;
+    constructor(storage: StorageLocalService, documentService: DocumentService, activityService: DocumentActivityService);
+    execute(command: UploadVersionCommand): Promise<{
+        id: string;
+        tenantId: string;
+        description: string | null;
+        version: number;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        category: import("@prisma/working-client").$Enums.DocumentCategory;
+        status: import("@prisma/working-client").$Enums.DocumentStatus;
+        tags: string[];
+        thumbnailUrl: string | null;
+        fileSize: number;
+        fileName: string;
+        originalName: string;
+        mimeType: string;
+        storagePath: string | null;
+        storageType: import("@prisma/working-client").$Enums.StorageType;
+        storageProvider: import("@prisma/working-client").$Enums.StorageProvider;
+        storageUrl: string | null;
+        cloudFileId: string | null;
+        uploadedById: string;
+        parentVersionId: string | null;
+        folderId: string | null;
+    }>;
+}

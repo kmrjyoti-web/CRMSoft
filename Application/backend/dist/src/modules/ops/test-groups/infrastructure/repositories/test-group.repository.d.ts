@@ -1,0 +1,181 @@
+import { PrismaService } from "../../../../../core/prisma/prisma.service";
+import type { TestGroupStatus } from '@prisma/platform-client';
+export declare const TEST_GROUP_REPOSITORY: unique symbol;
+export interface ITestGroupRepository {
+    create(data: CreateTestGroupData): Promise<Record<string, unknown>>;
+    findById(id: string): Promise<any | null>;
+    findByTenantId(tenantId: string, filters?: ListFilters): Promise<any[]>;
+    update(id: string, data: Partial<CreateTestGroupData & {
+        lastRunAt: Date;
+        lastRunStatus: string;
+        runCount: {
+            increment: number;
+        };
+    }>): Promise<Record<string, unknown>>;
+    softDelete(id: string): Promise<Record<string, unknown>>;
+    findExecution(executionId: string): Promise<any | null>;
+    listExecutions(testGroupId: string): Promise<any[]>;
+}
+export interface CreateTestGroupData {
+    tenantId: string;
+    name: string;
+    nameHi?: string;
+    description?: string;
+    icon?: string;
+    color?: string;
+    modules: string[];
+    steps: Record<string, unknown>[];
+    status?: TestGroupStatus;
+    isSystem?: boolean;
+    estimatedDuration?: number;
+    createdById: string;
+}
+export interface ListFilters {
+    status?: string;
+    module?: string;
+}
+export declare class PrismaTestGroupRepository implements ITestGroupRepository {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    create(data: CreateTestGroupData): Promise<{
+        id: string;
+        tenantId: string;
+        name: string;
+        description: string | null;
+        createdById: string;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        color: string | null;
+        icon: string | null;
+        status: import("@prisma/platform-client").$Enums.TestGroupStatus;
+        isSystem: boolean;
+        lastRunAt: Date | null;
+        lastRunStatus: string | null;
+        nameHi: string | null;
+        modules: string[];
+        steps: import("@prisma/platform-client/runtime/library").JsonValue;
+        estimatedDuration: number | null;
+        runCount: number;
+    }>;
+    findById(id: string): Promise<{
+        id: string;
+        tenantId: string;
+        name: string;
+        description: string | null;
+        createdById: string;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        color: string | null;
+        icon: string | null;
+        status: import("@prisma/platform-client").$Enums.TestGroupStatus;
+        isSystem: boolean;
+        lastRunAt: Date | null;
+        lastRunStatus: string | null;
+        nameHi: string | null;
+        modules: string[];
+        steps: import("@prisma/platform-client/runtime/library").JsonValue;
+        estimatedDuration: number | null;
+        runCount: number;
+    } | null>;
+    findByTenantId(tenantId: string, filters?: ListFilters): Promise<{
+        id: string;
+        tenantId: string;
+        name: string;
+        description: string | null;
+        createdById: string;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        color: string | null;
+        icon: string | null;
+        status: import("@prisma/platform-client").$Enums.TestGroupStatus;
+        isSystem: boolean;
+        lastRunAt: Date | null;
+        lastRunStatus: string | null;
+        nameHi: string | null;
+        modules: string[];
+        steps: import("@prisma/platform-client/runtime/library").JsonValue;
+        estimatedDuration: number | null;
+        runCount: number;
+    }[]>;
+    update(id: string, data: any): Promise<{
+        id: string;
+        tenantId: string;
+        name: string;
+        description: string | null;
+        createdById: string;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        color: string | null;
+        icon: string | null;
+        status: import("@prisma/platform-client").$Enums.TestGroupStatus;
+        isSystem: boolean;
+        lastRunAt: Date | null;
+        lastRunStatus: string | null;
+        nameHi: string | null;
+        modules: string[];
+        steps: import("@prisma/platform-client/runtime/library").JsonValue;
+        estimatedDuration: number | null;
+        runCount: number;
+    }>;
+    softDelete(id: string): Promise<{
+        id: string;
+        tenantId: string;
+        name: string;
+        description: string | null;
+        createdById: string;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
+        color: string | null;
+        icon: string | null;
+        status: import("@prisma/platform-client").$Enums.TestGroupStatus;
+        isSystem: boolean;
+        lastRunAt: Date | null;
+        lastRunStatus: string | null;
+        nameHi: string | null;
+        modules: string[];
+        steps: import("@prisma/platform-client/runtime/library").JsonValue;
+        estimatedDuration: number | null;
+        runCount: number;
+    }>;
+    findExecution(executionId: string): Promise<{
+        id: string;
+        tenantId: string;
+        status: string;
+        duration: number;
+        completedAt: Date | null;
+        startedAt: Date;
+        totalFailed: number;
+        totalSteps: number;
+        testEnvId: string | null;
+        testRunId: string | null;
+        testGroupId: string;
+        currentStep: number;
+        stepResults: import("@prisma/platform-client/runtime/library").JsonValue;
+        totalPassed: number;
+        totalErrors: number;
+        executedById: string;
+    } | null>;
+    listExecutions(testGroupId: string): Promise<{
+        id: string;
+        tenantId: string;
+        status: string;
+        duration: number;
+        completedAt: Date | null;
+        startedAt: Date;
+        totalFailed: number;
+        totalSteps: number;
+        testEnvId: string | null;
+        testRunId: string | null;
+        testGroupId: string;
+        currentStep: number;
+        stepResults: import("@prisma/platform-client/runtime/library").JsonValue;
+        totalPassed: number;
+        totalErrors: number;
+        executedById: string;
+    }[]>;
+}

@@ -1,0 +1,65 @@
+import { AggregateRoot } from '../../../../../shared/domain/aggregate-root';
+import { RawContactStatus } from '../value-objects/raw-contact-status.vo';
+export interface CreateRawContactProps {
+    firstName: string;
+    lastName: string;
+    source?: string;
+    companyName?: string;
+    designation?: string;
+    department?: string;
+    notes?: string;
+    createdById: string;
+}
+export declare class RawContactEntity extends AggregateRoot {
+    private _firstName;
+    private _lastName;
+    private _status;
+    private _source;
+    private _companyName?;
+    private _designation?;
+    private _department?;
+    private _notes?;
+    private _verifiedAt?;
+    private _verifiedById?;
+    private _contactId?;
+    private _isActive;
+    private _isDeleted;
+    private _deletedAt;
+    private _deletedById;
+    private _createdById;
+    static create(id: string, props: CreateRawContactProps): RawContactEntity;
+    static fromPersistence(data: any): RawContactEntity;
+    verify(contactId: string, verifiedById: string): void;
+    reject(reason?: string): void;
+    markDuplicate(): void;
+    reopen(): void;
+    updateDetails(data: {
+        firstName?: string;
+        lastName?: string;
+        companyName?: string;
+        designation?: string;
+        department?: string;
+        notes?: string;
+    }): void;
+    deactivate(): void;
+    reactivate(): void;
+    softDelete(deletedById: string): void;
+    restore(): void;
+    get fullName(): string;
+    get firstName(): string;
+    get lastName(): string;
+    get status(): RawContactStatus;
+    get source(): string;
+    get companyName(): string | undefined;
+    get designation(): string | undefined;
+    get department(): string | undefined;
+    get notes(): string | undefined;
+    get verifiedAt(): Date | undefined;
+    get verifiedById(): string | undefined;
+    get contactId(): string | undefined;
+    get isActive(): boolean;
+    get isDeleted(): boolean;
+    get deletedAt(): Date | null;
+    get deletedById(): string | null;
+    get createdById(): string;
+}

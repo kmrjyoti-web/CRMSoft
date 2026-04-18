@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRM Mobile App UI</title>
+  <style>
+    :root{
+      --bg:#09111f;
+      --card:#101b2f;
+      --card-2:#13223b;
+      --line:rgba(255,255,255,0.08);
+      --text:#f5f7fb;
+      --muted:#a8b3c7;
+      --green:#2dd4bf;
+      --blue:#38bdf8;
+      --yellow:#fbbf24;
+      --orange:#fb923c;
+      --pink:#fb7185;
+      --purple:#8b5cf6;
+      --red:#f87171;
+      --shadow:0 18px 50px rgba(0,0,0,.32);
+      --radius:28px;
+      --radius-sm:18px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,.14), transparent 20%),
+        radial-gradient(circle at 90% 10%, rgba(251,113,133,.12), transparent 18%),
+        linear-gradient(180deg,#08101c,#0d1728 45%,#09111f);
+      color:var(--text);
+      min-height:100vh;
+      padding:24px;
+    }
+
+    .container{
+      max-width:1500px;
+      margin:0 auto;
+    }
+
+    .hero{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:20px;
+      flex-wrap:wrap;
+      margin-bottom:28px;
+    }
+
+    .hero h1{
+      margin:0 0 10px;
+      font-size:clamp(32px,5vw,62px);
+      line-height:1;
+      letter-spacing:-1px;
+    }
+
+    .hero p{
+      margin:0;
+      max-width:760px;
+      color:var(--muted);
+      font-size:16px;
+      line-height:1.6;
+    }
+
+    .eyebrow{
+      display:inline-block;
+      margin-bottom:10px;
+      color:#8de3d3;
+      font-size:12px;
+      letter-spacing:2px;
+      text-transform:uppercase;
+    }
+
+    .legend{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .legend span{
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .screens{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+      gap:22px;
+    }
+
+    .phone{
+      border-radius:36px;
+      padding:14px;
+      position:relative;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      min-height:690px;
+      background:linear-gradient(180deg,#1d4ed8,#0b1020);
+    }
+
+    .phone::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg, rgba(255,255,255,.18), transparent 22%);
+      pointer-events:none;
+    }
+
+    .phone.sunrise{background:linear-gradient(180deg,#fb7185,#7c3aed)}
+    .phone.teal{background:linear-gradient(180deg,#14b8a6,#0f172a)}
+    .phone.orange{background:linear-gradient(180deg,#fb923c,#7c2d12)}
+    .phone.green{background:linear-gradient(180deg,#16a34a,#052e16)}
+    .phone.indigo{background:linear-gradient(180deg,#6366f1,#312e81)}
+    .phone.cyan{background:linear-gradient(180deg,#06b6d4,#164e63)}
+    .phone.plum{background:linear-gradient(180deg,#9333ea,#3b0764)}
+    .phone.gold{background:linear-gradient(180deg,#fbbf24,#92400e)}
+    .phone.sky{background:linear-gradient(180deg,#38bdf8,#0c4a6e)}
+    .phone.slate{background:linear-gradient(180deg,#64748b,#0f172a)}
+    .phone.rose{background:linear-gradient(180deg,#f43f5e,#4c0519)}
+    .phone.mint{background:linear-gradient(180deg,#34d399,#134e4a)}
+
+    .screen{
+      position:relative;
+      height:100%;
+      min-height:662px;
+      border-radius:28px;
+      padding:18px;
+      background:rgba(8,14,26,.42);
+      border:1px solid rgba(255,255,255,.08);
+      backdrop-filter:blur(18px);
+    }
+
+    .status{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:12px;
+      font-weight:700;
+      margin-bottom:10px;
+      opacity:.95;
+    }
+
+    .title{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      margin-bottom:16px;
+    }
+
+    .title h2{
+      margin:6px 0 0;
+      font-size:28px;
+      line-height:1.05;
+    }
+
+    .label{
+      font-size:11px;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.72);
+    }
+
+    .avatar,.logo,.mini-btn,.icon{
+      display:grid;
+      place-items:center;
+      border-radius:18px;
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.06);
+      font-weight:700;
+    }
+
+    .avatar,.logo{width:46px;height:46px}
+    .avatar.lg{width:70px;height:70px;border-radius:24px}
+    .mini-btn{
+      padding:10px 12px;
+      font-size:12px;
+      min-width:44px;
+    }
+
+    .card{
+      background:rgba(255,255,255,.07);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:16px;
+      margin-bottom:14px;
+    }
+
+    .card.dark{background:rgba(0,0,0,.18)}
+    .card.note{background:rgba(251,191,36,.13);border-color:rgba(251,191,36,.22)}
+
+    .muted{color:var(--muted)}
+    .row{display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .row.top{align-items:flex-start}
+    .stack{display:grid;gap:12px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .grid-4{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .center{text-align:center}
+
+    input{
+      width:100%;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      border-radius:16px;
+      padding:14px;
+      margin-top:8px;
+      outline:none;
+    }
+
+    .field{margin-bottom:14px}
+    .field label{
+      display:block;
+      font-size:13px;
+      color:rgba(255,255,255,.82);
+    }
+
+    .btn{
+      width:100%;
+      border:none;
+      padding:14px 16px;
+      border-radius:18px;
+      font-weight:700;
+      margin-top:6px;
+      cursor:pointer;
+      color:#08111f;
+      background:linear-gradient(135deg,var(--yellow),var(--pink));
+    }
+
+    .btn-soft{
+      border:none;
+      background:rgba(255,255,255,.1);
+      color:var(--text);
+      border-radius:16px;
+      padding:12px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .btn-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+
+    .otp{
+      display:grid;
+      grid-template-columns:repeat(6,1fr);
+      gap:10px;
+      margin:18px 0;
+    }
+
+    .otp span{
+      display:grid;
+      place-items:center;
+      min-height:58px;
+      border-radius:16px;
+      background:rgba(255,255,255,.09);
+      border:1px solid var(--line);
+      font-weight:700;
+      font-size:20px;
+    }
+
+    .bio-ring{
+      width:220px;
+      height:220px;
+      border-radius:50%;
+      margin:26px auto 18px;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(56,189,248,.24);
+      background:radial-gradient(circle, rgba(56,189,248,.18), transparent 58%);
+    }
+
+    .bio-finger{
+      width:120px;
+      height:120px;
+      border-radius:50%;
+      border:3px solid rgba(125,211,252,.85);
+      position:relative;
+      box-shadow:0 0 22px rgba(56,189,248,.26);
+    }
+
+    .bio-finger:before,.bio-finger:after{
+      content:"";
+      position:absolute;
+      inset:16px;
+      border:2px solid rgba(125,211,252,.72);
+      border-radius:50%;
+    }
+
+    .bio-finger:after{inset:32px}
+
+    .camera{
+      height:280px;
+      border-radius:28px;
+      position:relative;
+      overflow:hidden;
+      border:1px solid var(--line);
+      margin:18px 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.18)),
+        radial-gradient(circle at 50% 36%, rgba(255,255,255,.08), transparent 18%),
+        linear-gradient(180deg,#142338,#0d182a);
+    }
+
+    .camera-grid{
+      position:absolute;
+      inset:0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
+      background-size:32px 32px;
+    }
+
+    .face{
+      position:absolute;
+      inset:46px 84px;
+      border:2px solid #34d399;
+      border-radius:120px 120px 90px 90px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+      background:rgba(255,255,255,.12);
+    }
+
+    .badge.live{background:#34d399;color:#06261c}
+    .badge.ok{background:#22c55e1f;color:#b8f7d1;border:1px solid rgba(34,197,94,.3)}
+    .badge.warn{background:#fbbf2418;color:#ffe8aa;border:1px solid rgba(251,191,36,.3)}
+    .badge.danger{background:#f8717118;color:#ffd0d0;border:1px solid rgba(248,113,113,.28)}
+
+    .kpi{
+      background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:18px;
+      padding:14px;
+    }
+
+    .kpi small,.meta small{display:block;color:var(--muted);margin-bottom:4px}
+    .kpi strong{font-size:24px}
+
+    .bars{
+      height:140px;
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:10px;
+      align-items:end;
+      margin-top:12px;
+    }
+
+    .bars span{
+      border-radius:999px 999px 14px 14px;
+      background:linear-gradient(180deg,var(--blue),var(--green));
+      display:block;
+    }
+
+    .search{
+      padding:14px 16px;
+      border-radius:18px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      color:#93a4bf;
+      margin-bottom:14px;
+    }
+
+    .item{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      padding:14px;
+      border-radius:18px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06);
+    }
+
+    .item + .item{margin-top:12px}
+    .item strong{display:block}
+    .item small{display:block;color:var(--muted);margin-top:4px;line-height:1.4}
+
+    .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .tags span{
+      font-size:12px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.1);
+    }
+
+    .summary{
+      font-size:36px;
+      line-height:1;
+      margin:8px 0;
+      font-weight:800;
+    }
+
+    .profile{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      margin-bottom:14px;
+    }
+
+    .map{
+      height:190px;
+      border-radius:22px;
+      margin-bottom:14px;
+      border:1px solid var(--line);
+      position:relative;
+      background:
+        radial-gradient(circle at 30% 28%, rgba(255,255,255,.08), transparent 18%),
+        radial-gradient(circle at 68% 56%, rgba(255,255,255,.07), transparent 16%),
+        linear-gradient(135deg, rgba(34,197,94,.16), rgba(14,165,233,.18)),
+        rgba(255,255,255,.06);
+    }
+
+    .pin{
+      position:absolute;
+      top:44%;
+      left:56%;
+      width:24px;
+      height:24px;
+      border-radius:50% 50% 50% 0;
+      transform:rotate(-45deg);
+      background:var(--pink);
+    }
+
+    .progress{
+      height:12px;
+      border-radius:999px;
+      overflow:hidden;
+      background:rgba(255,255,255,.08);
+      margin:14px 0;
+    }
+
+    .progress span{
+      display:block;
+      height:100%;
+      width:72%;
+      background:linear-gradient(90deg,var(--pink),var(--yellow));
+    }
+
+    .route{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:14px;
+      padding:18px 8px;
+    }
+
+    .route-dot{
+      width:18px;
+      height:18px;
+      border-radius:50%;
+      background:rgba(255,255,255,.34);
+      position:relative;
+      z-index:1;
+    }
+
+    .route-dot.active{
+      background:var(--blue);
+      box-shadow:0 0 0 6px rgba(56,189,248,.16);
+    }
+
+    .route-line{
+      height:3px;
+      flex:1;
+      background:rgba(255,255,255,.22);
+    }
+
+    .timeline{
+      display:grid;
+      gap:12px;
+    }
+
+    .timeline .item{
+      align-items:flex-start;
+    }
+
+    .meeting-steps{
+      display:grid;
+      gap:10px;
+      margin-bottom:14px;
+    }
+
+    .meeting-steps div{
+      padding:14px;
+      border-radius:18px;
+      background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.08);
+      font-weight:700;
+    }
+
+    .meeting-steps .done{border-color:rgba(34,197,94,.35)}
+    .meeting-steps .active{
+      border-color:rgba(251,191,36,.35);
+      background:rgba(251,191,36,.12);
+    }
+
+    .password-meter{
+      display:flex;
+      gap:8px;
+      margin:14px 0 6px;
+    }
+
+    .password-meter span{
+      flex:1;
+      height:8px;
+      border-radius:999px;
+      background:rgba(255,255,255,.12);
+    }
+
+    .password-meter span:last-child{
+      background:linear-gradient(90deg,var(--green),var(--blue));
+    }
+
+    @media (max-width: 720px){
+      body{padding:16px}
+      .screens{grid-template-columns:1fr}
+      .phone{min-height:630px}
+      .screen{min-height:602px}
+      .hero h1{font-size:34px}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">Complete HTML Design</span>
+        <h1>CRM Mobile App UI</h1>
+        <p>
+          Mobile screens for CRM dashboard, login, OTP, biometric access, face attendance,
+          contacts, organizations, leads, support tickets, customer and organization profiles,
+          task details, tour plan, activity logs, meeting flow, profile, and password change.
+        </p>
+      </div>
+      <div class="legend">
+        <span>Field Sales</span>
+        <span>Attendance</span>
+        <span>Lead Tracking</span>
+        <span>Support Desk</span>
+        <span>Meeting Workflow</span>
+      </div>
+    </section>
+
+    <section class="screens">
+
+      <article class="phone">
+        <div class="screen">
+          <div class="status"><span>9:41</span><span>5G 100%</span></div>
+          <div class="title">
+            <div class="row">
+              <div class="logo">CX</div>
+              <div>
+                <div class="label">Welcome Back</div>
+                <h2>Login Screen</h2>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="field">
+              <label>Email or Mobile Number</label>
+              <input value="rahul@crmflow.com" />
+            </div>
+            <div class="field">
+              <label>Password</label>
+              <input type="password" value="password" />
+            </div>
+            <div class="row">
+              <span class="muted">Forgot password?</span>
+              <span class="badge">Secure Login</span>
+            </div>
+            <button class="btn">Sign In</button>
+            <div class="btn-grid">
+              <button class="btn-soft">Fingerprint</button>
+              <button class="btn-soft">Face ID</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phone sunrise">
+        <div class="screen">
+          <div class="status"><span>9:42</span><span>LTE 92%</span></div>
+          <div class="title">
+            <div>
+              <div class="label">Verification</div>
+              <h2>OTP Screen</h2>
+            </div>
+          </div>
+
+          <p class="muted">Enter the 6 digit verification code sent to +91 98XXXX2231</p>
+
+          <div class="otp">
+            <span>2</span>
+            <span>1</span>
+            <span>7</span>
+            <span>4</span>
+            <span>8</span>
+            <span>5</span>
+          </div>
+
+          <div class="card">
+            <strong>Device Verified</strong>
+            <p class="muted">Biometric login will be enabled after successful OTP verification.</p>
+          </div>
+
+          <button class="btn">Verify OTP</button>
+          <p class="center muted">Resend code in 00:19</p>
+        </div>
+      </article>
+
+      <article class="phone teal">
+        <div class="screen">
+          <div class="status"><span>9:43</span><span>WiFi 88%</span></div>
+          <div class="title">
+            <div>
+              <div class="label">Biometric Security</div>
+              <h2>Fingerprint</h2>
+            </div>
+          </div>
+
+          <div class="bio-ring">
+            <div class="bio-finger"></div>
+          </div>
+
+          <p class="center muted">Touch the fingerprint sensor to unlock CRM access</p>
+
+          <div class="grid-2">
+            <div class="kpi">
+              <small>Device</small>
+              <strong>Ready</strong>
+            </div>
+            <div class="kpi">
+              <small>Policy</small>
+              <strong>OK</strong>
+            </div>
+          </div>
+
+          <button class="btn">Use Fingerprint</button>
+        </div>
+      </article>
+
+      <article class="phone green">
+        <div class="screen">
+          <div class="status"><span>9:45</span><span>GPS On</span></div>
+          <div class="title">
+            <div>
+              <div class="label">Attendance</div>
+              <h2>Face Attendance</h2>
+            </div>
+          </div>
+
+          <div class="camera">
+            <div class="camera-grid"></div>
+            <div class="face"></div>
+            <div style="position:absolute;right:16px;bottom:16px" class="badge live">AI Match 98%</div>
+          </div>
+
+          <div class="grid-2">
+            <div class="kpi">
+              <small>Check-in</small>
+              <strong>09:45</strong>
+            </div>
+            <div class="kpi">
+              <small>Location</small>
+              <strong>HQ</strong>
+            </div>
+          </div>
+
+          <button class="btn">Mark Attendance</button>
+        </div>
+      </article>
+
+      <article class="phone orange">
+        <div class="screen">
+          <div class="status"><span>9:48</span><span>4G 90%</span></div>
+          <div class="title">
+            <div>
+              <div class="label">CRM Overview</div>
+              <h2>Project Dashboard</h2>
+            </div>
+            <div class="avatar">RK</div>
+          </div>
+
+          <div class="card">
+            <div class="muted">Monthly Pipeline</div>
+            <div class="summary">₹ 2.86 Cr</div>
+            <div class="muted">12% above target with 18 active enterprise deals</div>
+          </div>
+
+          <div class="grid-4">
+            <div class="kpi"><small>Leads</small><strong>128</strong></div>
+            <div class="kpi"><small>Meetings</small><strong>14</strong></div>
+            <div class="kpi"><small>Tickets</small><strong>09</strong></div>
+            <div class="kpi"><small>Tasks</small><strong>22</strong></div>
+          </div>
+
+          <div class="card">
+            <div class="row">
+              <strong>Pipeline Stages</strong>
+              <span class="badge">This Month</span>
+            </div>
+            <div class="bars">
+              <span style="height:30%"></span>
+              <span style="height:55%"></span>
+              <span style="height:78%"></span>
+              <span style="height:68%"></span>
+              <span style="height:94%"></span>
+            </div>
+            <div class="tags">
+              <span>Prospect</span>
+              <span>Qualified</span>
+              <span>Proposal</span>
+              <span>Won</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phone green">
+        <div class="screen">
+          <div class="status"><span>10:02</span><span>Sync</span></div>
+          <div class="title">
+            <div>
+              <div class="label">Customers</div>
+              <h2>Contact Management</h2>
+            </div>
+            <div class="mini-btn">+</div>
+          </div>
+
+          <div class="search">Search contact, mobile, company</div>
+
+          <div class="item">
+            <div class="row">
+              <div class="avatar">AS</div>
+              <div>
+                <strong>Anaya Shah</strong>
+                <small>Procurement Head • Westcore</small>
+              </div>
+            </div>
+            <span class="badge">VIP</span>
+          </div>
+
+          <div class="item">
+            <div class="row">
+              <div class="avatar">RP</div>
+              <div>
+                <strong>Rohit Patel</strong>
+                <small>Plant Manager • Aster Labs</small>
+              </div>
+            </div>
+            <span class="badge">Follow-up</span>
+          </div>
+
+          <div class="item">
+            <div class="row">
+              <div class="avatar">VM</div>
+              <div>
+                <strong>Veena Mehta</strong>
+                <small>Finance Controller • Nexa</small>
+              </div>
+            </div>
+            <span class="badge">New</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="phone indigo">
+        <div class="screen">
+          <div class="status"><span>10:05</span><span>2 Alerts</span></div>
+          <div class="title">
+            <div>
+              <div class="label">Accounts</div>
+              <h2>Organization Management</h2>
+            </div>
+            <div class="mini-btn">+</div>
+          </div>
+
+          <div class="card">
+            <strong>Westcore Industries</strong>
+            <p class="muted">Ahmedabad • Manufacturing</p>
+            <div class="tags">
+              <span>Active Deal</span>
+              <span>5 Contacts</span>
+              <span>3 Open Tickets</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <strong>Globex Healthcare</strong>
+            <p class="muted">Mumbai • Pharma</p>
+            <div class="tags">
+              <span>Gold Support</span>
+              <span>2 Plants</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <strong>Nexa Retail Group</strong>
+            <p class="muted">Pune • Retail</p>
+            <div class="tags">
+              <span>Renewal Due</span>
+              <span>11 Stores</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phone cyan">
+        <div class="screen">
+          <div class="status"><span>10:10</span><span>Lead Sync</span></div>
+          <div class="title">
+            <div>
+              <div class="label">Sales</div>
+              <h2>Lead Management</h2>
+            </div>
+            <div class="mini-btn">Filter</div>
+          </div>
+
+          <div class="tags" style="margin-bottom:14px">
+            <span style="background:rgba(248,113,113,.18)">Hot 18</span>
+            <span style="background:rgba(251,191,36,.18)">Warm 34</span>
+            <span style="background:rgba(56,189,248,.18)">Cold 76</span>
+          </div>
+
+          <div class="item">
+            <div>
+              <strong>Smart Valve Upgrade</strong>
+              <small>Westcore Industries</small>
+            </div>
+            <strong>₹ 48L</strong>
+          </div>
+
+          <div class="item">
+            <div>
+              <strong>Factory Monitoring Suite</strong>
+              <small>Globex Healthcare</small>
+            </div>
+            <strong>₹ 1.2Cr</strong>
+          </div>
+
+          <div class="item">
+            <div>
+              <strong>Retail CRM Rollout</strong>
+              <small>Nexa Retail Group</small>
+            </div>
+            <strong>₹ 64L</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="phone plum">
+        <div class="screen">
+          <div class="status"><span>10:14</span><span>Urgent 3</span></div>
+          <div class="title">
+            <div>
+              <div class="label">Service Desk</div>
+              <h2>Support Ticket Management</h2>
+            </div>
+            <div class="mini-btn">Sort</div>
+          </div>
+
+          <div class="card">
+            <div class="row">
+              <div>
+                <strong>#SUP-2048 Server downtime</strong>
+                <p class="muted">Westcore Industries</p>
+              </div>
+              <span class="badge danger">Critical</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="row">
+              <div>
+                <strong>#SUP-2042 Biometric issue</strong>
+                <p class="muted">Sales Office</p>
+              </div>
+              <span class="badge warn">High</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="row">
+              <div>
+                <strong>#SUP-2037 License renewal</strong>
+                <p class="muted">Globex Healthcare</p>
+              </div>
+              <span class="badge ok">Resolved</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phone gold">
+        <div class="screen">
+          <div class="status"><span>10:18</span><span>Live</span></div>
+          <div class="title">
+            <div>
+              <div class="label">Customer 360</div>
+              <h2>Customer Profile</h2>
+            </div>
+          </div>
+
+          <div class="profile">
+            <div class="avatar lg">AS</div>
+            <div>
+              <strong>Anaya Shah</strong>
+              <div class="muted">Procurement Head</div>
+              <div class="muted">Westcore Industries</div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="kpi"><small>Phone</small><strong>+91 98765</strong></div>
+            <div class="kpi"><small>Email</small><strong>anaya@</strong></div>
+            <div class="kpi"><small>Open Deal</small><strong>₹ 48L</strong></div>
+            <div class="kpi"><small>Last Meeting</small><strong>15 Apr</strong></div>
+          </div>
+
+          <div class="card">
+            <strong>Recent Note</strong>
+            <p class="muted">Requested revised pricing with AMC breakup and deployment timeline.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="phone sky">
+        <div class="screen">
+          <div class="status"><span>10:21</span><span>Map Ready</span></div>
+          <div class="title">
+            <div>
+              <div class="label">Account 360</div>
+              <h2>Organization Profile</h2>
+            </div>
+          </div>
+
+          <div class="map"><div class="pin"></div></div>
+
+          <div class="grid-2">
+            <div class="kpi"><small>Company</small><strong>Westcore</strong></div>
+            <div class="kpi"><small>Branch</small><strong>Ahmedabad</strong></div>
+            <div class="kpi"><small>Industry</small><strong>Manufacturing</strong></div>
+            <div class="kpi"><small>Employees</small><strong>1200+</strong></div>
+          </div>
+
+          <div class="tags">
+            <span>AMC Customer</span>
+            <span>3 Open Tickets</span>
+            <span>5 Contacts</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="phone slate">
+        <div class="screen">
+          <div class="status"><span>10:26</span><span>Task 5/8</span></div>
+          <div class="title">
+            <div>
+              <div class="label">Execution</div>
+              <h2>Task Detail</h2>
+            </div>
+          </div>
+
+          <div class="card">
+            <strong>Prepare Proposal Revision</strong>
+            <p class="muted">Update price sheet, implementation schedule, and scope notes for Westcore.</p>
+          </div>
+
+          <div class="progress"><span></span></div>
+
+          <div class="item">
+            <div>
+              <strong>Share revised quote</strong>
+              <small>Completed by sales team</small>
+            </div>
+            <span class="badge ok">Done</span>
+          </div>
+
+          <div class="item">
+            <div>
+              <strong>Add AMC options</strong>
+              <small>Waiting for commercial approval</small>
+            </div>
+            <span class="badge warn">In Progress</span>
+          </div>
+
+          <div class="item">
+            <div>
+              <strong>Attach case study</strong>
+              <small>Reference document pending</small>
+            </div>
+            <span class="badge">Pending</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="phone orange">
+        <div class="screen">
+          <div class="status"><span>10:31</span><span>Tour Mode</span></div>
+          <div class="title">
+            <div>
+              <div class="label">Field Movement</div>
+              <h2>Tour Plan Detail</h2>
+            </div>
+          </div>
+
+          <div class="card route">
+            <div class="route-dot active"></div>
+            <div class="route-line"></div>
+            <div class="route-dot"></div>
+            <div class="route-line"></div>
+            <div class="route-dot"></div>
+          </div>
+
+          <div class="item">
+            <div>
+              <strong>09:30 AM</strong>
+              <small>Head Office Check-in</small>
+            </div>
+          </div>
+
+          <div class="item">
+            <div>
+              <strong>11:00 AM</strong>
+              <small>Westcore Plant Visit</small>
+            </div>
+          </div>
+
+          <div class="item">
+            <div>
+              <strong>03:30 PM</strong>
+              <small>Globex Review Meeting</small>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phone rose">
+        <div class="screen">
+          <div class="status"><span>10:35</span><span>Activity Feed</span></div>
+          <div class="title">
+            <div>
+              <div class="label">Logs</div>
+              <h2>Activity Detail</h2>
+            </div>
+          </div>
+
+          <div class="timeline">
+            <div class="item">
+              <div>
+                <strong>10:05</strong>
+                <small>Lead moved from Qualified to Proposal Sent</small>
+              </div>
+            </div>
+            <div class="item">
+              <div>
+                <strong>09:52</strong>
+                <small>Face attendance captured with GPS lock</small>
+              </div>
+            </div>
+            <div class="item">
+              <div>
+                <strong>09:14</strong>
+                <small>Support ticket #SUP-2042 assigned to service team</small>
+              </div>
+            </div>
+            <div class="item">
+              <div>
+                <strong>08:48</strong>
+                <small>Customer note added after morning follow-up</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phone teal">
+        <div class="screen">
+          <div class="status"><span>11:00</span><span>GPS Locked</span></div>
+          <div class="title">
+            <div>
+              <div class="label">Meeting Workflow</div>
+              <h2>Meeting Start</h2>
+            </div>
+            <span class="badge live">Live</span>
+          </div>
+
+          <div class="meeting-steps">
+            <div class="done">GPS Capture Completed</div>
+            <div class="done">Image Capture Completed</div>
+            <div class="active">Meeting Started</div>
+          </div>
+
+          <div class="card note">
+            <strong>Tooltip</strong>
+            <p class="muted">Show tooltip for voice record, image capture, video capture, document upload, and requirement detail while meeting is active.</p>
+          </div>
+
+          <div class="btn-grid">
+            <button class="btn-soft">Voice Record</button>
+            <button class="btn-soft">Image Capture</button>
+            <button class="btn-soft">Video Capture</button>
+            <button class="btn-soft">Document Upload</button>
+          </div>
+
+          <div class="card dark" style="margin-top:14px">
+            <strong>Requirement Detail</strong>
+            <p class="muted">Client requested centralized dashboard, AMC pricing, biometric integration, and team activity visibility.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="phone sky">
+        <div class="screen">
+          <div class="status"><span>11:14</span><span>Profile</span></div>
+          <div class="title">
+            <div>
+              <div class="label">My Account</div>
+              <h2>Profile</h2>
+            </div>
+          </div>
+
+          <div class="profile">
+            <div class="avatar lg">RK</div>
+            <div>
+              <strong>Rahul Kumar</strong>
+              <div class="muted">Regional Sales Manager</div>
+              <div class="muted">North & West Zone</div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div>
+              <strong>Employee ID</strong>
+              <small>CRM-204</small>
+            </div>
+          </div>
+
+          <div class="item">
+            <div>
+              <strong>Reporting Manager</strong>
+              <small>Meera Nair</small>
+            </div>
+          </div>
+
+          <div class="item">
+            <div>
+              <strong>Default Branch</strong>
+              <small>Ahmedabad HQ</small>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phone mint">
+        <div class="screen">
+          <div class="status"><span>11:18</span><span>Secure</span></div>
+          <div class="title">
+            <div>
+              <div class="label">Security</div>
+              <h2>Password Change</h2>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Current Password</label>
+            <input type="password" value="password" />
+          </div>
+
+          <div class="field">
+            <label>New Password</label>
+            <input type="password" value="newpassword" />
+          </div>
+
+          <div class="field">
+            <label>Confirm Password</label>
+            <input type="password" value="newpassword" />
+          </div>
+
+          <div class="password-meter">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
+          <p class="muted">Password strength: Strong</p>
+          <button class="btn">Update Password</button>
+        </div>
+      </article>
+
+    </section>
+  </div>
+</body>
+</html>

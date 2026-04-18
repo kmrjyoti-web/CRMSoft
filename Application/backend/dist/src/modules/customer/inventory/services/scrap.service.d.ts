@@ -1,0 +1,113 @@
+import { PrismaService } from '../../../../core/prisma/prisma.service';
+export declare class ScrapService {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    recordScrap(tenantId: string, userId: string, data: {
+        productId: string;
+        scrapType: string;
+        quantity: number;
+        reason: string;
+        locationId?: string;
+        bomProductionId?: string;
+        serialMasterId?: string;
+        batchId?: string;
+        unitCost?: number;
+        isRawMaterial?: boolean;
+        isFinishedProduct?: boolean;
+        disposalMethod?: string;
+    }): Promise<{
+        id: string;
+        tenantId: string;
+        createdById: string | null;
+        createdAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        productId: string;
+        isRawMaterial: boolean;
+        isFinishedProduct: boolean;
+        locationId: string | null;
+        quantity: number;
+        serialMasterId: string | null;
+        batchId: string | null;
+        bomProductionId: string | null;
+        reason: string;
+        scrapType: import("@prisma/working-client").$Enums.ScrapType;
+        unitCost: import("@prisma/working-client/runtime/library").Decimal | null;
+        totalLoss: import("@prisma/working-client/runtime/library").Decimal | null;
+        disposalMethod: string | null;
+    }>;
+    findAll(tenantId: string, filters?: {
+        scrapType?: string;
+        productId?: string;
+        locationId?: string;
+        startDate?: string;
+        endDate?: string;
+        isRawMaterial?: boolean;
+        isFinishedProduct?: boolean;
+    }): Promise<{
+        id: string;
+        tenantId: string;
+        createdById: string | null;
+        createdAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        productId: string;
+        isRawMaterial: boolean;
+        isFinishedProduct: boolean;
+        locationId: string | null;
+        quantity: number;
+        serialMasterId: string | null;
+        batchId: string | null;
+        bomProductionId: string | null;
+        reason: string;
+        scrapType: import("@prisma/working-client").$Enums.ScrapType;
+        unitCost: import("@prisma/working-client/runtime/library").Decimal | null;
+        totalLoss: import("@prisma/working-client/runtime/library").Decimal | null;
+        disposalMethod: string | null;
+    }[]>;
+    getReport(tenantId: string, startDate?: string, endDate?: string): Promise<{
+        totalScrapValue: number;
+        totalRecords: number;
+        scrapByType: {
+            type: string;
+            value: number;
+        }[];
+        scrapByProduct: {
+            productId: string;
+            quantity: number;
+            value: number;
+        }[];
+        rawMaterialWasteCount: number;
+        finishedProductWasteCount: number;
+    }>;
+    writeOff(tenantId: string, id: string, disposalMethod?: string): Promise<{
+        id: string;
+        tenantId: string;
+        createdById: string | null;
+        createdAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        productId: string;
+        isRawMaterial: boolean;
+        isFinishedProduct: boolean;
+        locationId: string | null;
+        quantity: number;
+        serialMasterId: string | null;
+        batchId: string | null;
+        bomProductionId: string | null;
+        reason: string;
+        scrapType: import("@prisma/working-client").$Enums.ScrapType;
+        unitCost: import("@prisma/working-client/runtime/library").Decimal | null;
+        totalLoss: import("@prisma/working-client/runtime/library").Decimal | null;
+        disposalMethod: string | null;
+    }>;
+}

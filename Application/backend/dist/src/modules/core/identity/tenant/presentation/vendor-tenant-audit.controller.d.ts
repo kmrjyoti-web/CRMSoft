@@ -1,0 +1,180 @@
+import { ApiResponse } from '../../../../../common/utils/api-response';
+import { TenantAuditService } from '../services/tenant-audit.service';
+export declare class VendorTenantAuditController {
+    private readonly auditService;
+    constructor(auditService: TenantAuditService);
+    startAudit(tenantId: string, body: {
+        reason: string;
+        scheduledDays?: number;
+    }, req: any): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        status: import("@prisma/identity-client").$Enums.AuditSessionStatus;
+        startedAt: Date;
+        reason: string;
+        startedById: string;
+        startedByName: string | null;
+        endedAt: Date | null;
+        scheduledEndAt: Date | null;
+        totalActions: number;
+        uniqueUsers: number;
+        reportGeneratedAt: Date | null;
+        reportUrl: string | null;
+    }>>;
+    stopAudit(tenantId: string): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        status: import("@prisma/identity-client").$Enums.AuditSessionStatus;
+        startedAt: Date;
+        reason: string;
+        startedById: string;
+        startedByName: string | null;
+        endedAt: Date | null;
+        scheduledEndAt: Date | null;
+        totalActions: number;
+        uniqueUsers: number;
+        reportGeneratedAt: Date | null;
+        reportUrl: string | null;
+    }>>;
+    getAuditStatus(tenantId: string): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        status: import("@prisma/identity-client").$Enums.AuditSessionStatus;
+        startedAt: Date;
+        reason: string;
+        startedById: string;
+        startedByName: string | null;
+        endedAt: Date | null;
+        scheduledEndAt: Date | null;
+        totalActions: number;
+        uniqueUsers: number;
+        reportGeneratedAt: Date | null;
+        reportUrl: string | null;
+    } | null>>;
+    getAuditLogs(tenantId: string, page?: number, limit?: number, userId?: string, actionType?: string, entityType?: string): Promise<ApiResponse<{
+        data: {
+            id: string;
+            tenantId: string;
+            entityType: string | null;
+            description: string;
+            createdAt: Date;
+            isDeleted: boolean;
+            deletedAt: Date | null;
+            deletedById: string | null;
+            updatedById: string | null;
+            updatedByName: string | null;
+            metadata: import("@prisma/identity-client/runtime/library").JsonValue | null;
+            userId: string;
+            actionType: import("@prisma/identity-client").$Enums.TenantAuditActionType;
+            userAgent: string | null;
+            userName: string | null;
+            userRole: string | null;
+            entityId: string | null;
+            sessionId: string;
+            pageUrl: string | null;
+            durationMs: number | null;
+            ipAddress: string | null;
+            deviceType: string | null;
+        }[];
+        meta: {
+            page: number;
+            limit: number;
+            total: number;
+            totalPages: number;
+        };
+    }>>;
+    getAuditReport(tenantId: string): Promise<ApiResponse<null> | ApiResponse<{
+        session: {
+            id: string;
+            tenantId: string;
+            isDeleted: boolean;
+            deletedAt: Date | null;
+            deletedById: string | null;
+            updatedById: string | null;
+            updatedByName: string | null;
+            status: import("@prisma/identity-client").$Enums.AuditSessionStatus;
+            startedAt: Date;
+            reason: string;
+            startedById: string;
+            startedByName: string | null;
+            endedAt: Date | null;
+            scheduledEndAt: Date | null;
+            totalActions: number;
+            uniqueUsers: number;
+            reportGeneratedAt: Date | null;
+            reportUrl: string | null;
+        };
+        summary: {
+            totalActions: number;
+            uniqueUsers: number;
+            byAction: {
+                action: import("@prisma/identity-client").$Enums.TenantAuditActionType;
+                count: number;
+            }[];
+            byUser: {
+                userId: string;
+                userName: string | null;
+                count: number;
+            }[];
+            byEntity: {
+                entityType: string | null;
+                count: number;
+            }[];
+        };
+    }>>;
+    getAuditHistory(tenantId: string): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        status: import("@prisma/identity-client").$Enums.AuditSessionStatus;
+        startedAt: Date;
+        reason: string;
+        startedById: string;
+        startedByName: string | null;
+        endedAt: Date | null;
+        scheduledEndAt: Date | null;
+        totalActions: number;
+        uniqueUsers: number;
+        reportGeneratedAt: Date | null;
+        reportUrl: string | null;
+    }[]>>;
+    getAllActiveAudits(): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        status: import("@prisma/identity-client").$Enums.AuditSessionStatus;
+        startedAt: Date;
+        reason: string;
+        startedById: string;
+        startedByName: string | null;
+        endedAt: Date | null;
+        scheduledEndAt: Date | null;
+        totalActions: number;
+        uniqueUsers: number;
+        reportGeneratedAt: Date | null;
+        reportUrl: string | null;
+    }[]>>;
+}

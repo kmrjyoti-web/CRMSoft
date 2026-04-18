@@ -1,0 +1,65 @@
+import { PrismaService } from '../../../../core/prisma/prisma.service';
+import { ApiResponse } from '../../../../common/utils/api-response';
+import { CreateApprovalRuleDto, UpdateApprovalRuleDto } from './dto/approval-rule.dto';
+export declare class ApprovalRulesController {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    create(dto: CreateApprovalRuleDto): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        entityType: string;
+        isActive: boolean;
+        createdAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        action: string;
+        amountField: string | null;
+        checkerRole: string;
+        minCheckers: number;
+        skipForRoles: string[];
+        amountThreshold: number | null;
+        expiryHours: number;
+    }>>;
+    list(): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        entityType: string;
+        isActive: boolean;
+        createdAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        action: string;
+        amountField: string | null;
+        checkerRole: string;
+        minCheckers: number;
+        skipForRoles: string[];
+        amountThreshold: number | null;
+        expiryHours: number;
+    }[]>>;
+    update(id: string, dto: UpdateApprovalRuleDto): Promise<ApiResponse<{
+        id: string;
+        tenantId: string;
+        entityType: string;
+        isActive: boolean;
+        createdAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        action: string;
+        amountField: string | null;
+        checkerRole: string;
+        minCheckers: number;
+        skipForRoles: string[];
+        amountThreshold: number | null;
+        expiryHours: number;
+    }>>;
+    remove(id: string): Promise<ApiResponse<null>>;
+}

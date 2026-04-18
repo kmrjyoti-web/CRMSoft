@@ -1,0 +1,41 @@
+import { ICommandHandler } from '@nestjs/cqrs';
+import { CreateAuditLogCommand } from './create-audit-log.command';
+import { AuditCoreService } from '../../../services/audit-core.service';
+export declare class CreateAuditLogHandler implements ICommandHandler<CreateAuditLogCommand> {
+    private readonly auditService;
+    private readonly logger;
+    constructor(auditService: AuditCoreService);
+    execute(command: CreateAuditLogCommand): Promise<{
+        id: string;
+        tenantId: string;
+        entityType: import("@prisma/identity-client").$Enums.AuditEntityType;
+        createdAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        source: string | null;
+        action: import("@prisma/identity-client").$Enums.AuditAction;
+        tags: string[];
+        module: string | null;
+        userAgent: string | null;
+        requestBody: import("@prisma/identity-client/runtime/library").JsonValue | null;
+        entityId: string;
+        performedById: string | null;
+        performedByName: string | null;
+        summary: string;
+        ipAddress: string | null;
+        correlationId: string | null;
+        entityLabel: string | null;
+        changeCount: number;
+        beforeSnapshot: import("@prisma/identity-client/runtime/library").JsonValue | null;
+        afterSnapshot: import("@prisma/identity-client/runtime/library").JsonValue | null;
+        performedByEmail: string | null;
+        performedByRole: string | null;
+        httpMethod: string | null;
+        requestUrl: string | null;
+        isSensitive: boolean;
+        isSystemAction: boolean;
+    } | null>;
+}

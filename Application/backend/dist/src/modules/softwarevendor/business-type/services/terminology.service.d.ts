@@ -1,0 +1,90 @@
+import { PrismaService } from '../../../../core/prisma/prisma.service';
+export declare class TerminologyService {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    getResolved(tenantId: string): Promise<Record<string, string>>;
+    list(tenantId: string): Promise<{
+        id: string;
+        tenantId: string;
+        isActive: boolean;
+        createdAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        scope: string;
+        businessTypeId: string | null;
+        termKey: string;
+        defaultLabel: string;
+        customLabel: string;
+        regionalLabel: string | null;
+        userHelpText: string | null;
+    }[]>;
+    upsert(tenantId: string, data: {
+        termKey: string;
+        defaultLabel: string;
+        customLabel: string;
+        scope?: string;
+        regionalLabel?: string;
+        userHelpText?: string;
+    }): Promise<{
+        id: string;
+        tenantId: string;
+        isActive: boolean;
+        createdAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        scope: string;
+        businessTypeId: string | null;
+        termKey: string;
+        defaultLabel: string;
+        customLabel: string;
+        regionalLabel: string | null;
+        userHelpText: string | null;
+    }>;
+    bulkUpsert(tenantId: string, items: Array<{
+        termKey: string;
+        defaultLabel: string;
+        customLabel: string;
+        scope?: string;
+    }>): Promise<{
+        id: string;
+        tenantId: string;
+        isActive: boolean;
+        createdAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        scope: string;
+        businessTypeId: string | null;
+        termKey: string;
+        defaultLabel: string;
+        customLabel: string;
+        regionalLabel: string | null;
+        userHelpText: string | null;
+    }[]>;
+    remove(tenantId: string, termKey: string, scope?: string): Promise<{
+        id: string;
+        tenantId: string;
+        isActive: boolean;
+        createdAt: Date;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        deletedById: string | null;
+        updatedById: string | null;
+        updatedByName: string | null;
+        scope: string;
+        businessTypeId: string | null;
+        termKey: string;
+        defaultLabel: string;
+        customLabel: string;
+        regionalLabel: string | null;
+        userHelpText: string | null;
+    }>;
+}

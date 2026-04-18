@@ -1,0 +1,1 @@
+{"version":3,"file":"get-delegation-status.query.js","sourceRoot":"","sources":["../../../../../../../../src/modules/customer/ownership/application/queries/get-delegation-status/get-delegation-status.query.ts"],"names":[],"mappings":";;;AAAA,MAAa,wBAAwB;IACnC,YACkB,MAAe,EACf,QAAkB;QADlB,WAAM,GAAN,MAAM,CAAS;QACf,aAAQ,GAAR,QAAQ,CAAU;IACjC,CAAC;CACL;AALD,4DAKC"}

@@ -1,0 +1,28 @@
+{
+  "runId": "7c7780d0-a138-49e2-81b8-8ab8512af5c2",
+  "startedAt": "2026-04-17T10:57:58.720Z",
+  "finishedAt": "2026-04-17T10:57:58.724Z",
+  "durationMs": 4,
+  "summary": {
+    "totalFindings": 1,
+    "errors": 1,
+    "warnings": 0,
+    "byCheck": {
+      "naming": 1,
+      "crossDbInclude": 0,
+      "fkOrphan": 0
+    },
+    "byDb": {
+      "all": 1
+    }
+  },
+  "findings": [
+    {
+      "severity": "error",
+      "check": "naming",
+      "db": "all",
+      "rule": "check-failed",
+      "message": "Check 'naming' threw an exception: parse failed"
+    }
+  ]
+}

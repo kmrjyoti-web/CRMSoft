@@ -1,0 +1,31 @@
+export declare class CreateTaskCommand {
+    readonly title: string;
+    readonly createdById: string;
+    readonly creatorRoleLevel: number;
+    readonly tenantId: string;
+    readonly assignedToId?: string | undefined;
+    readonly description?: string | undefined;
+    readonly type?: string | undefined;
+    readonly customTaskType?: string | undefined;
+    readonly priority?: string | undefined;
+    readonly assignmentScope?: string | undefined;
+    readonly assignedDepartmentId?: string | undefined;
+    readonly assignedDesignationId?: string | undefined;
+    readonly assignedRoleId?: string | undefined;
+    readonly dueDate?: Date | undefined;
+    readonly dueTime?: string | undefined;
+    readonly startDate?: Date | undefined;
+    readonly recurrence?: string | undefined;
+    readonly recurrenceConfig?: Record<string, unknown> | undefined;
+    readonly parentTaskId?: string | undefined;
+    readonly entityType?: string | undefined;
+    readonly entityId?: string | undefined;
+    readonly tags?: string[] | undefined;
+    readonly attachments?: Record<string, unknown>[] | undefined;
+    readonly customFields?: Record<string, unknown> | undefined;
+    readonly estimatedMinutes?: number | undefined;
+    readonly reminderMinutesBefore?: number | undefined;
+    readonly activityType?: string | undefined;
+    readonly leadId?: string | undefined;
+    constructor(title: string, createdById: string, creatorRoleLevel: number, tenantId: string, assignedToId?: string | undefined, description?: string | undefined, type?: string | undefined, customTaskType?: string | undefined, priority?: string | undefined, assignmentScope?: string | undefined, assignedDepartmentId?: string | undefined, assignedDesignationId?: string | undefined, assignedRoleId?: string | undefined, dueDate?: Date | undefined, dueTime?: string | undefined, startDate?: Date | undefined, recurrence?: string | undefined, recurrenceConfig?: Record<string, unknown> | undefined, parentTaskId?: string | undefined, entityType?: string | undefined, entityId?: string | undefined, tags?: string[] | undefined, attachments?: Record<string, unknown>[] | undefined, customFields?: Record<string, unknown> | undefined, estimatedMinutes?: number | undefined, reminderMinutesBefore?: number | undefined, activityType?: string | undefined, leadId?: string | undefined);
+}

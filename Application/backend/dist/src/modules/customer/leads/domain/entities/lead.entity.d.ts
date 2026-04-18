@@ -1,0 +1,60 @@
+import { AggregateRoot } from '../../../../../shared/domain/aggregate-root';
+import { LeadStatus } from '../value-objects/lead-status.vo';
+export interface CreateLeadProps {
+    leadNumber: string;
+    contactId: string;
+    organizationId?: string;
+    priority: string;
+    expectedValue?: number;
+    expectedCloseDate?: Date;
+    notes?: string;
+    createdById: string;
+}
+export declare class LeadEntity extends AggregateRoot {
+    private _leadNumber;
+    private _contactId;
+    private _organizationId?;
+    private _status;
+    private _priority;
+    private _expectedValue?;
+    private _expectedCloseDate?;
+    private _allocatedToId?;
+    private _allocatedAt?;
+    private _lostReason?;
+    private _notes?;
+    private _isActive;
+    private _isDeleted;
+    private _deletedAt;
+    private _deletedById;
+    private _createdById;
+    static create(id: string, props: CreateLeadProps): LeadEntity;
+    static fromPersistence(data: any): LeadEntity;
+    allocate(userId: string): void;
+    changeStatus(newStatus: string, reason?: string): void;
+    updateDetails(data: {
+        priority?: string;
+        expectedValue?: number;
+        expectedCloseDate?: Date;
+        notes?: string;
+    }): void;
+    deactivate(): void;
+    reactivate(): void;
+    softDelete(deletedById: string): void;
+    restore(): void;
+    get leadNumber(): string;
+    get contactId(): string;
+    get organizationId(): string | undefined;
+    get status(): LeadStatus;
+    get priority(): string;
+    get expectedValue(): number | undefined;
+    get expectedCloseDate(): Date | undefined;
+    get allocatedToId(): string | undefined;
+    get allocatedAt(): Date | undefined;
+    get lostReason(): string | undefined;
+    get notes(): string | undefined;
+    get isActive(): boolean;
+    get isDeleted(): boolean;
+    get deletedAt(): Date | null;
+    get deletedById(): string | null;
+    get createdById(): string;
+}
