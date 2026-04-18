@@ -1,1 +1,0 @@
-{"version":3,"file":"acknowledge-reminder.command.js","sourceRoot":"","sources":["../../../../../../../../src/modules/customer/reminders/application/commands/acknowledge-reminder/acknowledge-reminder.command.ts"],"names":[],"mappings":";;;AAAA,MAAa,0BAA0B;IACrC,YACkB,UAAkB,EAClB,MAAc;QADd,eAAU,GAAV,UAAU,CAAQ;QAClB,WAAM,GAAN,MAAM,CAAQ;IAC7B,CAAC;CACL;AALD,gEAKC"}
