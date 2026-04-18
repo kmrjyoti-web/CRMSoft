@@ -216,7 +216,9 @@ describe('ReligiousModeService', () => {
       mockPrisma.tenant.findUnique.mockResolvedValue({ settings: {} });
       mockPrisma.tenant.update.mockResolvedValue({});
 
-      await service.logInteraction('t1', 'u1', ['DEEP', 'PHOOL'], 12, '2026-04-03');
+      // Use today's date so the entry falls within the service's 7-day retention window.
+      const today = new Date().toISOString().split('T')[0];
+      await service.logInteraction('t1', 'u1', ['DEEP', 'PHOOL'], 12, today);
       expect(mockPrisma.tenant.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 't1' },

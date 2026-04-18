@@ -33,6 +33,11 @@ describe('NamingCheckService', () => {
       { code: 'gv', tablePrefix: 'gv_' },
       { code: 'soft', tablePrefix: 'soft_' },
     ]);
+    // Sprint F: service uses fs.readdirSync to enumerate *.prisma files in
+    // prismaSchemaFolder. Each test overrides readFileSync to return its
+    // fixture content; readdirSync must return a single-file list so the
+    // service reads that fixture via readFileSync.
+    (fs.readdirSync as jest.Mock).mockReturnValue(['schema.prisma']);
   });
 
   it('should return no findings for valid snake_case tables with known prefix', async () => {
