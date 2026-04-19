@@ -22,7 +22,7 @@ export interface PaginatedResult<T> {
   limit: number;
   totalPages: number;
   hasNext: boolean;
-  hasPrev: boolean;
+  hasPrevious: boolean;
 }
 
 /**
@@ -56,6 +56,6 @@ export function buildPaginatedResult<T>(
     limit,
     totalPages: Math.ceil(total / limit),
     hasNext: page * limit < total,
-    hasPrev: page > 1,
+    hasPrevious: page > 1,
   };
 }

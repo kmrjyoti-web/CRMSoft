@@ -9,13 +9,13 @@ describe('paginate()', () => {
     expect(result.limit).toBe(3);
     expect(result.totalPages).toBe(4);
     expect(result.hasNext).toBe(true);
-    expect(result.hasPrev).toBe(false);
+    expect(result.hasPrevious).toBe(false);
   });
 
   it('should mark last page correctly', () => {
     const result = paginate(['x'], 7, 4, 2);
     expect(result.hasNext).toBe(false);
-    expect(result.hasPrev).toBe(true);
+    expect(result.hasPrevious).toBe(true);
   });
 
   it('should handle empty data', () => {
@@ -24,6 +24,6 @@ describe('paginate()', () => {
     expect(result.total).toBe(0);
     expect(result.totalPages).toBe(0);
     expect(result.hasNext).toBe(false);
-    expect(result.hasPrev).toBe(false);
+    expect(result.hasPrevious).toBe(false);
   });
 });
