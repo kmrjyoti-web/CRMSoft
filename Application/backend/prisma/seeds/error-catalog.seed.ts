@@ -969,6 +969,54 @@ export const ERROR_CATALOG_SEED: ErrorSeedEntry[] = [
     solutionEn: 'Check the Sale Order ID and verify it belongs to your account.',
     solutionHi: 'सेल ऑर्डर ID जांचें और सत्यापित करें कि यह आपके खाते से संबंधित है।',
   },
+
+  // ═══════════════════════════════════════════════════
+  // CUSTOMER PORTAL (BE)
+  // ═══════════════════════════════════════════════════
+  {
+    code: 'PORTAL_INVITE_REQUIRES_VERIFICATION',
+    layer: 'BE',
+    module: 'CUSTOMER_PORTAL',
+    severity: 'ERROR',
+    httpStatus: 400,
+    messageEn: 'Contact or organization must be verified before portal invite',
+    messageHi: 'पोर्टल निमंत्रण से पहले संपर्क या संगठन सत्यापित होना चाहिए',
+    solutionEn: 'Complete entity verification first (email/GST/document).',
+    solutionHi: 'पहले एंटिटी सत्यापन पूरा करें (ईमेल/GST/दस्तावेज़)।',
+  },
+  {
+    code: 'PORTAL_INVITE_NO_EMAIL',
+    layer: 'BE',
+    module: 'CUSTOMER_PORTAL',
+    severity: 'ERROR',
+    httpStatus: 400,
+    messageEn: 'Recipient has no email address on record',
+    messageHi: 'प्राप्तकर्ता के पास कोई ईमेल नहीं है',
+    solutionEn: 'Add email to the contact or organization first.',
+    solutionHi: 'पहले संपर्क या संगठन में ईमेल जोड़ें।',
+  },
+  {
+    code: 'PORTAL_INVITE_DELIVERY_PARTIAL',
+    layer: 'BE',
+    module: 'CUSTOMER_PORTAL',
+    severity: 'WARNING',
+    httpStatus: 200,
+    messageEn: 'Portal activated but some delivery channels skipped or failed',
+    messageHi: 'पोर्टल सक्रिय हुआ लेकिन कुछ चैनल छूट गए या विफल रहे',
+    solutionEn: 'Review the communication log and share credentials manually if needed.',
+    solutionHi: 'संचार लॉग देखें और आवश्यकतानुसार क्रेडेंशियल्स मैन्युअल भेजें।',
+  },
+  {
+    code: 'PORTAL_INVITE_PLUGIN_STUB',
+    layer: 'BE',
+    module: 'CUSTOMER_PORTAL',
+    severity: 'INFO',
+    httpStatus: 200,
+    messageEn: 'Credentials queued — plugin delivery pending implementation',
+    messageHi: 'क्रेडेंशियल्स क्यू में — प्लगइन डिलीवरी लंबित है',
+    solutionEn: 'Use the temporary password in the admin response to onboard the customer manually.',
+    solutionHi: 'ग्राहक को मैन्युअल रूप से ऑनबोर्ड करने के लिए एडमिन प्रतिक्रिया में दिखाया गया अस्थायी पासवर्ड उपयोग करें।',
+  },
 ];
 
 export async function seedErrorCatalog(prisma: PrismaClient): Promise<number> {

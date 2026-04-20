@@ -31,6 +31,13 @@ const mockPrisma = {
 describe('ActivatePortalHandler', () => {
   let handler: ActivatePortalHandler;
   let mockUserRepo: jest.Mocked<any>;
+  const mockPluginRegistry = {
+    get: jest.fn().mockReturnValue(undefined),
+    register: jest.fn(),
+    has: jest.fn(),
+    getAll: jest.fn(),
+    getCodes: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -38,7 +45,7 @@ describe('ActivatePortalHandler', () => {
       findByLinkedEntity: jest.fn().mockResolvedValue(null),
       save: jest.fn().mockResolvedValue({ success: true, data: { id: 'cu-1', email: 'ravi@example.com' } }),
     };
-    handler = new ActivatePortalHandler(mockUserRepo, mockPrisma as any);
+    handler = new ActivatePortalHandler(mockUserRepo, mockPrisma as any, mockPluginRegistry as any);
   });
 
   it('activates portal successfully for a verified contact', async () => {

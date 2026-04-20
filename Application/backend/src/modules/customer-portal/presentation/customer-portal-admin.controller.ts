@@ -78,6 +78,8 @@ export class CustomerPortalAdminController {
         dto.entityType,
         dto.entityId,
         dto.menuCategoryId,
+        dto.channels,
+        dto.customMessage,
       ),
     );
   }

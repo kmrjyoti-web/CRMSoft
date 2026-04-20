@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PluginsModule } from '../plugins/plugins.module';
 
 // ─── Presentation ───
 import { CustomerAuthController } from './presentation/customer-auth.controller';
@@ -65,6 +66,7 @@ const QUERY_HANDLERS = [
 @Module({
   imports: [
     CqrsModule,
+    PluginsModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
