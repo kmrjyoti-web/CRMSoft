@@ -29,6 +29,8 @@ import { GetPortalUserQuery } from '../application/queries/get-portal-user/get-p
 import { ListMenuCategoriesQuery } from '../application/queries/list-menu-categories/list-menu-categories.query';
 import { GetMenuCategoryQuery } from '../application/queries/get-menu-category/get-menu-category.query';
 import { GetPortalAnalyticsQuery } from '../application/queries/get-portal-analytics/get-portal-analytics.query';
+import { ListCommunicationLogQuery } from '../application/queries/list-communication-log/list-communication-log.query';
+import { ListCommunicationLogDto } from './dto/list-communication-log.dto';
 
 @ApiTags('Customer Portal — Admin Management')
 @ApiBearerAuth()
@@ -187,6 +189,33 @@ export class CustomerPortalAdminController {
   @ApiOperation({ summary: 'Delete menu category (soft delete, fails if users assigned)' })
   deleteMenuCategory(@Param('id') id: string) {
     return this.commandBus.execute(new DeleteMenuCategoryCommand(id));
+  }
+
+  // ═══ COMMUNICATION LOG ═══════════════════════════════
+
+  @Get('communication-log')
+  @ApiOperation({ summary: 'List communication log entries for a linked entity (Contact/Organization/Ledger)' })
+  @ApiQuery({ name: 'entityType', enum: ['CONTACT', 'ORGANIZATION', 'LEDGER'] })
+  @ApiQuery({ name: 'entityId' })
+  @ApiQuery({ name: 'channel', required: false, enum: ['EMAIL', 'WHATSAPP'] })
+  @ApiQuery({ name: 'status', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'offset', required: false })
+  listCommunicationLog(
+    @Request() req: { user: { tenantId: string } },
+    @Query() dto: ListCommunicationLogDto,
+  ) {
+    return this.queryBus.execute(
+      new ListCommunicationLogQuery(
+        req.user.tenantId,
+        dto.entityType,
+        dto.entityId,
+        dto.channel,
+        dto.status,
+        dto.limit,
+        dto.offset,
+      ),
+    );
   }
 
   // ═══ AVAILABLE ROUTES ════════════════════════════════
