@@ -35,6 +35,7 @@ import { GetPortalUserHandler } from './application/queries/get-portal-user/get-
 import { ListMenuCategoriesHandler } from './application/queries/list-menu-categories/list-menu-categories.handler';
 import { GetMenuCategoryHandler } from './application/queries/get-menu-category/get-menu-category.handler';
 import { GetPortalAnalyticsHandler } from './application/queries/get-portal-analytics/get-portal-analytics.handler';
+import { ListCommunicationLogHandler } from './application/queries/list-communication-log/list-communication-log.handler';
 
 const COMMAND_HANDLERS = [
   CustomerLoginHandler,
@@ -60,6 +61,7 @@ const QUERY_HANDLERS = [
   ListMenuCategoriesHandler,
   GetMenuCategoryHandler,
   GetPortalAnalyticsHandler,
+  ListCommunicationLogHandler,
 ];
 
 @Module({
