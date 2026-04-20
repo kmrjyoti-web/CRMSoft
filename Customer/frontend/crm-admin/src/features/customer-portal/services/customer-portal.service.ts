@@ -10,6 +10,8 @@ import type {
   CreateMenuCategoryDto,
   UpdateMenuCategoryDto,
   UpdatePortalUserDto,
+  ActivatePortalWithChannelsDto,
+  ActivatePortalWithChannelsResponse,
 } from '../types/customer-portal.types';
 
 const BASE = '/api/v1/admin/customer-portal';
@@ -29,6 +31,17 @@ export function activatePortal(dto: ActivatePortalDto) {
     `${BASE}/activate`,
     dto,
   ).then((r) => r.data);
+}
+
+/**
+ * Activate portal and optionally trigger credential delivery on one or more channels.
+ * Requires backend KUMAR-001X (channels[] + customMessage on ActivatePortalCommand).
+ * Until KUMAR-001X merges, the extra fields are ignored by the backend (backward compat).
+ */
+export function activatePortalWithChannels(dto: ActivatePortalWithChannelsDto) {
+  return apiClient
+    .post<ActivatePortalWithChannelsResponse>(`${BASE}/activate`, dto)
+    .then((r) => r.data);
 }
 
 // ── Portal Users ──────────────────────────────────────────────────────────────

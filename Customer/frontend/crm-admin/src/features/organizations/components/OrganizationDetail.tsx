@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,6 +18,7 @@ import { formatDate } from "@/lib/format-date";
 
 import { VerifyButton } from "@/features/entity-verification";
 import { CommunicationLogPanel } from "@/features/communication-log/CommunicationLogPanel";
+import { PortalInviteDialog } from "@/features/customer-portal/components/PortalInviteDialog";
 
 import {
   useOrganizationDetail,
@@ -40,6 +41,7 @@ export function OrganizationDetail({ organizationId }: OrganizationDetailProps) 
   const { data, isLoading } = useOrganizationDetail(organizationId);
   const deactivateMutation = useDeactivateOrganization();
   const reactivateMutation = useReactivateOrganization();
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   const organization = data?.data;
 
@@ -111,6 +113,9 @@ export function OrganizationDetail({ organizationId }: OrganizationDetailProps) 
               entityPhone={organization.phone}
               initialStatus={organization.entityVerificationStatus ?? "UNVERIFIED"}
             />
+            <Button variant="outline" onClick={() => setInviteOpen(true)}>
+              <Icon name="user-plus" size={16} /> Invite to Portal
+            </Button>
             <Button variant="outline" onClick={() => router.back()}>
               <Icon name="arrow-left" size={16} /> Back
             </Button>
@@ -342,6 +347,16 @@ export function OrganizationDetail({ organizationId }: OrganizationDetailProps) 
       <div className="mt-6">
         <CommunicationLogPanel entityType="ORGANIZATION" entityId={organizationId} />
       </div>
+
+      <PortalInviteDialog
+        open={inviteOpen}
+        onClose={() => setInviteOpen(false)}
+        entityType="ORGANIZATION"
+        entityId={organizationId}
+        entityName={organization.name}
+        availableEmail={organization.email}
+        availablePhone={organization.phone}
+      />
 
       <ConfirmDialogPortal />
     </div>

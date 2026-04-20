@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,6 +18,7 @@ import { formatDate } from "@/lib/format-date";
 
 import { VerifyButton } from "@/features/entity-verification";
 import { CommunicationLogPanel } from "@/features/communication-log/CommunicationLogPanel";
+import { PortalInviteDialog } from "@/features/customer-portal/components/PortalInviteDialog";
 
 import {
   useContactDetail,
@@ -55,6 +56,7 @@ export function ContactDetail({ contactId }: ContactDetailProps) {
   const { data, isLoading } = useContactDetail(contactId);
   const deactivateMutation = useDeactivateContact();
   const reactivateMutation = useReactivateContact();
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   const contact = data?.data;
 
@@ -121,6 +123,9 @@ export function ContactDetail({ contactId }: ContactDetailProps) {
               entityPhone={primaryPhone}
               initialStatus={contact.entityVerificationStatus ?? "UNVERIFIED"}
             />
+            <Button variant="outline" onClick={() => setInviteOpen(true)}>
+              <Icon name="user-plus" size={16} /> Invite to Portal
+            </Button>
             <Button variant="outline" onClick={() => router.push("/contacts")}>
               <Icon name="arrow-left" size={16} /> Back
             </Button>
@@ -330,6 +335,16 @@ export function ContactDetail({ contactId }: ContactDetailProps) {
       <div className="mt-6">
         <CommunicationLogPanel entityType="CONTACT" entityId={contactId} />
       </div>
+
+      <PortalInviteDialog
+        open={inviteOpen}
+        onClose={() => setInviteOpen(false)}
+        entityType="CONTACT"
+        entityId={contactId}
+        entityName={`${contact.firstName} ${contact.lastName || ""}`.trim()}
+        availableEmail={primaryEmail}
+        availablePhone={primaryPhone}
+      />
 
       <ConfirmDialogPortal />
     </div>
