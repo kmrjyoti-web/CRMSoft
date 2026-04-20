@@ -121,6 +121,7 @@ export class CreatePODto {
   @ApiProperty() @IsString() poNumber: string;
   @ApiProperty() @IsUUID() vendorId: string;
   @ApiPropertyOptional() @IsOptional() @IsUUID() quotationId?: string;
+  @ApiPropertyOptional() @IsOptional() @IsUUID() saleOrderId?: string;
   @ApiPropertyOptional() @IsOptional() @IsDateString() expectedDate?: string;
   @ApiPropertyOptional() @IsOptional() @IsInt() paymentTermDays?: number;
   @ApiPropertyOptional() @IsOptional() @IsString() deliveryAddress?: string;

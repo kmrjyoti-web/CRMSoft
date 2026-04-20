@@ -13,6 +13,7 @@ import { LookupSelect } from "@/components/common/LookupSelect";
 import { ProductSelect } from "@/components/common/ProductSelect";
 import type { ProductSelectOption } from "@/components/common/ProductSelect";
 import { ContactSelect } from "@/components/common/ContactSelect";
+import { SaleOrderSelect } from "@/components/common/SaleOrderSelect";
 import { FormErrors } from "@/components/common/FormErrors";
 import { FormSubmitOverlay } from "@/components/common/FormSubmitOverlay";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
@@ -42,6 +43,7 @@ const lineItemSchema = z.object({
 
 const poSchema = z.object({
   vendorId: z.string().min(1, "Vendor is required"),
+  saleOrderId: z.string().optional().nullable(),
   orderDate: z.string().min(1, "Order date required"),
   expectedDeliveryDate: z.string().optional(),
   creditDays: z.number().nullable().optional(),
@@ -95,6 +97,7 @@ export function POForm({ poId, mode = "page", panelId, onSuccess }: POFormProps)
     resolver: zodResolver(poSchema),
     defaultValues: {
       vendorId: "",
+      saleOrderId: null,
       orderDate: new Date().toISOString().slice(0, 10),
       expectedDeliveryDate: "",
       creditDays: null,
@@ -129,6 +132,7 @@ export function POForm({ poId, mode = "page", panelId, onSuccess }: POFormProps)
     const p = poData.data;
     reset({
       vendorId: p.vendorId,
+      saleOrderId: p.saleOrderId ?? null,
       orderDate: p.orderDate.slice(0, 10),
       expectedDeliveryDate: p.expectedDeliveryDate ? p.expectedDeliveryDate.slice(0, 10) : "",
       creditDays: p.creditDays ?? null,
@@ -203,6 +207,7 @@ export function POForm({ poId, mode = "page", panelId, onSuccess }: POFormProps)
     try {
       const payload = {
         vendorId: values.vendorId,
+        saleOrderId: values.saleOrderId || undefined,
         orderDate: values.orderDate,
         expectedDeliveryDate: values.expectedDeliveryDate || undefined,
         creditDays: values.creditDays ?? undefined,
@@ -296,6 +301,17 @@ export function POForm({ poId, mode = "page", panelId, onSuccess }: POFormProps)
                   onChange={field.onChange}
                   min={0}
                   precision={0}
+                />
+              )}
+            />
+            <Controller
+              name="saleOrderId"
+              control={control}
+              render={({ field }) => (
+                <SaleOrderSelect
+                  label="Source Sale Order"
+                  value={field.value ?? null}
+                  onChange={(val) => field.onChange(val == null ? null : String(val))}
                 />
               )}
             />

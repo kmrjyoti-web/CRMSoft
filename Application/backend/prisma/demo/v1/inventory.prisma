@@ -865,6 +865,7 @@ model PurchaseOrder {
   vendorId             String    @map("vendor_id")
   quotationId          String?   @map("quotation_id")
   rfqId                String?   @map("rfq_id")
+  saleOrderId          String?   @map("sale_order_id")
   status               String    @default("DRAFT")
   orderDate            DateTime  @default(now()) @map("order_date")
   expectedDeliveryDate DateTime? @map("expected_delivery_date")
@@ -889,6 +890,7 @@ model PurchaseOrder {
   items            PurchaseOrderItem[]
   goodsReceipts    GoodsReceipt[]
   purchaseInvoices PurchaseInvoice[]
+  saleOrder        SaleOrder?          @relation("SaleOrderToPurchaseOrders", fields: [saleOrderId], references: [id])
 
   updatedById   String?   @map("updated_by_id")
   updatedByName String?   @map("updated_by_name")
@@ -899,6 +901,7 @@ model PurchaseOrder {
 
   @@index([tenantId])
   @@index([tenantId, status])
+  @@index([saleOrderId])
   @@map("gv_inv_purchase_orders")
 }
 
