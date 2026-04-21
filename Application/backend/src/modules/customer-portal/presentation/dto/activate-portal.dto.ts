@@ -1,4 +1,4 @@
-import { IsIn, IsUUID, IsOptional } from 'class-validator';
+import { IsIn, IsUUID, IsOptional, IsArray, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ActivatePortalDto {
@@ -14,4 +14,19 @@ export class ActivatePortalDto {
   @IsOptional()
   @IsUUID()
   menuCategoryId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Delivery channels for credentials (plugins currently stubbed — status=QUEUED_AWAITING_PLUGIN_IMPL).',
+    isArray: true,
+    enum: ['EMAIL', 'WHATSAPP'],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsIn(['EMAIL', 'WHATSAPP'], { each: true })
+  channels?: ('EMAIL' | 'WHATSAPP')[];
+
+  @ApiPropertyOptional({ description: 'Optional custom message included in the delivered invite body.' })
+  @IsOptional()
+  @IsString()
+  customMessage?: string;
 }
