@@ -11,10 +11,11 @@
 | #3 | feat/portal-invite-channels | KUMAR-001X | Merged | ce2fce5d |
 | #4 | feat/communication-log-viewer | KUMAR-002 | Merged | bcb30672 |
 | #5 | feat/portal-invite-ui | KUMAR-003 | Merged | b9b10429 |
+| #8 | feat/retry-communication | KUMAR-005 | Merged | f44ff75d |
 | #6 | test/activate-portal-delivery-paths | KUMAR-004 | Pending (base change) |  |
-| #7 | feat/retry-communication | KUMAR-005 | Pending (base change) |  |
+| #7 | feat/retry-communication | KUMAR-005 | Closed (base deleted; resubmitted as #8) |  |
 
-## Stage 3 Status: 3/5 stacked PRs merged (60% complete)
+## Stage 3 Status: 4/5 stacked PRs merged (80% complete)
 
 ## PR #3 Recovery + Merge — 2026-04-21
 
@@ -91,6 +92,30 @@ Resolution kept both sections in order (PROCUREMENT first, CUSTOMER PORTAL secon
 ## Environment Notes
 - After rebase on develop, backend tsc requires `pnpm prisma:generate` to refresh per-module Prisma clients (PR #2's schema change introduced `PurchaseOrder.saleOrderId`).
 
+## PR #7 → #8 Recovery + Merge — 2026-04-21
+
+### Starting State
+- **PR #7 was CLOSED, not OPEN**: GitHub auto-closed it when its base `feat/communication-log-viewer` was deleted after PR #4 squash-merge (auto-retarget did NOT happen — that behavior depends on repo settings, and the closed-on-base-deletion path was taken here).
+- Could not reopen via `gh pr reopen`: GraphQL error `Could not open the pull request`. Could not change base while closed: `Cannot change the base branch of a closed pull request`.
+
+### Recovery
+1. Left PR #7 closed; rebased the existing branch `feat/retry-communication` onto current `develop`.
+2. Rebase auto-skipped commit `ae7fd050` (the prior communication-log-viewer commit, already in develop via PR #4 squash `bcb30672`) — exactly correct behavior.
+3. Two conflicts in error-catalog.seed.ts + error-codes.ts. Both were additive: develop had PROCUREMENT + PORTAL_INVITE_* sections, this PR adds COMMUNICATION_LOG_* (3 codes). Kept all entries in both files.
+4. Force-pushed `906bdbeb` → `2bf73b7c` with `--force-with-lease`.
+5. Created **new PR #8** targeting develop directly.
+
+### CI Results (10 checks)
+- **Pass**: Tests (affected since base) 1m14s, Type check (tsc) backend 1m15s, Type check (tsc) crm-admin non-blocking 1m20s, Lint backend, Lint crm-admin non-blocking, DB schema audit 44s, Vercel Preview Comments, Vercel × 2
+- **Fail (non-blocking)**: `Next.js build — non-blocking v1` — same two pre-existing errors verified via `gh run view --log-failed` (`api-gateway/keys/page.tsx` ApiKeyList, `settings/verifications/page.tsx` ssr:false). Identical pattern to PRs #4, #5.
+
+### Post-merge Build Verification
+- **Backend** (`Application/backend`): `tsc --noEmit` clean (0 errors).
+- **crm-admin**: 328 top-level tsc errors — exact baseline match. Zero regression.
+
+### Resolved Error Code Sections
+- Preserved from develop: PROCUREMENT (`PURCHASE_ORDER_SALE_ORDER_NOT_FOUND`), CUSTOMER PORTAL (`PORTAL_INVITE_REQUIRES_VERIFICATION`, `PORTAL_INVITE_NO_EMAIL`, `PORTAL_INVITE_DELIVERY_PARTIAL`, `PORTAL_INVITE_PLUGIN_STUB`).
+- Added by PR #8: COMMUNICATION LOG (`COMMUNICATION_LOG_NOT_FOUND`, `COMMUNICATION_LOG_CANNOT_RETRY_SENT`, `COMMUNICATION_LOG_CHANNEL_NOT_SUPPORTED`).
+
 ## Next Steps
-1. **PR #7** (`feat/retry-communication`, KUMAR-005): base likely auto-retargeted to develop after PR #4 branch deletion; rebase + merge.
-2. **PR #6** (`test/activate-portal-delivery-paths`, KUMAR-004): base likely auto-retargeted to develop after PR #3 branch deletion; rebase + merge. Depends on PR #3 + PR #5 content.
+1. **PR #6** (`test/activate-portal-delivery-paths`, KUMAR-004): same risk as PR #7 — its base was `feat/portal-invite-channels` (deleted). Likely auto-closed; recover by rebase + new PR if so. Final stacked PR for Stage 3.
