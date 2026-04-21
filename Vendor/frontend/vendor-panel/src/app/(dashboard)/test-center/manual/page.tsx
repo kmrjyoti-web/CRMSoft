@@ -94,7 +94,7 @@ export default function ManualTestsPage() {
           ) : logs.length === 0 ? (
             <div className="p-6">
               <EmptyState
-                icon={<ClipboardList className="h-8 w-8" />}
+                icon={ClipboardList}
                 title="No manual test logs"
                 description="Manual test logs submitted by testers will appear here."
               />

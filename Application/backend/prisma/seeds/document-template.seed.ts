@@ -1,4 +1,5 @@
-import { PrismaClient, DocumentType } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { DocumentType } from '@prisma/working-client';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // DEFAULT SETTINGS

@@ -63,6 +63,7 @@ export default function ErrorLogDetailPage({ params }: { params: { traceId: stri
   const reportToProvider = useReportToProvider();
 
   const handleReportToProvider = () => {
+    if (!log) return;
     if (!confirm('This will notify the software provider about this critical error. Continue?')) return;
     reportToProvider.mutate(log.id, {
       onSuccess: () => toast.success('Error reported to software provider'),

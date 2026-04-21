@@ -202,7 +202,14 @@ export async function seedRawContacts(
 
   for (let batch = 0; batch < Math.ceil(toCreate / batchSize); batch++) {
     const size = Math.min(batchSize, toCreate - created);
-    const records: Parameters<typeof prisma.rawContact.create>[0]['data'][] = [];
+    // Resolve to the Prisma-generated create-input type when available
+    // (local), or fall back to a loose record when the client stub lacks
+    // the model (CI's bare @prisma/client).
+    type RawContactCreateData =
+      Parameters<typeof prisma.rawContact.create>[0] extends { data: infer D }
+        ? D
+        : Record<string, unknown>;
+    const records: RawContactCreateData[] = [];
     const commsData: { index: number; comms: { type: string; value: string; priorityType: string; isPrimary: boolean }[] }[] = [];
 
     for (let i = 0; i < size; i++) {

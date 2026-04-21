@@ -31,10 +31,16 @@ async function bootstrap() {
       },
     },
   }));
+  const corsOrigins = process.env.CORS_ORIGINS?.trim()
+    ? process.env.CORS_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean)
+    : [];
+  if (isProd && corsOrigins.length === 0) {
+    throw new Error(
+      'CORS_ORIGINS must be set in production. Refusing to start with a permissive fallback.',
+    );
+  }
   app.enableCors({
-    origin: process.env.CORS_ORIGINS?.trim()
-      ? process.env.CORS_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean)
-      : true,
+    origin: corsOrigins.length > 0 ? corsOrigins : isProd ? false : true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Tenant-ID', 'X-Industry-Code'],

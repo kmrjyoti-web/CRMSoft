@@ -35,10 +35,10 @@ async function main() {
   console.log(`✅ Tenant: ${tenant.name} (${tenantId})`);
 
   // Delete all existing menus for this tenant (children first)
-  const level2 = await prisma.menu.findMany({
+  const level2 = (await prisma.menu.findMany({
     where: { parentId: { not: null }, tenantId },
     select: { id: true },
-  });
+  })) as Array<{ id: string }>;
   const l2ids = level2.map((m) => m.id);
 
   if (l2ids.length > 0) {

@@ -20,7 +20,7 @@ export interface PaginationMeta {
   total: number;
   totalPages: number;
   hasNext: boolean;
-  hasPrev: boolean;
+  hasPrevious: boolean;
 }
 
 export const paginate = <T>(
@@ -35,5 +35,5 @@ export const paginate = <T>(
   limit,
   totalPages: Math.ceil(total / limit),
   hasNext: page * limit < total,
-  hasPrev: page > 1,
+  hasPrevious: page > 1,
 });

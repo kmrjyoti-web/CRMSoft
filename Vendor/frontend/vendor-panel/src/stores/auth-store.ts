@@ -31,7 +31,7 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const res = await authApi.login(email, password);
-          const data = res.data;
+          const data = res.data!;
           localStorage.setItem('vendor_token', data.accessToken);
           localStorage.setItem('vendor_tenant_id', data.tenantId);
           // Set cookie so Next.js middleware can detect auth

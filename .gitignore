@@ -26,11 +26,32 @@ Application/backend/docs/health-reports/audit-runs/
 Application/backend/docs/health-reports/latest-audit.json
 
 # ────────────────────────────────────────────────────────────
-# Env files & secrets
+# Env files & secrets — NEVER commit these
 # ────────────────────────────────────────────────────────────
 .env
+.env.*
+!.env.example
 .env.local
 .env.*.local
+.env.old-*
+.env.backup
+.env.backup.*
+# explicit paths (defensive redundancy for subdirs)
+Application/backend/.env
+Application/backend/.env.*
+!Application/backend/.env.example
+Customer/frontend/crm-admin/.env
+Customer/frontend/crm-admin/.env.*
+!Customer/frontend/crm-admin/.env.example
+Vendor/frontend/vendor-panel/.env
+Vendor/frontend/vendor-panel/.env.*
+!Vendor/frontend/vendor-panel/.env.example
+WhiteLabel/**/.env
+WhiteLabel/**/.env.*
+!WhiteLabel/**/.env.example
+PlatformConsole/frontend/**/.env
+PlatformConsole/frontend/**/.env.*
+!PlatformConsole/frontend/**/.env.example
 
 # ────────────────────────────────────────────────────────────
 # IDE

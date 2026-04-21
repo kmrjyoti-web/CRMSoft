@@ -113,7 +113,7 @@ export default function AutomatedTestsPage() {
             </div>
           ) : runs.length === 0 ? (
             <EmptyState
-              icon={<BarChart2 className="h-8 w-8" />}
+              icon={BarChart2}
               title="No test runs"
               description="Click Run Tests above to start your first automated test run."
             />
