@@ -1260,6 +1260,16 @@ export const ERROR_CODES: Record<string, ErrorCodeDefinition> = {
     message: 'A tour plan already exists for this date',
     suggestion: 'Edit the existing tour plan or choose a different date.',
   },
+
+  // ═══════════════════════════════════════════════════
+  // PROCUREMENT
+  // ═══════════════════════════════════════════════════
+  PURCHASE_ORDER_SALE_ORDER_NOT_FOUND: {
+    code: 'PURCHASE_ORDER_SALE_ORDER_NOT_FOUND',
+    httpStatus: 404,
+    message: 'Sale Order not found',
+    suggestion: 'Check the Sale Order ID and verify it belongs to your account.',
+  },
 };
 
 /** Total error codes count. */

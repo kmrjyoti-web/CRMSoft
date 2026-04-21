@@ -387,6 +387,7 @@ model SaleOrder {
 
   items            SaleOrderItem[]
   deliveryChallans DeliveryChallan[]
+  purchaseOrders   PurchaseOrder[]   @relation("SaleOrderToPurchaseOrders")
 
   updatedById   String?   @map("updated_by_id")
   updatedByName String?   @map("updated_by_name")

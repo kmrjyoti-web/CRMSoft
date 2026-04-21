@@ -365,11 +365,12 @@ export class ProcurementController {
     @CurrentUser('tenantId') tenantId: string,
     @Query('vendorId') vendorId?: string,
     @Query('status') status?: string,
+    @Query('saleOrderId') saleOrderId?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
     const result = await this.poService.list(tenantId, {
-      vendorId, status,
+      vendorId, status, saleOrderId,
       page: page ? parseInt(page) : undefined, limit: limit ? parseInt(limit) : undefined,
     });
     return ApiResponse.paginated(result.data, result.total, result.page, result.limit);
@@ -381,6 +382,17 @@ export class ProcurementController {
   async generatePONumber(@CurrentUser('tenantId') tenantId: string) {
     const number = await this.poService.generateNumber(tenantId);
     return ApiResponse.success({ number });
+  }
+
+  @Get('purchase-orders/by-sale-order/:saleOrderId')
+  @ApiOperation({ summary: 'List purchase orders linked to a sale order' })
+  @RequirePermissions('procurement:read')
+  async listPOsBySaleOrder(
+    @CurrentUser('tenantId') tenantId: string,
+    @Param('saleOrderId', ParseUUIDPipe) saleOrderId: string,
+  ) {
+    const result = await this.poService.list(tenantId, { saleOrderId, limit: 100 });
+    return ApiResponse.success(result.data);
   }
 
   @Get('purchase-orders/:id')

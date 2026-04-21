@@ -954,6 +954,21 @@ export const ERROR_CATALOG_SEED: ErrorSeedEntry[] = [
     solutionEn: 'Check available lookup values in Settings → Lookups.',
     solutionHi: 'सेटिंग्स → लुकअप में उपलब्ध लुकअप मान जांचें।',
   },
+
+  // ═══════════════════════════════════════════════════
+  // PROCUREMENT (BE)
+  // ═══════════════════════════════════════════════════
+  {
+    code: 'PURCHASE_ORDER_SALE_ORDER_NOT_FOUND',
+    layer: 'BE',
+    module: 'PROCUREMENT',
+    severity: 'WARNING',
+    httpStatus: 404,
+    messageEn: 'Sale Order not found',
+    messageHi: 'सेल ऑर्डर नहीं मिला',
+    solutionEn: 'Check the Sale Order ID and verify it belongs to your account.',
+    solutionHi: 'सेल ऑर्डर ID जांचें और सत्यापित करें कि यह आपके खाते से संबंधित है।',
+  },
 ];
 
 export async function seedErrorCatalog(prisma: PrismaClient): Promise<number> {

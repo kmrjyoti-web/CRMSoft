@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { TableFull, Badge } from "@/components/ui";
 import { useEntityPanel } from "@/hooks/useEntityPanel";
 import { usePOList } from "../hooks/useProcurement";
@@ -14,6 +15,7 @@ const COLUMNS = [
   { id: "grandTotal", label: "Total", visible: true },
   { id: "itemCount", label: "Items", visible: true },
   { id: "grnCount", label: "GRN", visible: true },
+  { id: "saleOrder", label: "Source SO", visible: true },
   { id: "expectedDeliveryDate", label: "Expected Delivery", visible: true },
   { id: "createdAt", label: "Created", visible: true },
 ];
@@ -35,6 +37,11 @@ function flattenPOs(pos: PurchaseOrder[]): Record<string, unknown>[] {
     grandTotal: <span style={{ fontWeight: 600 }}>₹{Number(po.grandTotal).toLocaleString()}</span>,
     itemCount: po.items?.length ?? 0,
     grnCount: po._count?.goodsReceipts ?? 0,
+    saleOrder: po.saleOrder ? (
+      <Link href={`/sales/orders/${po.saleOrder.id}`} className="text-blue-600 hover:underline">
+        {po.saleOrder.orderNumber}
+      </Link>
+    ) : "—",
     expectedDeliveryDate: po.expectedDeliveryDate ? new Date(po.expectedDeliveryDate).toLocaleDateString() : "—",
     createdAt: new Date(po.createdAt).toLocaleDateString(),
   }));
