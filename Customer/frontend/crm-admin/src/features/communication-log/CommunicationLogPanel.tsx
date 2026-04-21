@@ -45,6 +45,8 @@ function formatTimestamp(iso: string | null): string {
   });
 }
 
+const RETRYABLE_STATUSES = new Set(["FAILED", "SKIPPED"]);
+
 export function CommunicationLogPanel({ entityType, entityId }: Props) {
   const [items, setItems] = useState<LogEntry[]>([]);
   const [total, setTotal] = useState(0);
@@ -53,6 +55,7 @@ export function CommunicationLogPanel({ entityType, entityId }: Props) {
   const [channelFilter, setChannelFilter] = useState<"ALL" | "EMAIL" | "WHATSAPP">("ALL");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [selectedEntry, setSelectedEntry] = useState<LogEntry | null>(null);
+  const [retryingId, setRetryingId] = useState<string | null>(null);
 
   const fetchLogs = useCallback(async () => {
     setLoading(true);
@@ -83,6 +86,25 @@ export function CommunicationLogPanel({ entityType, entityId }: Props) {
   useEffect(() => {
     fetchLogs();
   }, [fetchLogs]);
+
+  const handleRetry = useCallback(
+    async (entryId: string) => {
+      setRetryingId(entryId);
+      try {
+        await api.post(`/admin/customer-portal/communication-log/${entryId}/retry`);
+        await fetchLogs();
+      } catch (err) {
+        const message =
+          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+          (err as { message?: string })?.message ??
+          "Retry failed";
+        setError(message);
+      } finally {
+        setRetryingId(null);
+      }
+    },
+    [fetchLogs],
+  );
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white">
@@ -163,9 +185,24 @@ export function CommunicationLogPanel({ entityType, entityId }: Props) {
                     )}
                   </div>
                 </div>
-                <div className="text-right text-xs text-gray-500">
-                  <div>Created: {formatTimestamp(entry.createdAt)}</div>
-                  {entry.sentAt && <div>Sent: {formatTimestamp(entry.sentAt)}</div>}
+                <div className="flex flex-col items-end gap-2">
+                  <div className="text-right text-xs text-gray-500">
+                    <div>Created: {formatTimestamp(entry.createdAt)}</div>
+                    {entry.sentAt && <div>Sent: {formatTimestamp(entry.sentAt)}</div>}
+                  </div>
+                  {RETRYABLE_STATUSES.has(entry.status) && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRetry(entry.id);
+                      }}
+                      disabled={retryingId === entry.id}
+                      className="rounded border border-blue-300 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {retryingId === entry.id ? "Retrying…" : "Retry"}
+                    </button>
+                  )}
                 </div>
               </div>
             </li>

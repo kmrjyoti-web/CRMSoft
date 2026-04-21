@@ -26,6 +26,7 @@ import { AdminResetCustomerPasswordHandler } from './application/commands/admin-
 import { CreateMenuCategoryHandler } from './application/commands/create-menu-category/create-menu-category.handler';
 import { UpdateMenuCategoryHandler } from './application/commands/update-menu-category/update-menu-category.handler';
 import { DeleteMenuCategoryHandler } from './application/commands/delete-menu-category/delete-menu-category.handler';
+import { RetryCommunicationHandler } from './application/commands/retry-communication/retry-communication.handler';
 
 // ─── Query Handlers ───
 import { GetCustomerMenuHandler } from './application/queries/get-customer-menu/get-customer-menu.handler';
@@ -51,6 +52,7 @@ const COMMAND_HANDLERS = [
   CreateMenuCategoryHandler,
   UpdateMenuCategoryHandler,
   DeleteMenuCategoryHandler,
+  RetryCommunicationHandler,
 ];
 
 const QUERY_HANDLERS = [

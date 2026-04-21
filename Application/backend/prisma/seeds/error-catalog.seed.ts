@@ -1017,6 +1017,43 @@ export const ERROR_CATALOG_SEED: ErrorSeedEntry[] = [
     solutionEn: 'Use the temporary password in the admin response to onboard the customer manually.',
     solutionHi: 'ग्राहक को मैन्युअल रूप से ऑनबोर्ड करने के लिए एडमिन प्रतिक्रिया में दिखाया गया अस्थायी पासवर्ड उपयोग करें।',
   },
+
+  // ═══════════════════════════════════════════════════
+  // COMMUNICATION LOG (BE)
+  // ═══════════════════════════════════════════════════
+  {
+    code: 'COMMUNICATION_LOG_NOT_FOUND',
+    layer: 'BE',
+    module: 'CUSTOMER_PORTAL',
+    severity: 'WARNING',
+    httpStatus: 404,
+    messageEn: 'Communication log entry not found',
+    messageHi: 'संचार लॉग प्रविष्टि नहीं मिली',
+    solutionEn: 'Refresh the list and retry with a current entry ID.',
+    solutionHi: 'सूची को रिफ़्रेश करें और मौजूदा प्रविष्टि ID से पुनः प्रयास करें।',
+  },
+  {
+    code: 'COMMUNICATION_LOG_CANNOT_RETRY_SENT',
+    layer: 'BE',
+    module: 'CUSTOMER_PORTAL',
+    severity: 'WARNING',
+    httpStatus: 400,
+    messageEn: 'This communication was already delivered and cannot be retried',
+    messageHi: 'यह संचार पहले ही डिलीवर हो चुका है, पुनः प्रयास नहीं किया जा सकता',
+    solutionEn: 'Only FAILED or SKIPPED entries can be retried.',
+    solutionHi: 'केवल FAILED या SKIPPED प्रविष्टियाँ पुनः भेजी जा सकती हैं।',
+  },
+  {
+    code: 'COMMUNICATION_LOG_CHANNEL_NOT_SUPPORTED',
+    layer: 'BE',
+    module: 'CUSTOMER_PORTAL',
+    severity: 'WARNING',
+    httpStatus: 400,
+    messageEn: 'Retry is not supported for this channel',
+    messageHi: 'इस चैनल के लिए पुनः प्रयास समर्थित नहीं है',
+    solutionEn: 'Retry is currently supported for EMAIL and WHATSAPP channels only.',
+    solutionHi: 'पुनः प्रयास वर्तमान में केवल EMAIL और WHATSAPP चैनलों के लिए समर्थित है।',
+  },
 ];
 
 export async function seedErrorCatalog(prisma: PrismaClient): Promise<number> {

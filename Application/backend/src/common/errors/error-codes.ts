@@ -1270,6 +1270,28 @@ export const ERROR_CODES: Record<string, ErrorCodeDefinition> = {
     message: 'Sale Order not found',
     suggestion: 'Check the Sale Order ID and verify it belongs to your account.',
   },
+
+  // ═══════════════════════════════════════════════════
+  // COMMUNICATION LOG (CUSTOMER PORTAL)
+  // ═══════════════════════════════════════════════════
+  COMMUNICATION_LOG_NOT_FOUND: {
+    code: 'COMMUNICATION_LOG_NOT_FOUND',
+    httpStatus: 404,
+    message: 'Communication log entry not found',
+    suggestion: 'Refresh the list and retry with a current entry ID.',
+  },
+  COMMUNICATION_LOG_CANNOT_RETRY_SENT: {
+    code: 'COMMUNICATION_LOG_CANNOT_RETRY_SENT',
+    httpStatus: 400,
+    message: 'This communication was already delivered and cannot be retried',
+    suggestion: 'Only FAILED or SKIPPED entries can be retried.',
+  },
+  COMMUNICATION_LOG_CHANNEL_NOT_SUPPORTED: {
+    code: 'COMMUNICATION_LOG_CHANNEL_NOT_SUPPORTED',
+    httpStatus: 400,
+    message: 'Retry is not supported for this channel',
+    suggestion: 'Retry is currently supported for EMAIL and WHATSAPP channels only.',
+  },
 };
 
 /** Total error codes count. */
