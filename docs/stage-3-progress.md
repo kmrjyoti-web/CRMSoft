@@ -10,9 +10,11 @@
 | #2 | fix/blocker-2-po-saleorder-fk | BD-001 | Merged | 4095957c |
 | #3 | feat/portal-invite-channels | KUMAR-001X | Merged | ce2fce5d |
 | #4 | feat/communication-log-viewer | KUMAR-002 | Merged | bcb30672 |
-| #5 | feat/portal-invite-ui | KUMAR-003 | Pending rebase |  |
+| #5 | feat/portal-invite-ui | KUMAR-003 | Merged | b9b10429 |
 | #6 | test/activate-portal-delivery-paths | KUMAR-004 | Pending (base change) |  |
 | #7 | feat/retry-communication | KUMAR-005 | Pending (base change) |  |
+
+## Stage 3 Status: 3/5 stacked PRs merged (60% complete)
 
 ## PR #3 Recovery + Merge — 2026-04-21
 
@@ -62,6 +64,25 @@ Resolution kept both sections in order (PROCUREMENT first, CUSTOMER PORTAL secon
 ### Scope Notes
 - PR #4's edits to `ContactDetail.tsx` / `OrganizationDetail.tsx` are 5 lines each (one import + one JSX block). The implicit-any errors reported on those files (lines 204, 221, 228, 254, 294, 305, 310) are in pre-existing code, not PR #4's additions.
 
+## PR #5 Merge — 2026-04-21
+
+### Rebase
+- Base: `develop` (no change needed).
+- Rebased onto `77970504` (develop tip). Old HEAD `af3d2202` → new HEAD `47cbdea8`.
+- **Two conflicts**, both expected: PR #4 and PR #5 both added imports + JSX blocks to `ContactDetail.tsx` and `OrganizationDetail.tsx` at the same regions.
+
+### Conflict Resolution
+- `ContactDetail.tsx` + `OrganizationDetail.tsx`: kept BOTH imports (`CommunicationLogPanel` from PR #4 + `PortalInviteDialog` from PR #5) and BOTH JSX blocks (communication-log panel + invite dialog). No logical overlap — different features coexist.
+- Non-conflicting regions (`useCallback, useState` import, `[inviteOpen, setInviteOpen]` state, "Invite to Portal" button in action bar) auto-merged.
+
+### CI Results (6 checks — path-filtered to crm-admin only, PR #5 is frontend-only)
+- **Pass**: Type check (tsc) — non-blocking v1, Lint — non-blocking v1, Vercel Preview Comments, Vercel × 2
+- **Fail (non-blocking)**: `Next.js build — non-blocking v1` — SAME two pre-existing errors as PR #4 (`api-gateway/keys/page.tsx`, `settings/verifications/page.tsx`). Verified identical output — no new failures introduced by PR #5.
+
+### Post-merge Build Verification
+- **Backend** (`Application/backend`): `tsc --noEmit` clean (0 errors).
+- **crm-admin** (`Customer/frontend/crm-admin`): 328 top-level tsc errors — identical to baseline. Zero regression.
+
 ## Pre-existing Issues (out-of-scope for Stage 3)
 - crm-admin TypeScript errors in `features/whatsapp/*`, `features/workflows/*`, implicit-any across multiple components, missing `@shared-types` module (total 328 top-level errors). Predates Stage 3.
 - Next.js build breaks on `api-gateway/keys` and `settings/verifications` pages. Non-blocking CI check.
@@ -71,6 +92,5 @@ Resolution kept both sections in order (PROCUREMENT first, CUSTOMER PORTAL secon
 - After rebase on develop, backend tsc requires `pnpm prisma:generate` to refresh per-module Prisma clients (PR #2's schema change introduced `PurchaseOrder.saleOrderId`).
 
 ## Next Steps
-1. **PR #5** (`feat/portal-invite-ui`, KUMAR-003): base=develop already; rebase + merge.
-2. **PR #7** (`feat/retry-communication`, KUMAR-005): base likely auto-retargeted to develop after PR #4 branch deletion; rebase + merge.
-3. **PR #6** (`test/activate-portal-delivery-paths`, KUMAR-004): base likely auto-retargeted to develop after PR #3 branch deletion; rebase + merge. Depends on PR #3 + PR #5 content.
+1. **PR #7** (`feat/retry-communication`, KUMAR-005): base likely auto-retargeted to develop after PR #4 branch deletion; rebase + merge.
+2. **PR #6** (`test/activate-portal-delivery-paths`, KUMAR-004): base likely auto-retargeted to develop after PR #3 branch deletion; rebase + merge. Depends on PR #3 + PR #5 content.
