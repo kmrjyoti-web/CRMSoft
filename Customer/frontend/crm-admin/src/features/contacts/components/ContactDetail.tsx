@@ -17,6 +17,7 @@ import { useConfirmDialog } from "@/components/common/useConfirmDialog";
 import { formatDate } from "@/lib/format-date";
 
 import { VerifyButton } from "@/features/entity-verification";
+import { CommunicationLogPanel } from "@/features/communication-log/CommunicationLogPanel";
 
 import {
   useContactDetail,
@@ -324,6 +325,10 @@ export function ContactDetail({ contactId }: ContactDetailProps) {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="mt-6">
+        <CommunicationLogPanel entityType="CONTACT" entityId={contactId} />
       </div>
 
       <ConfirmDialogPortal />
