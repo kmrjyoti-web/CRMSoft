@@ -12,10 +12,11 @@
 | #4 | feat/communication-log-viewer | KUMAR-002 | Merged | bcb30672 |
 | #5 | feat/portal-invite-ui | KUMAR-003 | Merged | b9b10429 |
 | #8 | feat/retry-communication | KUMAR-005 | Merged | f44ff75d |
-| #6 | test/activate-portal-delivery-paths | KUMAR-004 | Pending (base change) |  |
+| #9 | test/activate-portal-delivery-paths | KUMAR-004 | Merged | e30afaf0 |
+| #6 | test/activate-portal-delivery-paths | KUMAR-004 | Closed (base deleted; resubmitted as #9) |  |
 | #7 | feat/retry-communication | KUMAR-005 | Closed (base deleted; resubmitted as #8) |  |
 
-## Stage 3 Status: 4/5 stacked PRs merged (80% complete)
+## Stage 3 Status: ✅ 5/5 stacked PRs merged — STAGE 3 COMPLETE
 
 ## PR #3 Recovery + Merge — 2026-04-21
 
@@ -117,5 +118,41 @@ Resolution kept both sections in order (PROCUREMENT first, CUSTOMER PORTAL secon
 - Preserved from develop: PROCUREMENT (`PURCHASE_ORDER_SALE_ORDER_NOT_FOUND`), CUSTOMER PORTAL (`PORTAL_INVITE_REQUIRES_VERIFICATION`, `PORTAL_INVITE_NO_EMAIL`, `PORTAL_INVITE_DELIVERY_PARTIAL`, `PORTAL_INVITE_PLUGIN_STUB`).
 - Added by PR #8: COMMUNICATION LOG (`COMMUNICATION_LOG_NOT_FOUND`, `COMMUNICATION_LOG_CANNOT_RETRY_SENT`, `COMMUNICATION_LOG_CHANNEL_NOT_SUPPORTED`).
 
+## PR #6 → #9 Recovery + Merge — 2026-04-21
+
+### Starting State
+- **PR #6 was CLOSED** (auto-closed when base `feat/portal-invite-channels` was deleted after PR #3 merge — same fate as PR #7).
+
+### Recovery
+1. Rebased `test/activate-portal-delivery-paths` onto current `develop`.
+2. The branch's first commit `c8b6085d` (PR #3's content) hit a conflict in `error-catalog.seed.ts` because git's auto cherry-pick detection didn't match the squash. Resolved with `git rebase --skip` — develop already has all PR #3 content via squash `ce2fce5d`.
+3. Result: single new commit `485f5d84` containing only `__tests__/activate-portal.handler.spec.ts` (the actual test deliverable for KUMAR-004).
+4. Force-pushed; created **new PR #9** targeting develop directly.
+
+### Local + CI Verification
+- Local jest: 28/28 specs pass (`pnpm exec jest --testPathPattern=activate-portal`, 11.9s).
+- CI: Type check (tsc) ✅, Tests (affected since base) ✅ 59s, Lint ✅, DB schema audit ✅, Vercel ×2 ✅. No Next.js build / crm-admin checks ran (path filters skipped — backend-only PR).
+
+### Post-merge Build Verification
+- **Backend** (`Application/backend`): `tsc --noEmit` clean.
+- **crm-admin**: 328 top-level tsc errors — exact baseline match.
+- **Tests** on develop: 28/28 activate-portal specs pass.
+
+### Test Coverage Added
+28 specs across these groups: existing preconditions (3); `channels` parameter (3); EMAIL channel (5); WHATSAPP channel (6); multi-channel delivery (3); `entityVerificationStatus` precondition × channels (3); tenant isolation (2); `customMessage` handling (2). Targets `ActivatePortalHandler` from KUMAR-001X (PR #3).
+
+## 🎉 Stage 3 COMPLETE
+
+| Metric | Value |
+|---|---|
+| Stacked PRs merged | 5/5 (KUMAR-001X, 002, 003, 004, 005) |
+| Recovered from auto-close | 2 (PR #6 → #9, PR #7 → #8) |
+| Backend tsc | Clean throughout |
+| Frontend tsc | 328 baseline maintained (zero regression) |
+| Rollbacks | 0 |
+| Pre-existing blockers carried forward | 2 (api-gateway/keys ApiKeyList; settings/verifications ssr:false) + 328 crm-admin tsc errors |
+
 ## Next Steps
-1. **PR #6** (`test/activate-portal-delivery-paths`, KUMAR-004): same risk as PR #7 — its base was `feat/portal-invite-channels` (deleted). Likely auto-closed; recover by rebase + new PR if so. Final stacked PR for Stage 3.
+1. **Stage 4 smoke test** on `develop`: full backend test run, full frontend tsc, sanity startup of dev server.
+2. **Cleanup sprint** (recommended before Phase 0): fix `api-gateway/keys/page.tsx` (ApiKeyList module), fix `settings/verifications/page.tsx` (ssr:false), triage 328 crm-admin tsc errors (`features/whatsapp/*`, `features/workflows/*`, `@shared-types`).
+3. **Phase 0 execution** once develop builds for prod (Next.js build green).
