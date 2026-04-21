@@ -29,7 +29,7 @@ export default function TestCenterErrorsPage() {
   const { data: logsRes, isLoading: logsLoading, refetch } = useErrorLogs({ severity: 'CRITICAL', status: 'OPEN', limit: 10 });
   const { data: statsRes } = useErrorStats();
 
-  const criticalLogs = logsRes?.data ?? [];
+  const criticalLogs = logsRes?.data?.data ?? [];
   const stats = statsRes?.data;
 
   // Simulate category breakdown from stats

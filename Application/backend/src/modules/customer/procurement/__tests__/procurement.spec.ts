@@ -1,5 +1,6 @@
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { PurchaseOrderService } from '../services/purchase-order.service';
+import { AppError } from '../../../../common/errors/app-error';
 
 const makePO = (overrides = {}) => ({
   id: 'po-1',
@@ -31,6 +32,9 @@ describe('PurchaseOrderService', () => {
         },
         purchaseOrderItem: {
           createMany: jest.fn(),
+        },
+        saleOrder: {
+          findFirst: jest.fn(),
         },
       },
     };
@@ -148,6 +152,78 @@ describe('PurchaseOrderService', () => {
         items: [{ productId: 'p-1', quantity: 2, unitPrice: 500, taxRate: 18 }],
       } as any);
       expect(result).toBeDefined();
+    });
+
+    it('should create a PO with saleOrderId when SO exists and belongs to tenant', async () => {
+      prisma.working.saleOrder.findFirst.mockResolvedValue({ id: 'so-1' });
+      prisma.working.purchaseOrder.create.mockResolvedValue(makePO({ saleOrderId: 'so-1' }));
+      await service.create('t-1', 'user-1', {
+        poNumber: 'PO-002',
+        vendorId: 'v-1',
+        saleOrderId: 'so-1',
+        items: [{ productId: 'p-1', quantity: 1, unitPrice: 100, taxRate: 18 }],
+      } as any);
+      expect(prisma.working.saleOrder.findFirst).toHaveBeenCalledWith({
+        where: { id: 'so-1', tenantId: 't-1' },
+        select: { id: true },
+      });
+      const createArg = prisma.working.purchaseOrder.create.mock.calls[0][0];
+      expect(createArg.data.saleOrderId).toBe('so-1');
+    });
+
+    it('should create a PO without saleOrderId (backward compatible)', async () => {
+      prisma.working.purchaseOrder.create.mockResolvedValue(makePO());
+      await service.create('t-1', 'user-1', {
+        poNumber: 'PO-003',
+        vendorId: 'v-1',
+        items: [{ productId: 'p-1', quantity: 1, unitPrice: 100, taxRate: 18 }],
+      } as any);
+      expect(prisma.working.saleOrder.findFirst).not.toHaveBeenCalled();
+      const createArg = prisma.working.purchaseOrder.create.mock.calls[0][0];
+      expect(createArg.data.saleOrderId).toBeNull();
+    });
+
+    it('should throw PURCHASE_ORDER_SALE_ORDER_NOT_FOUND when SO does not exist', async () => {
+      prisma.working.saleOrder.findFirst.mockResolvedValue(null);
+      await expect(
+        service.create('t-1', 'user-1', {
+          poNumber: 'PO-004',
+          vendorId: 'v-1',
+          saleOrderId: 'missing-so',
+          items: [{ productId: 'p-1', quantity: 1, unitPrice: 100, taxRate: 18 }],
+        } as any),
+      ).rejects.toMatchObject({
+        code: 'PURCHASE_ORDER_SALE_ORDER_NOT_FOUND',
+        httpStatus: 404,
+      });
+      expect(prisma.working.purchaseOrder.create).not.toHaveBeenCalled();
+    });
+
+    it('should throw PURCHASE_ORDER_SALE_ORDER_NOT_FOUND when SO belongs to a different tenant', async () => {
+      prisma.working.saleOrder.findFirst.mockResolvedValue(null);
+      await expect(
+        service.create('t-1', 'user-1', {
+          poNumber: 'PO-005',
+          vendorId: 'v-1',
+          saleOrderId: 'so-other-tenant',
+          items: [{ productId: 'p-1', quantity: 1, unitPrice: 100, taxRate: 18 }],
+        } as any),
+      ).rejects.toBeInstanceOf(AppError);
+      expect(prisma.working.saleOrder.findFirst).toHaveBeenCalledWith({
+        where: { id: 'so-other-tenant', tenantId: 't-1' },
+        select: { id: true },
+      });
+    });
+  });
+
+  describe('list with saleOrderId filter', () => {
+    it('should filter POs by saleOrderId', async () => {
+      prisma.working.purchaseOrder.findMany.mockResolvedValue([makePO({ saleOrderId: 'so-1' })]);
+      prisma.working.purchaseOrder.count.mockResolvedValue(1);
+      await service.list('t-1', { saleOrderId: 'so-1' });
+      const where = prisma.working.purchaseOrder.findMany.mock.calls[0][0].where;
+      expect(where.saleOrderId).toBe('so-1');
+      expect(where.tenantId).toBe('t-1');
     });
   });
 });

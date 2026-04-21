@@ -116,6 +116,8 @@ export interface PurchaseOrder {
   vendorId: string;
   quotationId?: string;
   rfqId?: string;
+  saleOrderId?: string | null;
+  saleOrder?: { id: string; orderNumber: string } | null;
   status: string;
   orderDate: string;
   expectedDeliveryDate?: string;

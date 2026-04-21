@@ -1,4 +1,5 @@
-import { PrismaClient, ConfigCategory, ConfigValueType } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { ConfigCategory, ConfigValueType } from '@prisma/identity-client';
 
 interface SeedConfig {
   category: ConfigCategory;

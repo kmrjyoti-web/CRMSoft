@@ -46,16 +46,24 @@ export default function VerticalsPage() {
 
       {/* Filters */}
       <div className="flex items-center gap-4">
-        <Select value={activeFilter} onChange={(e) => setActiveFilter(e.target.value)}>
-          <option value="all">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </Select>
-        <Select value={builtFilter} onChange={(e) => setBuiltFilter(e.target.value)}>
-          <option value="all">All Build Status</option>
-          <option value="built">Built (shipped)</option>
-          <option value="unbuilt">Unbuilt</option>
-        </Select>
+        <Select
+          value={activeFilter}
+          onChange={(e) => setActiveFilter(e.target.value)}
+          options={[
+            { value: 'all', label: 'All Status' },
+            { value: 'active', label: 'Active' },
+            { value: 'inactive', label: 'Inactive' },
+          ]}
+        />
+        <Select
+          value={builtFilter}
+          onChange={(e) => setBuiltFilter(e.target.value)}
+          options={[
+            { value: 'all', label: 'All Build Status' },
+            { value: 'built', label: 'Built (shipped)' },
+            { value: 'unbuilt', label: 'Unbuilt' },
+          ]}
+        />
       </div>
 
       {/* Error state */}

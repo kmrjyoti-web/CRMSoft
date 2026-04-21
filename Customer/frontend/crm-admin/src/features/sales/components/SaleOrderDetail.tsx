@@ -18,7 +18,9 @@ import {
   useConvertToInvoice,
   useCancelSaleOrder,
 } from "../hooks/useSales";
+import { usePOList } from "@/features/procurement/hooks/useProcurement";
 import type { SaleOrder, SaleOrderItem, DeliveryChallan } from "../types/sales.types";
+import type { PurchaseOrder } from "@/features/procurement/types/procurement.types";
 
 // ---------------------------------------------------------------------------
 // Status helpers
@@ -67,6 +69,9 @@ export function SaleOrderDetail({ id }: SaleOrderDetailProps) {
   const cancelMutation = useCancelSaleOrder();
 
   const order: SaleOrder | undefined = data?.data;
+
+  const { data: relatedPOData } = usePOList({ saleOrderId: id });
+  const relatedPOs: PurchaseOrder[] = ((relatedPOData as any)?.data ?? []) as PurchaseOrder[];
 
   // -- Action handlers --------------------------------------------------------
 
@@ -434,6 +439,60 @@ export function SaleOrderDetail({ id }: SaleOrderDetailProps) {
                         </tr>
                       );
                     })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Related Purchase Orders */}
+          {relatedPOs.length > 0 && (
+            <div className="rounded-lg border border-gray-200 bg-white p-5">
+              <h3 className="mb-4 text-sm font-semibold uppercase text-gray-500">
+                Related Purchase Orders
+              </h3>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr style={{ borderBottom: "2px solid #e2e8f0", textAlign: "left" }}>
+                      <th style={{ padding: "10px 12px", fontSize: 13, fontWeight: 600, color: "#475569" }}>
+                        PO No
+                      </th>
+                      <th style={{ padding: "10px 12px", fontSize: 13, fontWeight: 600, color: "#475569" }}>
+                        Status
+                      </th>
+                      <th style={{ padding: "10px 12px", fontSize: 13, fontWeight: 600, color: "#475569" }}>
+                        Order Date
+                      </th>
+                      <th style={{ padding: "10px 12px", fontSize: 13, fontWeight: 600, color: "#475569", textAlign: "right" }}>
+                        Grand Total
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {relatedPOs.map((po) => (
+                      <tr key={po.id} style={{ borderBottom: "1px solid #e2e8f0" }}>
+                        <td style={{ padding: "10px 12px", fontSize: 14 }}>
+                          <Link
+                            href={`/procurement/purchase-orders/${po.id}`}
+                            className="text-blue-600 hover:underline font-medium"
+                          >
+                            {po.poNumber}
+                          </Link>
+                        </td>
+                        <td style={{ padding: "10px 12px" }}>
+                          <Badge variant={STATUS_COLOR_MAP[po.status] ?? "default"}>
+                            {po.status.replace(/_/g, " ")}
+                          </Badge>
+                        </td>
+                        <td style={{ padding: "10px 12px", fontSize: 14 }}>
+                          {po.orderDate ? formatDate(po.orderDate) : "\u2014"}
+                        </td>
+                        <td style={{ padding: "10px 12px", fontSize: 14, textAlign: "right" }}>
+                          {fmt(Number(po.grandTotal))}
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>

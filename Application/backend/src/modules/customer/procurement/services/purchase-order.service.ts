@@ -1,24 +1,27 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
+import { AppError } from '../../../../common/errors/app-error';
 
 @Injectable()
 export class PurchaseOrderService {
   constructor(private readonly prisma: PrismaService) {}
 
   async list(tenantId: string, filters?: {
-    vendorId?: string; status?: string; page?: number; limit?: number;
+    vendorId?: string; status?: string; saleOrderId?: string; page?: number; limit?: number;
   }) {
     const page = filters?.page ?? 1;
     const limit = filters?.limit ?? 20;
     const where: any = { tenantId };
     if (filters?.vendorId) where.vendorId = filters.vendorId;
     if (filters?.status) where.status = filters.status;
+    if (filters?.saleOrderId) where.saleOrderId = filters.saleOrderId;
 
     const [data, total] = await Promise.all([
       this.prisma.working.purchaseOrder.findMany({
         where,
         include: {
           items: true,
+          saleOrder: { select: { id: true, orderNumber: true } },
           _count: { select: { goodsReceipts: true, purchaseInvoices: true } },
         },
         orderBy: { createdAt: 'desc' },
@@ -45,7 +48,7 @@ export class PurchaseOrderService {
   }
 
   async create(tenantId: string, userId: string, dto: {
-    poNumber: string; vendorId: string; quotationId?: string;
+    poNumber: string; vendorId: string; quotationId?: string; saleOrderId?: string;
     expectedDate?: string; paymentTermDays?: number;
     deliveryAddress?: string; notes?: string;
     items: Array<{
@@ -54,6 +57,14 @@ export class PurchaseOrderService {
       expectedDeliveryDate?: string;
     }>;
   }) {
+    if (dto.saleOrderId) {
+      const so = await this.prisma.working.saleOrder.findFirst({
+        where: { id: dto.saleOrderId, tenantId },
+        select: { id: true },
+      });
+      if (!so) throw AppError.from('PURCHASE_ORDER_SALE_ORDER_NOT_FOUND');
+    }
+
     let subtotal = 0;
     let taxTotal = 0;
     let discountTotal = 0;
@@ -90,6 +101,7 @@ export class PurchaseOrderService {
         poNumber: dto.poNumber,
         vendorId: dto.vendorId,
         quotationId: dto.quotationId,
+        saleOrderId: dto.saleOrderId ?? null,
         expectedDeliveryDate: dto.expectedDate ? new Date(dto.expectedDate) : null,
         creditDays: dto.paymentTermDays,
         remarks: dto.notes,

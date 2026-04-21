@@ -1,0 +1,92 @@
+name: CI — vendor-panel
+
+on:
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - 'Vendor/frontend/vendor-panel/**'
+      - '.github/workflows/ci-vendor-panel.yml'
+  push:
+    branches: [develop]
+    paths:
+      - 'Vendor/frontend/vendor-panel/**'
+
+concurrency:
+  group: ci-vendor-panel-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '24'
+  PNPM_VERSION: '9'
+  NODE_OPTIONS: '--max-old-space-size=4096'
+  APP_DIR: 'Vendor/frontend/vendor-panel'
+
+jobs:
+  typecheck:
+    name: Type check (tsc)
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: 'Vendor/frontend/vendor-panel/pnpm-lock.yaml'
+      - name: Install
+        working-directory: ${{ env.APP_DIR }}
+        run: pnpm install --frozen-lockfile
+      - name: tsc --noEmit
+        working-directory: ${{ env.APP_DIR }}
+        run: pnpm exec tsc --noEmit
+
+  # ⚠️ Lint is non-blocking in v1 — tighten in follow-up sprint.
+  lint:
+    name: Lint — non-blocking v1
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: 'Vendor/frontend/vendor-panel/pnpm-lock.yaml'
+      - name: Install
+        working-directory: ${{ env.APP_DIR }}
+        run: pnpm install --frozen-lockfile
+      - name: next lint
+        working-directory: ${{ env.APP_DIR }}
+        run: pnpm lint
+        continue-on-error: true
+
+  build:
+    name: Next.js build
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    needs: typecheck
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: 'Vendor/frontend/vendor-panel/pnpm-lock.yaml'
+      - name: Install
+        working-directory: ${{ env.APP_DIR }}
+        run: pnpm install --frozen-lockfile
+      - name: Build (generate-routes + next build)
+        working-directory: ${{ env.APP_DIR }}
+        env:
+          NEXT_PUBLIC_API_URL: 'http://localhost:3001'
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: pnpm build
