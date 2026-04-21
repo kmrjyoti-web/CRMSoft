@@ -38,3 +38,5 @@ Application/backend/docs/health-reports/latest-audit.json
 .vscode/
 .idea/
 *.swp
+.env.backup
+sprint-findings/
