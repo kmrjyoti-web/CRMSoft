@@ -31,6 +31,7 @@ import { GetMenuCategoryQuery } from '../application/queries/get-menu-category/g
 import { GetPortalAnalyticsQuery } from '../application/queries/get-portal-analytics/get-portal-analytics.query';
 import { ListCommunicationLogQuery } from '../application/queries/list-communication-log/list-communication-log.query';
 import { ListCommunicationLogDto } from './dto/list-communication-log.dto';
+import { RetryCommunicationCommand } from '../application/commands/retry-communication/retry-communication.command';
 
 @ApiTags('Customer Portal — Admin Management')
 @ApiBearerAuth()
@@ -190,6 +191,17 @@ export class CustomerPortalAdminController {
   }
 
   // ═══ COMMUNICATION LOG ═══════════════════════════════
+
+  @Post('communication-log/:id/retry')
+  @ApiOperation({ summary: 'Retry a failed or skipped communication log delivery' })
+  retryCommunicationLog(
+    @Request() req: { user: { id: string; tenantId: string } },
+    @Param('id') id: string,
+  ) {
+    return this.commandBus.execute(
+      new RetryCommunicationCommand(req.user.tenantId, req.user.id, id),
+    );
+  }
 
   @Get('communication-log')
   @ApiOperation({ summary: 'List communication log entries for a linked entity (Contact/Organization/Ledger)' })
