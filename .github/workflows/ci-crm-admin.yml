@@ -4,12 +4,12 @@ on:
   pull_request:
     branches: [develop, main]
     paths:
-      - 'Customer/frontend/crm-admin/**'
+      - 'apps-frontend/crm-admin/**'
       - '.github/workflows/ci-crm-admin.yml'
   push:
     branches: [develop]
     paths:
-      - 'Customer/frontend/crm-admin/**'
+      - 'apps-frontend/crm-admin/**'
 
 concurrency:
   group: ci-crm-admin-${{ github.ref }}
@@ -17,10 +17,9 @@ concurrency:
 
 env:
   NODE_VERSION: '24'
-  PNPM_VERSION: '9'
   NODE_OPTIONS: '--max-old-space-size=4096'
-  APP_DIR: 'Customer/frontend/crm-admin'
-  COREUI_DIR: 'Customer/frontend/crm-admin/lib/coreui'
+  APP_DIR: 'apps-frontend/crm-admin'
+  COREUI_DIR: 'apps-frontend/crm-admin/lib/coreui'
 
 jobs:
   # ─────────────────────────────────────────────
@@ -36,15 +35,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-          cache-dependency-path: 'Customer/frontend/crm-admin/pnpm-lock.yaml'
-      - name: Install crm-admin
-        working-directory: ${{ env.APP_DIR }}
+          cache-dependency-path: 'pnpm-lock.yaml'
+      - name: Install (workspace root)
         run: pnpm install --frozen-lockfile
       - name: Install + build coreui (turbo workspaces)
         working-directory: ${{ env.COREUI_DIR }}
@@ -67,15 +63,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-          cache-dependency-path: 'Customer/frontend/crm-admin/pnpm-lock.yaml'
-      - name: Install crm-admin
-        working-directory: ${{ env.APP_DIR }}
+          cache-dependency-path: 'pnpm-lock.yaml'
+      - name: Install (workspace root)
         run: pnpm install --frozen-lockfile
       - name: next lint
         working-directory: ${{ env.APP_DIR }}
@@ -95,15 +88,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-          cache-dependency-path: 'Customer/frontend/crm-admin/pnpm-lock.yaml'
-      - name: Install crm-admin
-        working-directory: ${{ env.APP_DIR }}
+          cache-dependency-path: 'pnpm-lock.yaml'
+      - name: Install (workspace root)
         run: pnpm install --frozen-lockfile
       - name: Install + build coreui
         working-directory: ${{ env.COREUI_DIR }}

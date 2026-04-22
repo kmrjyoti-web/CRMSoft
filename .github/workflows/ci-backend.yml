@@ -4,12 +4,12 @@ on:
   pull_request:
     branches: [develop, main]
     paths:
-      - 'Application/backend/**'
+      - 'apps-backend/api/**'
       - '.github/workflows/ci-backend.yml'
   push:
     branches: [develop]
     paths:
-      - 'Application/backend/**'
+      - 'apps-backend/api/**'
 
 concurrency:
   group: ci-backend-${{ github.ref }}
@@ -18,7 +18,7 @@ concurrency:
 env:
   NODE_VERSION: '24'
   NODE_OPTIONS: '--max-old-space-size=4096'
-  BACKEND_DIR: 'Application/backend'
+  BACKEND_DIR: 'apps-backend/api'
 
 jobs:
   # ─────────────────────────────────────────────
@@ -32,7 +32,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'Application/backend/package-lock.json'
+          cache-dependency-path: 'apps-backend/api/package-lock.json'
       - name: Install
         working-directory: ${{ env.BACKEND_DIR }}
         run: npm ci
@@ -61,7 +61,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'Application/backend/package-lock.json'
+          cache-dependency-path: 'apps-backend/api/package-lock.json'
       - name: Install
         working-directory: ${{ env.BACKEND_DIR }}
         run: npm ci
@@ -84,7 +84,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'Application/backend/package-lock.json'
+          cache-dependency-path: 'apps-backend/api/package-lock.json'
       - name: Install
         working-directory: ${{ env.BACKEND_DIR }}
         run: npm ci
@@ -128,7 +128,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'Application/backend/package-lock.json'
+          cache-dependency-path: 'apps-backend/api/package-lock.json'
       - name: Install
         working-directory: ${{ env.BACKEND_DIR }}
         run: npm ci
