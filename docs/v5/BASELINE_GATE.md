@@ -101,7 +101,7 @@ If a count DECREASES → bonus, document but don't celebrate prematurely.
 | 5 | open | `marketplace` tsc cleanup | P3 |
 | 6 | open | `@shared-types` migration | P2/P3 |
 | 7 | open | `vendor-panel` jest.config.ts type-tree quirk | P2 |
-| 8 | open | **SECURITY**: `CRM_V1_DB_CONNECTIONS.txt` plaintext creds in git history | **P1** |
+| 8 | ✅ CLOSED 2026-04-23 | **SECURITY**: `CRM_V1_DB_CONNECTIONS.txt` plaintext creds — removed, seeds use env vars, DB rotation SQL ready | **P1** |
 | 9 | open | Proper per-seed multi-DB-aware refactor | P3 |
 
 ### #1 — Seed import fix ✅ CLOSED 2026-04-22
@@ -132,9 +132,20 @@ Either (a) repoint the alias to a real location and update `Shared/common/types/
 
 `apps-frontend/vendor-panel/jest.config.ts(46,33)` errors in CI's resolved jest type tree (TS2345 `InitialProjectOptions`, `'string' is not assignable to type 'string[]'`). Reproduces locally on fresh installs across crm-admin (line 67), vendor-panel (line 46), marketplace (line 45) — confirmed in smoke test 2026-04-22. Workaround: ci-vendor-panel.yml typecheck job is `continue-on-error: true` (non-blocking v5). Proper fix options: (a) tighten the local `Config` typing, (b) pin a single jest version across the workspace via root `pnpm.overrides`, or (c) add a narrow `as any` / `// @ts-expect-error` at the boundary.
 
-### #8 — Security: `CRM_V1_DB_CONNECTIONS.txt` (P1)
+### #8 — Security: `CRM_V1_DB_CONNECTIONS.txt` (P1) — PARTIAL 2026-04-22
 
-Tracked file (despite its own header claiming gitignored) contains plaintext seeded admin credentials (`admin@crm.com / Admin@123` and `platform@crm.com / SuperAdmin@123`) plus production Railway host `nozomi.proxy.rlwy.net:35324`. Already in git history. Required: (a) verify those credentials are rotated/disabled in production, (b) `git rm` the file and add to `.gitignore`, (c) optionally `git filter-repo` to scrub history (rewrites everyone's clones — coordinate with team).
+Tracked file (despite its own header claiming gitignored) contained plaintext seeded admin credentials (`admin@crm.com / Admin@123` and `platform@crm.com / SuperAdmin@123`) plus production Railway host `nozomi.proxy.rlwy.net:35324`.
+
+**Done (2026-04-22, PR #14):** `git rm CRM_V1_DB_CONNECTIONS.txt`; `.gitignore` hardened with credential file patterns.
+
+**Done (2026-04-23, this PR):** Seeds refactored to read `ADMIN_INITIAL_PASSWORD` / `PLATFORM_INITIAL_PASSWORD` env vars (throw if missing); new bcrypt hashes generated; `docs/security/rotate-admin-passwords.sql` and `docs/security/TICKET_8_RESOLUTION.md` created.
+
+**Done (2026-04-23, task 4 final):** DB rotation executed via Railway CLI psql — 6 rows updated in `gv_usr_users` + `gv_usr_super_admins`; verified: old creds → 401, new creds → 200+JWT; `apps-backend/api/.env` discovered committed in PR #12 → `git rm --cached` applied immediately; local `.env` updated with `ADMIN_INITIAL_PASSWORD` + `PLATFORM_INITIAL_PASSWORD`.
+
+**Pending (Kumar manual):**
+- (a) Rotate Railway PostgreSQL password `AKSqubzlBWnuuOJrxYNwQbPwQRBIuovf` via Railway dashboard → CRM_V1 → Postgres → Reset Password; update all local `.env` connection strings after rotation
+- (b) `git filter-repo` to scrub both `CRM_V1_DB_CONNECTIONS.txt` AND `apps-backend/api/.env` from history before any repo publication (coordinate with team)
+- (c) Fix `WhiteLabel/wl-api/src/modules/auth/auth.service.ts:19,26` — hardcoded `SuperAdmin@123` fallback (separate follow-up PR)
 
 ### #9 — Seed multi-DB refactor (P3, follow-up to #1)
 
