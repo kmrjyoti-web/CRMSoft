@@ -95,6 +95,7 @@ These should land on their own branches against `develop`, not on the V5 restruc
 4. **`QuotationForm.tsx` Control<> type errors (P2):** Lines 751, 835, 842, 849. Fix properly for `react-hook-form` 7.73.x — do not pin to 7.71.2. The narrower type is correct; the form code needs a tighter generic.
 5. **`marketplace` tsc cleanup (P3):** 10 errors, contained. Quick follow-up PR.
 6. **`@shared-types` migration (P2 or P3):** Either (a) repoint the alias to a real location and update `Shared/common/types/` to export the missing names, or (b) migrate imports to a proper `@crmsoft/types` package (Phase 5 created the alias slot).
+7. **`vendor-panel` jest.config.ts CI typecheck (P2):** `apps-frontend/vendor-panel/jest.config.ts(46,33)` errors in CI's resolved jest type tree (TS2345 `InitialProjectOptions`, `'string' is not assignable to type 'string[]'`) but passes `pnpm exec tsc --noEmit` locally. CI's `pnpm install --frozen-lockfile` resolves jest transitives slightly differently than local. Workaround: ci-vendor-panel.yml typecheck job is `continue-on-error: true` (non-blocking v5). Proper fix options: (a) tighten the local `Config` typing, (b) pin a single jest version across the workspace via root `pnpm.overrides`, or (c) add a narrow `as any` / `// @ts-expect-error` at the boundary.
 
 ## Tooling Notes Affecting Future Work
 
