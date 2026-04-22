@@ -1,0 +1,145 @@
+name: V6 Folder Boundary Check
+
+# Enforces V6 architecture access rules on every PR:
+#   core/               — Kumar-only (team lead gate)
+#   verticals/          — internal devs only; no partner access
+#   partner-customizations/<X>/  — isolated per partner; no cross-writes
+#   brands/<X>/         — partner brand devs only for their own brand
+#
+# Partners are identified by their GitHub team membership.
+# For now (no external GitHub teams yet), the check logs violations
+# and sets the job result — no hard block until GitHub teams are configured.
+
+on:
+  pull_request:
+    branches: [develop, main, 'sprint/**']
+
+concurrency:
+  group: v6-boundaries-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  boundary-check:
+    name: V6 Folder Boundary Enforcement
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed paths
+        id: changed
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          CHANGED=$(git diff --name-only "$BASE" "$HEAD")
+          echo "Changed files:"
+          echo "$CHANGED"
+          echo "changed_files<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$CHANGED" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Check core/ protection (Kumar-only zone)
+        env:
+          CHANGED_FILES: ${{ steps.changed.outputs.changed_files }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          KUMAR_LOGIN: 'kmrjyoti-web'
+        run: |
+          CORE_CHANGES=$(echo "$CHANGED_FILES" | grep "^core/" || true)
+          if [ -n "$CORE_CHANGES" ]; then
+            echo "::notice::core/ changes detected in this PR:"
+            echo "$CORE_CHANGES"
+            if [ "$PR_AUTHOR" != "$KUMAR_LOGIN" ]; then
+              echo "::warning::core/ is Kumar-only. PR author ($PR_AUTHOR) should have Kumar review and explicitly approve core changes."
+              echo "CORE_VIOLATION=true" >> "$GITHUB_ENV"
+            else
+              echo "✅ core/ changes by $PR_AUTHOR (authorized)"
+            fi
+          else
+            echo "✅ No core/ changes"
+          fi
+
+      - name: Check partner-customizations isolation
+        env:
+          CHANGED_FILES: ${{ steps.changed.outputs.changed_files }}
+        run: |
+          PARTNER_CHANGES=$(echo "$CHANGED_FILES" | grep "^partner-customizations/" || true)
+          if [ -z "$PARTNER_CHANGES" ]; then
+            echo "✅ No partner-customizations changes"
+            exit 0
+          fi
+
+          echo "partner-customizations changes detected:"
+          echo "$PARTNER_CHANGES"
+
+          # Collect all unique partners touched
+          PARTNERS_TOUCHED=$(echo "$PARTNER_CHANGES" | awk -F/ '{print $2}' | sort -u)
+          PARTNER_COUNT=$(echo "$PARTNERS_TOUCHED" | grep -c . || true)
+          echo "Partners touched: $PARTNERS_TOUCHED"
+
+          if [ "$PARTNER_COUNT" -gt 1 ]; then
+            echo "::error::Cross-partner modification detected!"
+            echo "::error::This PR touches $PARTNER_COUNT partner folders: $PARTNERS_TOUCHED"
+            echo "::error::Each partner can only modify their own folder."
+            echo "PARTNER_VIOLATION=true" >> "$GITHUB_ENV"
+            exit 1
+          else
+            echo "✅ Single partner ($PARTNERS_TOUCHED) — isolation maintained"
+          fi
+
+      - name: Check verticals/ — no partner access
+        env:
+          CHANGED_FILES: ${{ steps.changed.outputs.changed_files }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          VERTICAL_CHANGES=$(echo "$CHANGED_FILES" | grep "^verticals/" || true)
+          if [ -n "$VERTICAL_CHANGES" ]; then
+            echo "verticals/ changes detected:"
+            echo "$VERTICAL_CHANGES"
+            # Verticals are internal-only. Kumar or internal devs only.
+            # Once GitHub teams are configured, check team membership here.
+            echo "::notice::verticals/ changes require internal dev access."
+            echo "✅ Vertical changes logged for Kumar review"
+          else
+            echo "✅ No verticals/ changes"
+          fi
+
+      - name: Check brands/ isolation
+        env:
+          CHANGED_FILES: ${{ steps.changed.outputs.changed_files }}
+        run: |
+          BRAND_CHANGES=$(echo "$CHANGED_FILES" | grep "^brands/" || true)
+          if [ -z "$BRAND_CHANGES" ]; then
+            echo "✅ No brands/ changes"
+            exit 0
+          fi
+
+          echo "brands/ changes detected:"
+          echo "$BRAND_CHANGES"
+
+          # Collect all unique brands touched
+          BRANDS_TOUCHED=$(echo "$BRAND_CHANGES" | awk -F/ '{print $2}' | grep -v "_template" | sort -u)
+          BRAND_COUNT=$(echo "$BRANDS_TOUCHED" | grep -c . || true)
+
+          if [ "$BRAND_COUNT" -gt 1 ]; then
+            echo "::error::Cross-brand modification detected!"
+            echo "::error::Brands touched: $BRANDS_TOUCHED"
+            echo "BRAND_VIOLATION=true" >> "$GITHUB_ENV"
+            exit 1
+          else
+            echo "✅ Single brand ($BRANDS_TOUCHED) modified"
+          fi
+
+      - name: Boundary summary
+        if: always()
+        run: |
+          echo "========================================"
+          echo "V6 Boundary Check Summary"
+          echo "========================================"
+          echo "Core violation:    ${CORE_VIOLATION:-false}"
+          echo "Partner violation: ${PARTNER_VIOLATION:-false}"
+          echo "Brand violation:   ${BRAND_VIOLATION:-false}"
+          echo ""
+          echo "Note: Core violations generate warnings, not failures (Kumar review SLA applies)."
+          echo "Partner/Brand cross-writes are hard failures."
