@@ -59,6 +59,34 @@
 
 ---
 
+## ⚠️ Second Exposure Found During Task 4 Final (2026-04-23)
+
+`apps-backend/api/.env` was committed in PR #12 (V5 restructure, commit `c8e4cded`) with **10 real Railway connection strings** including the actual PostgreSQL password:
+
+```
+postgresql://postgres:AKSqubzlBWnuuOJrxYNwQbPwQRBIuovf@nozomi.proxy.rlwy.net:35324/<dbname>
+```
+
+**Immediate action taken:** `git rm --cached apps-backend/api/.env` — file untracked (local `.env` preserved). `.gitignore` line `apps-backend/api/.env` confirmed at line 67.
+
+**Additional pending action (P1):** Rotate the Railway PostgreSQL password `AKSqubzlBWnuuOJrxYNwQbPwQRBIuovf` via Railway dashboard → CRM_V1 → Postgres → Reset Password. After rotation: update `PGPASSWORD` in Railway service variables and update all local `.env` files with the new connection strings.
+
+**History scrub scope expands:** `git filter-repo` should now cover both `CRM_V1_DB_CONNECTIONS.txt` AND `apps-backend/api/.env` before any repo publication.
+
+---
+
+## Verification Completed: 2026-04-23
+
+| Test | Result |
+|---|---|
+| `admin@crm.com` old creds (`Admin@123`) → `POST /auth/admin/login` | **401 DENIED** ✅ |
+| `admin@crm.com` new creds → `POST /auth/admin/login` | **200 + JWT token** ✅ |
+| `platform@crm.com` old creds (`SuperAdmin@123`) → `POST /auth/super-admin/login` | **401 DENIED** ✅ |
+| `platform@crm.com` new creds → `POST /auth/super-admin/login` | **200 + JWT token** ✅ |
+| `manager`, `sales1`, `marketing1`, `support1` → password hash updated in DB | **6 rows updated** ✅ |
+
+---
+
 ## Why Git History Is Acceptable Post-Rotation
 
 Old passwords (`Admin@123`, `SuperAdmin@123`) remain in git history. **This is the industry-standard outcome:**

@@ -140,11 +140,12 @@ Tracked file (despite its own header claiming gitignored) contained plaintext se
 
 **Done (2026-04-23, this PR):** Seeds refactored to read `ADMIN_INITIAL_PASSWORD` / `PLATFORM_INITIAL_PASSWORD` env vars (throw if missing); new bcrypt hashes generated; `docs/security/rotate-admin-passwords.sql` and `docs/security/TICKET_8_RESOLUTION.md` created.
 
-**Pending (Kumar manual — DB rotation):**
-- (a) Run `docs/security/rotate-admin-passwords.sql` against Railway IdentityDB with new hashes from Phase 4 terminal output
-- (b) Update local `.env` with `ADMIN_INITIAL_PASSWORD` / `PLATFORM_INITIAL_PASSWORD`
-- (c) `git filter-repo` history scrub if repo ever becomes public (coordinate with team)
-- (d) Fix `WhiteLabel/wl-api/src/modules/auth/auth.service.ts:19,26` — hardcoded `SuperAdmin@123` fallback (separate follow-up PR)
+**Done (2026-04-23, task 4 final):** DB rotation executed via Railway CLI psql — 6 rows updated in `gv_usr_users` + `gv_usr_super_admins`; verified: old creds → 401, new creds → 200+JWT; `apps-backend/api/.env` discovered committed in PR #12 → `git rm --cached` applied immediately; local `.env` updated with `ADMIN_INITIAL_PASSWORD` + `PLATFORM_INITIAL_PASSWORD`.
+
+**Pending (Kumar manual):**
+- (a) Rotate Railway PostgreSQL password `AKSqubzlBWnuuOJrxYNwQbPwQRBIuovf` via Railway dashboard → CRM_V1 → Postgres → Reset Password; update all local `.env` connection strings after rotation
+- (b) `git filter-repo` to scrub both `CRM_V1_DB_CONNECTIONS.txt` AND `apps-backend/api/.env` from history before any repo publication (coordinate with team)
+- (c) Fix `WhiteLabel/wl-api/src/modules/auth/auth.service.ts:19,26` — hardcoded `SuperAdmin@123` fallback (separate follow-up PR)
 
 ### #9 — Seed multi-DB refactor (P3, follow-up to #1)
 
