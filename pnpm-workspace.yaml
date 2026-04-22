@@ -9,6 +9,10 @@ packages:
   - 'apps-backend/*'
   - 'apps-frontend/*'
 
+  # V6 new frontend locations (copies — originals in apps-frontend/ are preserved for Customer X Apr 28)
+  - 'apps/frontend/customer-portal-new'
+  - 'apps/frontend/marketplace-new'
+
   # V5 reusable packages — glob patterns for future growth.
   # Currently only README placeholders; pnpm skips any folder without
   # a package.json so these are safe no-ops today.
