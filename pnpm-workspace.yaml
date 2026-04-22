@@ -13,6 +13,7 @@ packages:
   - 'apps/frontend/crm-admin-new'
   - 'apps/frontend/vendor-panel-new'
 
+
   # V5 reusable packages — glob patterns for future growth.
   # Currently only README placeholders; pnpm skips any folder without
   # a package.json so these are safe no-ops today.
