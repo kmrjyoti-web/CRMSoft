@@ -16,7 +16,7 @@ import { calculateLineItem } from "../utils/gst";
 
 // Mirrors the shape of QuotationFormValues used in QuotationForm
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyControl = Control<any>;
+type AnyControl = Control<any, any, any>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySetValue = UseFormSetValue<any>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -58,7 +58,7 @@ interface QuotationLineItemsGridProps {
   blankRowCount: number;
   control: AnyControl;
   errors: AnyFieldErrors;
-  productSelectMode: "autocomplete" | "modal";
+  productSelectMode: "autocomplete" | "popup";
   makeTabHandler: (colName: string, rowIndex: number, totalRows: number) => (e: React.KeyboardEvent) => void;
   setValue: AnySetValue;
   calculateLineItem: typeof calculateLineItem;
