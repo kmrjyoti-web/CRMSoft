@@ -1,0 +1,23 @@
+{
+  "brandId": "crmsoft",
+  "displayName": "CRMSoft",
+  "version": "1.0.0",
+  "features": {
+    "marketplace": true,
+    "whiteLabel": false,
+    "customerPortal": true,
+    "aiAssistant": true,
+    "multiVertical": true
+  },
+  "copy": {
+    "productName": "CRMSoft",
+    "tagline": "The CRM Built for Growth",
+    "supportEmail": "support@crmsoft.in"
+  },
+  "portals": {
+    "crm-admin": { "port": 3000, "enabled": true },
+    "vendor-panel": { "port": 3001, "enabled": true },
+    "customer-portal": { "port": 3007, "enabled": true },
+    "marketplace": { "port": 3008, "enabled": true }
+  }
+}
