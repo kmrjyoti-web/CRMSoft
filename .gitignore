@@ -34,6 +34,10 @@ Application/backend/docs/health-reports/latest-audit.json
 *_CREDS.txt
 *.credentials
 *.secrets
+# scratch/paste files with creds (e.g. apps-backend/api/pas committed in PR #12)
+apps-backend/api/pas
+**/pas
+**/*.pass
 
 # ────────────────────────────────────────────────────────────
 # Env files & secrets — NEVER commit these
