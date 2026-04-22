@@ -1,0 +1,88 @@
+name: CI — V6 integration tests
+
+# Runs V6 folder structure integrity tests on every PR.
+# Tests are migration-aware: portals only validated once package.json exists.
+# As dev2/dev3/dev4 PRs merge, more assertions activate automatically.
+
+on:
+  pull_request:
+    branches: [develop, main, 'sprint/**']
+    paths:
+      - 'core/**'
+      - 'verticals/**'
+      - 'apps/frontend/**'
+      - 'brands/**'
+      - 'partner-customizations/**'
+      - 'pnpm-workspace.yaml'
+      - 'tests/integration/v6/**'
+      - '.github/workflows/ci-v6-tests.yml'
+  push:
+    branches: [develop, 'sprint/**']
+    paths:
+      - 'tests/integration/v6/**'
+
+concurrency:
+  group: ci-v6-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '24'
+
+jobs:
+  v6-structure:
+    name: V6 folder structure integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: Install (integration test package only)
+        run: pnpm install --filter '@crmsoft/v6-integration-tests'
+
+      - name: Run V6 structure tests
+        working-directory: tests/integration/v6
+        run: pnpm test:ci
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v6-test-results
+          path: tests/integration/v6/coverage/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  vertical-conflict-check:
+    name: Prisma conflict check (populated verticals)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: |
+      contains(github.event.pull_request.title, 'vertical') ||
+      contains(github.event.pull_request.title, 'travel') ||
+      contains(github.event.pull_request.title, 'electronic')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check travel vertical conflicts
+        run: |
+          if find verticals/travel -name "*.prisma" 2>/dev/null | grep -q .; then
+            echo "Running conflict check for travel vertical..."
+            bash scripts/v6-migration/check-vertical-conflicts.sh travel
+          else
+            echo "Travel vertical has no Prisma schemas yet — skipping conflict check"
+          fi
+
+      - name: Check electronic vertical conflicts
+        run: |
+          if find verticals/electronic -name "*.prisma" 2>/dev/null | grep -q .; then
+            echo "Running conflict check for electronic vertical..."
+            bash scripts/v6-migration/check-vertical-conflicts.sh electronic
+          else
+            echo "Electronic vertical has no Prisma schemas yet — skipping conflict check"
+          fi
