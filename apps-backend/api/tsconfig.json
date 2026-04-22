@@ -28,11 +28,24 @@
       "@modules/customer/*": ["src/modules/customer/*"],
       "@modules/softwarevendor/*": ["src/modules/softwarevendor/*"],
       "@modules/marketplace/*": ["src/modules/marketplace/*"],
-      "@modules/plugins/*": ["src/modules/plugins/*"]
+      "@modules/plugins/*": ["src/modules/plugins/*"],
+      "@crmsoft/core-platform": ["../../core/platform/src/index.ts"],
+      "@crmsoft/core-platform/*": ["../../core/platform/src/*"],
+      "@nestjs/common": ["node_modules/@nestjs/common"],
+      "@nestjs/common/*": ["node_modules/@nestjs/common/*"],
+      "@nestjs/cqrs": ["node_modules/@nestjs/cqrs"],
+      "@nestjs/cqrs/*": ["node_modules/@nestjs/cqrs/*"],
+      "@nestjs/swagger": ["node_modules/@nestjs/swagger"],
+      "@nestjs/swagger/*": ["node_modules/@nestjs/swagger/*"],
+      "class-validator": ["node_modules/class-validator"],
+      "class-validator/*": ["node_modules/class-validator/*"],
+      "class-transformer": ["node_modules/class-transformer"],
+      "class-transformer/*": ["node_modules/class-transformer/*"]
     }
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "../../core/platform/src/**/*"
   ],
   "exclude": [
     "node_modules",
@@ -42,4 +55,3 @@
     "scripts/**"
   ]
 }
-

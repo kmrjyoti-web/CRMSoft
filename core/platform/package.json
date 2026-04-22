@@ -1,0 +1,22 @@
+{
+  "name": "@crmsoft/core-platform",
+  "version": "0.0.1",
+  "description": "CRMSoft V6 — core platform modules (health, help, lookups)",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/cqrs": "^10.0.0",
+    "@nestjs/swagger": "^7.0.0",
+    "class-validator": "^0.14.0",
+    "class-transformer": "^0.5.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
