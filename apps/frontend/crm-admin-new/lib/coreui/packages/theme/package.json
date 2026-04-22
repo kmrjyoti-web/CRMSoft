@@ -1,0 +1,47 @@
+{
+  "name": "@coreui/theme",
+  "version": "1.0.2",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./tokens/default.css": "./src/tokens/default.css",
+    "./tokens/dark.css": "./src/tokens/dark.css",
+    "./tokens/high-contrast.css": "./src/tokens/high-contrast.css",
+    "./tokens/density.css": "./src/tokens/density.css"
+  },
+  "files": [
+    "dist",
+    "src/tokens",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "zustand": "^5.0.11"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@coreui/config": "workspace:*",
+    "@types/react": "^18.2.48",
+    "jsdom": "^28.1.0",
+    "react": "^18.2.0",
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.18"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  }
+}

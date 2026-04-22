@@ -1,0 +1,26 @@
+{
+  "name": "coreui",
+  "description": "Enterprise Component Library & Design System",
+  "private": true,
+  "packageManager": "pnpm@10.30.2",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "storybook": "turbo run storybook",
+    "build-storybook": "turbo run build-storybook",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "publish:all": "pnpm -r publish --no-git-checks",
+    "release": "pnpm build && pnpm publish:all",
+    "release:patch": "node scripts/bump.js patch && pnpm build",
+    "release:minor": "node scripts/bump.js minor && pnpm build",
+    "release:major": "node scripts/bump.js major && pnpm build",
+    "version:check": "node -e \"const p=require('./packages/ui/package.json'); console.log('Current version: v'+p.version)\""
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "turbo": "^2.3.0",
+    "typescript": "^5.3.3"
+  }
+}
