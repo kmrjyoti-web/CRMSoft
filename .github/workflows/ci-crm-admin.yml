@@ -40,8 +40,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
-      - name: Install crm-admin
-        working-directory: ${{ env.APP_DIR }}
+      - name: Install (workspace root)
         run: pnpm install --frozen-lockfile
       - name: Install + build coreui (turbo workspaces)
         working-directory: ${{ env.COREUI_DIR }}
@@ -69,8 +68,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
-      - name: Install crm-admin
-        working-directory: ${{ env.APP_DIR }}
+      - name: Install (workspace root)
         run: pnpm install --frozen-lockfile
       - name: next lint
         working-directory: ${{ env.APP_DIR }}
@@ -95,8 +93,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
-      - name: Install crm-admin
-        working-directory: ${{ env.APP_DIR }}
+      - name: Install (workspace root)
         run: pnpm install --frozen-lockfile
       - name: Install + build coreui
         working-directory: ${{ env.COREUI_DIR }}

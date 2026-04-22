@@ -33,8 +33,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
-      - name: Install
-        working-directory: ${{ env.APP_DIR }}
+      - name: Install (workspace root)
         run: pnpm install --frozen-lockfile
       - name: tsc --noEmit
         working-directory: ${{ env.APP_DIR }}
@@ -53,8 +52,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
-      - name: Install
-        working-directory: ${{ env.APP_DIR }}
+      - name: Install (workspace root)
         run: pnpm install --frozen-lockfile
       - name: next lint
         working-directory: ${{ env.APP_DIR }}
@@ -74,8 +72,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
-      - name: Install
-        working-directory: ${{ env.APP_DIR }}
+      - name: Install (workspace root)
         run: pnpm install --frozen-lockfile
       - name: Build (generate-routes + next build)
         working-directory: ${{ env.APP_DIR }}
