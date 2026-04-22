@@ -1,0 +1,51 @@
+{
+  "name": "@crmsoft/marketplace-new",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3008",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "jest --passWithNoTests",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --passWithNoTests --forceExit",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "e2e:headed": "playwright test --headed",
+    "e2e:chromium": "playwright test --project=chromium",
+    "e2e:debug": "playwright test --debug",
+    "e2e:report": "playwright show-report"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@tanstack/react-query": "^5.95.2",
+    "@tanstack/react-query-devtools": "^5.95.2",
+    "date-fns": "^4.1.0",
+    "eslint-config-next": "^15.5.15",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.0.1",
+    "next": "^15.5.15",
+    "next-pwa": "^5.6.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-hook-form": "^7.72.0",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
