@@ -26,6 +26,16 @@ Application/backend/docs/health-reports/audit-runs/
 Application/backend/docs/health-reports/latest-audit.json
 
 # ────────────────────────────────────────────────────────────
+# Credential / connection reference files — NEVER commit these
+# ────────────────────────────────────────────────────────────
+*_DB_CONNECTIONS.txt
+*_CONNECTIONS.txt
+*_CREDENTIALS.txt
+*_CREDS.txt
+*.credentials
+*.secrets
+
+# ────────────────────────────────────────────────────────────
 # Env files & secrets — NEVER commit these
 # ────────────────────────────────────────────────────────────
 .env
@@ -37,6 +47,7 @@ Application/backend/docs/health-reports/latest-audit.json
 .env.backup
 .env.backup.*
 # explicit paths (defensive redundancy for subdirs)
+# pre-V5 paths (kept for git history coverage)
 Application/backend/.env
 Application/backend/.env.*
 !Application/backend/.env.example
@@ -52,6 +63,13 @@ WhiteLabel/**/.env.*
 PlatformConsole/frontend/**/.env
 PlatformConsole/frontend/**/.env.*
 !PlatformConsole/frontend/**/.env.example
+# V5 paths
+apps-backend/api/.env
+apps-backend/api/.env.*
+!apps-backend/api/.env.example
+apps-frontend/**/.env
+apps-frontend/**/.env.*
+!apps-frontend/**/.env.example
 
 # ────────────────────────────────────────────────────────────
 # IDE
