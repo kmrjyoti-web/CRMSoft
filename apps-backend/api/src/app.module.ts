@@ -104,7 +104,7 @@ import { CustomerPortalModule } from './modules/softwarevendor/customer-portal/c
 import { CustomerPortalModule as CustomerPortalAuthModule } from './modules/customer-portal/customer-portal.module';
 import { OpsModule } from './modules/ops/ops.module';
 import { VersionControlModule } from './modules/softwarevendor/version-control/version-control.module';
-import { HealthModule } from './modules/core/health/health.module';
+import { HealthModule } from '@crmsoft/core-platform';
 // TODO: create module — reference-data
 // import { ReferenceDataModule } from './modules/core/reference-data/reference-data.module';
 // TODO: create module — system-field
