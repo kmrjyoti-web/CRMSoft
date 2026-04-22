@@ -13,7 +13,7 @@ import { SmartDateInput } from "@/components/common/SmartDateInput";
 // We use a loose type here so this file does not re-declare the full Zod schema.
 // The `control` prop is typed against the same inferred shape.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyControl = Control<any>;
+type AnyControl = Control<any, any, any>;
 
 // ---------------------------------------------------------------------------
 // QuotationSummaryModal

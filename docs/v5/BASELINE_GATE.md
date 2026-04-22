@@ -11,7 +11,7 @@
 |---|---:|---:|---|
 | Backend tsc (`apps-backend/api`) | 41 | **0** ✅ | tickets #1 + #2 closed (this commit) |
 | Backend boot (`pnpm run start:dev`) | ❌ stuck at "Found 41 errors" | ✅ NestJS initializes successfully | tickets #1 + #2 closed |
-| crm-admin tsc (source files only, after `rm -rf .next`) | 327 | **332** | +4 from `react-hook-form` 7.71.2 → 7.73.1 (Phase 4); +1 from jest type drift on fresh installs (Smoke test 2026-04-22, ticket #7 pattern) |
+| crm-admin tsc (source files only, after `rm -rf .next`) | 327 | **329** | 332 → 329 after ticket #4 closed (AnyControl 3-param fix + ProductSelectMode prop) |
 | `vendor-panel` tsc | n/a | **1** | jest type-tree quirk on fresh install (ticket #7) |
 | `customer-portal` tsc | n/a | **0** | clean |
 | `marketplace` tsc | n/a | **11** | 10 baseline + 1 jest type quirk (ticket #7) |
@@ -97,7 +97,7 @@ If a count DECREASES → bonus, document but don't celebrate prematurely.
 | 1 | ✅ CLOSED 2026-04-22 | Seed import fix (workaround applied) | P2 |
 | 2 | ✅ CLOSED 2026-04-22 | `form-data` explicit dep | P2 |
 | 3 | open | Legacy `.prisma/client/` cleanup on main | P3 |
-| 4 | open | `QuotationForm.tsx` Control<> type errors | P2 |
+| 4 | ✅ CLOSED 2026-04-23 | `QuotationForm.tsx` Control<> type errors — AnyControl 3-param + ProductSelectMode prop | P2 |
 | 5 | open | `marketplace` tsc cleanup | P3 |
 | 6 | open | `@shared-types` migration | P2/P3 |
 | 7 | open | `vendor-panel` jest.config.ts type-tree quirk | P2 |
