@@ -103,6 +103,7 @@ If a count DECREASES → bonus, document but don't celebrate prematurely.
 | 7 | open | `vendor-panel` jest.config.ts type-tree quirk | P2 |
 | 8 | ✅ CLOSED 2026-04-23 | **SECURITY**: `CRM_V1_DB_CONNECTIONS.txt` plaintext creds — removed, seeds use env vars, DB rotation SQL ready | **P1** |
 | 9 | open | Proper per-seed multi-DB-aware refactor | P3 |
+| 10 | ✅ CLOSED 2026-04-23 | **SECURITY**: `wl-api/auth.service.ts` hardcoded `SuperAdmin@123` fallback + plaintext auth | **P1** |
 
 ### #1 — Seed import fix ✅ CLOSED 2026-04-22
 
@@ -150,6 +151,16 @@ Tracked file (despite its own header claiming gitignored) contained plaintext se
 ### #9 — Seed multi-DB refactor (P3, follow-up to #1)
 
 All 30 files in `apps-backend/api/prisma/seed.ts`, `prisma/seeds/*.seed.ts`, and `scripts/reseed-menus.ts` import `PrismaClient` from the bare-stub `@prisma/client`. Several touch models from MULTIPLE DBs (e.g., `inventory.seed.ts` uses `prisma.inventoryLabel` from WorkingDB AND `prisma.tenant` from IdentityDB). Proper fix requires per-seed analysis and either (a) refactoring each seed to take multiple per-DB clients, or (b) consolidating cross-DB seeds. Currently bypassed by excluding seeds from tsc scope (#1 above). Seeds remain runnable via `ts-node` for now.
+
+### #10 — Security: `wl-api/auth.service.ts` hardcoded fallback ✅ CLOSED 2026-04-23
+
+Two issues fixed in `WhiteLabel/wl-api/src/modules/auth/auth.service.ts`:
+
+1. **Hardcoded `SuperAdmin@123` default** (lines 19, 26): `this.config.get('ADMIN_PASSWORD', 'SuperAdmin@123')` — silently fell back to weak known password if env var missing. Fixed: reads env var with no default, throws `Error('ADMIN_PASSWORD environment variable is required')` at startup.
+
+2. **Plaintext password comparison**: `adminLogin` was comparing the raw password string directly against the env var instead of using bcrypt. The constructor was already computing `bcrypt.hashSync(raw, 10)` but `adminLogin` ignored it. Fixed: uses `bcrypt.compareSync` against `this.adminPasswordHash`. Also upgraded bcrypt cost 10 → 12.
+
+`WhiteLabel/wl-api/.env.example` created (didn't exist). PR #15, commit `c3142564`.
 
 ## Tooling Notes Affecting Future Work
 
