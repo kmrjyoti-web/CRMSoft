@@ -1,0 +1,395 @@
+/*
+ * CoreUI – Base Styles
+ * Master stylesheet that imports tokens, provides resets, and defines animations.
+ * Source: Angular index.css + ui-components.css.
+ *
+ * Usage:
+ *   import '@coreui/ui/styles/base.css';
+ *   — OR —
+ *   @import '@coreui/ui/styles/base.css';
+ */
+
+/* ═══════════════════════════════════════════════════════
+   TOKEN IMPORTS
+   ═══════════════════════════════════════════════════════ */
+@import "../tokens/control-tokens.css";
+@import "../tokens/component-tokens.css";
+
+/* ═══════════════════════════════════════════════════════
+   MINIMAL RESET (form-control specific)
+   ═══════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  margin: 0;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS
+   Source: Angular aic-dialog, aic-drawer, aic-toast
+   ═══════════════════════════════════════════════════════ */
+
+@keyframes st-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes st-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes st-slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes st-slide-out-right {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes st-slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes st-slide-in-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes st-slide-in-down {
+  from {
+    transform: translateY(-1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes st-zoom-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes st-zoom-out {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+@keyframes st-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes st-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   ANIMATION UTILITY CLASSES
+   ═══════════════════════════════════════════════════════ */
+
+.st-animate-fade-in {
+  animation: st-fade-in 0.2s ease-out;
+}
+
+.st-animate-fade-out {
+  animation: st-fade-out 0.2s ease-in;
+}
+
+.st-animate-slide-right {
+  animation: st-slide-in-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-animate-slide-left {
+  animation: st-slide-in-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-animate-slide-up {
+  animation: st-slide-in-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-animate-slide-down {
+  animation: st-slide-in-down 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-animate-zoom-in {
+  animation: st-zoom-in 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-animate-zoom-out {
+  animation: st-zoom-out 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-animate-shake {
+  animation: st-shake 0.5s ease-in-out;
+}
+
+.st-animate-spin {
+  animation: st-spin 1s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUTTON BASE (from Angular ui-components.css)
+   ═══════════════════════════════════════════════════════ */
+
+.st-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: var(--st-button-font-weight, 500);
+  border-radius: var(--st-button-radius, 0.5rem);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 1px solid transparent;
+  outline: none;
+  font-family: inherit;
+  white-space: nowrap;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.st-button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.st-button:disabled {
+  opacity: var(--st-button-disabled-opacity, 0.5);
+  cursor: not-allowed;
+}
+
+.st-button-primary {
+  background-color: var(--st-button-primary-bg);
+  color: var(--st-button-primary-text);
+  border-color: var(--st-button-primary-border);
+  box-shadow: var(--st-button-shadow);
+}
+
+.st-button-primary:hover:not(:disabled) {
+  background-color: var(--st-button-primary-hover-bg);
+}
+
+.st-button-secondary {
+  background-color: var(--st-button-secondary-bg);
+  color: var(--st-button-secondary-text);
+  border-color: var(--st-button-secondary-border);
+}
+
+.st-button-secondary:hover:not(:disabled) {
+  background-color: var(--st-button-secondary-hover-bg);
+}
+
+.st-button-danger {
+  background-color: var(--st-button-danger-bg);
+  color: var(--st-button-danger-text);
+  border-color: var(--st-button-danger-border);
+}
+
+.st-button-danger:hover:not(:disabled) {
+  background-color: var(--st-button-danger-hover-bg);
+}
+
+.st-button-ghost {
+  background-color: transparent;
+  color: var(--st-button-ghost-text);
+  border-color: transparent;
+}
+
+.st-button-ghost:hover:not(:disabled) {
+  background-color: var(--st-button-ghost-hover-bg);
+}
+
+.st-button-outline {
+  background-color: transparent;
+  color: var(--st-button-outline-text);
+  border-color: var(--st-button-outline-border);
+}
+
+.st-button-outline:hover:not(:disabled) {
+  background-color: var(--st-button-outline-hover-bg);
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUTTON SIZES
+   ═══════════════════════════════════════════════════════ */
+
+.st-button-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  height: 2rem;
+}
+
+.st-button-md {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  height: 2.5rem;
+}
+
+.st-button-lg {
+  padding: 0.75rem 1.75rem;
+  font-size: 1rem;
+  height: 3rem;
+}
+
+.st-button-block {
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LABEL BASE
+   ═══════════════════════════════════════════════════════ */
+
+.st-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--st-label-text, #475569);
+  margin-bottom: 0.4rem;
+  opacity: 0.8;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CARD BASE
+   ═══════════════════════════════════════════════════════ */
+
+.st-card {
+  background-color: var(--st-card-bg);
+  border: 1px solid var(--st-card-border);
+  border-radius: var(--st-card-radius);
+  box-shadow: var(--st-card-shadow);
+  overflow: hidden;
+}
+
+.st-card-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--st-card-border);
+  background-color: var(--st-card-header-bg);
+}
+
+.st-card-body {
+  padding: 1.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SCROLLBAR (from Angular aic-table styles.css)
+   ═══════════════════════════════════════════════════════ */
+
+.st-scrollbar::-webkit-scrollbar {
+  width: var(--st-scrollbar-width);
+  height: var(--st-scrollbar-width);
+}
+
+.st-scrollbar::-webkit-scrollbar-track {
+  background: var(--st-scrollbar-track);
+}
+
+.st-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--st-scrollbar-thumb);
+  border-radius: 3px;
+}
+
+.st-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--st-scrollbar-thumb-hover);
+}
+
+/* ═══════════════════════════════════════════════════════
+   FOCUS RING UTILITY
+   ═══════════════════════════════════════════════════════ */
+
+.st-focus-ring:focus-visible {
+  outline: 2px solid var(--st-focus-border, #4f46e5);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   TRANSITIONS
+   ═══════════════════════════════════════════════════════ */
+
+.st-transition {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-transition-fast {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.st-transition-slow {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

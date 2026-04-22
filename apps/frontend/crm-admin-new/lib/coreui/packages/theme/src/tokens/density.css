@@ -1,0 +1,52 @@
+/* Density tokens - controls spacing, component heights, and font sizes */
+
+[data-density="compact"] {
+  --density-spacing-xs: 2px;
+  --density-spacing-sm: 4px;
+  --density-spacing-md: 8px;
+  --density-spacing-lg: 12px;
+  --density-spacing-xl: 16px;
+  --density-component-height-sm: 24px;
+  --density-component-height-md: 32px;
+  --density-component-height-lg: 40px;
+  --density-font-size-sm: 0.75rem;
+  --density-font-size-md: 0.8125rem;
+  --density-font-size-lg: 0.875rem;
+  --density-gap: 4px;
+  --density-padding-x: 8px;
+  --density-padding-y: 4px;
+}
+
+[data-density="comfortable"] {
+  --density-spacing-xs: 4px;
+  --density-spacing-sm: 8px;
+  --density-spacing-md: 16px;
+  --density-spacing-lg: 24px;
+  --density-spacing-xl: 32px;
+  --density-component-height-sm: 32px;
+  --density-component-height-md: 40px;
+  --density-component-height-lg: 48px;
+  --density-font-size-sm: 0.8125rem;
+  --density-font-size-md: 0.875rem;
+  --density-font-size-lg: 1rem;
+  --density-gap: 8px;
+  --density-padding-x: 16px;
+  --density-padding-y: 8px;
+}
+
+[data-density="spacious"] {
+  --density-spacing-xs: 8px;
+  --density-spacing-sm: 12px;
+  --density-spacing-md: 24px;
+  --density-spacing-lg: 32px;
+  --density-spacing-xl: 48px;
+  --density-component-height-sm: 40px;
+  --density-component-height-md: 48px;
+  --density-component-height-lg: 56px;
+  --density-font-size-sm: 0.875rem;
+  --density-font-size-md: 1rem;
+  --density-font-size-lg: 1.125rem;
+  --density-gap: 12px;
+  --density-padding-x: 24px;
+  --density-padding-y: 12px;
+}

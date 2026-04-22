@@ -1,0 +1,7 @@
+.next
+node_modules
+lib/coreui
+pnpm-lock.yaml
+*.woff
+*.ico
+coverage

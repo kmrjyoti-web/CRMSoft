@@ -1,0 +1,4 @@
+[submodule "lib/coreui"]
+	path = lib/coreui
+	url = https://github.com/kmrjyoti-web/COREUI.git
+	branch = crm-custom

@@ -5,9 +5,13 @@
 # ignores. This file is what pnpm actually reads for workspace discovery.
 
 packages:
-  # Apps (executables)
+  # Apps (executables) — V5 locations (keep for Customer X launch Apr 28)
   - 'apps-backend/*'
   - 'apps-frontend/*'
+
+  # V6 new app locations (migration in progress)
+  - 'apps/frontend/crm-admin-new'
+  - 'apps/frontend/vendor-panel-new'
 
   # V5 reusable packages — glob patterns for future growth.
   # Currently only README placeholders; pnpm skips any folder without

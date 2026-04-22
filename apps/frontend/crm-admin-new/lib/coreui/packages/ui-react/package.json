@@ -1,0 +1,58 @@
+{
+  "name": "@coreui/ui-react",
+  "version": "1.0.2",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@coreui/ui": "workspace:^",
+    "@coreui/theme": "workspace:^",
+    "lucide-react": "^0.453.0",
+    "motion": "^12.0.0",
+    "recharts": "^2.12.0",
+    "zustand": "^5.0.11"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "leaflet": "^1.9.0",
+    "react-leaflet": "^4.0.0 || ^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "leaflet": { "optional": true },
+    "react-leaflet": { "optional": true }
+  },
+  "devDependencies": {
+    "@coreui/config": "workspace:*",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "jsdom": "^28.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.18"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  }
+}

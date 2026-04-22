@@ -1,0 +1,597 @@
+=== PACKAGE.JSON ===
+{
+  "name": "crm-admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3005",
+    "build": "next build",
+    "start": "next start -p 3005",
+    "clean": "rm -rf .next .swc tsconfig.tsbuildinfo",
+    "typecheck": "tsc --noEmit 2>&1 | grep -v '^lib/coreui/' | tee /dev/stderr | grep 'error TS' > /dev/null && exit 1 || exit 0",
+    "typecheck:watch": "tsc --noEmit --watch",
+    "lint": "next lint",
+    "lint:strict": "next lint --max-warnings 0",
+    "lint:fix": "next lint --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css,json}\"",
+    "test": "jest --passWithNoTests",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --passWithNoTests --forceExit",
+    "test:ui": "jest src/components/ui --verbose --passWithNoTests",
+    "test:common": "jest src/components/common --verbose --passWithNoTests",
+    "test:features": "jest src/features --verbose --passWithNoTests",
+    "test:stores": "jest src/stores --verbose --passWithNoTests",
+    "test:services": "jest src/services --verbose --passWithNoTests",
+    "test:hooks": "jest src/hooks --verbose --passWithNoTests",
+    "validate": "pnpm typecheck && pnpm lint:strict && pnpm test:ci",
+    "validate:quick": "pnpm typecheck && pnpm lint",
+    "validate:full": "pnpm clean && pnpm typecheck && pnpm lint:strict && pnpm format:check && pnpm test:ci && pnpm build",
+    "coreui:status": "cd lib/coreui && echo '── Branch ──' && git branch --show-current && echo '── Commits ──' && git log --oneline -5 && cd ../..",
+    "coreui:update": "echo '⏳ Pulling CoreUI...' && cd lib/coreui && git fetch origin main && git merge origin/main && cd ../.. && echo '⏳ Testing wrappers...' && pnpm test:ui && echo '✅ CoreUI update safe'",
+    "coreui:build": "cd lib/coreui && pnpm build && cd ../..",
+    "coreui:check": "pnpm coreui:check:imports && pnpm coreui:check:react",
+    "coreui:check:imports": "LEAKS=$(grep -rn '@coreui' src/ --include='*.ts' --include='*.tsx' | grep -v 'src/components/ui/' | grep -v node_modules | wc -l | tr -d ' ') && [ \"$LEAKS\" -gt 0 ] && echo \"❌ $LEAKS @coreui imports outside ui/\" && grep -rn '@coreui' src/ --include='*.ts' --include='*.tsx' | grep -v 'src/components/ui/' | grep -v node_modules && exit 1 || echo '✅ No @coreui leaks'",
+    "coreui:check:react": "DUPES=$(find lib/coreui -path '*/node_modules/react/package.json' 2>/dev/null | wc -l | tr -d ' ') && [ \"$DUPES\" -gt 0 ] && echo \"❌ $DUPES duplicate React\" && exit 1 || echo '✅ No duplicate React'",
+    "coreui:clean:react": "find lib/coreui -path '*/node_modules/react' -type d -prune -exec rm -rf {} + && find lib/coreui -path '*/node_modules/react-dom' -type d -prune -exec rm -rf {} + && echo '✅ Cleaned duplicate React'",
+    "check:all": "pnpm coreui:check && pnpm check:svg && pnpm check:structure && pnpm validate",
+    "check:svg": "SVGS=$(grep -rn '<svg' src/ --include='*.tsx' | grep -v node_modules | grep -v 'components/ui/Icon' | grep -v 'layout.tsx' | wc -l | tr -d ' ') && [ \"$SVGS\" -gt 0 ] && echo \"❌ $SVGS inline SVGs found\" && grep -rn '<svg' src/ --include='*.tsx' | grep -v node_modules | grep -v 'components/ui/Icon' | grep -v 'layout.tsx' && exit 1 || echo '✅ No inline SVGs'",
+    "check:structure": "echo '── UI wrappers:' $(ls src/components/ui/*.tsx 2>/dev/null | wc -l | tr -d ' ') && echo '── Common:' $(ls src/components/common/*.tsx 2>/dev/null | wc -l | tr -d ' ') && echo '── Features:' $(ls -d src/features/*/ 2>/dev/null | wc -l | tr -d ' ') && echo '── Stores:' $(ls src/stores/*.ts 2>/dev/null | wc -l | tr -d ' ') && echo '── Services:' $(ls src/services/*.ts 2>/dev/null | wc -l | tr -d ' ') && echo '── Hooks:' $(ls src/hooks/*.ts 2>/dev/null | wc -l | tr -d ' ')",
+    "gen:feature": "bash scripts/generate-feature.sh",
+    "precommit": "pnpm validate:quick && pnpm coreui:check:imports",
+    "ci": "pnpm clean && pnpm install && pnpm validate:full"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@hookform/resolvers": "^5.2.2",
+    "@tanstack/react-query": "^5.90.21",
+    "@tanstack/react-query-devtools": "^5.91.3",
+    "axios": "^1.13.5",
+    "date-fns": "^4.1.0",
+    "jwt-decode": "^4.0.0",
+    "lucide-react": "^0.575.0",
+    "motion": "^12.34.3",
+    "next": "14.2.35",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-hook-form": "^7.71.2",
+    "react-hot-toast": "^2.6.0",
+    "recharts": "^3.7.0",
+    "file-saver": "^2.0.5",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.4",
+    "xlsx": "^0.18.5",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "@types/file-saver": "^2.0.7",
+    "@playwright/test": "^1.58.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.35",
+    "eslint-plugin-import": "^2.31.0",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "postcss": "^8",
+    "prettier": "^3.5.3",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
+=== APP MODULE ===
+=== PRISMA SCHEMA ===
+=== FOLDER STRUCTURE ===
+src/components/common/SidePanel/index.ts
+src/components/common/criteria/criteria.types.ts
+src/components/common/criteria/index.ts
+src/components/common/index.ts
+src/components/ui/index.ts
+src/components/ui/layout-hooks.ts
+src/components/ui/table-filter.types.ts
+src/config/constants.ts
+src/config/navigation.ts
+src/config/permissions.ts
+src/features/activities/hooks/useActivities.ts
+src/features/activities/services/__tests__/activities.service.test.ts
+src/features/activities/services/activities.service.ts
+src/features/activities/types/activities.types.ts
+src/features/activities/utils/activity-filters.ts
+src/features/audit-logs/hooks/useAuditLogs.ts
+src/features/audit-logs/services/audit.service.ts
+src/features/audit-logs/types/audit.types.ts
+src/features/auth/services/__tests__/auth.service.test.ts
+src/features/auth/services/auth.service.ts
+src/features/auth/types/auth.types.ts
+src/features/auth/utils/auth-cookies.ts
+src/features/auth/utils/jwt-decode.ts
+src/features/auth/utils/time-utils.ts
+src/features/calendar/hooks/useCalendar.ts
+src/features/calendar/services/calendar.service.ts
+src/features/calendar/types/calendar.types.ts
+src/features/communication/hooks/useCommunication.ts
+src/features/communication/services/__tests__/communication.service.test.ts
+src/features/communication/services/communication.service.ts
+src/features/communication/types/communication.types.ts
+src/features/contacts/hooks/useContacts.ts
+src/features/contacts/services/__tests__/contacts.service.test.ts
+src/features/contacts/services/contacts.service.ts
+src/features/contacts/types/contacts.types.ts
+src/features/contacts/utils/contact-filters.ts
+src/features/dashboard/hooks/useDashboard.ts
+src/features/dashboard/services/__tests__/dashboard.service.test.ts
+src/features/dashboard/services/dashboard.service.ts
+src/features/dashboard/types/dashboard.types.ts
+src/features/dashboard/utils/chart-colors.ts
+src/features/dashboard/utils/date-range.ts
+src/features/demos/hooks/useDemos.ts
+src/features/demos/services/__tests__/demos.service.test.ts
+src/features/demos/services/demos.service.ts
+src/features/demos/types/demos.types.ts
+src/features/demos/utils/demo-filters.ts
+src/features/dev-panel/components/tabs/ui-kit/types.ts
+src/features/dev-panel/hooks/useApiHealth.ts
+src/features/dev-panel/hooks/useErrorLog.ts
+src/features/dev-panel/hooks/useNetworkLog.ts
+src/features/dev-panel/services/dev-panel.service.ts
+src/features/dev-panel/types/dev-panel.types.ts
+src/features/dev-panel/utils/error-boundary.ts
+src/features/dev-panel/utils/network-interceptor.ts
+src/features/documents/hooks/useAi.ts
+src/features/documents/hooks/useDocumentEditor.ts
+src/features/documents/hooks/useDocuments.ts
+src/features/documents/hooks/useFolders.ts
+src/features/documents/hooks/useShareLinks.ts
+src/features/documents/services/ai.service.ts
+src/features/documents/services/documents.service.ts
+src/features/documents/services/folders.service.ts
+src/features/documents/services/share-links.service.ts
+src/features/documents/types/documents.types.ts
+src/features/documents/utils/document-columns.ts
+src/features/documents/utils/document-filters.ts
+src/features/documents/utils/document-helpers.ts
+src/features/finance/hooks/useFinance.ts
+src/features/finance/hooks/useProforma.ts
+src/features/finance/services/__tests__/finance.service.test.ts
+src/features/finance/services/finance.service.ts
+src/features/finance/services/proforma.service.ts
+src/features/finance/types/finance.types.ts
+src/features/finance/types/proforma.types.ts
+src/features/finance/utils/invoice-filters.ts
+src/features/finance/utils/payment-filters.ts
+src/features/finance/utils/proforma-filters.ts
+src/features/form-config/hooks/useFormConfig.ts
+src/features/form-config/types/form-config.types.ts
+src/features/form-config/utils/form-registry.ts
+src/features/form-config/utils/merge-form-config.ts
+src/features/leads/hooks/useLeads.ts
+src/features/leads/services/__tests__/leads.service.test.ts
+src/features/leads/services/leads.service.ts
+src/features/leads/types/leads.types.ts
+src/features/leads/utils/lead-filters.ts
+src/features/onboarding/hooks/useOnboarding.ts
+src/features/onboarding/services/onboarding.service.ts
+src/features/onboarding/types/onboarding.types.ts
+src/features/organizations/hooks/useOrganizations.ts
+src/features/organizations/services/__tests__/organizations.service.test.ts
+src/features/organizations/services/organizations.service.ts
+src/features/organizations/types/organizations.types.ts
+src/features/organizations/utils/organization-filters.ts
+src/features/post-sales/hooks/usePostSales.ts
+src/features/post-sales/services/__tests__/post-sales.service.test.ts
+src/features/post-sales/services/post-sales.service.ts
+src/features/post-sales/types/post-sales.types.ts
+src/features/post-sales/utils/installation-filters.ts
+src/features/post-sales/utils/ticket-filters.ts
+src/features/post-sales/utils/training-filters.ts
+src/features/products/hooks/useProducts.ts
+src/features/products/services/__tests__/products.service.test.ts
+src/features/products/services/products.service.ts
+src/features/products/types/products.types.ts
+src/features/quotations/hooks/useQuotations.ts
+src/features/quotations/services/__tests__/quotations.service.test.ts
+src/features/quotations/services/quotations.service.ts
+src/features/quotations/types/quotations.types.ts
+src/features/quotations/utils/__tests__/gst.test.ts
+src/features/quotations/utils/gst.ts
+src/features/quotations/utils/quotation-filters.ts
+src/features/raw-contacts/hooks/useRawContacts.ts
+src/features/raw-contacts/services/__tests__/raw-contacts.service.test.ts
+src/features/raw-contacts/services/raw-contacts.service.ts
+src/features/raw-contacts/types/raw-contacts.types.ts
+src/features/raw-contacts/utils/raw-contact-filters.ts
+src/features/recycle-bin/hooks/useRecycleBin.ts
+src/features/recycle-bin/services/recycle-bin.service.ts
+src/features/recycle-bin/types/recycle-bin.types.ts
+src/features/registration/services/registration.service.ts
+src/features/registration/types/registration.types.ts
+src/features/reports/hooks/useReports.ts
+src/features/reports/services/report.service.ts
+src/features/reports/types/report.types.ts
+src/features/reports/utils/report-fields.ts
+src/features/reports/utils/report-helpers.ts
+src/features/settings/hooks/useAiSettings.ts
+src/features/settings/hooks/useAutoNumbering.ts
+src/features/settings/hooks/useCronConfig.ts
+src/features/settings/hooks/useDepartments.ts
+src/features/settings/hooks/useDesignations.ts
+src/features/settings/hooks/useEmailConfig.ts
+src/features/settings/hooks/useGoogleIntegration.ts
+src/features/settings/hooks/useIntegrations.ts
+src/features/settings/hooks/useLookups.ts
+src/features/settings/hooks/useMenus.ts
+src/features/settings/hooks/useNotion.ts
+src/features/settings/hooks/usePermissions.ts
+src/features/settings/hooks/useRoles.ts
+src/features/settings/hooks/useUsers.ts
+src/features/settings/hooks/useWhatsAppConfig.ts
+src/features/settings/services/__tests__/cron-config.service.test.ts
+src/features/settings/services/__tests__/email-config.service.test.ts
+src/features/settings/services/__tests__/notion.service.test.ts
+src/features/settings/services/__tests__/roles.service.test.ts
+src/features/settings/services/__tests__/users.service.test.ts
+src/features/settings/services/__tests__/whatsapp-config.service.test.ts
+src/features/settings/services/ai-settings.service.ts
+src/features/settings/services/auto-numbering.service.ts
+src/features/settings/services/cron-config.service.ts
+src/features/settings/services/departments.service.ts
+src/features/settings/services/designations.service.ts
+src/features/settings/services/email-config.service.ts
+src/features/settings/services/google-integration.service.ts
+src/features/settings/services/integrations.service.ts
+src/features/settings/services/lookups.service.ts
+src/features/settings/services/menus.service.ts
+src/features/settings/services/notion.service.ts
+src/features/settings/services/permissions.service.ts
+src/features/settings/services/roles.service.ts
+src/features/settings/services/users.service.ts
+src/features/settings/services/whatsapp-config.service.ts
+src/features/settings/types/ai-settings.types.ts
+src/features/settings/types/auto-numbering.types.ts
+src/features/settings/types/cron-config.types.ts
+src/features/settings/types/department.types.ts
+src/features/settings/types/designation.types.ts
+src/features/settings/types/email-config.types.ts
+src/features/settings/types/google-integration.types.ts
+src/features/settings/types/integrations.types.ts
+src/features/settings/types/lookup.types.ts
+src/features/settings/types/notion.types.ts
+src/features/settings/types/settings.types.ts
+src/features/settings/types/whatsapp-config.types.ts
+src/features/settings/utils/google-services.ts
+src/features/settings/utils/lookup-filters.ts
+src/features/settings/utils/user-filters.ts
+src/features/subscription/hooks/usePlanAdmin.ts
+src/features/subscription/hooks/useSubscription.ts
+src/features/subscription/services/plan-admin.service.ts
+src/features/subscription/services/subscription.service.ts
+src/features/subscription/types/subscription.types.ts
+src/features/subscription/utils/subscription-helpers.ts
+src/features/table-config/hooks/useDataMasking.ts
+src/features/table-config/hooks/useTableConfig.ts
+src/features/table-config/services/data-masking.service.ts
+src/features/table-config/services/table-config.service.ts
+src/features/table-config/types/table-config.types.ts
+src/features/table-config/utils/column-registry.ts
+src/features/table-config/utils/export-utils.ts
+src/features/table-config/utils/mask-utils.ts
+src/features/table-config/utils/merge-config.ts
+src/features/tasks/hooks/useTasks.ts
+src/features/tasks/services/tasks.service.ts
+src/features/tasks/types/tasks.types.ts
+src/features/tour-plans/hooks/useTourPlans.ts
+src/features/tour-plans/services/__tests__/tour-plans.service.test.ts
+src/features/tour-plans/services/tour-plans.service.ts
+src/features/tour-plans/types/tour-plans.types.ts
+src/features/tour-plans/utils/tour-plan-filters.ts
+src/features/vendor/hooks/useVendor.ts
+src/features/vendor/services/vendor.service.ts
+src/features/vendor/types/vendor.types.ts
+src/features/vendor/utils/vendor-helpers.ts
+src/features/wallet/hooks/useWallet.ts
+src/features/wallet/hooks/useWalletAdmin.ts
+src/features/wallet/services/wallet-admin.service.ts
+src/features/wallet/services/wallet.service.ts
+src/features/wallet/types/wallet.types.ts
+src/features/wallet/utils/wallet-helpers.ts
+src/features/whatsapp/hooks/useConversationStore.ts
+src/features/whatsapp/hooks/useWaAnalytics.ts
+src/features/whatsapp/hooks/useWaBroadcasts.ts
+src/features/whatsapp/hooks/useWaChatbot.ts
+src/features/whatsapp/hooks/useWaConversations.ts
+src/features/whatsapp/hooks/useWaOptOuts.ts
+src/features/whatsapp/hooks/useWaQuickReplies.ts
+src/features/whatsapp/hooks/useWaTemplates.ts
+src/features/whatsapp/services/wa-analytics.service.ts
+src/features/whatsapp/services/wa-broadcasts.service.ts
+src/features/whatsapp/services/wa-chatbot.service.ts
+src/features/whatsapp/services/wa-conversations.service.ts
+src/features/whatsapp/services/wa-opt-outs.service.ts
+src/features/whatsapp/services/wa-quick-replies.service.ts
+src/features/whatsapp/services/wa-templates.service.ts
+src/features/whatsapp/types/analytics.types.ts
+src/features/whatsapp/types/broadcast.types.ts
+src/features/whatsapp/types/chatbot.types.ts
+src/features/whatsapp/types/conversation.types.ts
+src/features/whatsapp/types/template.types.ts
+src/features/whatsapp/types/whatsapp.types.ts
+src/features/whatsapp/utils/wa-filters.ts
+src/features/whatsapp/utils/wa-status-badges.ts
+src/features/workflows/hooks/useWorkflowExecution.ts
+src/features/workflows/hooks/useWorkflows.ts
+src/features/workflows/services/workflow-execution.service.ts
+src/features/workflows/services/workflows.service.ts
+src/features/workflows/types/workflows.types.ts
+src/hooks/__tests__/useBulkOperations.test.ts
+src/hooks/__tests__/useBulkSelect.test.ts
+src/hooks/useBulkOperations.ts
+src/hooks/useBulkSelect.ts
+src/hooks/useDynamicFilterConfig.ts
+src/hooks/useLookup.ts
+src/hooks/usePermission.ts
+src/hooks/useTableFilters.ts
+src/lib/__tests__/utils.test.ts
+src/lib/format-currency.ts
+src/lib/format-date.ts
+src/lib/validators.ts
+src/middleware.ts
+src/services/__tests__/api-client.test.ts
+src/services/__tests__/lookup.service.test.ts
+src/services/__tests__/menu.service.test.ts
+src/services/__tests__/permission.service.test.ts
+src/services/api-client.ts
+src/services/lookup.service.ts
+src/services/menu.service.ts
+src/services/permission.service.ts
+src/stores/__tests__/auth.store.test.ts
+src/stores/__tests__/menu.store.test.ts
+src/stores/__tests__/permission.store.test.ts
+src/stores/auth.store.ts
+src/stores/menu.store.ts
+src/stores/permission.store.ts
+src/stores/side-panel.store.ts
+src/types/api-response.ts
+src/types/lookup.ts
+src/types/menu.ts
+=== EXCEPTION FILTER ===
+=== AUDIT FILES ===
+export type AuditAction =
+  | "CREATE"
+  | "UPDATE"
+  | "DELETE"
+  | "RESTORE"
+  | "PERMANENT_DELETE"
+  | "LOGIN"
+  | "LOGOUT"
+  | "EXPORT"
+  | "IMPORT"
+  | "BULK_UPDATE"
+  | "BULK_DELETE";
+
+export type AuditEntityType =
+  | "contact"
+  | "organization"
+  | "lead"
+  | "activity"
+  | "user"
+  | "role"
+  | "raw_contact"
+  | "quotation"
+  | "invoice"
+  | "payment"
+  | "installation"
+  | "training"
+  | "ticket"
+  | "workflow"
+  | "template";
+
+export interface AuditFieldChange {
+  id: string;
+  fieldName: string;
+  oldValue: string | null;
+  newValue: string | null;
+  oldDisplayValue?: string | null;
+  newDisplayValue?: string | null;
+}
+
+export interface AuditLogItem {
+  id: string;
+  entityType: string;
+  entityId: string;
+  action: string;
+  summary: string;
+  beforeSnapshot?: Record<string, unknown> | null;
+  afterSnapshot?: Record<string, unknown> | null;
+  performedById?: string | null;
+  performedByName?: string | null;
+  performedByEmail?: string | null;
+  performedByRole?: string | null;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  httpMethod?: string | null;
+  requestUrl?: string | null;
+  source?: string | null;
+  module?: string | null;
+  correlationId?: string | null;
+  tags?: string[];
+  isSensitive?: boolean;
+  fieldChanges?: AuditFieldChange[];
+  createdAt: string;
+}
+
+export interface AuditDiff {
+  id: string;
+  entityType: string;
+  entityId: string;
+  action: string;
+  changes: AuditFieldChange[];
+  beforeSnapshot?: Record<string, unknown> | null;
+  afterSnapshot?: Record<string, unknown> | null;
+}
+
+export interface AuditQueryParams {
+  page?: number;
+  limit?: number;
+  entityType?: string;
+  action?: string;
+  userId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export interface AuditSearchParams extends AuditQueryParams {
+  q?: string;
+  field?: string;
+  module?: string;
+  sensitive?: boolean;
+}
+
+export interface AuditStats {
+  totalLogs: number;
+  byAction: Record<string, number>;
+  byEntityType: Record<string, number>;
+  byUser: { userId: string; name: string; count: number }[];
+}
+import apiClient from "@/services/api-client";
+import type { ApiResponse } from "@/types/api-response";
+
+import type {
+  AuditLogItem,
+  AuditDiff,
+  AuditQueryParams,
+  AuditSearchParams,
+  AuditStats,
+} from "../types/audit.types";
+
+const BASE_URL = "/api/v1/audit";
+
+export const auditService = {
+  /** Global audit feed with pagination & filters. */
+  getFeed: (params?: AuditQueryParams) =>
+    apiClient
+      .get<ApiResponse<AuditLogItem[]>>(`${BASE_URL}/feed`, { params })
+      .then((r) => r.data),
+
+  /** Full-text search across audit logs. */
+  search: (params?: AuditSearchParams) =>
+    apiClient
+      .get<ApiResponse<AuditLogItem[]>>(`${BASE_URL}/search`, { params })
+      .then((r) => r.data),
+
+  /** Single audit log detail. */
+  getById: (id: string) =>
+    apiClient
+      .get<ApiResponse<AuditLogItem>>(`${BASE_URL}/${id}`)
+      .then((r) => r.data),
+
+  /** Diff view for a specific audit log. */
+  getDiff: (id: string) =>
+    apiClient
+      .get<ApiResponse<AuditDiff>>(`${BASE_URL}/${id}/diff`)
+      .then((r) => r.data),
+
+  /** Aggregate statistics. */
+  getStats: (params?: Pick<AuditQueryParams, "dateFrom" | "dateTo">) =>
+    apiClient
+      .get<ApiResponse<AuditStats>>(`${BASE_URL}/stats`, { params })
+      .then((r) => r.data),
+
+  /** Export audit trail. */
+  export: (body: {
+    format: "CSV" | "XLSX";
+    dateFrom: string;
+    dateTo: string;
+    entityType?: string;
+    entityId?: string;
+    userId?: string;
+  }) =>
+    apiClient
+      .post<ApiResponse<{ message: string }>>(`${BASE_URL}/export`, body)
+      .then((r) => r.data),
+};
+=== ERROR FILES ===
+import type { ErrorLogEntry, ErrorSeverity } from "../types/dev-panel.types";
+
+// ── Singleton error log ─────────────────────────────────
+
+const MAX_LOG_SIZE = 200;
+let errorLog: ErrorLogEntry[] = [];
+let nextId = 1;
+let listeners: Array<() => void> = [];
+
+function notify() {
+  listeners.forEach((fn) => fn());
+}
+
+export function getErrorLog(): ErrorLogEntry[] {
+  return errorLog;
+}
+
+export function clearErrorLog() {
+  errorLog = [];
+  notify();
+}
+
+export function subscribeErrorLog(listener: () => void): () => void {
+  listeners.push(listener);
+  return () => {
+    listeners = listeners.filter((l) => l !== listener);
+  };
+}
+
+export function addErrorEntry(
+  severity: ErrorSeverity,
+  message: string,
+  extra?: Partial<Pick<ErrorLogEntry, "stack" | "component" | "url" | "metadata">>,
+) {
+  const entry: ErrorLogEntry = {
+    id: `err-${nextId++}`,
+    timestamp: new Date().toISOString(),
+    severity,
+    message,
+    ...extra,
+  };
+  errorLog = [entry, ...errorLog].slice(0, MAX_LOG_SIZE);
+  notify();
+}
+
+// ── Global error listeners ──────────────────────────────
+
+let installed = false;
+
+export function installGlobalErrorCapture() {
+  if (installed || typeof window === "undefined") return;
+  installed = true;
+
+  window.addEventListener("error", (event) => {
+    addErrorEntry("error", event.message || "Uncaught error", {
+      stack: event.error?.stack,
+      url: event.filename ? `${event.filename}:${event.lineno}:${event.colno}` : undefined,
+    });
+  });
+
+  window.addEventListener("unhandledrejection", (event) => {
+    const reason = event.reason;
+    const message =
+      typeof reason === "string"
+        ? reason
+        : reason?.message ?? "Unhandled Promise rejection";
+    addErrorEntry("error", message, {
+      stack: reason?.stack,
+    });
+  });
+
+  // Intercept console.warn to capture warnings
+  const originalWarn = console.warn;
+  console.warn = (...args: unknown[]) => {
+    addErrorEntry("warning", args.map(String).join(" "));
+    originalWarn.apply(console, args);
+  };
+}

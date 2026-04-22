@@ -1,0 +1,1054 @@
+/* ── Side Panel System ─────────────────────────────────
+   Prefix: .sp-  (separate from CoreUI — safe from updates)
+   ──────────────────────────────────────────────────── */
+
+/* ── Panel Container ──────────────────────────────── */
+.sp-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+  border-left: 1px solid #e5e7eb;
+  transform: translateX(0);
+  transition: width 0.25s ease, transform 0.25s ease;
+  overflow: hidden;
+}
+
+.sp-panel--entering {
+  animation: sp-slide-in 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+@keyframes sp-slide-in {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+/* ── Width States ─────────────────────────────────── */
+.sp-panel--normal {
+  width: 600px;
+}
+
+.sp-panel--maximized {
+  width: 800px;
+}
+
+.sp-panel--fullscreen {
+  width: 100%;
+}
+
+.sp-panel--inset {
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+}
+
+/* ── Header ───────────────────────────────────────── */
+.sp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  flex-shrink: 0;
+}
+
+.sp-header__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+}
+
+.sp-header__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sp-header__custom-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 16px;
+  border-left: 1px solid #d1d5db;
+}
+
+.sp-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 16px;
+  flex-shrink: 0;
+}
+
+.sp-header__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sp-header__btn:hover {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.sp-header__btn--close:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* ── Body (scrollable) ────────────────────────────── */
+.sp-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px;
+  background: #fff;
+}
+
+/* ── Footer ───────────────────────────────────────── */
+.sp-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+  flex-shrink: 0;
+}
+
+/* ── Shared Button Styles ─────────────────────────── */
+.sp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+
+.sp-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sp-btn--primary {
+  background: var(--color-primary, #1e5f74);
+  color: #fff;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.sp-btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-hover, #174d5f);
+}
+
+.sp-btn--secondary {
+  background: #fff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.sp-btn--secondary:hover:not(:disabled) {
+  background: #f9fafb;
+}
+
+.sp-btn--danger {
+  background: #dc2626;
+  color: #fff;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.sp-btn--danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.sp-btn--ghost {
+  background: transparent;
+  color: #6b7280;
+  padding: 6px;
+  font-size: 13px;
+}
+
+.sp-btn--ghost:hover:not(:disabled) {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+/* ── Taskbar (inside footer-area flow) ────────────── */
+.sp-taskbar {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #111827;
+  border-top: 1px solid #1f2937;
+}
+
+.sp-taskbar__wrapper {
+  position: relative;
+}
+
+/* ── Taskbar Preview Popup ────────────────────────── */
+.sp-taskbar__preview {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 8px;
+  width: 256px;
+  height: 192px;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  animation: sp-preview-in 0.15s ease;
+  z-index: 9999;
+}
+
+@keyframes sp-preview-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sp-taskbar__preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sp-taskbar__preview-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sp-taskbar__preview-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.sp-taskbar__preview-close:hover {
+  background: #e5e7eb;
+  color: #dc2626;
+}
+
+.sp-taskbar__preview-body {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  pointer-events: none;
+  background: #fff;
+}
+
+.sp-taskbar__preview-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 600px;
+  height: 400px;
+  transform: scale(0.426);
+  transform-origin: top left;
+  opacity: 0.9;
+}
+
+/* ── Taskbar Tab ──────────────────────────────────── */
+.sp-taskbar__tab {
+  border: 1px solid #374151;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+  width: 192px;
+  background: #1f2937;
+  transition: background 0.15s;
+}
+
+.sp-taskbar__tab:hover {
+  background: #374151;
+}
+
+.sp-taskbar__tab--active {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+.sp-taskbar__tab-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.sp-taskbar__tab-label {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 4px;
+}
+
+.sp-taskbar__tab-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.sp-taskbar__tab-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0;
+}
+
+.sp-taskbar__tab-btn:hover {
+  background: #4b5563;
+  color: #fff;
+}
+
+.sp-taskbar__tab-btn--close:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+/* ── No-padding body (for dashboard panels) ──────── */
+.sp-body--no-pad {
+  padding: 0;
+}
+
+/* ── Entity Dashboard Layout ─────────────────────── */
+.sp-dashboard__wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.sp-dashboard__top {
+  flex-shrink: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.sp-dashboard {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sp-dashboard__profile {
+  width: 230px;
+  flex-shrink: 0;
+  border-right: 1px solid #e5e7eb;
+  background: #f9fafb;
+  overflow-y: auto;
+  padding: 20px 16px;
+}
+
+.sp-dashboard__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sp-dashboard__tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #e5e7eb;
+  padding: 0 16px;
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.sp-dashboard__tab {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.sp-dashboard__tab:hover {
+  color: #1f2937;
+}
+
+.sp-dashboard__tab--active {
+  color: var(--color-primary, #1e5f74);
+  border-bottom-color: var(--color-primary, #1e5f74);
+}
+
+.sp-dashboard__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.sp-dashboard__kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* ── Filled KPI Card ─────────────────────────────── */
+
+.kpi-card-filled {
+  border-radius: 12px;
+  padding: 16px 14px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card-filled:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+}
+
+.kpi-card-filled__icon-ring {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.kpi-card-filled__value {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.kpi-card-filled__title {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.85;
+  margin: 4px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpi-card-filled__trend {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 6px;
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+/* ── Clean KPI Card ──────────────────────────────── */
+
+.kpi-card-clean {
+  position: relative;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card-clean:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.kpi-card-clean__accent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.kpi-card-clean__content {
+  padding: 14px 14px 14px 16px;
+}
+
+.kpi-card-clean__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.kpi-card-clean__title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.kpi-card-clean__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpi-card-clean__value {
+  font-size: 26px;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.kpi-card-clean__bottom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.kpi-card-clean__trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.kpi-card-clean__subtitle {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* ── Dashboard Profile Card Internals ────────────── */
+.sp-dashboard__avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.sp-dashboard__info-table {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.sp-dashboard__info-table dt {
+  font-size: 11px;
+  color: #9ca3af;
+  padding: 6px 0 2px;
+}
+
+.sp-dashboard__info-table dd {
+  font-size: 13px;
+  color: #1f2937;
+  font-weight: 500;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+/* ── Quick Add Activity ──────────────────────────── */
+
+.quick-add-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #3b82f6;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quick-add-trigger:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.quick-add-card {
+  border: 2px solid #d1d5db;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  overflow: visible;
+}
+
+/* ── Header ─────── */
+.quick-add-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 18px 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.quick-add-card__header-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.quick-add-card__type-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.06);
+}
+
+.quick-add-card__subject {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  background: transparent;
+  padding: 0;
+}
+
+.quick-add-card__subject::placeholder {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* ── Description ── */
+.quick-add-card__desc {
+  display: block;
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #334155;
+  resize: none;
+  padding: 10px 18px;
+  background: transparent;
+  line-height: 1.6;
+}
+
+.quick-add-card__desc::placeholder {
+  color: #9ca3af;
+}
+
+/* ── Chip Row ───── */
+.quick-add-card__row {
+  padding: 10px 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.quick-add-card__chips {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.quick-add-card__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #334155;
+  background: #fff;
+  transition: border-color 0.15s;
+}
+
+.quick-add-card__chip--date {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1e40af;
+}
+
+/* ── Icon button ── */
+.quick-add-card__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid #d1d5db;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.quick-add-card__icon-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.quick-add-card__icon-btn--active {
+  background: #dbeafe;
+  border-color: #3b82f6;
+}
+
+/* ── Actions button ── */
+.quick-add-card__actions-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #64748b;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.quick-add-card__actions-btn:hover {
+  border-color: #64748b;
+  color: #334155;
+  background: #f8fafc;
+}
+
+/* ── Dropdown ───── */
+.quick-add-card__dropdown-wrap {
+  position: relative;
+}
+
+.quick-add-card__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 6px;
+  min-width: 220px;
+  background: #fff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 6px 0;
+  z-index: 50;
+}
+
+.quick-add-card__dropdown--right {
+  left: auto;
+  right: 0;
+}
+
+.quick-add-card__dropdown-title {
+  padding: 8px 16px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quick-add-card__dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 16px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  color: #1e293b;
+  cursor: pointer;
+  text-align: left;
+  font-weight: 400;
+  transition: background 0.1s;
+}
+
+.quick-add-card__dropdown-item:hover {
+  background: #f1f5f9;
+}
+
+.quick-add-card__dropdown-item.active {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* ── Type Row ───── */
+.quick-add-card__type-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.quick-add-card__type-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.quick-add-card__type-select {
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 700;
+  outline: none;
+  cursor: pointer;
+}
+
+/* ── Field Rows ─── */
+.quick-add-card__field-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.quick-add-card__field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.quick-add-card__field-value {
+  font-size: 14px;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.quick-add-card__field-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #334155;
+  background: transparent;
+}
+
+.quick-add-card__field-input::placeholder {
+  color: #9ca3af;
+}
+
+/* ── Footer ─────── */
+.quick-add-card__footer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-top: 2px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.quick-add-card__cancel {
+  background: none;
+  border: none;
+  color: #475569;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quick-add-card__cancel:hover {
+  color: #0f172a;
+}
+
+/* ── Activity Timeline ──────────────────────────── */
+
+.activity-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+
+.activity-timeline::before {
+  content: "";
+  position: absolute;
+  left: 17px;
+  top: 20px;
+  bottom: 20px;
+  width: 2px;
+  background: #e5e7eb;
+}
+
+.activity-timeline__item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  position: relative;
+}
+
+.activity-timeline__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.activity-timeline__body {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  transition: box-shadow 0.15s ease;
+}
+
+.activity-timeline__body:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.activity-timeline__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.activity-timeline__subject {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.activity-timeline__outcome {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.activity-timeline__meta {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.activity-timeline__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 768px) {
+  .sp-panel--normal {
+    width: 100% !important;
+  }
+  .sp-panel--maximized {
+    width: 100%;
+  }
+  .sp-dashboard {
+    flex-direction: column;
+  }
+  .sp-dashboard__profile {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    max-height: 200px;
+  }
+}
