@@ -1,0 +1,54 @@
+/* Partner brand theme template — copy brands/crmsoft/theme/variables.css
+ * and replace all values with partner's design tokens.
+ *
+ * Required: ALL variables below must be defined.
+ * Optional: add partner-specific variables after the required block.
+ */
+
+:root {
+  /* ── Primary palette ──────────────────────────────── */
+  --brand-primary:         #REPLACE;
+  --brand-primary-hover:   #REPLACE;
+  --brand-primary-light:   #REPLACE;
+  --brand-primary-text:    #ffffff;
+
+  /* ── Secondary palette ────────────────────────────── */
+  --brand-secondary:       #REPLACE;
+  --brand-secondary-hover: #REPLACE;
+
+  /* ── Accent ───────────────────────────────────────── */
+  --brand-accent:          #REPLACE;
+  --brand-accent-light:    #REPLACE;
+
+  /* ── Status (keep accessible contrast ratios) ─────── */
+  --brand-success:         #16a34a;
+  --brand-warning:         #d97706;
+  --brand-error:           #dc2626;
+  --brand-info:            #0284c7;
+
+  /* ── Surface ──────────────────────────────────────── */
+  --brand-bg:              #REPLACE;
+  --brand-surface:         #ffffff;
+  --brand-surface-raised:  #REPLACE;
+  --brand-border:          #REPLACE;
+
+  /* ── Typography ───────────────────────────────────── */
+  --brand-text-primary:    #REPLACE;
+  --brand-text-secondary:  #REPLACE;
+  --brand-text-muted:      #REPLACE;
+
+  /* ── Brand identity ────────────────────────────────── */
+  --brand-name:            'REPLACE_ME';
+  --brand-logo:            '/assets/partner-logo.svg';
+  --brand-favicon:         '/assets/partner-favicon.ico';
+
+  /* ── Sidebar ───────────────────────────────────────── */
+  --brand-sidebar-bg:      #REPLACE;
+  --brand-sidebar-text:    #REPLACE;
+  --brand-sidebar-active:  #REPLACE;
+
+  /* ── Radius + spacing (inherit from crmsoft or override) ─ */
+  --brand-radius-sm:       4px;
+  --brand-radius-md:       8px;
+  --brand-radius-lg:       12px;
+}
