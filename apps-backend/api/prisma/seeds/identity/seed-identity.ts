@@ -22,14 +22,19 @@ const TENANT_SLUG = 'default';
 async function main() {
   console.log('🌱 Seeding IdentityDB...\n');
 
+  const platformInitialPw = process.env.PLATFORM_INITIAL_PASSWORD;
+  const adminInitialPw = process.env.ADMIN_INITIAL_PASSWORD;
+  if (!platformInitialPw) throw new Error('PLATFORM_INITIAL_PASSWORD env var is required for seeding');
+  if (!adminInitialPw) throw new Error('ADMIN_INITIAL_PASSWORD env var is required for seeding');
+
   // ─── SUPER ADMIN (no tenantId) ───
-  const superAdminPw = await bcrypt.hash('SuperAdmin@123', 12);
+  const superAdminPw = await bcrypt.hash(platformInitialPw, 12);
   await identity.superAdmin.upsert({
     where: { email: 'platform@crm.com' },
     update: {},
     create: { email: 'platform@crm.com', password: superAdminPw, firstName: 'Platform', lastName: 'Admin' },
   });
-  console.log('✅ SuperAdmin: platform@crm.com / SuperAdmin@123');
+  console.log('✅ SuperAdmin: platform@crm.com (password from PLATFORM_INITIAL_PASSWORD)');
 
   // ─── DEFAULT TENANT ───
   const tenant = await identity.tenant.upsert({
@@ -143,7 +148,7 @@ async function main() {
   console.log(`✅ Permissions assigned to all roles`);
 
   // ─── ADMIN USER ───
-  const pw = await bcrypt.hash('Admin@123', 12);
+  const pw = await bcrypt.hash(adminInitialPw, 12);
   const saRoleId = roleMap['SUPER_ADMIN'];
   const adminUser = await identity.user.upsert({
     where: { tenantId_email: { tenantId, email: 'admin@crm.com' } },
@@ -197,13 +202,13 @@ async function main() {
   console.log(`   Roles:        ${counts[1]}`);
   console.log(`   Permissions:  ${counts[2]}`);
   console.log(`   SuperAdmins:  ${counts[3]}`);
-  console.log('\n🔑 Credentials:');
-  console.log('   platform@crm.com     / SuperAdmin@123  (SuperAdmin)');
-  console.log('   admin@crm.com        / Admin@123       (SUPER_ADMIN role)');
-  console.log('   manager@crm.com      / Admin@123       (MANAGER)');
-  console.log('   sales1@crm.com       / Admin@123       (SALES_EXECUTIVE)');
-  console.log('   marketing1@crm.com   / Admin@123       (MARKETING_STAFF)');
-  console.log('   support1@crm.com     / Admin@123       (SUPPORT_AGENT)');
+  console.log('\n🔑 Credentials seeded (passwords from env vars):');
+  console.log('   platform@crm.com     → PLATFORM_INITIAL_PASSWORD  (SuperAdmin)');
+  console.log('   admin@crm.com        → ADMIN_INITIAL_PASSWORD      (SUPER_ADMIN role)');
+  console.log('   manager@crm.com      → ADMIN_INITIAL_PASSWORD      (MANAGER)');
+  console.log('   sales1@crm.com       → ADMIN_INITIAL_PASSWORD      (SALES_EXECUTIVE)');
+  console.log('   marketing1@crm.com   → ADMIN_INITIAL_PASSWORD      (MARKETING_STAFF)');
+  console.log('   support1@crm.com     → ADMIN_INITIAL_PASSWORD      (SUPPORT_AGENT)');
 }
 
 main()

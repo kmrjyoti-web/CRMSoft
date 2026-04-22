@@ -68,6 +68,11 @@ async function seedMenus(tenantId: string) {
 async function main() {
   console.log('🌱 Seeding...\n');
 
+  const platformInitialPw = process.env.PLATFORM_INITIAL_PASSWORD;
+  const adminInitialPw = process.env.ADMIN_INITIAL_PASSWORD;
+  if (!platformInitialPw) throw new Error('PLATFORM_INITIAL_PASSWORD env var is required for seeding');
+  if (!adminInitialPw) throw new Error('ADMIN_INITIAL_PASSWORD env var is required for seeding');
+
   // ─── PLANS (global, no tenantId) ───
   const freePlan = await prisma.plan.upsert({
     where: { code: 'FREE' },
@@ -124,7 +129,7 @@ async function main() {
   console.log('✅ Tenant usage');
 
   // ─── SUPER ADMIN (global, no tenantId) ───
-  const superAdminPw = await bcrypt.hash('SuperAdmin@123', 12);
+  const superAdminPw = await bcrypt.hash(platformInitialPw, 12);
   await prisma.superAdmin.upsert({
     where: { email: 'platform@crm.com' },
     update: {},
@@ -157,7 +162,7 @@ async function main() {
   console.log(`✅ ${pc} permissions`);
 
   // ─── USERS ───
-  const pw = await bcrypt.hash('Admin@123', 12);
+  const pw = await bcrypt.hash(adminInitialPw, 12);
   const sa = roles.find(r => r.name === 'SUPER_ADMIN')!;
   const admin = await prisma.user.upsert({ where: { tenantId_email: { tenantId, email: 'admin@crm.com' } }, update: {}, create: { tenantId, email: 'admin@crm.com', password: pw, firstName: 'System', lastName: 'Admin', roleId: sa.id } });
   const mgr = roles.find(r => r.name === 'MANAGER')!;
@@ -679,13 +684,14 @@ async function main() {
   const { safeCompleteSeed } = await import('./seeds/safe-complete-seed');
   await safeCompleteSeed(prisma);
 
-  console.log('\n🔑 Platform: platform@crm.com / SuperAdmin@123');
-  console.log('🔑 Admin:    admin@crm.com / Admin@123');
-  console.log('🔑 Employee: manager@crm.com / Admin@123');
-  console.log('🔑 Employee: sales1@crm.com / Admin@123');
-  console.log('🔑 Employee: marketing1@crm.com / Admin@123');
-  console.log('🔑 Customer: customer@example.com / Admin@123');
-  console.log('🔑 Partner:  partner@example.com / Admin@123');
+  console.log('\n🔑 Seeded accounts (passwords from env vars):');
+  console.log('🔑 Platform: platform@crm.com → PLATFORM_INITIAL_PASSWORD');
+  console.log('🔑 Admin:    admin@crm.com    → ADMIN_INITIAL_PASSWORD');
+  console.log('🔑 Employee: manager@crm.com  → ADMIN_INITIAL_PASSWORD');
+  console.log('🔑 Employee: sales1@crm.com   → ADMIN_INITIAL_PASSWORD');
+  console.log('🔑 Employee: marketing1@crm.com → ADMIN_INITIAL_PASSWORD');
+  console.log('🔑 Customer: customer@example.com → ADMIN_INITIAL_PASSWORD');
+  console.log('🔑 Partner:  partner@example.com  → ADMIN_INITIAL_PASSWORD');
   // ─── INVENTORY SYSTEM ───
   console.log('\n📦 Seeding inventory system...');
   await seedInventory(prisma);

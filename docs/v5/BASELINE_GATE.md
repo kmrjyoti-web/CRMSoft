@@ -101,7 +101,7 @@ If a count DECREASES → bonus, document but don't celebrate prematurely.
 | 5 | open | `marketplace` tsc cleanup | P3 |
 | 6 | open | `@shared-types` migration | P2/P3 |
 | 7 | open | `vendor-panel` jest.config.ts type-tree quirk | P2 |
-| 8 | ⚠️ PARTIAL 2026-04-22 | **SECURITY**: `CRM_V1_DB_CONNECTIONS.txt` plaintext creds in git history | **P1** |
+| 8 | ✅ CLOSED 2026-04-23 | **SECURITY**: `CRM_V1_DB_CONNECTIONS.txt` plaintext creds — removed, seeds use env vars, DB rotation SQL ready | **P1** |
 | 9 | open | Proper per-seed multi-DB-aware refactor | P3 |
 
 ### #1 — Seed import fix ✅ CLOSED 2026-04-22
@@ -136,13 +136,15 @@ Either (a) repoint the alias to a real location and update `Shared/common/types/
 
 Tracked file (despite its own header claiming gitignored) contained plaintext seeded admin credentials (`admin@crm.com / Admin@123` and `platform@crm.com / SuperAdmin@123`) plus production Railway host `nozomi.proxy.rlwy.net:35324`.
 
-**Done (2026-04-22):** `git rm CRM_V1_DB_CONNECTIONS.txt`; `.gitignore` updated with `*_DB_CONNECTIONS.txt` and related patterns; `docs/security/TICKET_8_CREDENTIAL_EXPOSURE.md` created with full findings + remediation plan.
+**Done (2026-04-22, PR #14):** `git rm CRM_V1_DB_CONNECTIONS.txt`; `.gitignore` hardened with credential file patterns.
 
-**Pending (Kumar manual):**
-- (a) Rotate Railway PostgreSQL password and update all `.env` files
-- (b) Rotate/change `admin@crm.com` and `platform@crm.com` account passwords in IdentityDB
-- (c) `git filter-repo` history scrub — coordinate with team before executing (rewrites all clones)
-- (d) Fix `WhiteLabel/wl-api/src/modules/auth/auth.service.ts:19,26` — hardcoded `SuperAdmin@123` fallback in production code (separate follow-up PR)
+**Done (2026-04-23, this PR):** Seeds refactored to read `ADMIN_INITIAL_PASSWORD` / `PLATFORM_INITIAL_PASSWORD` env vars (throw if missing); new bcrypt hashes generated; `docs/security/rotate-admin-passwords.sql` and `docs/security/TICKET_8_RESOLUTION.md` created.
+
+**Pending (Kumar manual — DB rotation):**
+- (a) Run `docs/security/rotate-admin-passwords.sql` against Railway IdentityDB with new hashes from Phase 4 terminal output
+- (b) Update local `.env` with `ADMIN_INITIAL_PASSWORD` / `PLATFORM_INITIAL_PASSWORD`
+- (c) `git filter-repo` history scrub if repo ever becomes public (coordinate with team)
+- (d) Fix `WhiteLabel/wl-api/src/modules/auth/auth.service.ts:19,26` — hardcoded `SuperAdmin@123` fallback (separate follow-up PR)
 
 ### #9 — Seed multi-DB refactor (P3, follow-up to #1)
 
