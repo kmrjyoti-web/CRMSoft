@@ -1,0 +1,30 @@
+{
+  "brandId": "REPLACE_ME",
+  "displayName": "Partner Brand Name",
+  "version": "1.0.0",
+  "features": {
+    "marketplace":      false,
+    "whiteLabel":       true,
+    "customerPortal":   true,
+    "aiAssistant":      false,
+    "multiVertical":    false,
+    "bulkImport":       true,
+    "advancedReports":  false
+  },
+  "copy": {
+    "productName": "REPLACE_ME",
+    "tagline":     "REPLACE_ME",
+    "supportEmail":"REPLACE_ME@example.com",
+    "docsUrl":     "https://docs.REPLACE_ME.in"
+  },
+  "portals": {
+    "crm-admin":       { "port": 3000, "enabled": true },
+    "customer-portal": { "port": 3007, "enabled": true }
+  },
+  "assets": {
+    "logo":     "/brand/REPLACE_ME/logo.svg",
+    "favicon":  "/brand/REPLACE_ME/favicon.ico",
+    "loginBg":  "/brand/REPLACE_ME/login-bg.jpg"
+  },
+  "vertical": "REPLACE_ME"
+}

@@ -1,0 +1,85 @@
+/* CRMSoft — default brand design tokens
+ * All portals use these when BRAND=crmsoft (the default).
+ * Generated from: apps-frontend/crm-admin/src/app/globals.css palette audit
+ */
+
+:root {
+  /* ── Brand identity ──────────────────────────────────────── */
+  --brand-id:              'crmsoft';
+  --brand-name:            'CRMSoft';
+  --brand-tagline:         'The CRM Built for Growth';
+
+  /* ── Primary ─────────────────────────────────────────────── */
+  --brand-primary:         #2563eb;
+  --brand-primary-hover:   #1d4ed8;
+  --brand-primary-active:  #1e40af;
+  --brand-primary-light:   #dbeafe;
+  --brand-primary-text:    #ffffff;
+
+  /* ── Secondary ───────────────────────────────────────────── */
+  --brand-secondary:       #64748b;
+  --brand-secondary-hover: #475569;
+  --brand-secondary-light: #f1f5f9;
+  --brand-secondary-text:  #ffffff;
+
+  /* ── Accent ──────────────────────────────────────────────── */
+  --brand-accent:          #7c3aed;
+  --brand-accent-hover:    #6d28d9;
+  --brand-accent-light:    #ede9fe;
+  --brand-accent-text:     #ffffff;
+
+  /* ── Status ──────────────────────────────────────────────── */
+  --brand-success:         #16a34a;
+  --brand-success-light:   #dcfce7;
+  --brand-warning:         #d97706;
+  --brand-warning-light:   #fef3c7;
+  --brand-error:           #dc2626;
+  --brand-error-light:     #fee2e2;
+  --brand-info:            #0284c7;
+  --brand-info-light:      #e0f2fe;
+
+  /* ── Surface ─────────────────────────────────────────────── */
+  --brand-bg:              #f8fafc;
+  --brand-surface:         #ffffff;
+  --brand-surface-raised:  #f1f5f9;
+  --brand-surface-overlay: rgba(15, 23, 42, 0.5);
+  --brand-border:          #e2e8f0;
+  --brand-border-strong:   #cbd5e1;
+  --brand-divider:         #f1f5f9;
+
+  /* ── Typography ──────────────────────────────────────────── */
+  --brand-font-sans:       'Inter', system-ui, -apple-system, sans-serif;
+  --brand-font-mono:       'JetBrains Mono', 'Fira Code', monospace;
+  --brand-text-primary:    #0f172a;
+  --brand-text-secondary:  #475569;
+  --brand-text-muted:      #94a3b8;
+  --brand-text-disabled:   #cbd5e1;
+  --brand-text-inverse:    #ffffff;
+
+  /* ── Sidebar ─────────────────────────────────────────────── */
+  --brand-sidebar-bg:      #1e293b;
+  --brand-sidebar-bg-hover:#2d3d53;
+  --brand-sidebar-text:    #cbd5e1;
+  --brand-sidebar-text-active: #ffffff;
+  --brand-sidebar-active:  #2563eb;
+  --brand-sidebar-active-bg: rgba(37, 99, 235, 0.15);
+  --brand-sidebar-width:   260px;
+
+  /* ── Header ──────────────────────────────────────────────── */
+  --brand-header-bg:       #ffffff;
+  --brand-header-border:   #e2e8f0;
+  --brand-header-height:   60px;
+
+  /* ── Radius ──────────────────────────────────────────────── */
+  --brand-radius-xs:       2px;
+  --brand-radius-sm:       4px;
+  --brand-radius-md:       8px;
+  --brand-radius-lg:       12px;
+  --brand-radius-xl:       16px;
+  --brand-radius-full:     9999px;
+
+  /* ── Shadows ─────────────────────────────────────────────── */
+  --brand-shadow-sm:       0 1px 2px 0 rgba(0,0,0,0.05);
+  --brand-shadow-md:       0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+  --brand-shadow-lg:       0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+}
