@@ -28,7 +28,8 @@
       "@modules/customer/*": ["src/modules/customer/*"],
       "@modules/softwarevendor/*": ["src/modules/softwarevendor/*"],
       "@modules/marketplace/*": ["src/modules/marketplace/*"],
-      "@modules/plugins/*": ["src/modules/plugins/*"]
+      "@modules/plugins/*": ["src/modules/plugins/*"],
+      "@verticals/*": ["../../verticals/*"]
     }
   },
   "include": [
