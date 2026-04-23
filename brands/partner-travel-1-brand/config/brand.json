@@ -1,0 +1,33 @@
+{
+  "brandId": "partner-travel-1",
+  "displayName": "TravelPro CRM",
+  "version": "1.0.0",
+  "features": {
+    "marketplace": false,
+    "whiteLabel": true,
+    "customerPortal": true,
+    "aiAssistant": true,
+    "multiVertical": false,
+    "bulkImport": true,
+    "advancedReports": true,
+    "tourPlans": true,
+    "itineraryBuilder": true,
+    "bookingCalendar": true
+  },
+  "copy": {
+    "productName": "TravelPro CRM",
+    "tagline": "Journeys Managed. Customers Delighted.",
+    "supportEmail": "support@travelpro.in",
+    "docsUrl": "https://docs.travelpro.in"
+  },
+  "portals": {
+    "crm-admin":        { "port": 3000, "enabled": true },
+    "customer-portal":  { "port": 3007, "enabled": true }
+  },
+  "assets": {
+    "logo": "/brand/partner-travel-1/logo.svg",
+    "favicon": "/brand/partner-travel-1/favicon.ico",
+    "loginBg": "/brand/partner-travel-1/login-bg.jpg"
+  },
+  "vertical": "travel"
+}
