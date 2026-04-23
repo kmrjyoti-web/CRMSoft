@@ -1,0 +1,30 @@
+{
+  "brandId": "partner-electronic-1",
+  "displayName": "ElectroHub CRM",
+  "version": "1.0.0",
+  "features": {
+    "marketplace":      true,
+    "whiteLabel":       true,
+    "customerPortal":   true,
+    "aiAssistant":      false,
+    "multiVertical":    false,
+    "bulkImport":       true,
+    "advancedReports":  false
+  },
+  "copy": {
+    "productName": "ElectroHub CRM",
+    "tagline":     "Devices Tracked. Deals Closed.",
+    "supportEmail":"support@electrohub.in",
+    "docsUrl":     "https://docs.electrohub.in"
+  },
+  "portals": {
+    "crm-admin":       { "port": 3000, "enabled": true },
+    "customer-portal": { "port": 3007, "enabled": true }
+  },
+  "assets": {
+    "logo":     "/brand/partner-electronic-1/logo.svg",
+    "favicon":  "/brand/partner-electronic-1/favicon.ico",
+    "loginBg":  "/brand/partner-electronic-1/login-bg.jpg"
+  },
+  "vertical": "electronic"
+}
