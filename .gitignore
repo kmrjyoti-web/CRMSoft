@@ -16,6 +16,9 @@ Thumbs.db
 dist/
 build/
 *.tsbuildinfo
+.next/
+.turbo/
+next-env.d.ts
 
 # ────────────────────────────────────────────────────────────
 # Runtime / generated reports (per-run artifacts)
