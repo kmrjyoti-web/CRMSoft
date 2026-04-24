@@ -366,6 +366,7 @@ function PreviewTab({ brand, verticals }: { brand: Brand; verticals: VerticalWit
   const enabled = verticals.filter((v) => v.is_enabled_for_brand);
   return (
     <div className="space-y-4">
+      {/* Brand gradient card */}
       <div
         className="rounded-lg p-6 text-white"
         style={{
@@ -375,10 +376,18 @@ function PreviewTab({ brand, verticals }: { brand: Brand; verticals: VerticalWit
         <p className="text-xs font-mono opacity-70 mb-1">{brand.brandCode}</p>
         <h2 className="text-xl font-bold">{brand.displayName}</h2>
         {brand.description && <p className="text-sm opacity-80 mt-1">{brand.description}</p>}
-        <p className="text-xs mt-3 opacity-60">{enabled.length} verticals enabled</p>
+        <div className="flex items-center justify-between mt-3">
+          <p className="text-xs opacity-60">{enabled.length} vertical{enabled.length !== 1 ? 's' : ''} enabled</p>
+          <Link
+            href={`/brand-config/${brand.id}/preview`}
+            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-md transition-colors"
+          >
+            <Eye className="w-3 h-3" /> Open Full Preview
+          </Link>
+        </div>
       </div>
 
-      {enabled.length > 0 && (
+      {enabled.length > 0 ? (
         <div className="bg-console-sidebar border border-console-border rounded-lg p-4">
           <h3 className="text-xs font-semibold text-console-muted uppercase tracking-wide mb-3">Enabled Verticals</h3>
           <div className="flex flex-wrap gap-2">
@@ -392,6 +401,10 @@ function PreviewTab({ brand, verticals }: { brand: Brand; verticals: VerticalWit
               </span>
             ))}
           </div>
+        </div>
+      ) : (
+        <div className="bg-console-sidebar border border-console-border rounded-lg p-6 text-center">
+          <p className="text-xs text-console-muted">Enable verticals in the Verticals tab to see them in the preview.</p>
         </div>
       )}
     </div>
