@@ -1,43 +1,39 @@
 'use client';
 
-import { Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { BrandContextProvider } from '@/hooks/auth/useBrandContext';
-import BrandLoginResolver from '@/components/brand-login/BrandLoginResolver';
+import { useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-function LoginInner() {
-  const params = useSearchParams();
-  const router = useRouter();
-  const brandCode = params.get('brand');
+const CRM_PORTAL = process.env.NEXT_PUBLIC_CRM_PORTAL_URL ?? 'http://localhost:3005';
 
-  function handleSuccess() {
-    const redirect = params.get('redirect') ?? '/dashboard';
-    router.push(redirect);
-  }
+function LoginRedirectInner() {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const brand = searchParams.get('brand');
+    const redirect = searchParams.get('redirect');
+    const params = new URLSearchParams();
+    if (brand) params.set('brand', brand);
+    if (redirect) params.set('redirect', redirect);
+    const qs = params.toString();
+    window.location.replace(`${CRM_PORTAL}/login${qs ? `?${qs}` : ''}`);
+  }, [searchParams]);
 
   return (
-    <BrandContextProvider brandCode={brandCode}>
-      <BrandLoginResolver onSuccess={handleSuccess} />
-    </BrandContextProvider>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh', background: '#0f172a', color: '#fff', fontFamily: 'sans-serif' }}>
+      <div style={{ textAlign: 'center' }}>
+        <p style={{ opacity: 0.6 }}>Redirecting to CRM Portal…</p>
+        <p style={{ fontSize: 13, marginTop: 8, opacity: 0.4 }}>
+          <a href={`${CRM_PORTAL}/login`} style={{ color: '#d4b878' }}>Click here</a> if not redirected automatically.
+        </p>
+      </div>
+    </div>
   );
 }
 
-export default function LoginPage() {
+export default function LoginRedirectPage() {
   return (
-    <Suspense
-      fallback={
-        <div
-          style={{
-            minHeight: '100dvh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: '#0d1117',
-          }}
-        />
-      }
-    >
-      <LoginInner />
+    <Suspense fallback={<div style={{ minHeight: '100dvh', background: '#0f172a' }} />}>
+      <LoginRedirectInner />
     </Suspense>
   );
 }
