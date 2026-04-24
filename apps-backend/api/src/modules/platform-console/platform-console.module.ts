@@ -38,6 +38,8 @@ import { HealthSnapshotCron } from './security/health-snapshot.cron';
 import { seedDRPlans } from './security/seed-dr-plans';
 import { CICDService } from './cicd/cicd.service';
 import { CICDController } from './cicd/cicd.controller';
+import { BrandConfigService } from './brand-config/brand-config.service';
+import { BrandConfigController } from './brand-config/brand-config.controller';
 
 @Module({
   imports: [ScheduleModule.forRoot()],
@@ -56,6 +58,7 @@ import { CICDController } from './cicd/cicd.controller';
     MenuManagementController,
     SecurityController,
     CICDController,
+    BrandConfigController,
   ],
   providers: [
     PlatformConsolePrismaService,
@@ -77,6 +80,7 @@ import { CICDController } from './cicd/cicd.controller';
     SecurityService,
     HealthSnapshotCron,
     CICDService,
+    BrandConfigService,
   ],
   exports: [PlatformConsolePrismaService, EscalationService, VersionManagerService, VerticalManagerService, TestRunnerService, BrandManagerService, MenuManagementService, SecurityService, CICDService],
 })

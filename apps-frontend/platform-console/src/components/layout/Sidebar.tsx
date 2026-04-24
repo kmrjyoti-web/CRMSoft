@@ -23,6 +23,8 @@ import {
   Tag,
   Bell,
   History,
+  Palette,
+  Plus,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useState } from 'react';
@@ -84,6 +86,13 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { label: 'All Brands', icon: Building2, href: '/brands' },
       { label: 'Error Overview', icon: AlertTriangle, href: '/brands/errors' },
+    ],
+  },
+  {
+    label: 'Brand Config', icon: Palette, href: '/brand-config',
+    children: [
+      { label: 'All Brands', icon: Building2, href: '/brand-config' },
+      { label: 'Create Brand', icon: Plus, href: '/brand-config/new' },
     ],
   },
   {

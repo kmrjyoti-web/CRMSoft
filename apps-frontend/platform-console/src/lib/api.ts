@@ -263,6 +263,23 @@ export const api = {
     addBuildLog: (pipelineId: string, data: { jobName: string; output: string; exitCode?: number; duration?: number }) =>
       apiFetch(`/platform-console/cicd/pipelines/${pipelineId}/logs`, { method: 'POST', body: JSON.stringify({ ...data, pipelineRunId: pipelineId }) }),
   },
+  brandConfig: {
+    list: () => apiFetch('/platform-console/brand-config'),
+    get: (id: string) => apiFetch(`/platform-console/brand-config/${id}`),
+    create: (data: { brandCode: string; brandName: string; displayName: string; description?: string; primaryColor?: string; secondaryColor?: string; logoUrl?: string; domain?: string; subdomain?: string; contactEmail?: string }) =>
+      apiFetch('/platform-console/brand-config', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: Record<string, unknown>) =>
+      apiFetch(`/platform-console/brand-config/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    verticals: (brandId: string) => apiFetch(`/platform-console/brand-config/${brandId}/verticals`),
+    enableVertical: (brandId: string, code: string) =>
+      apiFetch(`/platform-console/brand-config/${brandId}/verticals/${code}/enable`, { method: 'POST' }),
+    disableVertical: (brandId: string, code: string) =>
+      apiFetch(`/platform-console/brand-config/${brandId}/verticals/${code}/disable`, { method: 'POST' }),
+    updateOverrides: (brandId: string, code: string, data: Record<string, unknown>) =>
+      apiFetch(`/platform-console/brand-config/${brandId}/verticals/${code}/overrides`, { method: 'PATCH', body: JSON.stringify(data) }),
+    effectiveConfig: (brandId: string, code: string) =>
+      apiFetch(`/platform-console/brand-config/${brandId}/verticals/${code}/effective`),
+  },
   verticals: {
     list: () => apiFetch('/platform-console/verticals'),
     get: (code: string) => apiFetch(`/platform-console/verticals/${code}`),

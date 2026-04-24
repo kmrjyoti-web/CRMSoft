@@ -381,3 +381,23 @@ model BrandMenuOverride {
   @@unique([brandId, menuKey])
   @@map("pc_menu_brand_overrides")
 }
+
+model BrandProfile {
+  id             String    @id @default(uuid())
+  brandCode      String    @unique @map("brand_code")
+  brandName      String    @map("brand_name")
+  displayName    String    @map("display_name")
+  description    String?
+  primaryColor   String    @default("#1976d2") @map("primary_color")
+  secondaryColor String    @default("#dc004e") @map("secondary_color")
+  logoUrl        String?   @map("logo_url")
+  domain         String?
+  subdomain      String?
+  contactEmail   String?   @map("contact_email")
+  isActive       Boolean   @default(true) @map("is_active")
+  isDefault      Boolean   @default(false) @map("is_default")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@map("pc_brand_profiles")
+}
