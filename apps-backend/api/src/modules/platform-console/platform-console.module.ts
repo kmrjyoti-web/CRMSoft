@@ -40,6 +40,10 @@ import { CICDService } from './cicd/cicd.service';
 import { CICDController } from './cicd/cicd.controller';
 import { BrandConfigService } from './brand-config/brand-config.service';
 import { BrandConfigController } from './brand-config/brand-config.controller';
+import { MenuEditorService } from './brand-config/menu-editor.service';
+import { MenuEditorController } from './brand-config/menu-editor.controller';
+import { CreatorService } from './brand-config/creator.service';
+import { CreatorController } from './brand-config/creator.controller';
 
 @Module({
   imports: [ScheduleModule.forRoot()],
@@ -59,6 +63,8 @@ import { BrandConfigController } from './brand-config/brand-config.controller';
     SecurityController,
     CICDController,
     BrandConfigController,
+    MenuEditorController,
+    CreatorController,
   ],
   providers: [
     PlatformConsolePrismaService,
@@ -81,6 +87,8 @@ import { BrandConfigController } from './brand-config/brand-config.controller';
     HealthSnapshotCron,
     CICDService,
     BrandConfigService,
+    MenuEditorService,
+    CreatorService,
   ],
   exports: [PlatformConsolePrismaService, EscalationService, VersionManagerService, VerticalManagerService, TestRunnerService, BrandManagerService, MenuManagementService, SecurityService, CICDService],
 })

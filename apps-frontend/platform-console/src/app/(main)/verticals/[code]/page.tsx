@@ -190,6 +190,28 @@ export default function VerticalDetailPage() {
         </div>
       </div>
 
+      {/* Quick actions */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <Link
+          href={`/verticals/${code}/menus`}
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-[#21262d] border border-[#30363d] text-[#c9d1d9] hover:border-[#58a6ff]/50 rounded-md transition-colors"
+        >
+          Menu Builder
+        </Link>
+        <Link
+          href={`/verticals/${code}/module/new`}
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-[#238636] hover:bg-[#238636]/80 text-white rounded-md transition-colors"
+        >
+          + Add Module
+        </Link>
+        <Link
+          href={`/verticals/${code}/feature/new`}
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-[#21262d] border border-[#30363d] text-[#c9d1d9] hover:border-[#3fb950]/50 rounded-md transition-colors"
+        >
+          + Add Feature
+        </Link>
+      </div>
+
       {/* Tabs */}
       <div className="flex items-center gap-1 border-b border-[#30363d]">
         {TABS.map((tab) => (

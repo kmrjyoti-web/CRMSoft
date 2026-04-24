@@ -298,4 +298,41 @@ export const api = {
     },
     auditDetail: (code: string, id: string) => apiFetch(`/platform-console/verticals/${code}/audits/${id}`),
   },
+  creator: {
+    validateVertical: (code: string) =>
+      apiFetch(`/platform-console/creator/vertical/validate?code=${encodeURIComponent(code)}`),
+    createVertical: (data: Record<string, unknown>) =>
+      apiFetch('/platform-console/creator/vertical', { method: 'POST', body: JSON.stringify(data) }),
+    getModules: (verticalCode: string) =>
+      apiFetch(`/platform-console/creator/vertical/${verticalCode}/modules`),
+    validateModule: (verticalCode: string, code: string) =>
+      apiFetch(`/platform-console/creator/vertical/${verticalCode}/module/validate?code=${encodeURIComponent(code)}`),
+    createModule: (verticalCode: string, data: Record<string, unknown>) =>
+      apiFetch(`/platform-console/creator/vertical/${verticalCode}/module`, { method: 'POST', body: JSON.stringify(data) }),
+    updateModule: (id: string, data: Record<string, unknown>) =>
+      apiFetch(`/platform-console/creator/module/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    deleteModule: (id: string) =>
+      apiFetch(`/platform-console/creator/module/${id}`, { method: 'DELETE' }),
+    validateFeature: (verticalCode: string, code: string) =>
+      apiFetch(`/platform-console/creator/vertical/${verticalCode}/feature/validate?code=${encodeURIComponent(code)}`),
+    createFeature: (verticalCode: string, data: Record<string, unknown>) =>
+      apiFetch(`/platform-console/creator/vertical/${verticalCode}/feature`, { method: 'POST', body: JSON.stringify(data) }),
+    updateFeature: (id: string, data: Record<string, unknown>) =>
+      apiFetch(`/platform-console/creator/feature/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    deleteFeature: (id: string) =>
+      apiFetch(`/platform-console/creator/feature/${id}`, { method: 'DELETE' }),
+  },
+  menuEditor: {
+    list: (verticalCode: string) => apiFetch(`/platform-console/menu-editor/${verticalCode}`),
+    create: (verticalCode: string, data: Record<string, unknown>) =>
+      apiFetch(`/platform-console/menu-editor/${verticalCode}`, { method: 'POST', body: JSON.stringify(data) }),
+    update: (verticalCode: string, menuId: string, data: Record<string, unknown>) =>
+      apiFetch(`/platform-console/menu-editor/${verticalCode}/menu/${menuId}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    remove: (verticalCode: string, menuId: string) =>
+      apiFetch(`/platform-console/menu-editor/${verticalCode}/menu/${menuId}`, { method: 'DELETE' }),
+    bulkOrder: (verticalCode: string, updates: Array<{ id: string; parent_menu_id?: string | null; sort_order?: number; depth_level?: number }>) =>
+      apiFetch(`/platform-console/menu-editor/${verticalCode}/bulk-order`, { method: 'POST', body: JSON.stringify({ updates }) }),
+    validateRoute: (verticalCode: string, route: string, excludeMenuId?: string) =>
+      apiFetch(`/platform-console/menu-editor/${verticalCode}/validate-route`, { method: 'POST', body: JSON.stringify({ route, excludeMenuId }) }),
+  },
 };

@@ -68,6 +68,8 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Vertical Manager', icon: Factory, href: '/verticals',
     children: [
       { label: 'Registry', icon: Factory, href: '/verticals' },
+      { label: 'Create Vertical', icon: Plus, href: '/verticals/create' },
+      { label: 'Menu Builder', icon: Menu, href: '/verticals' },
     ],
   },
   { label: 'Health Monitor', icon: HeartPulse, href: '/health' },
