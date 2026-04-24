@@ -1,0 +1,85 @@
+// GlobalReferenceDB — System reference data
+// Sprint B.2 — 2026-04-16
+// Models: GlCfgCurrency, GlCfgTimezone, GlCfgIndustryType, GlCfgLanguage
+
+// ─── Currencies ───────────────────────────────────────────────────────────────
+
+model GlCfgCurrency {
+  id             String   @id @default(uuid())
+  code           String   @unique             // ISO 4217: "INR", "USD", "EUR"
+  name           String                       // "Indian Rupee"
+  nameLocal      String?  @map("name_local")  // "भारतीय रुपया"
+  symbol         String                       // "₹", "$", "€"
+  symbolAlt      String?  @map("symbol_alt")  // "Rs.", "US$"
+  decimalPlaces  Int      @default(2) @map("decimal_places")
+  thousandSep    String   @default(",") @map("thousand_sep") // "," or "."
+  decimalSep     String   @default(".") @map("decimal_sep")  // "." or ","
+  isDefault      Boolean  @default(false) @map("is_default") // true for INR
+  isActive       Boolean  @default(true) @map("is_active")
+  sortOrder      Int      @default(0) @map("sort_order")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive])
+  @@index([isDefault])
+  @@map("gl_cfg_currency")
+}
+
+// ─── Timezones ────────────────────────────────────────────────────────────────
+
+model GlCfgTimezone {
+  id             String   @id @default(uuid())
+  tzIdentifier   String   @unique @map("tz_identifier") // IANA: "Asia/Kolkata"
+  displayName    String   @map("display_name")          // "(UTC+05:30) India Standard Time"
+  offsetHours    Int      @map("offset_hours")          // 5
+  offsetMinutes  Int      @default(0) @map("offset_minutes") // 30
+  isDst          Boolean  @default(false) @map("is_dst") // true if observes daylight saving
+  isDefault      Boolean  @default(false) @map("is_default") // true for Asia/Kolkata
+  isActive       Boolean  @default(true) @map("is_active")
+  sortOrder      Int      @default(0) @map("sort_order")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive])
+  @@index([isDefault])
+  @@map("gl_cfg_timezone")
+}
+
+// ─── Industry Types ───────────────────────────────────────────────────────────
+
+model GlCfgIndustryType {
+  id          String   @id @default(uuid())
+  code        String   @unique             // "SOFTWARE", "RETAIL", "PHARMA"
+  name        String                       // "Software & IT"
+  nameHi      String?  @map("name_hi")    // "सॉफ्टवेयर और आईटी"
+  description String?
+  icon        String?                      // icon identifier for UI
+  isActive    Boolean  @default(true) @map("is_active")
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive])
+  @@map("gl_cfg_industry_type")
+}
+
+// ─── Languages ────────────────────────────────────────────────────────────────
+
+model GlCfgLanguage {
+  id          String   @id @default(uuid())
+  code        String   @unique             // ISO 639-1: "hi", "en", "mr"
+  code3       String?  @map("code3")       // ISO 639-2: "hin", "eng", "mar"
+  name        String                       // "Hindi"
+  nameLocal   String?  @map("name_local")  // "हिन्दी"
+  script      String?                      // "Devanagari", "Latin"
+  isIndian    Boolean  @default(false) @map("is_indian") // true for Indian languages
+  isDefault   Boolean  @default(false) @map("is_default") // true for "en"
+  isActive    Boolean  @default(true) @map("is_active")
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive])
+  @@index([isIndian])
+  @@map("gl_cfg_language")
+}
