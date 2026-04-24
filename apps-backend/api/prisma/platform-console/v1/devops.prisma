@@ -381,3 +381,114 @@ model BrandMenuOverride {
   @@unique([brandId, menuKey])
   @@map("pc_menu_brand_overrides")
 }
+
+// ─── Brand Configuration (Visual Identity + Deployment) ──────────────────────
+// Stores brand metadata — separate from BrandModuleWhitelist/BrandFeatureFlag
+// which handle runtime module/feature access.
+
+model BrandConfig {
+  id             String   @id @default(cuid())
+  brandCode      String   @unique @map("brand_code") // e.g., "crmsoft", "partner-travel-1"
+  brandName      String   @map("brand_name")         // e.g., "CRMSoft"
+  displayName    String   @map("display_name")
+
+  // Visual identity
+  primaryColor   String?  @map("primary_color")   @default("#1976d2")
+  secondaryColor String?  @map("secondary_color") @default("#dc004e")
+  accentColor    String?  @map("accent_color")
+  logoUrl        String?  @map("logo_url")
+  faviconUrl     String?  @map("favicon_url")
+  fontFamily     String?  @map("font_family")
+
+  // Deployment
+  domain         String?  // e.g., travel.crmsoft.com
+  subdomain      String?  // e.g., travel
+  supportUrl     String?  @map("support_url")
+  contactEmail   String?  @map("contact_email")
+  description    String?
+
+  // Control
+  isActive       Boolean  @default(true)  @map("is_active")
+  isDefault      Boolean  @default(false) @map("is_default")
+  launchDate     DateTime? @map("launch_date")
+
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt      @map("updated_at")
+  createdBy      String?  @map("created_by")
+  updatedBy      String?  @map("updated_by")
+
+  partners       PartnerRegistry[]
+
+  @@map("brand_config")
+}
+
+// ─── Partner Registry ─────────────────────────────────────────────────────────
+
+model PartnerRegistry {
+  id            String   @id @default(cuid())
+  partnerCode   String   @unique @map("partner_code") // e.g., "travel-01"
+  partnerName   String   @map("partner_name")
+  legalName     String?  @map("legal_name")
+
+  // Contact
+  contactPerson String?  @map("contact_person")
+  contactEmail  String   @map("contact_email")
+  contactPhone  String?  @map("contact_phone")
+  city          String?
+  state         String?
+  country       String?  @default("India")
+
+  // Business
+  businessType  String?  @map("business_type") // "reseller" | "industry-specialist" | "oem"
+  industry      String?                         // "travel" | "electronics" | "retail"
+  gstin         String?
+  pan           String?
+
+  // Brand linkage
+  brandCode     String?  @map("brand_code")
+  brand         BrandConfig? @relation(fields: [brandCode], references: [brandCode])
+
+  // Integration
+  apiKey        String?  @unique @map("api_key")
+  webhookUrl    String?  @map("webhook_url")
+
+  // Limits
+  maxTenants    Int?     @default(100)  @map("max_tenants")
+  maxUsers      Int?     @default(1000) @map("max_users")
+
+  // Status
+  isActive      Boolean  @default(true)  @map("is_active")
+  onboardedAt   DateTime? @map("onboarded_at")
+  trialEndsAt   DateTime? @map("trial_ends_at")
+
+  description   String?
+  logoUrl       String?  @map("logo_url")
+  websiteUrl    String?  @map("website_url")
+
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt      @map("updated_at")
+  createdBy     String?  @map("created_by")
+  updatedBy     String?  @map("updated_by")
+
+  verticalAccess PartnerVerticalAccess[]
+
+  @@map("partner_registry")
+}
+
+// ─── Partner ↔ Vertical (M-M) ────────────────────────────────────────────────
+
+model PartnerVerticalAccess {
+  id          String   @id @default(cuid())
+  partnerCode String   @map("partner_code")
+  verticalCode String  @map("vertical_code")
+
+  isEnabled   Boolean  @default(true) @map("is_enabled")
+  enabledAt   DateTime @default(now()) @map("enabled_at")
+  expiresAt   DateTime? @map("expires_at")
+  config      Json?
+
+  partner     PartnerRegistry @relation(fields: [partnerCode], references: [partnerCode], onDelete: Cascade)
+
+  @@unique([partnerCode, verticalCode])
+  @@map("partner_vertical_access")
+}

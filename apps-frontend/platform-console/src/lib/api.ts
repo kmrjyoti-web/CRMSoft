@@ -281,4 +281,50 @@ export const api = {
     },
     auditDetail: (code: string, id: string) => apiFetch(`/platform-console/verticals/${code}/audits/${id}`),
   },
+
+  // Brand visual identity / deployment config
+  brandConfig: {
+    list: (active?: boolean) => {
+      const qs = active !== undefined ? `?active=${active}` : '';
+      return apiFetch(`/platform-console/brands/config${qs}`);
+    },
+    get: (brandCode: string) => apiFetch(`/platform-console/brands/config/${brandCode}`),
+    create: (data: Record<string, unknown>) =>
+      apiFetch('/platform-console/brands/config', { method: 'POST', body: JSON.stringify(data) }),
+    update: (brandCode: string, data: Record<string, unknown>) =>
+      apiFetch(`/platform-console/brands/config/${brandCode}`, { method: 'PUT', body: JSON.stringify(data) }),
+    toggle: (brandCode: string) =>
+      apiFetch(`/platform-console/brands/config/${brandCode}/toggle`, { method: 'PATCH' }),
+  },
+
+  // Partner management
+  partners: {
+    list: (params?: { active?: boolean; brandCode?: string }) => {
+      const parts = Object.entries(params ?? {})
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => [k, String(v)]);
+      const qs = parts.length ? '?' + new URLSearchParams(parts).toString() : '';
+      return apiFetch(`/platform-console/partners${qs}`);
+    },
+    get: (partnerCode: string) => apiFetch(`/platform-console/partners/${partnerCode}`),
+    create: (data: Record<string, unknown>) =>
+      apiFetch('/platform-console/partners', { method: 'POST', body: JSON.stringify(data) }),
+    update: (partnerCode: string, data: Record<string, unknown>) =>
+      apiFetch(`/platform-console/partners/${partnerCode}`, { method: 'PUT', body: JSON.stringify(data) }),
+    toggle: (partnerCode: string) =>
+      apiFetch(`/platform-console/partners/${partnerCode}/toggle`, { method: 'PATCH' }),
+    regenerateApiKey: (partnerCode: string) =>
+      apiFetch(`/platform-console/partners/${partnerCode}/api-key/regenerate`, { method: 'PATCH' }),
+    getVerticals: (partnerCode: string) =>
+      apiFetch(`/platform-console/partners/${partnerCode}/verticals`),
+    enableVertical: (partnerCode: string, verticalCode: string, config?: unknown) =>
+      apiFetch(`/platform-console/partners/${partnerCode}/verticals/${verticalCode}/enable`, {
+        method: 'POST',
+        body: JSON.stringify({ config }),
+      }),
+    disableVertical: (partnerCode: string, verticalCode: string) =>
+      apiFetch(`/platform-console/partners/${partnerCode}/verticals/${verticalCode}/disable`, {
+        method: 'POST',
+      }),
+  },
 };
