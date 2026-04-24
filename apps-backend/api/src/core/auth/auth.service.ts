@@ -262,7 +262,7 @@ export class AuthService {
 
     const requiresApproval = ['DMC_PROVIDER', 'AGENT', 'TOUR_GUIDE'].includes(data.subcategoryCode);
 
-    const role = await this.getOrCreateRole(data.categoryCode, data.categoryCode.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()));
+    const role = await this.getOrCreateRole('CUSTOMER', 'Customer');
 
     const hashed = await bcrypt.hash(data.password, this.getSaltRounds());
     const user = await this.prisma.identity.user.create({
@@ -271,7 +271,7 @@ export class AuthService {
         password: hashed,
         firstName: data.registrationFields?.full_name?.split(' ')[0] ?? data.registrationFields?.company_name?.split(' ')[0] ?? data.registrationFields?.agency_name?.split(' ')[0] ?? 'User',
         lastName: data.registrationFields?.full_name?.split(' ').slice(1).join(' ') ?? '',
-        userType: data.categoryCode === 'EMPLOYEE' ? 'EMPLOYEE' : data.categoryCode === 'CUSTOMER' ? 'CUSTOMER' : 'ADMIN',
+        userType: 'CUSTOMER',
         roleId: role.id,
         tenantId: '',
         status: 'ACTIVE',
