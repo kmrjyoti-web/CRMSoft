@@ -38,6 +38,8 @@ import { HealthSnapshotCron } from './security/health-snapshot.cron';
 import { seedDRPlans } from './security/seed-dr-plans';
 import { CICDService } from './cicd/cicd.service';
 import { CICDController } from './cicd/cicd.controller';
+import { VerticalConfigService } from './vertical-config/vertical-config.service';
+import { VerticalConfigController } from './vertical-config/vertical-config.controller';
 
 @Module({
   imports: [ScheduleModule.forRoot()],
@@ -56,6 +58,7 @@ import { CICDController } from './cicd/cicd.controller';
     MenuManagementController,
     SecurityController,
     CICDController,
+    VerticalConfigController,
   ],
   providers: [
     PlatformConsolePrismaService,
@@ -77,8 +80,9 @@ import { CICDController } from './cicd/cicd.controller';
     SecurityService,
     HealthSnapshotCron,
     CICDService,
+    VerticalConfigService,
   ],
-  exports: [PlatformConsolePrismaService, EscalationService, VersionManagerService, VerticalManagerService, TestRunnerService, BrandManagerService, MenuManagementService, SecurityService, CICDService],
+  exports: [PlatformConsolePrismaService, EscalationService, VersionManagerService, VerticalManagerService, TestRunnerService, BrandManagerService, MenuManagementService, SecurityService, CICDService, VerticalConfigService],
 })
 export class PlatformConsoleModule implements OnModuleInit {
   constructor(

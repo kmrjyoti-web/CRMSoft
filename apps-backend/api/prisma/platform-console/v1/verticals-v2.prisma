@@ -1,0 +1,253 @@
+// ================================================================
+// VERTICAL COMPLETE SCHEMA — v2
+// Verticals + Modules + Menus + Features + Brand config overrides
+// ================================================================
+
+// ── Core Vertical Definition ─────────────────────────────────────
+
+model PcVerticalV2 {
+  id              String    @id @default(cuid())
+  verticalCode    String    @unique @map("vertical_code")
+  verticalName    String    @map("vertical_name")
+  displayName     String    @map("display_name")
+  description     String?   @db.Text
+
+  // Visual
+  iconName        String?   @map("icon_name")
+  colorTheme      String?   @map("color_theme")
+  bannerImage     String?   @map("banner_image")
+
+  // Technical mapping
+  folderPath      String    @map("folder_path")
+  packageName     String    @map("package_name")
+  databaseSchemas Json      @map("database_schemas")
+  apiPrefix       String    @map("api_prefix")
+
+  // Lifecycle
+  isActive        Boolean   @default(true)  @map("is_active")
+  isBeta          Boolean   @default(false) @map("is_beta")
+  isComingSoon    Boolean   @default(false) @map("is_coming_soon")
+  releaseDate     DateTime? @map("release_date")
+  deprecationDate DateTime? @map("deprecation_date")
+
+  // Pricing
+  basePrice       Decimal?  @db.Decimal(10, 2) @map("base_price")
+  perUserPrice    Decimal?  @db.Decimal(10, 2) @map("per_user_price")
+  currency        String?   @default("INR")
+
+  // Configuration schema
+  defaultSettings Json?     @map("default_settings")
+  settingsSchema  Json?     @map("settings_schema")
+
+  // Discovery
+  documentationUrl String?  @map("documentation_url")
+  demoUrl         String?   @map("demo_url")
+  videoTourUrl    String?   @map("video_tour_url")
+  sortOrder       Int       @default(0) @map("sort_order")
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt      @map("updated_at")
+
+  // Relations
+  modules         PcVerticalModule[]
+  menus           PcVerticalMenu[]
+  features        PcVerticalFeature[]
+  brandConfigs    PcBrandVerticalConfig[]
+
+  @@map("pc_vertical_v2")
+}
+
+// ── Modules within a Vertical ────────────────────────────────────
+
+model PcVerticalModule {
+  id                 String   @id @default(cuid())
+  verticalId         String   @map("vertical_id")
+  moduleCode         String   @map("module_code")
+  moduleName         String   @map("module_name")
+  displayName        String   @map("display_name")
+  description        String?  @db.Text
+
+  // Status
+  isRequired         Boolean  @default(false) @map("is_required")
+  isDefaultEnabled   Boolean  @default(true)  @map("is_default_enabled")
+  isPremium          Boolean  @default(false) @map("is_premium")
+
+  // Visual
+  iconName           String?  @map("icon_name")
+  colorTheme         String?  @map("color_theme")
+  sortOrder          Int      @default(0) @map("sort_order")
+
+  // Technical
+  packagePath        String?  @map("package_path")
+  apiNamespace       String?  @map("api_namespace")
+  dbTables           Json?    @map("db_tables")
+
+  // Dependencies
+  dependsOn          Json?    @map("depends_on")
+  conflictsWith      Json?    @map("conflicts_with")
+
+  // Pricing addon
+  addonPrice         Decimal? @db.Decimal(10, 2) @map("addon_price")
+  perUserAddon       Decimal? @db.Decimal(10, 2) @map("per_user_addon")
+
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt      @map("updated_at")
+
+  // Relations
+  vertical           PcVerticalV2      @relation(fields: [verticalId], references: [id], onDelete: Cascade)
+  features           PcVerticalFeature[]
+  menus              PcVerticalMenu[]
+
+  @@unique([verticalId, moduleCode])
+  @@map("pc_vertical_module")
+}
+
+// ── Menu Tree (per Vertical) ─────────────────────────────────────
+
+model PcVerticalMenu {
+  id                  String   @id @default(cuid())
+  verticalId          String   @map("vertical_id")
+  moduleId            String?  @map("module_id")
+
+  // Menu identity
+  menuCode            String   @map("menu_code")
+  menuLabel           String   @map("menu_label")
+  menuDescription     String?  @map("menu_description")
+
+  // Visual
+  iconName            String?  @map("icon_name")
+  badgeType           String?  @map("badge_type")
+  badgeValue          String?  @map("badge_value")
+
+  // Navigation
+  route               String?
+  isExternal          Boolean  @default(false) @map("is_external")
+  opensInNewTab       Boolean  @default(false) @map("opens_in_new_tab")
+
+  // Tree
+  parentMenuId        String?  @map("parent_menu_id")
+  sortOrder           Int      @default(0) @map("sort_order")
+  depthLevel          Int      @default(0) @map("depth_level")
+
+  // Access control
+  permissionsRequired Json?    @map("permissions_required")
+  rolesAllowed        Json?    @map("roles_allowed")
+  featuresRequired    Json?    @map("features_required")
+
+  // Display
+  isVisible           Boolean  @default(true)  @map("is_visible")
+  isEnabled           Boolean  @default(true)  @map("is_enabled")
+  hideIfEmpty         Boolean  @default(false) @map("hide_if_empty")
+
+  // Extra
+  customComponent     String?  @map("custom_component")
+  extraConfig         Json?    @map("extra_config")
+
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt      @map("updated_at")
+
+  // Relations
+  vertical            PcVerticalV2     @relation(fields: [verticalId], references: [id], onDelete: Cascade)
+  module              PcVerticalModule? @relation(fields: [moduleId], references: [id])
+  parentMenu          PcVerticalMenu?   @relation("MenuTree", fields: [parentMenuId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  childMenus          PcVerticalMenu[]  @relation("MenuTree")
+
+  @@unique([verticalId, menuCode])
+  @@map("pc_vertical_menu")
+}
+
+// ── Features within Modules ───────────────────────────────────────
+
+model PcVerticalFeature {
+  id                 String   @id @default(cuid())
+  verticalId         String   @map("vertical_id")
+  moduleId           String?  @map("module_id")
+
+  // Feature identity
+  featureCode        String   @map("feature_code")
+  featureName        String   @map("feature_name")
+  description        String?  @db.Text
+
+  // Classification
+  category           String?  // "core" | "premium" | "beta" | "experimental"
+  subCategory        String?  @map("sub_category")
+
+  // Defaults
+  isDefaultEnabled   Boolean  @default(true)  @map("is_default_enabled")
+  isPremium          Boolean  @default(false) @map("is_premium")
+  isBeta             Boolean  @default(false) @map("is_beta")
+  isExperimental     Boolean  @default(false) @map("is_experimental")
+
+  // Pricing
+  addonPrice         Decimal? @db.Decimal(10, 2) @map("addon_price")
+
+  // Config
+  configSchema       Json?    @map("config_schema")
+  defaultConfig      Json?    @map("default_config")
+
+  // Dependencies
+  dependsOn          Json?    @map("depends_on")
+  conflictsWith      Json?    @map("conflicts_with")
+
+  // Visual
+  iconName           String?  @map("icon_name")
+  sortOrder          Int      @default(0) @map("sort_order")
+
+  // Metadata
+  documentationUrl   String?  @map("documentation_url")
+  releasedInVersion  String?  @map("released_in_version")
+
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt      @map("updated_at")
+
+  // Relations
+  vertical           PcVerticalV2     @relation(fields: [verticalId], references: [id], onDelete: Cascade)
+  module             PcVerticalModule? @relation(fields: [moduleId], references: [id])
+
+  @@unique([verticalId, featureCode])
+  @@map("pc_vertical_feature")
+}
+
+// ── Brand-Vertical Config (Customization Overrides) ───────────────
+
+model PcBrandVerticalConfig {
+  id                 String   @id @default(cuid())
+  brandCode          String   @map("brand_code")
+  verticalId         String   @map("vertical_id")
+
+  // Override settings
+  isEnabled          Boolean  @default(true)  @map("is_enabled")
+  customName         String?  @map("custom_name")
+  customDescription  String?  @map("custom_description") @db.Text
+  customColor        String?  @map("custom_color")
+
+  // Module overrides
+  enabledModules     Json?    @map("enabled_modules")
+  disabledModules    Json?    @map("disabled_modules")
+
+  // Menu customization
+  customMenus        Json?    @map("custom_menus")
+  hiddenMenus        Json?    @map("hidden_menus")
+
+  // Feature overrides
+  enabledFeatures    Json?    @map("enabled_features")
+  disabledFeatures   Json?    @map("disabled_features")
+  featureConfigs     Json?    @map("feature_configs")
+
+  // Pricing overrides
+  customPrice        Decimal? @db.Decimal(10, 2) @map("custom_price")
+  customPerUserPrice Decimal? @db.Decimal(10, 2) @map("custom_per_user_price")
+
+  // Branding
+  customLogo         String?  @map("custom_logo")
+  customTheme        Json?    @map("custom_theme")
+
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt      @map("updated_at")
+
+  // Relations
+  vertical           PcVerticalV2 @relation(fields: [verticalId], references: [id], onDelete: Cascade)
+
+  @@unique([brandCode, verticalId])
+  @@map("pc_brand_vertical_config")
+}
