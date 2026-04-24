@@ -1,0 +1,1410 @@
+// ─── Generator + Datasource ─────────────────────────────────────────────────
+// DemoDB — mirrors WorkingDB schema exactly (same models, separate physical DB).
+// Purpose: isolate demo/trial tenant data from production WorkingDB.
+// Domain files are copied from prisma/working/v1/ via scripts/sync-demo-schema.sh.
+// Run sync script after any WorkingDB schema change.
+//
+// Tenant routing: Tenant.status === 'DEMO' → queries go to DemoDB instead of WorkingDB.
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../../../node_modules/.prisma/demo-client"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DEMO_DATABASE_URL")
+}
+
+// ─── Enums ─────────────────────────────────────────────────────────────────
+
+enum RawContactStatus {
+  RAW
+  VERIFIED
+  REJECTED
+  DUPLICATE
+}
+
+enum RawContactSource {
+  MANUAL
+  BULK_IMPORT
+  WEB_FORM
+  REFERRAL
+  API
+}
+
+enum CommunicationType {
+  PHONE
+  EMAIL
+  MOBILE
+  ADDRESS
+  WHATSAPP
+}
+
+enum PriorityType {
+  PRIMARY
+  WORK
+  HOME
+  PERSONAL
+  OTHER
+}
+
+enum ContactOrgRelationType {
+  PRIMARY_CONTACT
+  EMPLOYEE
+  CONSULTANT
+  PARTNER
+  VENDOR
+  DIRECTOR
+  FOUNDER
+}
+
+enum ContactType {
+  RAW
+  VALIDATED
+}
+
+enum DataStatus {
+  COMPLETE
+  INCOMPLETE_DATA
+}
+
+enum ContactSource {
+  MANUAL
+  BULK_IMPORT
+  WEB_FORM
+  REFERRAL
+  API
+}
+
+enum LeadStatus {
+  NEW
+  VERIFIED
+  ALLOCATED
+  IN_PROGRESS
+  DEMO_SCHEDULED
+  QUOTATION_SENT
+  NEGOTIATION
+  WON
+  LOST
+  ON_HOLD
+}
+
+enum LeadPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ActivityType {
+  CALL
+  EMAIL
+  MEETING
+  NOTE
+  WHATSAPP
+  SMS
+  VISIT
+}
+
+enum DemoMode {
+  ONLINE
+  OFFLINE
+}
+
+enum DemoStatus {
+  SCHEDULED
+  RESCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum TourPlanStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum QuotationStatus {
+  DRAFT
+  INTERNAL_REVIEW
+  SENT
+  VIEWED
+  NEGOTIATION
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  REVISED
+  CANCELLED
+}
+
+enum NegotiationType {
+  PRICE_CHANGE
+  ITEM_CHANGE
+  TERM_CHANGE
+  DISCOUNT_REQUEST
+  COUNTER_OFFER
+  REQUIREMENT
+  GENERAL_NOTE
+}
+
+enum QuotationPriceType {
+  FIXED
+  RANGE
+  NEGOTIABLE
+}
+
+enum QuotationSendChannel {
+  EMAIL
+  WHATSAPP
+  PORTAL
+  MANUAL
+  DOWNLOAD
+}
+
+enum EntityType {
+  RAW_CONTACT
+  CONTACT
+  ORGANIZATION
+  LEAD
+  QUOTATION
+  TICKET
+  PRODUCT
+}
+
+enum OwnerType {
+  PRIMARY_OWNER
+  CO_OWNER
+  WATCHER
+  DELEGATED_OWNER
+  TEAM_OWNER
+}
+
+enum OwnershipAction {
+  ASSIGN
+  TRANSFER
+  REVOKE
+  DELEGATE
+  AUTO_REVERT
+  ROTATION
+  ESCALATION
+}
+
+enum AssignmentMethod {
+  MANUAL
+  ROUND_ROBIN
+  RULE_BASED
+  WORKLOAD_BALANCE
+  ESCALATION
+  AUTO_REVERT
+}
+
+enum AssignmentRuleStatus {
+  ACTIVE
+  INACTIVE
+  DRAFT
+}
+
+enum RuleConditionOperator {
+  EQUALS
+  NOT_EQUALS
+  CONTAINS
+  GREATER_THAN
+  LESS_THAN
+  IN
+  NOT_IN
+  IS_EMPTY
+  IS_NOT_EMPTY
+}
+
+enum OrgType {
+  GENERAL
+  BRAND
+  MANUFACTURER
+  DISTRIBUTOR
+  DEALER
+  FRANCHISE
+}
+
+enum LocationLevel {
+  COUNTRY
+  STATE
+  CITY
+  AREA
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  DISCONTINUED
+  COMING_SOON
+}
+
+enum PriceType {
+  MRP
+  SALE_PRICE
+  PURCHASE_PRICE
+  DEALER_PRICE
+  DISTRIBUTOR_PRICE
+  SPECIAL_PRICE
+}
+
+enum TaxType {
+  GST
+  IGST
+  EXEMPT
+  ZERO_RATED
+  COMPOSITE
+}
+
+enum UnitType {
+  PIECE
+  BOX
+  PACK
+  CARTON
+  KG
+  GRAM
+  LITRE
+  ML
+  METER
+  CM
+  SQ_FT
+  SQ_METER
+  DOZEN
+  SET
+  PAIR
+  ROLL
+  BUNDLE
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  PAID
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum WorkflowStateType {
+  INITIAL
+  INTERMEDIATE
+  TERMINAL
+}
+
+enum WorkflowStateCategory {
+  SUCCESS
+  FAILURE
+  PAUSED
+}
+
+enum WorkflowTriggerType {
+  MANUAL
+  AUTO
+  SCHEDULED
+  APPROVAL
+}
+
+enum WorkflowApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum DemoResult {
+  INTERESTED
+  NOT_INTERESTED
+  FOLLOW_UP
+  NO_SHOW
+}
+
+enum FollowUpPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ReminderChannel {
+  IN_APP
+  EMAIL
+  SMS
+  PUSH
+  WHATSAPP
+}
+
+enum RecurrencePattern {
+  NONE
+  DAILY
+  WEEKDAYS
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  MONTHLY_NTH
+  QUARTERLY
+  YEARLY
+  CUSTOM
+}
+
+enum ScheduledEventType {
+  MEETING
+  CALL
+  FOLLOW_UP
+  VISIT
+  TRAINING
+  WEBINAR
+  BREAK
+  PERSONAL
+  HOLIDAY
+  OTHER
+}
+
+enum EventStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+  NO_SHOW
+}
+
+enum RSVPStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  TENTATIVE
+}
+
+enum CalendarSourceType {
+  TASK
+  ACTIVITY
+  DEMO
+  TOUR_PLAN
+  REMINDER
+  FOLLOW_UP
+  SCHEDULED_EVENT
+  EXTERNAL_GOOGLE
+  EXTERNAL_OUTLOOK
+}
+
+enum CalendarSyncProvider {
+  GOOGLE
+  OUTLOOK
+  ICAL
+}
+
+enum CalendarSyncDirection {
+  ONE_WAY_TO_CRM
+  ONE_WAY_FROM_CRM
+  TWO_WAY
+}
+
+enum CalendarSyncStatus {
+  ACTIVE
+  PAUSED
+  ERROR
+  DISCONNECTED
+}
+
+enum AvailabilityStatus {
+  FREE
+  BUSY
+  TENTATIVE
+  OUT_OF_OFFICE
+}
+
+enum NotificationCategory {
+  LEAD_ASSIGNED
+  LEAD_UPDATED
+  OWNERSHIP_CHANGED
+  DEMO_SCHEDULED
+  DEMO_COMPLETED
+  FOLLOW_UP_DUE
+  FOLLOW_UP_OVERDUE
+  QUOTATION_SENT
+  QUOTATION_APPROVED
+  TOUR_PLAN_APPROVED
+  ACTIVITY_REMINDER
+  DELEGATION_STARTED
+  DELEGATION_ENDED
+  SYSTEM_ALERT
+  WORKFLOW_ACTION
+}
+
+enum NotificationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  DISMISSED
+  ARCHIVED
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  PUSH
+  WHATSAPP
+  CALL
+}
+
+enum DigestFrequency {
+  REALTIME
+  HOURLY
+  DAILY
+  WEEKLY
+  NONE
+}
+
+enum TaskStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  ON_HOLD
+  OVERDUE
+  PENDING_APPROVAL
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+  CRITICAL
+}
+
+enum TaskType {
+  GENERAL
+  FOLLOW_UP
+  REMINDER
+  ACTIVITY_LINKED
+  APPROVAL
+  REVIEW
+  CALL_BACK
+  MEETING
+  DEMO
+  CUSTOM
+}
+
+enum TaskRecurrence {
+  NONE
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum TaskAssignmentScope {
+  SELF
+  REPORTEES
+  ANY_USER
+  SPECIFIC_USER
+  DEPARTMENT
+  DESIGNATION
+  ROLE
+}
+
+enum ReminderStatus {
+  PENDING
+  SENT
+  TRIGGERED
+  ACKNOWLEDGED
+  SNOOZED
+  MISSED
+  DISMISSED
+  CANCELLED
+}
+
+enum ReminderType {
+  PERSONAL
+  TASK_LINKED
+  ACTIVITY_LINKED
+  FOLLOW_UP_LINKED
+  SYSTEM
+  ONCE
+  RECURRING
+}
+
+enum CommentVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum CommentEntityType {
+  LEAD
+  CONTACT
+  ORGANIZATION
+  TASK
+  ACTIVITY
+  QUOTATION
+  TICKET
+  INVOICE
+  DEMO
+}
+
+enum NotificationEventType {
+  TASK_ASSIGNED
+  TASK_UPDATED
+  TASK_COMPLETED
+  TASK_OVERDUE
+  TASK_COMMENT
+  TASK_COMMENT_ADDED
+  REMINDER_DUE
+  REMINDER_TRIGGERED
+  REMINDER_MISSED
+  LEAD_ASSIGNED
+  LEAD_STATUS_CHANGED
+  LEAD_COMMENT_ADDED
+  LEAD_FOLLOW_UP_DUE
+  LEAD_WON
+  LEAD_LOST
+  ACTIVITY_TAGGED
+  ACTIVITY_REMINDER
+  COMMENT_ADDED
+  COMMENT_PRIVATE
+  APPROVAL_REQUIRED
+  ESCALATION_TRIGGERED
+  SYSTEM_ALERT
+  CUSTOM
+}
+
+enum EscalationAction {
+  NOTIFY_MANAGER
+  NOTIFY_ADMIN
+  REASSIGN
+  REASSIGN_TASK
+  ESCALATE_UP
+  CHANGE_PRIORITY
+  AUTO_CLOSE
+  CUSTOM_WEBHOOK
+}
+
+enum TargetPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum TargetMetric {
+  LEADS_CREATED
+  LEADS_WON
+  REVENUE
+  ACTIVITIES
+  DEMOS
+  CALLS
+  MEETINGS
+  VISITS
+  QUOTATIONS_SENT
+  QUOTATIONS_ACCEPTED
+}
+
+enum ReportFormat {
+  CSV
+  XLSX
+  JSON
+  PDF
+}
+
+enum ReportType {
+  LEAD_REPORT
+  ACTIVITY_REPORT
+  QUOTATION_REPORT
+  DEMO_REPORT
+  TOUR_PLAN_REPORT
+  REVENUE_REPORT
+  PIPELINE_REPORT
+  TEAM_PERFORMANCE_REPORT
+  CONVERSION_REPORT
+  CUSTOM
+}
+
+enum ReportFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  ON_DEMAND
+}
+
+enum ScheduledReportStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+enum ReportCategory {
+  SALES
+  LEAD
+  CONTACT_ORG
+  ACTIVITY
+  DEMO
+  QUOTATION
+  TOUR_PLAN
+  TEAM
+  COMMUNICATION
+  EXECUTIVE
+  CUSTOM
+}
+
+enum ImportJobStatus {
+  UPLOADING
+  PARSING
+  PARSED
+  MAPPING
+  MAPPED
+  VALIDATING
+  VALIDATED
+  REVIEWING
+  IMPORTING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum ImportTargetEntity {
+  ROW_CONTACT
+  CONTACT
+  ORGANIZATION
+  LEAD
+  PRODUCT
+  LEDGER
+}
+
+enum ImportRowStatus {
+  PENDING
+  VALID
+  INVALID
+  DUPLICATE_EXACT
+  DUPLICATE_FUZZY
+  DUPLICATE_UPDATE
+  DUPLICATE_NEW
+  DUPLICATE_IN_FILE
+  SKIPPED
+  IMPORTING
+  IMPORTED
+  FAILED
+}
+
+enum DuplicateStrategy {
+  SKIP
+  UPDATE
+  CREATE_ANYWAY
+  ASK_PER_ROW
+}
+
+enum DuplicateConfidence {
+  EXACT
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum ProfileStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum ExportStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ValidatorType {
+  REQUIRED
+  EMAIL
+  INDIAN_MOBILE
+  PHONE
+  GST_NUMBER
+  PAN_NUMBER
+  TAN_NUMBER
+  AADHAAR
+  IFSC_CODE
+  PINCODE
+  WEBSITE
+  URL
+  NUMERIC
+  DECIMAL
+  DATE
+  ENUM
+  CUSTOM_REGEX
+  MIN_LENGTH
+  MAX_LENGTH
+}
+
+enum StorageType {
+  LOCAL
+  S3
+  CLOUD_LINK
+}
+
+enum StorageProvider {
+  NONE
+  GOOGLE_DRIVE
+  ONEDRIVE
+  DROPBOX
+}
+
+enum DocumentStatus {
+  UPLOADING
+  ACTIVE
+  ARCHIVED
+  DELETED
+}
+
+enum DocumentCategory {
+  GENERAL
+  PROPOSAL
+  CONTRACT
+  INVOICE
+  QUOTATION
+  REPORT
+  PRESENTATION
+  SPREADSHEET
+  IMAGE
+  VIDEO
+  AUDIO
+  OTHER
+}
+
+enum CloudConnectionStatus {
+  CONNECTED
+  EXPIRED
+  REVOKED
+  ERROR
+}
+
+enum ShareLinkAccess {
+  VIEW
+  DOWNLOAD
+  EDIT
+}
+
+enum EmailProvider {
+  GMAIL
+  OUTLOOK
+  IMAP_SMTP
+  ORGANIZATION_SMTP
+}
+
+enum EmailAccountStatus {
+  ACTIVE
+  DISCONNECTED
+  ERROR
+  TOKEN_EXPIRED
+  SYNCING
+}
+
+enum EmailDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum EmailStatus {
+  DRAFT
+  QUEUED
+  SENDING
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  REPLIED
+  BOUNCED
+  FAILED
+  CANCELLED
+}
+
+enum EmailPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  PAUSED
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum CampaignRecipientStatus {
+  PENDING
+  QUEUED
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  REPLIED
+  BOUNCED
+  FAILED
+  UNSUBSCRIBED
+}
+
+enum TemplateCategory {
+  GENERAL
+  FOLLOW_UP
+  INTRODUCTION
+  PROPOSAL
+  QUOTATION_MAIL
+  MEETING
+  THANK_YOU
+  REMINDER
+  FEEDBACK
+  CAMPAIGN
+  WELCOME
+  ANNOUNCEMENT
+  NEWSLETTER
+  CUSTOM
+}
+
+enum WabaConnectionStatus {
+  ACTIVE
+  DISCONNECTED
+  ERROR
+  PENDING_VERIFICATION
+}
+
+enum WaConversationStatus {
+  OPEN
+  PENDING
+  RESOLVED
+  EXPIRED
+  SPAM
+}
+
+enum WaMessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum WaMessageType {
+  TEXT
+  TEMPLATE
+  IMAGE
+  VIDEO
+  AUDIO
+  DOCUMENT
+  STICKER
+  LOCATION
+  CONTACT_CARD
+  INTERACTIVE
+  REACTION
+  BUTTON_REPLY
+  LIST_REPLY
+  ORDER
+  UNKNOWN
+}
+
+enum WaMessageStatus {
+  PENDING
+  QUEUED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+enum WaTemplateStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAUSED
+  DISABLED
+  DELETED
+}
+
+enum WaTemplateCategory {
+  UTILITY
+  AUTHENTICATION
+  MARKETING
+}
+
+enum WaBroadcastStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  PAUSED
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum WaBroadcastRecipientStatus {
+  PENDING
+  QUEUED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+  OPTED_OUT
+}
+
+enum WaChatbotFlowStatus {
+  ACTIVE
+  INACTIVE
+  DRAFT
+}
+
+enum WaChatbotNodeType {
+  WELCOME
+  KEYWORD_TRIGGER
+  MENU
+  TEXT_REPLY
+  MEDIA_REPLY
+  QUICK_BUTTONS
+  COLLECT_INPUT
+  CONDITION
+  API_CALL
+  ASSIGN_AGENT
+  DELAY
+  TAG_CONTACT
+  LINK_LEAD
+}
+
+enum SyncDirection {
+  BIDIRECTIONAL
+  DOWNLOAD_ONLY
+  UPLOAD_ONLY
+  DISABLED
+}
+
+enum ConflictStrategy {
+  SERVER_WINS
+  CLIENT_WINS
+  LATEST_WINS
+  MERGE_FIELDS
+  MANUAL
+}
+
+enum SyncWarningLevel {
+  INFO
+  WARNING
+  URGENT
+  BLOCK
+}
+
+enum SyncEnforcement {
+  WARN_ONLY
+  BLOCK_AFTER_DELAY
+  BLOCK_UNTIL_SYNC
+  FLUSH_AND_RESYNC
+}
+
+enum SyncWarningTrigger {
+  TIME_SINCE_SYNC
+  DATA_AGE
+  PENDING_UPLOAD_COUNT
+  PENDING_UPLOAD_AGE
+  STORAGE_SIZE
+  ENTITY_SPECIFIC
+}
+
+enum FlushType {
+  FULL
+  ENTITY
+  DEVICE
+}
+
+enum FlushStatus {
+  PENDING
+  ACKNOWLEDGED
+  EXECUTED
+  FAILED
+}
+
+enum DeviceStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+  FLUSH_PENDING
+}
+
+enum ChangeAction {
+  CREATE
+  UPDATE
+  DELETE
+  SOFT_DELETE
+}
+
+enum ConflictStatus {
+  PENDING
+  AUTO_RESOLVED
+  MANUALLY_RESOLVED
+  SERVER_APPLIED
+  CLIENT_APPLIED
+  SKIPPED
+}
+
+enum CronJobStatus {
+  ACTIVE
+  PAUSED
+  DISABLED
+}
+
+enum CronJobScope {
+  GLOBAL
+  TENANT
+}
+
+enum CronRunStatus {
+  SUCCESS
+  FAILED
+  TIMEOUT
+  SKIPPED
+  RUNNING
+}
+
+enum CronAlertChannel {
+  EMAIL
+  IN_APP
+  BOTH
+}
+
+enum TicketCategory {
+  BUG
+  FEATURE_REQUEST
+  BILLING
+  PERFORMANCE
+  DATA_ISSUE
+  SECURITY
+  OTHER
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_ON_CUSTOMER
+  WAITING_ON_VENDOR
+  RESOLVED
+  CLOSED
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum HolidayType {
+  NATIONAL
+  REGIONAL
+  COMPANY
+  OPTIONAL
+}
+
+enum SequenceResetPolicy {
+  NEVER
+  DAILY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum NotificationEventCategory {
+  LEAD
+  CONTACT
+  ACTIVITY
+  DEMO
+  QUOTATION
+  TOUR_PLAN
+  SYSTEM
+  USER
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+  VOID
+}
+
+enum PaymentMethod {
+  CASH
+  CHEQUE
+  BANK_TRANSFER
+  UPI
+  CREDIT_CARD
+  DEBIT_CARD
+  NET_BANKING
+  WALLET
+  RAZORPAY
+  STRIPE
+  OTHER
+}
+
+enum PaymentGateway {
+  RAZORPAY
+  STRIPE
+  MANUAL
+}
+
+enum RefundStatus {
+  REFUND_PENDING
+  REFUND_PROCESSED
+  REFUND_FAILED
+  REFUND_CANCELLED
+}
+
+enum CreditNoteStatus {
+  CN_DRAFT
+  CN_ISSUED
+  CN_APPLIED
+  CN_CANCELLED
+}
+
+enum ReminderLevel {
+  GENTLE
+  FIRM
+  URGENT
+  FINAL
+}
+
+enum ProformaInvoiceStatus {
+  PI_DRAFT
+  PI_SENT
+  PI_ACCEPTED
+  PI_REJECTED
+  PI_CONVERTED
+  PI_CANCELLED
+}
+
+enum ApiKeyStatus {
+  API_ACTIVE
+  API_REVOKED
+  API_EXPIRED
+  API_SUSPENDED
+}
+
+enum WebhookStatus {
+  WH_ACTIVE
+  WH_PAUSED
+  WH_FAILED
+  WH_DISABLED
+}
+
+enum WebhookDeliveryStatus {
+  WH_PENDING
+  WH_DELIVERED
+  WH_DELIVERY_FAILED
+  WH_RETRYING
+}
+
+enum ApiLogLevel {
+  API_INFO
+  API_WARN
+  API_ERROR
+}
+
+enum FeatureType {
+  PAGE
+  WIDGET
+  REPORT
+  ACTION
+  INTEGRATION
+}
+
+enum EntityLimitType {
+  CONTACTS
+  ORGANIZATIONS
+  LEADS
+  QUOTATIONS
+  INVOICES
+  PRODUCTS
+  USERS
+  FILE_STORAGE_MB
+  DB_SIZE_MB
+  MARKETPLACE_PROMOTIONS
+  EMAIL_PER_MONTH
+  WHATSAPP_PER_MONTH
+  SMS_PER_MONTH
+  API_CALLS_PER_DAY
+  REPORTS_COUNT
+  WORKFLOWS_COUNT
+  CUSTOM_FIELDS_COUNT
+}
+
+enum DocumentType {
+  GST_INVOICE
+  PROFORMA_INVOICE
+  QUOTATION
+  RECEIPT
+  PURCHASE_ORDER
+  SALE_CHALLAN
+  DELIVERY_CHALLAN
+  CREDIT_NOTE
+  DEBIT_NOTE
+  CUSTOMER_STATEMENT
+  SALES_REPORT
+  STOCK_REPORT
+  LEDGER_REPORT
+  CUSTOM
+}
+
+enum InventoryType {
+  SERIAL
+  BATCH
+  EXPIRY
+  BOM
+  SIMPLE
+}
+
+enum SerialStatus {
+  AVAILABLE
+  SOLD
+  RESERVED
+  EXPIRED
+  DAMAGED
+  RETURNED
+  ACTIVATED
+  DEACTIVATED
+}
+
+enum ExpiryType {
+  FIXED_DATE
+  DAYS
+  MONTHS
+  YEARS
+  NEVER
+}
+
+enum InventoryTaxType {
+  INV_GST
+  INV_CESS
+  INV_TDS
+  INV_EXEMPT
+  INV_ZERO_RATED
+}
+
+enum StockTransactionType {
+  PURCHASE_IN
+  SALE_OUT
+  RETURN_IN
+  TRANSFER
+  ADJUSTMENT
+  OPENING_BALANCE
+  DAMAGE
+  WRITE_OFF
+  PRODUCTION_IN
+  PRODUCTION_OUT
+  SCRAP
+}
+
+enum AdjustmentStatus {
+  ADJ_PENDING
+  ADJ_APPROVED
+  ADJ_REJECTED
+}
+
+enum ScrapType {
+  SCRAP_EXPIRED
+  SCRAP_DAMAGED
+  SCRAP_PRODUCTION_WASTE
+  SCRAP_RETURNED_DEFECTIVE
+  SCRAP_QUALITY_FAILURE
+}
+
+enum UnitCategory {
+  WEIGHT
+  VOLUME
+  LENGTH
+  QUANTITY
+  AREA
+}
+
+enum EntityVerificationMode {
+  OTP
+  LINK
+}
+
+enum EntityVerificationChannel {
+  EMAIL
+  MOBILE_SMS
+  WHATSAPP
+}
+
+enum EntityVerificationStatus {
+  PENDING
+  VERIFIED
+  EXPIRED
+  FAILED
+  REJECTED
+}
+
+enum VerifiedByType {
+  SELF
+  STAFF
+  SYSTEM
+}
+
+enum AiModelSource {
+  OLLAMA
+  CLOUD
+}
+
+enum AiModelStatus {
+  AVAILABLE
+  DOWNLOADING
+  NOT_INSTALLED
+  ERROR
+}
+
+enum AiDatasetStatus {
+  DRAFT
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum AiTrainingJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum AiChatSessionStatus {
+  ACTIVE
+  ARCHIVED
+  DELETED
+}
