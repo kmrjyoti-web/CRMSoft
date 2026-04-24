@@ -5,6 +5,9 @@ import {
   Box,
   Rocket,
   HeartPulse,
+  Building2,
+  Users,
+  Factory,
 } from 'lucide-react';
 import { StatCard } from '@/components/ui/StatCard';
 
@@ -12,7 +15,7 @@ import { StatCard } from '@/components/ui/StatCard';
 async function getDashboardData() {
   try {
     const base = process.env.INTERNAL_API_URL ?? 'http://localhost:3001';
-    const [overview, health, errors] = await Promise.all([
+    const [overview, health, errors, brands, partners, verticals] = await Promise.all([
       fetch(`${base}/platform-console/dashboard`, { cache: 'no-store' })
         .then((r) => r.json())
         .catch(() => null),
@@ -22,10 +25,19 @@ async function getDashboardData() {
       fetch(`${base}/platform-console/dashboard/errors`, { cache: 'no-store' })
         .then((r) => r.json())
         .catch(() => ({ recent: [], bySeverity: [] })),
+      fetch(`${base}/platform-console/brands/config`, { cache: 'no-store' })
+        .then((r) => r.json())
+        .catch(() => []),
+      fetch(`${base}/platform-console/partners`, { cache: 'no-store' })
+        .then((r) => r.json())
+        .catch(() => []),
+      fetch(`${base}/platform-console/verticals`, { cache: 'no-store' })
+        .then((r) => r.json())
+        .catch(() => []),
     ]);
-    return { overview, health, errors };
+    return { overview, health, errors, brands, partners, verticals };
   } catch {
-    return { overview: null, health: [], errors: { recent: [], bySeverity: [] } };
+    return { overview: null, health: [], errors: { recent: [], bySeverity: [] }, brands: [], partners: [], verticals: [] };
   }
 }
 
@@ -37,12 +49,19 @@ const STATUS_INDICATOR: Record<string, string> = {
 };
 
 export default async function DashboardPage() {
-  const { overview, health, errors } = await getDashboardData();
+  const { overview, health, errors, brands, partners, verticals } = await getDashboardData();
 
   const services = overview?.services ?? { total: 7, healthy: 0, allHealthy: false };
   const testsData = overview?.tests ?? { total: 0, passed: 0, failed: 0, status: 'UNKNOWN' };
   const errorsToday = overview?.errors?.today ?? 0;
   const lastDeploy = overview?.lastDeploy;
+
+  const brandsArr = Array.isArray(brands) ? brands : (brands as any)?.items ?? [];
+  const partnersArr = Array.isArray(partners) ? partners : (partners as any)?.items ?? [];
+  const verticalsArr = Array.isArray(verticals) ? verticals : (verticals as any)?.items ?? [];
+  const activeBrands = brandsArr.filter((b: any) => b.isActive).length;
+  const activePartners = partnersArr.filter((p: any) => p.isActive).length;
+  const activeVerticals = verticalsArr.filter((v: any) => v.status === 'ACTIVE').length;
 
   return (
     <div className="space-y-6">
@@ -82,6 +101,31 @@ export default async function DashboardPage() {
           sub={lastDeploy ? lastDeploy.status : 'No deploys yet'}
           icon={Rocket}
           status={lastDeploy?.status === 'SUCCESS' ? 'ok' : 'neutral'}
+        />
+      </div>
+
+      {/* Platform registry stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <StatCard
+          label="Active Brands"
+          value={activeBrands || '—'}
+          sub={`${brandsArr.length} total deployed`}
+          icon={Building2}
+          status={activeBrands > 0 ? 'ok' : 'neutral'}
+        />
+        <StatCard
+          label="Partners"
+          value={activePartners || '—'}
+          sub={`${partnersArr.length} total onboarded`}
+          icon={Users}
+          status={activePartners > 0 ? 'ok' : 'neutral'}
+        />
+        <StatCard
+          label="Verticals"
+          value={activeVerticals || '—'}
+          sub={`${verticalsArr.length} registered`}
+          icon={Factory}
+          status={activeVerticals > 0 ? 'ok' : 'neutral'}
         />
       </div>
 

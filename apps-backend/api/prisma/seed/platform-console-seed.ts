@@ -1,8 +1,9 @@
 /**
- * Platform Console seed — BrandConfig + PartnerRegistry + PartnerVerticalAccess
+ * Platform Console seed — BrandConfig + PartnerRegistry + PartnerVerticalAccess + Verticals
  * Run: npx ts-node -r tsconfig-paths/register prisma/seed/platform-console-seed.ts
  */
 import { PlatformConsolePrismaService } from '../../src/modules/platform-console/prisma/platform-console-prisma.service';
+import { seedInitialVerticals } from '../../src/modules/platform-console/vertical-manager/seed-verticals';
 
 const db = new PlatformConsolePrismaService();
 
@@ -57,7 +58,7 @@ const PARTNERS = [
     industry: 'travel',
     brandCode: 'partner-travel-1',
     description: 'First travel industry partner — pilot program',
-    enabledVerticals: ['GENERAL'],
+    enabledVerticals: ['GENERAL', 'TOURISM'],
   },
   {
     partnerCode: 'electronic-01',
@@ -69,7 +70,7 @@ const PARTNERS = [
     industry: 'electronics',
     brandCode: 'partner-electronic-1',
     description: 'First electronics retail partner — pilot program',
-    enabledVerticals: ['GENERAL'],
+    enabledVerticals: ['GENERAL', 'RETAIL'],
   },
 ];
 
@@ -110,8 +111,13 @@ async function main() {
     console.log(`     Verticals: ${enabledVerticals.join(', ')}`);
   }
 
+  // 3. Verticals (VerticalRegistry)
+  console.log('\n--- Verticals ---');
+  await seedInitialVerticals(db);
+  console.log('  ✅ 7 verticals seeded (GENERAL=ACTIVE, 6×BETA)');
+
   console.log('\n🎉 Platform Console seed complete!');
-  console.log('   3 brand configs, 2 partners, vertical access configured\n');
+  console.log('   3 brand configs, 2 partners, 7 verticals, vertical access configured\n');
 }
 
 main()

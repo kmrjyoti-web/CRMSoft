@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Users, Plus, CheckCircle, XCircle, RefreshCw, Layers } from 'lucide-react';
+import Link from 'next/link';
+import { Users, Plus, CheckCircle, XCircle, Layers } from 'lucide-react';
 import { api } from '@/lib/api';
 
 type Partner = {
@@ -95,7 +96,9 @@ export default function PartnersPage() {
             ) : partners.map((p) => (
               <tr key={p.partnerCode} className="hover:bg-[#21262d] transition-colors">
                 <td className="px-4 py-3">
-                  <div className="font-medium text-[#c9d1d9]">{p.partnerName}</div>
+                  <Link href={`/partners/${p.partnerCode}`} className="font-medium text-[#58a6ff] hover:underline">
+                    {p.partnerName}
+                  </Link>
                   {p.legalName && <div className="text-xs text-[#8b949e]">{p.legalName}</div>}
                 </td>
                 <td className="px-4 py-3 font-mono text-xs text-[#8b949e]">{p.partnerCode}</td>
