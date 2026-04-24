@@ -1,0 +1,61 @@
+-- Seed: Travvellis brand profile for Pattern 4 login showcase
+-- Table: pc_brand_profiles (model: BrandProfile)
+-- Run against: platformconsoledb
+
+INSERT INTO pc_brand_profiles (
+  id,
+  brand_code,
+  brand_name,
+  display_name,
+  description,
+  primary_color,
+  secondary_color,
+  logo_url,
+  domain,
+  subdomain,
+  contact_email,
+  is_active,
+  is_default,
+  custom_login_component,
+  custom_login_theme,
+  vertical_code,
+  design_tokens,
+  font_config,
+  brand_asset_path,
+  created_at,
+  updated_at
+) VALUES (
+  gen_random_uuid(),
+  'travvellis',
+  'Travvellis',
+  'Travvellis — Travel CRM',
+  'Premium travel CRM brand with passport-style animated login experience.',
+  '#f97316',
+  '#0ea5e9',
+  NULL,
+  'travvellis.com',
+  'app',
+  'hello@travvellis.com',
+  true,
+  false,
+  'TravvellisLogin',
+  'passport_dark',
+  'TRAVEL',
+  '{"colorScheme":"passport_dark","borderRadius":"12px","fontFamily":"system-ui"}',
+  '{"heading":"system-ui","body":"system-ui","mono":"Courier New"}',
+  'brand-assets/travelsis/assets',
+  NOW(),
+  NOW()
+)
+ON CONFLICT (brand_code) DO UPDATE SET
+  display_name            = EXCLUDED.display_name,
+  description             = EXCLUDED.description,
+  primary_color           = EXCLUDED.primary_color,
+  secondary_color         = EXCLUDED.secondary_color,
+  custom_login_component  = EXCLUDED.custom_login_component,
+  custom_login_theme      = EXCLUDED.custom_login_theme,
+  vertical_code           = EXCLUDED.vertical_code,
+  design_tokens           = EXCLUDED.design_tokens,
+  font_config             = EXCLUDED.font_config,
+  brand_asset_path        = EXCLUDED.brand_asset_path,
+  updated_at              = NOW();

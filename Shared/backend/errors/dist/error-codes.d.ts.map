@@ -1,0 +1,1 @@
+{"version":3,"file":"error-codes.d.ts","sourceRoot":"","sources":["../src/error-codes.ts"],"names":[],"mappings":"AAAA;;;;;;GAMG;AAEH,MAAM,WAAW,mBAAmB;IAClC,IAAI,EAAE,MAAM,CAAC;IACb,UAAU,EAAE,MAAM,CAAC;IACnB,OAAO,EAAE,MAAM,CAAC;IAChB,UAAU,EAAE,MAAM,CAAC;CACpB;AAED,eAAO,MAAM,WAAW,EAAE,MAAM,CAAC,MAAM,EAAE,mBAAmB,CA+tC3D,CAAC;AAEF,+BAA+B;AAC/B,eAAO,MAAM,iBAAiB,QAAkC,CAAC"}

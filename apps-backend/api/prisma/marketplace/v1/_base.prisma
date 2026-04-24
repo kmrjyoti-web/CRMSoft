@@ -1,0 +1,144 @@
+// ─── Generator + Datasource ─────────────────────────────────────────────────
+// This file is read by Prisma's prismaSchemaFolder feature.
+// It declares the generator, datasource, and all shared enums for MarketplaceDB.
+// Models live in the sibling domain files.
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../../../node_modules/@prisma/marketplace-client"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("MARKETPLACE_DATABASE_URL")
+}
+
+// ─── Enums ─────────────────────────────────────────────────────────────────
+
+enum ListingType {
+  PRODUCT
+  SERVICE
+  REQUIREMENT
+  JOB
+}
+
+enum ListingStatus {
+  DRAFT
+  SCHEDULED
+  ACTIVE
+  PAUSED
+  SOLD_OUT
+  EXPIRED
+  ARCHIVED
+  REJECTED
+}
+
+enum PostType {
+  TEXT
+  IMAGE
+  VIDEO
+  PRODUCT_SHARE
+  CUSTOMER_FEEDBACK
+  PRODUCT_LAUNCH
+  POLL
+  ANNOUNCEMENT
+}
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  ACTIVE
+  HIDDEN
+  ARCHIVED
+  DELETED
+}
+
+enum EngagementAction {
+  LIKE
+  UNLIKE
+  SAVE
+  UNSAVE
+  SHARE
+  VIEW
+  CLICK
+  REPORT
+}
+
+enum OfferType {
+  ONE_TIME
+  DAILY_RECURRING
+  WEEKLY_RECURRING
+  FIRST_N_ORDERS
+  LAUNCH
+  CUSTOM
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FLAT_AMOUNT
+  FREE_SHIPPING
+  BUY_X_GET_Y
+  BUNDLE_PRICE
+}
+
+enum OfferStatus {
+  DRAFT
+  SCHEDULED
+  ACTIVE
+  PAUSED
+  EXPIRED
+  CLOSED
+  ARCHIVED
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  FLAGGED
+}
+
+enum VisibilityType {
+  PUBLIC
+  GEO_TARGETED
+  VERIFIED_ONLY
+  MY_CONTACTS
+  SELECTED_CONTACTS
+  CATEGORY_BASED
+  GRADE_BASED
+}
+
+enum ExpiryAction {
+  DEACTIVATE
+  ARCHIVE
+  DELETE
+  NOTIFY_OWNER
+}
+
+enum AnalyticsEventType {
+  IMPRESSION
+  CLICK
+  ENQUIRY
+  LEAD
+  CUSTOMER
+  ORDER
+  SHARE
+  SAVE
+}
+
+enum AnalyticsEntityType {
+  POST
+  LISTING
+  OFFER
+}
+
+enum AnalyticsSource {
+  FEED
+  SEARCH
+  SHARE_LINK
+  DIRECT
+  NOTIFICATION
+  QR_CODE
+  EXTERNAL
+}
