@@ -1,1 +1,0 @@
-{"version":3,"file":"auditable.decorator.d.ts","sourceRoot":"","sources":["../src/auditable.decorator.ts"],"names":[],"mappings":"AAEA,MAAM,WAAW,SAAS;IACxB,UAAU,CAAC,EAAE,MAAM,CAAC;IACpB,MAAM,CAAC,EAAE,MAAM,CAAC;IAChB,MAAM,CAAC,EAAE,MAAM,CAAC;IAChB,OAAO,CAAC,EAAE,MAAM,CAAC;CAClB;AAED,eAAO,MAAM,cAAc,eAAe,CAAC;AAE3C,wBAAgB,SAAS,CAAC,IAAI,EAAE,SAAS,GAAG,eAAe,CAE1D"}
