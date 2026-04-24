@@ -159,9 +159,9 @@ export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }:
     setIsLoading(true);
     try {
       const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
-      const res = await fetch(`${API}/auth/travel/login`, {
+      const res = await fetch(`${API}/auth/customer/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Brand-Code': 'travvellis' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
       if (res.ok) {
