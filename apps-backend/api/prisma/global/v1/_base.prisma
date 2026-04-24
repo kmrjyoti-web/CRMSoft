@@ -1,0 +1,29 @@
+// ─── Generator + Datasource ─────────────────────────────────────────────────
+// This file is read by Prisma's prismaSchemaFolder feature.
+// It declares the generator, datasource, and all shared enums for GlobalReferenceDB.
+// Models live in the sibling domain files.
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../../../node_modules/.prisma/global-reference-client"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("GLOBAL_REFERENCE_DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum GstRateType {
+  STANDARD   // Normal GST slab (0%, 5%, 12%, 18%, 28%)
+  CESS       // Additional cess on top of GST (luxury, sin goods)
+  EXEMPT     // Fully exempt from GST
+  ZERO_RATED // 0% GST but eligible for input tax credit (exports)
+}
+
+enum HsnCodeType {
+  HSN  // Harmonised System of Nomenclature — goods
+  SAC  // Services Accounting Code — services
+}

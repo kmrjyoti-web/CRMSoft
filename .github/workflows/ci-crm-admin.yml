@@ -1,0 +1,108 @@
+name: CI — crm-admin
+
+on:
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - 'apps-frontend/crm-admin/**'
+      - '.github/workflows/ci-crm-admin.yml'
+  push:
+    branches: [develop]
+    paths:
+      - 'apps-frontend/crm-admin/**'
+
+concurrency:
+  group: ci-crm-admin-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '24'
+  NODE_OPTIONS: '--max-old-space-size=4096'
+  APP_DIR: 'apps-frontend/crm-admin'
+  COREUI_DIR: 'apps-frontend/crm-admin/lib/coreui'
+
+jobs:
+  # ─────────────────────────────────────────────
+  # ⚠️ Typecheck is non-blocking in v1 — crm-admin has ~328 tsc errors
+  # (type drift across IconProps, WhatsApp shapes, Icon components, etc.).
+  # Dedicated cleanup sprint required. Tighten after cleanup lands.
+  # ─────────────────────────────────────────────
+  typecheck:
+    name: Type check (tsc) — non-blocking v1
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+      - name: Install (workspace root)
+        run: pnpm install --frozen-lockfile
+      - name: Install + build coreui (turbo workspaces)
+        working-directory: ${{ env.COREUI_DIR }}
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+      - name: typecheck
+        working-directory: ${{ env.APP_DIR }}
+        # Uses the project's custom script which filters lib/coreui errors.
+        run: pnpm typecheck
+        continue-on-error: true
+
+  # ─────────────────────────────────────────────
+  # ⚠️ Lint is non-blocking in v1 — tighten in follow-up sprint.
+  # ─────────────────────────────────────────────
+  lint:
+    name: Lint — non-blocking v1
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+      - name: Install (workspace root)
+        run: pnpm install --frozen-lockfile
+      - name: next lint
+        working-directory: ${{ env.APP_DIR }}
+        run: pnpm lint
+        continue-on-error: true
+
+  # ─────────────────────────────────────────────
+  # Build also non-blocking in v1 (depends on typecheck-level types).
+  # Once cleanup sprint lands, flip both typecheck + build to blocking.
+  # ─────────────────────────────────────────────
+  build:
+    name: Next.js build — non-blocking v1
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    needs: typecheck
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+      - name: Install (workspace root)
+        run: pnpm install --frozen-lockfile
+      - name: Install + build coreui
+        working-directory: ${{ env.COREUI_DIR }}
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+      - name: next build
+        working-directory: ${{ env.APP_DIR }}
+        env:
+          NEXT_PUBLIC_API_URL: 'http://localhost:3001'
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: pnpm build

@@ -1,0 +1,1252 @@
+{
+  "generatedAt": "2026-03-19T20:15:06.195Z",
+  "annotationCoverage": "100%",
+  "total": 134,
+  "totalBusinessLogic": 23,
+  "totalAnnotated": 23,
+  "summary": {
+    "vendor → identity": {
+      "total": 21,
+      "infrastructure": 21,
+      "businessLogic": 0,
+      "annotated": 21
+    },
+    "vendor → work": {
+      "total": 8,
+      "infrastructure": 1,
+      "businessLogic": 7,
+      "annotated": 8
+    },
+    "identity → vendor": {
+      "total": 1,
+      "infrastructure": 0,
+      "businessLogic": 1,
+      "annotated": 1
+    },
+    "work → vendor": {
+      "total": 15,
+      "infrastructure": 12,
+      "businessLogic": 3,
+      "annotated": 15
+    },
+    "work → identity": {
+      "total": 89,
+      "infrastructure": 77,
+      "businessLogic": 12,
+      "annotated": 89
+    }
+  },
+  "legend": {
+    "infrastructure": "Shared decorator/guard — will live in shared-lib, not an API call",
+    "business-logic": "Substantive service dependency — must become API call or event when extracted",
+    "seed-data": "Static constant import — will become shared-lib or configuration"
+  },
+  "deps": [
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/designations/presentation/designations.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/workflows/presentation/workflow-admin.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/workflows/presentation/workflow-execution.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/workflows/presentation/workflow-approval.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/workflows/presentation/workflow-config.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/departments/presentation/departments.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/tenant-config/presentation/credential-admin.controller.ts",
+      "importedFrom": "../../../core/identity/tenant/infrastructure/super-admin.guard",
+      "lineNumber": 12,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/control-room/presentation/control-room.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/verification/presentation/verification.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 12,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/user-overrides/presentation/user-overrides.controller.ts",
+      "importedFrom": "../../../../core/permissions/engines/ubac.engine",
+      "lineNumber": 5,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/user-overrides/presentation/user-overrides.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/packages/presentation/packages.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/table-config/presentation/data-masking.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/table-config/presentation/table-config.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/keyboard-shortcuts/presentation/keyboard-shortcuts-admin.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/business-locations/presentation/company-locations.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/softwarevendor/business-locations/presentation/locations.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/plugins/presentation/plugin.controller.ts",
+      "importedFrom": "../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 14,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/plugins/presentation/plugin-health.controller.ts",
+      "importedFrom": "../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 11,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/marketplace/presentation/vendor.controller.ts",
+      "importedFrom": "../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 13,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "identity",
+      "sourceFile": "src/modules/marketplace/presentation/marketplace-feed.controller.ts",
+      "importedFrom": "../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 15,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "work",
+      "sourceFile": "src/modules/softwarevendor/cron-engine/cron-engine.module.ts",
+      "importedFrom": "../../core/work/notifications/notifications.module",
+      "lineNumber": 3,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "work",
+      "sourceFile": "src/modules/softwarevendor/cron-engine/handlers/calendar-handlers.ts",
+      "importedFrom": "../../../core/work/notifications/services/notification-dispatch.service",
+      "lineNumber": 9,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "work",
+      "sourceFile": "src/modules/softwarevendor/workflows/application/queries/get-instance-transitions/get-instance-transitions.handler.ts",
+      "importedFrom": "../../../../../../core/workflow/workflow-engine.service",
+      "lineNumber": 2,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "work",
+      "sourceFile": "src/modules/softwarevendor/workflows/application/queries/get-entity-status/get-entity-status.handler.ts",
+      "importedFrom": "../../../../../../core/workflow/workflow-engine.service",
+      "lineNumber": 2,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "work",
+      "sourceFile": "src/modules/softwarevendor/workflows/application/commands/approve-transition/approve-transition.handler.ts",
+      "importedFrom": "../../../../../../core/workflow/workflow-engine.service",
+      "lineNumber": 2,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "work",
+      "sourceFile": "src/modules/softwarevendor/workflows/application/commands/reject-transition/reject-transition.handler.ts",
+      "importedFrom": "../../../../../../core/workflow/workflow-engine.service",
+      "lineNumber": 2,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "work",
+      "sourceFile": "src/modules/softwarevendor/workflows/application/commands/initialize-workflow/initialize-workflow.handler.ts",
+      "importedFrom": "../../../../../../core/workflow/workflow-engine.service",
+      "lineNumber": 2,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "vendor",
+      "targetService": "work",
+      "sourceFile": "src/modules/softwarevendor/workflows/application/commands/execute-transition/execute-transition.handler.ts",
+      "importedFrom": "../../../../../../core/workflow/workflow-engine.service",
+      "lineNumber": 2,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "identity",
+      "targetService": "vendor",
+      "sourceFile": "src/core/auth/platform-bootstrap.service.ts",
+      "importedFrom": "../../modules/softwarevendor/business-type/services/business-type-seed-data",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "seed-data"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "vendor",
+      "sourceFile": "src/modules/customer/organizations/organizations.module.ts",
+      "importedFrom": "../../softwarevendor/table-config/table-config.module",
+      "lineNumber": 3,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "vendor",
+      "sourceFile": "src/modules/customer/organizations/presentation/organizations.controller.ts",
+      "importedFrom": "../../../softwarevendor/table-config/data-masking.interceptor",
+      "lineNumber": 21,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "vendor",
+      "sourceFile": "src/modules/customer/raw-contacts/application/event-handlers/on-raw-contact-verified.handler.ts",
+      "importedFrom": "../../../../softwarevendor/control-room/services/rule-resolver.service",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "vendor",
+      "sourceFile": "src/modules/customer/raw-contacts/raw-contacts.module.ts",
+      "importedFrom": "../../softwarevendor/table-config/table-config.module",
+      "lineNumber": 3,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "vendor",
+      "sourceFile": "src/modules/customer/raw-contacts/raw-contacts.module.ts",
+      "importedFrom": "../../softwarevendor/control-room/control-room.module",
+      "lineNumber": 5,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "vendor",
+      "sourceFile": "src/modules/customer/raw-contacts/presentation/raw-contacts.controller.ts",
+      "importedFrom": "../../../softwarevendor/table-config/data-masking.interceptor",
+      "lineNumber": 27,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "vendor",
+      "sourceFile": "src/modules/customer/leads/leads.module.ts",
+      "importedFrom": "../../softwarevendor/table-config/table-config.module",
+      "lineNumber": 3,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "vendor",
+      "sourceFile": "src/modules/customer/leads/presentation/leads.controller.ts",
+      "importedFrom": "../../../softwarevendor/table-config/data-masking.interceptor",
+      "lineNumber": 27,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "vendor",
+      "sourceFile": "src/modules/customer/contacts/contacts.module.ts",
+      "importedFrom": "../../softwarevendor/table-config/table-config.module",
+      "lineNumber": 3,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "vendor",
+      "sourceFile": "src/modules/customer/contacts/presentation/contacts.controller.ts",
+      "importedFrom": "../../../softwarevendor/table-config/data-masking.interceptor",
+      "lineNumber": 21,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "vendor",
+      "sourceFile": "src/modules/customer/activities/activities.module.ts",
+      "importedFrom": "../../softwarevendor/table-config/table-config.module",
+      "lineNumber": 3,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "vendor",
+      "sourceFile": "src/modules/customer/activities/presentation/activity.controller.ts",
+      "importedFrom": "../../../softwarevendor/table-config/data-masking.interceptor",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "vendor",
+      "sourceFile": "src/modules/customer/email/email.module.ts",
+      "importedFrom": "../../softwarevendor/tenant-config/tenant-config.module",
+      "lineNumber": 3,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "vendor",
+      "sourceFile": "src/modules/customer/email/services/gmail.service.ts",
+      "importedFrom": "../../../softwarevendor/tenant-config/services/credential.service",
+      "lineNumber": 3,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "vendor",
+      "sourceFile": "src/modules/customer/email/services/outlook.service.ts",
+      "importedFrom": "../../../softwarevendor/tenant-config/services/credential.service",
+      "lineNumber": 3,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/approval-requests/application/queries/get-pending/get-pending.handler.ts",
+      "importedFrom": "../../../../../../core/permissions/engines/maker-checker.engine",
+      "lineNumber": 3,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/approval-requests/application/commands/reject-request/reject-request.handler.ts",
+      "importedFrom": "../../../../../../core/permissions/engines/maker-checker.engine",
+      "lineNumber": 3,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/approval-requests/application/commands/submit-approval/submit-approval.handler.ts",
+      "importedFrom": "../../../../../../core/permissions/engines/maker-checker.engine",
+      "lineNumber": 3,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/approval-requests/application/commands/approve-request/approve-request.handler.ts",
+      "importedFrom": "../../../../../../core/permissions/engines/maker-checker.engine",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/approval-requests/presentation/approval-requests.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/recurrence/presentation/recurrence.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/comments/presentation/comment.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/tasks/presentation/task.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/calendar/presentation/calendar-events.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 3,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/calendar/presentation/calendar.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 3,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/calendar/presentation/calendar-ical.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 15,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/calendar/presentation/calendar-admin.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 13,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/calendar/presentation/calendar-sync.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 12,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/calendar/presentation/calendar-availability.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 12,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/products/presentation/products.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 9,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/approval-rules/presentation/approval-rules.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 5,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/sales/presentation/sales.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 16,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/product-pricing/presentation/product-pricing.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/brands/presentation/brands.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/payment/payment.module.ts",
+      "importedFrom": "../../core/identity/settings/settings.module",
+      "lineNumber": 3,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/payment/services/credit-note.service.ts",
+      "importedFrom": "../../../core/identity/settings/services/auto-number.service",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/payment/services/proforma-invoice.service.ts",
+      "importedFrom": "../../../core/identity/settings/services/auto-number.service",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/payment/services/proforma-invoice.service.ts",
+      "importedFrom": "../../../core/identity/settings/services/company-profile.service",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/payment/services/payment.service.ts",
+      "importedFrom": "../../../core/identity/settings/services/auto-number.service",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/payment/services/invoice.service.ts",
+      "importedFrom": "../../../core/identity/settings/services/auto-number.service",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/payment/services/invoice.service.ts",
+      "importedFrom": "../../../core/identity/settings/services/company-profile.service",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/payment/services/refund.service.ts",
+      "importedFrom": "../../../core/identity/settings/services/auto-number.service",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/payment/services/receipt.service.ts",
+      "importedFrom": "../../../core/identity/settings/services/auto-number.service",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "business-logic"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/product-units/presentation/product-units.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/tour-plans/presentation/tour-plan.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/mis-reports/presentation/report-schedules.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/mis-reports/presentation/reports.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/mis-reports/presentation/report-templates.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/mis-reports/presentation/daily-digest.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 5,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/mis-reports/presentation/custom-report.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 5,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/mis-reports/presentation/report-bookmarks.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 13,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/dashboard/presentation/dashboard.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/dashboard/presentation/performance.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/dashboard/presentation/analytics.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/dashboard/presentation/reports.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 5,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/ownership/presentation/ownership.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/ownership/presentation/ownership-rules.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/ownership/presentation/ownership-workload.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/bulk-export/presentation/export.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/bulk-export/presentation/export.controller.ts",
+      "importedFrom": "../../../core/identity/audit/decorators/audit-skip.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/bulk-import/presentation/import.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/bulk-import/presentation/import.controller.ts",
+      "importedFrom": "../../../core/identity/audit/decorators/audit-skip.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/bulk-import/presentation/profile.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 5,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/bulk-import/presentation/profile.controller.ts",
+      "importedFrom": "../../../core/identity/audit/decorators/audit-skip.decorator",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/accounts/presentation/accounts.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/support/presentation/vendor-support.controller.ts",
+      "importedFrom": "../../../core/identity/tenant/infrastructure/vendor.guard",
+      "lineNumber": 14,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/procurement/presentation/procurement.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/inventory/presentation/bom.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/inventory/presentation/inventory.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/customer-price-groups/presentation/customer-price-groups.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/manufacturers/presentation/manufacturers.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/wallet/presentation/wallet-admin.controller.ts",
+      "importedFrom": "../../../core/identity/tenant/infrastructure/super-admin.guard",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/wallet/presentation/wallet-admin.controller.ts",
+      "importedFrom": "../../../core/identity/tenant/infrastructure/decorators/super-admin-route.decorator",
+      "lineNumber": 9,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/activities/presentation/activity.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/follow-ups/presentation/follow-up.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/product-tax/presentation/product-tax.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 8,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/quotations/presentation/quotation-analytics.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 5,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/quotations/presentation/quotation-ai.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/quotations/presentation/quotations.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/quotations/presentation/quotation-templates.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 6,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/documents/presentation/share-link.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 5,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/documents/presentation/folder.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 5,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/documents/presentation/cloud.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 5,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/documents/presentation/document.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 9,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/documents/presentation/attachment.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 5,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/task-logic/presentation/task-logic.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 2,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/demos/presentation/demo.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/document-templates/presentation/vendor-document-template.controller.ts",
+      "importedFrom": "../../../core/identity/tenant/infrastructure/vendor.guard",
+      "lineNumber": 14,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/document-templates/presentation/document-template.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 12,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/reminders/presentation/reminder.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/email/presentation/email-signature.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/email/presentation/email-account.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/email/presentation/email.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/email/presentation/email-campaign.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/email/presentation/email-template.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/whatsapp/presentation/whatsapp-chatbot.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/whatsapp/presentation/whatsapp-templates.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/whatsapp/presentation/whatsapp-broadcasts.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/whatsapp/presentation/whatsapp.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/customer/whatsapp/presentation/whatsapp-quick-replies.controller.ts",
+      "importedFrom": "../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 7,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/core/work/custom-fields/presentation/custom-fields.controller.ts",
+      "importedFrom": "../../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 9,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/core/work/notifications/presentation/notification-admin.controller.ts",
+      "importedFrom": "../../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 2,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/core/work/notifications/presentation/notification-settings.controller.ts",
+      "importedFrom": "../../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    },
+    {
+      "sourceService": "work",
+      "targetService": "identity",
+      "sourceFile": "src/modules/core/work/notifications/presentation/notification.controller.ts",
+      "importedFrom": "../../../../../core/permissions/decorators/require-permissions.decorator",
+      "lineNumber": 4,
+      "isAnnotated": true,
+      "category": "infrastructure"
+    }
+  ]
+}

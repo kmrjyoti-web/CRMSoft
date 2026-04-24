@@ -1,0 +1,103 @@
+// IdentityDB — company / person-centric identity domain
+// Models: Company, UserCompanyMapping, UserCompanyMappingLog
+
+model Company {
+  id          String        @id @default(uuid())
+  talentId    String        @unique @map("talent_id")     // C0000001 format
+
+  name        String
+  displayName String?       @map("display_name")
+
+  categoryCode    String?   @map("category_code")         // COMPANY_B2B | FREELANCER | ...
+  subcategoryCode String?   @map("subcategory_code")      // DMC_PROVIDER | AGENT | ...
+  brandCode       String?   @map("brand_code")            // travvellis | ...
+  verticalCode    String?   @map("vertical_code")         // TRAVEL | ...
+
+  gstNumber         String?   @map("gst_number")
+  panNumber         String?   @map("pan_number")
+  registeredAddress Json?     @map("registered_address")
+
+  status  CompanyStatus @default(ACTIVE)
+
+  ownerId String?   @map("owner_id")
+  owner   User?     @relation(fields: [ownerId], references: [id])
+
+  registrationFields Json? @map("registration_fields")
+
+  mappings UserCompanyMapping[]
+
+  isDeleted   Boolean   @default(false) @map("is_deleted")
+  deletedAt   DateTime? @map("deleted_at")
+  deletedById String?   @map("deleted_by_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdBy   String?   @map("created_by")
+  updatedById String?   @map("updated_by_id")
+
+  @@index([status])
+  @@index([verticalCode, brandCode])
+  @@index([isDeleted])
+  @@map("gv_cmp_companies")
+}
+
+model UserCompanyMapping {
+  id        String @id @default(uuid())
+  userId    String @map("user_id")
+  companyId String @map("company_id")
+
+  user    User    @relation(fields: [userId], references: [id])
+  company Company @relation(fields: [companyId], references: [id])
+
+  role     CompanyMemberRole @default(MEMBER)
+  joinMode CompanyJoinMode   @default(SELF_REGISTERED) @map("join_mode")
+  status   MappingStatus     @default(PENDING)
+  isDefault Boolean          @default(false) @map("is_default")
+
+  invitedBy       String?   @map("invited_by")
+  approvedBy      String?   @map("approved_by")
+  approvedAt      DateTime? @map("approved_at")
+  rejectedBy      String?   @map("rejected_by")
+  rejectedAt      DateTime? @map("rejected_at")
+  rejectionReason String?   @map("rejection_reason")
+  blockedBy       String?   @map("blocked_by")
+  blockedAt       DateTime? @map("blocked_at")
+  blockReason     String?   @map("block_reason")
+  resignedAt      DateTime? @map("resigned_at")
+  resignReason    String?   @map("resign_reason")
+
+  logs UserCompanyMappingLog[]
+
+  isDeleted   Boolean   @default(false) @map("is_deleted")
+  deletedAt   DateTime? @map("deleted_at")
+  deletedById String?   @map("deleted_by_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@unique([userId, companyId])
+  @@index([userId, status])
+  @@index([companyId, status])
+  @@index([userId, isDefault])
+  @@index([isDeleted])
+  @@map("gv_cmp_user_company_mappings")
+}
+
+model UserCompanyMappingLog {
+  id        String             @id @default(uuid())
+  mappingId String             @map("mapping_id")
+  mapping   UserCompanyMapping @relation(fields: [mappingId], references: [id])
+
+  changedBy  String        @map("changed_by")
+  action     MappingAction
+  fromStatus String?       @map("from_status")
+  toStatus   String?       @map("to_status")
+  fromRole   String?       @map("from_role")
+  toRole     String?       @map("to_role")
+  note       String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([mappingId])
+  @@index([changedBy])
+  @@index([createdAt])
+  @@map("gv_cmp_mapping_logs")
+}

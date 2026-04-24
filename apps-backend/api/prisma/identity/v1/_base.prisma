@@ -1,0 +1,445 @@
+// ─── Generator + Datasource ─────────────────────────────────────────────────
+// This file is read by Prisma's prismaSchemaFolder feature.
+// It declares the generator, datasource, and all shared enums for IdentityDB.
+// Models live in the sibling domain files.
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../../../node_modules/@prisma/identity-client"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("IDENTITY_DATABASE_URL")
+}
+
+// ─── Enums ─────────────────────────────────────────────────────────────────
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PARTIALLY_VERIFIED
+  FULLY_VERIFIED
+}
+
+enum RegistrationType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum OtpPurpose {
+  EMAIL_VERIFICATION
+  MOBILE_VERIFICATION
+  PASSWORD_RESET
+  LOGIN_OTP
+  TRANSACTION
+}
+
+enum OtpStatus {
+  OTP_PENDING
+  OTP_VERIFIED
+  OTP_EXPIRED
+  OTP_FAILED
+}
+
+enum ContactType {
+  RAW
+  VALIDATED
+}
+
+enum ContactSource {
+  MANUAL
+  BULK_IMPORT
+  WEB_FORM
+  REFERRAL
+  API
+}
+
+enum EntityType {
+  RAW_CONTACT
+  CONTACT
+  ORGANIZATION
+  LEAD
+  QUOTATION
+  TICKET
+  PRODUCT
+}
+
+enum RuleConditionOperator {
+  EQUALS
+  NOT_EQUALS
+  CONTAINS
+  GREATER_THAN
+  LESS_THAN
+  IN
+  NOT_IN
+  IS_EMPTY
+  IS_NOT_EMPTY
+}
+
+enum UserType {
+  ADMIN
+  EMPLOYEE
+  CUSTOMER
+  REFERRAL_PARTNER
+}
+
+enum TenantStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  TRIAL
+  DEMO
+  CANCELLED
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
+
+enum PlanInterval {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  PAID
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum OnboardingStep {
+  CREATED
+  PROFILE_COMPLETED
+  USERS_INVITED
+  DATA_IMPORTED
+  COMPLETED
+}
+
+enum FeatureFlag {
+  WHATSAPP_INTEGRATION
+  EMAIL_INTEGRATION
+  BULK_IMPORT
+  BULK_EXPORT
+  DOCUMENTS
+  WORKFLOWS
+  QUOTATION_AI
+  ADVANCED_REPORTS
+  CUSTOM_FIELDS
+  API_ACCESS
+  QUOTATIONS
+  INVOICES
+  DEMOS
+  TOUR_PLANS
+  ACTIVITIES
+  INSTALLATIONS
+  TRAININGS
+  TICKETS
+  AI_FEATURES
+  WALLET
+}
+
+enum CalendarSourceType {
+  TASK
+  ACTIVITY
+  DEMO
+  TOUR_PLAN
+  REMINDER
+  FOLLOW_UP
+  SCHEDULED_EVENT
+  EXTERNAL_GOOGLE
+  EXTERNAL_OUTLOOK
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  SOFT_DELETE
+  RESTORE
+  STATUS_CHANGE
+  BULK_UPDATE
+  BULK_DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+}
+
+enum AuditEntityType {
+  USER
+  ROLE
+  PERMISSION
+  CONTACT
+  ORGANIZATION
+  LEAD
+  ACTIVITY
+  DEMO
+  TOUR_PLAN
+  QUOTATION
+  LOOKUP_VALUE
+  MASTER_LOOKUP
+  ENTITY_OWNER
+  OWNERSHIP_LOG
+  FOLLOW_UP
+  REMINDER
+  RECURRENCE_RULE
+  ASSIGNMENT_RULE
+  SALES_TARGET
+  NOTIFICATION
+  QUOTATION_TEMPLATE
+  PRODUCT
+  INVOICE
+  PAYMENT
+  WORKFLOW
+  COMMUNICATION
+  OTHER
+}
+
+enum DuplicateConfidence {
+  EXACT
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum ValidatorType {
+  REQUIRED
+  EMAIL
+  INDIAN_MOBILE
+  PHONE
+  GST_NUMBER
+  PAN_NUMBER
+  TAN_NUMBER
+  AADHAAR
+  IFSC_CODE
+  PINCODE
+  WEBSITE
+  URL
+  NUMERIC
+  DECIMAL
+  DATE
+  ENUM
+  CUSTOM_REGEX
+  MIN_LENGTH
+  MAX_LENGTH
+}
+
+enum WaChatbotNodeType {
+  WELCOME
+  KEYWORD_TRIGGER
+  MENU
+  TEXT_REPLY
+  MEDIA_REPLY
+  QUICK_BUTTONS
+  COLLECT_INPUT
+  CONDITION
+  API_CALL
+  ASSIGN_AGENT
+  DELAY
+  TAG_CONTACT
+  LINK_LEAD
+}
+
+enum SyncWarningLevel {
+  INFO
+  WARNING
+  URGENT
+  BLOCK
+}
+
+enum ConfigCategory {
+  GENERAL
+  NUMBERING
+  BUSINESS_HOURS
+  LEAD_SETTINGS
+  COMMUNICATION
+  NOTIFICATION
+  DISPLAY
+  SECURITY
+  SYNC
+  CUSTOM
+}
+
+enum ConfigValueType {
+  STRING
+  INTEGER
+  DECIMAL
+  BOOLEAN
+  JSON
+  ENUM
+}
+
+enum CredentialProvider {
+  GMAIL
+  OUTLOOK
+  SMTP
+  WHATSAPP_BUSINESS
+  RAZORPAY
+  STRIPE
+  AWS_S3
+  MINIO
+  GOOGLE_DRIVE
+  ONEDRIVE
+  DROPBOX
+  GOOGLE_MAPS
+  EXOTEL
+  KNOWLARITY
+  TWILIO
+  FIREBASE
+  SENDGRID
+  MAILGUN
+  CUSTOM
+  // AI Providers
+  ANTHROPIC_CLAUDE
+  OPENAI_GPT
+  GOOGLE_GEMINI
+  GROQ
+}
+
+enum CredentialStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+  ERROR
+  PENDING_SETUP
+  REVOKED
+}
+
+enum AuditSessionStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum TenantAuditActionType {
+  PAGE_VISIT
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+  IMPORT
+  SETTINGS_CHANGE
+  PERMISSION_DENIED
+  API_CALL
+  FILE_UPLOAD
+  FILE_DOWNLOAD
+  SEARCH
+  BULK_ACTION
+}
+
+enum RetentionAction {
+  ARCHIVE
+  SOFT_DELETE
+  HARD_DELETE
+  ANONYMIZE
+}
+
+enum IpRuleType {
+  WHITELIST
+  BLACKLIST
+}
+
+enum LimitType {
+  TOTAL
+  MONTHLY
+  UNLIMITED
+  DISABLED
+}
+
+enum DbStrategy {
+  SHARED
+  DEDICATED
+}
+
+enum ModuleAccessLevel {
+  MOD_DISABLED
+  MOD_READONLY
+  MOD_FULL
+}
+
+enum FeatureType {
+  PAGE
+  WIDGET
+  REPORT
+  ACTION
+  INTEGRATION
+}
+
+enum EntityLimitType {
+  CONTACTS
+  ORGANIZATIONS
+  LEADS
+  QUOTATIONS
+  INVOICES
+  PRODUCTS
+  USERS
+  FILE_STORAGE_MB
+  DB_SIZE_MB
+  MARKETPLACE_PROMOTIONS
+  EMAIL_PER_MONTH
+  WHATSAPP_PER_MONTH
+  SMS_PER_MONTH
+  API_CALLS_PER_DAY
+  REPORTS_COUNT
+  WORKFLOWS_COUNT
+  CUSTOM_FIELDS_COUNT
+}
+
+// ─── Company / Person-Centric Identity Enums ────────────────────────────────
+
+enum CompanyStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+enum CompanyMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum CompanyJoinMode {
+  SELF_REGISTERED
+  INVITED
+  ADMIN_ADDED
+}
+
+enum MappingStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+  BLOCKED
+  RESIGNED
+}
+
+enum MappingAction {
+  CREATED
+  APPROVED
+  REJECTED
+  BLOCKED
+  UNBLOCKED
+  RESIGNED
+  STATUS_CHANGED
+  ROLE_CHANGED
+  SET_DEFAULT
+}

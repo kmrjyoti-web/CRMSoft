@@ -1,44 +1,83 @@
-# Dependencies
-node_modules/
+node_modules
 
-# OS files
+# ────────────────────────────────────────────────────────────
+# OS artifacts
+# ────────────────────────────────────────────────────────────
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 Thumbs.db
 
-# Claude Code
-.claude/
+# ────────────────────────────────────────────────────────────
+# Build artifacts (should never be committed)
+# ────────────────────────────────────────────────────────────
+dist/
+build/
+*.tsbuildinfo
 
-# Environment
+# ────────────────────────────────────────────────────────────
+# Runtime / generated reports (per-run artifacts)
+# ────────────────────────────────────────────────────────────
+Application/backend/tmp/reports/
+Application/backend/uploads/exports/
+Application/backend/docs/health-reports/audit-runs/
+Application/backend/docs/health-reports/latest-audit.json
+
+# ────────────────────────────────────────────────────────────
+# Credential / connection reference files — NEVER commit these
+# ────────────────────────────────────────────────────────────
+*_DB_CONNECTIONS.txt
+*_CONNECTIONS.txt
+*_CREDENTIALS.txt
+*_CREDS.txt
+*.credentials
+*.secrets
+# scratch/paste files with creds (e.g. apps-backend/api/pas committed in PR #12)
+apps-backend/api/pas
+**/pas
+**/*.pass
+
+# ────────────────────────────────────────────────────────────
+# Env files & secrets — NEVER commit these
+# ────────────────────────────────────────────────────────────
 .env
 .env.*
 !.env.example
+.env.local
+.env.*.local
+.env.old-*
+.env.backup
+.env.backup.*
+# explicit paths (defensive redundancy for subdirs)
+# pre-V5 paths (kept for git history coverage)
+Application/backend/.env
+Application/backend/.env.*
+!Application/backend/.env.example
+Customer/frontend/crm-admin/.env
+Customer/frontend/crm-admin/.env.*
+!Customer/frontend/crm-admin/.env.example
+Vendor/frontend/vendor-panel/.env
+Vendor/frontend/vendor-panel/.env.*
+!Vendor/frontend/vendor-panel/.env.example
+WhiteLabel/**/.env
+WhiteLabel/**/.env.*
+!WhiteLabel/**/.env.example
+PlatformConsole/frontend/**/.env
+PlatformConsole/frontend/**/.env.*
+!PlatformConsole/frontend/**/.env.example
+# V5 paths
+apps-backend/api/.env
+apps-backend/api/.env.*
+!apps-backend/api/.env.example
+apps-frontend/**/.env
+apps-frontend/**/.env.*
+!apps-frontend/**/.env.example
 
-# Build output
-dist/
-.next/
-out/
-
+# ────────────────────────────────────────────────────────────
 # IDE
-.idea/
+# ────────────────────────────────────────────────────────────
 .vscode/
+.idea/
 *.swp
-*.swo
-
-# Logs
-*.log
-npm-debug.log*
-
-# Coverage
-coverage/
-
-# Temp files
-API/tmp/
-*.csv
-*.xlsx
-
-# Embedded repos
-CRMSoft/
-
-# Test artifacts
-playwright-report/
-e2e/

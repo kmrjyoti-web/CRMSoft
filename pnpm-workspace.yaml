@@ -1,0 +1,37 @@
+# CRMSoft V5 — pnpm workspace configuration
+# Created: 2026-04-22 (Phase 4 of V5 restructure)
+#
+# Replaces the npm-style "workspaces" field in root package.json, which pnpm
+# ignores. This file is what pnpm actually reads for workspace discovery.
+
+packages:
+  # Apps (executables)
+  - 'apps-backend/*'
+  - 'apps-frontend/*'
+
+  # V5 reusable packages — glob patterns for future growth.
+  # Currently only README placeholders; pnpm skips any folder without
+  # a package.json so these are safe no-ops today.
+  - 'packages-backend/*'
+  - 'packages-frontend/*'
+  - 'packages-shared/*'
+  - 'tools/*'
+
+  # Pre-V5 Shared/* packages (still used by the backend; keep until migrated)
+  - 'Shared/common'
+  - 'Shared/frontend'
+  - 'Shared/prisma-schemas'
+  - 'Shared/backend/audit'
+  - 'Shared/backend/cache'
+  - 'Shared/backend/encryption'
+  - 'Shared/backend/errors'
+  - 'Shared/backend/global-data'
+  - 'Shared/backend/identity'
+  - 'Shared/backend/notifications'
+  - 'Shared/backend/prisma'
+  - 'Shared/backend/queue'
+  - 'Shared/backend/storage'
+  - 'Shared/backend/tenant'
+
+  # White Label API (separate Next.js service, stays per V5 plan)
+  - 'WhiteLabel/wl-api'

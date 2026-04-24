@@ -1,0 +1,149 @@
+# Sprint B.2 — GlobalReferenceDB Reference Models
+
+**Date:** 2026-04-17
+**Sprint:** B.2 — 7 remaining reference models for GlobalReferenceDB
+**Verdict:** ✅ COMPLETE
+
+---
+
+## What was built
+
+GlobalReferenceDB now contains 12 tables (was 5). Seven new reference models were added covering
+Indian tax codes, currency, timezones, industry types, and languages — all read-only global reference
+data consumed by all tenants via CrossDbResolverService.
+
+---
+
+## Discovery outcome
+
+All 7 entities were clear — no conflicts with existing models in any DB.
+
+| Entity | Existing DB check | Result |
+|--------|-------------------|--------|
+| GlCfgPincode | `CompanyPincode` in WorkingDB — tenant-scoped config, not global reference | ✅ No conflict |
+| GlCfgCurrency | No Currency model anywhere | ✅ No conflict |
+| GlCfgTimezone | No Timezone model anywhere | ✅ No conflict |
+| GlCfgHsnCode | No HsnCode model anywhere | ✅ No conflict |
+| GlCfgGstRate | `GstVerificationLog` in WorkingDB — audit log, not a rate table | ✅ No conflict |
+| GlCfgIndustryType | `IndustryPackage`/`IndustryPatch` in PlatformDB — feature config, not reference list | ✅ No conflict |
+| GlCfgLanguage | No Language model anywhere | ✅ No conflict |
+
+---
+
+## Files created
+
+| File | Description |
+|------|-------------|
+| `prisma/global/v1/indian-reference.prisma` | GlCfgPincode, GlCfgGstRate, GlCfgHsnCode |
+| `prisma/global/v1/system-reference.prisma` | GlCfgCurrency, GlCfgTimezone, GlCfgIndustryType, GlCfgLanguage |
+| `prisma/seeds/global-reference/seed-b2-reference.ts` | Seed script for all 7 new entities |
+| `docs/discovery/2026-04-16_sprint_b2_reference_models_scan.md` | Discovery report |
+
+---
+
+## Files modified
+
+| File | Change |
+|------|--------|
+| `prisma/global/v1/_base.prisma` | Added `GstRateType` + `HsnCodeType` enums |
+| `prisma/global/v1/reference.prisma` | Added `pincodes GlCfgPincode[]` back-relation on `GlCfgState` |
+| `src/core/prisma/cross-db-resolver.service.ts` | Added 14 resolver methods for the 7 new entities |
+| `Application/backend/package.json` | Added `seed:global-b2` script; added `prisma/demo/v1` to `prisma:generate` chain |
+| `CRM_V1_DB_CONNECTIONS.txt` | Updated globalreferencedb count (5 → 12), total (611 → 618), schema layout |
+
+---
+
+## Database state
+
+| DB | Before | After | Status |
+|----|--------|-------|--------|
+| globalreferencedb | 5 tables | 12 tables | ✅ Live on Railway CRM_V1 |
+
+---
+
+## Seed data seeded
+
+| Table | Rows |
+|-------|------|
+| gl_cfg_gst_rate | 6 (Exempt, 0%, 5%, 12%, 18%, 28%) |
+| gl_cfg_hsn_code | 50 (HSN + SAC, common Indian codes) |
+| gl_cfg_currency | 11 (INR default + top 10 global) |
+| gl_cfg_timezone | 18 (Asia/Kolkata default + common) |
+| gl_cfg_industry_type | 10 (GENERAL, SOFTWARE, RETAIL, PHARMA, RESTAURANT, TOURISM, EDUCATION, REAL_ESTATE, MANUFACTURING, FINANCE) |
+| gl_cfg_language | 16 (12 Indian + 4 global; "en" = default) |
+| gl_cfg_pincode | 16 (sample Indian pincodes — MH, DL, KA, TN, GJ) |
+
+---
+
+## New CrossDbResolverService API
+
+```typescript
+// Pincodes
+await crossDb.resolvePincode('400001')           // single lookup
+await crossDb.resolvePincodes(['400001','560001']) // batch
+
+// GST
+await crossDb.resolveAllGstRates()               // all active slabs
+await crossDb.resolveGstRate(id)
+await crossDb.resolveGstRates([id1, id2])
+
+// HSN/SAC
+await crossDb.resolveHsnCode('9983')             // single by code
+await crossDb.resolveHsnCodes(['9983','8517'])   // batch + defaultGstRate included
+
+// Currency
+await crossDb.resolveDefaultCurrency()           // INR
+await crossDb.resolveCurrency('USD')
+await crossDb.resolveAllCurrencies()
+
+// Timezone
+await crossDb.resolveDefaultTimezone()           // Asia/Kolkata
+await crossDb.resolveTimezone('Asia/Kolkata')
+await crossDb.resolveAllTimezones()
+
+// Industry
+await crossDb.resolveIndustryType('SOFTWARE')
+await crossDb.resolveAllIndustryTypes()
+
+// Language
+await crossDb.resolveDefaultLanguage()           // en
+await crossDb.resolveLanguage('hi')
+await crossDb.resolveAllLanguages()              // all active
+await crossDb.resolveAllLanguages(true)          // Indian only
+```
+
+---
+
+## Enums added to GlobalReferenceDB
+
+```typescript
+enum GstRateType { STANDARD | CESS | EXEMPT | ZERO_RATED }
+enum HsnCodeType { HSN | SAC }
+```
+
+---
+
+## Verification
+
+| Check | Result |
+|-------|--------|
+| `npx prisma generate --schema=prisma/global/v1` | ✅ Clean |
+| `npx prisma db push --schema=prisma/global/v1` | ✅ 12 tables live |
+| `npm run seed:global-b2` | ✅ 6+50+11+18+10+16+16 rows |
+| `npm run typecheck` (tsc --noEmit) | ✅ 0 errors |
+| `npm run lint:prisma` | ✅ 0 errors, 0 warnings |
+| `npm run audit:db` | ✅ 0 findings |
+
+---
+
+## Out of scope (future sprints)
+
+- Full Indian PIN code database (6-lakh+ records — bulk import from India Post data)
+- Full HSN master (5000+ codes from CBIC)
+- Currency exchange rates (live feed from RBI/ECB)
+- Timezone DST calendar (auto-update from IANA TZ database)
+- Admin UI for browsing/editing reference data
+
+---
+
+*Generated by Claude Code session 2026-04-17*

@@ -1,0 +1,38 @@
+{
+  "name": "@crmsoft/encryption",
+  "version": "1.0.0",
+  "description": "CRMSoft Encryption SDK — AES-256-GCM encrypt/decrypt, key rotation, masking",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kmrjyoti-web/CrmProject.git",
+    "directory": "Shared/backend/encryption"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/config": "^3.0.0"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^10.4.0",
+    "@nestjs/config": "^3.0.0",
+    "@nestjs/core": "^10.4.0",
+    "@types/node": "^25.5.2",
+    "reflect-metadata": "^0.2.0",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.3.0"
+  }
+}

@@ -1,0 +1,98 @@
+
+> crm-backend@1.0.0 prisma:generate /Users/kmrjyoti/GitProject/CRM/CrmProject-V5/apps-backend/api
+> npx prisma generate --schema=prisma/identity/v1 && npx prisma generate --schema=prisma/platform/v1 && npx prisma generate --schema=prisma/working/v1 && npx prisma generate --schema=prisma/marketplace/v1 && npx prisma generate --schema=prisma/platform-console/v1 && npx prisma generate --schema=prisma/global/v1 && npx prisma generate --schema=prisma/demo/v1
+
+npm warn Unknown env config "npm-globalconfig". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "_jsr-registry". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+Environment variables loaded from .env
+Prisma schema loaded from prisma/identity/v1
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/identity-client in 166ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Help us improve the Prisma ORM for everyone. Share your feedback in a short 2-min survey: https://pris.ly/orm/survey/release-5-22
+
+npm warn Unknown env config "npm-globalconfig". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "_jsr-registry". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+Environment variables loaded from .env
+Prisma schema loaded from prisma/platform/v1
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/platform-client in 212ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Curious about the SQL queries Prisma ORM generates? Optimize helps you enhance your visibility: https://pris.ly/tip-2-optimize
+
+┌─────────────────────────────────────────────────────────┐
+│  Update available 5.22.0 -> 7.7.0                       │
+│                                                         │
+│  This is a major update - please follow the guide at    │
+│  https://pris.ly/d/major-version-upgrade                │
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘
+npm warn Unknown env config "npm-globalconfig". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "_jsr-registry". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+Environment variables loaded from .env
+Prisma schema loaded from prisma/working/v1
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/working-client in 825ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to react to database changes in your app as they happen? Discover how with Pulse: https://pris.ly/tip-1-pulse
+
+npm warn Unknown env config "npm-globalconfig". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "_jsr-registry". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+Environment variables loaded from .env
+Prisma schema loaded from prisma/marketplace/v1
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/marketplace-client in 74ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want real-time updates to your database without manual polling? Discover how with Pulse: https://pris.ly/tip-0-pulse
+
+npm warn Unknown env config "npm-globalconfig". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "_jsr-registry". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+Environment variables loaded from .env
+Prisma schema loaded from prisma/platform-console/v1
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/.prisma/platform-console-client in 68ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+
+npm warn Unknown env config "npm-globalconfig". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "_jsr-registry". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+Environment variables loaded from .env
+Prisma schema loaded from prisma/global/v1
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/.prisma/global-reference-client in 46ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
+
+npm warn Unknown env config "npm-globalconfig". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "_jsr-registry". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+Environment variables loaded from .env
+Prisma schema loaded from prisma/demo/v1
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/.prisma/demo-client in 776ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Curious about the SQL queries Prisma ORM generates? Optimize helps you enhance your visibility: https://pris.ly/tip-2-optimize
+
