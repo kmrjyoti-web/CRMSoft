@@ -12,6 +12,7 @@ import { SailScene } from './scenes/SailScene';
 import { DesertScene } from './scenes/DesertScene';
 import { NightScene } from './scenes/NightScene';
 import styles from './travvellis.module.css';
+import { authService } from '@/features/auth/services/auth.service';
 
 interface Props {
   brandName?: string;
@@ -158,19 +159,10 @@ export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }:
     setError('');
     setIsLoading(true);
     try {
-      const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
-      const res = await fetch(`${API}/auth/customer/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      if (res.ok) {
-        onSuccess?.();
-      } else {
-        setError('Invalid credentials. Please try again.');
-      }
+      await authService.login({ email, password }, 'customer');
+      onSuccess?.();
     } catch {
-      setError('Network error. Please try again.');
+      setError('Invalid credentials. Please try again.');
     } finally {
       setIsLoading(false);
     }

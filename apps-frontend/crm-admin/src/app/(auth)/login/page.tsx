@@ -2,35 +2,31 @@
 
 import { Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { BrandContextProvider } from '@/hooks/auth/useBrandContext';
-import BrandLoginResolver from '@/components/brand-login/BrandLoginResolver';
+import { getBrandConfig } from '@/lib/brand/registry';
 import { LoginForm } from '@/features/auth/components/LoginForm';
 
-function LoginInner() {
+function LoginContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const brandCode = searchParams.get('brand');
+  const brand = getBrandConfig(brandCode);
 
   function handleSuccess() {
-    const redirect = searchParams.get('redirect') ?? '/dashboard';
-    router.push(redirect);
+    router.push(searchParams.get('redirect') ?? '/dashboard');
   }
 
-  if (!brandCode) {
-    return <LoginForm />;
+  if (brand) {
+    const BrandLogin = brand.loginComponent;
+    return <BrandLogin onSuccess={handleSuccess} />;
   }
 
-  return (
-    <BrandContextProvider brandCode={brandCode}>
-      <BrandLoginResolver onSuccess={handleSuccess} />
-    </BrandContextProvider>
-  );
+  return <LoginForm />;
 }
 
 export default function LoginPage() {
   return (
     <Suspense fallback={<div style={{ minHeight: '100dvh', background: '#0f172a' }} />}>
-      <LoginInner />
+      <LoginContent />
     </Suspense>
   );
 }
