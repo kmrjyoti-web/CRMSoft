@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback, FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 import { PHOTOS, PHASES, DURATION, interp } from '../constants';
 import { Clouds } from '../skyfx/Clouds';
 import { Stars } from '../skyfx/Stars';
@@ -25,6 +26,7 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 
 export default function TravvellisRegister() {
+  const router = useRouter();
   const { register, isLoading, error } = useRegister();
   const { categories } = useCategories();
   const [step, setStep] = useState(0);
@@ -118,8 +120,12 @@ export default function TravvellisRegister() {
       registrationFields: fieldValues,
     });
     if (res.success) {
-      setResult({ requiresApproval: res.requiresApproval ?? false, message: res.message ?? '' });
-      setStep(4);
+      if (!res.requiresApproval && res.accessToken) {
+        router.push('/dashboard');
+      } else {
+        setResult({ requiresApproval: res.requiresApproval ?? false, message: res.message ?? '' });
+        setStep(4);
+      }
     }
   }
 

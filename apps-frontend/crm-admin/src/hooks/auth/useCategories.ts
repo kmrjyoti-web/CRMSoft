@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import api from '@/services/api-client';
 
 export interface UserCategory {
   id: string;
@@ -35,16 +36,16 @@ export interface FieldDef {
   options?: string[];
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
-
 export function useCategories() {
   const [categories, setCategories] = useState<UserCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE}/platform-console/creator/user-categories`)
-      .then((r) => r.json())
-      .then((d) => setCategories(Array.isArray(d) ? d : (d.data ?? [])))
+    api.get('/api/v1/platform-console/creator/user-categories')
+      .then(({ data }) => {
+        const list = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
+        setCategories(list);
+      })
       .catch(console.error)
       .finally(() => setIsLoading(false));
   }, []);
@@ -59,10 +60,13 @@ export function useSubcategories(verticalCode: string, categoryCode?: string) {
   useEffect(() => {
     if (!verticalCode || !categoryCode) return;
     setIsLoading(true);
-    const url = `${API_BASE}/platform-console/creator/user-categories/subcategories?vertical_code=${verticalCode}&category_code=${categoryCode}`;
-    fetch(url)
-      .then((r) => r.json())
-      .then((d) => setSubcategories(Array.isArray(d) ? d : (d.data ?? [])))
+    api.get('/api/v1/platform-console/creator/user-categories/subcategories', {
+      params: { vertical_code: verticalCode, category_code: categoryCode },
+    })
+      .then(({ data }) => {
+        const list = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
+        setSubcategories(list);
+      })
       .catch(console.error)
       .finally(() => setIsLoading(false));
   }, [verticalCode, categoryCode]);

@@ -1,6 +1,10 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import api from '@/services/api-client';
+import { setAuthCookie } from '@/features/auth/utils/auth-cookies';
+import { useAuthStore } from '@/stores/auth.store';
+import type { ApiResponse } from '@/types/api-response';
 
 export interface RegisterParams {
   verticalCode: string;
@@ -17,52 +21,60 @@ export interface RegisterResult {
   requiresApproval?: boolean;
   message?: string;
   error?: string;
+  accessToken?: string;
+}
+
+interface RegisterApiData {
+  requiresApproval: boolean;
+  message?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  user?: Record<string, any>;
 }
 
 export function useRegister() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
-
   const register = useCallback(async (params: RegisterParams): Promise<RegisterResult> => {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch(
-        `${API_BASE}/auth/${params.verticalCode.toLowerCase()}/register`,
+      const { data } = await api.post<ApiResponse<RegisterApiData>>(
+        `/api/v1/auth/${params.verticalCode.toLowerCase()}/register`,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            categoryCode: params.categoryCode,
-            subcategoryCode: params.subcategoryCode,
-            brandCode: params.brandCode,
-            email: params.email,
-            password: params.password,
-            registrationFields: params.registrationFields ?? {},
-          }),
+          categoryCode: params.categoryCode,
+          subcategoryCode: params.subcategoryCode,
+          brandCode: params.brandCode,
+          email: params.email,
+          password: params.password,
+          registrationFields: params.registrationFields ?? {},
         },
       );
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        const msg = json.message ?? 'Registration failed';
-        setError(msg);
-        return { success: false, error: msg };
+
+      const apiData = data.data as RegisterApiData;
+      const requiresApproval = apiData?.requiresApproval ?? false;
+      const accessToken = apiData?.accessToken;
+
+      if (!requiresApproval && accessToken) {
+        useAuthStore.getState().setAuth({ accessToken, user: apiData.user as any });
+        setAuthCookie(accessToken);
       }
+
       return {
         success: true,
-        requiresApproval: json.data?.requiresApproval ?? false,
-        message: json.data?.message,
+        requiresApproval,
+        message: apiData?.message ?? (data as any).message,
+        accessToken,
       };
     } catch (e: any) {
-      const msg = e.message ?? 'Network error';
+      const msg = e.response?.data?.message ?? e.message ?? 'Registration failed';
       setError(msg);
       return { success: false, error: msg };
     } finally {
       setIsLoading(false);
     }
-  }, [API_BASE]);
+  }, []);
 
   return { register, isLoading, error };
 }
