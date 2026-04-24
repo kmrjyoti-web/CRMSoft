@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Param, Body, Query } from '@nestjs/common';
 import { BrandManagerService } from './brand-manager.service';
 import { WhitelistModuleDto } from './dto/whitelist-module.dto';
 import { SetFeatureFlagDto } from './dto/set-feature-flag.dto';
+import { CreateBrandConfigDto, UpdateBrandConfigDto } from './dto/brand-config.dto';
 
 @Controller('platform-console/brands')
 export class BrandManagerController {
@@ -66,5 +67,36 @@ export class BrandManagerController {
   @Get(':brandId/errors')
   getBrandErrors(@Param('brandId') brandId: string) {
     return this.brandManagerService.getBrandErrors(brandId);
+  }
+
+  // ─── Brand Config (visual identity) ───────────────────────────────────────
+
+  @Get('config')
+  listBrandConfigs(@Query('active') active?: string) {
+    const isActive = active === 'true' ? true : active === 'false' ? false : undefined;
+    return this.brandManagerService.listBrandConfigs(isActive);
+  }
+
+  @Get('config/:brandCode')
+  getBrandConfig(@Param('brandCode') brandCode: string) {
+    return this.brandManagerService.getBrandConfig(brandCode);
+  }
+
+  @Post('config')
+  createBrandConfig(@Body() dto: CreateBrandConfigDto) {
+    return this.brandManagerService.createBrandConfig(dto);
+  }
+
+  @Put('config/:brandCode')
+  updateBrandConfig(
+    @Param('brandCode') brandCode: string,
+    @Body() dto: UpdateBrandConfigDto,
+  ) {
+    return this.brandManagerService.updateBrandConfig(brandCode, dto);
+  }
+
+  @Patch('config/:brandCode/toggle')
+  toggleBrandConfig(@Param('brandCode') brandCode: string) {
+    return this.brandManagerService.toggleBrandConfig(brandCode);
   }
 }

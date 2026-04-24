@@ -3,6 +3,7 @@ import { PlatformConsolePrismaService } from '../prisma/platform-console-prisma.
 import { WhitelistModuleDto } from './dto/whitelist-module.dto';
 import { SetFeatureFlagDto } from './dto/set-feature-flag.dto';
 import { BRAND_MANAGER_ERRORS } from './brand-manager.errors';
+import { CreateBrandConfigDto, UpdateBrandConfigDto } from './dto/brand-config.dto';
 
 const FEATURE_CODES = [
   'MARKETPLACE',
@@ -238,5 +239,44 @@ export class BrandManagerService {
       this.logger.error(`Failed to get brand errors: ${brandId}`, (error as Error).stack);
       throw error;
     }
+  }
+
+  // ─── Brand Config (visual identity + deployment) ─────────────────────────
+
+  async listBrandConfigs(isActive?: boolean) {
+    return this.db.brandConfig.findMany({
+      where: isActive !== undefined ? { isActive } : undefined,
+      include: { partners: { select: { partnerCode: true, partnerName: true, isActive: true } } },
+      orderBy: { brandName: 'asc' },
+    });
+  }
+
+  async getBrandConfig(brandCode: string) {
+    return this.db.brandConfig.findUnique({
+      where: { brandCode },
+      include: { partners: true },
+    });
+  }
+
+  async createBrandConfig(dto: CreateBrandConfigDto, createdBy?: string) {
+    return this.db.brandConfig.create({
+      data: { ...dto, createdBy, updatedBy: createdBy },
+    });
+  }
+
+  async updateBrandConfig(brandCode: string, dto: UpdateBrandConfigDto, updatedBy?: string) {
+    return this.db.brandConfig.update({
+      where: { brandCode },
+      data: { ...dto, updatedBy },
+    });
+  }
+
+  async toggleBrandConfig(brandCode: string) {
+    const config = await this.db.brandConfig.findUnique({ where: { brandCode } });
+    if (!config) throw new HttpException('Brand config not found', 404);
+    return this.db.brandConfig.update({
+      where: { brandCode },
+      data: { isActive: !config.isActive },
+    });
   }
 }
