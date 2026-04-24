@@ -146,6 +146,11 @@ model User {
   approvedBy         String?   @map("approved_by")
   approvedAt         DateTime? @map("approved_at")
 
+  // ─── PERSON-CENTRIC IDENTITY ───
+  talentId        String?              @unique @map("talent_id") // T0000001 format
+  companyMappings UserCompanyMapping[]
+  ownedCompanies  Company[]
+
   @@unique([tenantId, email])
   @@unique([tenantId, employeeCode])
   @@index([userType, status])

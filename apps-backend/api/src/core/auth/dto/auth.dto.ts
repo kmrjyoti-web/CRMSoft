@@ -87,6 +87,21 @@ export class VerticalRegisterDto {
   @IsOptional() @IsObject() registrationFields?: Record<string, any>;
 }
 
+// ─── UNIVERSAL LOGIN (brand portals) ───
+
+export class UniversalLoginDto {
+  @ApiProperty({ example: 'user@travvellis.com' }) @IsEmail() email: string;
+  @ApiProperty({ example: 'Pass@12345' }) @IsString() @MinLength(6) password: string;
+}
+
+// ─── SWITCH COMPANY ───
+
+export class SwitchCompanyDto {
+  @ApiProperty({ description: 'Company ID to switch context to' }) @IsUUID() companyId: string;
+}
+
+// ─── TENANT REGISTER ───
+
 export class TenantRegisterDto {
   @ApiProperty({ example: 'Acme Corp' })
   @IsString() companyName: string;

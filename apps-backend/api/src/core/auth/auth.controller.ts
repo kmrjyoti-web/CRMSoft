@@ -6,7 +6,7 @@ import { AuthService } from './auth.service';
 import {
   LoginDto, RegisterDto, RefreshTokenDto, ChangePasswordDto,
   CustomerRegisterDto, PartnerRegisterDto, TenantRegisterDto,
-  VerticalRegisterDto,
+  VerticalRegisterDto, UniversalLoginDto, SwitchCompanyDto,
 } from './dto/auth.dto';
 import { Public, Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -92,6 +92,31 @@ export class AuthController {
     return ApiResponse.success(
       await this.auth.superAdminLogin(dto.email, dto.password),
       'Super admin login successful',
+    );
+  }
+
+  // --- UNIVERSAL LOGIN (brand portals — email + company selection) ---
+
+  @Public()
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Universal login — returns user + company list for selection' })
+  async universalLogin(@Body() dto: UniversalLoginDto) {
+    return ApiResponse.success(
+      await this.auth.universalLogin(dto.email, dto.password),
+      'Login successful',
+    );
+  }
+
+  @Post('switch-company')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Switch active company context (re-issues JWT with new companyId)' })
+  async switchCompany(@Body() dto: SwitchCompanyDto, @CurrentUser('id') userId: string) {
+    return ApiResponse.success(
+      await this.auth.switchCompany(userId, dto.companyId),
+      'Company switched',
     );
   }
 

@@ -8,6 +8,8 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { PlatformBootstrapService } from './platform-bootstrap.service';
+import { TalentIdService } from './talent-id.service';
+import { MappingService } from './mapping.service';
 import { TenantModule } from '../../modules/core/identity/tenant/tenant.module';
 
 @Module({
@@ -23,8 +25,8 @@ import { TenantModule } from '../../modules/core/identity/tenant/tenant.module';
     forwardRef(() => TenantModule),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, PlatformBootstrapService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
-  exports: [AuthService],
+  providers: [AuthService, JwtStrategy, PlatformBootstrapService, TalentIdService, MappingService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
+  exports: [AuthService, MappingService],
 })
 export class AuthModule {}
 

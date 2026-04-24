@@ -7,6 +7,8 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantProvisioningService } from '../../modules/core/identity/tenant/services/tenant-provisioning.service';
+import { TalentIdService } from './talent-id.service';
+import { MappingService } from './mapping.service';
 import { randomBytes } from 'crypto';
 
 @Injectable()
@@ -16,6 +18,8 @@ export class AuthService {
     private jwt: JwtService,
     private config: ConfigService,
     private tenantProvisioning: TenantProvisioningService,
+    private talentId: TalentIdService,
+    private mapping: MappingService,
   ) {}
 
   // ═══════════════════════════════════════
@@ -263,6 +267,7 @@ export class AuthService {
     const requiresApproval = ['DMC_PROVIDER', 'AGENT', 'TOUR_GUIDE'].includes(data.subcategoryCode);
 
     const role = await this.getOrCreateRole('CUSTOMER', 'Customer');
+    const userTalentId = await this.talentId.nextUserId();
 
     const hashed = await bcrypt.hash(data.password, this.getSaltRounds());
     const user = await this.prisma.identity.user.create({
@@ -283,22 +288,35 @@ export class AuthService {
         permissionsJson: permissions as any,
         registrationFields: (data.registrationFields ?? {}) as any,
         registrationStatus: requiresApproval ? 'PENDING' : 'ACTIVE',
+        talentId: userTalentId,
       } as any,
       include: { role: true },
     });
 
+    const companyResult = await this.mapping.createForRegistration({
+      userId: user.id,
+      categoryCode: data.categoryCode,
+      subcategoryCode: data.subcategoryCode,
+      brandCode: data.brandCode,
+      verticalCode: data.verticalCode,
+      registrationFields: data.registrationFields,
+      requiresApproval,
+    });
+
     if (!requiresApproval) {
-      const tokens = await this.generateTokens(user.id, user.email, role.name, user.userType, user.tenantId);
+      const companyId = companyResult?.company?.id;
+      const tokens = await this.generateTokens(user.id, user.email, role.name, user.userType, user.tenantId, companyId);
       return {
         user: this.mapUserResponse(user),
         requiresApproval: false,
         message: 'Registration successful. Welcome!',
+        ...(companyResult && { company: { id: companyResult.company.id, talentId: companyResult.company.talentId, name: companyResult.company.name } }),
         ...tokens,
       };
     }
 
     return {
-      user: { id: user.id, email: user.email },
+      user: { id: user.id, email: user.email, talentId: userTalentId },
       requiresApproval: true,
       message: 'Registration submitted. Our team will review and activate your account.',
     };
@@ -689,11 +707,89 @@ export class AuthService {
     };
   }
 
+  // ═══════════════════════════════════════
+  // UNIVERSAL LOGIN (brand portal — any email)
+  // ═══════════════════════════════════════
+
+  async universalLogin(email: string, password: string) {
+    const user = await this.prisma.identity.user.findFirst({
+      where: { email },
+      include: { role: true },
+    });
+    if (!user) throw new UnauthorizedException('Invalid credentials');
+    if (user.status !== 'ACTIVE') throw new UnauthorizedException('Account inactive or suspended');
+
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) throw new UnauthorizedException('Invalid credentials');
+
+    await this.prisma.identity.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    });
+
+    const companies = await this.mapping.getUserCompanies(user.id);
+
+    let companyId: string | undefined;
+    if (companies.length === 1) {
+      companyId = companies[0].company.id;
+    } else if (companies.length > 1) {
+      const defaultMapping = companies.find((m: any) => m.isDefault);
+      companyId = defaultMapping?.company?.id;
+    }
+
+    const tokens = await this.generateTokens(
+      user.id, user.email, user.role.name, user.userType, user.tenantId, companyId,
+    );
+
+    return {
+      user: {
+        ...this.mapUserResponse(user),
+        talentId: (user as any).talentId,
+      },
+      companies: companies.map((m: any) => ({
+        id: m.company.id,
+        talentId: m.company.talentId,
+        name: m.company.name,
+        role: m.role,
+        isDefault: m.isDefault,
+        status: m.status,
+      })),
+      activeCompanyId: companyId ?? null,
+      requiresCompanySelection: companies.length > 1 && !companyId,
+      ...tokens,
+    };
+  }
+
+  // ═══════════════════════════════════════
+  // SWITCH COMPANY (exchange JWT companyId)
+  // ═══════════════════════════════════════
+
+  async switchCompany(userId: string, companyId: string) {
+    const user = await this.prisma.identity.user.findFirst({
+      where: { id: userId },
+      include: { role: true },
+    });
+    if (!user) throw new NotFoundException('User not found');
+
+    const isMember = await this.mapping.verifyMembership(userId, companyId);
+    if (!isMember) throw new ForbiddenException('Not a member of this company');
+
+    const tokens = await this.generateTokens(
+      user.id, user.email, user.role.name, user.userType, user.tenantId, companyId,
+    );
+    return { activeCompanyId: companyId, ...tokens };
+  }
+
   private async generateTokens(
     id: string, email: string, role: string, userType: string, tenantId: string,
+    companyId?: string,
   ) {
     const isSuperAdmin = userType === 'ADMIN' && ['SUPER_ADMIN', 'ADMIN'].includes(role);
-    const payload = { sub: id, email, role, userType, tenantId, ...(isSuperAdmin && { isSuperAdmin: true }) };
+    const payload = {
+      sub: id, email, role, userType, tenantId,
+      ...(isSuperAdmin && { isSuperAdmin: true }),
+      ...(companyId && { companyId }),
+    };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwt.signAsync(payload, {
         secret: this.config.get('JWT_SECRET'),

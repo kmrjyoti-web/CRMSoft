@@ -401,3 +401,45 @@ enum EntityLimitType {
   WORKFLOWS_COUNT
   CUSTOM_FIELDS_COUNT
 }
+
+// ─── Company / Person-Centric Identity Enums ────────────────────────────────
+
+enum CompanyStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+enum CompanyMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum CompanyJoinMode {
+  SELF_REGISTERED
+  INVITED
+  ADMIN_ADDED
+}
+
+enum MappingStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+  BLOCKED
+  RESIGNED
+}
+
+enum MappingAction {
+  CREATED
+  APPROVED
+  REJECTED
+  BLOCKED
+  UNBLOCKED
+  RESIGNED
+  STATUS_CHANGED
+  ROLE_CHANGED
+  SET_DEFAULT
+}

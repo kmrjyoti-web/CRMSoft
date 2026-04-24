@@ -60,7 +60,9 @@ describe('AuthService — Multi-Login', () => {
     };
     config = { get: jest.fn().mockReturnValue('secret') };
     const tenantProvisioning = { provision: jest.fn() };
-    service = new AuthService(prisma as any, jwt as any, config as any, tenantProvisioning as any);
+    const talentIdService = { nextUserId: jest.fn().mockResolvedValue('T0000001'), nextCompanyId: jest.fn().mockResolvedValue('C0000001') };
+    const mappingService = { createForRegistration: jest.fn().mockResolvedValue(null), getUserCompanies: jest.fn().mockResolvedValue([]), getDefaultCompany: jest.fn().mockResolvedValue(null), verifyMembership: jest.fn().mockResolvedValue(true) };
+    service = new AuthService(prisma as any, jwt as any, config as any, tenantProvisioning as any, talentIdService as any, mappingService as any);
   });
 
   // ─── ADMIN LOGIN ───
