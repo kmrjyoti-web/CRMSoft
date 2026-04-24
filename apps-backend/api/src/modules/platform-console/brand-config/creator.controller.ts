@@ -1,9 +1,31 @@
 import { Controller, Get, Post, Patch, Delete, Param, Body, Query } from '@nestjs/common';
 import { CreatorService } from './creator.service';
+import { Public } from '../../../common/decorators/roles.decorator';
 
+@Public()
 @Controller('platform-console/creator')
 export class CreatorController {
   constructor(private readonly svc: CreatorService) {}
+
+  // ─── Vertical list / detail ────────────────────────────────────────────────
+
+  @Get('verticals')
+  listVerticals() {
+    return this.svc.listVerticals();
+  }
+
+  @Get('verticals/:code')
+  getVertical(@Param('code') code: string) {
+    return this.svc.getVertical(code);
+  }
+
+  @Patch('verticals/:code')
+  updateVertical(
+    @Param('code') code: string,
+    @Body() body: { is_active?: boolean; is_beta?: boolean; is_coming_soon?: boolean },
+  ) {
+    return this.svc.updateVerticalFlags(code, body);
+  }
 
   // ─── Vertical ─────────────────────────────────────────────────────────────
 
