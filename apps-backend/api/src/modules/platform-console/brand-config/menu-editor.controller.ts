@@ -1,6 +1,8 @@
 import { Controller, Get, Post, Patch, Delete, Param, Body } from '@nestjs/common';
 import { MenuEditorService } from './menu-editor.service';
+import { Public } from '../../../common/decorators/roles.decorator';
 
+@Public()
 @Controller('platform-console/menu-editor')
 export class MenuEditorController {
   constructor(private readonly service: MenuEditorService) {}

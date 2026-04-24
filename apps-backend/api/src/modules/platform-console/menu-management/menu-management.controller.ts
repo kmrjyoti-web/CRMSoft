@@ -3,7 +3,9 @@ import { MenuManagementService } from './menu-management.service';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
 import { SetBrandOverrideDto } from './dto/set-brand-override.dto';
+import { Public } from '../../../common/decorators/roles.decorator';
 
+@Public()
 @Controller('platform-console/menus')
 export class MenuManagementController {
   constructor(private readonly menuManagementService: MenuManagementService) {}

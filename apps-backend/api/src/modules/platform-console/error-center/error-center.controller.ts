@@ -1,6 +1,8 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ErrorCenterService } from './error-center.service';
+import { Public } from '../../../common/decorators/roles.decorator';
 
+@Public()
 @Controller('platform-console/errors')
 export class ErrorCenterController {
   constructor(private readonly errorCenterService: ErrorCenterService) {}

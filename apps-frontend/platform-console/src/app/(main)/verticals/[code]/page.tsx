@@ -3,55 +3,55 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Play, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { api } from '@/lib/api';
 
-type VerticalDetail = {
-  code: string;
-  name: string;
-  nameHi: string;
-  status: string;
-  schemaVersion?: string;
-  modulesCount: number;
-  schemasConfig?: Record<string, unknown>;
-  createdAt?: string;
-  updatedAt?: string;
-};
-
-type HealthData = {
-  apiStatus: string;
-  dbStatus: string;
-  testStatus: string;
-  errorRate: number;
-  avgResponseMs: number;
-  lastChecked: string;
-};
-
-type AuditEntry = {
+type V2Vertical = {
   id: string;
-  score: number;
-  metrics?: Record<string, { passed: boolean; label: string }>;
-  issues?: string[];
-  createdAt: string;
+  vertical_code: string;
+  vertical_name: string;
+  display_name: string;
+  description: string | null;
+  icon_name: string | null;
+  color_theme: string | null;
+  folder_path: string;
+  package_name: string;
+  api_prefix: string;
+  database_schemas: unknown;
+  base_price: string | null;
+  per_user_price: string | null;
+  currency: string | null;
+  is_active: boolean;
+  is_beta: boolean;
+  is_coming_soon: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+  _count: { pc_vertical_module: number; pc_vertical_feature: number; pc_vertical_menu: number };
 };
 
-const STATUS_OPTIONS = ['ACTIVE', 'BETA', 'DEPRECATED'];
+function deriveStatus(v: V2Vertical): string {
+  if (v.is_coming_soon) return 'COMING_SOON';
+  if (v.is_beta) return 'BETA';
+  if (v.is_active) return 'ACTIVE';
+  return 'INACTIVE';
+}
 
 const STATUS_COLORS: Record<string, string> = {
   ACTIVE: 'bg-green-900/50 text-green-400 border-green-800',
   BETA: 'bg-yellow-900/50 text-yellow-400 border-yellow-800',
-  DEPRECATED: 'bg-red-900/50 text-red-400 border-red-800',
+  INACTIVE: 'bg-red-900/50 text-red-400 border-red-800',
+  COMING_SOON: 'bg-blue-900/50 text-blue-400 border-blue-800',
 };
 
-const HEALTH_STATUS_DOT: Record<string, string> = {
-  HEALTHY: 'bg-green-400',
-  PASSING: 'bg-green-400',
-  DEGRADED: 'bg-yellow-400',
-  FAILING: 'bg-yellow-400',
-  DOWN: 'bg-red-400',
-};
+const STATUS_OPTIONS = [
+  { label: 'Active', value: 'ACTIVE', flags: { is_active: true, is_beta: false, is_coming_soon: false } },
+  { label: 'Beta', value: 'BETA', flags: { is_active: true, is_beta: true, is_coming_soon: false } },
+  { label: 'Coming Soon', value: 'COMING_SOON', flags: { is_active: false, is_beta: false, is_coming_soon: true } },
+  { label: 'Inactive', value: 'INACTIVE', flags: { is_active: false, is_beta: false, is_coming_soon: false } },
+];
 
-const TABS = ['Overview', 'Health', 'Audits'] as const;
+const TABS = ['Overview', 'Technical'] as const;
 type Tab = typeof TABS[number];
 
 export default function VerticalDetailPage() {
@@ -59,85 +59,40 @@ export default function VerticalDetailPage() {
   const code = params.code as string;
 
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
-  const [detail, setDetail] = useState<VerticalDetail | null | undefined>(undefined);
-  const [health, setHealth] = useState<HealthData | null>(null);
-  const [audits, setAudits] = useState<AuditEntry[]>([]);
-  const [selectedAudit, setSelectedAudit] = useState<AuditEntry | null>(null);
+  const [vertical, setVertical] = useState<V2Vertical | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
-  const [actionMsg, setActionMsg] = useState('');
   const [statusValue, setStatusValue] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState('');
 
-  const loadDetail = useCallback(async () => {
+  const load = useCallback(async () => {
     try {
-      const data = (await api.verticals.get(code)) as VerticalDetail;
-      setDetail(data);
-      setStatusValue(data.status);
+      const data = (await api.creator.getVertical(code)) as V2Vertical;
+      setVertical(data);
+      setStatusValue(deriveStatus(data));
     } catch {
-      setDetail(null);
+      setVertical(null);
     } finally {
       setLoading(false);
     }
   }, [code]);
 
-  const loadHealth = useCallback(async () => {
-    try {
-      const data = (await api.verticals.health(code)) as HealthData;
-      setHealth(data);
-    } catch {
-      setHealth(null);
-    }
-  }, [code]);
-
-  const loadAudits = useCallback(async () => {
-    try {
-      const data = (await api.verticals.audits(code)) as any;
-      const items: AuditEntry[] = Array.isArray(data) ? data : data.items ?? [];
-      setAudits(items);
-      if (items.length > 0 && !selectedAudit) {
-        setSelectedAudit(items[0]);
-      }
-    } catch {
-      setAudits([]);
-    }
-  }, [code, selectedAudit]);
-
-  useEffect(() => {
-    loadDetail();
-  }, [loadDetail]);
-
-  useEffect(() => {
-    if (activeTab === 'Health') loadHealth();
-    if (activeTab === 'Audits') loadAudits();
-  }, [activeTab, loadHealth, loadAudits]);
+  useEffect(() => { load(); }, [load]);
 
   async function handleStatusChange() {
-    if (!statusValue || statusValue === detail?.status) return;
-    setActionLoading(true);
-    setActionMsg('');
+    if (!vertical || !statusValue) return;
+    const option = STATUS_OPTIONS.find((o) => o.value === statusValue);
+    if (!option) return;
+    setSaving(true);
+    setSaveMsg('');
     try {
-      await api.verticals.updateStatus(code, statusValue);
-      setActionMsg('Status updated.');
-      await loadDetail();
+      await api.creator.updateVertical(code, option.flags);
+      setSaveMsg('Status updated.');
+      await load();
     } catch {
-      setActionMsg('Failed to update status.');
+      setSaveMsg('Failed to update status.');
     } finally {
-      setActionLoading(false);
-    }
-  }
-
-  async function handleRunAudit() {
-    setActionLoading(true);
-    setActionMsg('');
-    try {
-      await api.verticals.audit(code);
-      setActionMsg('Audit started.');
-      setSelectedAudit(null);
-      await loadAudits();
-    } catch {
-      setActionMsg('Failed to run audit.');
-    } finally {
-      setActionLoading(false);
+      setSaving(false);
     }
   }
 
@@ -151,7 +106,7 @@ export default function VerticalDetailPage() {
     );
   }
 
-  if (detail === null) {
+  if (vertical === null) {
     return (
       <div className="max-w-4xl space-y-4">
         <Link href="/verticals" className="flex items-center gap-1 text-sm text-[#8b949e] hover:text-[#c9d1d9]">
@@ -164,29 +119,39 @@ export default function VerticalDetailPage() {
     );
   }
 
+  const status = vertical ? deriveStatus(vertical) : '';
+
   return (
     <div className="max-w-4xl space-y-6">
-      <Link
-        href="/verticals"
-        className="flex items-center gap-1 text-sm text-[#8b949e] hover:text-[#c9d1d9] transition-colors"
-      >
+      <Link href="/verticals" className="flex items-center gap-1 text-sm text-[#8b949e] hover:text-[#c9d1d9] transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back to verticals
       </Link>
 
       {/* Header */}
       <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-5">
         <div className="flex items-start justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-[#c9d1d9]">{detail!.code}</h2>
-            <p className="text-sm text-[#8b949e] mt-0.5">{detail!.name} / {detail!.nameHi}</p>
+          <div className="flex items-start gap-3">
+            {vertical!.color_theme && (
+              <div className="w-4 h-4 mt-1 rounded flex-shrink-0" style={{ backgroundColor: vertical!.color_theme }} />
+            )}
+            <div>
+              <h2 className="text-lg font-bold text-[#c9d1d9] font-mono">{vertical!.vertical_code}</h2>
+              <p className="text-sm text-[#8b949e] mt-0.5">{vertical!.vertical_name} · {vertical!.display_name}</p>
+              {vertical!.description && (
+                <p className="text-xs text-[#8b949e]/70 mt-1 max-w-xl">{vertical!.description}</p>
+              )}
+            </div>
           </div>
-          <span
-            className={`text-xs font-medium px-2 py-0.5 rounded border ${
-              STATUS_COLORS[detail!.status] ?? 'bg-gray-900/50 text-gray-400 border-gray-800'
-            }`}
-          >
-            {detail!.status}
+          <span className={`text-xs font-medium px-2 py-0.5 rounded border ${STATUS_COLORS[status] ?? 'bg-gray-900/50 text-gray-400 border-gray-800'}`}>
+            {status.replace('_', ' ')}
           </span>
+        </div>
+
+        {/* Counts */}
+        <div className="flex items-center gap-5 mt-4 pt-4 border-t border-[#30363d]">
+          <span className="text-xs text-[#8b949e]"><span className="text-[#c9d1d9] font-medium">{vertical!._count.pc_vertical_module}</span> modules</span>
+          <span className="text-xs text-[#8b949e]"><span className="text-[#c9d1d9] font-medium">{vertical!._count.pc_vertical_feature}</span> features</span>
+          <span className="text-xs text-[#8b949e]"><span className="text-[#c9d1d9] font-medium">{vertical!._count.pc_vertical_menu}</span> menu items</span>
         </div>
       </div>
 
@@ -229,32 +194,18 @@ export default function VerticalDetailPage() {
         ))}
       </div>
 
-      {actionMsg && <p className="text-xs text-green-400">{actionMsg}</p>}
+      {saveMsg && <p className="text-xs text-green-400">{saveMsg}</p>}
 
       {/* Tab: Overview */}
-      {activeTab === 'Overview' && detail && (
+      {activeTab === 'Overview' && vertical && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-3">
-              <p className="text-xs text-[#8b949e] mb-1">Code</p>
-              <p className="text-sm text-[#c9d1d9] font-mono">{detail.code}</p>
-            </div>
-            <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-3">
-              <p className="text-xs text-[#8b949e] mb-1">Name</p>
-              <p className="text-sm text-[#c9d1d9]">{detail.name}</p>
-            </div>
-            <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-3">
-              <p className="text-xs text-[#8b949e] mb-1">Hindi Name</p>
-              <p className="text-sm text-[#c9d1d9]">{detail.nameHi}</p>
-            </div>
-            <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-3">
-              <p className="text-xs text-[#8b949e] mb-1">Schema Version</p>
-              <p className="text-sm text-[#c9d1d9] font-mono">{detail.schemaVersion ?? '\u2014'}</p>
-            </div>
-            <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-3">
-              <p className="text-xs text-[#8b949e] mb-1">Modules</p>
-              <p className="text-sm text-[#c9d1d9]">{detail.modulesCount ?? 0}</p>
-            </div>
+            <Cell label="Code" value={vertical.vertical_code} mono />
+            <Cell label="Name" value={vertical.vertical_name} />
+            <Cell label="Display Name" value={vertical.display_name} />
+            <Cell label="Currency" value={vertical.currency ?? 'INR'} />
+            <Cell label="Base Price" value={vertical.base_price ? `₹${Number(vertical.base_price).toLocaleString('en-IN')}` : '—'} />
+            <Cell label="Per-User Price" value={vertical.per_user_price ? `₹${Number(vertical.per_user_price).toLocaleString('en-IN')}` : '—'} />
           </div>
 
           {/* Status change */}
@@ -266,192 +217,50 @@ export default function VerticalDetailPage() {
                 onChange={(e) => setStatusValue(e.target.value)}
                 className="bg-[#0d1117] border border-[#30363d] rounded-md text-sm text-[#c9d1d9] px-3 py-1.5 focus:outline-none focus:border-[#58a6ff]"
               >
-                {STATUS_OPTIONS.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                {STATUS_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
               <button
                 onClick={handleStatusChange}
-                disabled={actionLoading || statusValue === detail.status}
+                disabled={saving || statusValue === status}
                 className="px-3 py-1.5 text-xs bg-[#1f6feb] text-white rounded-md hover:bg-[#388bfd] disabled:opacity-50 transition-colors"
               >
-                {actionLoading ? 'Updating...' : 'Update Status'}
+                {saving ? 'Updating…' : 'Update Status'}
               </button>
             </div>
           </div>
-
-          {/* Schemas Config */}
-          {detail.schemasConfig && Object.keys(detail.schemasConfig).length > 0 && (
-            <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4">
-              <p className="text-xs text-[#8b949e] mb-2 uppercase tracking-wider font-medium">Schemas Config</p>
-              <pre className="text-xs text-[#c9d1d9]/80 overflow-x-auto whitespace-pre-wrap font-mono leading-relaxed">
-                {JSON.stringify(detail.schemasConfig, null, 2)}
-              </pre>
-            </div>
-          )}
         </div>
       )}
 
-      {/* Tab: Health */}
-      {activeTab === 'Health' && (
+      {/* Tab: Technical */}
+      {activeTab === 'Technical' && vertical && (
         <div className="space-y-4">
-          {health ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {[
-                { label: 'API Status', value: health.apiStatus },
-                { label: 'DB Status', value: health.dbStatus },
-                { label: 'Test Status', value: health.testStatus },
-              ].map(({ label, value }) => (
-                <div key={label} className="bg-[#161b22] border border-[#30363d] rounded-lg p-4">
-                  <p className="text-xs text-[#8b949e] mb-2">{label}</p>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2.5 h-2.5 rounded-full ${HEALTH_STATUS_DOT[value] ?? 'bg-gray-400'}`} />
-                    <p className="text-sm font-medium text-[#c9d1d9]">{value}</p>
-                  </div>
-                </div>
-              ))}
-              <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4">
-                <p className="text-xs text-[#8b949e] mb-2">Error Rate</p>
-                <p className="text-lg font-bold text-[#c9d1d9]">{health.errorRate}<span className="text-xs text-[#8b949e] ml-1">errors/hr</span></p>
-              </div>
-              <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4">
-                <p className="text-xs text-[#8b949e] mb-2">Avg Response</p>
-                <p className="text-lg font-bold text-[#c9d1d9]">{health.avgResponseMs}<span className="text-xs text-[#8b949e] ml-1">ms</span></p>
-              </div>
-              <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4">
-                <p className="text-xs text-[#8b949e] mb-2">Last Checked</p>
-                <p className="text-sm text-[#c9d1d9]">
-                  {new Date(health.lastChecked).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-8 text-center">
-              <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-[#8b949e] opacity-30" />
-              <p className="text-sm text-[#8b949e]">No health data available</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Tab: Audits */}
-      {activeTab === 'Audits' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-[#8b949e]">{audits.length} audit(s) recorded</p>
-            <button
-              onClick={handleRunAudit}
-              disabled={actionLoading}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-[#238636] text-white rounded-md hover:bg-[#2ea043] disabled:opacity-50 transition-colors"
-            >
-              <Play className="w-3.5 h-3.5" /> Run Audit
-            </button>
+          <div className="grid grid-cols-2 gap-3">
+            <Cell label="Folder Path" value={vertical.folder_path} mono />
+            <Cell label="Package Name" value={vertical.package_name} mono />
+            <Cell label="API Prefix" value={vertical.api_prefix} mono />
+            <Cell label="Sort Order" value={String(vertical.sort_order)} />
+            <Cell label="Created" value={new Date(vertical.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} />
+            <Cell label="Updated" value={new Date(vertical.updated_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} />
           </div>
-
-          {/* Selected audit detail */}
-          {selectedAudit && (
-            <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-[#8b949e] uppercase tracking-wider font-medium">Latest Audit</p>
-                <p className="text-xs text-[#8b949e]">
-                  {new Date(selectedAudit.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className={`text-3xl font-bold ${
-                  selectedAudit.score >= 80 ? 'text-green-400' : selectedAudit.score >= 50 ? 'text-yellow-400' : 'text-red-400'
-                }`}>
-                  {selectedAudit.score}
-                </div>
-                <span className="text-sm text-[#8b949e]">/ 100</span>
-              </div>
-
-              {/* Metrics breakdown */}
-              {selectedAudit.metrics && Object.keys(selectedAudit.metrics).length > 0 && (
-                <div className="space-y-1.5 pt-2 border-t border-[#30363d]">
-                  {Object.entries(selectedAudit.metrics).map(([key, metric]) => (
-                    <div key={key} className="flex items-center gap-2">
-                      {metric.passed ? (
-                        <CheckCircle className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
-                      ) : (
-                        <XCircle className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
-                      )}
-                      <span className="text-xs text-[#c9d1d9]">{metric.label ?? key}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Issues */}
-              {selectedAudit.issues && selectedAudit.issues.length > 0 && (
-                <div className="pt-2 border-t border-[#30363d]">
-                  <p className="text-xs text-[#8b949e] mb-1.5 uppercase tracking-wider font-medium">Issues</p>
-                  <ul className="space-y-1">
-                    {selectedAudit.issues.map((issue, i) => (
-                      <li key={i} className="text-xs text-red-400 flex items-start gap-1.5">
-                        <span className="mt-0.5">{'\u2022'}</span>
-                        <span>{issue}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Previous audits table */}
-          {audits.length > 0 && (
-            <div className="bg-[#161b22] border border-[#30363d] rounded-lg overflow-hidden">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-[#30363d]">
-                    <th className="text-left px-4 py-3 text-xs text-[#8b949e] font-medium">Date</th>
-                    <th className="text-left px-4 py-3 text-xs text-[#8b949e] font-medium">Score</th>
-                    <th className="text-left px-4 py-3 text-xs text-[#8b949e] font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {audits.map((audit) => (
-                    <tr
-                      key={audit.id}
-                      className={`border-b border-[#30363d]/50 hover:bg-white/[0.02] transition-colors cursor-pointer ${
-                        selectedAudit?.id === audit.id ? 'bg-[#58a6ff]/5' : ''
-                      }`}
-                      onClick={() => setSelectedAudit(audit)}
-                    >
-                      <td className="px-4 py-3 text-[#8b949e] text-xs">
-                        {new Date(audit.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`text-sm font-bold ${
-                          audit.score >= 80 ? 'text-green-400' : audit.score >= 50 ? 'text-yellow-400' : 'text-red-400'
-                        }`}>
-                          {audit.score}/100
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setSelectedAudit(audit); }}
-                          className="text-xs text-[#58a6ff] hover:underline"
-                        >
-                          View Detail
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {audits.length === 0 && (
-            <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-8 text-center">
-              <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-[#8b949e] opacity-30" />
-              <p className="text-sm text-[#8b949e]">No audits recorded. Run your first audit above.</p>
+          {vertical.database_schemas && (
+            <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4">
+              <p className="text-xs text-[#8b949e] mb-2 uppercase tracking-wider font-medium">Database Schemas</p>
+              <pre className="text-xs text-[#c9d1d9]/80 font-mono">{JSON.stringify(vertical.database_schemas, null, 2)}</pre>
             </div>
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function Cell({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-3">
+      <p className="text-xs text-[#8b949e] mb-1">{label}</p>
+      <p className={`text-sm text-[#c9d1d9] ${mono ? 'font-mono' : ''}`}>{value}</p>
     </div>
   );
 }

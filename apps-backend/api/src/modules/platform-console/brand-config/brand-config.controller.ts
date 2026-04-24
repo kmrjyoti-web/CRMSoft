@@ -1,6 +1,8 @@
 import { Controller, Get, Post, Patch, Param, Body } from '@nestjs/common';
 import { BrandConfigService } from './brand-config.service';
+import { Public } from '../../../common/decorators/roles.decorator';
 
+@Public()
 @Controller('platform-console/brand-config')
 export class BrandConfigController {
   constructor(private readonly service: BrandConfigService) {}

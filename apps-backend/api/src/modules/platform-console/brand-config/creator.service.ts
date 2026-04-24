@@ -8,6 +8,39 @@ export class CreatorService {
 
   // ─── Vertical ─────────────────────────────────────────────────────────────
 
+  async listVerticals() {
+    return this.db.pc_vertical_v2.findMany({
+      orderBy: { sort_order: 'asc' },
+      include: {
+        _count: { select: { pc_vertical_module: true, pc_vertical_feature: true } },
+      },
+    });
+  }
+
+  async getVertical(vertical_code: string) {
+    const v = await this.db.pc_vertical_v2.findUnique({
+      where: { vertical_code },
+      include: {
+        _count: { select: { pc_vertical_module: true, pc_vertical_feature: true, pc_vertical_menu: true } },
+      },
+    });
+    if (!v) throw new HttpException('Vertical not found', HttpStatus.NOT_FOUND);
+    return v;
+  }
+
+  async updateVerticalFlags(vertical_code: string, data: {
+    is_active?: boolean;
+    is_beta?: boolean;
+    is_coming_soon?: boolean;
+  }) {
+    const v = await this.db.pc_vertical_v2.findUnique({ where: { vertical_code } });
+    if (!v) throw new HttpException('Vertical not found', HttpStatus.NOT_FOUND);
+    return this.db.pc_vertical_v2.update({
+      where: { vertical_code },
+      data: { ...data, updated_at: new Date() },
+    });
+  }
+
   async validateVerticalCode(vertical_code: string) {
     const existing = await this.db.pc_vertical_v2.findUnique({ where: { vertical_code } });
     return {

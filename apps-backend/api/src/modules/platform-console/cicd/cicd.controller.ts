@@ -2,7 +2,9 @@ import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common
 import { CICDService } from './cicd.service';
 import { LogDeploymentDto } from './dto/log-deployment.dto';
 import { LogPipelineDto } from './dto/log-pipeline.dto';
+import { Public } from '../../../common/decorators/roles.decorator';
 
+@Public()
 @Controller('platform-console/cicd')
 export class CICDController {
   constructor(private readonly cicdService: CICDService) {}

@@ -5,7 +5,9 @@ import { TestCoverageService } from './test-coverage.service';
 import { CreateTestPlanDto } from './dto/create-test-plan.dto';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { RunTestsDto } from './dto/run-tests.dto';
+import { Public } from '../../../common/decorators/roles.decorator';
 
+@Public()
 @Controller('platform-console/tests')
 export class TestCenterController {
   private readonly logger = new Logger(TestCenterController.name);

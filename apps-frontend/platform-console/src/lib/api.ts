@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -12,7 +12,12 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
     const err = await res.text();
     throw new Error(`API ${path} failed: ${res.status} ${err}`);
   }
-  return res.json();
+  const json = await res.json();
+  // Unwrap NestJS ResponseMapperInterceptor envelope: { success, data, ... }
+  if (json && typeof json === 'object' && 'success' in json && 'data' in json) {
+    return json.data as T;
+  }
+  return json as T;
 }
 
 export type AlertRuleInput = {
@@ -299,6 +304,15 @@ export const api = {
     auditDetail: (code: string, id: string) => apiFetch(`/platform-console/verticals/${code}/audits/${id}`),
   },
   creator: {
+    listVerticals: () =>
+      apiFetch('/platform-console/creator/verticals'),
+    getVertical: (code: string) =>
+      apiFetch(`/platform-console/creator/verticals/${encodeURIComponent(code)}`),
+    updateVertical: (code: string, data: Record<string, unknown>) =>
+      apiFetch(`/platform-console/creator/verticals/${encodeURIComponent(code)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
     validateVertical: (code: string) =>
       apiFetch(`/platform-console/creator/vertical/validate?code=${encodeURIComponent(code)}`),
     createVertical: (data: Record<string, unknown>) =>
