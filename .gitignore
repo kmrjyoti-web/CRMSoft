@@ -81,3 +81,11 @@ apps-frontend/**/.env.*
 .vscode/
 .idea/
 *.swp
+
+# ────────────────────────────────────────────────────────────
+# Build artifacts (should never be committed)
+# ────────────────────────────────────────────────────────────
+dist/
+.next/
+.turbo/
+next-env.d.ts
