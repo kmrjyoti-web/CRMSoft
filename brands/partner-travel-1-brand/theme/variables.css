@@ -1,0 +1,32 @@
+/* Partner Travel 1 Brand — TravelCRM */
+:root {
+  --brand-primary: #0ea5e9;
+  --brand-primary-hover: #0284c7;
+  --brand-primary-light: #e0f2fe;
+  --brand-secondary: #06b6d4;
+  --brand-accent: #f59e0b;
+
+  --brand-sidebar-bg: #0c4a6e;
+  --brand-sidebar-text: #e0f2fe;
+  --brand-sidebar-active: #0ea5e9;
+
+  --brand-bg: #f0f9ff;
+  --brand-surface: #ffffff;
+  --brand-border: #bae6fd;
+  --brand-text: #0c4a6e;
+  --brand-text-muted: #64748b;
+
+  --brand-success: #10b981;
+  --brand-warning: #f59e0b;
+  --brand-danger: #ef4444;
+  --brand-info: #0ea5e9;
+
+  --brand-font-family: 'Poppins', 'Inter', sans-serif;
+  --brand-font-size-base: 14px;
+  --brand-border-radius: 12px;
+  --brand-border-radius-lg: 16px;
+  --brand-shadow: 0 4px 6px rgba(14,165,233,0.1);
+
+  --brand-name: "TravelCRM";
+  --brand-logo-text: "TravelCRM";
+}

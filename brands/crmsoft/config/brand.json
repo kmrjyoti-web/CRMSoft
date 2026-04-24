@@ -1,0 +1,12 @@
+{
+  "brandId": "crmsoft",
+  "displayName": "CRMSoft",
+  "vertical": "general",
+  "primaryColor": "#6366f1",
+  "features": {
+    "marketplace": true,
+    "whiteLabel": false,
+    "aiEngine": true,
+    "multiTenant": true
+  }
+}

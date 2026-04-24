@@ -1,0 +1,44 @@
+
+======================================================
+  CRMSoft V6 — Multi-Brand Deployment Demo
+======================================================
+
+Building 3 brand deployments from ONE codebase...
+
+Building: crmsoft
+Built: /Users/kmrjyoti/GitProject/CRM/CrmProject/dist/brands/crmsoft/index.html
+  primary: --brand-primary: #6366f1
+
+Building: partner-travel-1-brand
+Built: /Users/kmrjyoti/GitProject/CRM/CrmProject/dist/brands/partner-travel-1-brand/index.html
+  primary: --brand-primary: #0ea5e9
+
+Building: partner-electronic-1-brand
+Built: /Users/kmrjyoti/GitProject/CRM/CrmProject/dist/brands/partner-electronic-1-brand/index.html
+  primary: --brand-primary: #e11d48
+
+======================================================
+  Brand Color Verification (isolation check)
+======================================================
+
+  CRMSoft                        #6366f1
+  TravelCRM                      #0ea5e9
+  ElectroHub CRM                 #e11d48
+
+  ✅ ISOLATION CHECK PASSED — all 3 brands have distinct primary colors
+
+======================================================
+  Opening brands in browser...
+======================================================
+
+  Opening: /Users/kmrjyoti/GitProject/CRM/CrmProject/dist/brands/crmsoft/index.html
+  Opening: /Users/kmrjyoti/GitProject/CRM/CrmProject/dist/brands/partner-travel-1-brand/index.html
+  Opening: /Users/kmrjyoti/GitProject/CRM/CrmProject/dist/brands/partner-electronic-1-brand/index.html
+
+======================================================
+  DEMO COMPLETE
+======================================================
+
+  Same codebase. 3 brands. 3 separate deployments.
+  This is CRMSoft V6 multi-brand white label.
+

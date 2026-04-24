@@ -1,0 +1,12 @@
+{
+  "brandId": "partner-electronic-1",
+  "displayName": "ElectroHub CRM",
+  "vertical": "electronic",
+  "primaryColor": "#e11d48",
+  "features": {
+    "marketplace": true,
+    "whiteLabel": true,
+    "aiEngine": true,
+    "multiTenant": true
+  }
+}
