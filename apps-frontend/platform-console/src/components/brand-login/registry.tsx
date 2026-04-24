@@ -13,7 +13,7 @@ type RegistryEntry = {
 const registry: Record<string, RegistryEntry> = {
   TravvellisLogin: {
     component: dynamic(
-      () => import('./travvellis/TravvellisLogin'),
+      () => import('./brands/travvellis/TravvellisLogin'),
       { ssr: false, loading: () => <LoginSkeleton /> },
     ),
   },
