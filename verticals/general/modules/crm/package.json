@@ -1,0 +1,18 @@
+{
+  "name": "@crmsoft/gv-crm",
+  "version": "0.1.0",
+  "description": "General Vertical — CRM modules (leads, contacts, organizations, activities, tasks, follow-ups)",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint 'src/**/*.ts'"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

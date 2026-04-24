@@ -1,0 +1,10 @@
+export { DocumentsModule } from './documents.module';
+export { AttachmentService } from './services/attachment.service';
+export { CloudLinkParserService } from './services/cloud-link-parser.service';
+export { CloudProviderService } from './services/cloud-provider.service';
+export { DocumentActivityService } from './services/document-activity.service';
+export { DocumentService } from './services/document.service';
+export { FolderService } from './services/folder.service';
+export { DocumentSearchService as SearchService } from './services/search.service';
+export { ShareLinkService } from './services/share-link.service';
+export { StorageLocalService } from './services/storage-local.service';

@@ -1,0 +1,38 @@
+import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
+import { Logger } from '@nestjs/common';
+import { GetDemoStatsQuery } from './get-demo-stats.query';
+import { PrismaService } from '../../../../../../core/prisma/prisma.service';
+
+@QueryHandler(GetDemoStatsQuery)
+export class GetDemoStatsHandler implements IQueryHandler<GetDemoStatsQuery> {
+    private readonly logger = new Logger(GetDemoStatsHandler.name);
+
+  constructor(private readonly prisma: PrismaService) {}
+
+  async execute(query: GetDemoStatsQuery) {
+    try {
+      const where: any = {};
+      if (query.userId) where.conductedById = query.userId;
+      if (query.fromDate || query.toDate) {
+        where.scheduledAt = {};
+        if (query.fromDate) where.scheduledAt.gte = new Date(query.fromDate);
+        if (query.toDate) where.scheduledAt.lte = new Date(query.toDate);
+      }
+
+      const [total, byStatus, byResult] = await Promise.all([
+        this.prisma.working.demo.count({ where }),
+        this.prisma.working.demo.groupBy({ by: ['status'], where, _count: true }),
+        this.prisma.working.demo.groupBy({ by: ['result'], where: { ...where, result: { not: null } }, _count: true }),
+      ]);
+
+      return {
+        total,
+        byStatus: byStatus.map((g) => ({ status: g.status, count: g._count })),
+        byResult: byResult.map((g) => ({ result: g.result, count: g._count })),
+      };
+    } catch (error) {
+      this.logger.error(`GetDemoStatsHandler failed: ${(error as Error).message}`, (error as Error).stack);
+      throw error;
+    }
+  }
+}
