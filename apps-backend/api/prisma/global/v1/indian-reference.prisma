@@ -1,0 +1,69 @@
+// GlobalReferenceDB — Indian reference data
+// Sprint B.2 — 2026-04-16
+// Models: GlCfgPincode, GlCfgHsnCode, GlCfgGstRate
+
+// ─── Indian PIN Codes ─────────────────────────────────────────────────────────
+
+model GlCfgPincode {
+  id             String      @id @default(uuid())
+  pincode        String      @unique               // 6-digit PIN e.g. "400001"
+  stateId        String?     @map("state_id")      // FK → GlCfgState (nullable for non-India)
+  district       String?                           // "Mumbai City"
+  cityName       String?     @map("city_name")     // "Mumbai"
+  officeName     String?     @map("office_name")   // "Mumbai GPO"
+  officeType     String?     @map("office_type")   // "H.O.", "S.O.", "B.O."
+  deliveryStatus String?     @map("delivery_status") // "Delivery", "Non-Delivery"
+  isActive       Boolean     @default(true) @map("is_active")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  state          GlCfgState? @relation(fields: [stateId], references: [id])
+
+  @@index([pincode])
+  @@index([stateId])
+  @@index([district])
+  @@map("gl_cfg_pincode")
+}
+
+// ─── GST Rates ───────────────────────────────────────────────────────────────
+
+model GlCfgGstRate {
+  id          String        @id @default(uuid())
+  name        String        @unique             // "GST 18%", "GST Exempt", "GST 28% + Cess 12%"
+  rate        Decimal       @db.Decimal(5, 2)  // 18.00, 0.00, 28.00
+  cessRate    Decimal?      @map("cess_rate") @db.Decimal(5, 2) // 12.00 for luxury goods
+  type        GstRateType   @default(STANDARD)
+  description String?
+  isActive    Boolean       @default(true) @map("is_active")
+  sortOrder   Int           @default(0) @map("sort_order")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  hsnCodes    GlCfgHsnCode[]
+
+  @@index([isActive])
+  @@map("gl_cfg_gst_rate")
+}
+
+// ─── HSN / SAC Codes ─────────────────────────────────────────────────────────
+
+model GlCfgHsnCode {
+  id               String       @id @default(uuid())
+  code             String       @unique           // "0101", "8517", "9983"
+  codeType         HsnCodeType  @default(HSN) @map("code_type")
+  description      String                         // "Live horses, asses, mules and hinnies"
+  descriptionHi    String?      @map("description_hi") // Hindi description
+  chapter          String?                        // "01" — HSN chapter number
+  section          String?                        // "I" — HSN section
+  defaultGstRateId String?      @map("default_gst_rate_id")
+  isActive         Boolean      @default(true) @map("is_active")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  defaultGstRate   GlCfgGstRate? @relation(fields: [defaultGstRateId], references: [id])
+
+  @@index([code])
+  @@index([chapter])
+  @@index([isActive])
+  @@map("gl_cfg_hsn_code")
+}

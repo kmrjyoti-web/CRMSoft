@@ -1,0 +1,17 @@
+export class CheckEligibilityQuery {
+  constructor(
+    public readonly offerId: string,
+    public readonly tenantId: string,
+    public readonly userId: string,
+    public readonly city?: string,
+    public readonly state?: string,
+    public readonly pincode?: string,
+    public readonly grade?: string,
+    public readonly groupId?: string,
+    public readonly isVerified?: boolean,
+    public readonly orderValue?: number,
+    public readonly quantity?: number,
+    public readonly productId?: string,
+    public readonly categoryId?: string,
+  ) {}
+}
