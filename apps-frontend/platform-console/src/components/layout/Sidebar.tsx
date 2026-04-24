@@ -23,6 +23,9 @@ import {
   Tag,
   Bell,
   History,
+  Users,
+  Palette,
+  Layers,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useState } from 'react';
@@ -83,7 +86,20 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Brand Manager', icon: Building2, href: '/brands',
     children: [
       { label: 'All Brands', icon: Building2, href: '/brands' },
+      { label: 'Brand Config', icon: Palette, href: '/brands/config' },
       { label: 'Error Overview', icon: AlertTriangle, href: '/brands/errors' },
+    ],
+  },
+  {
+    label: 'Partner Manager', icon: Users, href: '/partners',
+    children: [
+      { label: 'All Partners', icon: Users, href: '/partners' },
+    ],
+  },
+  {
+    label: 'Vertical Config', icon: Layers, href: '/vertical-config',
+    children: [
+      { label: 'All Verticals', icon: Layers, href: '/vertical-config' },
     ],
   },
   {
