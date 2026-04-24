@@ -1,0 +1,11 @@
+// Core V4 modules barrel
+export * from './identity/tenant/tenant.module';
+export * from './identity/settings/settings.module';
+export * from './platform/lookups/lookups.module';
+export * from './work/notifications/notifications.module';
+export * from './identity/audit/audit.module';
+export * from './identity/menus/menus.module';
+export * from './work/search/smart-search.module';
+export * from './work/custom-fields/custom-fields.module';
+export * from './identity/entity-filters/entity-filters.module';
+export * from './platform/help/help.module';

@@ -1,0 +1,29 @@
+{
+  "name": "@crmsoft/global-data",
+  "version": "1.0.0",
+  "description": "CRMSoft Global Data SDK — Indian states, GST codes, currency formatting, shared constants",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kmrjyoti-web/CrmProject.git",
+    "directory": "Shared/backend/global-data"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.10",
+    "typescript": "^5.9.3"
+  }
+}

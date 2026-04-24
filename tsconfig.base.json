@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@crmsoft/types": ["packages-shared/types/src/index.ts"],
+      "@crmsoft/types/*": ["packages-shared/types/src/*"],
+      "@crmsoft/enums": ["packages-shared/enums/src/index.ts"],
+      "@crmsoft/enums/*": ["packages-shared/enums/src/*"],
+      "@crmsoft/validators": ["packages-shared/validators/src/index.ts"],
+      "@crmsoft/validators/*": ["packages-shared/validators/src/*"],
+      "@crmsoft/constants": ["packages-shared/constants/src/index.ts"],
+      "@crmsoft/constants/*": ["packages-shared/constants/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "build", ".next"]
+}

@@ -1,0 +1,6 @@
+{
+  "framework": "nextjs",
+  "installCommand": "npm install && cd UI/marketplace && npm install",
+  "buildCommand": "cd UI/marketplace && npm run build",
+  "outputDirectory": "UI/marketplace/.next"
+}
