@@ -1,0 +1,13 @@
+export { NotificationsModule } from './notifications.module';
+export { ChannelRouterService } from './services/channel-router.service';
+export { CleanupService } from './services/cleanup.service';
+export { DigestService } from './services/digest.service';
+export { EscalationService } from './services/escalation.service';
+export { NotificationAnalyticsService } from './services/notification-analytics.service';
+export { NotificationConfigService } from './services/notification-config.service';
+export { NotificationCoreService } from './services/notification-core.service';
+export { NotificationDispatchService } from './services/notification-dispatch.service';
+export { PreferenceService } from './services/preference.service';
+export { QuietHourService } from './services/quiet-hour.service';
+export { RealtimeService } from './services/realtime.service';
+export { NotificationTemplateService as TemplateService } from './services/template.service';
