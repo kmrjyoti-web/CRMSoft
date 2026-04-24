@@ -135,6 +135,17 @@ model User {
   updatedById   String?   @map("updated_by_id")
   updatedByName String?   @map("updated_by_name")
 
+  // ─── REGISTRATION / VERTICAL IDENTITY ───
+  categoryCode       String?   @map("category_code")       // COMPANY_B2B | CUSTOMER | ...
+  subcategoryCode    String?   @map("subcategory_code")    // DMC_PROVIDER | TRAVELER | ...
+  brandCode          String?   @map("brand_code")          // travvellis | ...
+  verticalCode       String?   @map("vertical_code")       // TRAVEL | ...
+  permissionsJson    Json?     @map("permissions_json")    // snapshot at registration
+  registrationFields Json?     @map("registration_fields") // dynamic form values
+  registrationStatus String    @default("ACTIVE")          @map("registration_status")
+  approvedBy         String?   @map("approved_by")
+  approvedAt         DateTime? @map("approved_at")
+
   @@unique([tenantId, email])
   @@unique([tenantId, employeeCode])
   @@index([userType, status])

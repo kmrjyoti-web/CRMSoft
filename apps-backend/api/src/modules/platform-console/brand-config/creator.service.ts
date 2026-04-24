@@ -277,4 +277,27 @@ export class CreatorService {
   async deleteFeature(featureId: string) {
     return this.db.pc_vertical_feature.delete({ where: { id: featureId } });
   }
+
+  // ─── Registration categories (public) ─────────────────────────────────────
+
+  async listUserCategories() {
+    return (this.db as any).userCategory.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: 'asc' },
+    });
+  }
+
+  async listSubcategories(verticalCode: string, categoryCode?: string) {
+    return (this.db as any).subcategory.findMany({
+      where: {
+        isActive: true,
+        vertical: { vertical_code: verticalCode },
+        ...(categoryCode ? { category: { code: categoryCode } } : {}),
+      },
+      include: {
+        category: { select: { code: true, name: true, icon: true } },
+      },
+      orderBy: { sortOrder: 'asc' },
+    });
+  }
 }

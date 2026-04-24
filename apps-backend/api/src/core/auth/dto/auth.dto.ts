@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsUUID, IsEnum, IsNumber, Matches } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional, IsUUID, IsEnum, IsNumber, Matches, IsObject } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 // ─── SHARED ───
@@ -66,6 +66,26 @@ export class PartnerRegisterDto {
 }
 
 // ─── TENANT SELF-REGISTER (public) ───
+
+export class VerticalRegisterDto {
+  @ApiProperty({ example: 'CUSTOMER' })
+  @IsString() categoryCode: string;
+
+  @ApiProperty({ example: 'TRAVELER' })
+  @IsString() subcategoryCode: string;
+
+  @ApiProperty({ example: 'travvellis' })
+  @IsString() brandCode: string;
+
+  @ApiProperty({ example: 'traveler@world.com' })
+  @IsEmail() email: string;
+
+  @ApiProperty({ example: 'Pass@12345' })
+  @IsString() @MinLength(8) password: string;
+
+  @ApiPropertyOptional({ example: { full_name: 'Alice', phone: '+91-9876543210', country: 'India' } })
+  @IsOptional() @IsObject() registrationFields?: Record<string, any>;
+}
 
 export class TenantRegisterDto {
   @ApiProperty({ example: 'Acme Corp' })

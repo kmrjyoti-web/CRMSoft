@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, Query, BadRequestException } from '@nestjs/common';
 import { CreatorService } from './creator.service';
 import { Public } from '../../../common/decorators/roles.decorator';
 
@@ -12,6 +12,22 @@ export class CreatorController {
   @Get('brand/:code')
   getBrandByCode(@Param('code') code: string) {
     return this.svc.getBrandByCode(code);
+  }
+
+  // ─── User categories + subcategories (public, for registration wizard) ────
+
+  @Get('user-categories')
+  listUserCategories() {
+    return this.svc.listUserCategories();
+  }
+
+  @Get('user-categories/subcategories')
+  listSubcategories(
+    @Query('vertical_code') verticalCode: string,
+    @Query('category_code') categoryCode?: string,
+  ) {
+    if (!verticalCode) throw new BadRequestException('vertical_code is required');
+    return this.svc.listSubcategories(verticalCode, categoryCode);
   }
 
   // ─── Vertical list / detail ────────────────────────────────────────────────

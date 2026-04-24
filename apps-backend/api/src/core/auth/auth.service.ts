@@ -1,6 +1,6 @@
 ﻿import {
   Injectable, UnauthorizedException, ConflictException,
-  NotFoundException, ForbiddenException,
+  NotFoundException, ForbiddenException, BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -231,6 +231,77 @@ export class AuthService {
       include: { role: true },
     });
     return this.mapUserResponse(user);
+  }
+
+  // ═══════════════════════════════════════
+  // VERTICAL SELF-REGISTER (brand-aware)
+  // ═══════════════════════════════════════
+
+  private static readonly PERMISSION_MATRIX: Record<string, Record<string, boolean | string>> = {
+    COMPANY_B2B:   { canOfferToB2b: true,  canOfferToB2c: true,  canViewB2bShopping: true,  canViewB2cShopping: true,  canBrowseB2bOffers: true,  canOfferServicesB2b: false, canOfferServicesB2c: false, marketplaceRole: 'SELLER_B2B_B2C' },
+    COMPANY_B2C:   { canOfferToB2b: false, canOfferToB2c: true,  canViewB2bShopping: false, canViewB2cShopping: true,  canBrowseB2bOffers: false, canOfferServicesB2b: false, canOfferServicesB2c: false, marketplaceRole: 'SELLER_B2C_ONLY' },
+    INDIVIDUAL_SP: { canOfferToB2b: false, canOfferToB2c: false, canViewB2bShopping: false, canViewB2cShopping: true,  canBrowseB2bOffers: false, canOfferServicesB2b: true,  canOfferServicesB2c: true,  marketplaceRole: 'SERVICE_PROVIDER_DUAL' },
+    CUSTOMER:      { canOfferToB2b: false, canOfferToB2c: false, canViewB2bShopping: false, canViewB2cShopping: true,  canBrowseB2bOffers: false, canOfferServicesB2b: false, canOfferServicesB2c: false, marketplaceRole: 'BUYER_B2C' },
+    EMPLOYEE:      { canOfferToB2b: false, canOfferToB2c: false, canViewB2bShopping: false, canViewB2cShopping: false, canBrowseB2bOffers: false, canOfferServicesB2b: false, canOfferServicesB2c: false, marketplaceRole: 'INTERNAL' },
+  };
+
+  async registerVertical(data: {
+    verticalCode: string;
+    categoryCode: string;
+    subcategoryCode: string;
+    brandCode: string;
+    email: string;
+    password: string;
+    registrationFields?: Record<string, any>;
+  }) {
+    const existing = await this.prisma.identity.user.findFirst({ where: { email: data.email } });
+    if (existing) throw new ConflictException('Email already registered');
+
+    const permissions = AuthService.PERMISSION_MATRIX[data.categoryCode];
+    if (!permissions) throw new BadRequestException(`Unknown category: ${data.categoryCode}`);
+
+    const requiresApproval = ['DMC_PROVIDER', 'AGENT', 'TOUR_GUIDE'].includes(data.subcategoryCode);
+
+    const role = await this.getOrCreateRole(data.categoryCode, data.categoryCode.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()));
+
+    const hashed = await bcrypt.hash(data.password, this.getSaltRounds());
+    const user = await this.prisma.identity.user.create({
+      data: {
+        email: data.email,
+        password: hashed,
+        firstName: data.registrationFields?.full_name?.split(' ')[0] ?? data.registrationFields?.company_name?.split(' ')[0] ?? data.registrationFields?.agency_name?.split(' ')[0] ?? 'User',
+        lastName: data.registrationFields?.full_name?.split(' ').slice(1).join(' ') ?? '',
+        userType: data.categoryCode === 'EMPLOYEE' ? 'EMPLOYEE' : data.categoryCode === 'CUSTOMER' ? 'CUSTOMER' : 'ADMIN',
+        roleId: role.id,
+        tenantId: '',
+        status: 'ACTIVE',
+        emailVerified: !requiresApproval,
+        categoryCode: data.categoryCode,
+        subcategoryCode: data.subcategoryCode,
+        brandCode: data.brandCode,
+        verticalCode: data.verticalCode,
+        permissionsJson: permissions as any,
+        registrationFields: (data.registrationFields ?? {}) as any,
+        registrationStatus: requiresApproval ? 'PENDING' : 'ACTIVE',
+      } as any,
+      include: { role: true },
+    });
+
+    if (!requiresApproval) {
+      const tokens = await this.generateTokens(user.id, user.email, role.name, user.userType, user.tenantId);
+      return {
+        user: this.mapUserResponse(user),
+        requiresApproval: false,
+        message: 'Registration successful. Welcome!',
+        ...tokens,
+      };
+    }
+
+    return {
+      user: { id: user.id, email: user.email },
+      requiresApproval: true,
+      message: 'Registration submitted. Our team will review and activate your account.',
+    };
   }
 
   // ═══════════════════════════════════════

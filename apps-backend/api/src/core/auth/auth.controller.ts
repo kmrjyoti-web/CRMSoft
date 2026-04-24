@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import {
   LoginDto, RegisterDto, RefreshTokenDto, ChangePasswordDto,
   CustomerRegisterDto, PartnerRegisterDto, TenantRegisterDto,
+  VerticalRegisterDto,
 } from './dto/auth.dto';
 import { Public, Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -73,7 +74,7 @@ export class AuthController {
   @Public()
   @Post('vendor/login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Vendor Portal Login — VENDORS ONLY' })
+  @ApiOperation({ summary: 'Vendor Portal Login ï¿½ VENDORS ONLY' })
   async vendorLogin(@Body() dto: LoginDto) {
     return ApiResponse.success(
       await this.auth.vendorLogin(dto.email, dto.password),
@@ -91,6 +92,21 @@ export class AuthController {
     return ApiResponse.success(
       await this.auth.superAdminLogin(dto.email, dto.password),
       'Super admin login successful',
+    );
+  }
+
+  // --- VERTICAL REGISTRATION (public, brand-aware) ---
+
+  @Public()
+  @Post(':vertical/register')
+  @ApiOperation({ summary: 'Vertical self-registration (travel, retail, etc.)' })
+  async verticalRegister(
+    @Param('vertical') vertical: string,
+    @Body() dto: VerticalRegisterDto,
+  ) {
+    return ApiResponse.success(
+      await this.auth.registerVertical({ ...dto, verticalCode: vertical.toUpperCase() }),
+      'Registration successful',
     );
   }
 

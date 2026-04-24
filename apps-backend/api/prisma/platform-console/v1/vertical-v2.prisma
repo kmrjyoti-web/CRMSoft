@@ -35,6 +35,7 @@ model pc_vertical_v2 {
   pc_vertical_feature      pc_vertical_feature[]
   pc_vertical_menu         pc_vertical_menu[]
   pc_vertical_module       pc_vertical_module[]
+  subcategories            Subcategory[]
 }
 
 model pc_vertical_module {

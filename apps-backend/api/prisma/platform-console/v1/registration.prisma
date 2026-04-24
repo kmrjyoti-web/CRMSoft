@@ -1,0 +1,61 @@
+// PlatformConsoleDB — registration domain
+// Models: UserCategory, Subcategory
+
+model UserCategory {
+  id          String  @id @default(uuid())
+  code        String  @unique // COMPANY_B2B | COMPANY_B2C | INDIVIDUAL_SP | CUSTOMER | EMPLOYEE
+  name        String
+  description String?
+  icon        String? // lucide icon name
+
+  // Permission flags
+  canOfferToB2b     Boolean @default(false) @map("can_offer_to_b2b")
+  canOfferToB2c     Boolean @default(false) @map("can_offer_to_b2c")
+  canViewB2bShopping Boolean @default(false) @map("can_view_b2b_shopping")
+  canViewB2cShopping Boolean @default(true)  @map("can_view_b2c_shopping")
+  canBrowseB2bOffers Boolean @default(false) @map("can_browse_b2b_offers")
+  canOfferServicesB2b Boolean @default(false) @map("can_offer_services_b2b")
+  canOfferServicesB2c Boolean @default(false) @map("can_offer_services_b2c")
+  marketplaceRole   String? @map("marketplace_role")
+
+  isActive  Boolean  @default(true)  @map("is_active")
+  sortOrder Int      @default(0)     @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt      @map("updated_at")
+
+  subcategories Subcategory[]
+
+  @@map("pc_user_category")
+}
+
+model Subcategory {
+  id         String       @id @default(uuid())
+  verticalId String       @map("vertical_id")
+  categoryId String       @map("category_id")
+  code       String
+  name       String
+  description String?
+  icon        String?
+
+  // Override permissions (optional — merged on top of category)
+  overridePermissions Json? @map("override_permissions")
+
+  // Dynamic registration form fields (array of field defs)
+  registrationFields Json @map("registration_fields")
+
+  // Verification requirements
+  requiresDocumentUpload Boolean  @default(false) @map("requires_document_upload")
+  requiredDocuments      String[] @default([])    @map("required_documents")
+  requiresApproval       Boolean  @default(false) @map("requires_approval")
+
+  isActive  Boolean  @default(true)  @map("is_active")
+  sortOrder Int      @default(0)     @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt      @map("updated_at")
+
+  vertical pc_vertical_v2 @relation(fields: [verticalId], references: [id])
+  category UserCategory   @relation(fields: [categoryId], references: [id])
+
+  @@unique([verticalId, code])
+  @@map("pc_subcategory")
+}
