@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRMSoft — Brand Demo</title>
+  <link id="brand-css" rel="stylesheet" href="../theme/variables.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--brand-font-family, 'Inter', sans-serif);
+      font-size: var(--brand-font-size-base, 14px);
+      background: var(--brand-bg, #f8fafc);
+      color: var(--brand-text, #0f172a);
+      display: flex;
+      height: 100vh;
+    }
+    .sidebar {
+      width: 240px;
+      background: var(--brand-sidebar-bg, #1e1b4b);
+      color: var(--brand-sidebar-text, #e0e7ff);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+      flex-shrink: 0;
+    }
+    .brand-logo {
+      padding: 0 24px 24px;
+      font-size: 20px;
+      font-weight: 700;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 16px;
+    }
+    .nav-item {
+      padding: 10px 24px;
+      cursor: pointer;
+      border-radius: 0;
+      transition: background 0.15s;
+    }
+    .nav-item:hover, .nav-item.active {
+      background: var(--brand-sidebar-active, #4f46e5);
+    }
+    .main {
+      flex: 1;
+      padding: 32px;
+      overflow-y: auto;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    .header h1 { font-size: 24px; font-weight: 600; }
+    .badge {
+      background: var(--brand-primary, #6366f1);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--brand-surface, #fff);
+      border: 1px solid var(--brand-border, #e2e8f0);
+      border-radius: var(--brand-border-radius, 8px);
+      padding: 20px;
+      box-shadow: var(--brand-shadow);
+    }
+    .stat-card .label { font-size: 12px; color: var(--brand-text-muted, #64748b); margin-bottom: 8px; }
+    .stat-card .value { font-size: 28px; font-weight: 700; color: var(--brand-primary, #6366f1); }
+    .card {
+      background: var(--brand-surface, #fff);
+      border: 1px solid var(--brand-border, #e2e8f0);
+      border-radius: var(--brand-border-radius, 8px);
+      padding: 24px;
+      box-shadow: var(--brand-shadow);
+    }
+    .card h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+    .btn {
+      background: var(--brand-primary, #6366f1);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--brand-border-radius, 8px);
+      cursor: pointer;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .btn:hover { background: var(--brand-primary-hover, #4f46e5); }
+    .pill {
+      display: inline-block;
+      background: var(--brand-primary-light, #e0e7ff);
+      color: var(--brand-primary, #6366f1);
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      margin: 2px;
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand-logo" id="brand-logo-text">CRMSoft</div>
+    <div class="nav-item active">Dashboard</div>
+    <div class="nav-item">Leads</div>
+    <div class="nav-item">Contacts</div>
+    <div class="nav-item">Organizations</div>
+    <div class="nav-item">Accounts</div>
+    <div class="nav-item">Inventory</div>
+    <div class="nav-item">Reports</div>
+    <div class="nav-item">Settings</div>
+  </aside>
+  <main class="main">
+    <div class="header">
+      <h1 id="page-title">Dashboard</h1>
+      <span class="badge" id="brand-badge">CRMSoft</span>
+    </div>
+    <div class="stats">
+      <div class="stat-card">
+        <div class="label">Total Leads</div>
+        <div class="value">1,284</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Active Contacts</div>
+        <div class="value">3,491</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Open Quotations</div>
+        <div class="value">47</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Revenue (MTD)</div>
+        <div class="value">₹8.2L</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>V6 Architecture — Active Modules</h2>
+      <p style="margin-bottom:16px;color:var(--brand-text-muted)">
+        All modules live at <code>verticals/general/modules/</code> — 108,000+ lines of production code.
+      </p>
+      <span class="pill">@crmsoft/gv-crm</span>
+      <span class="pill">@crmsoft/gv-accounting</span>
+      <span class="pill">@crmsoft/gv-inventory</span>
+      <span class="pill">@crmsoft/gv-communication</span>
+      <span class="pill">@crmsoft/gv-platform</span>
+      <div style="margin-top:20px">
+        <button class="btn">New Lead</button>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "brandId": "partner-travel-1",
+  "displayName": "TravelCRM",
+  "vertical": "travel",
+  "primaryColor": "#0ea5e9",
+  "features": {
+    "marketplace": true,
+    "whiteLabel": true,
+    "aiEngine": true,
+    "multiTenant": true
+  }
+}

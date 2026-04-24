@@ -1,0 +1,32 @@
+/* Partner Electronic 1 Brand — ElectroHub CRM */
+:root {
+  --brand-primary: #e11d48;
+  --brand-primary-hover: #be123c;
+  --brand-primary-light: #ffe4e6;
+  --brand-secondary: #f43f5e;
+  --brand-accent: #22c55e;
+
+  --brand-sidebar-bg: #0f172a;
+  --brand-sidebar-text: #f1f5f9;
+  --brand-sidebar-active: #e11d48;
+
+  --brand-bg: #f8fafc;
+  --brand-surface: #ffffff;
+  --brand-border: #fecdd3;
+  --brand-text: #0f172a;
+  --brand-text-muted: #64748b;
+
+  --brand-success: #22c55e;
+  --brand-warning: #f59e0b;
+  --brand-danger: #ef4444;
+  --brand-info: #3b82f6;
+
+  --brand-font-family: 'Roboto', 'Inter', sans-serif;
+  --brand-font-size-base: 14px;
+  --brand-border-radius: 4px;
+  --brand-border-radius-lg: 6px;
+  --brand-shadow: 0 1px 3px rgba(225,29,72,0.08);
+
+  --brand-name: "ElectroHub CRM";
+  --brand-logo-text: "ElectroHub";
+}
