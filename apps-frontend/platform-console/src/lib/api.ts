@@ -281,4 +281,20 @@ export const api = {
     },
     auditDetail: (code: string, id: string) => apiFetch(`/platform-console/verticals/${code}/audits/${id}`),
   },
+
+  // Vertical v2 config — modules / menus / features / brand overrides (WAR #10 schema)
+  verticalConfig: {
+    list: () => apiFetch('/platform-console/vertical-config'),
+    get: (code: string) => apiFetch(`/platform-console/vertical-config/${code}`),
+    modules: (code: string) => apiFetch(`/platform-console/vertical-config/${code}/modules`),
+    menuTree: (code: string) => apiFetch(`/platform-console/vertical-config/${code}/menus`),
+    features: (code: string) => apiFetch(`/platform-console/vertical-config/${code}/features`),
+    getBrandConfig: (code: string, brandCode: string) =>
+      apiFetch(`/platform-console/vertical-config/${code}/brand/${brandCode}`),
+    upsertBrandConfig: (code: string, brandCode: string, data: Record<string, unknown>) =>
+      apiFetch(`/platform-console/vertical-config/${code}/brand/${brandCode}`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+  },
 };
