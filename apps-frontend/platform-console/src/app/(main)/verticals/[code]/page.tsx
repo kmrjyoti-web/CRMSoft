@@ -244,7 +244,7 @@ export default function VerticalDetailPage() {
             <Cell label="Created" value={new Date(vertical.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} />
             <Cell label="Updated" value={new Date(vertical.updated_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} />
           </div>
-          {vertical.database_schemas && (
+          {vertical.database_schemas != null && (
             <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4">
               <p className="text-xs text-[#8b949e] mb-2 uppercase tracking-wider font-medium">Database Schemas</p>
               <pre className="text-xs text-[#c9d1d9]/80 font-mono">{JSON.stringify(vertical.database_schemas, null, 2)}</pre>

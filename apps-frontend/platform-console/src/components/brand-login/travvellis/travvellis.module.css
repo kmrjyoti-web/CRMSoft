@@ -1,0 +1,291 @@
+/* Travvellis login — passport skin */
+
+.root {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: background 2.5s ease;
+}
+
+/* ── sky gradient background ─────────────────────────────────── */
+.sky {
+  position: absolute;
+  inset: 0;
+  transition: background 2.5s ease;
+  z-index: 0;
+}
+
+/* ── stars layer (night phases) ──────────────────────────────── */
+.stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 15%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 50%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 25%, rgba(255,255,255,0.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 90%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,0.5) 0%, transparent 100%);
+  transition: opacity 2.5s ease;
+  z-index: 0;
+}
+
+/* ── plane icon ──────────────────────────────────────────────── */
+.plane {
+  position: absolute;
+  top: 18%;
+  transition: left 14s linear, top 14s ease-in-out;
+  font-size: 2rem;
+  z-index: 1;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+  animation: planeWobble 4s ease-in-out infinite;
+}
+
+@keyframes planeWobble {
+  0%, 100% { transform: rotate(-5deg) translateY(0); }
+  50%       { transform: rotate(5deg) translateY(-6px); }
+}
+
+/* ── passport card ───────────────────────────────────────────── */
+.card {
+  position: relative;
+  z-index: 10;
+  width: min(440px, 92vw);
+  background: #1a1008;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06);
+}
+
+.cardInner {
+  padding: 32px 28px 28px;
+}
+
+/* ── passport cover strip ────────────────────────────────────── */
+.coverStrip {
+  height: 6px;
+  transition: background 2.5s ease;
+}
+
+/* ── passport header ─────────────────────────────────────────── */
+.passportHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.passportEmblem {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.passportTitle {
+  flex: 1;
+}
+
+.passportBrandName {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 1px;
+}
+
+.passportDoc {
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  letter-spacing: 0.05em;
+}
+
+/* ── phase stamp ─────────────────────────────────────────────── */
+.stamp {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 6px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  transition: color 2.5s ease, border-color 2.5s ease;
+}
+
+.stampTime {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+/* ── photo row ───────────────────────────────────────────────── */
+.photoRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.photoSlot {
+  flex: 1;
+  height: 80px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.05);
+  position: relative;
+  transition: background 2.5s ease;
+}
+
+.photoSlot.active {
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.photoLabel {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 7px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+}
+
+.photoLandmark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  opacity: 0.4;
+  transition: opacity 0.8s ease;
+}
+
+.photoSlot.active .photoLandmark {
+  opacity: 1;
+  animation: landmarkPop 0.4s ease;
+}
+
+@keyframes landmarkPop {
+  0%   { transform: scale(0.7); opacity: 0; }
+  60%  { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ── form ────────────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 20px 0;
+  position: relative;
+}
+
+.dividerLabel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #1a1008;
+  padding: 0 10px;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+}
+
+.inputGroup {
+  margin-bottom: 14px;
+}
+
+.inputLabel {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 6px;
+}
+
+.input {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.9);
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  border-color: rgba(255,255,255,0.3);
+}
+
+.input::placeholder {
+  color: rgba(255,255,255,0.2);
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #fff;
+  transition: background 2.5s ease, opacity 0.2s;
+  margin-top: 8px;
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── MRZ strip ───────────────────────────────────────────────── */
+.mrz {
+  background: rgba(0,0,0,0.35);
+  padding: 10px 14px;
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.25);
+  line-height: 1.6;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+/* ── phase progress bar ──────────────────────────────────────── */
+.progressBar {
+  height: 2px;
+  background: rgba(255,255,255,0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  transition: width 0.1s linear, background 2.5s ease;
+}

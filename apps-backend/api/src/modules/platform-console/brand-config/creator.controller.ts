@@ -7,6 +7,13 @@ import { Public } from '../../../common/decorators/roles.decorator';
 export class CreatorController {
   constructor(private readonly svc: CreatorService) {}
 
+  // ─── Brand profile (public lookup for login resolver) ─────────────────────
+
+  @Get('brand/:code')
+  getBrandByCode(@Param('code') code: string) {
+    return this.svc.getBrandByCode(code);
+  }
+
   // ─── Vertical list / detail ────────────────────────────────────────────────
 
   @Get('verticals')

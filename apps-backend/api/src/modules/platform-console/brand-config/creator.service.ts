@@ -41,6 +41,12 @@ export class CreatorService {
     });
   }
 
+  async getBrandByCode(brand_code: string) {
+    const brand = await this.db.brandProfile.findUnique({ where: { brandCode: brand_code } });
+    if (!brand) throw new HttpException('Brand not found', HttpStatus.NOT_FOUND);
+    return brand;
+  }
+
   async validateVerticalCode(vertical_code: string) {
     const existing = await this.db.pc_vertical_v2.findUnique({ where: { vertical_code } });
     return {

@@ -383,21 +383,28 @@ model BrandMenuOverride {
 }
 
 model BrandProfile {
-  id             String    @id @default(uuid())
-  brandCode      String    @unique @map("brand_code")
-  brandName      String    @map("brand_name")
-  displayName    String    @map("display_name")
-  description    String?
-  primaryColor   String    @default("#1976d2") @map("primary_color")
-  secondaryColor String    @default("#dc004e") @map("secondary_color")
-  logoUrl        String?   @map("logo_url")
-  domain         String?
-  subdomain      String?
-  contactEmail   String?   @map("contact_email")
-  isActive       Boolean   @default(true) @map("is_active")
-  isDefault      Boolean   @default(false) @map("is_default")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
+  id                   String    @id @default(uuid())
+  brandCode            String    @unique @map("brand_code")
+  brandName            String    @map("brand_name")
+  displayName          String    @map("display_name")
+  description          String?
+  primaryColor         String    @default("#1976d2") @map("primary_color")
+  secondaryColor       String    @default("#dc004e") @map("secondary_color")
+  logoUrl              String?   @map("logo_url")
+  domain               String?
+  subdomain            String?
+  contactEmail         String?   @map("contact_email")
+  isActive             Boolean   @default(true) @map("is_active")
+  isDefault            Boolean   @default(false) @map("is_default")
+  // Brand skin / login customisation
+  customLoginComponent String?   @map("custom_login_component")
+  customLoginTheme     String?   @map("custom_login_theme")
+  verticalCode         String?   @map("vertical_code")
+  designTokens         Json?     @map("design_tokens")
+  fontConfig           Json?     @map("font_config")
+  brandAssetPath       String?   @map("brand_asset_path")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
 
   @@map("pc_brand_profiles")
 }

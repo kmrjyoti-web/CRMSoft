@@ -303,6 +303,9 @@ export const api = {
     },
     auditDetail: (code: string, id: string) => apiFetch(`/platform-console/verticals/${code}/audits/${id}`),
   },
+  brandProfile: {
+    getByCode: (code: string) => apiFetch(`/platform-console/creator/brand/${encodeURIComponent(code)}`),
+  },
   creator: {
     listVerticals: () =>
       apiFetch('/platform-console/creator/verticals'),
