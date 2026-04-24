@@ -63,12 +63,20 @@ export default function VerticalsPage() {
           <h2 className="text-base font-semibold text-[#c9d1d9]">Vertical Registry</h2>
           <p className="text-xs text-[#8b949e] mt-0.5">Manage trade verticals and their configurations</p>
         </div>
-        <Link
-          href="/verticals/new"
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-[#238636] text-white rounded-md hover:bg-[#2ea043] transition-colors"
-        >
-          <Plus className="w-3.5 h-3.5" /> Register Vertical
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/verticals/create"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-[#238636] text-white rounded-md hover:bg-[#2ea043] transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" /> Add Vertical
+          </Link>
+          <Link
+            href="/verticals/new"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-[#30363d] text-[#8b949e] rounded-md hover:text-[#c9d1d9] transition-colors"
+          >
+            Register (legacy)
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

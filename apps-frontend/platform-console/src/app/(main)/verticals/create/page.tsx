@@ -142,10 +142,10 @@ export default function CreateVerticalPage() {
         </p>
         <div className="flex items-center justify-center gap-3 pt-2">
           <Link
-            href={`/verticals/${created}`}
+            href="/verticals"
             className="text-xs px-4 py-2 bg-console-accent hover:bg-console-accent/80 text-white rounded-md transition-colors"
           >
-            View Vertical
+            Back to Verticals
           </Link>
           <button
             onClick={() => { setCreated(null); setForm(EMPTY); setStep(0); setCodeValidation('idle'); }}
