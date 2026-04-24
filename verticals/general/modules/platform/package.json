@@ -1,0 +1,18 @@
+{
+  "name": "@crmsoft/gv-platform",
+  "version": "0.1.0",
+  "description": "General Vertical — Platform modules (dashboard, reports, demos, ownership, filters, recycle-bin, tour-plans)",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint 'src/**/*.ts'"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

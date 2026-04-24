@@ -1,0 +1,25 @@
+{
+  "name": "@crmsoft/vertical-general",
+  "version": "0.1.0",
+  "description": "CRMSoft General Vertical — default industry-agnostic CRM + Accounting + Inventory",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint 'modules/**/*.ts'"
+  },
+  "dependencies": {
+    "@crmsoft/gv-crm": "workspace:*",
+    "@crmsoft/gv-accounting": "workspace:*",
+    "@crmsoft/gv-inventory": "workspace:*",
+    "@crmsoft/gv-communication": "workspace:*",
+    "@crmsoft/gv-platform": "workspace:*"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

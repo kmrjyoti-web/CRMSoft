@@ -1,0 +1,11 @@
+export { BulkImportModule } from './bulk-import.module';
+export { DuplicateDetectorService } from './services/duplicate-detector.service';
+export { FieldMapperService } from './services/field-mapper.service';
+export { FileParserService } from './services/file-parser.service';
+export { FuzzyMatcherService } from './services/fuzzy-matcher.service';
+export { ImportExecutorService } from './services/import-executor.service';
+export { IndianValidatorsService } from './services/indian-validators.service';
+export { PatchGeneratorService } from './services/patch-generator.service';
+export { ProfileMatcherService } from './services/profile-matcher.service';
+export { ResultReportService } from './services/result-report.service';
+export { RowValidatorService } from './services/row-validator.service';

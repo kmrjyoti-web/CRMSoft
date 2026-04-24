@@ -1,37 +1,56 @@
-# CRMSoft V5 — pnpm workspace configuration
-# Created: 2026-04-22 (Phase 4 of V5 restructure)
-#
-# Replaces the npm-style "workspaces" field in root package.json, which pnpm
-# ignores. This file is what pnpm actually reads for workspace discovery.
+# CRMSoft V6 — pnpm workspace configuration
+# Updated: 2026-04-24 (real-code-merge-gv-vertical sprint)
 
 packages:
-  # Apps (executables)
+  # ── V5 Apps (active — CI workflows hardcode these paths) ──────────────────
+  # apps-backend/api: ci-backend.yml triggers on apps-backend/api/**
+  # apps-frontend/*: ci-crm-admin.yml, ci-vendor-panel.yml trigger here
+  # DO NOT remove until CI is updated to reference apps/backend/api
   - 'apps-backend/*'
   - 'apps-frontend/*'
 
-  # V5 reusable packages — glob patterns for future growth.
-  # Currently only README placeholders; pnpm skips any folder without
-  # a package.json so these are safe no-ops today.
-  - 'packages-backend/*'
-  - 'packages-frontend/*'
-  - 'packages-shared/*'
+  # ── V6 Apps (new structure — being populated via migration PRs) ───────────
+  - 'apps/backend/*'
+  - 'apps/frontend/*'
+
+  # ── V6 Core Packages ──────────────────────────────────────────────────────
+  - 'core/platform'
+  - 'core/ai-engine'
+  - 'core/base-modules/*'
+  - 'core/shared-libraries'
+  - 'core/governance'
+
+  # ── V6 General Vertical (real modules — 52 NestJS modules copied) ─────────
+  - 'verticals/general'
+  - 'verticals/general/modules/crm'
+  - 'verticals/general/modules/accounting'
+  - 'verticals/general/modules/inventory'
+  - 'verticals/general/modules/communication'
+  - 'verticals/general/modules/platform'
+
+  # ── V6 Other Verticals ────────────────────────────────────────────────────
+  - 'verticals/travel'
+  - 'verticals/electronic'
+  - 'verticals/restaurant'
+  - 'verticals/tourism'
+  - 'verticals/retail'
+  - 'verticals/software'
+
+  # ── V6 Partner Customizations ─────────────────────────────────────────────
+  - 'partner-customizations/*'
+
+  # ── V6 Brands ─────────────────────────────────────────────────────────────
+  - 'brands/*'
+
+  # ── Tools ─────────────────────────────────────────────────────────────────
   - 'tools/*'
 
-  # Pre-V5 Shared/* packages (still used by the backend; keep until migrated)
-  - 'Shared/common'
-  - 'Shared/frontend'
-  - 'Shared/prisma-schemas'
-  - 'Shared/backend/audit'
-  - 'Shared/backend/cache'
-  - 'Shared/backend/encryption'
-  - 'Shared/backend/errors'
-  - 'Shared/backend/global-data'
-  - 'Shared/backend/identity'
-  - 'Shared/backend/notifications'
-  - 'Shared/backend/prisma'
-  - 'Shared/backend/queue'
-  - 'Shared/backend/storage'
-  - 'Shared/backend/tenant'
-
-  # White Label API (separate Next.js service, stays per V5 plan)
-  - 'WhiteLabel/wl-api'
+# ── Removed (archived in archive/) ────────────────────────────────────────────
+#   packages-backend/*        → archive/old-v5-structure/packages-backend/
+#   packages-frontend/*       → archive/old-v5-structure/packages-frontend/
+#   packages-shared/*         → archive/old-v5-structure/packages-shared/
+#   Shared/common             → archive/legacy-folders/Shared/common/
+#   Shared/frontend           → archive/legacy-folders/Shared/frontend/
+#   Shared/prisma-schemas     → archive/legacy-folders/Shared/prisma-schemas/
+#   Shared/backend/*          → archive/legacy-folders/Shared/backend/
+#   WhiteLabel/wl-api         → archive/legacy-folders/WhiteLabel/wl-api/
