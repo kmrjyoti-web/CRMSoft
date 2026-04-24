@@ -12,7 +12,9 @@ import {
 import { PlatformConsolePrismaService } from '../prisma/platform-console-prisma.service';
 import { EscalationService } from './escalation.service';
 import { ERROR_CENTER_ERRORS } from './error-center.errors';
+import { Public } from '../../../common/decorators/roles.decorator';
 
+@Public()
 @Controller('errors/brand')
 export class BrandErrorController {
   private readonly logger = new Logger(BrandErrorController.name);

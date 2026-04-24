@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Patch, Param, Query, Body } from '@nestjs/common';
 import { VerticalManagerService } from './vertical-manager.service';
 import { RegisterVerticalDto } from './dto/register-vertical.dto';
+import { Public } from '../../../common/decorators/roles.decorator';
 
+@Public()
 @Controller('platform-console/verticals')
 export class VerticalManagerController {
   constructor(private readonly verticalManagerService: VerticalManagerService) {}

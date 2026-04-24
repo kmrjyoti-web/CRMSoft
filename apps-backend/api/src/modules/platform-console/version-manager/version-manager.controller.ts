@@ -2,7 +2,9 @@ import { Controller, Get, Post, Patch, Param, Query, Body } from '@nestjs/common
 import { VersionManagerService } from './version-manager.service';
 import { CreateReleaseDto } from './dto/create-release.dto';
 import { UpdateReleaseDto } from './dto/update-release.dto';
+import { Public } from '../../../common/decorators/roles.decorator';
 
+@Public()
 @Controller('platform-console/versions')
 export class VersionManagerController {
   constructor(private readonly versionManagerService: VersionManagerService) {}

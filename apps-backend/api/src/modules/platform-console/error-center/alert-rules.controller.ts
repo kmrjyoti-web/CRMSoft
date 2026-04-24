@@ -10,7 +10,9 @@ import {
   Logger,
 } from '@nestjs/common';
 import { PlatformConsolePrismaService } from '../prisma/platform-console-prisma.service';
+import { Public } from '../../../common/decorators/roles.decorator';
 
+@Public()
 @Controller('platform-console/alerts')
 export class AlertRulesController {
   private readonly logger = new Logger(AlertRulesController.name);

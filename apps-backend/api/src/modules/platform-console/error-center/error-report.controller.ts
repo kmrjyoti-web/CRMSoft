@@ -11,7 +11,9 @@ import { EscalationService } from './escalation.service';
 import { PlatformConsolePrismaService } from '../prisma/platform-console-prisma.service';
 import { Logger, NotFoundException } from '@nestjs/common';
 import { ERROR_CENTER_ERRORS } from './error-center.errors';
+import { Public } from '../../../common/decorators/roles.decorator';
 
+@Public()
 @Controller('errors/report')
 export class ErrorReportController {
   private readonly logger = new Logger(ErrorReportController.name);

@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
 import { SecurityService } from './security.service';
 import { CreateIncidentDto } from './dto/create-incident.dto';
+import { Public } from '../../../common/decorators/roles.decorator';
 
+@Public()
 @Controller('platform-console/security')
 export class SecurityController {
   constructor(private readonly securityService: SecurityService) {}

@@ -10,7 +10,9 @@ import {
 } from '@nestjs/common';
 import { PlatformConsolePrismaService } from '../prisma/platform-console-prisma.service';
 import { EscalationService } from './escalation.service';
+import { Public } from '../../../common/decorators/roles.decorator';
 
+@Public()
 @Controller('platform-console/errors')
 export class DeveloperErrorController {
   private readonly logger = new Logger(DeveloperErrorController.name);

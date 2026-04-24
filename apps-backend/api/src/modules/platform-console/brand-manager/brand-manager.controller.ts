@@ -2,7 +2,9 @@ import { Controller, Get, Post, Patch, Delete, Param, Body } from '@nestjs/commo
 import { BrandManagerService } from './brand-manager.service';
 import { WhitelistModuleDto } from './dto/whitelist-module.dto';
 import { SetFeatureFlagDto } from './dto/set-feature-flag.dto';
+import { Public } from '../../../common/decorators/roles.decorator';
 
+@Public()
 @Controller('platform-console/brands')
 export class BrandManagerController {
   constructor(private readonly brandManagerService: BrandManagerService) {}
