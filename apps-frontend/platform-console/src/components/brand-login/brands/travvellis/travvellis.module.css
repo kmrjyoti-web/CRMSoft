@@ -38,8 +38,7 @@
   animation: kenburns 28s ease-in-out infinite alternate;
 }
 
-/* Active class set via direct DOM (not React state) — global needed for classList.toggle */
-:global(.photo-active) {
+.photoActive {
   opacity: 1;
 }
 
@@ -252,7 +251,7 @@
   transition: opacity 1.6s ease;
 }
 
-:global(.scene-active) {
+.sceneActive {
   opacity: 1;
 }
 
@@ -1065,8 +1064,7 @@
 
 .devBtn:hover { background: rgba(212, 184, 120, 0.3); }
 
-/* active state set via classList.toggle('dev-btn-on') */
-:global(.dev-btn-on) {
+.devBtnOn {
   background: #d4b878 !important;
   color: #1e3a5f !important;
   border-color: #d4b878 !important;
@@ -1120,8 +1118,7 @@
 
 .chip:hover { opacity: 0.9; }
 
-/* active state set via classList.toggle('chip-active') */
-:global(.chip-active) {
+.chipActive {
   opacity: 1 !important;
   background: #d4b878 !important;
   color: #1e3a5f !important;

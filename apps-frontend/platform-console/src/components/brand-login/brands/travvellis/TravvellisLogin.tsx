@@ -74,7 +74,7 @@ export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }:
     // Photo crossfade
     if (x.p.key !== lastKeyRef.current) {
       Object.entries(photoRefs.current).forEach(([k, el]) => {
-        el?.classList.toggle('photo-active', k === x.p.bg);
+        el?.classList.toggle(styles.photoActive, k === x.p.bg);
       });
       lastKeyRef.current = x.p.key;
     }
@@ -82,7 +82,7 @@ export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }:
     // Foreground scene visibility
     const want = new Set(x.p.fg);
     Object.entries(sceneRefs.current).forEach(([k, el]) => {
-      el?.classList.toggle('scene-active', want.has(k));
+      el?.classList.toggle(styles.sceneActive, want.has(k));
     });
 
     // Plane / contrail
@@ -96,7 +96,7 @@ export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }:
 
     // Chip active highlight
     chipRefs.current.forEach((el, i) => {
-      el?.classList.toggle('chip-active', PHASES[i] === x.p);
+      el?.classList.toggle(styles.chipActive, PHASES[i] === x.p);
     });
 
     // Scrub control
@@ -109,12 +109,12 @@ export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }:
   useEffect(() => {
     // Set first photo active immediately
     if (photoRefs.current['mountain']) {
-      photoRefs.current['mountain'].classList.add('photo-active');
+      photoRefs.current['mountain'].classList.add(styles.photoActive);
       lastKeyRef.current = 'mountain';
     }
     // Set first scene active
     if (sceneRefs.current['mountain']) {
-      sceneRefs.current['mountain'].classList.add('scene-active');
+      sceneRefs.current['mountain'].classList.add(styles.sceneActive);
     }
     rafRef.current = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(rafRef.current);
@@ -128,7 +128,7 @@ export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }:
     }
     if (playBtnRef.current) {
       playBtnRef.current.textContent = playingRef.current ? 'Pause' : 'Play';
-      playBtnRef.current.classList.toggle('dev-btn-on', playingRef.current);
+      playBtnRef.current.classList.toggle(styles.devBtnOn, playingRef.current);
     }
   }, []);
 
@@ -136,7 +136,7 @@ export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }:
     playingRef.current = false;
     if (playBtnRef.current) {
       playBtnRef.current.textContent = 'Play';
-      playBtnRef.current.classList.remove('dev-btn-on');
+      playBtnRef.current.classList.remove(styles.devBtnOn);
     }
   }, []);
 
@@ -251,7 +251,7 @@ export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }:
         <span className={styles.devLabel}>Dev</span>
         <button
           ref={playBtnRef}
-          className={`${styles.devBtn} dev-btn-on`}
+          className={`${styles.devBtn} ${styles.devBtnOn}`}
           type="button"
           onClick={handleTogglePlay}
         >
