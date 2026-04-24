@@ -1,0 +1,529 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PartnerStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+}
+
+enum PartnerPlan {
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum DomainType {
+  PRIMARY
+  CRM_ADMIN
+  VENDOR_PANEL
+  MARKETPLACE
+  API
+}
+
+enum SslStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  FAILED
+}
+
+enum DeploymentStatus {
+  RUNNING
+  STOPPED
+  DEPLOYING
+  FAILED
+  MAINTENANCE
+}
+
+enum BranchType {
+  MAIN
+  FEATURE
+  HOTFIX
+  CUSTOM
+}
+
+enum BranchScope {
+  FULL
+  FUNCTION_SPECIFIC
+}
+
+enum DevRequestType {
+  FEATURE
+  BUG_FIX
+  CUSTOMIZATION
+  INTEGRATION
+}
+
+enum DevRequestStatus {
+  SUBMITTED
+  REVIEWING
+  APPROVED
+  IN_PROGRESS
+  TESTING
+  DELIVERED
+  ACCEPTED
+  REJECTED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+}
+
+enum ErrorSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model WhiteLabelPartner {
+  id                String        @id @default(uuid())
+  partnerCode       String        @unique @map("partner_code")
+  companyName       String        @map("company_name")
+  contactName       String        @map("contact_name")
+  email             String        @unique
+  phone             String?
+  passwordHash      String        @map("password_hash")
+  gstNumber         String?       @map("gst_number")
+  panNumber         String?       @map("pan_number")
+  billingAddress    Json?         @map("billing_address")
+  status            PartnerStatus @default(TRIAL)
+  plan              PartnerPlan   @default(STARTER)
+  maxTenants        Int           @default(10) @map("max_tenants")
+  maxUsersPerTenant Int           @default(5) @map("max_users_per_tenant")
+  dbConnectionConfig Json?        @map("db_connection_config")
+  onboardedAt       DateTime?     @map("onboarded_at")
+  trialExpiresAt    DateTime?     @map("trial_expires_at")
+  suspendedAt       DateTime?     @map("suspended_at")
+  suspendedReason   String?       @map("suspended_reason")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  branding          PartnerBranding?
+  domains           PartnerDomain[]
+  servicePricing    PartnerServicePricing[]
+  customerPricing   PartnerCustomerPricing[]
+  deployment        PartnerDeployment?
+  gitBranches       PartnerGitBranch[]
+  errorLogs         PartnerErrorLog[]
+  testLogs          PartnerTestLog[]
+  devRequests       PartnerDevRequest[]
+  featureFlags      PartnerFeatureFlag[]
+  layoutOverrides   PartnerLayoutOverride[]
+  usageLogs         PartnerUsageLog[]
+  invoices          PartnerInvoice[]
+  auditLogs         PartnerAuditLog[]
+  scalingPolicy     PartnerScalingPolicy?
+  scalingEvents     PartnerScalingEvent[]
+
+  @@map("white_label_partners")
+}
+
+model PartnerBranding {
+  id               String            @id @default(uuid())
+  partnerId        String            @unique @map("partner_id")
+  partner          WhiteLabelPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  brandName        String            @map("brand_name")
+  tagline          String?
+  logo             String?
+  favicon          String?
+  loginBackground  String?           @map("login_background")
+  primaryColor     String            @default("#1E40AF") @map("primary_color")
+  secondaryColor   String            @default("#3B82F6") @map("secondary_color")
+  accentColor      String            @default("#F59E0B") @map("accent_color")
+  fontFamily       String            @default("Inter") @map("font_family")
+  emailFromName    String?           @map("email_from_name")
+  emailFromAddress String?           @map("email_from_address")
+  supportEmail     String?           @map("support_email")
+  supportPhone     String?           @map("support_phone")
+  supportUrl       String?           @map("support_url")
+  termsUrl         String?           @map("terms_url")
+  privacyUrl       String?           @map("privacy_url")
+  footerText       String?           @map("footer_text")
+  copyrightText    String?           @map("copyright_text")
+  customCss        String?           @map("custom_css")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  @@map("partner_brandings")
+}
+
+model PartnerDomain {
+  id                String            @id @default(uuid())
+  partnerId         String            @map("partner_id")
+  partner           WhiteLabelPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  domainType        DomainType        @map("domain_type")
+  domain            String            @unique
+  sslStatus         SslStatus         @default(PENDING) @map("ssl_status")
+  sslCertPath       String?           @map("ssl_cert_path")
+  sslExpiresAt      DateTime?         @map("ssl_expires_at")
+  isVerified        Boolean           @default(false) @map("is_verified")
+  verifiedAt        DateTime?         @map("verified_at")
+  dnsRecords        Json?             @map("dns_records")
+  verificationToken String?           @map("verification_token")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  @@map("partner_domains")
+  @@index([partnerId])
+}
+
+model ServicePricingTier {
+  id                   String    @id @default(uuid())
+  serviceCode          String    @unique @map("service_code")
+  serviceName          String    @map("service_name")
+  unitDescription      String    @map("unit_description")
+  baseCostPerUnit      Decimal   @map("base_cost_per_unit")
+  defaultPartnerPrice  Decimal   @map("default_partner_price")
+  defaultCustomerPrice Decimal   @map("default_customer_price")
+  currency             String    @default("INR")
+  isActive             Boolean   @default(true) @map("is_active")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  partnerPricing  PartnerServicePricing[]
+  customerPricing PartnerCustomerPricing[]
+
+  @@map("service_pricing_tiers")
+}
+
+model PartnerServicePricing {
+  id                     String             @id @default(uuid())
+  partnerId              String             @map("partner_id")
+  partner                WhiteLabelPartner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  serviceCode            String             @map("service_code")
+  service                ServicePricingTier @relation(fields: [serviceCode], references: [serviceCode])
+  pricePerUnit           Decimal            @map("price_per_unit")
+  customerMinPrice       Decimal?           @map("customer_min_price")
+  customerSuggestedPrice Decimal?           @map("customer_suggested_price")
+  createdAt              DateTime           @default(now()) @map("created_at")
+  updatedAt              DateTime           @updatedAt @map("updated_at")
+
+  @@unique([partnerId, serviceCode])
+  @@map("partner_service_pricing")
+}
+
+model PartnerCustomerPricing {
+  id                   String             @id @default(uuid())
+  partnerId            String             @map("partner_id")
+  partner              WhiteLabelPartner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  serviceCode          String             @map("service_code")
+  service              ServicePricingTier @relation(fields: [serviceCode], references: [serviceCode])
+  customerPricePerUnit Decimal            @map("customer_price_per_unit")
+  isCustomizable       Boolean            @default(false) @map("is_customizable")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+
+  @@unique([partnerId, serviceCode])
+  @@map("partner_customer_pricing")
+}
+
+model PartnerDeployment {
+  id              String            @id @default(uuid())
+  partnerId       String            @unique @map("partner_id")
+  partner         WhiteLabelPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  currentVersion  String?           @map("current_version")
+  deployedAt      DateTime?         @map("deployed_at")
+  deployedBy      String?           @map("deployed_by")
+  gitBranch       String?           @map("git_branch")
+  gitCommitHash   String?           @map("git_commit_hash")
+  gitTag          String?           @map("git_tag")
+  deploymentType  String            @default("SHARED_INFRA") @map("deployment_type")
+  serverConfig    Json?             @map("server_config")
+  status          DeploymentStatus  @default(STOPPED)
+  lastHealthCheck DateTime?         @map("last_health_check")
+  healthStatus    String?           @map("health_status")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  @@map("partner_deployments")
+}
+
+model PartnerGitBranch {
+  id                String            @id @default(uuid())
+  partnerId         String            @map("partner_id")
+  partner           WhiteLabelPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  branchName        String            @map("branch_name")
+  branchType        BranchType        @default(MAIN) @map("branch_type")
+  parentBranch      String?           @map("parent_branch")
+  allowedScope      BranchScope       @default(FULL) @map("allowed_scope")
+  restrictedModules Json?             @map("restricted_modules")
+  lastCommitHash    String?           @map("last_commit_hash")
+  lastCommitAt      DateTime?         @map("last_commit_at")
+  mergeStatus       String?           @map("merge_status")
+  createdBy         String?           @map("created_by")
+  isActive          Boolean           @default(true) @map("is_active")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  @@map("partner_git_branches")
+  @@index([partnerId])
+}
+
+model PartnerErrorLog {
+  id                 String            @id @default(uuid())
+  partnerId          String            @map("partner_id")
+  partner            WhiteLabelPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  errorCode          String?           @map("error_code")
+  severity           ErrorSeverity     @default(MEDIUM)
+  message            String
+  stackTrace         String?           @map("stack_trace")
+  module             String?
+  component          String?
+  endpoint           String?
+  requestContext     Json?             @map("request_context")
+  isReportedToMaster Boolean           @default(false) @map("is_reported_to_master")
+  resolvedAt         DateTime?         @map("resolved_at")
+  resolvedBy         String?           @map("resolved_by")
+  resolution         String?
+  createdAt          DateTime          @default(now()) @map("created_at")
+
+  @@map("partner_error_logs")
+  @@index([partnerId])
+  @@index([severity])
+  @@index([createdAt])
+}
+
+model PartnerTestLog {
+  id             String            @id @default(uuid())
+  partnerId      String            @map("partner_id")
+  partner        WhiteLabelPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  testType       String            @map("test_type")
+  totalTests     Int               @default(0) @map("total_tests")
+  passed         Int               @default(0)
+  failed         Int               @default(0)
+  warnings       Int               @default(0)
+  passRate       Float?            @map("pass_rate")
+  categories     Json?
+  reportFilePath String?           @map("report_file_path")
+  triggeredBy    String?           @map("triggered_by")
+  startedAt      DateTime?         @map("started_at")
+  completedAt    DateTime?         @map("completed_at")
+  createdAt      DateTime          @default(now()) @map("created_at")
+
+  @@map("partner_test_logs")
+  @@index([partnerId])
+}
+
+model PartnerDevRequest {
+  id                String            @id @default(uuid())
+  partnerId         String            @map("partner_id")
+  partner           WhiteLabelPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  requestType       DevRequestType    @map("request_type")
+  title             String
+  description       String?
+  priority          ErrorSeverity     @default(MEDIUM)
+  status            DevRequestStatus  @default(SUBMITTED)
+  estimatedHours    Float?            @map("estimated_hours")
+  actualHours       Float?            @map("actual_hours")
+  quotedPrice       Decimal?          @map("quoted_price")
+  approvedPrice     Decimal?          @map("approved_price")
+  assignedDeveloper String?           @map("assigned_developer")
+  gitBranch         String?           @map("git_branch")
+  attachments       Json?
+  deliveredAt       DateTime?         @map("delivered_at")
+  acceptedAt        DateTime?         @map("accepted_at")
+  rejectedReason    String?           @map("rejected_reason")
+  dueDate           DateTime?         @map("due_date")
+  slaHours          Int?              @map("sla_hours")
+  comments          PartnerDevRequestComment[]
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  @@map("partner_dev_requests")
+  @@index([partnerId])
+  @@index([status])
+}
+
+model PartnerDevRequestComment {
+  id          String            @id @default(uuid())
+  requestId   String            @map("request_id")
+  request     PartnerDevRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  authorRole  String            @map("author_role")  // MASTER_ADMIN | PARTNER | DEVELOPER
+  authorName  String            @map("author_name")
+  message     String
+  isInternal  Boolean           @default(false) @map("is_internal")  // internal = only visible to admin
+  createdAt   DateTime          @default(now()) @map("created_at")
+
+  @@map("partner_dev_request_comments")
+  @@index([requestId])
+}
+
+model PartnerFeatureFlag {
+  id          String            @id @default(uuid())
+  partnerId   String            @map("partner_id")
+  partner     WhiteLabelPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  featureCode String            @map("feature_code")
+  isEnabled   Boolean           @default(false) @map("is_enabled")
+  config      Json?
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  @@unique([partnerId, featureCode])
+  @@map("partner_feature_flags")
+}
+
+model PartnerLayoutOverride {
+  id                  String            @id @default(uuid())
+  partnerId           String            @map("partner_id")
+  partner             WhiteLabelPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  layoutType          String            @map("layout_type")
+  overrideConfig      Json              @map("override_config")
+  customComponentPath String?           @map("custom_component_path")
+  isActive            Boolean           @default(true) @map("is_active")
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  @@unique([partnerId, layoutType])
+  @@map("partner_layout_overrides")
+}
+
+model PartnerUsageLog {
+  id                      String            @id @default(uuid())
+  partnerId               String            @map("partner_id")
+  partner                 WhiteLabelPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  serviceCode             String            @map("service_code")
+  period                  String
+  totalUnitsConsumed      Decimal           @map("total_units_consumed")
+  totalCostToYou          Decimal           @map("total_cost_to_you")
+  totalChargedToPartner   Decimal           @map("total_charged_to_partner")
+  totalChargedToCustomers Decimal           @map("total_charged_to_customers")
+  yourProfit              Decimal           @map("your_profit")
+  partnerProfit           Decimal           @map("partner_profit")
+  invoiceId               String?           @map("invoice_id")
+  createdAt               DateTime          @default(now()) @map("created_at")
+
+  @@unique([partnerId, serviceCode, period])
+  @@map("partner_usage_logs")
+}
+
+model PartnerInvoice {
+  id                String            @id @default(uuid())
+  partnerId         String            @map("partner_id")
+  partner           WhiteLabelPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  period            String
+  invoiceNumber     String            @unique @map("invoice_number")
+  lineItems         Json              @map("line_items")
+  subtotal          Decimal
+  gstAmount         Decimal           @map("gst_amount")
+  totalAmount       Decimal           @map("total_amount")
+  status            InvoiceStatus     @default(DRAFT)
+  dueDate           DateTime          @map("due_date")
+  paidAt            DateTime?         @map("paid_at")
+  razorpayPaymentId String?           @map("razorpay_payment_id")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  @@map("partner_invoices")
+  @@index([partnerId])
+  @@index([status])
+}
+
+enum ScalingEventType {
+  SCALE_UP
+  SCALE_DOWN
+  NO_CHANGE
+}
+
+enum SlaAlertType {
+  WARNING_24H
+  BREACH
+  PAYMENT_OVERDUE
+}
+
+enum WebhookEventStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+model PartnerScalingPolicy {
+  id                   String            @id @default(uuid())
+  partnerId            String            @unique @map("partner_id")
+  partner              WhiteLabelPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  maxInstances         Int               @default(1) @map("max_instances")
+  minInstances         Int               @default(1) @map("min_instances")
+  currentInstances     Int               @default(1) @map("current_instances")
+  scaleUpThreshold     Int               @default(80) @map("scale_up_threshold")
+  scaleDownThreshold   Int               @default(20) @map("scale_down_threshold")
+  isAutoScalingEnabled Boolean           @default(false) @map("is_auto_scaling_enabled")
+  cooldownMinutes      Int               @default(15) @map("cooldown_minutes")
+  lastScaledAt         DateTime?         @map("last_scaled_at")
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
+
+  @@map("partner_scaling_policies")
+}
+
+model PartnerScalingEvent {
+  id            String            @id @default(uuid())
+  partnerId     String            @map("partner_id")
+  partner       WhiteLabelPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  eventType     ScalingEventType  @map("event_type")
+  fromInstances Int               @map("from_instances")
+  toInstances   Int               @map("to_instances")
+  reason        String
+  usageMetric   Float?            @map("usage_metric")
+  triggeredBy   String            @default("auto") @map("triggered_by")
+  createdAt     DateTime          @default(now()) @map("created_at")
+
+  @@map("partner_scaling_events")
+  @@index([partnerId])
+}
+
+model SlaAlert {
+  id        String       @id @default(uuid())
+  requestId String       @map("request_id")
+  alertType SlaAlertType @map("alert_type")
+  sentAt    DateTime     @default(now()) @map("sent_at")
+  metadata  Json?
+
+  @@unique([requestId, alertType])
+  @@map("sla_alerts")
+}
+
+model WebhookEvent {
+  id               String             @id @default(uuid())
+  source           String
+  eventType        String             @map("event_type")
+  payload          Json
+  signature        String
+  isVerified       Boolean            @default(false) @map("is_verified")
+  processingStatus WebhookEventStatus @default(PENDING) @map("processing_status")
+  errorMessage     String?            @map("error_message")
+  processedAt      DateTime?          @map("processed_at")
+  createdAt        DateTime           @default(now()) @map("created_at")
+
+  @@map("webhook_events")
+  @@index([source, eventType])
+  @@index([processingStatus])
+  @@index([createdAt])
+}
+
+model PartnerAuditLog {
+  id              String             @id @default(uuid())
+  partnerId       String?            @map("partner_id")
+  partner         WhiteLabelPartner? @relation(fields: [partnerId], references: [id])
+  action          String
+  performedBy     String             @map("performed_by")
+  performedByRole String             @map("performed_by_role")
+  details         Json?
+  ipAddress       String?            @map("ip_address")
+  userAgent       String?            @map("user_agent")
+  createdAt       DateTime           @default(now()) @map("created_at")
+
+  @@map("partner_audit_logs")
+  @@index([partnerId])
+  @@index([action])
+  @@index([createdAt])
+}
