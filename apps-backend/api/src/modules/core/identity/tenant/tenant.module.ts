@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { APP_GUARD } from '@nestjs/core';
+import { PrismaModule } from '../../../../core/prisma/prisma.module';
 
 // Services
 import { TenantProvisioningService } from './services/tenant-provisioning.service';
@@ -137,7 +138,7 @@ const QueryHandlers = [
 ];
 
 @Module({
-  imports: [CqrsModule],
+  imports: [CqrsModule, PrismaModule],
   controllers: [
     TenantAdminController,
     PlanAdminController,

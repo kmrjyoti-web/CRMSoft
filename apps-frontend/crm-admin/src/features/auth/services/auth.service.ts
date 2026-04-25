@@ -2,7 +2,6 @@ import type {
   User,
   LoginRequest,
   LoginResponse,
-  LoginPortal,
 } from "@/features/auth/types/auth.types";
 import { setAuthCookie, clearAuthCookie } from "@/features/auth/utils/auth-cookies";
 import api from "@/services/api-client";
@@ -13,15 +12,19 @@ import type { ApiResponse } from "@/types/api-response";
 
 export const authService = {
   /**
-   * POST /api/v1/auth/{portal}/login
-   * Portal determines the login endpoint: admin, employee, customer, partner, super-admin
+   * POST /api/v1/auth/login  (universal — backend resolves user type via DB)
+   *
+   * Brand-wise deployments (Travvellis, Software, Electronic) must NOT hardcode
+   * a portal/userType. The backend reads User+Company+Mapping and decides.
+   *
+   * @deprecated second arg `_portal` is accepted but ignored — will be removed next sprint
    */
   async login(
     payload: LoginRequest,
-    portal: LoginPortal = "admin",
+    _portal?: string,
   ): Promise<LoginResponse> {
     const { data } = await api.post<ApiResponse<LoginResponse>>(
-      `/api/v1/auth/${portal}/login`,
+      `/api/v1/auth/login`,
       payload,
     );
 

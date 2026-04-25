@@ -8,6 +8,7 @@ export interface User {
   userType: string;
   role: string;
   roleDisplayName?: string;
+  talentId?: string;
 }
 
 // ── JWT ─────────────────────────────────────────────────
@@ -38,4 +39,8 @@ export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
   tenantCode?: string;
+  // Universal endpoint fields (PR #44 — Person-Centric Identity)
+  companies?: Array<{ companyId: string; name: string }>;
+  activeCompanyId?: string | null;
+  requiresCompanySelection?: boolean;
 }

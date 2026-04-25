@@ -688,8 +688,13 @@ export class AuthService {
       select: { id: true, name: true, slug: true, status: true, onboardingStep: true, industryCode: true },
     });
 
+    // Backward-compat: include companyId so JWT carries the person-centric field
+    const companies = await this.mapping.getUserCompanies(user.id);
+    const primaryMapping = companies.find((m: any) => m.isDefault) ?? companies[0];
+    const companyId = primaryMapping?.company?.id;
+
     const tokens = await this.generateTokens(
-      user.id, user.email, user.role.name, user.userType, user.tenantId,
+      user.id, user.email, user.role.name, user.userType, user.tenantId, companyId,
     );
 
     return {
@@ -784,11 +789,21 @@ export class AuthService {
     id: string, email: string, role: string, userType: string, tenantId: string,
     companyId?: string,
   ) {
+    // Backward-compat: CUSTOMER/TRAVELER users have tenantId='' in DB (no dedicated tenant yet).
+    // Fall back to DEFAULT_TENANT_ID so legacy endpoints don't see an empty tenantId.
+    const sharedTenantId = this.config.get<string>('DEFAULT_TENANT_ID') || '';
+    const effectiveTenantId = tenantId || sharedTenantId;
+    const isSharedTenant = !tenantId || tenantId === sharedTenantId;
+
     const isSuperAdmin = userType === 'ADMIN' && ['SUPER_ADMIN', 'ADMIN'].includes(role);
     const payload = {
-      sub: id, email, role, userType, tenantId,
+      sub: id, email, role, userType,
+      // Legacy field — required by 15+ endpoints via request.user.tenantId
+      tenantId: effectiveTenantId,
+      // New person-centric field (PR #44) — may be null for FREE plan / no company
+      companyId: companyId ?? null,
+      isSharedTenant,
       ...(isSuperAdmin && { isSuperAdmin: true }),
-      ...(companyId && { companyId }),
     };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwt.signAsync(payload, {
