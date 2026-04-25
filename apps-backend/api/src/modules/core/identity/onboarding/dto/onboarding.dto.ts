@@ -1,4 +1,4 @@
-import { IsEnum, IsString, Length } from 'class-validator';
+import { IsEnum, IsObject, IsOptional, IsString, Length } from 'class-validator';
 
 export type OnboardingLocale = 'en' | 'hi' | 'mr';
 export type OtpType = 'email' | 'mobile';
@@ -32,5 +32,7 @@ export class CompleteProfileDto {
   @IsString()
   verticalCode: string;
 
+  @IsOptional()
+  @IsObject()
   profileFields?: Record<string, unknown>;
 }
