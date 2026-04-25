@@ -27,8 +27,8 @@ function AuthLayoutInner({ children }: { children: React.ReactNode }) {
     setPeriod(getTimePeriod());
   }, []);
 
-  // Brand-specific pages render fullscreen — skip the glass card wrapper
-  if (brandCode) {
+  // Brand-specific pages and generic register render fullscreen — skip the glass card wrapper
+  if (brandCode || isRegister) {
     return <>{children}</>;
   }
 
