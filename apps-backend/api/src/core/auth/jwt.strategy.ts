@@ -16,9 +16,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: {
     sub: string; email: string; role: string; userType: string;
-    tenantId?: string; isSuperAdmin?: boolean;
+    tenantId?: string; companyId?: string | null; isSharedTenant?: boolean; isSuperAdmin?: boolean;
   }) {
-    // Super admin � no User DB lookup needed
+    // Super admin — no User DB lookup needed
     if (payload.isSuperAdmin) {
       return {
         id: payload.sub,
@@ -26,11 +26,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         role: payload.role ?? 'PLATFORM_ADMIN',
         userType: payload.userType ?? 'SUPER_ADMIN',
         tenantId: payload.tenantId,
+        companyId: payload.companyId ?? null,
+        isSharedTenant: payload.isSharedTenant ?? false,
         isSuperAdmin: true,
       };
     }
 
-    // Vendor � no User DB lookup needed (vendors are in marketplaceVendor table)
+    // Vendor — no User DB lookup needed (vendors are in marketplaceVendor table)
     if ((payload as any).vendorId || payload.userType === 'VENDOR') {
       return {
         id: payload.sub,
@@ -41,9 +43,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       };
     }
 
-    // Regular tenant user � explicit tenantId (interceptor hasn't run yet)
+    // Regular user — match by userId only; tenantId may be empty for CUSTOMER (shared-tenant model)
     const user = await this.prisma.identity.user.findFirst({
-      where: { id: payload.sub, tenantId: payload.tenantId },
+      where: { id: payload.sub },
       select: {
         id: true, email: true, firstName: true, lastName: true,
         status: true, userType: true, tenantId: true,
@@ -57,7 +59,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('User not found or inactive');
     }
 
-    // Lookup tenant's industry code for cross-cutting filters
+    // Lookup tenant's industry code for cross-cutting filters (skip for shared/empty tenants)
     let businessTypeCode: string | undefined;
     if (user.tenantId) {
       const tenant = await this.prisma.identity.tenant.findUnique({
@@ -79,6 +81,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       departmentId: user.departmentId,
       departmentPath: user.department?.path,
       tenantId: user.tenantId,
+      // Person-centric fields (PR #44) — passed through from JWT
+      companyId: payload.companyId ?? null,
+      isSharedTenant: payload.isSharedTenant ?? !user.tenantId,
       businessTypeCode,
     };
   }

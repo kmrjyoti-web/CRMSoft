@@ -269,4 +269,13 @@ export class CrossDbResolverService {
       where: { isDefault: true },
     });
   }
+
+  // Backward-compat: resolve companyId → tenantId for TenantGuard resolution chain.
+  // Company model does not carry a tenantId field yet (roadmap post-WAR#18).
+  // Returns null until Company → Tenant mapping is established.
+  async resolveCompanyToTenant(
+    companyId: string,
+  ): Promise<{ companyId: string; tenantId: string } | null> {
+    return null;
+  }
 }
