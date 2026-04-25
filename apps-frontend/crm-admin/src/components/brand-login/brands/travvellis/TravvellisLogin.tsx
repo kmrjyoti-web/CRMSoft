@@ -14,6 +14,8 @@ import { NightScene } from './scenes/NightScene';
 import styles from './travvellis.module.css';
 import { authService } from '@/features/auth/services/auth.service';
 import { useBrandContext } from '@/hooks/auth/useBrandContext';
+import { useAuthStore } from '@/stores/auth.store';
+import { useRouter } from 'next/navigation';
 
 interface Props {
   brandName?: string;
@@ -22,6 +24,8 @@ interface Props {
 
 export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }: Props) {
   const { buildBrandUrl } = useBrandContext();
+  const router = useRouter();
+  const { setActiveCompany, setAvailableCompanies } = useAuthStore();
 
   // Form state (only React state needed — low frequency)
   const [email, setEmail] = useState('');
@@ -162,7 +166,21 @@ export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }:
     setError('');
     setIsLoading(true);
     try {
-      await authService.login({ email, password });
+      const loginData = await authService.login({ email, password });
+      const companies = (loginData as any).companies ?? [];
+      setAvailableCompanies(companies);
+
+      if ((loginData as any).requiresCompanySelection && companies.length > 1) {
+        sessionStorage.setItem('selector-token', loginData.accessToken);
+        sessionStorage.setItem('selector-companies', JSON.stringify(companies));
+        router.push('/select-company?brand=travvellis');
+        return;
+      }
+
+      const activeId = (loginData as any).activeCompanyId;
+      const activeCompany = companies.find((c: any) => c.id === activeId) ?? companies[0] ?? null;
+      if (activeCompany) setActiveCompany(activeCompany);
+
       onSuccess?.();
     } catch {
       setError('Invalid credentials. Please try again.');

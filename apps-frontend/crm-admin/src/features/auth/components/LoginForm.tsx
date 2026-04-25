@@ -13,6 +13,7 @@ import { z } from "zod";
 import { Input, Button, Checkbox, Typography, Icon } from "@/components/ui";
 
 import { authService } from "@/features/auth/services/auth.service";
+import { useAuthStore } from "@/stores/auth.store";
 
 // ── Validation Schema ────────────────────────────────────
 
@@ -34,6 +35,8 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/dashboard";
+  const brandFromUrl = searchParams.get("brand");
+  const { setActiveCompany, setAvailableCompanies } = useAuthStore();
 
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -54,9 +57,27 @@ export function LoginForm() {
   const onSubmit = async (values: LoginFormValues) => {
     setServerError(null);
     try {
-      await authService.login(
+      const loginData = await authService.login(
         { email: values.email, password: values.password },
       );
+
+      // Store available companies for switcher
+      const companies = (loginData as any).companies ?? [];
+      setAvailableCompanies(companies);
+
+      // Multi-company: send to selector
+      if ((loginData as any).requiresCompanySelection && companies.length > 1) {
+        sessionStorage.setItem("selector-token", loginData.accessToken);
+        sessionStorage.setItem("selector-companies", JSON.stringify(companies));
+        router.push(brandFromUrl ? `/select-company?brand=${brandFromUrl}` : "/select-company");
+        return;
+      }
+
+      // Single company or no company — set active + redirect
+      const activeId = (loginData as any).activeCompanyId;
+      const activeCompany = companies.find((c: any) => c.id === activeId) ?? companies[0] ?? null;
+      if (activeCompany) setActiveCompany(activeCompany);
+
       toast.success("Welcome back!");
       router.push(redirectTo);
     } catch (err: unknown) {

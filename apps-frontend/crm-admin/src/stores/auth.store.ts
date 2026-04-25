@@ -10,6 +10,15 @@ export type { User, LoginResponse };
 
 // ── Store ───────────────────────────────────────────────
 
+export interface ActiveCompany {
+  id: string;
+  name: string;
+  brandCode: string | null;
+  verticalCode: string | null;
+  role: string;
+  isDefault: boolean;
+}
+
 export interface AuthState {
   token: string | null;
   refreshToken: string | null;
@@ -23,12 +32,18 @@ export interface AuthState {
   onboardingStep: string | null;
   terminology: Record<string, any> | null;
   industryCode: string | null;
+  // Person-centric multi-brand fields (PR #50)
+  activeCompany: ActiveCompany | null;
+  activeCompanyBrandCode: string | null;
+  availableCompanies: ActiveCompany[];
 
   setAuth: (res: Partial<LoginResponse> & { accessToken: string; tenant?: { name?: string; onboardingStep?: string; industryCode?: string } }) => void;
   clearAuth: () => void;
   setUser: (user: User) => void;
   setOnboardingStep: (step: string) => void;
   setTerminology: (t: Record<string, any>) => void;
+  setActiveCompany: (company: ActiveCompany | null) => void;
+  setAvailableCompanies: (companies: ActiveCompany[]) => void;
 }
 
 const INITIAL_STATE = {
@@ -44,6 +59,9 @@ const INITIAL_STATE = {
   onboardingStep: null as string | null,
   terminology: null as Record<string, any> | null,
   industryCode: null as string | null,
+  activeCompany: null as ActiveCompany | null,
+  activeCompanyBrandCode: null as string | null,
+  availableCompanies: [] as ActiveCompany[],
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -87,6 +105,13 @@ export const useAuthStore = create<AuthState>()(
       setOnboardingStep: (step) => set({ onboardingStep: step }),
 
       setTerminology: (t) => set({ terminology: t }),
+
+      setActiveCompany: (company) => set({
+        activeCompany: company,
+        activeCompanyBrandCode: company?.brandCode ?? null,
+      }),
+
+      setAvailableCompanies: (companies) => set({ availableCompanies: companies }),
     }),
     { name: "crm-auth" },
   ),
