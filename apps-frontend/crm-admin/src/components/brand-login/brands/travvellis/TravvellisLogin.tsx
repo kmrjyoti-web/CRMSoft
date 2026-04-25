@@ -175,8 +175,7 @@ export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }:
       if (activeCompany) setActiveCompany(activeCompany);
 
       onSuccess?.();
-      // Always land on self-care panel after login
-      router.push('/self-care');
+      router.push('/dashboard');
     } catch {
       setError('Invalid credentials. Please try again.');
     } finally {

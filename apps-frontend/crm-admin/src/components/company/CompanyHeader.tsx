@@ -96,9 +96,9 @@ export function CompanyHeader() {
         {/* Brand name + back */}
         <div className="flex items-center gap-3">
           <button
-            onClick={() => router.push("/self-care")}
+            onClick={() => router.push("/dashboard")}
             className="p-1.5 rounded hover:bg-white/5 transition-colors"
-            title="All workspaces"
+            title="Dashboard"
           >
             <Home className="h-4 w-4" style={{ color: theme.text, opacity: 0.5 }} />
           </button>
@@ -173,12 +173,12 @@ export function CompanyHeader() {
                 <button
                   onClick={() => {
                     setOpen(false);
-                    router.push("/self-care");
+                    router.push("/dashboard");
                   }}
                   className="w-full px-3 py-2.5 flex items-center gap-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
                 >
                   <Home className="h-3.5 w-3.5" />
-                  All workspaces
+                  Dashboard
                 </button>
                 <button
                   onClick={handleLogout}

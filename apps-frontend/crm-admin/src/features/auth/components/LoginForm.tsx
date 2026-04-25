@@ -68,9 +68,8 @@ export function LoginForm() {
       const activeCompany = companies.find((c: any) => c.id === activeId) ?? companies[0] ?? null;
       if (activeCompany) setActiveCompany(activeCompany);
 
-      // Always land on self-care panel (LinkedIn-style) — user picks workspace there
       toast.success("Welcome back!");
-      router.push("/self-care");
+      router.push("/dashboard");
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data

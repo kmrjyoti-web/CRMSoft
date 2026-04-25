@@ -6,10 +6,12 @@ import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { ProfileService } from './profile.service';
 import { ApiResponse } from '../../../../common/utils/api-response';
+import { SkipTenantGuard } from '../../../../common/decorators/roles.decorator';
 
 @ApiTags('Personal Profile')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
+@SkipTenantGuard()
 @Controller('profile')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}

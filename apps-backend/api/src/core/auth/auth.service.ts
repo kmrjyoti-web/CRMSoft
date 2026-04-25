@@ -746,16 +746,14 @@ export class AuthService {
     const activeBrandCode = activeCompany?.company?.brandCode ?? null;
     const talentId = (user as any).talentId ?? null;
 
-    // purpose = 'self-care' when no active company (user must pick one)
-    const purpose = companyId ? undefined : 'self-care';
+    const purpose = companyId ? undefined : 'dashboard';
 
     const tokens = await this.generateTokens(
       user.id, user.email, user.role.name, user.userType, user.tenantId, companyId,
       { talentId, brandCode: activeBrandCode, purpose },
     );
 
-    // redirectPath guides the frontend: dashboard if company selected, self-care otherwise
-    const redirectPath = companyId ? '/dashboard' : '/self-care';
+    const redirectPath = '/dashboard';
 
     return {
       user: {

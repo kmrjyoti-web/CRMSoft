@@ -1,0 +1,65 @@
+{
+  "onboarding": {
+    "welcome": "Welcome to CRMSoft",
+    "subtitle": "Set up your account to unlock your workspace",
+    "stages": {
+      "language": "Language",
+      "emailOtp": "Verify email",
+      "mobileOtp": "Verify mobile",
+      "userType": "User type",
+      "verticalProfile": "Profile"
+    },
+    "language": {
+      "title": "Choose your language",
+      "subtitle": "We'll use this throughout your CRMSoft experience.",
+      "continue": "Continue"
+    },
+    "emailOtp": {
+      "title": "Verify your email",
+      "subtitle": "We've sent a 6-digit code to {email}",
+      "codeLabel": "Enter 6-digit code",
+      "verify": "Verify",
+      "resend": "Resend code",
+      "resendIn": "Resend in {seconds}s"
+    },
+    "mobileOtp": {
+      "title": "Verify your mobile",
+      "subtitle": "Optional — required later for SMS notifications",
+      "skipForNow": "Skip for now",
+      "verify": "Verify"
+    },
+    "userType": {
+      "title": "What best describes you?",
+      "subtitle": "This shapes your workspace experience.",
+      "b2b": "Business (B2B)",
+      "b2bDesc": "Sells to other businesses",
+      "b2c": "Business (B2C)",
+      "b2cDesc": "Sells to end consumers",
+      "indSp": "Service Provider",
+      "indSpDesc": "Solo professional offering services",
+      "indEe": "Employee / Job seeker",
+      "indEeDesc": "Looking for opportunities"
+    },
+    "vertical": {
+      "title": "Choose your industry",
+      "software": "Software & IT",
+      "restaurant": "Restaurant & Food",
+      "travel": "Travel & Tourism",
+      "retail": "Retail",
+      "healthcare": "Healthcare",
+      "education": "Education"
+    },
+    "errors": {
+      "otpInvalid": "Invalid code. Please try again.",
+      "otpExpired": "Code expired. Request a new one.",
+      "rateLimited": "Too many attempts. Wait 15 minutes."
+    }
+  },
+  "common": {
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip",
+    "continue": "Continue",
+    "loading": "Loading…"
+  }
+}

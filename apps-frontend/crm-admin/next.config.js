@@ -1,7 +1,10 @@
 const path = require('path');
+const createNextIntlPlugin = require('next-intl/plugin');
+
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
-module.exports = {
+const nextConfig = {
   output: 'standalone',
   // Prevent browser from caching HTML pages so stale chunk URLs never cause 404s
   async headers() {
@@ -50,3 +53,5 @@ module.exports = {
     return config;
   },
 };
+
+module.exports = withNextIntl(nextConfig);

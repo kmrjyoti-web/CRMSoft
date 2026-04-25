@@ -8,7 +8,7 @@ import {
   CustomerRegisterDto, PartnerRegisterDto, TenantRegisterDto,
   VerticalRegisterDto, UniversalLoginDto, SwitchCompanyDto,
 } from './dto/auth.dto';
-import { Public, Roles } from '../../common/decorators/roles.decorator';
+import { Public, Roles, SkipTenantGuard } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -110,6 +110,7 @@ export class AuthController {
 
   @Post('switch-company')
   @UseGuards(JwtAuthGuard)
+  @SkipTenantGuard()
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Switch active company context (re-issues JWT with new companyId)' })
@@ -122,6 +123,7 @@ export class AuthController {
 
   @Post('select-company')
   @UseGuards(JwtAuthGuard)
+  @SkipTenantGuard()
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Initial company selection after multi-company login (re-issues JWT)' })
@@ -134,6 +136,7 @@ export class AuthController {
 
   @Get('me/companies')
   @UseGuards(JwtAuthGuard)
+  @SkipTenantGuard()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List all companies the authenticated user belongs to' })
   async getMyCompanies(@CurrentUser('id') userId: string) {

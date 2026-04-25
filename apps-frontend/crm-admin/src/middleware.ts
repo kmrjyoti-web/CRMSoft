@@ -20,9 +20,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Authenticated user on a public route → redirect to self-care panel
+  // Authenticated user on a public route → redirect to dashboard
   if (token && isPublicPath) {
-    return NextResponse.redirect(new URL("/self-care", request.url));
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();

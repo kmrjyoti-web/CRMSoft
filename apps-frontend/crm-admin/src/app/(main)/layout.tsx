@@ -36,6 +36,7 @@ import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { useControlRoomSync } from "@/hooks/useControlRoomSync";
 import { CRMHeader } from "./_components/CRMHeader";
 import { CRMSidebar } from "./_components/CRMSidebar";
+import { OnboardingDialog } from "@/features/user-onboarding/OnboardingDialog";
 import { PujaOverlay } from "@/features/puja/components/PujaOverlay";
 import { pujaService } from "@/features/puja/services/puja.service";
 import { PUJA_SESSION_KEY } from "@/features/puja/types/puja.types";
@@ -303,6 +304,9 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
 
       {/* AI Chat Widget (floats over content) */}
       <AiChatWidget />
+
+      {/* User onboarding wall — auto-shows when user.onboardingComplete is false */}
+      <OnboardingDialog />
 
       {/* Puja / Prayer Overlay — shown once per day when religious mode is enabled */}
       {pujaConfig && (

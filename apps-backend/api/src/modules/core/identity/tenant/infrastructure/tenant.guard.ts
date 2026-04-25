@@ -4,7 +4,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { CrossDbResolverService } from '../../../../../core/prisma/cross-db-resolver.service';
-import { IS_PUBLIC_KEY } from '../../../../../common/decorators/roles.decorator';
+import { IS_PUBLIC_KEY, SKIP_TENANT_GUARD_KEY } from '../../../../../common/decorators/roles.decorator';
 import { IS_SUPER_ADMIN_ROUTE } from './decorators/super-admin-route.decorator';
 
 @Injectable()
@@ -31,6 +31,13 @@ export class TenantGuard implements CanActivate {
       context.getClass(),
     ]);
     if (isSuperAdminRoute) return true;
+
+    // Skip for auth-context routes (JWT still required, but no tenant yet — e.g. /auth/me/companies)
+    const skipTenantGuard = this.reflector.getAllAndOverride<boolean>(SKIP_TENANT_GUARD_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (skipTenantGuard) return true;
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;

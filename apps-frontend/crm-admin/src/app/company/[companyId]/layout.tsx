@@ -12,9 +12,8 @@ export default function CompanyLayout({ children }: { children: ReactNode }) {
   const activeCompany = useAuthStore((s) => s.activeCompany);
 
   useEffect(() => {
-    // If no active company, or URL company doesn't match store, send back to self-care
     if (!activeCompany || activeCompany.id !== params.companyId) {
-      router.replace("/self-care");
+      router.replace("/dashboard");
     }
   }, [activeCompany, params.companyId, router]);
 

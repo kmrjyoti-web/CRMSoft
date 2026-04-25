@@ -135,6 +135,13 @@ model User {
   updatedById   String?   @map("updated_by_id")
   updatedByName String?   @map("updated_by_name")
 
+  // ─── ONBOARDING STATE ───
+  onboardingComplete Boolean   @default(false) @map("onboarding_complete")
+  onboardingStage    String?   @default("language") @map("onboarding_stage")
+  // Values: "language" | "email_otp" | "mobile_otp" | "user_type" | "vertical_profile" | "complete"
+  preferredLocale    String    @default("en") @map("preferred_locale")
+  // Values: "en" | "hi" | "mr"
+
   // ─── REGISTRATION / VERTICAL IDENTITY ───
   categoryCode       String?   @map("category_code")       // COMPANY_B2B | CUSTOMER | ...
   subcategoryCode    String?   @map("subcategory_code")    // DMC_PROVIDER | TRAVELER | ...

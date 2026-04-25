@@ -119,6 +119,15 @@ api.interceptors.response.use(
 
     // ── 401 Unauthorized → try refresh → fail → logout ──
     if (status === 401 && !originalRequest._retry) {
+      // Auth endpoints (login, refresh) don't have an active session — skip the
+      // refresh/redirect dance so the caller's catch block handles the error directly.
+      const isAuthEndpoint =
+        originalRequest.url?.includes("/auth/login") ||
+        originalRequest.url?.includes("/auth/refresh");
+      if (isAuthEndpoint) {
+        return Promise.reject(error);
+      }
+
       const { refreshToken, setAuth, clearAuth } = useAuthStore.getState();
 
       // No refresh token → clear auth immediately
