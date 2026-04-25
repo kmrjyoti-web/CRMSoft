@@ -110,6 +110,25 @@ export class OtpService {
   async verifyOtp(params: VerifyOtpParams): Promise<{ success: boolean; message: string }> {
     const { target, purpose, otp } = params;
 
+    // Dev master OTP bypass — never active in production
+    const masterOtp = this.config.get<string>('DEV_OTP_MASTER');
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      masterOtp &&
+      otp === masterOtp
+    ) {
+      this.logger.warn(`[DEV] Master OTP used for ${this.maskTarget(target)}`);
+      // Mark any pending OTP as verified so state is consistent
+      await this.prisma.verificationOtp.updateMany({
+        where: { target, purpose, status: 'OTP_PENDING' },
+        data: { status: 'OTP_VERIFIED', verifiedAt: new Date() },
+      });
+      return {
+        success: true,
+        message: `${params.targetType === 'EMAIL' ? 'Email' : 'Mobile'} verified successfully`,
+      };
+    }
+
     // Find pending OTP
     const otpRecord = await this.prisma.verificationOtp.findFirst({
       where: {
