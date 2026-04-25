@@ -59,8 +59,10 @@ export class OnboardingService {
   }
 
   private computeNextStage(user: any): OnboardingStage {
-    // Language: skip if locale already set (e.g. from registration)
-    if (!user.preferredLocale) return 'language';
+    // Language: show if onboarding hasn't started (stage null or default 'language').
+    // Do NOT use preferredLocale — it defaults to 'en' for all new users in the DB.
+    const notStarted = !user.onboardingStage || user.onboardingStage === 'language';
+    if (notStarted) return 'language';
 
     // Email OTP: always required
     if (!user.emailVerified) return 'email_otp';

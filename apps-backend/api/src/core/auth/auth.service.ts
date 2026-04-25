@@ -289,8 +289,6 @@ export class AuthService {
         registrationFields: (data.registrationFields ?? {}) as any,
         registrationStatus: requiresApproval ? 'PENDING' : 'ACTIVE',
         talentId: userTalentId,
-        preferredLocale: 'en',
-        onboardingStage: 'email_otp',
       } as any,
       include: { role: true },
     });
@@ -307,7 +305,7 @@ export class AuthService {
 
     if (!requiresApproval) {
       const companyId = companyResult?.company?.id;
-      const tokens = await this.generateTokens(user.id, user.email, role.name, user.userType, user.tenantId, companyId);
+      const tokens = await this.generateTokens(user.id, user.email, role.name, user.userType, user.tenantId, companyId, { companyRole: 'OWNER' });
       return {
         user: this.mapUserResponse(user),
         requiresApproval: false,
@@ -746,13 +744,14 @@ export class AuthService {
 
     const activeCompany = companies.find((m: any) => m.company.id === companyId);
     const activeBrandCode = activeCompany?.company?.brandCode ?? null;
+    const activeCompanyRole = activeCompany?.role ?? null;
     const talentId = (user as any).talentId ?? null;
 
     const purpose = companyId ? undefined : 'dashboard';
 
     const tokens = await this.generateTokens(
       user.id, user.email, user.role.name, user.userType, user.tenantId, companyId,
-      { talentId, brandCode: activeBrandCode, purpose },
+      { talentId, brandCode: activeBrandCode, purpose, companyRole: activeCompanyRole },
     );
 
     const redirectPath = '/dashboard';
@@ -823,11 +822,12 @@ export class AuthService {
       include: { company: true },
     });
     const brandCode = mapping?.company?.brandCode ?? null;
+    const mappingRole = mapping?.role ?? null;
     const talentId = (user as any).talentId ?? null;
 
     const tokens = await this.generateTokens(
       user.id, user.email, user.role.name, user.userType, user.tenantId, companyId,
-      { talentId, brandCode },
+      { talentId, brandCode, companyRole: mappingRole },
     );
     return { activeCompanyId: companyId, activeCompanyBrandCode: brandCode, ...tokens };
   }
@@ -835,7 +835,7 @@ export class AuthService {
   private async generateTokens(
     id: string, email: string, role: string, userType: string, tenantId: string,
     companyId?: string,
-    opts?: { talentId?: string | null; brandCode?: string | null; purpose?: string },
+    opts?: { talentId?: string | null; brandCode?: string | null; purpose?: string; companyRole?: string | null },
   ) {
     // Backward-compat: CUSTOMER/TRAVELER users have tenantId='' in DB (no dedicated tenant yet).
     // Fall back to DEFAULT_TENANT_ID so legacy endpoints don't see an empty tenantId.
@@ -855,6 +855,7 @@ export class AuthService {
       ...(opts?.talentId && { talentId: opts.talentId }),
       ...(opts?.brandCode && { brandCode: opts.brandCode }),
       ...(opts?.purpose && { purpose: opts.purpose }),
+      ...(opts?.companyRole && { companyRole: opts.companyRole }),
       ...(isSuperAdmin && { isSuperAdmin: true }),
     };
     const [accessToken, refreshToken] = await Promise.all([

@@ -45,6 +45,11 @@ export class PermissionPolicyGuard implements CanActivate {
     // Super admin bypasses all permission checks
     if (user.isSuperAdmin) return true;
 
+    // TODO post-demo: remove once PermissionChain evaluates company role from JWT.
+    // Company owners need ADMIN-level access; identity role is CUSTOMER until
+    // the permission chain is updated to consider companyRole.
+    if (user.companyRole === 'OWNER') return true;
+
     // Get ownership metadata
     const ownershipMeta = this.reflector.get<{ resourceType: string; paramName: string }>(
       OWNERSHIP_KEY, context.getHandler(),
