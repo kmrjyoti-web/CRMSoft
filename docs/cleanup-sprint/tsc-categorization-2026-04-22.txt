@@ -1,0 +1,32 @@
+=== Top modules by error count ===
+  44 features/settings
+  34 features/whatsapp
+  21 features/contacts
+  19 features/leads
+  14 features/vendor
+  11 features/customer-portal
+  10 features/email
+   9 features/wallet
+   9 features/procurement
+   9 features/campaigns
+   8 features/quotations
+   8 features/product-pricing
+   7 features/reports
+   7 features/raw-contacts
+   7 features/bulk-import
+
+=== Top error codes ===
+ 117 error TS2322
+ 110 error TS7006
+  32 error TS2345
+  20 error TS2339
+  16 error TS7053
+   9 error TS2353
+   6 error TS18048
+   5 error TS2551
+   4 error TS2554
+   4 error TS2307
+
+=== Cannot find module ===
+   3 @shared-types
+   1 @/features/api-gateway/components/ApiKeyList

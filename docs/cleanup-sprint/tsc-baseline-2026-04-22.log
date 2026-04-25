@@ -1,0 +1,487 @@
+lib/coreui/packages/ui-react/src/components/AICDatePicker/AICDatePicker.tsx(185,7): error TS2345: Argument of type 'string | false | 0 | 0n | null | undefined' is not assignable to parameter of type 'ClassValue'.
+  Type '0n' is not assignable to type 'ClassValue'.
+lib/coreui/packages/ui-react/src/components/AICDatePicker/AICDatePicker.tsx(197,7): error TS2345: Argument of type 'string | false | 0 | 0n | null | undefined' is not assignable to parameter of type 'ClassValue'.
+  Type '0n' is not assignable to type 'ClassValue'.
+src/app/(main)/api-gateway/keys/page.tsx(3,28): error TS2307: Cannot find module '@/features/api-gateway/components/ApiKeyList' or its corresponding type declarations.
+src/features/accounts/components/TDSList.tsx(218,48): error TS2352: Conversion of type 'FilterValues' to type 'Record<string, string>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  'string' index signatures are incompatible.
+    Type 'FilterValue' is not comparable to type 'string'.
+      Type '{ type: "boolean"; value: boolean; }' is not comparable to type 'string'.
+src/features/accounts/components/TDSList.tsx(258,51): error TS2345: Argument of type 'string | Date' is not assignable to parameter of type 'SetStateAction<string>'.
+  Type 'Date' is not assignable to type 'SetStateAction<string>'.
+src/features/activities/components/ActivityDetail.tsx(147,27): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<ActivityType, string>'.
+src/features/amc-warranty/components/WarrantyForm.tsx(230,15): error TS2322: Type 'boolean' is not assignable to type 'string'.
+src/features/api-gateway/components/ApiUsageDashboard.tsx(315,27): error TS2345: Argument of type 'string | Date | null' is not assignable to parameter of type 'SetStateAction<string>'.
+  Type 'null' is not assignable to type 'SetStateAction<string>'.
+src/features/api-gateway/components/ApiUsageDashboard.tsx(323,25): error TS2345: Argument of type 'string | Date | null' is not assignable to parameter of type 'SetStateAction<string>'.
+  Type 'null' is not assignable to type 'SetStateAction<string>'.
+src/features/api-gateway/components/WebhookList.tsx(410,33): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | Date'.
+  Type 'undefined' is not assignable to type 'string | Date'.
+src/features/approvals/components/ApprovalDetail.tsx(374,44): error TS2322: Type '{ name: any; size: number; style: { color: string; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/approvals/components/ApprovalInbox.tsx(232,42): error TS2322: Type '{ name: string; size: number; style: { color: string; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/approvals/components/ApprovalRuleList.tsx(122,42): error TS2322: Type '{ name: string; size: number; style: { color: string; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/approvals/components/ApprovalRuleList.tsx(225,60): error TS2322: Type '{ name: string; size: number; style: { color: string; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/approvals/components/WorkflowApprovalInbox.tsx(197,42): error TS2322: Type '{ name: string; size: number; style: { color: string; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/approvals/components/WorkflowApprovalInbox.tsx(261,60): error TS2322: Type '{ name: string; size: number; style: { color: string; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/audit-logs/components/AuditLogList.tsx(178,13): error TS2322: Type '"date"' is not assignable to type 'InputType | undefined'.
+src/features/audit-logs/components/AuditLogList.tsx(187,13): error TS2322: Type '"date"' is not assignable to type 'InputType | undefined'.
+src/features/bulk-import/components/ImportStepMapping.tsx(139,36): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/features/bulk-import/components/ImportStepMapping.tsx(206,32): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/features/bulk-import/components/ImportStepValidation.tsx(253,31): error TS18048: 'row.validationErrors.length' is possibly 'undefined'.
+src/features/bulk-import/components/ImportStepValidation.tsx(283,28): error TS18048: 'row.validationErrors' is possibly 'undefined'.
+src/features/bulk-import/components/ImportStepValidation.tsx(284,28): error TS18048: 'row.validationErrors' is possibly 'undefined'.
+src/features/bulk-import/components/ImportStepValidation.tsx(284,68): error TS18048: 'row.validationErrors' is possibly 'undefined'.
+src/features/bulk-import/components/ImportStepValidation.tsx(355,26): error TS18048: 'row.validationErrors' is possibly 'undefined'.
+src/features/business-locations/components/CompanyLocationsTree.tsx(134,44): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/features/business-locations/components/CompanyLocationsTree.tsx(180,44): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/features/business-locations/components/CompanyLocationsTree.tsx(223,24): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/features/business-locations/components/CompanyLocationsTree.tsx(251,37): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/features/business-locations/components/CompanyLocationsTree.tsx(317,44): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/features/business-locations/components/CompanyLocationsTree.tsx(369,24): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/features/calendar/components/EventDetail.tsx(228,33): error TS7006: Parameter 'att' implicitly has an 'any' type.
+src/features/calendar/components/EventDetail.tsx(228,38): error TS7006: Parameter 'idx' implicitly has an 'any' type.
+src/features/calendar/components/EventDetail.tsx(258,33): error TS7006: Parameter 'rem' implicitly has an 'any' type.
+src/features/calendar/components/EventDetail.tsx(258,38): error TS7006: Parameter 'idx' implicitly has an 'any' type.
+src/features/calendar/components/EventForm.tsx(189,12): error TS2322: Type '{ children: Element; visible: boolean; onClose: () => void; size: "lg"; }' is not assignable to type 'IntrinsicAttributes & ModalProps'.
+  Property 'visible' does not exist on type 'IntrinsicAttributes & ModalProps'.
+src/features/campaigns/components/CampaignAnalytics.tsx(229,46): error TS2322: Type '{ name: any; size: number; style: { color: string; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/campaigns/components/CampaignAnalytics.tsx(279,44): error TS2322: Type '{ name: any; size: number; style: { color: string; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/campaigns/components/CampaignDetail.tsx(277,74): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | Date'.
+  Type 'undefined' is not assignable to type 'string | Date'.
+src/features/campaigns/components/CampaignDetail.tsx(368,42): error TS2322: Type '{ name: any; size: number; style: { color: string; marginTop: number; flexShrink: number; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/campaigns/components/CampaignList.tsx(129,39): error TS2322: Type '{ name: string; size: number; style: { color: string; marginBottom: number; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/campaigns/components/RecipientManager.tsx(137,40): error TS2322: Type '{ name: string; size: number; style: { color: string; marginBottom: number; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/campaigns/components/RecipientManager.tsx(175,51): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | Date'.
+  Type 'undefined' is not assignable to type 'string | Date'.
+src/features/campaigns/components/RecipientManager.tsx(176,51): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | Date'.
+  Type 'undefined' is not assignable to type 'string | Date'.
+src/features/campaigns/components/RecipientManager.tsx(177,51): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | Date'.
+  Type 'undefined' is not assignable to type 'string | Date'.
+src/features/communication/components/TemplateDetail.tsx(130,45): error TS7006: Parameter 'v' implicitly has an 'any' type.
+src/features/contacts/components/ContactDashboard.tsx(61,8): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/features/contacts/components/ContactDashboard.tsx(63,36): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/features/contacts/components/ContactDashboard.tsx(68,8): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/features/contacts/components/ContactDashboard.tsx(71,8): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/features/contacts/components/ContactDashboard.tsx(74,8): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/features/contacts/components/ContactDashboard.tsx(193,60): error TS7006: Parameter 'comm' implicitly has an 'any' type.
+src/features/contacts/components/ContactDashboard.tsx(204,31): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<CommunicationType, string>'.
+src/features/contacts/components/ContactDashboard.tsx(246,37): error TS7006: Parameter 'lead' implicitly has an 'any' type.
+src/features/contacts/components/ContactDashboard.tsx(298,52): error TS7006: Parameter 'co' implicitly has an 'any' type.
+src/features/contacts/components/ContactDashboard.tsx(351,46): error TS7006: Parameter 'comm' implicitly has an 'any' type.
+src/features/contacts/components/ContactDashboard.tsx(362,29): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<CommunicationType, string>'.
+src/features/contacts/components/ContactDetail.tsx(209,46): error TS7006: Parameter 'comm' implicitly has an 'any' type.
+src/features/contacts/components/ContactDetail.tsx(233,52): error TS7006: Parameter 'co' implicitly has an 'any' type.
+src/features/contacts/components/ContactDetail.tsx(299,39): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/features/contacts/components/ContactDetail.tsx(315,49): error TS7006: Parameter 'lead' implicitly has an 'any' type.
+src/features/contacts/components/ContactForm.tsx(106,8): error TS7006: Parameter 'comm' implicitly has an 'any' type.
+src/features/contacts/components/ContactForm.tsx(107,41): error TS7006: Parameter 'comm' implicitly has an 'any' type.
+src/features/contacts/components/ContactForm.tsx(109,8): error TS7006: Parameter 'comm' implicitly has an 'any' type.
+src/features/contacts/components/ContactForm.tsx(111,8): error TS7006: Parameter 'comm' implicitly has an 'any' type.
+src/features/contacts/components/ContactForm.tsx(114,8): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/features/contacts/components/ContactForm.tsx(117,8): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/features/custom-fields/components/FieldPreview.tsx(124,13): error TS2322: Type '{ label: string; value: null; readOnly: true; }' is not assignable to type 'IntrinsicAttributes & AICDatePickerProps'.
+  Property 'readOnly' does not exist on type 'IntrinsicAttributes & AICDatePickerProps'.
+src/features/custom-fields/components/FieldPreview.tsx(142,13): error TS2322: Type '{ label: string; options: { label: string; value: string; }[]; value: null; placeholder: string; leftIcon: Element; readOnly: true; }' is not assignable to type 'IntrinsicAttributes & AutocompleteProps & RefAttributes<HTMLDivElement>'.
+  Property 'readOnly' does not exist on type 'IntrinsicAttributes & AutocompleteProps & RefAttributes<HTMLDivElement>'.
+src/features/custom-fields/components/FieldPreview.tsx(154,13): error TS2322: Type '{ label: string; options: { label: string; value: string; }[]; value: null; placeholder: string; leftIcon: Element; readOnly: true; }' is not assignable to type 'IntrinsicAttributes & AutocompleteProps & RefAttributes<HTMLDivElement>'.
+  Property 'readOnly' does not exist on type 'IntrinsicAttributes & AutocompleteProps & RefAttributes<HTMLDivElement>'.
+src/features/customer-portal/components/CustomerPortalDashboard.tsx(145,58): error TS7006: Parameter 'log' implicitly has an 'any' type.
+src/features/customer-portal/components/MenuCategories.tsx(46,38): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/features/customer-portal/components/MenuCategories.tsx(146,32): error TS7006: Parameter 'cat' implicitly has an 'any' type.
+src/features/customer-portal/components/PortalUsers.tsx(35,34): error TS7006: Parameter 'u' implicitly has an 'any' type.
+src/features/customer-portal/components/PortalUsers.tsx(85,45): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/features/customer-portal/components/PortalUsers.tsx(115,95): error TS7006: Parameter 'u' implicitly has an 'any' type.
+src/features/customer-portal/components/PortalUsers.tsx(115,150): error TS7006: Parameter 'u' implicitly has an 'any' type.
+src/features/customer-portal/components/PortalUsers.tsx(161,30): error TS7006: Parameter 'user' implicitly has an 'any' type.
+src/features/customer-portal/components/PortalUsers.tsx(162,46): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/features/customer-portal/components/PortalUsers.tsx(264,34): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/features/customer-portal/types/customer-portal.types.ts(13,8): error TS2307: Cannot find module '@shared-types' or its corresponding type declarations.
+src/features/dashboard/components/ReportViewer.tsx(145,42): error TS2345: Argument of type 'string | Date | null' is not assignable to parameter of type 'SetStateAction<string>'.
+  Type 'null' is not assignable to type 'SetStateAction<string>'.
+src/features/dashboard/components/ReportViewer.tsx(150,40): error TS2345: Argument of type 'string | Date | null' is not assignable to parameter of type 'SetStateAction<string>'.
+  Type 'null' is not assignable to type 'SetStateAction<string>'.
+src/features/demos/components/DemoDetail.tsx(230,29): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<DemoResult, "secondary" | "success" | "warning" | "danger">'.
+src/features/demos/components/DemoDetail.tsx(377,37): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<DemoResult, "secondary" | "success" | "warning" | "danger">'.
+src/features/discount-master/components/AgencyDiscountForm.tsx(21,31): error TS2353: Object literal may only specify known properties, and 'invalid_type_error' does not exist in type '{ error?: string | $ZodErrorMap<$ZodIssueInvalidType<unknown>> | undefined; message?: string | undefined; }'.
+src/features/document-templates/components/PrintSelector.tsx(45,9): error TS2353: Object literal may only specify known properties, and 'sampleData' does not exist in type 'PreviewPayload'.
+src/features/document-templates/components/PrintSelector.tsx(86,9): error TS2353: Object literal may only specify known properties, and 'sampleData' does not exist in type 'PreviewPayload'.
+src/features/documents/components/DocumentForm.tsx(106,9): error TS2322: Type '{ label: string; tags: string[]; onChange: Dispatch<SetStateAction<string[]>>; }' is not assignable to type 'IntrinsicAttributes & Omit<TagsInputProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement>'.
+  Property 'tags' does not exist on type 'IntrinsicAttributes & Omit<TagsInputProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement>'.
+src/features/documents/components/DocumentList.tsx(53,60): error TS2345: Argument of type '{ entityKey: string; entityLabel: string; FormComponent: (props: any) => JSX.Element; idProp: string; displayField: string; }' is not assignable to parameter of type 'EntityPanelConfig'.
+  Type '{ entityKey: string; entityLabel: string; FormComponent: (props: any) => Element; idProp: string; displayField: string; }' is missing the following properties from type 'EntityPanelConfig': editRoute, createRoute
+src/features/documents/components/FolderTree.tsx(22,92): error TS2345: Argument of type '{ entityKey: string; entityLabel: string; FormComponent: ({ folderId, initialData, onClose }: FolderFormProps) => JSX.Element; idProp: string; displayField: string; }' is not assignable to parameter of type 'EntityPanelConfig'.
+  Type '{ entityKey: string; entityLabel: string; FormComponent: ({ folderId, initialData, onClose }: FolderFormProps) => Element; idProp: string; displayField: string; }' is missing the following properties from type 'EntityPanelConfig': editRoute, createRoute
+src/features/documents/components/ShareLinkForm.tsx(71,54): error TS2551: Property 'toISOString' does not exist on type 'string | Date'. Did you mean 'toString'?
+  Property 'toISOString' does not exist on type 'string'.
+src/features/documents/components/ShareLinkManager.tsx(20,59): error TS2345: Argument of type '{ entityKey: string; entityLabel: string; FormComponent: (props: any) => JSX.Element; idProp: string; displayField: string; }' is not assignable to parameter of type 'EntityPanelConfig'.
+  Type '{ entityKey: string; entityLabel: string; FormComponent: (props: any) => Element; idProp: string; displayField: string; }' is missing the following properties from type 'EntityPanelConfig': editRoute, createRoute
+src/features/email/components/EmailComposer.tsx(361,42): error TS2322: Type '{ name: string; size: number; style: { color: string; flexShrink: number; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/email/components/EmailComposer.tsx(535,49): error TS2345: Argument of type 'string | Date | null' is not assignable to parameter of type 'SetStateAction<Date | null>'.
+  Type 'string' is not assignable to type 'SetStateAction<Date | null>'.
+src/features/email/components/EmailDetail.tsx(108,23): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<EmailStatus, { label: string; variant: "primary" | "secondary" | "success" | "warning" | "danger" | "outline"; }>'.
+src/features/email/components/EmailDetail.tsx(109,42): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<EmailPriority, { label: string; variant: "secondary" | "warning" | "danger" | "outline"; }>'.
+src/features/email/components/EmailDetail.tsx(159,15): error TS2322: Type '{ name: string; size: number; color: string; fill: string; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'fill' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/email/components/EmailDetail.tsx(247,39): error TS7006: Parameter 'att' implicitly has an 'any' type.
+src/features/email/components/EmailDetail.tsx(312,15): error TS2322: Type '{ name: string; size: number; color: string; fill: string; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'fill' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/email/components/EmailDetail.tsx(322,11): error TS2322: Type '{ children: Element; visible: boolean; onClose: () => void; title: string; size: "lg"; }' is not assignable to type 'IntrinsicAttributes & ModalProps'.
+  Property 'visible' does not exist on type 'IntrinsicAttributes & ModalProps'.
+src/features/email/components/EmailItem.tsx(103,11): error TS2322: Type '{ name: string; size: number; color: string; fill: string; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'fill' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/email/components/EmailThreadView.tsx(265,30): error TS7006: Parameter 'email' implicitly has an 'any' type.
+src/features/error-report/ErrorReportDrawer.tsx(71,13): error TS2322: Type '{ children: Element; isOpen: boolean; onClose: () => void; title: string; position: "right"; size: "md"; }' is not assignable to type 'IntrinsicAttributes & DrawerProps & RefAttributes<HTMLDivElement>'.
+  Property 'isOpen' does not exist on type 'IntrinsicAttributes & DrawerProps & RefAttributes<HTMLDivElement>'. Did you mean 'open'?
+src/features/finance/components/InvoiceDetail.tsx(887,48): error TS2345: Argument of type 'string | Date | null' is not assignable to parameter of type 'SetStateAction<string>'.
+  Type 'null' is not assignable to type 'SetStateAction<string>'.
+src/features/finance/components/ProformaDetail.tsx(238,53): error TS2345: Argument of type 'string | null | undefined' is not assignable to parameter of type 'string | Date'.
+  Type 'undefined' is not assignable to type 'string | Date'.
+src/features/finance/components/ProformaDetail.tsx(486,33): error TS2345: Argument of type 'string | null | undefined' is not assignable to parameter of type 'string | Date'.
+  Type 'undefined' is not assignable to type 'string | Date'.
+src/features/finance/components/ProformaLineItemsGrid.tsx(61,51): error TS2344: Type '"lineItems"' does not satisfy the constraint 'never'.
+src/features/follow-ups/components/OverdueWidget.tsx(66,49): error TS2322: Type '{ name: string; size: number; style: { color: string; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/follow-ups/components/SnoozeModal.tsx(124,15): error TS2322: Type '(v: string) => void' is not assignable to type '(date: string | Date | null) => void'.
+  Types of parameters 'v' and 'date' are incompatible.
+    Type 'string | Date | null' is not assignable to type 'string'.
+      Type 'null' is not assignable to type 'string'.
+src/features/leads/components/LeadDashboard.tsx(365,36): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/features/leads/components/LeadDashboard.tsx(605,39): error TS7006: Parameter 'activity' implicitly has an 'any' type.
+src/features/leads/components/LeadDashboard.tsx(663,34): error TS7006: Parameter 'q' implicitly has an 'any' type.
+src/features/leads/components/LeadDashboard.tsx(785,32): error TS7006: Parameter 'inv' implicitly has an 'any' type.
+src/features/leads/components/LeadDashboard.tsx(851,32): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/features/leads/components/LeadDetail.tsx(108,30): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<LeadPriority, "secondary" | "warning" | "danger">'.
+src/features/leads/components/LeadDetail.tsx(210,39): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/features/leads/components/LeadDetail.tsx(237,31): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+src/features/leads/components/LeadDetail.tsx(313,36): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/features/leads/components/LeadForm.tsx(137,17): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<LeadPriority, number>'.
+src/features/leads/components/LeadKanban.tsx(66,11): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<LeadStatus, LeadListItem[]>'.
+src/features/leads/components/LeadKanban.tsx(67,9): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<LeadStatus, LeadListItem[]>'.
+src/features/leads/components/LeadKanban.tsx(81,32): error TS7006: Parameter 'l' implicitly has an 'any' type.
+src/features/leads/components/LeadPipeline.tsx(277,31): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/features/leads/components/LeadPipeline.tsx(310,35): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/features/leads/components/LeadPipeline.tsx(403,31): error TS7006: Parameter 't' implicitly has an 'any' type.
+src/features/leads/components/LeadPipeline.tsx(455,49): error TS7006: Parameter 'tr' implicitly has an 'any' type.
+src/features/leads/components/LeadPipeline.tsx(465,49): error TS7006: Parameter 'tr' implicitly has an 'any' type.
+src/features/leads/components/LeadPipeline.tsx(488,35): error TS7006: Parameter 't' implicitly has an 'any' type.
+src/features/notifications/components/NotificationPreferences.tsx(192,13): error TS2322: Type '"time"' is not assignable to type 'InputType | undefined'.
+src/features/notifications/components/NotificationPreferences.tsx(199,13): error TS2322: Type '"time"' is not assignable to type 'InputType | undefined'.
+src/features/offline-sync/components/SyncDeviceList.tsx(250,35): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | Date'.
+  Type 'undefined' is not assignable to type 'string | Date'.
+src/features/offline-sync/components/SyncDeviceList.tsx(253,35): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | Date'.
+  Type 'undefined' is not assignable to type 'string | Date'.
+src/features/offline-sync/components/SyncPolicyList.tsx(137,41): error TS2345: Argument of type 'string' is not assignable to parameter of type 'SetStateAction<"BIDIRECTIONAL" | "SERVER_TO_CLIENT" | "CLIENT_TO_SERVER">'.
+src/features/offline-sync/components/SyncPolicyList.tsx(144,40): error TS2345: Argument of type 'string' is not assignable to parameter of type 'SetStateAction<"MANUAL" | "SERVER_WINS" | "CLIENT_WINS">'.
+src/features/ops/components/DbMaintenancePage.tsx(155,60): error TS7006: Parameter 't' implicitly has an 'any' type.
+src/features/ops/components/DbMaintenancePage.tsx(192,46): error TS7006: Parameter 'q' implicitly has an 'any' type.
+src/features/ops/components/DbMaintenancePage.tsx(192,49): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/features/ops/components/IndexAnalysisPage.tsx(29,47): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/features/ops/components/IndexAnalysisPage.tsx(29,50): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/features/ops/components/OpsDashboard.tsx(72,47): error TS7006: Parameter 'db' implicitly has an 'any' type.
+src/features/organizations/components/OrganizationDashboard.tsx(235,36): error TS7006: Parameter 'oc' implicitly has an 'any' type.
+src/features/organizations/components/OrganizationDashboard.tsx(298,33): error TS7006: Parameter 'lead' implicitly has an 'any' type.
+src/features/organizations/components/OrganizationDetail.tsx(226,45): error TS7006: Parameter 'co' implicitly has an 'any' type.
+src/features/organizations/components/OrganizationDetail.tsx(259,42): error TS7006: Parameter 'lead' implicitly has an 'any' type.
+src/features/organizations/components/OrganizationDetail.tsx(310,44): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/features/ownership/components/WorkloadDashboard.tsx(268,35): error TS7006: Parameter 'member' implicitly has an 'any' type.
+src/features/performance/components/PerformanceDashboard.tsx(152,53): error TS2322: Type '{ name: "check-circle" | "users" | "indian-rupee" | "activity" | "percent"; size: number; style: { color: string; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/performance/components/TargetForm.tsx(192,11): error TS2322: Type '(v: string) => void' is not assignable to type '(date: string | Date | null) => void'.
+  Types of parameters 'v' and 'date' are incompatible.
+    Type 'string | Date | null' is not assignable to type 'string'.
+      Type 'null' is not assignable to type 'string'.
+src/features/performance/components/TargetForm.tsx(199,11): error TS2322: Type '(v: string) => void' is not assignable to type '(date: string | Date | null) => void'.
+  Types of parameters 'v' and 'date' are incompatible.
+    Type 'string | Date | null' is not assignable to type 'string'.
+      Type 'null' is not assignable to type 'string'.
+src/features/performance/components/TargetList.tsx(186,56): error TS2322: Type '{ name: string; size: number; style: { color: string; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/plugin-store/components/InstalledPlugins.tsx(230,53): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | Date'.
+  Type 'undefined' is not assignable to type 'string | Date'.
+src/features/plugin-store/components/UninstallConfirmDialog.tsx(80,65): error TS2322: Type '{ name: string; size: number; color: string; style: { flexShrink: number; marginTop: number; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/procurement/components/GRNForm.tsx(114,24): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/procurement/components/GRNForm.tsx(207,63): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/procurement/components/GRNForm.tsx(214,69): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/procurement/components/POForm.tsx(145,24): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/procurement/components/PurchaseInvoiceForm.tsx(122,26): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/procurement/components/PurchaseInvoiceForm.tsx(235,69): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/procurement/components/QuotationForm.tsx(124,24): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/procurement/components/RFQForm.tsx(99,24): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/procurement/components/RFQForm.tsx(206,19): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/product-pricing/components/PriceEditor.tsx(79,49): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/features/product-pricing/components/PriceEditor.tsx(93,50): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/features/product-pricing/components/PriceEditor.tsx(106,33): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/features/product-pricing/components/PriceEditor.tsx(116,34): error TS7006: Parameter 'g' implicitly has an 'any' type.
+src/features/product-pricing/components/PriceListPage.tsx(94,33): error TS2322: Type '"date"' is not assignable to type 'InputType | undefined'.
+src/features/product-pricing/components/PriceListPage.tsx(95,31): error TS2322: Type '"date"' is not assignable to type 'InputType | undefined'.
+src/features/product-pricing/components/PriceListPage.tsx(156,9): error TS2322: Type '{ data: { id: string; name: Element; currency: string; products: Element; valid: string; priority: number; status: Element; _raw: PriceListRecord; }[]; ... 8 more ...; onCreate: () => void; }' is not assignable to type 'IntrinsicAttributes & TableFullProps'.
+  Property 'isLoading' does not exist on type 'IntrinsicAttributes & TableFullProps'.
+src/features/product-pricing/components/TierPricingPage.tsx(21,33): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/features/quotation-analytics/components/QuotationAnalyticsDashboard.tsx(82,13): error TS2322: Type '"date"' is not assignable to type 'InputType | undefined'.
+src/features/quotation-analytics/components/QuotationAnalyticsDashboard.tsx(89,13): error TS2322: Type '"date"' is not assignable to type 'InputType | undefined'.
+src/features/quotations/components/QuotationForm.tsx(450,23): error TS2339: Property 'message' does not exist on type '{}'.
+src/features/quotations/components/QuotationForm.tsx(451,51): error TS2339: Property 'message' does not exist on type '{}'.
+src/features/quotations/components/QuotationForm.tsx(452,42): error TS2339: Property 'root' does not exist on type '{}'.
+src/features/quotations/components/QuotationForm.tsx(453,51): error TS2339: Property 'root' does not exist on type '{}'.
+src/features/quotations/components/QuotationForm.tsx(753,11): error TS2322: Type 'ProductSelectMode' is not assignable to type '"modal" | "autocomplete"'.
+  Type '"popup"' is not assignable to type '"modal" | "autocomplete"'.
+src/features/quotations/components/QuotationLineItemsGrid.tsx(135,29): error TS2322: Type '"modal" | "autocomplete"' is not assignable to type 'ProductInputMode | undefined'.
+  Type '"modal"' is not assignable to type 'ProductInputMode | undefined'.
+src/features/quotations/components/QuotationLineItemsGrid.tsx(149,38): error TS7053: Element implicitly has an 'any' type because expression of type 'number' can't be used to index type 'FieldError | Merge<FieldError, FieldErrorsImpl<any>>'.
+  No index signature with a parameter of type 'number' was found on type 'FieldError | Merge<FieldError, FieldErrorsImpl<any>>'.
+src/features/quotations/components/QuotationLineItemsGrid.tsx(248,45): error TS2322: Type '"modal" | "autocomplete"' is not assignable to type 'ProductInputMode | undefined'.
+  Type '"modal"' is not assignable to type 'ProductInputMode | undefined'.
+src/features/raw-contacts/components/RawContactDetail.tsx(213,35): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<RawContactStatus, "secondary" | "success" | "warning" | "danger">'.
+src/features/raw-contacts/components/RawContactDetail.tsx(268,46): error TS7006: Parameter 'comm' implicitly has an 'any' type.
+src/features/raw-contacts/components/RawContactDetail.tsx(361,39): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/features/raw-contacts/components/RawContactForm.tsx(99,31): error TS7006: Parameter 'comm' implicitly has an 'any' type.
+src/features/raw-contacts/components/RawContactForm.tsx(100,31): error TS7006: Parameter 'comm' implicitly has an 'any' type.
+src/features/raw-contacts/components/RawContactForm.tsx(104,10): error TS7006: Parameter 'comm' implicitly has an 'any' type.
+src/features/raw-contacts/components/RawContactForm.tsx(107,10): error TS7006: Parameter 'comm' implicitly has an 'any' type.
+src/features/receipts/components/ReceiptList.tsx(104,53): error TS2554: Expected 1 arguments, but got 2.
+src/features/receipts/components/ReceiptView.tsx(80,49): error TS2554: Expected 1 arguments, but got 2.
+src/features/registration/components/IndustrySelector.tsx(67,23): error TS2345: Argument of type 'Record<string, unknown>[]' is not assignable to parameter of type 'SetStateAction<IndustryOption[]>'.
+  Type 'Record<string, unknown>[]' is not assignable to type 'IndustryOption[]'.
+    Type 'Record<string, unknown>' is missing the following properties from type 'IndustryOption': id, typeCode, typeName, industryCategory
+src/features/registration/components/IndustrySelector.tsx(71,37): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+src/features/reminders/components/ReminderForm.tsx(126,15): error TS2322: Type '"datetime-local"' is not assignable to type 'InputType | undefined'.
+src/features/reminders/components/ReminderList.tsx(198,13): error TS2322: Type '"date"' is not assignable to type 'InputType | undefined'.
+src/features/reminders/components/ReminderList.tsx(206,13): error TS2322: Type '"date"' is not assignable to type 'InputType | undefined'.
+src/features/reports/components/ReportChartRenderer.tsx(117,57): error TS18048: 'percent' is possibly 'undefined'.
+src/features/reports/components/ReportDesigner.tsx(108,25): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/features/reports/components/ReportScheduleForm.tsx(37,42): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/features/reports/components/ReportViewerEnhanced.tsx(77,34): error TS2345: Argument of type 'string' is not assignable to parameter of type 'DateRangePreset'.
+src/features/reports/components/ReportViewerEnhanced.tsx(314,13): error TS2322: Type 'Dispatch<SetStateAction<string>>' is not assignable to type '(date: string | Date | null) => void'.
+  Types of parameters 'value' and 'date' are incompatible.
+    Type 'string | Date | null' is not assignable to type 'SetStateAction<string>'.
+      Type 'null' is not assignable to type 'SetStateAction<string>'.
+src/features/reports/components/ReportViewerEnhanced.tsx(319,13): error TS2322: Type 'Dispatch<SetStateAction<string>>' is not assignable to type '(date: string | Date | null) => void'.
+  Types of parameters 'value' and 'date' are incompatible.
+    Type 'string | Date | null' is not assignable to type 'SetStateAction<string>'.
+      Type 'null' is not assignable to type 'SetStateAction<string>'.
+src/features/reports/components/ScheduledReportsPage.tsx(17,9): error TS2322: Type '{ title: string; description: string; actions: Element; }' is not assignable to type 'IntrinsicAttributes & PageHeaderProps'.
+  Property 'description' does not exist on type 'IntrinsicAttributes & PageHeaderProps'.
+src/features/sales/components/CreditNoteList.tsx(53,26): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | Date'.
+  Type 'undefined' is not assignable to type 'string | Date'.
+src/features/sales/components/DeliveryChallanList.tsx(53,30): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | Date'.
+  Type 'undefined' is not assignable to type 'string | Date'.
+src/features/sales/components/DeliveryChallanList.tsx(54,30): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | Date'.
+  Type 'undefined' is not assignable to type 'string | Date'.
+src/features/settings/components/AiSettingsPage.tsx(78,24): error TS7006: Parameter 'm' implicitly has an 'any' type.
+src/features/settings/components/AiSettingsPage.tsx(90,26): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+src/features/settings/components/AiSettingsPage.tsx(90,31): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/features/settings/components/AiSettingsPage.tsx(105,19): error TS2322: Type '{ children: Element[]; title: string; }' is not assignable to type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+src/features/settings/components/AiSettingsPage.tsx(147,19): error TS2322: Type '{ children: Element; title: string; }' is not assignable to type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+src/features/settings/components/AiSettingsPage.tsx(171,17): error TS2322: Type '{ children: Element; title: string; }' is not assignable to type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+src/features/settings/components/AiSettingsPage.tsx(194,31): error TS7006: Parameter 'stat' implicitly has an 'any' type.
+src/features/settings/components/AiSettingsPage.tsx(194,37): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/features/settings/components/AutoNumberingEditForm.tsx(118,56): error TS2339: Property 'setFooterDisabled' does not exist on type 'SidePanelStore'.
+src/features/settings/components/AutoNumberingEditForm.tsx(127,64): error TS2322: Type '{ prefix: string; formatPattern: string; seqPadding: number; startFrom: number; incrementBy: number; resetPolicy: string; }' is not assignable to type 'UpdateAutoNumberData'.
+  Types of property 'resetPolicy' are incompatible.
+    Type 'string' is not assignable to type 'SequenceResetPolicy | undefined'.
+src/features/settings/components/CronJobEditForm.tsx(111,56): error TS2339: Property 'setFooterDisabled' does not exist on type 'SidePanelStore'.
+src/features/settings/components/CronJobEditForm.tsx(146,17): error TS2322: Type '{ children: Element; title: string; }' is not assignable to type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+src/features/settings/components/CronJobEditForm.tsx(158,17): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/settings/components/CronJobEditForm.tsx(192,17): error TS2322: Type '{ children: Element[]; title: string; }' is not assignable to type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+src/features/settings/components/CronJobEditForm.tsx(204,17): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/settings/components/CronJobEditForm.tsx(219,17): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/settings/components/CronJobEditForm.tsx(234,17): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/settings/components/CronJobEditForm.tsx(257,17): error TS2322: Type '{ children: Element; title: string; }' is not assignable to type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+src/features/settings/components/EmailConfigForm.tsx(116,56): error TS2339: Property 'setFooterDisabled' does not exist on type 'SidePanelStore'.
+src/features/settings/components/EmailConfigForm.tsx(255,17): error TS2322: Type '{ children: Element; title: string; }' is not assignable to type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+src/features/settings/components/EmailConfigForm.tsx(281,17): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/settings/components/EmailConfigForm.tsx(318,19): error TS2322: Type '{ children: Element; title: string; }' is not assignable to type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+src/features/settings/components/EmailConfigForm.tsx(382,21): error TS2322: Type '{ children: Element; title: string; }' is not assignable to type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+src/features/settings/components/EmailConfigForm.tsx(426,21): error TS2322: Type '{ children: Element[]; title: string; }' is not assignable to type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+src/features/settings/components/GoogleConnectionCard.tsx(109,27): error TS2554: Expected 1-2 arguments, but got 0.
+src/features/settings/components/GoogleIntegration.tsx(36,18): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/features/settings/components/GoogleIntegration.tsx(37,15): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/features/settings/components/GoogleIntegration.tsx(43,41): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/features/settings/components/GoogleIntegration.tsx(121,19): error TS2322: Type '{ children: Element; title: string; }' is not assignable to type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+src/features/settings/components/GoogleIntegration.tsx(128,19): error TS2322: Type '{ children: Element; title: string; }' is not assignable to type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+src/features/settings/components/IntegrationCredentialForm.tsx(272,56): error TS2339: Property 'setFooterDisabled' does not exist on type 'SidePanelStore'.
+src/features/settings/components/IntegrationCredentialForm.tsx(307,17): error TS2322: Type '{ children: Element; title: string; }' is not assignable to type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+src/features/settings/components/IntegrationCredentialForm.tsx(374,19): error TS2322: Type '{ children: (false | Element)[]; title: string; }' is not assignable to type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+src/features/settings/components/IntegrationCredentialForm.tsx(404,17): error TS2322: Type '{ children: Element; title: string; }' is not assignable to type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & FieldsetProps & RefAttributes<HTMLDivElement>'.
+src/features/settings/components/LookupDetail.tsx(170,60): error TS2322: Type 'LookupValueCreateData | LookupValueUpdateData' is not assignable to type 'LookupValueCreateData'.
+  Property 'value' is missing in type 'LookupValueUpdateData' but required in type 'LookupValueCreateData'.
+src/features/settings/components/NotionSettings.tsx(220,19): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/settings/components/NotionSettings.tsx(315,21): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/settings/components/NotionSettings.tsx(331,21): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/settings/components/WhatsAppConfig.tsx(180,19): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/settings/components/WhatsAppConfig.tsx(195,19): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/settings/components/WhatsAppConfig.tsx(211,19): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/settings/components/WhatsAppConfig.tsx(227,19): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/settings/components/WhatsAppConfig.tsx(243,19): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/settings/components/WhatsAppConfig.tsx(258,19): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/shortcuts/components/ShortcutAdminPage.tsx(21,31): error TS2339: Property 'filter' does not exist on type '{}'.
+src/features/shortcuts/components/ShortcutAdminPage.tsx(27,52): error TS2339: Property 'map' does not exist on type '{}'.
+src/features/shortcuts/components/ShortcutAdminPage.tsx(69,13): error TS2322: Type '{ value: unknown; label: any; }[]' is not assignable to type 'AutocompleteOption[]'.
+  Type '{ value: unknown; label: any; }' is not assignable to type 'AutocompleteOption'.
+    Types of property 'value' are incompatible.
+      Type 'unknown' is not assignable to type 'string | number'.
+src/features/shortcuts/components/ShortcutAdminPage.tsx(69,114): error TS2538: Type 'unknown' cannot be used as an index type.
+src/features/shortcuts/components/ShortcutPanel.tsx(109,15): error TS2322: Type '{ name: string; size: number; style: { position: string; left: number; top: string; transform: string; color: string; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/subscription/components/PlanComparisonTable.tsx(103,45): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/features/subscription/components/PlanDesigner.tsx(109,52): error TS2345: Argument of type '{ features: string[]; name: string; code: string; interval: string; price: number; maxUsers: number; maxContacts: number; maxLeads: number; maxProducts: number; maxStorage: number; description?: string | undefined; isActive?: boolean | undefined; sortOrder?: number | undefined; }' is not assignable to parameter of type 'PlanCreateData'.
+  Types of property 'interval' are incompatible.
+    Type 'string' is not assignable to type 'PlanInterval'.
+src/features/subscription/components/PlanDesigner.tsx(180,21): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/subscription/components/PlanDesigner.tsx(185,21): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/subscription/components/SubscriptionOverview.tsx(148,24): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/subscription/components/UsageBreakdown.tsx(30,40): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/features/support/components/TicketDetail.tsx(161,31): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<TicketPriority, string>'.
+src/features/support/components/TicketDetail.tsx(169,31): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<TicketStatus, string>'.
+src/features/support/components/TicketDetail.tsx(170,20): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<TicketStatus, string>'.
+src/features/support/components/TicketDetail.tsx(303,30): error TS7006: Parameter 'msg' implicitly has an 'any' type.
+src/features/tasks/components/TaskList.tsx(211,7): error TS2322: Type '{ title: string; tableKey: string; data: { id: string; taskNumber: string; title: string; type: string; status: TaskStatus; priority: TaskPriority; assignedTo: string; ... 4 more ...; _raw: TaskListItem; }[]; ... 8 more ...; headerActions: Element; }' is not assignable to type 'IntrinsicAttributes & TableFullProps'.
+  Property 'rowActions' does not exist on type 'IntrinsicAttributes & TableFullProps'.
+src/features/tour-plans/components/TourPlanDetail.tsx(107,42): error TS7006: Parameter 'v' implicitly has an 'any' type.
+src/features/tour-plans/components/TourPlanDetail.tsx(243,34): error TS7006: Parameter 'visit' implicitly has an 'any' type.
+src/features/tour-plans/components/TourPlanForm.tsx(107,25): error TS7006: Parameter 'v' implicitly has an 'any' type.
+src/features/vendor/components/LicenseGenerateForm.tsx(78,17): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/vendor/components/LicenseGenerateForm.tsx(91,17): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/vendor/components/LicenseGenerateForm.tsx(114,17): error TS2322: Type '"date"' is not assignable to type 'InputType | undefined'.
+src/features/vendor/components/OfferForm.tsx(109,17): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/vendor/components/OfferForm.tsx(122,17): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/vendor/components/OfferForm.tsx(158,17): error TS2322: Type '"date"' is not assignable to type 'InputType | undefined'.
+src/features/vendor/components/OfferForm.tsx(161,17): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/vendor/components/OfferForm.tsx(171,17): error TS2322: Type '"date"' is not assignable to type 'InputType | undefined'.
+src/features/vendor/components/OfferForm.tsx(174,17): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/vendor/components/TenantProfileForm.tsx(114,17): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/vendor/components/TenantProfileForm.tsx(139,17): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/vendor/components/TenantProfileForm.tsx(152,17): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/vendor/components/TenantProfileForm.tsx(198,17): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/vendor/utils/vendor-helpers.ts(82,14): error TS2304: Cannot find name 'formatCurrency'.
+src/features/wallet/components/CouponManager.tsx(91,95): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/wallet/components/CouponManager.tsx(108,111): error TS2322: Type '"date"' is not assignable to type 'InputType | undefined'.
+src/features/wallet/components/RechargePlanManager.tsx(89,99): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/wallet/components/ServiceRateManager.tsx(100,81): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/wallet/components/ServiceRateManager.tsx(104,107): error TS2322: Type 'string | undefined' is not assignable to type 'boolean | undefined'.
+  Type 'string' is not assignable to type 'boolean | undefined'.
+src/features/wallet/components/WalletAnalytics.tsx(80,30): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/wallet/components/WalletAnalytics.tsx(81,61): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/features/wallet/components/WalletAnalytics.tsx(107,31): error TS7006: Parameter 'svc' implicitly has an 'any' type.
+src/features/wallet/components/WalletAnalytics.tsx(107,36): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/features/whatsapp/components/AgentPerformanceTable.tsx(23,15): error TS2339: Property 'assignedConversations' does not exist on type 'WaAgentPerformance'.
+src/features/whatsapp/components/AgentPerformanceTable.tsx(23,38): error TS2339: Property 'resolvedConversations' does not exist on type 'WaAgentPerformance'.
+src/features/whatsapp/components/AgentPerformanceTable.tsx(40,9): error TS2322: Type '({ id: string; header: string; accessorKey: string; cell?: undefined; } | { id: string; header: string; accessorKey: string; cell: ({ row }: { row: { original: WaAgentPerformance; }; }) => string; })[]' is not assignable to type 'ColumnDef[]'.
+  Type '{ id: string; header: string; accessorKey: string; cell?: undefined; } | { id: string; header: string; accessorKey: string; cell: ({ row }: { row: { original: WaAgentPerformance; }; }) => string; }' is not assignable to type 'ColumnDef'.
+    Type '{ id: string; header: string; accessorKey: string; cell?: undefined; }' is missing the following properties from type 'ColumnDef': label, visible
+src/features/whatsapp/components/ChatbotCanvas.tsx(18,54): error TS2551: Property 'targetNodeId' does not exist on type 'ChatbotNodeConnection'. Did you mean 'targetId'?
+src/features/whatsapp/components/ChatbotFlowEditor.tsx(86,54): error TS2551: Property 'targetNodeId' does not exist on type 'ChatbotNodeConnection'. Did you mean 'targetId'?
+src/features/whatsapp/components/ChatbotFlowEditor.tsx(96,41): error TS2551: Property 'targetNodeId' does not exist on type 'ChatbotNodeConnection'. Did you mean 'targetId'?
+src/features/whatsapp/components/ChatbotFlowEditor.tsx(97,47): error TS2561: Object literal may only specify known properties, but 'targetNodeId' does not exist in type 'ChatbotNodeConnection'. Did you mean to write 'targetId'?
+src/features/whatsapp/components/ChatbotFlowList.tsx(74,9): error TS2322: Type '({ id: string; header: string; accessorKey: string; cell?: undefined; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => Element; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => Element[] | "—"; } | { ...; })[]' is not assignable to type 'ColumnDef[]'.
+  Type '{ id: string; header: string; accessorKey: string; cell?: undefined; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => Element; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => Element[] | "—"; } | { ...; }' is not assignable to type 'ColumnDef'.
+    Type '{ id: string; header: string; accessorKey: string; cell?: undefined; }' is missing the following properties from type 'ColumnDef': label, visible
+src/features/whatsapp/components/ChatbotNode.tsx(76,11): error TS2322: Type '{}' is not assignable to type 'ReactNode'.
+src/features/whatsapp/components/ChatbotNodeEditor.tsx(169,13): error TS2322: Type '{ value: string; label: {}; }[]' is not assignable to type 'AutocompleteOption[]'.
+  Type '{ value: string; label: {}; }' is not assignable to type 'AutocompleteOption'.
+    Types of property 'label' are incompatible.
+      Type '{}' is not assignable to type 'string'.
+src/features/whatsapp/components/ConversationLayout.tsx(18,33): error TS2339: Property 'setActiveConversationId' does not exist on type 'ConversationState'.
+src/features/whatsapp/components/ConversationList.tsx(15,5): error TS2339: Property 'setActiveConversationId' does not exist on type 'ConversationState'.
+src/features/whatsapp/components/ConversationList.tsx(51,44): error TS2345: Argument of type '"" | "OPEN" | "RESOLVED" | "PENDING"' is not assignable to parameter of type '"ALL" | WaConversationStatus'.
+  Type '""' is not assignable to type '"ALL" | WaConversationStatus'.
+src/features/whatsapp/components/LinkEntityDialog.tsx(22,9): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type '{ conversationId: string; payload: LinkEntityPayload; }'.
+src/features/whatsapp/components/MessageBubble.tsx(88,18): error TS2339: Property 'body' does not exist on type 'WaMessageItem'.
+src/features/whatsapp/components/MessageBubble.tsx(90,22): error TS2339: Property 'body' does not exist on type 'WaMessageItem'.
+src/features/whatsapp/components/MessageBubble.tsx(110,73): error TS2322: Type '{ name: string; size: number; color: string; style: { marginLeft: number; }; }' is not assignable to type 'IntrinsicAttributes & IconProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & IconProps'.
+src/features/whatsapp/components/MessageComposer.tsx(24,9): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type '{ conversationId: string; payload: SendTextPayload; }'.
+src/features/whatsapp/components/MessageComposer.tsx(42,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type '{ conversationId: string; payload: SendTemplatePayload; }'.
+src/features/whatsapp/components/WaBroadcastList.tsx(52,9): error TS2322: Type '({ id: string; header: string; accessorKey: string; cell?: undefined; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => Element; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => string; })[]' is not assignable to type 'ColumnDef[]'.
+  Type '{ id: string; header: string; accessorKey: string; cell?: undefined; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => Element; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => string; }' is not assignable to type 'ColumnDef'.
+    Type '{ id: string; header: string; accessorKey: string; cell?: undefined; }' is missing the following properties from type 'ColumnDef': label, visible
+src/features/whatsapp/components/WaBroadcastRecipientTable.tsx(46,7): error TS2322: Type '({ id: string; header: string; accessorKey: string; cell?: undefined; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => Element; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => string; })[]' is not assignable to type 'ColumnDef[]'.
+  Type '{ id: string; header: string; accessorKey: string; cell?: undefined; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => Element; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => string; }' is not assignable to type 'ColumnDef'.
+    Type '{ id: string; header: string; accessorKey: string; cell?: undefined; }' is missing the following properties from type 'ColumnDef': label, visible
+src/features/whatsapp/components/WaBroadcastWizard.tsx(51,9): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type '{ broadcastId: string; recipients: BroadcastRecipientData[]; }'.
+src/features/whatsapp/components/WaBroadcastWizard.tsx(113,15): error TS2322: Type 'Dispatch<SetStateAction<string>>' is not assignable to type '(date: string | Date | null) => void'.
+  Types of parameters 'value' and 'date' are incompatible.
+    Type 'string | Date | null' is not assignable to type 'SetStateAction<string>'.
+      Type 'null' is not assignable to type 'SetStateAction<string>'.
+src/features/whatsapp/components/WaKpiCards.tsx(12,30): error TS2339: Property 'messagesSent' does not exist on type 'WaAnalyticsData'.
+src/features/whatsapp/components/WaKpiCards.tsx(13,25): error TS2339: Property 'messagesDelivered' does not exist on type 'WaAnalyticsData'.
+src/features/whatsapp/components/WaKpiCards.tsx(13,56): error TS2339: Property 'messagesSent' does not exist on type 'WaAnalyticsData'.
+src/features/whatsapp/components/WaKpiCards.tsx(26,22): error TS2339: Property 'messagesSent' does not exist on type 'WaAnalyticsData'.
+src/features/whatsapp/components/WaKpiCards.tsx(32,22): error TS2551: Property 'messagesReceived' does not exist on type 'WaAnalyticsData'. Did you mean 'totalMessagesReceived'?
+src/features/whatsapp/components/WaOptOutList.tsx(13,5): error TS2353: Object literal may only specify known properties, and 'entityName' does not exist in type 'EntityPanelConfig'.
+src/features/whatsapp/components/WaOptOutList.tsx(63,9): error TS2322: Type '({ id: string; header: string; accessorKey: string; cell?: undefined; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => string; } | { id: string; header: string; cell: ({ row }: any) => Element; accessorKey?: undefined; })[]' is not assignable to type 'ColumnDef[]'.
+  Type '{ id: string; header: string; accessorKey: string; cell?: undefined; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => string; } | { id: string; header: string; cell: ({ row }: any) => Element; accessorKey?: undefined; }' is not assignable to type 'ColumnDef'.
+    Type '{ id: string; header: string; accessorKey: string; cell?: undefined; }' is missing the following properties from type 'ColumnDef': label, visible
+src/features/whatsapp/components/WaQuickReplyList.tsx(35,5): error TS2353: Object literal may only specify known properties, and 'entityName' does not exist in type 'EntityPanelConfig'.
+src/features/whatsapp/components/WaQuickReplyList.tsx(51,9): error TS2322: Type '({ id: string; header: string; accessorKey: string; cell?: undefined; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => any; })[]' is not assignable to type 'ColumnDef[]'.
+  Type '{ id: string; header: string; accessorKey: string; cell?: undefined; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => any; }' is not assignable to type 'ColumnDef'.
+    Type '{ id: string; header: string; accessorKey: string; cell?: undefined; }' is missing the following properties from type 'ColumnDef': label, visible
+src/features/whatsapp/components/WaTemplateList.tsx(61,43): error TS2554: Expected 1-2 arguments, but got 0.
+src/features/whatsapp/components/WaTemplateList.tsx(71,9): error TS2322: Type '({ id: string; header: string; accessorKey: string; cell?: undefined; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => Element; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => string; })[]' is not assignable to type 'ColumnDef[]'.
+  Type '{ id: string; header: string; accessorKey: string; cell?: undefined; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => Element; } | { id: string; header: string; accessorKey: string; cell: ({ row }: any) => string; }' is not assignable to type 'ColumnDef'.
+    Type '{ id: string; header: string; accessorKey: string; cell?: undefined; }' is missing the following properties from type 'ColumnDef': label, visible
+src/features/workflows/components/WorkflowDetail.tsx(97,37): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/features/workflows/components/WorkflowDetail.tsx(107,39): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/types/api-response.ts(14,8): error TS2307: Cannot find module '@shared-types' or its corresponding type declarations.
+src/types/api-response.ts(15,55): error TS2307: Cannot find module '@shared-types' or its corresponding type declarations.

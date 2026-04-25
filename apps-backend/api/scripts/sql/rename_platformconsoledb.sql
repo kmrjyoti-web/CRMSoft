@@ -1,0 +1,28 @@
+-- platformconsoledb renames (25 tables)
+BEGIN;
+ALTER TABLE "global_error_logs" RENAME TO "pc_error_global_logs";
+ALTER TABLE "customer_error_reports" RENAME TO "pc_error_customer_reports";
+ALTER TABLE "error_escalations" RENAME TO "pc_error_escalations";
+ALTER TABLE "error_auto_reports" RENAME TO "pc_error_auto_reports";
+ALTER TABLE "error_trends" RENAME TO "pc_error_trends";
+ALTER TABLE "alert_rules" RENAME TO "pc_alert_rules";
+ALTER TABLE "version_releases" RENAME TO "pc_version_releases";
+ALTER TABLE "vertical_versions" RENAME TO "pc_vertical_versions";
+ALTER TABLE "rollback_logs" RENAME TO "pc_rollback_logs";
+ALTER TABLE "vertical_registry" RENAME TO "pc_vertical_registry";
+ALTER TABLE "vertical_audits" RENAME TO "pc_vertical_audits";
+ALTER TABLE "vertical_health" RENAME TO "pc_vertical_health";
+ALTER TABLE "brand_module_whitelists" RENAME TO "pc_brand_module_whitelists";
+ALTER TABLE "brand_feature_flags" RENAME TO "pc_brand_feature_flags";
+ALTER TABLE "brand_error_summaries" RENAME TO "pc_brand_error_summaries";
+ALTER TABLE "health_snapshots" RENAME TO "pc_health_snapshots";
+ALTER TABLE "alert_history" RENAME TO "pc_alert_history";
+ALTER TABLE "incident_logs" RENAME TO "pc_incident_logs";
+ALTER TABLE "notification_logs" RENAME TO "pc_notification_logs";
+ALTER TABLE "dr_plans" RENAME TO "pc_dr_plans";
+ALTER TABLE "deployment_logs" RENAME TO "pc_deployment_logs";
+ALTER TABLE "pipeline_runs" RENAME TO "pc_pipeline_runs";
+ALTER TABLE "build_logs" RENAME TO "pc_build_logs";
+ALTER TABLE "global_menu_configs" RENAME TO "pc_menu_global_configs";
+ALTER TABLE "brand_menu_overrides" RENAME TO "pc_menu_brand_overrides";
+COMMIT;

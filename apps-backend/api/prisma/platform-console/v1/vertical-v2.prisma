@@ -1,0 +1,162 @@
+// PlatformConsoleDB — vertical V2 domain (tables created by PR #35)
+// These models exist in the DB and are added here so Prisma doesn't drop them.
+
+model pc_vertical_v2 {
+  id                       String                     @id
+  vertical_code            String                     @unique
+  vertical_name            String
+  display_name             String
+  description              String?
+  icon_name                String?
+  color_theme              String?
+  banner_image             String?
+  folder_path              String
+  package_name             String
+  database_schemas         Json
+  api_prefix               String
+  is_active                Boolean                    @default(true)
+  is_beta                  Boolean                    @default(false)
+  is_coming_soon           Boolean                    @default(false)
+  release_date             DateTime?
+  deprecation_date         DateTime?
+  base_price               Decimal?                   @db.Decimal(10, 2)
+  per_user_price           Decimal?                   @db.Decimal(10, 2)
+  currency                 String?                    @default("INR")
+  default_settings         Json?
+  settings_schema          Json?
+  documentation_url        String?
+  demo_url                 String?
+  video_tour_url           String?
+  sort_order               Int                        @default(0)
+  created_at               DateTime                   @default(now())
+  updated_at               DateTime                   @updatedAt
+
+  pc_brand_vertical_config pc_brand_vertical_config[]
+  pc_vertical_feature      pc_vertical_feature[]
+  pc_vertical_menu         pc_vertical_menu[]
+  pc_vertical_module       pc_vertical_module[]
+  subcategories            Subcategory[]
+}
+
+model pc_vertical_module {
+  id                  String                @id
+  vertical_id         String
+  module_code         String
+  module_name         String
+  display_name        String
+  description         String?
+  is_required         Boolean               @default(false)
+  is_default_enabled  Boolean               @default(true)
+  is_premium          Boolean               @default(false)
+  icon_name           String?
+  color_theme         String?
+  sort_order          Int                   @default(0)
+  package_path        String?
+  api_namespace       String?
+  db_tables           Json?
+  depends_on          Json?
+  conflicts_with      Json?
+  addon_price         Decimal?              @db.Decimal(10, 2)
+  per_user_addon      Decimal?              @db.Decimal(10, 2)
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+
+  pc_vertical_v2      pc_vertical_v2        @relation(fields: [vertical_id], references: [id], onDelete: Cascade)
+  pc_vertical_feature pc_vertical_feature[]
+  pc_vertical_menu    pc_vertical_menu[]
+
+  @@unique([vertical_id, module_code])
+}
+
+model pc_vertical_menu {
+  id                     String              @id
+  vertical_id            String
+  module_id              String?
+  menu_code              String
+  menu_label             String
+  menu_description       String?
+  icon_name              String?
+  badge_type             String?
+  badge_value            String?
+  route                  String?
+  is_external            Boolean             @default(false)
+  opens_in_new_tab       Boolean             @default(false)
+  parent_menu_id         String?
+  sort_order             Int                 @default(0)
+  depth_level            Int                 @default(0)
+  permissions_required   Json?
+  roles_allowed          Json?
+  features_required      Json?
+  is_visible             Boolean             @default(true)
+  is_enabled             Boolean             @default(true)
+  hide_if_empty          Boolean             @default(false)
+  custom_component       String?
+  extra_config           Json?
+  created_at             DateTime            @default(now())
+  updated_at             DateTime            @updatedAt
+
+  pc_vertical_v2         pc_vertical_v2      @relation(fields: [vertical_id], references: [id], onDelete: Cascade)
+  pc_vertical_module     pc_vertical_module? @relation(fields: [module_id], references: [id])
+  parent                 pc_vertical_menu?   @relation("MenuParent", fields: [parent_menu_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children               pc_vertical_menu[]  @relation("MenuParent")
+
+  @@unique([vertical_id, menu_code])
+}
+
+model pc_vertical_feature {
+  id                  String              @id
+  vertical_id         String
+  module_id           String?
+  feature_code        String
+  feature_name        String
+  description         String?
+  category            String?
+  sub_category        String?
+  is_default_enabled  Boolean             @default(true)
+  is_premium          Boolean             @default(false)
+  is_beta             Boolean             @default(false)
+  is_experimental     Boolean             @default(false)
+  addon_price         Decimal?            @db.Decimal(10, 2)
+  config_schema       Json?
+  default_config      Json?
+  depends_on          Json?
+  conflicts_with      Json?
+  icon_name           String?
+  sort_order          Int                 @default(0)
+  documentation_url   String?
+  released_in_version String?
+  created_at          DateTime            @default(now())
+  updated_at          DateTime            @updatedAt
+
+  pc_vertical_v2      pc_vertical_v2      @relation(fields: [vertical_id], references: [id], onDelete: Cascade)
+  pc_vertical_module  pc_vertical_module? @relation(fields: [module_id], references: [id])
+
+  @@unique([vertical_id, feature_code])
+}
+
+model pc_brand_vertical_config {
+  id                    String         @id
+  brand_code            String
+  vertical_id           String
+  is_enabled            Boolean        @default(true)
+  custom_name           String?
+  custom_description    String?
+  custom_color          String?
+  enabled_modules       Json?
+  disabled_modules      Json?
+  custom_menus          Json?
+  hidden_menus          Json?
+  enabled_features      Json?
+  disabled_features     Json?
+  feature_configs       Json?
+  custom_price          Decimal?       @db.Decimal(10, 2)
+  custom_per_user_price Decimal?       @db.Decimal(10, 2)
+  custom_logo           String?
+  custom_theme          Json?
+  created_at            DateTime       @default(now())
+  updated_at            DateTime       @updatedAt
+
+  pc_vertical_v2        pc_vertical_v2 @relation(fields: [vertical_id], references: [id], onDelete: Cascade)
+
+  @@unique([brand_code, vertical_id])
+}
