@@ -120,6 +120,29 @@ export class AuthController {
     );
   }
 
+  @Post('select-company')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Initial company selection after multi-company login (re-issues JWT)' })
+  async selectCompany(@Body() dto: SwitchCompanyDto, @CurrentUser('id') userId: string) {
+    return ApiResponse.success(
+      await this.auth.selectCompany(userId, dto.companyId),
+      'Company selected',
+    );
+  }
+
+  @Get('me/companies')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all companies the authenticated user belongs to' })
+  async getMyCompanies(@CurrentUser('id') userId: string) {
+    return ApiResponse.success(
+      await this.auth.getMyCompanies(userId),
+      'Companies fetched',
+    );
+  }
+
   // --- VERTICAL REGISTRATION (public, brand-aware) ---
 
   @Public()

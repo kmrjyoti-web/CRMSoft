@@ -773,6 +773,26 @@ export class AuthService {
   // SWITCH COMPANY (exchange JWT companyId)
   // ═══════════════════════════════════════
 
+  async getMyCompanies(userId: string) {
+    const companies = await this.mapping.getUserCompanies(userId);
+    return companies.map((m: any) => ({
+      id: m.company.id,
+      talentId: m.company.talentId,
+      name: m.company.name,
+      brandCode: m.company.brandCode ?? null,
+      verticalCode: m.company.verticalCode ?? null,
+      categoryCode: m.company.categoryCode ?? null,
+      role: m.role,
+      isDefault: m.isDefault,
+      status: m.status,
+      lastAccessedAt: m.lastAccessedAt ?? null,
+    }));
+  }
+
+  async selectCompany(userId: string, companyId: string) {
+    return this.switchCompany(userId, companyId);
+  }
+
   async switchCompany(userId: string, companyId: string) {
     const user = await this.prisma.identity.user.findFirst({
       where: { id: userId },

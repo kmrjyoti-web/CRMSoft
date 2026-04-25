@@ -67,6 +67,16 @@ model UserCompanyMapping {
 
   logs UserCompanyMappingLog[]
 
+  brandCode            String?   @map("brand_code")
+  verticalCode         String?   @map("vertical_code")
+  partnerCode          String?   @map("partner_code")
+  lastAccessedAt       DateTime? @map("last_accessed_at")
+  redirectPathOverride String?   @map("redirect_path_override")
+
+  brand    GvCfgBrand?    @relation(fields: [brandCode], references: [code])
+  vertical GvCfgVertical? @relation(fields: [verticalCode], references: [code])
+  partner  GvCfgPartner?  @relation(fields: [partnerCode], references: [code])
+
   isDeleted   Boolean   @default(false) @map("is_deleted")
   deletedAt   DateTime? @map("deleted_at")
   deletedById String?   @map("deleted_by_id")

@@ -151,6 +151,13 @@ model User {
   companyMappings UserCompanyMapping[]
   ownedCompanies  Company[]
 
+  // ─── PERSONAL PROFILE ───
+  profile          GvPerUserProfile?
+  educations       GvPerEducation[]
+  experiences      GvPerExperience[]
+  skills           GvPerSkill[]
+  companyFollows   GvPerCompanyFollow[]
+
   @@unique([tenantId, email])
   @@unique([tenantId, employeeCode])
   @@index([userType, status])

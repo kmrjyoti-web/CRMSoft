@@ -105,6 +105,7 @@ import { CustomerPortalModule as CustomerPortalAuthModule } from './modules/cust
 import { OpsModule } from './modules/ops/ops.module';
 import { VersionControlModule } from './modules/softwarevendor/version-control/version-control.module';
 import { HealthModule } from './modules/core/health/health.module';
+import { ProfileModule } from './modules/core/identity/profile/profile.module';
 // TODO: create module — reference-data
 // import { ReferenceDataModule } from './modules/core/reference-data/reference-data.module';
 // TODO: create module — system-field
@@ -221,6 +222,7 @@ import { TenantAuditMiddleware } from './modules/core/identity/tenant/infrastruc
     OpsModule,
     VersionControlModule,
     HealthModule,
+    ProfileModule,
     // ReferenceDataModule, // TODO: create module
     // SystemFieldModule, // TODO: create module
     PlatformConsoleModule,

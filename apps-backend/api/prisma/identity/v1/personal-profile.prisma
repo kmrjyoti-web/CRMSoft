@@ -1,0 +1,114 @@
+// IdentityDB — Personal profile (talent / person-centric layer)
+// Models: GvPerUserProfile, GvPerEducation, GvPerExperience, GvPerSkill, GvPerCompanyFollow
+
+model GvPerUserProfile {
+  id     String @id @default(uuid())
+  userId String @unique @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  headline    String?
+  bio         String?
+  avatarUrl   String?  @map("avatar_url")
+  coverUrl    String?  @map("cover_url")
+  city        String?
+  state       String?
+  country     String?
+  pincode     String?
+  timezone    String?
+  dateOfBirth DateTime? @map("date_of_birth")
+  gender      String?
+
+  linkedinUrl  String? @map("linkedin_url")
+  twitterUrl   String? @map("twitter_url")
+  githubUrl    String? @map("github_url")
+  websiteUrl   String? @map("website_url")
+  portfolioUrl String? @map("portfolio_url")
+
+  isPublic     Boolean @default(false) @map("is_public")
+  profileScore Int     @default(0) @map("profile_score")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("gv_per_user_profiles")
+}
+
+model GvPerEducation {
+  id     String @id @default(uuid())
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  institution String
+  degree      String?
+  fieldOfStudy String? @map("field_of_study")
+  grade       String?
+  startYear   Int?    @map("start_year")
+  endYear     Int?    @map("end_year")
+  isCurrent   Boolean @default(false) @map("is_current")
+  description String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("gv_per_educations")
+}
+
+model GvPerExperience {
+  id     String @id @default(uuid())
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  companyName  String  @map("company_name")
+  companyId    String? @map("company_id")
+  role         String
+  employmentType String? @map("employment_type")
+  location     String?
+  startDate    DateTime  @map("start_date")
+  endDate      DateTime? @map("end_date")
+  isCurrent    Boolean   @default(false) @map("is_current")
+  description  String?
+  achievements String[]  @default([])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([companyId])
+  @@map("gv_per_experiences")
+}
+
+model GvPerSkill {
+  id     String @id @default(uuid())
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name         String
+  category     String?
+  proficiency  String  @default("INTERMEDIATE")
+  yearsOfExp   Int?    @map("years_of_exp")
+  isVerified   Boolean @default(false) @map("is_verified")
+  endorsements Int     @default(0)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("gv_per_skills")
+}
+
+model GvPerCompanyFollow {
+  id        String @id @default(uuid())
+  userId    String @map("user_id")
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId String @map("company_id")
+
+  followedAt DateTime @default(now()) @map("followed_at")
+
+  @@unique([userId, companyId])
+  @@index([userId])
+  @@index([companyId])
+  @@map("gv_per_company_follows")
+}
