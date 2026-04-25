@@ -64,6 +64,11 @@
   transition: var(--theme-transition);
 }
 
+/* Ensure html-level CSS var changes also transition */
+html {
+  transition: background-color 400ms ease;
+}
+
 /* Premium scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
