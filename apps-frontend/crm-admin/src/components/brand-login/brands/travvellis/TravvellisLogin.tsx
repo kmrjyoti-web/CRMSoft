@@ -162,7 +162,7 @@ export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }:
     setError('');
     setIsLoading(true);
     try {
-      await authService.login({ email, password }, 'customer');
+      await authService.login({ email, password });
       onSuccess?.();
     } catch {
       setError('Invalid credentials. Please try again.');

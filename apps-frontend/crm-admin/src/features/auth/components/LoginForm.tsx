@@ -56,7 +56,6 @@ export function LoginForm() {
     try {
       await authService.login(
         { email: values.email, password: values.password },
-        "admin",
       );
       toast.success("Welcome back!");
       router.push(redirectTo);
