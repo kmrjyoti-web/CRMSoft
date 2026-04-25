@@ -2,6 +2,8 @@ import type {
   User,
   LoginRequest,
   LoginResponse,
+  CompanyListItem,
+  SwitchCompanyResult,
 } from "@/features/auth/types/auth.types";
 import { setAuthCookie, clearAuthCookie } from "@/features/auth/utils/auth-cookies";
 import api from "@/services/api-client";
@@ -68,6 +70,34 @@ export const authService = {
     setAuthCookie(refreshData.accessToken);
 
     return refreshData;
+  },
+
+  // ── Company management ──────────────────────────────────
+
+  /** GET /api/v1/auth/me/companies — list all companies the user belongs to */
+  async getMyCompanies(): Promise<CompanyListItem[]> {
+    const { data } = await api.get<ApiResponse<CompanyListItem[]>>(
+      "/api/v1/auth/me/companies",
+    );
+    return (data as any).data ?? [];
+  },
+
+  /** POST /api/v1/auth/select-company — initial company selection after login */
+  async selectCompany(companyId: string): Promise<SwitchCompanyResult> {
+    const { data } = await api.post<ApiResponse<SwitchCompanyResult>>(
+      "/api/v1/auth/select-company",
+      { companyId },
+    );
+    return (data as any).data;
+  },
+
+  /** POST /api/v1/auth/switch-company — switch active company within session */
+  async switchCompany(companyId: string): Promise<SwitchCompanyResult> {
+    const { data } = await api.post<ApiResponse<SwitchCompanyResult>>(
+      "/api/v1/auth/switch-company",
+      { companyId },
+    );
+    return (data as any).data;
   },
 
   /** GET /api/v1/auth/me */

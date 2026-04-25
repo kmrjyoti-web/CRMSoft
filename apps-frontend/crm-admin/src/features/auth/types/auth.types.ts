@@ -21,6 +21,11 @@ export interface JwtPayload {
   tenantId?: string;
   tenantCode?: string;
   isSuperAdmin?: boolean;
+  // Person-centric fields (Day 1)
+  talentId?: string;
+  brandCode?: string;
+  companyId?: string;
+  purpose?: string;
   exp: number;
   iat: number;
 }
@@ -34,13 +39,38 @@ export interface LoginRequest {
 
 export type LoginPortal = "admin" | "employee" | "customer" | "partner" | "super-admin";
 
+// Company entry returned by /auth/login and /auth/me/companies
+export interface CompanyListItem {
+  id: string;
+  talentId: string;
+  name: string;
+  brandCode: string | null;
+  verticalCode: string | null;
+  categoryCode: string | null;
+  role: string;
+  isDefault: boolean;
+  status: string;
+  lastAccessedAt: string | null;
+}
+
+export interface SwitchCompanyResult {
+  activeCompanyId: string;
+  activeCompanyBrandCode: string | null;
+  accessToken: string;
+  refreshToken: string;
+}
+
 export interface LoginResponse {
   user: User;
   accessToken: string;
   refreshToken: string;
   tenantCode?: string;
-  // Universal endpoint fields (PR #44 — Person-Centric Identity)
-  companies?: Array<{ companyId: string; name: string }>;
+  // Universal endpoint fields (Day 1 — Person-Centric Identity)
+  companies?: CompanyListItem[];
   activeCompanyId?: string | null;
+  activeCompanyBrandCode?: string | null;
   requiresCompanySelection?: boolean;
+  hasCompanies?: boolean;
+  companyCount?: number;
+  redirectPath?: string;
 }

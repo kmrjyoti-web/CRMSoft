@@ -34,7 +34,6 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/dashboard";
   const brandFromUrl = searchParams.get("brand");
   const { setActiveCompany, setAvailableCompanies } = useAuthStore();
 
@@ -61,25 +60,17 @@ export function LoginForm() {
         { email: values.email, password: values.password },
       );
 
-      // Store available companies for switcher
+      // Store available companies + set active
       const companies = (loginData as any).companies ?? [];
       setAvailableCompanies(companies);
 
-      // Multi-company: send to selector
-      if ((loginData as any).requiresCompanySelection && companies.length > 1) {
-        sessionStorage.setItem("selector-token", loginData.accessToken);
-        sessionStorage.setItem("selector-companies", JSON.stringify(companies));
-        router.push(brandFromUrl ? `/select-company?brand=${brandFromUrl}` : "/select-company");
-        return;
-      }
-
-      // Single company or no company — set active + redirect
       const activeId = (loginData as any).activeCompanyId;
       const activeCompany = companies.find((c: any) => c.id === activeId) ?? companies[0] ?? null;
       if (activeCompany) setActiveCompany(activeCompany);
 
+      // Always land on self-care panel (LinkedIn-style) — user picks workspace there
       toast.success("Welcome back!");
-      router.push(redirectTo);
+      router.push("/self-care");
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data

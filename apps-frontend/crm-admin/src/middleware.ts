@@ -1,7 +1,7 @@
 import type { NextRequest} from "next/server";
 import { NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/forgot-password", "/register", "/select-company"];
+const PUBLIC_PATHS = ["/login", "/forgot-password", "/register", "/select-company", "/brand-login"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -20,9 +20,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Authenticated user on a public route → redirect to dashboard
+  // Authenticated user on a public route → redirect to self-care panel
   if (token && isPublicPath) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/self-care", request.url));
   }
 
   return NextResponse.next();

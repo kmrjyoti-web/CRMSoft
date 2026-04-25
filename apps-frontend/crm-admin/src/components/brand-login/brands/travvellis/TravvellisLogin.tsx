@@ -170,18 +170,13 @@ export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }:
       const companies = (loginData as any).companies ?? [];
       setAvailableCompanies(companies);
 
-      if ((loginData as any).requiresCompanySelection && companies.length > 1) {
-        sessionStorage.setItem('selector-token', loginData.accessToken);
-        sessionStorage.setItem('selector-companies', JSON.stringify(companies));
-        router.push('/select-company?brand=travvellis');
-        return;
-      }
-
       const activeId = (loginData as any).activeCompanyId;
       const activeCompany = companies.find((c: any) => c.id === activeId) ?? companies[0] ?? null;
       if (activeCompany) setActiveCompany(activeCompany);
 
       onSuccess?.();
+      // Always land on self-care panel after login
+      router.push('/self-care');
     } catch {
       setError('Invalid credentials. Please try again.');
     } finally {

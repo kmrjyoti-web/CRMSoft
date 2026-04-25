@@ -95,6 +95,8 @@ export const useAuthStore = create<AuthState>()(
           onboardingStep: (res as any)?.tenant?.onboardingStep ?? state.onboardingStep,
           terminology: (res as any)?.terminology ?? state.terminology,
           industryCode: (res as any)?.tenant?.industryCode ?? state.industryCode,
+          // Sync activeCompanyBrandCode from JWT on token refresh/switch
+          activeCompanyBrandCode: decoded?.brandCode ?? state.activeCompanyBrandCode ?? null,
         }));
       },
 
