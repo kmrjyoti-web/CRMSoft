@@ -13,6 +13,7 @@ import { DesertScene } from './scenes/DesertScene';
 import { NightScene } from './scenes/NightScene';
 import styles from './travvellis.module.css';
 import { authService } from '@/features/auth/services/auth.service';
+import { useBrandContext } from '@/hooks/auth/useBrandContext';
 
 interface Props {
   brandName?: string;
@@ -20,6 +21,8 @@ interface Props {
 }
 
 export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }: Props) {
+  const { buildBrandUrl } = useBrandContext();
+
   // Form state (only React state needed — low frequency)
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -365,7 +368,7 @@ export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }:
           </div>
 
           <div className={styles.pspFooter}>
-            First journey? <a href="/register">Request a passport →</a>
+            First journey? <a href={buildBrandUrl('/register')}>Request a passport →</a>
           </div>
         </form>
       </div>

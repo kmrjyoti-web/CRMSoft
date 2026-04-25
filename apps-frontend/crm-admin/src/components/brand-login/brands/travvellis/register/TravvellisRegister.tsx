@@ -14,6 +14,7 @@ import { DesertScene } from '../scenes/DesertScene';
 import { NightScene } from '../scenes/NightScene';
 import { useRegister } from '@/hooks/auth/useRegister';
 import { useCategories, useSubcategories, type FieldDef } from '@/hooks/auth/useCategories';
+import { useBrandContext } from '@/hooks/auth/useBrandContext';
 import parentStyles from '../travvellis.module.css';
 import styles from './travvellis-register.module.css';
 
@@ -27,6 +28,7 @@ const CATEGORY_ICONS: Record<string, string> = {
 
 export default function TravvellisRegister() {
   const router = useRouter();
+  const { buildBrandUrl } = useBrandContext();
   const { register, isLoading, error } = useRegister();
   const { categories } = useCategories();
   const [step, setStep] = useState(0);
@@ -323,7 +325,7 @@ export default function TravvellisRegister() {
                   ? 'Your application is under review. We will notify you once your account is approved.'
                   : 'Your Travvellis passport has been issued! You can now sign in and start your journey.'}
               </div>
-              <button className={styles.successBtn} onClick={() => { window.location.href = '/login?brand=travvellis'; }}>
+              <button className={styles.successBtn} onClick={() => { window.location.href = buildBrandUrl('/login'); }}>
                 → Go to Login
               </button>
             </div>
@@ -351,7 +353,7 @@ export default function TravvellisRegister() {
           {step < 4 && (
             <div className={styles.footer}>
               Already have a passport?{' '}
-              <a href="/login?brand=travvellis">Sign in →</a>
+              <a href={buildBrandUrl('/login')}>Sign in →</a>
             </div>
           )}
         </div>
