@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import localFont from "next/font/local";
+import { Inter, Playfair_Display } from 'next/font/google';
 
 import "./globals.css";
 import "../styles/crm-theme.css";
@@ -20,6 +21,20 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-serif',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: "CRM Admin",
   description: "CRM Admin Dashboard",
@@ -31,7 +46,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
