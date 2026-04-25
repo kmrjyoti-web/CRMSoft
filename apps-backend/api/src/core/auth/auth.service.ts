@@ -742,14 +742,25 @@ export class AuthService {
       companyId = defaultMapping?.company?.id;
     }
 
+    const activeCompany = companies.find((m: any) => m.company.id === companyId);
+    const activeBrandCode = activeCompany?.company?.brandCode ?? null;
+    const talentId = (user as any).talentId ?? null;
+
+    // purpose = 'self-care' when no active company (user must pick one)
+    const purpose = companyId ? undefined : 'self-care';
+
     const tokens = await this.generateTokens(
       user.id, user.email, user.role.name, user.userType, user.tenantId, companyId,
+      { talentId, brandCode: activeBrandCode, purpose },
     );
+
+    // redirectPath guides the frontend: dashboard if company selected, self-care otherwise
+    const redirectPath = companyId ? '/dashboard' : '/self-care';
 
     return {
       user: {
         ...this.mapUserResponse(user),
-        talentId: (user as any).talentId,
+        talentId,
       },
       companies: companies.map((m: any) => ({
         id: m.company.id,
@@ -763,8 +774,11 @@ export class AuthService {
         status: m.status,
       })),
       activeCompanyId: companyId ?? null,
-      activeCompanyBrandCode: companies.find((m: any) => m.company.id === companyId)?.company?.brandCode ?? null,
+      activeCompanyBrandCode: activeBrandCode,
       requiresCompanySelection: companies.length > 1 && !companyId,
+      hasCompanies: companies.length > 0,
+      companyCount: companies.length,
+      redirectPath,
       ...tokens,
     };
   }
@@ -803,15 +817,25 @@ export class AuthService {
     const isMember = await this.mapping.verifyMembership(userId, companyId);
     if (!isMember) throw new ForbiddenException('Not a member of this company');
 
+    // Resolve brand from mapping for JWT
+    const mapping = await (this.prisma.identity as any).userCompanyMapping.findFirst({
+      where: { userId, companyId, status: 'ACTIVE', isDeleted: false },
+      include: { company: true },
+    });
+    const brandCode = mapping?.company?.brandCode ?? null;
+    const talentId = (user as any).talentId ?? null;
+
     const tokens = await this.generateTokens(
       user.id, user.email, user.role.name, user.userType, user.tenantId, companyId,
+      { talentId, brandCode },
     );
-    return { activeCompanyId: companyId, ...tokens };
+    return { activeCompanyId: companyId, activeCompanyBrandCode: brandCode, ...tokens };
   }
 
   private async generateTokens(
     id: string, email: string, role: string, userType: string, tenantId: string,
     companyId?: string,
+    opts?: { talentId?: string | null; brandCode?: string | null; purpose?: string },
   ) {
     // Backward-compat: CUSTOMER/TRAVELER users have tenantId='' in DB (no dedicated tenant yet).
     // Fall back to DEFAULT_TENANT_ID so legacy endpoints don't see an empty tenantId.
@@ -827,6 +851,10 @@ export class AuthService {
       // New person-centric field (PR #44) — may be null for FREE plan / no company
       companyId: companyId ?? null,
       isSharedTenant,
+      // Person-centric identity fields (Day 2)
+      ...(opts?.talentId && { talentId: opts.talentId }),
+      ...(opts?.brandCode && { brandCode: opts.brandCode }),
+      ...(opts?.purpose && { purpose: opts.purpose }),
       ...(isSuperAdmin && { isSuperAdmin: true }),
     };
     const [accessToken, refreshToken] = await Promise.all([

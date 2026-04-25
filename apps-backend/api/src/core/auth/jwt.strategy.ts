@@ -17,6 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: {
     sub: string; email: string; role: string; userType: string;
     tenantId?: string; companyId?: string | null; isSharedTenant?: boolean; isSuperAdmin?: boolean;
+    talentId?: string; brandCode?: string; purpose?: string;
   }) {
     // Super admin — no User DB lookup needed
     if (payload.isSuperAdmin) {
@@ -85,6 +86,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       companyId: payload.companyId ?? null,
       isSharedTenant: payload.isSharedTenant ?? !user.tenantId,
       businessTypeCode,
+      // Day 2 self-care fields — passed through from JWT
+      talentId: payload.talentId ?? null,
+      brandCode: payload.brandCode ?? null,
+      purpose: payload.purpose ?? null,
     };
   }
 }
