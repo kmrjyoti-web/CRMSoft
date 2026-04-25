@@ -5,7 +5,8 @@ export type OnboardingStage =
   | 'email_otp'
   | 'mobile_otp'
   | 'user_type'
-  | 'vertical_profile'
+  | 'sub_user_type'
+  | 'profile_redirect'
   | 'complete';
 
 export type OnboardingUserType = 'B2B' | 'B2C' | 'IND_SP' | 'IND_EE';
@@ -15,6 +16,10 @@ export interface OnboardingStatus {
   stage: OnboardingStage;
   emailVerified: boolean;
   mobileVerified: boolean;
+  categoryCode: string | null;
+  subcategoryCode: string | null;
+  verticalCode: string | null;
+  brandCode: string | null;
   locale: OnboardingLocale;
   complete: boolean;
 }
@@ -22,6 +27,14 @@ export interface OnboardingStatus {
 export interface OtpSentInfo {
   sentTo: string;
   expiresAt: string;
+}
+
+export interface SubTypeOption {
+  code: string;
+  name: string;
+  description?: string;
+  parentCategory: string;
+  requiresApproval: boolean;
 }
 
 export const userOnboardingService = {
@@ -43,6 +56,18 @@ export const userOnboardingService = {
   setUserType: (userType: OnboardingUserType): Promise<void> =>
     api.post('/api/v1/onboarding/user-type', { userType }).then(() => undefined),
 
-  completeProfile: (verticalCode: string, profileFields: Record<string, unknown>): Promise<void> =>
-    api.post('/api/v1/onboarding/complete-profile', { verticalCode, profileFields }).then(() => undefined),
+  getSubTypes: (verticalCode: string, categoryCode: string): Promise<SubTypeOption[]> =>
+    api
+      .get('/api/v1/platform-console/creator/user-categories/subcategories', {
+        params: { vertical_code: verticalCode, category_code: categoryCode },
+      })
+      .then((r) => r.data.data ?? r.data ?? []),
+
+  setSubType: (subTypeCode: string): Promise<void> =>
+    api.post('/api/v1/onboarding/sub-type', { subTypeCode }).then(() => undefined),
+
+  completeProfile: (profileFields: Record<string, unknown>, verticalCode?: string): Promise<void> =>
+    api
+      .post('/api/v1/onboarding/complete-profile', { profileFields, ...(verticalCode ? { verticalCode } : {}) })
+      .then(() => undefined),
 };

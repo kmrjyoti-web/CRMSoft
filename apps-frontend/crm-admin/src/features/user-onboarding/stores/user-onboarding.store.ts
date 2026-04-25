@@ -15,7 +15,8 @@ interface UserOnboardingState {
   verifyOtp: (type: 'email' | 'mobile', code: string) => Promise<{ nextStage: OnboardingStage }>;
   skipMobile: () => Promise<void>;
   setUserType: (userType: OnboardingUserType) => Promise<void>;
-  completeProfile: (verticalCode: string, profileFields: Record<string, unknown>) => Promise<void>;
+  setSubType: (subTypeCode: string) => Promise<void>;
+  completeProfile: (profileFields: Record<string, unknown>, verticalCode?: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -59,8 +60,13 @@ export const useUserOnboardingStore = create<UserOnboardingState>((set, get) => 
     await get().fetchStatus();
   },
 
-  completeProfile: async (verticalCode, profileFields) => {
-    await userOnboardingService.completeProfile(verticalCode, profileFields);
+  setSubType: async (subTypeCode) => {
+    await userOnboardingService.setSubType(subTypeCode);
+    await get().fetchStatus();
+  },
+
+  completeProfile: async (profileFields, verticalCode) => {
+    await userOnboardingService.completeProfile(profileFields, verticalCode);
     await get().fetchStatus();
   },
 

@@ -289,6 +289,8 @@ export class AuthService {
         registrationFields: (data.registrationFields ?? {}) as any,
         registrationStatus: requiresApproval ? 'PENDING' : 'ACTIVE',
         talentId: userTalentId,
+        preferredLocale: 'en',
+        onboardingStage: 'email_otp',
       } as any,
       include: { role: true },
     });

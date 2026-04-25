@@ -2,18 +2,27 @@ import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { OtpService } from '../../../softwarevendor/verification/services/otp.service';
 import { OtpPurpose } from '@prisma/identity-client';
-import type { OnboardingLocale, OtpType, OnboardingUserType, CompleteProfileDto } from './dto/onboarding.dto';
+import type { OnboardingLocale, OtpType, OnboardingUserType, CompleteProfileDto, SetSubTypeDto } from './dto/onboarding.dto';
 
 const STAGE_ORDER = [
   'language',
   'email_otp',
   'mobile_otp',
   'user_type',
-  'vertical_profile',
+  'sub_user_type',
+  'profile_redirect',
   'complete',
 ] as const;
 
 type OnboardingStage = typeof STAGE_ORDER[number];
+
+// Maps simplified onboarding codes → canonical PC category codes
+const USER_TYPE_TO_CATEGORY: Record<OnboardingUserType, string> = {
+  B2B:    'COMPANY_B2B',
+  B2C:    'COMPANY_B2C',
+  IND_SP: 'INDIVIDUAL_SP',
+  IND_EE: 'EMPLOYEE',
+};
 
 @Injectable()
 export class OnboardingService {
@@ -26,13 +35,52 @@ export class OnboardingService {
 
   async getStatus(userId: string) {
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+
+    const complete = user.onboardingComplete ?? false;
+    let stage: OnboardingStage;
+
+    if (complete) {
+      stage = 'complete';
+    } else {
+      stage = this.computeNextStage(user);
+    }
+
     return {
-      stage: user.onboardingStage ?? 'language',
+      stage,
       emailVerified: user.emailVerified,
       mobileVerified: user.mobileVerified,
+      categoryCode: (user as any).categoryCode ?? null,
+      subcategoryCode: (user as any).subcategoryCode ?? null,
+      verticalCode: (user as any).verticalCode ?? null,
+      brandCode: (user as any).brandCode ?? null,
       locale: user.preferredLocale ?? 'en',
-      complete: user.onboardingComplete ?? false,
+      complete,
     };
+  }
+
+  private computeNextStage(user: any): OnboardingStage {
+    // Language: skip if locale already set (e.g. from registration)
+    if (!user.preferredLocale) return 'language';
+
+    // Email OTP: always required
+    if (!user.emailVerified) return 'email_otp';
+
+    // Mobile OTP: use stored stage as skip indicator (skipMobile advances stored stage past mobile_otp).
+    // If the stored stage is an old/unknown value (indexOf returns -1), treat as past mobile_otp.
+    const storedStage = user.onboardingStage ?? 'language';
+    const rawIdx = STAGE_ORDER.indexOf(storedStage as OnboardingStage);
+    const storedIdx = rawIdx === -1 ? STAGE_ORDER.length : rawIdx;
+    const mobileIdx = STAGE_ORDER.indexOf('mobile_otp');
+    if (storedIdx <= mobileIdx && !user.mobileVerified) return 'mobile_otp';
+
+    // User type: skip if categoryCode already set (from registration)
+    if (!user.categoryCode) return 'user_type';
+
+    // Sub-type: skip if subcategoryCode already set (from registration)
+    if (!user.subcategoryCode) return 'sub_user_type';
+
+    // Everything set → profile redirect
+    return 'profile_redirect';
   }
 
   async selectLocale(userId: string, locale: OnboardingLocale) {
@@ -89,21 +137,20 @@ export class OnboardingService {
       userId,
     });
 
-    const nextStage: OnboardingStage = type === 'email' ? 'mobile_otp' : 'user_type';
-
     if (type === 'email') {
       await this.prisma.user.update({
         where: { id: userId },
-        data: { emailVerified: true, emailVerifiedAt: new Date(), onboardingStage: nextStage },
+        data: { emailVerified: true, emailVerifiedAt: new Date(), onboardingStage: 'mobile_otp' },
       });
     } else {
       await this.prisma.user.update({
         where: { id: userId },
-        data: { mobileVerified: true, mobileVerifiedAt: new Date(), onboardingStage: nextStage },
+        data: { mobileVerified: true, mobileVerifiedAt: new Date(), onboardingStage: 'user_type' },
       });
     }
 
-    return { verified: true, nextStage };
+    const updated = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    return { verified: true, nextStage: this.computeNextStage(updated) };
   }
 
   async skipMobile(userId: string) {
@@ -115,23 +162,32 @@ export class OnboardingService {
   }
 
   async selectUserType(userId: string, userType: OnboardingUserType) {
+    const canonicalCode = USER_TYPE_TO_CATEGORY[userType] ?? userType;
     await this.prisma.user.update({
       where: { id: userId },
-      data: { categoryCode: userType, onboardingStage: 'vertical_profile' },
+      data: { categoryCode: canonicalCode, onboardingStage: 'sub_user_type' } as any,
     });
-    return { nextStage: 'vertical_profile' as OnboardingStage };
+    return { nextStage: 'sub_user_type' as OnboardingStage };
+  }
+
+  async setSubType(userId: string, dto: SetSubTypeDto) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { subcategoryCode: dto.subTypeCode, onboardingStage: 'profile_redirect' } as any,
+    });
+    return { nextStage: 'profile_redirect' as OnboardingStage };
   }
 
   async completeProfile(userId: string, dto: CompleteProfileDto) {
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        verticalCode: dto.verticalCode,
-        registrationFields: (dto.profileFields ?? {}) as any,
-        onboardingComplete: true,
-        onboardingStage: 'complete',
-      },
-    });
+    const data: any = {
+      onboardingComplete: true,
+      onboardingStage: 'complete',
+      registrationFields: (dto.profileFields ?? {}) as any,
+    };
+    if (dto.verticalCode) {
+      data.verticalCode = dto.verticalCode;
+    }
+    await this.prisma.user.update({ where: { id: userId }, data });
     return { success: true, redirectTo: '/dashboard' };
   }
 

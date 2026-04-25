@@ -9,7 +9,8 @@ import { StageLanguage } from './stages/StageLanguage';
 import { StageEmailOtp } from './stages/StageEmailOtp';
 import { StageMobileOtp } from './stages/StageMobileOtp';
 import { StageUserType } from './stages/StageUserType';
-import { StageVerticalProfile } from './stages/StageVerticalProfile';
+import { StageSubUserType } from './stages/StageSubUserType';
+import { StageProfileRedirect } from './stages/StageProfileRedirect';
 import { useAuthStore } from '@/stores/auth.store';
 import type { OnboardingStage } from './user-onboarding.service';
 
@@ -18,7 +19,8 @@ const STAGE_ORDER: OnboardingStage[] = [
   'email_otp',
   'mobile_otp',
   'user_type',
-  'vertical_profile',
+  'sub_user_type',
+  'profile_redirect',
 ];
 
 export function OnboardingDialog() {
@@ -30,11 +32,8 @@ export function OnboardingDialog() {
     if (token) fetchStatus();
   }, [token, fetchStatus]);
 
-  // Not authenticated yet
   if (!token) return null;
-  // Still loading first fetch
   if (!status && loading) return null;
-  // No status or already complete
   if (!status || status.complete) return null;
 
   const steps = [
@@ -42,7 +41,8 @@ export function OnboardingDialog() {
     { key: 'email_otp' as const, label: t('stages.emailOtp') },
     { key: 'mobile_otp' as const, label: t('stages.mobileOtp') },
     { key: 'user_type' as const, label: t('stages.userType') },
-    { key: 'vertical_profile' as const, label: t('stages.verticalProfile') },
+    { key: 'sub_user_type' as const, label: t('stages.subUserType') },
+    { key: 'profile_redirect' as const, label: t('stages.profileSetup') },
   ];
 
   const currentIdx = STAGE_ORDER.indexOf(status.stage as OnboardingStage);
@@ -88,7 +88,8 @@ export function OnboardingDialog() {
         {status.stage === 'email_otp' && <StageEmailOtp />}
         {status.stage === 'mobile_otp' && <StageMobileOtp />}
         {status.stage === 'user_type' && <StageUserType />}
-        {status.stage === 'vertical_profile' && <StageVerticalProfile />}
+        {status.stage === 'sub_user_type' && <StageSubUserType />}
+        {status.stage === 'profile_redirect' && <StageProfileRedirect />}
       </div>
     </Modal>
   );

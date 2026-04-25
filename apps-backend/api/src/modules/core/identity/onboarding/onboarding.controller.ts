@@ -4,7 +4,7 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
 import { OnboardingService } from './onboarding.service';
-import { SelectLocaleDto, SendOtpDto, VerifyOtpDto, SelectUserTypeDto, CompleteProfileDto } from './dto/onboarding.dto';
+import { SelectLocaleDto, SendOtpDto, VerifyOtpDto, SelectUserTypeDto, SetSubTypeDto, CompleteProfileDto } from './dto/onboarding.dto';
 import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { ApiResponse } from '../../../../common/utils/api-response';
@@ -89,9 +89,22 @@ export class OnboardingController {
     );
   }
 
+  @Post('sub-type')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Stage 5 — select sub-type (DMC, Agent, etc.)' })
+  async setSubType(
+    @CurrentUser('id') userId: string,
+    @Body() dto: SetSubTypeDto,
+  ) {
+    return ApiResponse.success(
+      await this.onboarding.setSubType(userId, dto),
+      'Sub-type saved',
+    );
+  }
+
   @Post('complete-profile')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Stage 5 — complete profile and finish onboarding' })
+  @ApiOperation({ summary: 'Complete profile and finish onboarding' })
   async completeProfile(
     @CurrentUser('id') userId: string,
     @Body() dto: CompleteProfileDto,

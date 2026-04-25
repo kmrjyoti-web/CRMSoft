@@ -28,9 +28,15 @@ export class SelectUserTypeDto {
   userType: OnboardingUserType;
 }
 
-export class CompleteProfileDto {
+export class SetSubTypeDto {
   @IsString()
-  verticalCode: string;
+  subTypeCode: string;
+}
+
+export class CompleteProfileDto {
+  @IsOptional()
+  @IsString()
+  verticalCode?: string;
 
   @IsOptional()
   @IsObject()

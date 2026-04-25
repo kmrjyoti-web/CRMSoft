@@ -7,7 +7,12 @@
       "emailOtp": "Verify email",
       "mobileOtp": "Verify mobile",
       "userType": "User type",
-      "verticalProfile": "Profile"
+      "subUserType": "Sub-type",
+      "profileSetup": "Profile"
+    },
+    "subUserType": {
+      "title": "What kind of business?",
+      "subtitle": "Select the option that best describes your role."
     },
     "language": {
       "title": "Choose your language",

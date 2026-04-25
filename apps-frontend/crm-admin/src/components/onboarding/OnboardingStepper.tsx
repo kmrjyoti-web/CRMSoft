@@ -5,7 +5,8 @@ export type OnboardingStageKey =
   | 'email_otp'
   | 'mobile_otp'
   | 'user_type'
-  | 'vertical_profile';
+  | 'sub_user_type'
+  | 'profile_redirect';
 
 interface StepDef {
   key: OnboardingStageKey;
