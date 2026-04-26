@@ -154,7 +154,7 @@ export class TemplateCrudService {
       `Setting default template: ${templateId} for tenant ${tenantId}, type ${documentType}`,
     );
 
-    await this.prisma.$transaction(async (tx: any) => {
+    await this.prisma.safeTransaction(async (tx: any) => {
       // Unset existing default customization for this tenant + type
       const existingDefaults = await tx.tenantTemplateCustomization.findMany({
         where: {

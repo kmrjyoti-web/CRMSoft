@@ -13,7 +13,7 @@ export class SetFieldValueHandler
 
   async execute(cmd: SetFieldValueCommand) {
     try {
-      const results = await this.prisma.$transaction(async (tx: any) => {
+      const results = await this.prisma.safeTransaction(async (tx: any) => {
         const saved: any[] = [];
         for (const v of cmd.values) {
           const existing = await tx.entityConfigValue.findFirst({

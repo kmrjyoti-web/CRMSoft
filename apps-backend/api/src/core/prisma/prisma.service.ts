@@ -245,6 +245,27 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this._globalWorking.$transaction.bind(this._globalWorking);
   }
 
+  /**
+   * Tenant-safe interactive transaction.
+   * Prisma gives raw `tx` inside $transaction callbacks — extension is not applied.
+   * This method re-wraps `tx` with the tenant extension before passing to `fn`.
+   * Use this instead of prisma.$transaction(async (tx) => {...}) for tenant-scoped tables.
+   */
+  async safeTransaction<T>(
+    fn: (tx: WorkingClient) => Promise<T>,
+    options?: { maxWait?: number; timeout?: number; isolationLevel?: any },
+  ): Promise<T> {
+    return (this._globalWorking as any).$transaction(async (rawTx: any) => {
+      let tx: WorkingClient = rawTx;
+      if (this.tenantContext && typeof rawTx.$extends === 'function') {
+        tx = rawTx.$extends(
+          createTenantAwareExtension(this.tenantContext),
+        ) as unknown as WorkingClient;
+      }
+      return fn(tx);
+    }, options);
+  }
+
   get $executeRaw() {
     return this._globalWorking.$executeRaw.bind(this._globalWorking);
   }

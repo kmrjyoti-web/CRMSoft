@@ -18,7 +18,7 @@ export class CloneWorkflowHandler implements ICommandHandler<CloneWorkflowComman
       });
       if (!source) throw new NotFoundException(`Source workflow "${cmd.sourceId}" not found`);
 
-      return this.prisma.$transaction(async (tx: any) => {
+      return this.prisma.safeTransaction(async (tx: any) => {
         const clone = await tx.workflow.create({
           data: {
             name: `${source.name} (Copy)`,

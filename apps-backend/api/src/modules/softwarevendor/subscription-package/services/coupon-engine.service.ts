@@ -160,7 +160,7 @@ export class CouponEngineService {
     if (!coupon) throw new NotFoundException('Coupon not found');
 
     // Create redemption and increment in a transaction
-    return this.prisma.$transaction(async (tx: any) => {
+    return this.prisma.safeTransaction(async (tx: any) => {
       const redemption = await tx.couponRedemption.create({
         data: {
           couponId: coupon.id,
