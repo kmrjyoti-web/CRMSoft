@@ -83,10 +83,21 @@ model ErrorCatalog {
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
 
+  // M1 additions
+  partnerId             String? @map("partner_id") @db.Uuid
+  brandId               String? @map("brand_id") @db.Uuid
+  crmEditionId          String? @map("crm_edition_id") @db.Uuid
+  verticalId            String? @map("vertical_id") @db.Uuid
+  moduleCode            String? @map("module_code") @db.VarChar(50)
+  helpTextI18n          Json    @default("{}") @map("help_text")
+  helpUrlI18n           Json    @default("{}") @map("help_url_i18n")
+  suggestions           Json    @default("{}")
+  isCustomerOverridable Boolean @default(true) @map("is_customer_overridable")
+
   @@index([layer, module])
   @@index([severity])
   @@index([httpStatus])
-  @@map("gv_cfg_error_catalog")
+  @@map("pc_error_catalog")
 }
 
 model ModuleDefinition {
@@ -179,10 +190,14 @@ model BusinessTypeRegistry {
   createdAt            DateTime         @default(now()) @map("created_at")
   updatedAt            DateTime         @updatedAt @map("updated_at")
 
+  // M1 additions
+  crmEditionId String? @map("crm_edition_id") @db.Uuid
+  shortCode    String? @map("short_code") @db.VarChar(10)
+
   // [cross-db removed] tenants          Tenant[]
   industryPackages IndustryPackage[]
 
-  @@map("gv_cfg_business_type_registry")
+  @@map("pc_vertical")
 }
 
 model IndustryPackage {
@@ -431,12 +446,25 @@ model PageRegistry {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  // M1 additions
+  pageCode        String?  @unique @map("page_code") @db.VarChar(255)
+  version         Int      @default(1)
+  isLatestVersion Boolean  @default(true) @map("is_latest_version")
+  parentVersionId String?  @map("parent_version_id") @db.Uuid
+  isDemoReady     Boolean  @default(false) @map("is_demo_ready")
+  demoNotes       String?  @map("demo_notes")
+  partnerIds      Json     @default("[]") @map("partner_ids")
+  brandIds        Json     @default("[]") @map("brand_ids")
+  crmEditionIds   Json     @default("[]") @map("crm_edition_ids")
+  verticalIds     Json     @default("[]") @map("vertical_ids")
+  tags            Json     @default("[]")
+
   @@index([portal])
   @@index([moduleCode])
   @@index([category])
   @@index([pageType])
   @@index([industryCode])
-  @@map("gv_cfg_page_registry")
+  @@map("pc_page_registry")
 }
 
 model AppVersion {
@@ -599,10 +627,24 @@ model SystemFieldMaster {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt      @map("updated_at")
 
+  // M1 additions
+  partnerId             String? @map("partner_id") @db.Uuid
+  brandId               String? @map("brand_id") @db.Uuid
+  crmEditionId          String? @map("crm_edition_id") @db.Uuid
+  verticalId            String? @map("vertical_id") @db.Uuid
+  moduleCode            String? @map("module_code") @db.VarChar(50)
+  configType            String? @map("config_type") @db.VarChar(20)
+  configRules           Json    @default("{}") @map("config_rules")
+  translations          Json    @default("{}")
+  isCustomerToggleable  Boolean @default(false) @map("is_customer_toggleable")
+  isCustomerOverridable Boolean @default(false) @map("is_customer_overridable")
+  version               Int     @default(1)
+  isLatestVersion       Boolean @default(true) @map("is_latest_version")
+
   @@unique([fieldCode, tenantId])
   @@index([fieldGroup])
   @@index([tenantId, fieldCode])
-  @@map("gv_cfg_system_field_master")
+  @@map("pc_system_config")
 }
 
 model GvCfgVertical {

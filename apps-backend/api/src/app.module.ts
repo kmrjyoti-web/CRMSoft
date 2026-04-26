@@ -112,6 +112,8 @@ import { OnboardingModule } from './modules/core/identity/onboarding/onboarding.
 // TODO: create module — system-field
 // import { SystemFieldModule } from './modules/core/system-field/system-field.module';
 import { PlatformConsoleModule } from './modules/platform-console';
+import { RedisCacheModule } from './modules/core/cache/cache.module';
+import { PcConfigModule } from './modules/core/pc-config/pc-config.module';
 // TODO: create module — ai-apps
 // import { AiAppsModule } from './modules/softwarevendor/ai-apps/ai-apps.module';
 import { BullModule } from '@nestjs/bull';
@@ -228,6 +230,8 @@ import { TenantAuditMiddleware } from './modules/core/identity/tenant/infrastruc
     // ReferenceDataModule, // TODO: create module
     // SystemFieldModule, // TODO: create module
     PlatformConsoleModule,
+    RedisCacheModule,
+    PcConfigModule,
     // AiAppsModule, // TODO: create module
     ErrorsModule,
   ],

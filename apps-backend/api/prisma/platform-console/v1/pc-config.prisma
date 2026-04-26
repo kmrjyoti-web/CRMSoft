@@ -1,0 +1,161 @@
+// PlatformConsoleDB — Pc* config tables (Sprint M1/M2)
+// Models: PcPartner, PcSubType, PcCombinedCode, PcPageAccess,
+//         PcOnboardingStage, PcRegistrationField, PcBrandEdition, PcBrandVertical
+
+model PcPartner {
+  id            String    @id @default(uuid()) @db.Uuid
+  code          String    @unique
+  shortCode     String    @unique @map("short_code") @db.VarChar(20)
+  name          String
+  description   String?
+  ownerEmail    String    @map("owner_email")
+  licenseLevel  String?   @map("license_level")
+  licenseExpiry DateTime? @map("license_expiry")
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("pc_partner")
+}
+
+model PcSubType {
+  id                 String    @id @default(uuid()) @db.Uuid
+  code               String    @unique @db.VarChar(100)
+  shortCode          String    @map("short_code") @db.VarChar(20)
+  name               String    @db.VarChar(255)
+  description        String?
+  iconUrl            String?   @map("icon_url") @db.VarChar(500)
+  level              Int       @default(1)
+  parentId           String?   @map("parent_id") @db.Uuid
+  parent             PcSubType?  @relation("SubTypeHierarchy", fields: [parentId], references: [id])
+  children           PcSubType[] @relation("SubTypeHierarchy")
+  verticalId         String    @map("vertical_id") @db.Uuid
+  userType           String    @map("user_type") @db.VarChar(20)
+  translations       Json      @default("{}")
+  defaultModules     Json      @default("[]") @map("default_modules")
+  registrationFields Json      @default("[]") @map("registration_fields")
+  isActive           Boolean   @default(true) @map("is_active")
+  sortOrder          Int       @default(0) @map("sort_order")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  @@unique([verticalId, userType, code])
+  @@index([verticalId])
+  @@map("pc_subtype")
+}
+
+model PcCombinedCode {
+  id               String   @id @default(uuid()) @db.Uuid
+  code             String   @unique @db.VarChar(150)
+  partnerId        String   @map("partner_id") @db.Uuid
+  brandId          String   @map("brand_id")
+  crmEditionId     String   @map("crm_edition_id") @db.Uuid
+  verticalId       String   @map("vertical_id")
+  userType         String   @map("user_type") @db.VarChar(20)
+  subTypeId        String   @map("sub_type_id") @db.Uuid
+  displayName      String   @map("display_name") @db.VarChar(255)
+  description      String?
+  modulesEnabled   Json     @default("[]") @map("modules_enabled")
+  marketplaceRules Json     @default("{}") @map("marketplace_rules")
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  pageAccesses PcPageAccess[]
+
+  @@index([brandId])
+  @@index([crmEditionId])
+  @@map("pc_combined_code")
+}
+
+model PcPageAccess {
+  id             String         @id @default(uuid()) @db.Uuid
+  combinedCodeId String         @map("combined_code_id") @db.Uuid
+  combinedCode   PcCombinedCode @relation(fields: [combinedCodeId], references: [id])
+  pageRegistryId String         @map("page_registry_id")
+  fullCode       String?        @unique @map("full_code")
+  canRead        Boolean        @default(true) @map("can_read")
+  canCreate      Boolean        @default(false) @map("can_create")
+  canUpdate      Boolean        @default(false) @map("can_update")
+  canDelete      Boolean        @default(false) @map("can_delete")
+  canExport      Boolean        @default(false) @map("can_export")
+  fieldOverrides Json           @default("[]") @map("field_overrides")
+  customActions  Json           @default("[]") @map("custom_actions")
+  isEnabled      Boolean        @default(true) @map("is_enabled")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  @@unique([combinedCodeId, pageRegistryId])
+  @@index([fullCode])
+  @@map("pc_page_access")
+}
+
+model PcOnboardingStage {
+  id              String   @id @default(uuid()) @db.Uuid
+  combinedCodeId  String?  @map("combined_code_id") @db.Uuid
+  stageKey        String   @map("stage_key") @db.VarChar(50)
+  stageLabel      String   @map("stage_label") @db.VarChar(255)
+  componentName   String   @map("component_name") @db.VarChar(255)
+  sortOrder       Int      @default(0) @map("sort_order")
+  skipIfFieldSet  String?  @map("skip_if_field_set") @db.VarChar(100)
+  required        Boolean  @default(true)
+  translations    Json     @default("{}")
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@unique([combinedCodeId, stageKey])
+  @@index([combinedCodeId])
+  @@map("pc_onboarding_stage")
+}
+
+model PcRegistrationField {
+  id             String   @id @default(uuid()) @db.Uuid
+  combinedCodeId String   @map("combined_code_id") @db.Uuid
+  fieldKey       String   @map("field_key") @db.VarChar(100)
+  fieldType      String   @map("field_type") @db.VarChar(30)
+  label          String   @db.VarChar(255)
+  placeholder    String?  @db.VarChar(255)
+  helpText       String?  @map("help_text")
+  required       Boolean  @default(false)
+  options        Json?
+  validation     Json?
+  showWhen       Json?    @map("show_when")
+  translations   Json     @default("{}")
+  sortOrder      Int      @default(0) @map("sort_order")
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@unique([combinedCodeId, fieldKey])
+  @@index([combinedCodeId])
+  @@map("pc_registration_field")
+}
+
+model PcBrandEdition {
+  id           String   @id @default(uuid()) @db.Uuid
+  brandId      String   @map("brand_id")
+  crmEditionId String   @map("crm_edition_id") @db.Uuid
+  isPrimary    Boolean  @default(false) @map("is_primary")
+  sortOrder    Int      @default(0) @map("sort_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@unique([brandId, crmEditionId])
+  @@index([brandId])
+  @@index([crmEditionId])
+  @@map("pc_brand_edition")
+}
+
+model PcBrandVertical {
+  id         String   @id @default(uuid()) @db.Uuid
+  brandId    String   @map("brand_id")
+  verticalId String   @map("vertical_id")
+  isPrimary  Boolean  @default(false) @map("is_primary")
+  sortOrder  Int      @default(0) @map("sort_order")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([brandId, verticalId])
+  @@index([brandId])
+  @@index([verticalId])
+  @@map("pc_brand_vertical")
+}

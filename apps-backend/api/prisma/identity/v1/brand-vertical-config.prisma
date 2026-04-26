@@ -1,5 +1,5 @@
 // IdentityDB — Brand + Vertical + Partner configuration
-// Models: GvCfgBrand, GvCfgVertical, GvCfgPartner
+// Models: GvCfgBrand (→ pc_brand), GvCfgVertical (→ pc_crm_edition), GvCfgPartner
 
 model GvCfgBrand {
   id          String  @id @default(uuid())
@@ -16,6 +16,13 @@ model GvCfgBrand {
   defaultRedirectByRole Json    @default("{}") @map("default_redirect_by_role")
   menuOverrides         Json?   @map("menu_overrides")
 
+  // M1 additions
+  partnerId    String? @map("partner_id") @db.Uuid
+  shortCode    String? @unique @map("short_code") @db.VarChar(10)
+  layoutFolder String? @map("layout_folder") @db.VarChar(255)
+  themeId      String? @map("theme_id") @db.VarChar(255)
+  isPublic     Boolean @default(false) @map("is_public")
+
   isActive Boolean @default(true) @map("is_active")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -23,7 +30,7 @@ model GvCfgBrand {
 
   mappings UserCompanyMapping[]
 
-  @@map("gv_cfg_brands")
+  @@map("pc_brand")
   @@index([code])
   @@index([isActive])
 }
@@ -40,6 +47,11 @@ model GvCfgVertical {
   terminology      Json @default("{}")
   defaultDashboard Json @default("[]") @map("default_dashboard")
 
+  // M1 additions
+  shortCode        String? @unique @map("short_code") @db.VarChar(10)
+  defaultModulesV2 Json    @default("[]") @map("default_modules_v2")
+  isBuilt          Boolean @default(false) @map("is_built")
+
   isActive Boolean @default(true) @map("is_active")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -47,7 +59,7 @@ model GvCfgVertical {
 
   mappings UserCompanyMapping[]
 
-  @@map("gv_cfg_verticals")
+  @@map("pc_crm_edition")
   @@index([code])
   @@index([isActive])
 }
