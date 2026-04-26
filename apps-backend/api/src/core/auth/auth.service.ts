@@ -305,7 +305,7 @@ export class AuthService {
 
     if (!requiresApproval) {
       const companyId = companyResult?.company?.id;
-      const tokens = await this.generateTokens(user.id, user.email, role.name, user.userType, user.tenantId, companyId, { companyRole: 'OWNER' });
+      const tokens = await this.generateTokens(user.id, user.email, role.name, user.userType, user.tenantId, companyId, { companyRole: 'OWNER', combinedCode: (data.registrationFields as any)?._combinedCode ?? null });
       return {
         user: this.mapUserResponse(user),
         requiresApproval: false,
@@ -786,10 +786,11 @@ export class AuthService {
     const talentId = (user as any).talentId ?? null;
 
     const purpose = companyId ? undefined : 'dashboard';
+    const activeCombinedCode = ((user as any).registrationFields as any)?._combinedCode ?? null;
 
     const tokens = await this.generateTokens(
       user.id, user.email, user.role.name, user.userType, user.tenantId, companyId,
-      { talentId, brandCode: activeBrandCode, purpose, companyRole: activeCompanyRole },
+      { talentId, brandCode: activeBrandCode, purpose, companyRole: activeCompanyRole, combinedCode: activeCombinedCode },
     );
 
     const redirectPath = '/dashboard';
@@ -873,7 +874,7 @@ export class AuthService {
   private async generateTokens(
     id: string, email: string, role: string, userType: string, tenantId: string,
     companyId?: string,
-    opts?: { talentId?: string | null; brandCode?: string | null; purpose?: string; companyRole?: string | null },
+    opts?: { talentId?: string | null; brandCode?: string | null; purpose?: string; companyRole?: string | null; combinedCode?: string | null },
   ) {
     // Backward-compat: CUSTOMER/TRAVELER users have tenantId='' in DB (no dedicated tenant yet).
     // Fall back to DEFAULT_TENANT_ID so legacy endpoints don't see an empty tenantId.
@@ -894,6 +895,7 @@ export class AuthService {
       ...(opts?.brandCode && { brandCode: opts.brandCode }),
       ...(opts?.purpose && { purpose: opts.purpose }),
       ...(opts?.companyRole && { companyRole: opts.companyRole }),
+      ...(opts?.combinedCode && { combinedCode: opts.combinedCode }),
       ...(isSuperAdmin && { isSuperAdmin: true }),
     };
     const [accessToken, refreshToken] = await Promise.all([

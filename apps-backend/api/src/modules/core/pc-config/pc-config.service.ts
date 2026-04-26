@@ -414,6 +414,36 @@ export class PcConfigService {
   }
 
   // ═══════════════════════════════════════════
+  // M7: PAGE ACCESS (per combined-code)
+  // ═══════════════════════════════════════════
+
+  async getMyAccess(combinedCode: string | null) {
+    if (!combinedCode) {
+      return { combinedCode: null, allowAll: true, pages: [] };
+    }
+
+    const cacheKey = `config:pc_page_access:${combinedCode}`;
+    return this.cache.wrap(cacheKey, async () => {
+      const cc = await this.pcDb.pcCombinedCode.findFirst({ where: { code: combinedCode } });
+      if (!cc) return { combinedCode, allowAll: true, pages: [] };
+
+      const rules = await this.pcDb.pcPageAccess.findMany({
+        where: { combinedCodeId: cc.id, isEnabled: true },
+        select: {
+          pageRegistryId: true,
+          canRead: true,
+          canCreate: true,
+          canUpdate: true,
+          canDelete: true,
+          canExport: true,
+        },
+      });
+
+      return { combinedCode, allowAll: false, pages: rules };
+    });
+  }
+
+  // ═══════════════════════════════════════════
   // CACHE MANAGEMENT
   // ═══════════════════════════════════════════
 

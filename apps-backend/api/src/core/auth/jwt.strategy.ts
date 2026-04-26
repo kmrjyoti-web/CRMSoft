@@ -17,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: {
     sub: string; email: string; role: string; userType: string;
     tenantId?: string; companyId?: string | null; isSharedTenant?: boolean; isSuperAdmin?: boolean;
-    talentId?: string; brandCode?: string; purpose?: string; companyRole?: string;
+    talentId?: string; brandCode?: string; purpose?: string; companyRole?: string; combinedCode?: string;
   }) {
     // Super admin — no User DB lookup needed
     if (payload.isSuperAdmin) {
@@ -97,6 +97,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       brandCode: payload.brandCode ?? null,
       purpose: payload.purpose ?? null,
       companyRole: payload.companyRole ?? null,
+      // M7 — combined_code context for pc_page_access checks
+      combinedCode: payload.combinedCode ?? null,
     };
   }
 }

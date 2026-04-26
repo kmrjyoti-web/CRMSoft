@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Body, Param, Query,
-  ConflictException, HttpCode, HttpStatus, UseGuards,
+  ConflictException, HttpCode, HttpStatus, UseGuards, Request,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { IsString, IsUUID, IsOptional, MinLength, IsArray, IsBoolean, IsInt, IsEmail } from 'class-validator';
@@ -172,6 +172,16 @@ export class PcConfigController {
   @Public() @Get('combined-codes')
   listCombinedCodes(@Query('brandCode') brandCode?: string) {
     return this.svc.listCombinedCodes(brandCode);
+  }
+
+  // ── M7: Per-user access (requires portal_token) ────────────────────────────
+
+  @Get('my-access')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'M7 — Get current user page access rules from pc_page_access' })
+  async getMyAccess(@Request() req: any) {
+    const combinedCode: string | null = req.user?.combinedCode ?? null;
+    return this.svc.getMyAccess(combinedCode);
   }
 
   // ── WRITE endpoints (admin-only) ──────────────────────────────────────────
