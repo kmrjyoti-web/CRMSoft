@@ -1,7 +1,10 @@
+import { Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/identity-client';
 import { TenantContextService } from './tenant-context.service';
 
-// Models that exist outside tenant boundaries — skip all injection
+const logger = new Logger('TenantMiddleware');
+
+// Models that exist outside tenant boundaries â€” skip all injection
 const GLOBAL_MODELS = new Set([
   'Tenant',
   'Plan',
@@ -20,6 +23,20 @@ const GLOBAL_MODELS = new Set([
   'VersionBackup',
 ]);
 
+/** Detect and log when a caller explicitly passes a different tenantId in the where clause */
+function detectCrossTenantAttempt(
+  params: { model?: string; action: string; args?: any },
+  contextTenantId: string,
+) {
+  const requestedTenantId = params.args?.where?.tenantId ?? params.args?.data?.tenantId;
+  if (requestedTenantId && requestedTenantId !== contextTenantId) {
+    logger.error(
+      `CROSS_TENANT_ATTEMPT model=${params.model} action=${params.action} ` +
+      `context=${contextTenantId} requested=${requestedTenantId}`,
+    );
+  }
+}
+
 export function createTenantMiddleware(
   tenantContext: TenantContextService,
 ): Prisma.Middleware {
@@ -31,10 +48,12 @@ export function createTenantMiddleware(
 
     const tenantId = tenantContext.getTenantId();
 
-    // No tenant context (seed scripts, public routes, super admin) — passthrough
+    // No tenant context (seed scripts, public routes, super admin) â€” passthrough
     if (!tenantId) {
       return next(params);
     }
+
+    detectCrossTenantAttempt(params, tenantId);
 
     switch (params.action) {
       case 'create':

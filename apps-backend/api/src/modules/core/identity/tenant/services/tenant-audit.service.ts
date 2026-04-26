@@ -207,6 +207,28 @@ export class TenantAuditService {
   }
 
   /* ------------------------------------------------------------------ */
+  /*  Security event logging                                            */
+  /* ------------------------------------------------------------------ */
+
+  logTenantLeakBlocked(tenantId: string, model: string, action: string) {
+    this.logger.warn(
+      `TENANT_LEAK_BLOCKED tenant=${tenantId} model=${model} action=${action}`,
+    );
+  }
+
+  logCrossTenantAttempt(
+    contextTenantId: string,
+    requestedTenantId: string,
+    model: string,
+    action: string,
+  ) {
+    this.logger.error(
+      `CROSS_TENANT_ATTEMPT context=${contextTenantId} requested=${requestedTenantId} ` +
+      `model=${model} action=${action}`,
+    );
+  }
+
+  /* ------------------------------------------------------------------ */
   /*  Activity logging (called by middleware)                            */
   /* ------------------------------------------------------------------ */
 

@@ -5,6 +5,7 @@ import { PrismaClient as WorkingClient } from '@prisma/working-client';
 import { PrismaClient as GlobalReferenceClient } from '.prisma/global-reference-client';
 import { PrismaClient as DemoClient } from '.prisma/demo-client';
 import { TenantContextService } from '../../modules/core/identity/tenant/infrastructure/tenant-context.service';
+import { createTenantMiddleware } from '../../modules/core/identity/tenant/infrastructure/prisma-tenant.middleware';
 import { createSoftDeleteMiddleware } from './soft-delete.middleware';
 
 /**
@@ -78,6 +79,14 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     // Register soft-delete middleware on the WorkingDB and DemoDB clients (business data)
     (this._globalWorking as any).$use(createSoftDeleteMiddleware());
     (this._demo as any).$use(createSoftDeleteMiddleware());
+
+    // Register tenant isolation middleware — auto-injects/filters tenantId on all queries
+    if (this.tenantContext) {
+      const tenantMiddleware = createTenantMiddleware(this.tenantContext);
+      (this._identity as any).$use(tenantMiddleware);
+      (this._globalWorking as any).$use(tenantMiddleware);
+      (this._demo as any).$use(tenantMiddleware);
+    }
 
     // Connect each DB independently � a single unreachable DB must not crash the app.
     // Prisma lazy-connects on the first query anyway; $connect() here is just an eager
