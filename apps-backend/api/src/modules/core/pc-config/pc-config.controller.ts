@@ -179,7 +179,7 @@ export class PcConfigController {
   @Post('partners')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'ADMIN')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'M3.5 — Create a new partner' })
   async createPartner(@Body() dto: CreatePartnerDto) {
     try {
@@ -193,7 +193,7 @@ export class PcConfigController {
   @Post('brands')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'ADMIN')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'M3.5 — Create a new brand' })
   async createBrand(@Body() dto: CreateBrandDto) {
     try {
@@ -207,7 +207,7 @@ export class PcConfigController {
   @Post('crm-editions')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'ADMIN')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'M3.5 — Create a new CRM edition' })
   async createCrmEdition(@Body() dto: CreateCrmEditionDto) {
     try {
@@ -221,7 +221,7 @@ export class PcConfigController {
   @Post('verticals')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'ADMIN')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'M3.5 — Create a new vertical' })
   async createVertical(@Body() dto: CreateVerticalDto) {
     try {
@@ -235,7 +235,7 @@ export class PcConfigController {
   @Post('sub-types')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'ADMIN')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'v2.3 — Create a new sub-type' })
   async createSubType(@Body() dto: CreateSubTypeDto) {
     try {
@@ -249,7 +249,7 @@ export class PcConfigController {
   @Post('combined-code')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'ADMIN')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'M3 — Create a new combined code (builder save action)' })
   async createCombinedCode(@Body() dto: CreateCombinedCodeDto) {
     try {
