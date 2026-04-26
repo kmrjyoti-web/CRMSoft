@@ -105,6 +105,7 @@ import { TenantAuditStatusController } from './presentation/tenant-audit-status.
 
 // Guards
 import { VendorGuard } from './infrastructure/vendor.guard';
+import { TenantJobHelper } from './infrastructure/tenant-job.helper';
 
 const CommandHandlers = [
   CreateTenantHandler,
@@ -212,6 +213,7 @@ const QueryHandlers = [
     FeatureFlagGuard,
     ModuleAccessGuard,
     VendorGuard,
+    TenantJobHelper,
     // CQRS
     ...CommandHandlers,
     ...QueryHandlers,
@@ -226,6 +228,7 @@ const QueryHandlers = [
     LicenseService,
     TenantActivityService,
     TenantAuditService,
+    TenantJobHelper,
   ],
 })
 export class TenantModule {}
