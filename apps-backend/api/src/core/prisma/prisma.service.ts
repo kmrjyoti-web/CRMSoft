@@ -6,6 +6,7 @@ import { PrismaClient as GlobalReferenceClient } from '.prisma/global-reference-
 import { PrismaClient as DemoClient } from '.prisma/demo-client';
 import { TenantContextService } from '../../modules/core/identity/tenant/infrastructure/tenant-context.service';
 import { createTenantMiddleware } from '../../modules/core/identity/tenant/infrastructure/prisma-tenant.middleware';
+import { createTenantAwareExtension } from '../../modules/core/identity/tenant/infrastructure/tenant-aware-prisma';
 import { createSoftDeleteMiddleware } from './soft-delete.middleware';
 
 /**
@@ -76,16 +77,22 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    // Register soft-delete middleware on the WorkingDB and DemoDB clients (business data)
+    // Tenant isolation via $extends on working/demo clients (business data layer)
+    // Applied BEFORE soft-delete so middleware stack order is: tenant → soft-delete → query
+    if (this.tenantContext) {
+      const ext = createTenantAwareExtension(this.tenantContext);
+      this._globalWorking = (this._globalWorking.$extends(ext)) as unknown as WorkingClient;
+      this._demo = (this._demo.$extends(ext)) as unknown as DemoClient;
+    }
+
+    // Soft-delete middleware on the (now-extended) working/demo clients
     (this._globalWorking as any).$use(createSoftDeleteMiddleware());
     (this._demo as any).$use(createSoftDeleteMiddleware());
 
-    // Register tenant isolation middleware — auto-injects/filters tenantId on all queries
+    // Identity client keeps $use middleware (exclusion-list approach for auth/RBAC models)
     if (this.tenantContext) {
       const tenantMiddleware = createTenantMiddleware(this.tenantContext);
       (this._identity as any).$use(tenantMiddleware);
-      (this._globalWorking as any).$use(tenantMiddleware);
-      (this._demo as any).$use(tenantMiddleware);
     }
 
     // Connect each DB independently � a single unreachable DB must not crash the app.
