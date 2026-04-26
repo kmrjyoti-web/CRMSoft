@@ -70,6 +70,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       businessTypeCode = tenant?.industryCode ?? undefined;
     }
 
+    // Shared-tenant users have empty tenant_id in DB; fall back to the
+    // tenantId minted at login time (set from the active company's tenant).
+    const effectiveTenantId = (user.tenantId && user.tenantId.trim())
+      ? user.tenantId
+      : (payload.tenantId ?? '');
+
     return {
       id: user.id,
       email: user.email,
@@ -81,7 +87,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       userType: user.userType,
       departmentId: user.departmentId,
       departmentPath: user.department?.path,
-      tenantId: user.tenantId,
+      tenantId: effectiveTenantId,
       // Person-centric fields (PR #44) — passed through from JWT
       companyId: payload.companyId ?? null,
       isSharedTenant: payload.isSharedTenant ?? !user.tenantId,
