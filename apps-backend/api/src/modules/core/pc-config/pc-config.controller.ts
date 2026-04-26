@@ -9,7 +9,7 @@ import { Type } from 'class-transformer';
 import { PcConfigService } from './pc-config.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
+import { Roles, Public } from '../../../common/decorators/roles.decorator';
 
 // ── DTOs ─────────────────────────────────────────────────────────────────────
 
@@ -81,29 +81,29 @@ class CreateCombinedCodeDto {
 export class PcConfigController {
   constructor(private readonly svc: PcConfigService) {}
 
-  // ── READ endpoints (public within authenticated session) ──────────────────
+  // ── READ endpoints (public — unauthenticated users need these for registration) ──
 
-  @Get('partners')
+  @Public() @Get('partners')
   listPartners() { return this.svc.listPartners(); }
 
-  @Get('partner/:code')
+  @Public() @Get('partner/:code')
   getPartner(@Param('code') code: string) { return this.svc.getPartner(code); }
 
-  @Get('crm-editions')
+  @Public() @Get('crm-editions')
   listCrmEditions() { return this.svc.listCrmEditions(); }
 
-  @Get('brands')
+  @Public() @Get('brands')
   listBrands() { return this.svc.listBrands(); }
 
-  @Get('brand/:code')
+  @Public() @Get('brand/:code')
   getBrand(@Param('code') code: string) { return this.svc.getBrand(code); }
 
-  @Get('verticals')
+  @Public() @Get('verticals')
   listVerticals(@Query('crmEdition') crmEdition?: string) {
     return this.svc.listVerticals(crmEdition);
   }
 
-  @Get('sub-types')
+  @Public() @Get('sub-types')
   listSubTypes(
     @Query('vertical') vertical: string,
     @Query('userType') userType?: string,
@@ -112,7 +112,7 @@ export class PcConfigController {
     return this.svc.listSubTypes(vertical, userType);
   }
 
-  @Get('suggest-code')
+  @Public() @Get('suggest-code')
   @ApiOperation({ summary: 'v2.3 — Auto-suggest code from name + uniqueness check' })
   suggestCode(
     @Query('name') name: string,
@@ -121,7 +121,7 @@ export class PcConfigController {
     return this.svc.suggestCode(name, type);
   }
 
-  @Get('check-code')
+  @Public() @Get('check-code')
   @ApiOperation({ summary: 'M3.5 — Real-time code uniqueness check' })
   async checkCode(
     @Query('code') code: string,
@@ -151,25 +151,25 @@ export class PcConfigController {
     return { code: normalised, type, available };
   }
 
-  @Get('combined-code/:code')
+  @Public() @Get('combined-code/:code')
   getCombinedCode(@Param('code') code: string) { return this.svc.getCombinedCode(code); }
 
-  @Get('registration-form')
+  @Public() @Get('registration-form')
   getRegistrationForm(@Query('combinedCode') combinedCode: string) {
     return this.svc.getRegistrationFields(combinedCode);
   }
 
-  @Get('onboarding-stages')
+  @Public() @Get('onboarding-stages')
   getOnboardingStages(@Query('combinedCode') combinedCode?: string) {
     return this.svc.getOnboardingStages(combinedCode);
   }
 
-  @Get('page-registry')
+  @Public() @Get('page-registry')
   listPageRegistry(@Query('portal') portal?: string) {
     return this.svc.listPageRegistry(portal);
   }
 
-  @Get('combined-codes')
+  @Public() @Get('combined-codes')
   listCombinedCodes(@Query('brandCode') brandCode?: string) {
     return this.svc.listCombinedCodes(brandCode);
   }
