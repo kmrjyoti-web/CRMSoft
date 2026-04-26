@@ -37,6 +37,24 @@ export interface SubTypeOption {
   requiresApproval: boolean;
 }
 
+// ── M5: Config-driven status ──────────────────────────────────────────────────
+
+export interface OnboardingStageV2 {
+  stageKey: string;
+  stageLabel: string;
+  componentName: string;
+  required: boolean;
+  completed: boolean;
+}
+
+export interface OnboardingStatusV2 {
+  stages: OnboardingStageV2[];
+  currentStage: string | null;
+  complete: boolean;
+  totalStages: number;
+  combinedCode: string | null;
+}
+
 export const userOnboardingService = {
   getStatus: (): Promise<OnboardingStatus> =>
     api.get('/api/v1/onboarding/status').then((r) => r.data.data),
@@ -70,4 +88,11 @@ export const userOnboardingService = {
     api
       .post('/api/v1/onboarding/complete-profile', { profileFields, ...(verticalCode ? { verticalCode } : {}) })
       .then(() => undefined),
+
+  // M5 — config-driven
+  getStatusV2: (): Promise<OnboardingStatusV2> =>
+    api.get('/api/v1/onboarding/status-v2').then((r) => r.data.data),
+
+  completeCustomStage: (stageKey: string, data?: Record<string, any>): Promise<void> =>
+    api.post(`/api/v1/onboarding/custom-stage/${stageKey}/complete`, data ?? {}).then(() => undefined),
 };

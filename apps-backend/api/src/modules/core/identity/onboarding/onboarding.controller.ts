@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Body, UseGuards, HttpCode, HttpStatus, Req,
+  Controller, Get, Post, Body, UseGuards, HttpCode, HttpStatus, Req, Param,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -22,6 +22,26 @@ export class OnboardingController {
   @ApiOperation({ summary: 'Get onboarding status for current user' })
   async getStatus(@CurrentUser('id') userId: string) {
     return ApiResponse.success(await this.onboarding.getStatus(userId));
+  }
+
+  @Get('status-v2')
+  @ApiOperation({ summary: 'M5 — Config-driven status with componentName + per-brand stages' })
+  async getStatusV2(@CurrentUser('id') userId: string) {
+    return ApiResponse.success(await this.onboarding.getStatusV2(userId));
+  }
+
+  @Post('custom-stage/:stageKey/complete')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'M5 — Complete a custom (non-standard) onboarding stage' })
+  async completeCustomStage(
+    @CurrentUser('id') userId: string,
+    @Param('stageKey') stageKey: string,
+    @Body() data: Record<string, any>,
+  ) {
+    return ApiResponse.success(
+      await this.onboarding.completeCustomStage(userId, stageKey, data),
+      'Stage completed',
+    );
   }
 
   @Post('locale')

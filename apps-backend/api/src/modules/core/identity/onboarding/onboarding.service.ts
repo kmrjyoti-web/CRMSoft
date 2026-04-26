@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { OtpService } from '../../../softwarevendor/verification/services/otp.service';
+import { PcConfigService } from '../../pc-config/pc-config.service';
 import { OtpPurpose } from '@prisma/identity-client';
 import type { OnboardingLocale, OtpType, OnboardingUserType, CompleteProfileDto, SetSubTypeDto } from './dto/onboarding.dto';
 
@@ -31,6 +32,7 @@ export class OnboardingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly otp: OtpService,
+    private readonly pcConfig: PcConfigService,
   ) {}
 
   async getStatus(userId: string) {
@@ -191,6 +193,84 @@ export class OnboardingService {
     }
     await this.prisma.user.update({ where: { id: userId }, data });
     return { success: true, redirectTo: '/dashboard' };
+  }
+
+  // ── M5: Config-driven status (reads from pc_onboarding_stage) ──────────────
+
+  async getStatusV2(userId: string) {
+    const v1 = await this.getStatus(userId);
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    const regFields = (user.registrationFields ?? {}) as Record<string, any>;
+    const combinedCode: string | null = regFields._combinedCode ?? null;
+    const completedCustom: string[] = regFields._completedStages ?? [];
+
+    const allStages: any[] = await this.pcConfig.getOnboardingStages(combinedCode ?? undefined);
+
+    // v1 status fields for skipIfFieldSet evaluation
+    const v1Fields: Record<string, any> = {
+      emailVerified: v1.emailVerified,
+      mobileVerified: v1.mobileVerified,
+      categoryCode: v1.categoryCode,
+      subcategoryCode: v1.subcategoryCode,
+    };
+
+    // Keep only stages where the skip condition is NOT met
+    const applicable = allStages.filter((s: any) => {
+      if (!s.skipIfFieldSet) return true;
+      return !v1Fields[s.skipIfFieldSet];
+    });
+
+    const currentV1Idx = STAGE_ORDER.indexOf(v1.stage as any);
+
+    const stages = applicable.map((s: any) => {
+      const isStandard = STAGE_ORDER.includes(s.stageKey);
+      let completed: boolean;
+      if (isStandard) {
+        // Standard stage: completed if v1 has moved past it
+        const stageIdx = STAGE_ORDER.indexOf(s.stageKey);
+        completed = v1.complete || (currentV1Idx !== -1 && stageIdx < currentV1Idx);
+      } else {
+        // Custom stage: completed if explicitly flagged
+        completed = completedCustom.includes(s.stageKey);
+      }
+      return {
+        stageKey: s.stageKey,
+        stageLabel: s.stageLabel,
+        componentName: s.componentName,
+        required: s.required,
+        completed,
+      };
+    });
+
+    // First incomplete stage = currentStage
+    const currentStageDef = stages.find((s) => !s.completed) ?? null;
+
+    return {
+      stages,
+      currentStage: currentStageDef?.stageKey ?? null,
+      complete: !currentStageDef,
+      totalStages: stages.length,
+      combinedCode,
+    };
+  }
+
+  async completeCustomStage(userId: string, stageKey: string, data?: Record<string, any>) {
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    const regFields = (user.registrationFields ?? {}) as Record<string, any>;
+    const completed: string[] = regFields._completedStages ?? [];
+    if (!completed.includes(stageKey)) completed.push(stageKey);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        registrationFields: {
+          ...regFields,
+          _completedStages: completed,
+          ...(data ? { [`_stage_${stageKey}`]: data } : {}),
+        } as any,
+      },
+    });
+    return { stageKey, completed: true };
   }
 
   private maskTarget(target: string, type: OtpType): string {
