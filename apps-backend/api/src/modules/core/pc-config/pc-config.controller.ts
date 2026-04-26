@@ -67,4 +67,16 @@ export class PcConfigController {
   getOnboardingStages(@Query('combinedCode') combinedCode?: string) {
     return this.svc.getOnboardingStages(combinedCode);
   }
+
+  // 11. GET /pc-config/page-registry?portal=crm
+  @Get('page-registry')
+  listPageRegistry(@Query('portal') portal?: string) {
+    return this.svc.listPageRegistry(portal);
+  }
+
+  // 12. GET /pc-config/combined-codes?brandCode=TRAVELSIS
+  @Get('combined-codes')
+  listCombinedCodes(@Query('brandCode') brandCode?: string) {
+    return this.svc.listCombinedCodes(brandCode);
+  }
 }

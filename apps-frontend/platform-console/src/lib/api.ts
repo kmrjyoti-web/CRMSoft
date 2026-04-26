@@ -339,6 +339,34 @@ export const api = {
     deleteFeature: (id: string) =>
       apiFetch(`/platform-console/creator/feature/${id}`, { method: 'DELETE' }),
   },
+  pcConfig: {
+    partners: () => apiFetch('/pc-config/partners'),
+    partner: (code: string) => apiFetch(`/pc-config/partner/${encodeURIComponent(code)}`),
+    brands: () => apiFetch('/pc-config/brands'),
+    brand: (code: string) => apiFetch(`/pc-config/brand/${encodeURIComponent(code)}`),
+    crmEditions: () => apiFetch('/pc-config/crm-editions'),
+    verticals: (crmEdition?: string) => {
+      const qs = crmEdition ? `?crmEdition=${encodeURIComponent(crmEdition)}` : '';
+      return apiFetch(`/pc-config/verticals${qs}`);
+    },
+    subTypes: (vertical: string, userType: string) =>
+      apiFetch(`/pc-config/sub-types?vertical=${encodeURIComponent(vertical)}&userType=${encodeURIComponent(userType)}`),
+    combinedCode: (code: string) => apiFetch(`/pc-config/combined-code/${encodeURIComponent(code)}`),
+    combinedCodes: (brandCode?: string) => {
+      const qs = brandCode ? `?brandCode=${encodeURIComponent(brandCode)}` : '';
+      return apiFetch(`/pc-config/combined-codes${qs}`);
+    },
+    pageRegistry: (portal?: string) => {
+      const qs = portal ? `?portal=${encodeURIComponent(portal)}` : '';
+      return apiFetch(`/pc-config/page-registry${qs}`);
+    },
+    registrationForm: (combinedCode: string) =>
+      apiFetch(`/pc-config/registration-form?combinedCode=${encodeURIComponent(combinedCode)}`),
+    onboardingStages: (combinedCode?: string) => {
+      const qs = combinedCode ? `?combinedCode=${encodeURIComponent(combinedCode)}` : '';
+      return apiFetch(`/pc-config/onboarding-stages${qs}`);
+    },
+  },
   menuEditor: {
     list: (verticalCode: string) => apiFetch(`/platform-console/menu-editor/${verticalCode}`),
     create: (verticalCode: string, data: Record<string, unknown>) =>

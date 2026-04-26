@@ -25,6 +25,9 @@ import {
   History,
   Palette,
   Plus,
+  Layers,
+  FileText,
+  Users,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useState } from 'react';
@@ -102,6 +105,20 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { label: 'Global Menu', icon: Menu, href: '/menus' },
       { label: 'New Item', icon: Menu, href: '/menus/new' },
+    ],
+  },
+  {
+    label: 'Governance', icon: Layers, href: '/governance',
+    children: [
+      { label: 'Overview', icon: LayoutDashboard, href: '/governance' },
+      { label: 'Code Builder', icon: Zap, href: '/governance/combined-codes/builder' },
+      { label: 'Combined Codes', icon: ListFilter, href: '/governance/combined-codes' },
+      { label: 'Partners', icon: Users, href: '/governance/partners' },
+      { label: 'Brands', icon: Palette, href: '/governance/brands' },
+      { label: 'CRM Editions', icon: Factory, href: '/governance/crm-editions' },
+      { label: 'Verticals', icon: Tag, href: '/governance/verticals' },
+      { label: 'Sub-Types', icon: Building2, href: '/governance/sub-types' },
+      { label: 'Page Registry', icon: FileText, href: '/governance/page-registry' },
     ],
   },
   {

@@ -216,6 +216,42 @@ export class PcConfigService {
   }
 
   // ═══════════════════════════════════════════
+  // PAGE REGISTRY
+  // ═══════════════════════════════════════════
+
+  async listPageRegistry(portal?: string) {
+    const cacheKey = `config:pc_page_registry:${portal ?? 'all'}`;
+    return this.cache.wrap(cacheKey, () =>
+      this.prisma.platform.pageRegistry.findMany({
+        where: { isActive: true, ...(portal ? { portal } : {}) },
+        select: {
+          id: true, pageCode: true, routePath: true, portal: true,
+          friendlyName: true, category: true, moduleCode: true,
+          pageType: true, isDemoReady: true, isActive: true,
+        },
+        orderBy: [{ portal: 'asc' }, { routePath: 'asc' }],
+      }),
+    );
+  }
+
+  // ═══════════════════════════════════════════
+  // COMBINED CODES LIST
+  // ═══════════════════════════════════════════
+
+  async listCombinedCodes(brandCode?: string) {
+    const cacheKey = `config:pc_combined_code:list:${brandCode ?? 'all'}`;
+    return this.cache.wrap(cacheKey, async () => {
+      if (brandCode) {
+        return this.listCombinedCodesForBrand(brandCode);
+      }
+      return this.pcDb.pcCombinedCode.findMany({
+        where: { isActive: true },
+        orderBy: { code: 'asc' },
+      });
+    });
+  }
+
+  // ═══════════════════════════════════════════
   // CACHE MANAGEMENT
   // ═══════════════════════════════════════════
 
