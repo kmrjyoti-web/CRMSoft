@@ -67,11 +67,12 @@ model UserCompanyMapping {
 
   logs UserCompanyMappingLog[]
 
-  brandCode            String?   @map("brand_code")
-  verticalCode         String?   @map("vertical_code")
-  partnerCode          String?   @map("partner_code")
-  lastAccessedAt       DateTime? @map("last_accessed_at")
-  redirectPathOverride String?   @map("redirect_path_override")
+  brandCode               String?   @map("brand_code")
+  verticalCode            String?   @map("vertical_code")
+  partnerCode             String?   @map("partner_code")
+  lastAccessedAt          DateTime? @map("last_accessed_at")
+  redirectPathOverride    String?   @map("redirect_path_override")
+  selectedBusinessModes   Json?     @default("[]") @map("selected_business_modes")
 
   brand    GvCfgBrand?    @relation(fields: [brandCode], references: [code])
   vertical GvCfgVertical? @relation(fields: [verticalCode], references: [code])

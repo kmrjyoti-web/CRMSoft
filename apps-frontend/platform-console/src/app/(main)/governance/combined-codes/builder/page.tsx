@@ -8,7 +8,10 @@ type Partner = { id: string; code: string; shortCode: string; name: string };
 type Brand = { id: string; code: string; shortCode?: string; name: string };
 type CrmEdition = { id: string; code: string; shortCode?: string; name: string };
 type Vertical = { id: string; typeCode: string; typeName: string };
-type SubType = { id: string; code: string; shortCode: string; name: string; userType: string };
+type SubType = {
+  id: string; code: string; shortCode: string; name: string; userType: string;
+  allowedBusinessModes: string[]; defaultBusinessMode?: string; businessModeRequired: boolean;
+};
 type CombinedCode = { id: string; code: string; displayName: string; description?: string; isActive: boolean };
 type RegField = { fieldKey: string; label: string; fieldType: string; required: boolean; sortOrder: number };
 type OnboardingStage = { stageKey: string; stageLabel: string; componentName: string; required: boolean };
@@ -33,6 +36,7 @@ export default function CombinedCodeBuilderPage() {
   const [vertical, setVertical] = useState('');
   const [userType, setUserType] = useState('');
   const [subType, setSubType] = useState('');
+  const [selectedModes, setSelectedModes] = useState<string[]>([]);
 
   const [result, setResult] = useState<CombinedCode | null | 'not-found'>(null);
   const [checking, setChecking] = useState(false);
@@ -70,12 +74,28 @@ export default function CombinedCodeBuilderPage() {
 
   // Load sub-types when vertical + userType change
   useEffect(() => {
-    if (!vertical || !userType) { setSubTypes([]); setSubType(''); return; }
+    if (!vertical || !userType) { setSubTypes([]); setSubType(''); setSelectedModes([]); return; }
     api.pcConfig.subTypes(vertical, userType).then((data) => {
       setSubTypes(Array.isArray(data) ? data as SubType[] : []);
       setSubType('');
+      setSelectedModes([]);
     }).catch(() => setSubTypes([]));
   }, [vertical, userType]);
+
+  // Auto-set modes when sub-type is selected (single-mode → auto-select; multi-mode → clear for user)
+  useEffect(() => {
+    if (!subTypeObj) { setSelectedModes([]); return; }
+    const modes = subTypeObj.allowedBusinessModes as string[];
+    if (modes.length === 1) {
+      setSelectedModes(modes); // auto-select the only option
+    } else if (modes.length === 0) {
+      setSelectedModes([]); // Traveler — no modes
+    } else {
+      // Pre-check default, let user adjust
+      setSelectedModes(subTypeObj.defaultBusinessMode ? [subTypeObj.defaultBusinessMode] : []);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subType]);
 
   const partnerObj = partners.find((p) => p.code === partner);
   const brandObj = brands.find((b) => b.code === brand);
@@ -83,7 +103,9 @@ export default function CombinedCodeBuilderPage() {
   const verticalObj = verticals.find((v) => v.typeCode === vertical);
   const subTypeObj = subTypes.find((s) => s.code === subType);
 
-  const complete = !!(partner && brand && edition && vertical && userType && subType && subTypeObj);
+  const modesRequired = subTypeObj?.businessModeRequired && (subTypeObj?.allowedBusinessModes as string[]).length > 1;
+  const modesComplete = !modesRequired || selectedModes.length > 0;
+  const complete = !!(partner && brand && edition && vertical && userType && subType && subTypeObj && modesComplete);
 
   // Compute the actual generated code string
   const generatedCode = useMemo(() => {
@@ -148,6 +170,7 @@ export default function CombinedCodeBuilderPage() {
         subTypeId: subTypeObj.id,
         displayName: `${brandObj.name} ${subTypeObj.name}`,
         description: `${brandObj.name} ${subTypeObj.name} (${userType})`,
+        businessModes: selectedModes,
       });
       setSaved(true);
       // Refresh lookup to show found state
@@ -160,7 +183,7 @@ export default function CombinedCodeBuilderPage() {
   };
 
   const resetAll = () => {
-    setPartner(''); setBrand(''); setEdition(''); setVertical(''); setUserType(''); setSubType('');
+    setPartner(''); setBrand(''); setEdition(''); setVertical(''); setUserType(''); setSubType(''); setSelectedModes([]);
     setResult(null); setRegFields([]); setStages([]); setSaved(false); setSaveError('');
   };
 
@@ -252,6 +275,29 @@ export default function CombinedCodeBuilderPage() {
             <p className="text-xs text-console-muted/60 py-1">{userType ? 'No sub-types available for this combination' : 'Select user type first'}</p>
           )}
         </Step>
+
+        {/* 7 — Business Mode (conditional) */}
+        {subTypeObj && (subTypeObj.allowedBusinessModes as string[]).length > 1 && (
+          <Step n={7} color="#e3b341" label="Business Mode" hint="who do you sell to?">
+            <div className="space-y-2">
+              <p className="text-xs text-console-muted/70">Select all that apply</p>
+              <div className="flex gap-2">
+                {(subTypeObj.allowedBusinessModes as string[]).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setSelectedModes((prev) => prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m])}
+                    className={`px-3 py-2 text-xs rounded-md border transition-colors ${selectedModes.includes(m) ? 'border-[#e3b341] bg-[#e3b341]/10 text-[#e3b341]' : 'border-console-border text-console-muted hover:border-[#e3b341]/50 hover:text-console-text'}`}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+              {subTypeObj.defaultBusinessMode && (
+                <p className="text-xs text-console-muted/50">Default: {subTypeObj.defaultBusinessMode}</p>
+              )}
+            </div>
+          </Step>
+        )}
 
         <button onClick={resetAll} className="flex items-center gap-1.5 text-xs text-console-muted hover:text-console-text transition-colors">
           <RotateCcw className="w-3 h-3" /> Reset all

@@ -101,8 +101,8 @@ export class PcConfigService {
   // SUB-TYPES
   // ═══════════════════════════════════════════
 
-  async listSubTypes(verticalCode: string, userType: string) {
-    const cacheKey = `config:pc_subtype:${verticalCode}:${userType}`;
+  async listSubTypes(verticalCode: string, userType?: string) {
+    const cacheKey = `config:pc_subtype:${verticalCode}:${userType ?? 'all'}`;
     return this.cache.wrap(cacheKey, async () => {
       const vertical = await this.prisma.platform.businessTypeRegistry.findUnique({
         where: { typeCode: verticalCode },
@@ -110,10 +110,87 @@ export class PcConfigService {
       if (!vertical) return [];
 
       return this.pcDb.pcSubType.findMany({
-        where: { verticalId: vertical.id, userType, isActive: true },
+        where: { verticalId: vertical.id, ...(userType ? { userType } : {}), isActive: true },
         orderBy: { sortOrder: 'asc' },
       });
     });
+  }
+
+  async listAllSubTypes() {
+    return this.cache.wrap('config:pc_subtype:all', () =>
+      this.pcDb.pcSubType.findMany({
+        where: { isActive: true },
+        orderBy: [{ sortOrder: 'asc' }, { code: 'asc' }],
+      }),
+    );
+  }
+
+  // ── v2.3: Create sub-type ─────────────────────────────────────────────────
+
+  async createSubType(dto: {
+    code: string;
+    shortCode: string;
+    name: string;
+    description?: string;
+    verticalId: string;
+    userType: string;
+    allowedBusinessModes: string[];
+    defaultBusinessMode?: string;
+    businessModeRequired?: boolean;
+    sortOrder?: number;
+  }) {
+    const existing = await this.pcDb.pcSubType.findUnique({ where: { code: dto.code } });
+    if (existing) throw new Error(`Sub-type code '${dto.code}' already exists`);
+
+    const created = await this.pcDb.pcSubType.create({
+      data: {
+        code: dto.code,
+        shortCode: dto.shortCode,
+        name: dto.name,
+        description: dto.description ?? null,
+        verticalId: dto.verticalId,
+        userType: dto.userType,
+        allowedBusinessModes: dto.allowedBusinessModes,
+        defaultBusinessMode: dto.defaultBusinessMode ?? null,
+        businessModeRequired: dto.businessModeRequired ?? true,
+        sortOrder: dto.sortOrder ?? 0,
+        isActive: true,
+      },
+    });
+
+    await this.cache.invalidate('config:pc_subtype:*');
+    return created;
+  }
+
+  // ── v2.3: Code suggestion ─────────────────────────────────────────────────
+
+  async suggestCode(name: string, type: 'partner' | 'brand' | 'edition' | 'vertical' | 'subtype') {
+    const tableMap = {
+      partner:  () => this.pcDb.pcPartner.findMany({ select: { code: true } }),
+      brand:    () => this.prisma.identity.gvCfgBrand.findMany({ select: { code: true } }),
+      edition:  () => this.prisma.identity.gvCfgVertical.findMany({ select: { code: true } }),
+      vertical: () => this.prisma.platform.businessTypeRegistry.findMany({ select: { typeCode: true } }).then((r) => r.map((x) => ({ code: x.typeCode }))),
+      subtype:  () => this.pcDb.pcSubType.findMany({ select: { code: true } }),
+    };
+
+    const rows = await tableMap[type]();
+    const existing = rows.map((r: any) => (r.code as string).toUpperCase());
+
+    const primary = name.toUpperCase().replace(/[^A-Z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    const abbrev  = name.split(/\s+/).map((w) => w[0]).filter(Boolean).join('').toUpperCase();
+    const first   = name.split(/\s+/)[0].toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+    const candidates = [...new Set([primary, abbrev, first].filter(Boolean))];
+
+    for (const c of candidates) {
+      if (!existing.includes(c)) {
+        return { suggested: c, alternatives: candidates.filter((x) => x !== c), isUnique: true };
+      }
+    }
+
+    let n = 2;
+    while (existing.includes(`${primary}_${n}`)) n++;
+    return { suggested: `${primary}_${n}`, alternatives: [`${abbrev}_${n}`], isUnique: true };
   }
 
   // ═══════════════════════════════════════════
@@ -263,6 +340,7 @@ export class PcConfigService {
     subTypeId: string;
     displayName: string;
     description?: string;
+    businessModes?: string[];
   }) {
     const existing = await this.pcDb.pcCombinedCode.findUnique({ where: { code: dto.code } });
     if (existing) throw new Error(`Combined code '${dto.code}' already exists`);
@@ -278,6 +356,7 @@ export class PcConfigService {
         subTypeId: dto.subTypeId,
         displayName: dto.displayName,
         description: dto.description ?? null,
+        businessModes: dto.businessModes ?? [],
         modulesEnabled: [],
         marketplaceRules: {},
         isActive: true,

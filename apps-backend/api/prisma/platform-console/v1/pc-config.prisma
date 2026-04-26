@@ -30,14 +30,17 @@ model PcSubType {
   parent             PcSubType?  @relation("SubTypeHierarchy", fields: [parentId], references: [id])
   children           PcSubType[] @relation("SubTypeHierarchy")
   verticalId         String    @map("vertical_id") @db.Uuid
-  userType           String    @map("user_type") @db.VarChar(20)
-  translations       Json      @default("{}")
-  defaultModules     Json      @default("[]") @map("default_modules")
-  registrationFields Json      @default("[]") @map("registration_fields")
-  isActive           Boolean   @default(true) @map("is_active")
-  sortOrder          Int       @default(0) @map("sort_order")
-  createdAt          DateTime  @default(now()) @map("created_at")
-  updatedAt          DateTime  @updatedAt @map("updated_at")
+  userType               String    @map("user_type") @db.VarChar(20)
+  allowedBusinessModes   Json      @default("[]") @map("allowed_business_modes")
+  defaultBusinessMode    String?   @map("default_business_mode") @db.VarChar(20)
+  businessModeRequired   Boolean   @default(true) @map("business_mode_required")
+  translations           Json      @default("{}")
+  defaultModules         Json      @default("[]") @map("default_modules")
+  registrationFields     Json      @default("[]") @map("registration_fields")
+  isActive               Boolean   @default(true) @map("is_active")
+  sortOrder              Int       @default(0) @map("sort_order")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
 
   @@unique([verticalId, userType, code])
   @@index([verticalId])
@@ -55,6 +58,7 @@ model PcCombinedCode {
   subTypeId        String   @map("sub_type_id") @db.Uuid
   displayName      String   @map("display_name") @db.VarChar(255)
   description      String?
+  businessModes    Json     @default("[]") @map("business_modes")
   modulesEnabled   Json     @default("[]") @map("modules_enabled")
   marketplaceRules Json     @default("{}") @map("marketplace_rules")
   isActive         Boolean  @default(true) @map("is_active")

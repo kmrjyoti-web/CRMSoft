@@ -369,8 +369,15 @@ export const api = {
       const qs = crmEdition ? `?crmEdition=${encodeURIComponent(crmEdition)}` : '';
       return apiFetch(`/pc-config/verticals${qs}`);
     },
-    subTypes: (vertical: string, userType: string) =>
-      apiFetch(`/pc-config/sub-types?vertical=${encodeURIComponent(vertical)}&userType=${encodeURIComponent(userType)}`),
+    subTypes: (vertical?: string, userType?: string) => {
+      const params = new URLSearchParams();
+      if (vertical) params.set('vertical', vertical);
+      if (userType) params.set('userType', userType);
+      const qs = params.toString();
+      return apiFetch(`/pc-config/sub-types${qs ? `?${qs}` : ''}`);
+    },
+    suggestCode: (name: string, type: string) =>
+      apiFetch(`/pc-config/suggest-code?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}`),
     combinedCode: (code: string) => apiFetch(`/pc-config/combined-code/${encodeURIComponent(code)}`),
     combinedCodes: (brandCode?: string) => {
       const qs = brandCode ? `?brandCode=${encodeURIComponent(brandCode)}` : '';
@@ -389,8 +396,14 @@ export const api = {
     createCombinedCode: (payload: {
       code: string; partnerId: string; brandId: string; crmEditionId: string;
       verticalId: string; userType: string; subTypeId: string;
-      displayName: string; description?: string;
+      displayName: string; description?: string; businessModes?: string[];
     }) => apiFetch('/pc-config/combined-code', { method: 'POST', body: JSON.stringify(payload) }),
+    createSubType: (payload: {
+      code: string; shortCode: string; name: string; description?: string;
+      verticalId: string; userType: string;
+      allowedBusinessModes: string[]; defaultBusinessMode?: string;
+      businessModeRequired?: boolean; sortOrder?: number;
+    }) => apiFetch('/pc-config/sub-types', { method: 'POST', body: JSON.stringify(payload) }),
   },
   menuEditor: {
     list: (verticalCode: string) => apiFetch(`/platform-console/menu-editor/${verticalCode}`),
