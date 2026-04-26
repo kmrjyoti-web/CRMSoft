@@ -1,5 +1,23 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import {
+  Controller, Get, Post, Body, Param, Query,
+  ConflictException, HttpCode, HttpStatus,
+} from '@nestjs/common';
+import { ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { IsString, IsUUID, IsOptional, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PcConfigService } from './pc-config.service';
+
+class CreateCombinedCodeDto {
+  @ApiProperty({ example: 'B2B_TRAV_TRAVL_DMC' }) @IsString() code: string;
+  @ApiProperty() @IsUUID() partnerId: string;
+  @ApiProperty() @IsString() brandId: string;
+  @ApiProperty() @IsUUID() crmEditionId: string;
+  @ApiProperty() @IsString() verticalId: string;
+  @ApiProperty({ example: 'B2B' }) @IsString() userType: string;
+  @ApiProperty() @IsUUID() subTypeId: string;
+  @ApiProperty({ example: 'Travvellis DMC Provider' }) @IsString() @MinLength(2) displayName: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
+}
 
 @Controller('pc-config')
 export class PcConfigController {
@@ -78,5 +96,18 @@ export class PcConfigController {
   @Get('combined-codes')
   listCombinedCodes(@Query('brandCode') brandCode?: string) {
     return this.svc.listCombinedCodes(brandCode);
+  }
+
+  // 13. POST /pc-config/combined-code  (admin — create new code)
+  @Post('combined-code')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'M3 — Create a new combined code (builder save action)' })
+  async createCombinedCode(@Body() dto: CreateCombinedCodeDto) {
+    try {
+      return await this.svc.createCombinedCode(dto);
+    } catch (err: any) {
+      if (err.message?.includes('already exists')) throw new ConflictException(err.message);
+      throw err;
+    }
   }
 }

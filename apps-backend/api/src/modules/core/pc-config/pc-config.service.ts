@@ -251,6 +251,46 @@ export class PcConfigService {
     });
   }
 
+  // ── M3: Create combined code ──────────────────────────────────────────────
+
+  async createCombinedCode(dto: {
+    code: string;
+    partnerId: string;
+    brandId: string;
+    crmEditionId: string;
+    verticalId: string;
+    userType: string;
+    subTypeId: string;
+    displayName: string;
+    description?: string;
+  }) {
+    const existing = await this.pcDb.pcCombinedCode.findUnique({ where: { code: dto.code } });
+    if (existing) throw new Error(`Combined code '${dto.code}' already exists`);
+
+    const created = await this.pcDb.pcCombinedCode.create({
+      data: {
+        code: dto.code,
+        partnerId: dto.partnerId,
+        brandId: dto.brandId,
+        crmEditionId: dto.crmEditionId,
+        verticalId: dto.verticalId,
+        userType: dto.userType,
+        subTypeId: dto.subTypeId,
+        displayName: dto.displayName,
+        description: dto.description ?? null,
+        modulesEnabled: [],
+        marketplaceRules: {},
+        isActive: true,
+      },
+    });
+
+    // Bust relevant cache entries so subsequent reads see the new row
+    await this.cache.invalidate('config:pc_combined_code:list:*');
+    await this.cache.invalidate(`config:pc_combined_code:brand:${dto.brandId}`);
+
+    return created;
+  }
+
   // ═══════════════════════════════════════════
   // CACHE MANAGEMENT
   // ═══════════════════════════════════════════

@@ -366,6 +366,11 @@ export const api = {
       const qs = combinedCode ? `?combinedCode=${encodeURIComponent(combinedCode)}` : '';
       return apiFetch(`/pc-config/onboarding-stages${qs}`);
     },
+    createCombinedCode: (payload: {
+      code: string; partnerId: string; brandId: string; crmEditionId: string;
+      verticalId: string; userType: string; subTypeId: string;
+      displayName: string; description?: string;
+    }) => apiFetch('/pc-config/combined-code', { method: 'POST', body: JSON.stringify(payload) }),
   },
   menuEditor: {
     list: (verticalCode: string) => apiFetch(`/platform-console/menu-editor/${verticalCode}`),
