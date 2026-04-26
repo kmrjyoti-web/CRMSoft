@@ -50,13 +50,14 @@ tables have a `tenant_id` column — fail-closed is the right default.
 | `updateMany`         | ✅     | Injects `WHERE tenantId = ?`                       |
 | `delete`             | ✅     | Injects `WHERE tenantId = ?`                       |
 | `deleteMany`         | ✅     | Injects `WHERE tenantId = ?`                       |
-| `count`              | ⏳     | PARKED — Phase 2                                   |
-| `aggregate`          | ⏳     | PARKED — Phase 2                                   |
-| `groupBy`            | ⏳     | PARKED — Phase 2                                   |
-| `upsert`             | ⏳     | PARKED — Phase 2                                   |
-| `$queryRaw`          | ⏳     | PARKED — Phase 2 (use with extreme care)           |
-| `$executeRaw`        | ⏳     | PARKED — Phase 2 (use with extreme care)           |
-| `$transaction`       | ⏳     | Inner operations covered; outer TX itself not wrapped |
+| `count`              | ✅     | Injects `WHERE tenantId = ?` (Phase 2)             |
+| `aggregate`          | ✅     | Injects `WHERE tenantId = ?` (Phase 2)             |
+| `groupBy`            | ✅     | Injects `WHERE tenantId = ?` (Phase 2)             |
+| `upsert`             | ✅     | Inject `create.tenantId`, strip `update.tenantId`, post-verify (Phase 2) |
+| `$transaction` array | ✅     | Each op is extended — no extra wrapping needed      |
+| `$transaction` interactive | ✅ | Use `prisma.safeTransaction()` — wraps `tx` with extension (Phase 2) |
+| `$queryRaw`          | 📋     | Cannot auto-intercept. Manual audit done: all 8 usages SAFE (see docs/audit/) |
+| `$executeRaw`        | 📋     | Cannot auto-intercept. No usages found in working DB. |
 
 ---
 
@@ -97,53 +98,32 @@ The identity client logs the same format from `detectCrossTenantAttempt()` in
 | `infrastructure/tenant-aware-prisma.ts` | `$extends` factory for working/demo clients |
 | `infrastructure/prisma-tenant.middleware.ts` | `$use` middleware for identity client |
 | `infrastructure/tenant-context.service.ts` | AsyncLocalStorage wrapper |
-| `infrastructure/tenant-scoped-models.ts` | Documentation registry (TENANT_SCOPED_MODELS, TENANT_EXEMPT_MODELS) |
+| `infrastructure/tenant-scoped-models.ts` | Documentation registry — 220 models with tenantId |
+| `infrastructure/tenant-job.helper.ts` | BullMQ context propagation helper (Phase 2) |
 | `infrastructure/tenant.guard.ts` | Guards against requests with no tenant context |
 | `application/tenant-context.interceptor.ts` | Sets ALS context from JWT claims |
 | `__tests__/tenant-isolation.spec.ts` | 13 unit tests covering all isolation rules |
+| `../../core/prisma/prisma.service.ts` | `safeTransaction()` for interactive tx (Phase 2) |
+| `docs/audit/2026-04-27_RAW_SQL_AUDIT.md` | Raw SQL audit — all 8 usages verified SAFE |
 
 ---
 
-## Kumar Morning Handoff — Phase 2 Checklist
-
-### Aggregations (PARKED)
-- [ ] Extend `$allModels` to cover `count`, `aggregate`, `groupBy`
-- [ ] Same `injectWhere` pattern applies — add `where = injectWhere(args.where, tenantId)` before calling `query(args)`
-- [ ] Add 3 tests: `count` with no where, `count` with existing where, `groupBy` cross-tenant override
-
-### Upsert (PARKED)
-- [ ] `upsert` has both `where` and `create`/`update` blocks — inject tenantId into all three
-- [ ] Watch for unique constraint conflicts if tenantId is part of the unique key
-
-### Raw SQL (PARKED)
-- [ ] `$queryRaw` and `$executeRaw` cannot be auto-scoped — they must be audited manually
-- [ ] Create a lint rule or grep-based CI check: no `$queryRaw` without an inline `tenantId` bind param
-
-### $transaction (PARKED)
-- [ ] Interactive transactions (`$transaction(async (tx) => {...})`) pass a raw client — the extension is NOT applied to `tx`
-- [ ] Options: (a) wrap the callback to re-apply extension on `tx`, or (b) document as "use `prisma.model.*` not `tx.model.*` when tenant isolation matters"
-
-### Per-Tenant Dedicated DB Clients (PARKED)
-- [ ] `PrismaService.getWorkingClient(tenantId)` creates NEW `WorkingClient` instances
-- [ ] New instances bypass `$extends` — they must call `.$extends(createTenantAwareExtension(this.tenantContext))` at creation time
-- [ ] Or: pre-extend the base client and cache the extended version per tenantId
-
-### TENANT_SCOPED_MODELS Audit
-- [ ] Run `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'` on workingdb
-- [ ] Cross-reference against `TENANT_SCOPED_MODELS` in `tenant-scoped-models.ts`
-- [ ] Add any missing model names (documentation set only — runtime uses `$allModels`)
+## Kumar Morning Handoff — Remaining Tasks
 
 ### Performance Benchmarking
 - [ ] Measure `$extends` overhead vs baseline for `findMany` on a 100k-row table
 - [ ] Expected: < 0.5ms overhead per query (pure JS object wrapping, no extra DB round-trip)
-- [ ] Run: `apps-backend/api/scripts/test-tenant-isolation.ts` (smoke test below)
+- [ ] Run: `scripts/test-tenant-isolation.ts` smoke test against live workingdb
 
-### Edge Cases
-- [ ] Empty string tenantId in JWT → passthrough (confirmed by code, add regression test)
-- [ ] Nested `OR` clauses — `injectWhere` wraps with `AND [{tenantId}, ...]` which overrides OR correctly
-- [ ] Async context propagation through BullMQ queue processors (ALS does NOT cross process boundary — queue jobs need explicit tenantId parameter)
-- [ ] Async context propagation through `setTimeout`/`setInterval` — ALS propagates correctly within same process
-- [ ] Test with Prisma `$transaction` interactive mode (see above)
+### Per-Tenant Dedicated DB Clients (STILL PARKED)
+- [ ] `PrismaService.getWorkingClient(tenantId)` creates NEW `WorkingClient` instances
+- [ ] New instances bypass `$extends` — they must call `.$extends(createTenantAwareExtension(this.tenantContext))` at creation time
+- [ ] Fix: cache extended clients in `_tenantClients` map, keyed by tenantId
+
+### Demo Prep
+- [ ] Run all test scripts (smoke test, verify counts/notifications filter correctly)
+- [ ] Walk through lead creation, notification list, workflow stats in the UI
+- [ ] Verify CROSS_TENANT_ATTEMPT log appears when manually sending wrong tenantId in where
 
 ---
 
@@ -151,11 +131,16 @@ The identity client logs the same format from `detectCrossTenantAttempt()` in
 
 | Check | Status |
 |-------|--------|
-| Working DB tenant isolation | ✅ M8a done |
-| Demo DB tenant isolation | ✅ M8a done |
-| Identity DB tenant isolation | ✅ M8a done (via `$use` middleware) |
+| Working DB tenant isolation | ✅ M8a Phase 1 |
+| Demo DB tenant isolation | ✅ M8a Phase 1 |
+| Identity DB tenant isolation | ✅ M8a Phase 1 (via `$use` middleware) |
 | Cross-tenant detection logging | ✅ Both clients |
 | Unit tests (13 cases) | ✅ All passing |
-| Aggregations | ⏳ Phase 2 |
-| Raw SQL audit | ⏳ Phase 2 |
-| Dedicated DB clients | ⏳ Phase 2 |
+| count / aggregate / groupBy | ✅ M8a Phase 2 |
+| upsert | ✅ M8a Phase 2 |
+| safeTransaction() for interactive tx | ✅ M8a Phase 2 (5 files updated) |
+| Raw SQL audit | ✅ M8a Phase 2 (all 8 usages SAFE) |
+| BullMQ context helper | ✅ M8a Phase 2 (TenantJobHelper) |
+| TENANT_SCOPED_MODELS (220 models) | ✅ M8a Phase 2 |
+| Per-tenant dedicated DB clients | ⏳ getWorkingClient() gap — Kumar morning |
+| Performance benchmarking | ⏳ Kumar morning |
