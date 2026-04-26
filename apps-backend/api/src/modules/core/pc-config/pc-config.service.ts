@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { RedisCacheService } from '../cache/cache.service';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { PlatformConsolePrismaService } from '../../platform-console/prisma/platform-console-prisma.service';
@@ -441,6 +441,83 @@ export class PcConfigService {
 
       return { combinedCode, allowAll: false, pages: rules };
     });
+  }
+
+  // ═══════════════════════════════════════════
+  // ONBOARDING STAGE MANAGEMENT (admin CRUD)
+  // ═══════════════════════════════════════════
+
+  async listOnboardingStagesAdmin(combinedCode?: string) {
+    const where: any = {};
+    if (combinedCode) {
+      const cc = await this.pcDb.pcCombinedCode.findFirst({ where: { code: combinedCode } });
+      if (cc) where.combinedCodeId = cc.id;
+    }
+    return this.pcDb.pcOnboardingStage.findMany({
+      where,
+      orderBy: { sortOrder: 'asc' },
+    });
+  }
+
+  async createOnboardingStage(dto: {
+    stageKey: string; stageLabel: string; componentName: string;
+    required?: boolean; sortOrder?: number; combinedCodeId?: string | null;
+    skipIfFieldSet?: string | null; translations?: Record<string, any>;
+  }) {
+    const max = await this.pcDb.pcOnboardingStage.aggregate({
+      where: { combinedCodeId: dto.combinedCodeId ?? null },
+      _max: { sortOrder: true },
+    });
+    const stage = await this.pcDb.pcOnboardingStage.create({
+      data: {
+        ...dto,
+        sortOrder: dto.sortOrder ?? ((max._max.sortOrder ?? 0) + 10),
+        isActive: true,
+      },
+    });
+    await this.cache.invalidate('config:onboarding_stages:*');
+    return stage;
+  }
+
+  async updateOnboardingStage(id: string, dto: {
+    stageLabel?: string; componentName?: string; required?: boolean;
+    skipIfFieldSet?: string | null; translations?: Record<string, any>;
+  }) {
+    const stage = await this.pcDb.pcOnboardingStage.update({
+      where: { id },
+      data: dto,
+    });
+    await this.cache.invalidate('config:onboarding_stages:*');
+    return stage;
+  }
+
+  async toggleOnboardingStage(id: string) {
+    const current = await this.pcDb.pcOnboardingStage.findUnique({ where: { id } });
+    if (!current) throw new NotFoundException(`Stage ${id} not found`);
+    const updated = await this.pcDb.pcOnboardingStage.update({
+      where: { id },
+      data: { isActive: !current.isActive },
+    });
+    await this.cache.invalidate('config:onboarding_stages:*');
+    return updated;
+  }
+
+  async reorderOnboardingStages(stageIds: string[]) {
+    for (let i = 0; i < stageIds.length; i++) {
+      await this.pcDb.pcOnboardingStage.update({
+        where: { id: stageIds[i] },
+        data: { sortOrder: (i + 1) * 10 },
+      });
+    }
+    await this.cache.invalidate('config:onboarding_stages:*');
+  }
+
+  async deleteOnboardingStage(id: string) {
+    await this.pcDb.pcOnboardingStage.update({
+      where: { id },
+      data: { isActive: false },
+    });
+    await this.cache.invalidate('config:onboarding_stages:*');
   }
 
   // ═══════════════════════════════════════════

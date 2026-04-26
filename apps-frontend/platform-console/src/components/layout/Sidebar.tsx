@@ -28,6 +28,7 @@ import {
   Layers,
   FileText,
   Users,
+  ListChecks,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useState } from 'react';
@@ -119,6 +120,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: 'Verticals', icon: Tag, href: '/governance/verticals' },
       { label: 'Sub-Types', icon: Building2, href: '/governance/sub-types' },
       { label: 'Page Registry', icon: FileText, href: '/governance/page-registry' },
+      { label: 'Onboarding Stages', icon: ListChecks, href: '/governance/onboarding-stages' },
     ],
   },
   {

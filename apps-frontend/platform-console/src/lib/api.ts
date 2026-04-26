@@ -393,6 +393,23 @@ export const api = {
       const qs = combinedCode ? `?combinedCode=${encodeURIComponent(combinedCode)}` : '';
       return apiFetch(`/pc-config/onboarding-stages${qs}`);
     },
+    listOnboardingStagesAdmin: (combinedCode?: string) => {
+      const qs = combinedCode ? `?combinedCode=${encodeURIComponent(combinedCode)}` : '';
+      return apiFetch(`/pc-config/onboarding-stages-admin${qs}`);
+    },
+    createOnboardingStage: (data: {
+      stageKey: string; stageLabel: string; componentName: string;
+      required?: boolean; sortOrder?: number; combinedCodeId?: string; skipIfFieldSet?: string;
+    }) => apiFetch('/pc-config/onboarding-stages', { method: 'POST', body: JSON.stringify(data) }),
+    updateOnboardingStage: (id: string, data: {
+      stageLabel?: string; componentName?: string; required?: boolean; skipIfFieldSet?: string;
+    }) => apiFetch(`/pc-config/onboarding-stages/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    toggleOnboardingStage: (id: string) =>
+      apiFetch(`/pc-config/onboarding-stages/${id}/toggle`, { method: 'PATCH' }),
+    reorderOnboardingStages: (stageIds: string[]) =>
+      apiFetch('/pc-config/onboarding-stages/reorder', { method: 'PATCH', body: JSON.stringify({ stageIds }) }),
+    deleteOnboardingStage: (id: string) =>
+      apiFetch(`/pc-config/onboarding-stages/${id}`, { method: 'DELETE' }),
     createCombinedCode: (payload: {
       code: string; partnerId: string; brandId: string; crmEditionId: string;
       verticalId: string; userType: string; subTypeId: string;

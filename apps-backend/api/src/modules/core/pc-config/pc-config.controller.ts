@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Body, Param, Query,
+  Controller, Get, Post, Patch, Delete, Body, Param, Query,
   ConflictException, HttpCode, HttpStatus, UseGuards, Request,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
@@ -60,6 +60,27 @@ class CreateSubTypeDto {
   @ApiPropertyOptional({ example: 'B2B' }) @IsOptional() @IsString() defaultBusinessMode?: string;
   @ApiPropertyOptional() @IsOptional() @IsBoolean() businessModeRequired?: boolean;
   @ApiPropertyOptional() @IsOptional() @IsInt() @Type(() => Number) sortOrder?: number;
+}
+
+class CreateOnboardingStageDto {
+  @ApiProperty({ example: 'newsletter_consent' }) @IsString() stageKey: string;
+  @ApiProperty({ example: 'Subscribe to Newsletter' }) @IsString() stageLabel: string;
+  @ApiProperty({ example: 'StageNewsletterConsent' }) @IsString() componentName: string;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() required?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsInt() @Type(() => Number) sortOrder?: number;
+  @ApiPropertyOptional() @IsOptional() @IsString() combinedCodeId?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() skipIfFieldSet?: string;
+}
+
+class UpdateOnboardingStageDto {
+  @ApiPropertyOptional() @IsOptional() @IsString() stageLabel?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() componentName?: string;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() required?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsString() skipIfFieldSet?: string;
+}
+
+class ReorderOnboardingStagesDto {
+  @ApiProperty({ type: [String] }) @IsArray() @IsString({ each: true }) stageIds: string[];
 }
 
 class CreateCombinedCodeDto {
@@ -268,5 +289,58 @@ export class PcConfigController {
       if (err.message?.includes('already exists')) throw new ConflictException(err.message);
       throw err;
     }
+  }
+
+  // ── Onboarding Stage Management ──────────────────────────────────────────────
+
+  @Get('onboarding-stages-admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: list all onboarding stages (including inactive)' })
+  listStagesAdmin(@Query('combinedCode') combinedCode?: string) {
+    return this.svc.listOnboardingStagesAdmin(combinedCode);
+  }
+
+  @Post('onboarding-stages')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: create onboarding stage' })
+  createStage(@Body() dto: CreateOnboardingStageDto) {
+    return this.svc.createOnboardingStage(dto);
+  }
+
+  @Patch('onboarding-stages/reorder')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: reorder stages by array of IDs' })
+  async reorderStages(@Body() dto: ReorderOnboardingStagesDto) {
+    await this.svc.reorderOnboardingStages(dto.stageIds);
+    return { success: true };
+  }
+
+  @Patch('onboarding-stages/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: update onboarding stage' })
+  updateStage(@Param('id') id: string, @Body() dto: UpdateOnboardingStageDto) {
+    return this.svc.updateOnboardingStage(id, dto);
+  }
+
+  @Patch('onboarding-stages/:id/toggle')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: toggle stage active/inactive' })
+  toggleStage(@Param('id') id: string) {
+    return this.svc.toggleOnboardingStage(id);
+  }
+
+  @Delete('onboarding-stages/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: soft-delete (deactivate) a stage' })
+  async deleteStage(@Param('id') id: string) {
+    await this.svc.deleteOnboardingStage(id);
+    return { success: true };
   }
 }
