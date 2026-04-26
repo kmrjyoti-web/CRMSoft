@@ -72,8 +72,15 @@ const TravvellisLogin = dynamic(
   { ssr: false, loading: () => <div style={{ background: '#0a0d1a', minHeight: '100dvh' }} /> },
 );
 
+/** @deprecated hardcoded wizard — replaced by DynamicBrandRegister (M4) */
 const TravvellisRegister = dynamic(
   () => import('@/components/brand-login/brands/travvellis/register/TravvellisRegister'),
+  { ssr: false, loading: () => <div style={{ background: '#0a0d1a', minHeight: '100dvh' }} /> },
+);
+void TravvellisRegister; // kept for reference, not used in registry
+
+const DynamicBrandRegister = dynamic(
+  () => import('@/components/brand-login/DynamicBrandRegister'),
   { ssr: false, loading: () => <div style={{ background: '#0a0d1a', minHeight: '100dvh' }} /> },
 );
 
@@ -87,7 +94,7 @@ export const BRAND_REGISTRY: Record<string, BrandConfig> = {
     description: 'Luxury & adventure travel experiences',
     tagline: 'Curated journeys, golden moments',
     loginComponent: TravvellisLogin,
-    registerComponent: TravvellisRegister,
+    registerComponent: DynamicBrandRegister,
 
     // Golden Hour palette
     colors: {

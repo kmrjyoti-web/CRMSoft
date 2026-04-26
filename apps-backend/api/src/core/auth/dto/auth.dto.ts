@@ -87,6 +87,37 @@ export class VerticalRegisterDto {
   @IsOptional() @IsObject() registrationFields?: Record<string, any>;
 }
 
+// ─── DYNAMIC REGISTRATION (M4 — config-driven) ───
+
+export class DynamicRegisterDto {
+  @ApiProperty({ example: 'B2B_TRAV_TRAVL_DMC' })
+  @IsString() combinedCode: string;
+
+  @ApiProperty({ example: 'travvellis' })
+  @IsString() brandCode: string;
+
+  @ApiProperty({ example: 'TRAVEL_TOURISM' })
+  @IsString() verticalCode: string;
+
+  @ApiProperty({ example: 'B2B' })
+  @IsString() userType: string;
+
+  @ApiProperty({ example: 'DMC_PROVIDER' })
+  @IsString() subTypeCode: string;
+
+  @ApiProperty({ example: 'dmc@agency.com' })
+  @IsEmail() email: string;
+
+  @ApiProperty({ example: 'Pass@12345' })
+  @IsString() @MinLength(8) password: string;
+
+  @ApiPropertyOptional({ example: '+91-9876543210' })
+  @IsOptional() @IsString() mobile?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional() @IsObject() fields?: Record<string, any>;
+}
+
 // ─── UNIVERSAL LOGIN (brand portals) ───
 
 export class UniversalLoginDto {

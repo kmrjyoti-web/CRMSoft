@@ -6,7 +6,7 @@ import { AuthService } from './auth.service';
 import {
   LoginDto, RegisterDto, RefreshTokenDto, ChangePasswordDto,
   CustomerRegisterDto, PartnerRegisterDto, TenantRegisterDto,
-  VerticalRegisterDto, UniversalLoginDto, SwitchCompanyDto,
+  VerticalRegisterDto, UniversalLoginDto, SwitchCompanyDto, DynamicRegisterDto,
 } from './dto/auth.dto';
 import { Public, Roles, SkipTenantGuard } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -149,8 +149,18 @@ export class AuthController {
   // --- VERTICAL REGISTRATION (public, brand-aware) ---
 
   @Public()
+  @Post('register-dynamic')
+  @ApiOperation({ summary: 'Dynamic registration via combined code (M4 — config-driven)' })
+  async registerDynamic(@Body() dto: DynamicRegisterDto) {
+    return ApiResponse.success(
+      await this.auth.registerDynamic(dto),
+      'Registration successful',
+    );
+  }
+
+  @Public()
   @Post(':vertical/register')
-  @ApiOperation({ summary: 'Vertical self-registration (travel, retail, etc.)' })
+  @ApiOperation({ summary: 'Vertical self-registration (travel, retail, etc.) [use register-dynamic instead]' })
   async verticalRegister(
     @Param('vertical') vertical: string,
     @Body() dto: VerticalRegisterDto,

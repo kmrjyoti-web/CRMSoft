@@ -323,6 +323,44 @@ export class AuthService {
   }
 
   // ═══════════════════════════════════════
+  // DYNAMIC REGISTER (M4 — config-driven)
+  // ═══════════════════════════════════════
+
+  async registerDynamic(dto: {
+    combinedCode: string;
+    brandCode: string;
+    verticalCode: string;
+    userType: string;
+    subTypeCode: string;
+    email: string;
+    password: string;
+    mobile?: string;
+    fields?: Record<string, any>;
+  }) {
+    const USER_TYPE_CATEGORY_MAP: Record<string, string> = {
+      B2B: 'COMPANY_B2B',
+      B2C: 'COMPANY_B2C',
+      IND_SP: 'INDIVIDUAL_SP',
+      IND_EE: 'EMPLOYEE',
+    };
+    const categoryCode = USER_TYPE_CATEGORY_MAP[dto.userType] ?? 'COMPANY_B2B';
+
+    return this.registerVertical({
+      verticalCode: dto.verticalCode,
+      categoryCode,
+      subcategoryCode: dto.subTypeCode,
+      brandCode: dto.brandCode,
+      email: dto.email,
+      password: dto.password,
+      registrationFields: {
+        ...dto.fields,
+        ...(dto.mobile ? { mobile: dto.mobile } : {}),
+        _combinedCode: dto.combinedCode,
+      },
+    });
+  }
+
+  // ═══════════════════════════════════════
   // CUSTOMER SELF-REGISTER (public)
   // ═══════════════════════════════════════
 
