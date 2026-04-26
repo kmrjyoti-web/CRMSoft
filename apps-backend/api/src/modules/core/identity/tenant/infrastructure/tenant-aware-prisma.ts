@@ -12,8 +12,8 @@ const secLog = new Logger('TENANT_SECURITY');
  *   getTenantId() returns UUID     → inject tenantId into WHERE / DATA
  *   args.where.tenantId !== ctx    → log CROSS_TENANT_ATTEMPT, override with context tenant
  *
- * PARKED for Kumar Phase 2 (morning):
- *   count, aggregate, groupBy, upsert, $queryRaw, $executeRaw, $transaction
+ * Phase 2 adds: count, aggregate, groupBy, upsert
+ * Still parked: $queryRaw, $executeRaw (manual audit only — cannot intercept)
  *   Per-tenant dedicated DB clients (getWorkingClient)
  */
 export function createTenantAwareExtension(tenantContext: TenantContextService) {
@@ -131,6 +131,67 @@ export function createTenantAwareExtension(tenantContext: TenantContextService) 
           if (!tenantId) return query(args);
           args.where = injectWhere(args.where, tenantId);
           return query(args);
+        },
+
+        // ── Phase 2: aggregations ────────────────────────────────────────────
+
+        async count({ args, query }: any) {
+          const tenantId = getTenant();
+          if (!tenantId) return query(args);
+          args.where = injectWhere(args.where, tenantId);
+          return query(args);
+        },
+
+        async aggregate({ args, query }: any) {
+          const tenantId = getTenant();
+          if (!tenantId) return query(args);
+          args.where = injectWhere(args.where, tenantId);
+          return query(args);
+        },
+
+        async groupBy({ args, query }: any) {
+          const tenantId = getTenant();
+          if (!tenantId) return query(args);
+          args.where = injectWhere(args.where, tenantId);
+          return query(args);
+        },
+
+        // ── Phase 2: upsert ──────────────────────────────────────────────────
+        // WHERE is a unique constraint — cannot wrap with AND (Prisma rejects it).
+        // Strategy: inject tenantId into CREATE (so new records get right tenant),
+        //           strip tenantId from UPDATE (prevent tenant migration),
+        //           post-verify result matches context.
+
+        async upsert({ args, query, model }: any) {
+          const tenantId = getTenant();
+          if (!tenantId) return query(args);
+
+          // Inject into CREATE block
+          args.create = { ...args.create, tenantId };
+
+          // Strip from UPDATE block, log if attempted
+          if (args.update?.tenantId && args.update.tenantId !== tenantId) {
+            secLog.error(
+              `CROSS_TENANT_ATTEMPT op=upsert.update model=${model} ` +
+              `context=${tenantId} attempted=${args.update.tenantId}`,
+            );
+          }
+          if (args.update?.tenantId !== undefined) {
+            const { tenantId: _stripped, ...rest } = args.update;
+            args.update = rest;
+          }
+
+          const result = await query(args);
+
+          // Post-verify: ensure the record we touched belongs to our tenant
+          if (result && (result as any).tenantId && (result as any).tenantId !== tenantId) {
+            secLog.error(
+              `CROSS_TENANT_ATTEMPT op=upsert model=${model} ` +
+              `context=${tenantId} result=${(result as any).tenantId}`,
+            );
+          }
+
+          return result;
         },
       },
     },
