@@ -1,107 +1,276 @@
 /**
- * TENANT_SCOPED_MODELS — Prisma model names (PascalCase) that MUST be
- * auto-filtered by tenantId on every query.
+ * TENANT_SCOPED_MODELS — Prisma model names (PascalCase) with a tenantId field
+ * in the working DB schema.
  *
- * Context: All 220 tables in workingdb have a tenant_id column.
- * This set lists the critical user-data models.
- * The $extends factory uses this for FAST-PATH checks on hot paths;
- * for non-listed models in the working DB it still injects tenantId
- * (fail-closed default in tenant-aware-prisma.ts).
+ * This is a DOCUMENTATION set only. At runtime, the $extends factory in
+ * tenant-aware-prisma.ts uses $allModels (covers every model), so this list
+ * does not gate any query. Its purpose is:
+ *   1. Auditor reference — compare against schema changes at release time
+ *   2. Fast-path for any future per-model logic
  *
- * Kumar morning: Verify list is complete — reference docs/audit/tenant_tables.txt
+ * AUDIT: 2026-04-27 (M8a Phase 2)
+ *   Source: grep tenantId from apps-backend/api/prisma/working/v1/*.prisma
+ *   Total:  220 models (of 228 in working schema)
+ *   Missing tenantId: AMCPlanTemplate*, ControlRoomRule*, CronJobConfig*,
+ *                     InventoryLabel*, PriceListItem*, RateLimitTier*,
+ *                     ServiceRate*, TaskWatcher* (config/meta tables)
+ *                     (* not in this set)
  */
 export const TENANT_SCOPED_MODELS = new Set([
-  // Core CRM entities
-  'Lead',
-  'RawContact',
-  'Contact',
-  'Organization',
-  'Task',
-  'FollowUp',
+  // ── CRM ──────────────────────────────────────────────────────────────────
   'Activity',
-  'Demo',
-  'TourPlan',
-  'TourPlanVisit',
-  'TourPlanPhoto',
+  'AMCContract',
+  'AMCSchedule',
+  'AssignmentRule',
   'CalendarEvent',
-  'ScheduledEvent',
-  'RecurringEvent',
-  'SupportTicket',
   'Comment',
+  'Communication',
+  'Contact',
+  'ContactFilter',
+  'ContactOrganization',
+  'Demo',
+  'EntityOwner',
+  'EntityVerificationRecord',
+  'EscalationRule',
+  'EventHistory',
+  'EventParticipant',
+  'FollowUp',
+  'Lead',
+  'LeadFilter',
+  'Manufacturer',
+  'ManufacturerContact',
+  'ManufacturerOrganization',
+  'Organization',
+  'OrganizationFilter',
+  'OrganizationLocation',
+  'OwnershipLog',
+  'RawContact',
+  'RawContactFilter',
+  'RecurringEvent',
+  'Reminder',
+  'ScheduledEvent',
+  'ServiceCharge',
+  'ServiceVisitLog',
+  'SupportTicket',
+  'Task',
+  'TaskHistory',
+  'TaskLogicConfig',
+  'TourPlan',
+  'TourPlanPhoto',
+  'TourPlanVisit',
+  'WarrantyClaim',
+  'WarrantyRecord',
+  'WarrantyTemplate',
 
-  // Sales
-  'Quotation',
-  'QuotationLineItem',
-  'QuotationActivity',
-  'SaleOrder',
-  'SaleOrderItem',
+  // ── Sales ─────────────────────────────────────────────────────────────────
   'DeliveryChallan',
   'DeliveryChallanItem',
+  'PriceList',
+  'Quotation',
+  'QuotationActivity',
+  'QuotationComparison',
+  'QuotationLineItem',
+  'QuotationNegotiationLog',
+  'QuotationSendLog',
+  'QuotationTemplate',
+  'SaleMaster',
+  'SaleOrder',
+  'SaleOrderItem',
   'SaleReturn',
   'SaleReturnItem',
-  'SaleMaster',
+  'SalesTarget',
 
-  // Inventory
-  'Product',
-  'ProductPrice',
-  'InventoryItem',
-  'StockLocation',
-  'StockTransaction',
-  'StockSummary',
-  'StockAdjustment',
-  'PurchaseOrder',
-  'PurchaseOrderItem',
+  // ── Inventory ─────────────────────────────────────────────────────────────
+  'BOMFormula',
+  'BOMFormulaItem',
+  'BOMProduction',
+  'CustomerGroupMapping',
+  'CustomerPriceGroup',
   'GoodsReceipt',
   'GoodsReceiptItem',
+  'InventoryItem',
+  'Product',
+  'ProductFilter',
+  'ProductPrice',
+  'ProductRelation',
+  'ProductTaxDetail',
+  'ProductUnitConversion',
+  'PurchaseMaster',
+  'PurchaseOrder',
+  'PurchaseOrderItem',
+  'PurchaseQuotation',
+  'PurchaseQuotationItem',
+  'PurchaseRFQ',
+  'PurchaseRFQItem',
+  'ScrapRecord',
+  'SerialMaster',
+  'StockAdjustment',
+  'StockLocation',
+  'StockSummary',
+  'StockTransaction',
+  'UnitConversion',
+  'UnitMaster',
 
-  // Communication
-  'EmailThread',
-  'Email',
-  'WaConversation',
-  'WaMessage',
-  'WaBroadcast',
+  // ── Accounting ────────────────────────────────────────────────────────────
+  'AccountGroup',
+  'AccountTransaction',
+  'BankAccount',
+  'BankReconciliation',
+  'CreditNote',
+  'DebitNote',
+  'DebitNoteItem',
+  'GSTReturn',
+  'GstVerificationLog',
+  'Invoice',
+  'InvoiceLineItem',
+  'LedgerMapping',
+  'LedgerMaster',
+  'ProformaInvoice',
+  'ProformaLineItem',
+  'PurchaseInvoice',
+  'PurchaseInvoiceItem',
+  'SavedFormula',
+  'TDSRecord',
 
-  // Notifications
-  'Notification',
-  'Reminder',
-
-  // Payments
+  // ── Payments ──────────────────────────────────────────────────────────────
   'Payment',
   'PaymentReceipt',
+  'PaymentRecord',
+  'PaymentReminder',
   'Refund',
 
-  // Config (tenant-specific config, not global)
-  'CompanyProfile',
-  'Brand',
-  'ApiKey',
+  // ── Communication ─────────────────────────────────────────────────────────
+  'CampaignRecipient',
+  'CommunicationLog',
+  'Email',
+  'EmailAccount',
+  'EmailAttachment',
+  'EmailCampaign',
+  'EmailFooterTemplate',
+  'EmailSignature',
+  'EmailTemplate',
+  'EmailThread',
+  'EmailTrackingEvent',
+  'EmailUnsubscribe',
+  'WaBroadcast',
+  'WaBroadcastRecipient',
+  'WaChatbotFlow',
+  'WaConversation',
+  'WaMessage',
+  'WaOptOut',
+  'WaQuickReply',
+  'WaTemplate',
+  'WhatsAppBusinessAccount',
+  'WebhookDelivery',
   'WebhookEndpoint',
-  'CustomFieldDefinition',
 
-  // Workflows & Approvals
-  'Workflow',
-  'WorkflowInstance',
-  'ApprovalRequest',
+  // ── Notifications ─────────────────────────────────────────────────────────
+  'Notification',
+  'NotificationConfig',
+  'NotificationPreference',
+  'NotificationTemplate',
+  'PushSubscription',
 
-  // Documents
+  // ── Documents ─────────────────────────────────────────────────────────────
+  'CloudConnection',
   'Document',
+  'DocumentActivity',
+  'DocumentAttachment',
   'DocumentFolder',
-  'ImportJob',
+  'DocumentShareLink',
+  'DocumentTemplate',
   'ExportJob',
+  'ImportJob',
+  'ImportProfile',
+  'ImportRow',
+  'TenantTemplateCustomization',
 
-  // Reports
+  // ── Reports ───────────────────────────────────────────────────────────────
+  'ReportBookmark',
   'ReportDefinition',
+  'ReportExportLog',
+  'ReportTemplate',
   'ScheduledReport',
 
-  // Audit logs (tenant-scoped)
-  'SyncChangeLog',
-  'SyncAuditLog',
+  // ── Workflows & Approvals ─────────────────────────────────────────────────
+  'ApprovalRequest',
+  'ApprovalRule',
+  'Workflow',
+  'WorkflowActionLog',
+  'WorkflowApproval',
+  'WorkflowHistory',
+  'WorkflowInstance',
+  'WorkflowSlaEscalation',
+  'WorkflowState',
+  'WorkflowTransition',
+
+  // ── Config (tenant-specific) ──────────────────────────────────────────────
+  'ApiKey',
   'ApiRequestLog',
+  'AutoNumberSequence',
+  'BlockedSlot',
+  'Brand',
+  'BrandContact',
+  'BrandOrganization',
+  'BusinessHoursSchedule',
+  'BusinessLocation',
+  'CalendarConfig',
+  'CalendarHighlight',
+  'CompanyCity',
+  'CompanyCountry',
+  'CompanyPincode',
+  'CompanyProfile',
+  'CompanyState',
+  'ControlRoomAuditLog',
+  'ControlRoomDraft',
+  'ControlRoomValue',
+  'CronJobRunLog',
+  'CustomFieldDefinition',
+  'DataMaskingPolicy',
+  'EntityConfigValue',
+  'GoogleConnection',
+  'HolidayCalendar',
+  'NotionConfig',
+  'QuietHourConfig',
+  'SavedFilter',
+  'ShortcutDefinition',
+  'ShortcutUserOverride',
+  'TableConfig',
+  'TenantRuleCacheVersion',
+
+  // ── Audit Logs ────────────────────────────────────────────────────────────
+  'SyncAuditLog',
+  'SyncChangeLog',
+  'SyncConflict',
+  'SyncDevice',
+  'SyncFlushCommand',
+  'SyncPolicy',
+  'SyncWarningRule',
+  'UnmaskAuditLog',
+
+  // ── AI ────────────────────────────────────────────────────────────────────
+  'AiChatMessage',
+  'AiChatSession',
+  'AiDataset',
+  'AiDocument',
+  'AiEmbedding',
+  'AiModel',
+  'AiSettings',
+  'AiSystemPrompt',
+  'AiTrainingJob',
+  'AiUsageLog',
+
+  // ── Calendar / Availability ───────────────────────────────────────────────
+  'UserAvailability',
+  'UserCalendarSync',
 ]);
 
 /**
- * Models that are accessed cross-tenant or have no tenant_id.
- * These are explicitly exempt from auto-filtering.
- * All are in platform/identity DBs — not in working DB.
+ * Models that are accessed cross-tenant or have no tenantId.
+ * All live in platform/identity DBs — not in working DB.
+ * Working DB models without tenantId (meta/config tables):
+ *   AMCPlanTemplate, ControlRoomRule, CronJobConfig, InventoryLabel,
+ *   PriceListItem, RateLimitTier, ServiceRate, TaskWatcher
  */
 export const TENANT_EXEMPT_MODELS = new Set([
   // Platform DB — global config
