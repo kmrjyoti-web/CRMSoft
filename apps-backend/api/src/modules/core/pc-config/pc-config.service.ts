@@ -27,6 +27,14 @@ export class PcConfigService {
     );
   }
 
+  async createPartner(dto: { code: string; shortCode: string; name: string; ownerEmail: string; description?: string; licenseLevel?: string }) {
+    const existing = await this.pcDb.pcPartner.findUnique({ where: { code: dto.code } });
+    if (existing) throw new Error(`Partner code '${dto.code}' already exists`);
+    const created = await this.pcDb.pcPartner.create({ data: { ...dto, isActive: true } });
+    await this.cache.invalidate('config:pc_partner:*');
+    return created;
+  }
+
   // ═══════════════════════════════════════════
   // CRM EDITIONS (was "verticals" in gv_cfg_verticals)
   // ═══════════════════════════════════════════
@@ -46,6 +54,14 @@ export class PcConfigService {
     );
   }
 
+  async createCrmEdition(dto: { code: string; shortCode?: string; name: string; description?: string }) {
+    const existing = await this.prisma.identity.gvCfgVertical.findUnique({ where: { code: dto.code } });
+    if (existing) throw new Error(`CRM Edition code '${dto.code}' already exists`);
+    const created = await this.prisma.identity.gvCfgVertical.create({ data: { ...dto, isActive: true } });
+    await this.cache.invalidate('config:pc_crm_edition:*');
+    return created;
+  }
+
   // ═══════════════════════════════════════════
   // BRANDS
   // ═══════════════════════════════════════════
@@ -57,6 +73,14 @@ export class PcConfigService {
         orderBy: { name: 'asc' },
       }),
     );
+  }
+
+  async createBrand(dto: { code: string; shortCode?: string; name: string; description?: string; partnerId?: string; layoutFolder?: string; isPublic?: boolean }) {
+    const existing = await this.prisma.identity.gvCfgBrand.findUnique({ where: { code: dto.code } });
+    if (existing) throw new Error(`Brand code '${dto.code}' already exists`);
+    const created = await this.prisma.identity.gvCfgBrand.create({ data: { ...dto, isActive: true } });
+    await this.cache.invalidate('config:pc_brand:*');
+    return created;
   }
 
   async getBrand(code: string) {
@@ -76,6 +100,25 @@ export class PcConfigService {
   // ═══════════════════════════════════════════
   // VERTICALS (industries — was business_type_registry)
   // ═══════════════════════════════════════════
+
+  async createVertical(dto: { typeCode: string; typeName: string; industryCategory: string; crmEditionId?: string; description?: string; shortCode?: string; sortOrder?: number }) {
+    const existing = await this.prisma.platform.businessTypeRegistry.findUnique({ where: { typeCode: dto.typeCode } });
+    if (existing) throw new Error(`Vertical code '${dto.typeCode}' already exists`);
+    const created = await this.prisma.platform.businessTypeRegistry.create({
+      data: {
+        typeCode: dto.typeCode,
+        typeName: dto.typeName,
+        industryCategory: dto.industryCategory as any,
+        crmEditionId: dto.crmEditionId ?? null,
+        description: dto.description ?? null,
+        shortCode: dto.shortCode ?? null,
+        sortOrder: dto.sortOrder ?? 0,
+        isActive: true,
+      },
+    });
+    await this.cache.invalidate('config:pc_vertical:*');
+    return created;
+  }
 
   async listVerticals(crmEditionCode?: string) {
     const cacheKey = `config:pc_vertical:${crmEditionCode ?? 'all'}`;

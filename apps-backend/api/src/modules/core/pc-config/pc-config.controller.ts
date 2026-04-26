@@ -1,12 +1,53 @@
 import {
   Controller, Get, Post, Body, Param, Query,
-  ConflictException, HttpCode, HttpStatus,
+  ConflictException, HttpCode, HttpStatus, UseGuards,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { IsString, IsUUID, IsOptional, MinLength, IsArray, IsBoolean, IsInt } from 'class-validator';
+import { IsString, IsUUID, IsOptional, MinLength, IsArray, IsBoolean, IsInt, IsEmail } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { PcConfigService } from './pc-config.service';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
+import { Roles } from '../../../common/decorators/roles.decorator';
+
+// ── DTOs ─────────────────────────────────────────────────────────────────────
+
+class CreatePartnerDto {
+  @ApiProperty({ example: 'TRAVVELLIS' }) @IsString() code: string;
+  @ApiProperty({ example: 'TRV' }) @IsString() shortCode: string;
+  @ApiProperty({ example: 'Travvellis' }) @IsString() @MinLength(2) name: string;
+  @ApiProperty({ example: 'owner@travvellis.com' }) @IsEmail() ownerEmail: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
+  @ApiPropertyOptional({ example: 'ENTERPRISE' }) @IsOptional() @IsString() licenseLevel?: string;
+}
+
+class CreateBrandDto {
+  @ApiProperty({ example: 'TRAVELSIS' }) @IsString() code: string;
+  @ApiPropertyOptional({ example: 'TLS' }) @IsOptional() @IsString() shortCode?: string;
+  @ApiProperty({ example: 'Travelsis' }) @IsString() @MinLength(2) name: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() partnerId?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() layoutFolder?: string;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() isPublic?: boolean;
+}
+
+class CreateCrmEditionDto {
+  @ApiProperty({ example: 'TRAVEL' }) @IsString() code: string;
+  @ApiPropertyOptional({ example: 'TRV' }) @IsOptional() @IsString() shortCode?: string;
+  @ApiProperty({ example: 'Travel CRM' }) @IsString() @MinLength(2) name: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
+}
+
+class CreateVerticalDto {
+  @ApiProperty({ example: 'TRAVEL_TOURISM' }) @IsString() typeCode: string;
+  @ApiProperty({ example: 'Travel & Tourism' }) @IsString() @MinLength(2) typeName: string;
+  @ApiProperty({ example: 'SERVICES' }) @IsString() industryCategory: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() crmEditionId?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() shortCode?: string;
+  @ApiPropertyOptional() @IsOptional() @IsInt() @Type(() => Number) sortOrder?: number;
+}
 
 class CreateSubTypeDto {
   @ApiProperty({ example: 'DMC_PROVIDER' }) @IsString() code: string;
@@ -34,47 +75,34 @@ class CreateCombinedCodeDto {
   @ApiPropertyOptional({ example: ['B2B', 'B2C'] }) @IsOptional() @IsArray() @IsString({ each: true }) businessModes?: string[];
 }
 
+// ── Controller ────────────────────────────────────────────────────────────────
+
 @Controller('pc-config')
 export class PcConfigController {
   constructor(private readonly svc: PcConfigService) {}
 
-  // 1. GET /pc-config/partners
+  // ── READ endpoints (public within authenticated session) ──────────────────
+
   @Get('partners')
-  listPartners() {
-    return this.svc.listPartners();
-  }
+  listPartners() { return this.svc.listPartners(); }
 
-  // 2. GET /pc-config/partner/:code
   @Get('partner/:code')
-  getPartner(@Param('code') code: string) {
-    return this.svc.getPartner(code);
-  }
+  getPartner(@Param('code') code: string) { return this.svc.getPartner(code); }
 
-  // 3. GET /pc-config/crm-editions
   @Get('crm-editions')
-  listCrmEditions() {
-    return this.svc.listCrmEditions();
-  }
+  listCrmEditions() { return this.svc.listCrmEditions(); }
 
-  // 4. GET /pc-config/brands
   @Get('brands')
-  listBrands() {
-    return this.svc.listBrands();
-  }
+  listBrands() { return this.svc.listBrands(); }
 
-  // 5. GET /pc-config/brand/:code  (enriched with editions + verticals)
   @Get('brand/:code')
-  getBrand(@Param('code') code: string) {
-    return this.svc.getBrand(code);
-  }
+  getBrand(@Param('code') code: string) { return this.svc.getBrand(code); }
 
-  // 6. GET /pc-config/verticals?crmEdition=TRAVEL
   @Get('verticals')
   listVerticals(@Query('crmEdition') crmEdition?: string) {
     return this.svc.listVerticals(crmEdition);
   }
 
-  // 7. GET /pc-config/sub-types?vertical=TRAVEL_TOURISM&userType=B2B
   @Get('sub-types')
   listSubTypes(
     @Query('vertical') vertical: string,
@@ -84,7 +112,6 @@ export class PcConfigController {
     return this.svc.listSubTypes(vertical, userType);
   }
 
-  // 7b. GET /pc-config/suggest-code?name=DMC+Provider&type=subtype
   @Get('suggest-code')
   @ApiOperation({ summary: 'v2.3 — Auto-suggest code from name + uniqueness check' })
   suggestCode(
@@ -94,56 +121,139 @@ export class PcConfigController {
     return this.svc.suggestCode(name, type);
   }
 
-  // 8. GET /pc-config/combined-code/:code
-  @Get('combined-code/:code')
-  getCombinedCode(@Param('code') code: string) {
-    return this.svc.getCombinedCode(code);
+  @Get('check-code')
+  @ApiOperation({ summary: 'M3.5 — Real-time code uniqueness check' })
+  async checkCode(
+    @Query('code') code: string,
+    @Query('type') type: 'partner' | 'brand' | 'edition' | 'vertical' | 'subtype' | 'combined',
+  ) {
+    const normalised = code?.trim().toUpperCase();
+    if (!normalised) return { available: false, reason: 'empty' };
+
+    const checkers: Record<string, () => Promise<boolean>> = {
+      partner:  async () => !(await this.svc.getPartner(normalised)),
+      brand:    async () => !(await this.svc.getBrand(normalised)),
+      edition:  async () => !(await this.svc.getCrmEdition(normalised)),
+      vertical: async () => {
+        const all = await this.svc.listVerticals();
+        return !(all as any[]).some((v) => v.typeCode === normalised);
+      },
+      subtype:  async () => {
+        const all = await this.svc.listAllSubTypes();
+        return !(all as any[]).some((s) => s.code === normalised);
+      },
+      combined: async () => !(await this.svc.getCombinedCode(normalised)),
+    };
+
+    const check = checkers[type];
+    if (!check) return { available: false, reason: 'unknown type' };
+    const available = await check();
+    return { code: normalised, type, available };
   }
 
-  // 9. GET /pc-config/registration-form?combinedCode=B2B_TRAV_TRAVL_DMC
+  @Get('combined-code/:code')
+  getCombinedCode(@Param('code') code: string) { return this.svc.getCombinedCode(code); }
+
   @Get('registration-form')
   getRegistrationForm(@Query('combinedCode') combinedCode: string) {
     return this.svc.getRegistrationFields(combinedCode);
   }
 
-  // 10. GET /pc-config/onboarding-stages?combinedCode=...
   @Get('onboarding-stages')
   getOnboardingStages(@Query('combinedCode') combinedCode?: string) {
     return this.svc.getOnboardingStages(combinedCode);
   }
 
-  // 11. GET /pc-config/page-registry?portal=crm
   @Get('page-registry')
   listPageRegistry(@Query('portal') portal?: string) {
     return this.svc.listPageRegistry(portal);
   }
 
-  // 12. GET /pc-config/combined-codes?brandCode=TRAVELSIS
   @Get('combined-codes')
   listCombinedCodes(@Query('brandCode') brandCode?: string) {
     return this.svc.listCombinedCodes(brandCode);
   }
 
-  // 13. POST /pc-config/combined-code  (admin — create new code)
-  @Post('combined-code')
+  // ── WRITE endpoints (admin-only) ──────────────────────────────────────────
+
+  @Post('partners')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'M3 — Create a new combined code (builder save action)' })
-  async createCombinedCode(@Body() dto: CreateCombinedCodeDto) {
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN')
+  @ApiOperation({ summary: 'M3.5 — Create a new partner' })
+  async createPartner(@Body() dto: CreatePartnerDto) {
     try {
-      return await this.svc.createCombinedCode(dto);
+      return await this.svc.createPartner(dto);
     } catch (err: any) {
       if (err.message?.includes('already exists')) throw new ConflictException(err.message);
       throw err;
     }
   }
 
-  // 14. POST /pc-config/sub-types  (admin — create new sub-type)
+  @Post('brands')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN')
+  @ApiOperation({ summary: 'M3.5 — Create a new brand' })
+  async createBrand(@Body() dto: CreateBrandDto) {
+    try {
+      return await this.svc.createBrand(dto);
+    } catch (err: any) {
+      if (err.message?.includes('already exists')) throw new ConflictException(err.message);
+      throw err;
+    }
+  }
+
+  @Post('crm-editions')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN')
+  @ApiOperation({ summary: 'M3.5 — Create a new CRM edition' })
+  async createCrmEdition(@Body() dto: CreateCrmEditionDto) {
+    try {
+      return await this.svc.createCrmEdition(dto);
+    } catch (err: any) {
+      if (err.message?.includes('already exists')) throw new ConflictException(err.message);
+      throw err;
+    }
+  }
+
+  @Post('verticals')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN')
+  @ApiOperation({ summary: 'M3.5 — Create a new vertical' })
+  async createVertical(@Body() dto: CreateVerticalDto) {
+    try {
+      return await this.svc.createVertical(dto);
+    } catch (err: any) {
+      if (err.message?.includes('already exists')) throw new ConflictException(err.message);
+      throw err;
+    }
+  }
+
   @Post('sub-types')
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN')
   @ApiOperation({ summary: 'v2.3 — Create a new sub-type' })
   async createSubType(@Body() dto: CreateSubTypeDto) {
     try {
       return await this.svc.createSubType(dto);
+    } catch (err: any) {
+      if (err.message?.includes('already exists')) throw new ConflictException(err.message);
+      throw err;
+    }
+  }
+
+  @Post('combined-code')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN')
+  @ApiOperation({ summary: 'M3 — Create a new combined code (builder save action)' })
+  async createCombinedCode(@Body() dto: CreateCombinedCodeDto) {
+    try {
+      return await this.svc.createCombinedCode(dto);
     } catch (err: any) {
       if (err.message?.includes('already exists')) throw new ConflictException(err.message);
       throw err;

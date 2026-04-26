@@ -404,6 +404,23 @@ export const api = {
       allowedBusinessModes: string[]; defaultBusinessMode?: string;
       businessModeRequired?: boolean; sortOrder?: number;
     }) => apiFetch('/pc-config/sub-types', { method: 'POST', body: JSON.stringify(payload) }),
+    checkCode: (code: string, type: string) =>
+      apiFetch(`/pc-config/check-code?code=${encodeURIComponent(code)}&type=${encodeURIComponent(type)}`),
+    createPartner: (payload: {
+      code: string; shortCode: string; name: string; ownerEmail: string;
+      description?: string; licenseLevel?: string;
+    }) => apiFetch('/pc-config/partners', { method: 'POST', body: JSON.stringify(payload) }),
+    createBrand: (payload: {
+      code: string; shortCode?: string; name: string; description?: string;
+      partnerId?: string; layoutFolder?: string; isPublic?: boolean;
+    }) => apiFetch('/pc-config/brands', { method: 'POST', body: JSON.stringify(payload) }),
+    createCrmEdition: (payload: {
+      code: string; shortCode?: string; name: string; description?: string;
+    }) => apiFetch('/pc-config/crm-editions', { method: 'POST', body: JSON.stringify(payload) }),
+    createVertical: (payload: {
+      typeCode: string; typeName: string; industryCategory: string;
+      crmEditionId?: string; description?: string; shortCode?: string; sortOrder?: number;
+    }) => apiFetch('/pc-config/verticals', { method: 'POST', body: JSON.stringify(payload) }),
   },
   menuEditor: {
     list: (verticalCode: string) => apiFetch(`/platform-console/menu-editor/${verticalCode}`),
