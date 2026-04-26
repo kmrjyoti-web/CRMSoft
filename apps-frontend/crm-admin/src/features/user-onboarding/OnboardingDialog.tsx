@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter, usePathname } from 'next/navigation';
 import { Modal } from '@/components/ui';
 import { OnboardingStepper } from '@/components/onboarding/OnboardingStepper';
 import { useUserOnboardingStore } from './stores/user-onboarding.store';
@@ -10,7 +11,6 @@ import { StageEmailOtp } from './stages/StageEmailOtp';
 import { StageMobileOtp } from './stages/StageMobileOtp';
 import { StageUserType } from './stages/StageUserType';
 import { StageSubUserType } from './stages/StageSubUserType';
-import { StageProfileRedirect } from './stages/StageProfileRedirect';
 import { useAuthStore } from '@/stores/auth.store';
 import type { OnboardingStage } from './user-onboarding.service';
 
@@ -27,14 +27,26 @@ export function OnboardingDialog() {
   const t = useTranslations('onboarding');
   const { status, loading, fetchStatus } = useUserOnboardingStore();
   const token = useAuthStore((s) => s.token);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (token) fetchStatus();
   }, [token, fetchStatus]);
 
+  // profile_redirect: close dialog and navigate to setup page (don't show modal)
+  useEffect(() => {
+    if (status?.stage === 'profile_redirect' && !status.complete) {
+      if (!pathname.startsWith('/profile/setup')) {
+        router.push('/profile/setup');
+      }
+    }
+  }, [status?.stage, status?.complete, pathname, router]);
+
   if (!token) return null;
   if (!status && loading) return null;
   if (!status || status.complete) return null;
+  if (status.stage === 'profile_redirect') return null;
 
   const steps = [
     { key: 'language' as const, label: t('stages.language') },
@@ -89,7 +101,6 @@ export function OnboardingDialog() {
         {status.stage === 'mobile_otp' && <StageMobileOtp />}
         {status.stage === 'user_type' && <StageUserType />}
         {status.stage === 'sub_user_type' && <StageSubUserType />}
-        {status.stage === 'profile_redirect' && <StageProfileRedirect />}
       </div>
     </Modal>
   );

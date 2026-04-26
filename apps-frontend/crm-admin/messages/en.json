@@ -45,15 +45,6 @@
       "indEe": "Employee / Job seeker",
       "indEeDesc": "Looking for opportunities"
     },
-    "vertical": {
-      "title": "Choose your industry",
-      "software": "Software & IT",
-      "restaurant": "Restaurant & Food",
-      "travel": "Travel & Tourism",
-      "retail": "Retail",
-      "healthcare": "Healthcare",
-      "education": "Education"
-    },
     "errors": {
       "otpInvalid": "Invalid code. Please try again.",
       "otpExpired": "Code expired. Request a new one.",
