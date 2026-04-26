@@ -5,6 +5,29 @@
 :root {
   --background: #0f1117;
   --foreground: #e6edf3;
+
+  /* Brand variables — overridden at runtime by BrandProvider */
+  --brand-primary: #1a73e8;
+  --brand-primary-deep: #1557b0;
+  --brand-primary-soft: rgba(26, 115, 232, 0.12);
+  --brand-primary-glow: rgba(26, 115, 232, 0.25);
+  --brand-secondary: #34a853;
+  --brand-bg: #ffffff;
+  --brand-bg-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --brand-text: #1f2937;
+  --brand-text-muted: #6b7280;
+  --brand-text-subtle: #9ca3af;
+  --brand-card-bg: #ffffff;
+  --brand-card-border: #e5e7eb;
+  --brand-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --brand-border: #e5e7eb;
+  --brand-border-emphasis: #d1d5db;
+  --brand-success: #16a34a;
+  --brand-warning: #d97706;
+  --brand-danger: #dc2626;
+  --brand-info: #2563eb;
+  --brand-font-heading: "Inter", system-ui, sans-serif;
+  --brand-font-body: "Inter", system-ui, sans-serif;
 }
 
 body {

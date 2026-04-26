@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 48" width="180" height="48">
+  <defs>
+    <linearGradient id="blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#1a73e8"/>
+    </linearGradient>
+  </defs>
+  <!-- Icon mark: rounded square + dot -->
+  <rect x="0" y="8" width="32" height="32" rx="8" fill="url(#blue)"/>
+  <rect x="9" y="17" width="14" height="2.5" rx="1.25" fill="white"/>
+  <rect x="9" y="23" width="10" height="2.5" rx="1.25" fill="white"/>
+  <rect x="9" y="29" width="12" height="2.5" rx="1.25" fill="white"/>
+  <!-- Wordmark -->
+  <text x="42" y="34" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="20" font-weight="600" fill="#1a73e8">CRMSoft</text>
+</svg>
