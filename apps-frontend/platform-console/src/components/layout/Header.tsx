@@ -1,7 +1,7 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-import { RefreshCw } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { RefreshCw, LogOut } from 'lucide-react';
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -36,9 +36,22 @@ const PAGE_TITLES: Record<string, string> = {
   '/cicd/pipelines': 'Pipelines',
 };
 
+function handleLogout(router: ReturnType<typeof useRouter>) {
+  localStorage.removeItem('pc_token');
+  localStorage.removeItem('pc_user');
+  document.cookie = 'pc_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  router.push('/login');
+}
+
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const title = PAGE_TITLES[pathname] ?? 'Platform Console';
+
+  const user = (() => {
+    if (typeof window === 'undefined') return null;
+    try { return JSON.parse(localStorage.getItem('pc_user') ?? 'null'); } catch { return null; }
+  })();
 
   return (
     <header className="h-14 border-b border-console-border bg-console-sidebar/50 flex items-center justify-between px-6">
@@ -51,6 +64,18 @@ export function Header() {
           className="p-1.5 rounded hover:bg-white/5 text-console-muted hover:text-console-text transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
+        </button>
+        {user && (
+          <span className="text-xs text-console-muted pl-2 border-l border-console-border">
+            {user.email ?? user.firstName}
+          </span>
+        )}
+        <button
+          onClick={() => handleLogout(router)}
+          title="Sign out"
+          className="p-1.5 rounded hover:bg-white/5 text-console-muted hover:text-red-400 transition-colors"
+        >
+          <LogOut className="w-4 h-4" />
         </button>
       </div>
     </header>
