@@ -77,17 +77,19 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    // Tenant isolation via $extends on working/demo clients (business data layer)
-    // Applied BEFORE soft-delete so middleware stack order is: tenant → soft-delete → query
+    // Soft-delete middleware must be registered on BASE clients BEFORE $extends().
+    // Prisma rule: extended clients do not have $use(). $use registers on the
+    // underlying PrismaClient instance and fires regardless of later $extends calls.
+    (this._globalWorking as any).$use(createSoftDeleteMiddleware());
+    (this._demo as any).$use(createSoftDeleteMiddleware());
+
+    // Tenant isolation via $extends — applied AFTER $use so both layers cooperate.
+    // Execution order at query time: extension intercept → middleware → DB.
     if (this.tenantContext) {
       const ext = createTenantAwareExtension(this.tenantContext);
       this._globalWorking = (this._globalWorking.$extends(ext)) as unknown as WorkingClient;
       this._demo = (this._demo.$extends(ext)) as unknown as DemoClient;
     }
-
-    // Soft-delete middleware on the (now-extended) working/demo clients
-    (this._globalWorking as any).$use(createSoftDeleteMiddleware());
-    (this._demo as any).$use(createSoftDeleteMiddleware());
 
     // Identity client keeps $use middleware (exclusion-list approach for auth/RBAC models)
     if (this.tenantContext) {
