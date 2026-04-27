@@ -600,15 +600,28 @@ export class PcConfigService {
   // ═══════════════════════════════════════════
 
   async listOnboardingStagesAdmin(combinedCode?: string) {
-    const where: any = {};
-    if (combinedCode) {
-      const cc = await this.pcDb.pcCombinedCode.findFirst({ where: { code: combinedCode } });
-      if (cc) where.combinedCodeId = cc.id;
+    if (!combinedCode) {
+      return this.pcDb.pcOnboardingStage.findMany({ orderBy: { sortOrder: 'asc' } });
     }
-    return this.pcDb.pcOnboardingStage.findMany({
-      where,
+    const cc = await this.pcDb.pcCombinedCode.findFirst({ where: { code: combinedCode } });
+    const rows = await this.pcDb.pcOnboardingStage.findMany({
+      where: {
+        OR: [
+          { combinedCodeId: null },
+          { combinedCodeId: cc?.id ?? '__none__' },
+        ],
+      },
       orderBy: { sortOrder: 'asc' },
     });
+    // Deduplicate: code-specific override wins over global for same stageKey
+    const seen = new Map<string, typeof rows[0]>();
+    for (const row of rows) {
+      const existing = seen.get(row.stageKey);
+      if (!existing || (row.combinedCodeId && !existing.combinedCodeId)) {
+        seen.set(row.stageKey, row);
+      }
+    }
+    return Array.from(seen.values()).sort((a, b) => a.sortOrder - b.sortOrder);
   }
 
   async createOnboardingStage(dto: {
