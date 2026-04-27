@@ -83,6 +83,35 @@ class ReorderOnboardingStagesDto {
   @ApiProperty({ type: [String] }) @IsArray() @IsString({ each: true }) stageIds: string[];
 }
 
+class CreateRegistrationFieldDto {
+  @ApiProperty({ example: 'B2B_TRAV_TRAVL_DMC' }) @IsString() combinedCode: string;
+  @ApiProperty({ example: 'phone' }) @IsString() fieldKey: string;
+  @ApiProperty({ example: 'text' }) @IsString() fieldType: string;
+  @ApiProperty({ example: 'Phone Number' }) @IsString() label: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() placeholder?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() helpText?: string;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() required?: boolean;
+  @ApiPropertyOptional() @IsOptional() options?: any;
+  @ApiPropertyOptional() @IsOptional() validation?: any;
+  @ApiPropertyOptional() @IsOptional() showWhen?: any;
+  @ApiPropertyOptional() @IsOptional() @IsInt() @Type(() => Number) sortOrder?: number;
+}
+
+class UpdateRegistrationFieldDto {
+  @ApiPropertyOptional() @IsOptional() @IsString() label?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() placeholder?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() helpText?: string;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() required?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsString() fieldType?: string;
+  @ApiPropertyOptional() @IsOptional() options?: any;
+  @ApiPropertyOptional() @IsOptional() validation?: any;
+  @ApiPropertyOptional() @IsOptional() showWhen?: any;
+}
+
+class ReorderRegistrationFieldsDto {
+  @ApiProperty({ type: [String] }) @IsArray() @IsString({ each: true }) fieldIds: string[];
+}
+
 class CreateCombinedCodeDto {
   @ApiProperty({ example: 'B2B_TRAV_TRAVL_DMC' }) @IsString() code: string;
   @ApiProperty() @IsUUID() partnerId: string;
@@ -341,6 +370,59 @@ export class PcConfigController {
   @ApiOperation({ summary: 'Admin: soft-delete (deactivate) a stage' })
   async deleteStage(@Param('id') id: string) {
     await this.svc.deleteOnboardingStage(id);
+    return { success: true };
+  }
+
+  // ── Registration Field Management ────────────────────────────────────────────
+
+  @Get('registration-fields-admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: list all registration fields for a combined code (including inactive)' })
+  listFieldsAdmin(@Query('combinedCode') combinedCode: string) {
+    return this.svc.listRegistrationFieldsAdmin(combinedCode);
+  }
+
+  @Post('registration-fields')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: create registration field' })
+  createField(@Body() dto: CreateRegistrationFieldDto) {
+    return this.svc.createRegistrationField(dto);
+  }
+
+  @Patch('registration-fields/reorder')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: reorder fields by array of IDs' })
+  async reorderFields(@Body() dto: ReorderRegistrationFieldsDto) {
+    await this.svc.reorderRegistrationFields(dto.fieldIds);
+    return { success: true };
+  }
+
+  @Patch('registration-fields/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: update registration field' })
+  updateField(@Param('id') id: string, @Body() dto: UpdateRegistrationFieldDto) {
+    return this.svc.updateRegistrationField(id, dto);
+  }
+
+  @Patch('registration-fields/:id/toggle')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: toggle field active/inactive' })
+  toggleField(@Param('id') id: string) {
+    return this.svc.toggleRegistrationField(id);
+  }
+
+  @Delete('registration-fields/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: soft-delete (deactivate) a registration field' })
+  async deleteField(@Param('id') id: string) {
+    await this.svc.deleteRegistrationField(id);
     return { success: true };
   }
 }

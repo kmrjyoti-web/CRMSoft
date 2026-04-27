@@ -335,6 +335,92 @@ export class PcConfigService {
     });
   }
 
+  async listRegistrationFieldsAdmin(combinedCode: string) {
+    const cc = await this.getCombinedCode(combinedCode);
+    if (!cc) return [];
+    return this.pcDb.pcRegistrationField.findMany({
+      where: { combinedCodeId: (cc as any).id },
+      orderBy: { sortOrder: 'asc' },
+    });
+  }
+
+  async createRegistrationField(dto: {
+    combinedCode: string;
+    fieldKey: string; fieldType: string; label: string;
+    placeholder?: string | null; helpText?: string | null;
+    required?: boolean; options?: any; validation?: any;
+    showWhen?: any; sortOrder?: number;
+  }) {
+    const cc = await this.getCombinedCode(dto.combinedCode);
+    if (!cc) throw new NotFoundException(`Combined code ${dto.combinedCode} not found`);
+    const combinedCodeId = (cc as any).id;
+    const max = await this.pcDb.pcRegistrationField.aggregate({
+      where: { combinedCodeId },
+      _max: { sortOrder: true },
+    });
+    const field = await this.pcDb.pcRegistrationField.create({
+      data: {
+        combinedCodeId,
+        fieldKey: dto.fieldKey,
+        fieldType: dto.fieldType,
+        label: dto.label,
+        placeholder: dto.placeholder ?? null,
+        helpText: dto.helpText ?? null,
+        required: dto.required ?? false,
+        options: dto.options ?? null,
+        validation: dto.validation ?? null,
+        showWhen: dto.showWhen ?? null,
+        sortOrder: dto.sortOrder ?? ((max._max.sortOrder ?? 0) + 10),
+        isActive: true,
+        translations: {},
+      },
+    });
+    await this.cache.invalidate(`config:registration_fields:*`);
+    return field;
+  }
+
+  async updateRegistrationField(id: string, dto: {
+    label?: string; placeholder?: string | null; helpText?: string | null;
+    required?: boolean; options?: any; validation?: any; showWhen?: any;
+    fieldType?: string;
+  }) {
+    const field = await this.pcDb.pcRegistrationField.update({
+      where: { id },
+      data: dto,
+    });
+    await this.cache.invalidate(`config:registration_fields:*`);
+    return field;
+  }
+
+  async toggleRegistrationField(id: string) {
+    const current = await this.pcDb.pcRegistrationField.findUnique({ where: { id } });
+    if (!current) throw new NotFoundException(`Field ${id} not found`);
+    const updated = await this.pcDb.pcRegistrationField.update({
+      where: { id },
+      data: { isActive: !current.isActive },
+    });
+    await this.cache.invalidate(`config:registration_fields:*`);
+    return updated;
+  }
+
+  async reorderRegistrationFields(fieldIds: string[]) {
+    for (let i = 0; i < fieldIds.length; i++) {
+      await this.pcDb.pcRegistrationField.update({
+        where: { id: fieldIds[i] },
+        data: { sortOrder: (i + 1) * 10 },
+      });
+    }
+    await this.cache.invalidate(`config:registration_fields:*`);
+  }
+
+  async deleteRegistrationField(id: string) {
+    await this.pcDb.pcRegistrationField.update({
+      where: { id },
+      data: { isActive: false },
+    });
+    await this.cache.invalidate(`config:registration_fields:*`);
+  }
+
   // ═══════════════════════════════════════════
   // PAGE REGISTRY
   // ═══════════════════════════════════════════
