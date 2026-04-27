@@ -339,7 +339,7 @@ export class PcConfigService {
     const cc = await this.getCombinedCode(combinedCode);
     if (!cc) return [];
     return this.pcDb.pcRegistrationField.findMany({
-      where: { combinedCodeId: (cc as any).id },
+      where: { combinedCodeId: (cc as any).id, onboardingStageId: null },
       orderBy: { sortOrder: 'asc' },
     });
   }
@@ -419,6 +419,72 @@ export class PcConfigService {
       data: { isActive: false },
     });
     await this.cache.invalidate(`config:registration_fields:*`);
+  }
+
+  async toggleFieldRequired(id: string) {
+    const current = await this.pcDb.pcRegistrationField.findUnique({ where: { id } });
+    if (!current) throw new NotFoundException(`Field ${id} not found`);
+    const updated = await this.pcDb.pcRegistrationField.update({
+      where: { id },
+      data: { required: !current.required },
+    });
+    await this.cache.invalidate(`config:registration_fields:*`);
+    return updated;
+  }
+
+  async toggleFieldVisibility(id: string) {
+    const current = await this.pcDb.pcRegistrationField.findUnique({ where: { id } });
+    if (!current) throw new NotFoundException(`Field ${id} not found`);
+    const updated = await this.pcDb.pcRegistrationField.update({
+      where: { id },
+      data: { visibility: (current as any).visibility === 'hidden' ? 'visible' : 'hidden' },
+    });
+    await this.cache.invalidate(`config:registration_fields:*`);
+    return updated;
+  }
+
+  async listStageFields(stageId: string) {
+    return this.pcDb.pcRegistrationField.findMany({
+      where: { onboardingStageId: stageId, isActive: true },
+      orderBy: { sortOrder: 'asc' },
+    });
+  }
+
+  async addFieldToStage(dto: {
+    stageId: string; combinedCodeId: string;
+    fieldKey: string; fieldType: string; label: string;
+    placeholder?: string | null; helpText?: string | null; required?: boolean;
+  }) {
+    const max = await this.pcDb.pcRegistrationField.aggregate({
+      where: { onboardingStageId: dto.stageId },
+      _max: { sortOrder: true },
+    });
+    const field = await this.pcDb.pcRegistrationField.create({
+      data: {
+        combinedCodeId: dto.combinedCodeId,
+        onboardingStageId: dto.stageId,
+        fieldKey: dto.fieldKey,
+        fieldType: dto.fieldType,
+        label: dto.label,
+        placeholder: dto.placeholder ?? null,
+        helpText: dto.helpText ?? null,
+        required: dto.required ?? false,
+        sortOrder: (max._max.sortOrder ?? 0) + 10,
+        isActive: true,
+        translations: {},
+      },
+    });
+    await this.cache.invalidate(`config:registration_fields:*`);
+    return field;
+  }
+
+  async moveFieldToStage(fieldId: string, newStageId: string | null) {
+    const updated = await this.pcDb.pcRegistrationField.update({
+      where: { id: fieldId },
+      data: { onboardingStageId: newStageId },
+    });
+    await this.cache.invalidate(`config:registration_fields:*`);
+    return updated;
   }
 
   // ═══════════════════════════════════════════

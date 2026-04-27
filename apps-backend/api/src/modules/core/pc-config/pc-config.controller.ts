@@ -112,6 +112,17 @@ class ReorderRegistrationFieldsDto {
   @ApiProperty({ type: [String] }) @IsArray() @IsString({ each: true }) fieldIds: string[];
 }
 
+class AddStageFieldDto {
+  @ApiProperty() @IsUUID() stageId: string;
+  @ApiProperty() @IsUUID() combinedCodeId: string;
+  @ApiProperty({ example: 'mobile' }) @IsString() fieldKey: string;
+  @ApiProperty({ example: 'phone' }) @IsString() fieldType: string;
+  @ApiProperty({ example: 'Mobile Number' }) @IsString() label: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() placeholder?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() helpText?: string;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() required?: boolean;
+}
+
 class CreateCombinedCodeDto {
   @ApiProperty({ example: 'B2B_TRAV_TRAVL_DMC' }) @IsString() code: string;
   @ApiProperty() @IsUUID() partnerId: string;
@@ -417,6 +428,22 @@ export class PcConfigController {
     return this.svc.toggleRegistrationField(id);
   }
 
+  @Patch('registration-fields/:id/toggle-required')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: toggle field required on/off' })
+  toggleFieldRequired(@Param('id') id: string) {
+    return this.svc.toggleFieldRequired(id);
+  }
+
+  @Patch('registration-fields/:id/toggle-visibility')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: toggle field visibility (visible/hidden)' })
+  toggleFieldVisibility(@Param('id') id: string) {
+    return this.svc.toggleFieldVisibility(id);
+  }
+
   @Delete('registration-fields/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
@@ -424,5 +451,32 @@ export class PcConfigController {
   async deleteField(@Param('id') id: string) {
     await this.svc.deleteRegistrationField(id);
     return { success: true };
+  }
+
+  // ── Stage Field Management ────────────────────────────────────────────────────
+
+  @Get('stage-fields/:stageId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: list fields belonging to a specific onboarding stage' })
+  listStageFields(@Param('stageId') stageId: string) {
+    return this.svc.listStageFields(stageId);
+  }
+
+  @Post('stage-fields')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: add a field to an onboarding stage' })
+  addFieldToStage(@Body() dto: AddStageFieldDto) {
+    return this.svc.addFieldToStage(dto);
+  }
+
+  @Patch('stage-fields/:id/move')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: move a field to a different stage (or back to registration form)' })
+  moveFieldToStage(@Param('id') id: string, @Body() dto: { newStageId: string | null }) {
+    return this.svc.moveFieldToStage(id, dto.newStageId);
   }
 }

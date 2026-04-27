@@ -108,31 +108,37 @@ model PcOnboardingStage {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
+  stageFields PcRegistrationField[]
+
   @@unique([combinedCodeId, stageKey])
   @@index([combinedCodeId])
   @@map("pc_onboarding_stage")
 }
 
 model PcRegistrationField {
-  id             String   @id @default(uuid()) @db.Uuid
-  combinedCodeId String   @map("combined_code_id") @db.Uuid
-  fieldKey       String   @map("field_key") @db.VarChar(100)
-  fieldType      String   @map("field_type") @db.VarChar(30)
-  label          String   @db.VarChar(255)
-  placeholder    String?  @db.VarChar(255)
-  helpText       String?  @map("help_text")
-  required       Boolean  @default(false)
-  options        Json?
-  validation     Json?
-  showWhen       Json?    @map("show_when")
-  translations   Json     @default("{}")
-  sortOrder      Int      @default(0) @map("sort_order")
-  isActive       Boolean  @default(true) @map("is_active")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id                String   @id @default(uuid()) @db.Uuid
+  combinedCodeId    String   @map("combined_code_id") @db.Uuid
+  fieldKey          String   @map("field_key") @db.VarChar(100)
+  fieldType         String   @map("field_type") @db.VarChar(30)
+  label             String   @db.VarChar(255)
+  placeholder       String?  @db.VarChar(255)
+  helpText          String?  @map("help_text")
+  required          Boolean  @default(false)
+  options           Json?
+  validation        Json?
+  showWhen          Json?    @map("show_when")
+  translations      Json     @default("{}")
+  sortOrder         Int      @default(0) @map("sort_order")
+  isActive          Boolean  @default(true) @map("is_active")
+  visibility        String   @default("visible") @db.VarChar(20)
+  onboardingStageId String?  @map("onboarding_stage_id") @db.Uuid
+  onboardingStage   PcOnboardingStage? @relation(fields: [onboardingStageId], references: [id])
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
   @@unique([combinedCodeId, fieldKey])
   @@index([combinedCodeId])
+  @@index([onboardingStageId])
   @@map("pc_registration_field")
 }
 
