@@ -410,6 +410,23 @@ export const api = {
       apiFetch('/pc-config/onboarding-stages/reorder', { method: 'PATCH', body: JSON.stringify({ stageIds }) }),
     deleteOnboardingStage: (id: string) =>
       apiFetch(`/pc-config/onboarding-stages/${id}`, { method: 'DELETE' }),
+    listRegistrationFieldsAdmin: (combinedCode: string) =>
+      apiFetch(`/pc-config/registration-fields-admin?combinedCode=${encodeURIComponent(combinedCode)}`),
+    createRegistrationField: (data: {
+      combinedCode: string; fieldKey: string; fieldType: string; label: string;
+      placeholder?: string; helpText?: string; required?: boolean;
+      options?: unknown; validation?: unknown; sortOrder?: number;
+    }) => apiFetch('/pc-config/registration-fields', { method: 'POST', body: JSON.stringify(data) }),
+    updateRegistrationField: (id: string, data: {
+      label?: string; placeholder?: string; helpText?: string; required?: boolean;
+      fieldType?: string; options?: unknown; validation?: unknown;
+    }) => apiFetch(`/pc-config/registration-fields/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    toggleRegistrationField: (id: string) =>
+      apiFetch(`/pc-config/registration-fields/${id}/toggle`, { method: 'PATCH' }),
+    reorderRegistrationFields: (fieldIds: string[]) =>
+      apiFetch('/pc-config/registration-fields/reorder', { method: 'PATCH', body: JSON.stringify({ fieldIds }) }),
+    deleteRegistrationField: (id: string) =>
+      apiFetch(`/pc-config/registration-fields/${id}`, { method: 'DELETE' }),
     createCombinedCode: (payload: {
       code: string; partnerId: string; brandId: string; crmEditionId: string;
       verticalId: string; userType: string; subTypeId: string;
