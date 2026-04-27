@@ -21,7 +21,8 @@ type CombinedCode = { id: string; code: string; displayName: string; description
 type AdminField = {
   id: string; fieldKey: string; fieldType: string; label: string;
   placeholder?: string; helpText?: string; required: boolean;
-  sortOrder: number; isActive: boolean; options?: unknown; validation?: unknown;
+  sortOrder: number; isActive: boolean; visibility: 'visible' | 'hidden';
+  options?: unknown; validation?: unknown;
 };
 type AdminStage = {
   id: string; stageKey: string; stageLabel: string; componentName: string;
@@ -78,6 +79,13 @@ export default function CombinedCodeBuilderPage() {
   const [showAddStage, setShowAddStage] = useState(false);
   const [newStage, setNewStage] = useState({ stageKey: '', stageLabel: '', componentName: '', required: false, skipIfFieldSet: '' });
   const [stageSaving, setStageSaving] = useState(false);
+
+  // ── Stage field state ─────────────────────────────────────────────────────
+  const [stageFields, setStageFields] = useState<AdminField[]>([]);
+  const [stageFieldsLoading, setStageFieldsLoading] = useState(false);
+  const [showAddStageField, setShowAddStageField] = useState(false);
+  const [newStageField, setNewStageField] = useState({ fieldKey: '', fieldType: 'text', label: '', required: false });
+  const [stageFieldSaving, setStageFieldSaving] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -178,11 +186,17 @@ export default function CombinedCodeBuilderPage() {
     else { setResult(null); setAdminFields([]); setAdminStages([]); }
   }, [complete, generatedCode, lookup]);
 
-  // Sync editing state when selected stage changes
+  // Sync editing state + load stage fields when selected stage changes
   useEffect(() => {
     if (!selectedStageId) return;
     const s = adminStages.find((x) => x.id === selectedStageId);
     if (s) setEditingStage({ stageLabel: s.stageLabel, componentName: s.componentName, required: s.required, skipIfFieldSet: s.skipIfFieldSet ?? '' });
+    setStageFields([]); setShowAddStageField(false);
+    setStageFieldsLoading(true);
+    (api.pcConfig.listStageFields(selectedStageId) as Promise<{ data?: AdminField[] } | AdminField[]>)
+      .then((res) => setStageFields(Array.isArray(res) ? res : (res as any).data ?? []))
+      .catch(() => {})
+      .finally(() => setStageFieldsLoading(false));
   }, [selectedStageId, adminStages]);
 
   const handleSave = async () => {
@@ -227,14 +241,14 @@ export default function CombinedCodeBuilderPage() {
   };
 
   const handleToggleField = async (id: string) => {
-    await (api.pcConfig.toggleRegistrationField(id) as Promise<unknown>).catch(() => {});
-    setAdminFields((prev) => prev.map((f) => f.id === id ? { ...f, isActive: !f.isActive } : f));
+    await (api.pcConfig.toggleFieldVisibility(id) as Promise<unknown>).catch(() => {});
+    setAdminFields((prev) => prev.map((f) => f.id === id ? { ...f, visibility: f.visibility === 'hidden' ? 'visible' : 'hidden' } : f));
   };
 
   const handleToggleRequired = async (field: AdminField) => {
     const updated = { ...field, required: !field.required };
     setAdminFields((prev) => prev.map((f) => f.id === field.id ? updated : f));
-    await (api.pcConfig.updateRegistrationField(field.id, { required: !field.required }) as Promise<unknown>).catch(() => {});
+    await (api.pcConfig.toggleFieldRequired(field.id) as Promise<unknown>).catch(() => {});
   };
 
   const handleSaveFieldEdit = async () => {
@@ -303,6 +317,29 @@ export default function CombinedCodeBuilderPage() {
       setShowAddStage(false);
       setSelectedStageId(created.id);
     } finally { setStageSaving(false); }
+  };
+
+  const handleAddStageField = async () => {
+    if (!selectedStageId || !newStageField.fieldKey || !newStageField.label) return;
+    const ccId = result !== 'not-found' && result ? (result as CombinedCode).id : undefined;
+    if (!ccId) return;
+    setStageFieldSaving(true);
+    try {
+      const created = await api.pcConfig.addFieldToStage({
+        stageId: selectedStageId, combinedCodeId: ccId,
+        fieldKey: newStageField.fieldKey, fieldType: newStageField.fieldType,
+        label: newStageField.label, required: newStageField.required,
+      }) as AdminField;
+      setStageFields((prev) => [...prev, created]);
+      setNewStageField({ fieldKey: '', fieldType: 'text', label: '', required: false });
+      setShowAddStageField(false);
+    } finally { setStageFieldSaving(false); }
+  };
+
+  const handleDeleteStageField = async (id: string) => {
+    if (!confirm('Remove this field from the stage?')) return;
+    await (api.pcConfig.deleteRegistrationField(id) as Promise<unknown>).catch(() => {});
+    setStageFields((prev) => prev.filter((f) => f.id !== id));
   };
 
   const selectedStage = adminStages.find((s) => s.id === selectedStageId);
@@ -477,7 +514,7 @@ export default function CombinedCodeBuilderPage() {
                 <ListChecks className="w-3.5 h-3.5" />
                 Registration Fields
                 {adminFields.length > 0 && (
-                  <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-[#bc8cff]/20 text-[#bc8cff]">{adminFields.filter((f) => f.isActive).length}</span>
+                  <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-[#bc8cff]/20 text-[#bc8cff]">{adminFields.filter((f) => f.visibility !== 'hidden').length}</span>
                 )}
               </button>
               <button onClick={() => setActiveTab('stages')}
@@ -512,7 +549,7 @@ export default function CombinedCodeBuilderPage() {
                           onDragStart={() => setFieldDragIdx(idx)}
                           onDragOver={(e) => e.preventDefault()}
                           onDrop={() => handleFieldDrop(idx)}
-                          className={`flex items-center gap-2 px-2 py-1.5 rounded-md border transition-colors group ${f.isActive ? 'border-console-border/60 hover:border-console-border' : 'border-console-border/30 opacity-50'}`}
+                          className={`flex items-center gap-2 px-2 py-1.5 rounded-md border transition-colors group ${f.visibility !== 'hidden' ? 'border-console-border/60 hover:border-console-border' : 'border-console-border/30 opacity-50'}`}
                         >
                           <GripVertical className="w-3 h-3 text-console-muted/30 cursor-grab shrink-0" />
                           <span className="font-mono text-[10px] text-console-accent w-28 shrink-0 truncate">{f.fieldKey}</span>
@@ -524,9 +561,9 @@ export default function CombinedCodeBuilderPage() {
                             {f.required ? 'req' : 'opt'}
                           </button>
                           {/* Visibility toggle */}
-                          <button onClick={() => handleToggleField(f.id)} title={f.isActive ? 'Hide field' : 'Show field'}
+                          <button onClick={() => handleToggleField(f.id)} title={f.visibility !== 'hidden' ? 'Hide field' : 'Show field'}
                             className="text-console-muted/40 hover:text-console-muted transition-colors shrink-0">
-                            {f.isActive ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                            {f.visibility !== 'hidden' ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                           </button>
                           {/* Edit */}
                           <button onClick={() => setEditingField({ ...f })}
@@ -683,6 +720,75 @@ export default function CombinedCodeBuilderPage() {
                         {stageSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
                         Save changes
                       </button>
+
+                      {/* Stage fields section */}
+                      <div className="pt-3 border-t border-console-border/40">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs font-medium text-console-text flex items-center gap-1.5">
+                            <ListChecks className="w-3 h-3" />
+                            Fields in this stage
+                            {stageFields.length > 0 && (
+                              <span className="text-[10px] px-1.5 rounded-full bg-[#58a6ff]/20 text-[#58a6ff]">{stageFields.length}</span>
+                            )}
+                          </p>
+                          {!showAddStageField && (
+                            <button onClick={() => setShowAddStageField(true)}
+                              className="flex items-center gap-1 text-[10px] text-console-muted hover:text-console-text transition-colors">
+                              <Plus className="w-3 h-3" /> Add
+                            </button>
+                          )}
+                        </div>
+
+                        {stageFieldsLoading ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-console-muted mx-auto" />
+                        ) : stageFields.length === 0 && !showAddStageField ? (
+                          <p className="text-[10px] text-console-muted/50 py-1">No fields. Click Add to attach fields to this stage.</p>
+                        ) : (
+                          <div className="space-y-1 mb-2">
+                            {stageFields.map((f) => (
+                              <div key={f.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md border border-console-border/50 bg-[#0d1117]/30">
+                                <span className="font-mono text-[10px] text-console-accent flex-1 truncate">{f.fieldKey}</span>
+                                <span className="text-[10px] text-console-muted truncate">{f.label}</span>
+                                <span className="text-[10px] px-1 rounded bg-[#30363d] text-console-muted font-mono shrink-0">{f.fieldType}</span>
+                                {f.required && <span className="text-[9px] text-[#f85149] shrink-0">req</span>}
+                                <button onClick={() => handleDeleteStageField(f.id)}
+                                  className="text-console-muted/30 hover:text-[#f85149] transition-colors shrink-0">
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {showAddStageField && (
+                          <div className="border border-console-border/60 rounded-md p-2.5 mt-1 space-y-2 bg-[#0d1117]/40">
+                            <div className="grid grid-cols-2 gap-2">
+                              <input className={inputCls} placeholder="fieldKey" value={newStageField.fieldKey}
+                                onChange={(e) => setNewStageField((p) => ({ ...p, fieldKey: e.target.value }))} />
+                              <select className={selectCls} value={newStageField.fieldType}
+                                onChange={(e) => setNewStageField((p) => ({ ...p, fieldType: e.target.value }))}>
+                                {FIELD_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                              </select>
+                            </div>
+                            <input className={inputCls} placeholder="Label" value={newStageField.label}
+                              onChange={(e) => setNewStageField((p) => ({ ...p, label: e.target.value }))} />
+                            <label className="flex items-center gap-2 text-xs text-console-muted cursor-pointer">
+                              <input type="checkbox" checked={newStageField.required}
+                                onChange={(e) => setNewStageField((p) => ({ ...p, required: e.target.checked }))} />
+                              Required
+                            </label>
+                            <div className="flex gap-1">
+                              <button onClick={handleAddStageField} disabled={stageFieldSaving || !newStageField.fieldKey || !newStageField.label}
+                                className="flex items-center gap-1 px-2.5 py-1.5 text-xs bg-console-accent text-white rounded-md disabled:opacity-60">
+                                {stageFieldSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />} Save
+                              </button>
+                              <button onClick={() => setShowAddStageField(false)} className="px-2.5 py-1.5 text-xs border border-console-border/50 rounded-md text-console-muted">
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
                       <div className="pt-2 border-t border-console-border/40">
                         <p className="text-[10px] text-console-muted/40 font-mono">stageKey: {selectedStage.stageKey}</p>

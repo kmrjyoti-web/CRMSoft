@@ -423,10 +423,23 @@ export const api = {
     }) => apiFetch(`/pc-config/registration-fields/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     toggleRegistrationField: (id: string) =>
       apiFetch(`/pc-config/registration-fields/${id}/toggle`, { method: 'PATCH' }),
+    toggleFieldRequired: (id: string) =>
+      apiFetch(`/pc-config/registration-fields/${id}/toggle-required`, { method: 'PATCH' }),
+    toggleFieldVisibility: (id: string) =>
+      apiFetch(`/pc-config/registration-fields/${id}/toggle-visibility`, { method: 'PATCH' }),
     reorderRegistrationFields: (fieldIds: string[]) =>
       apiFetch('/pc-config/registration-fields/reorder', { method: 'PATCH', body: JSON.stringify({ fieldIds }) }),
     deleteRegistrationField: (id: string) =>
       apiFetch(`/pc-config/registration-fields/${id}`, { method: 'DELETE' }),
+    listStageFields: (stageId: string) =>
+      apiFetch(`/pc-config/stage-fields/${stageId}`),
+    addFieldToStage: (data: {
+      stageId: string; combinedCodeId: string;
+      fieldKey: string; fieldType: string; label: string;
+      placeholder?: string; helpText?: string; required?: boolean;
+    }) => apiFetch('/pc-config/stage-fields', { method: 'POST', body: JSON.stringify(data) }),
+    moveFieldToStage: (id: string, newStageId: string | null) =>
+      apiFetch(`/pc-config/stage-fields/${id}/move`, { method: 'PATCH', body: JSON.stringify({ newStageId }) }),
     createCombinedCode: (payload: {
       code: string; partnerId: string; brandId: string; crmEditionId: string;
       verticalId: string; userType: string; subTypeId: string;
