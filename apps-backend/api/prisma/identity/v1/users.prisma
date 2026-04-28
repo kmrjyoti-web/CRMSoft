@@ -541,6 +541,7 @@ model Tenant {
   name             String
   slug             String         @unique
   domain           String?        @unique
+  subdomain        String?        @unique
   logo             String?
   status           TenantStatus   @default(TRIAL)
   onboardingStep   OnboardingStep @default(CREATED) @map("onboarding_step")
@@ -548,8 +549,34 @@ model Tenant {
   businessTypeId   String?        @map("business_type_id")
   industryCode     String?        @map("industry_code")
   tradeProfileJson Json?          @default("{}") @map("trade_profile_json")
-  createdAt        DateTime       @default(now()) @map("created_at")
-  updatedAt        DateTime       @updatedAt @map("updated_at")
+
+  // ─── DOMAIN VERIFICATION ─────────────────────────────────────────────────
+  domainVerified   Boolean        @default(false) @map("domain_verified")
+
+  // ─── DATABASE ROUTING (hot-path fields for TenantResolverMiddleware) ─────
+  dbStrategy            DbStrategy  @default(SHARED)  @map("db_strategy")
+  dbConnectionEncrypted String?     @map("db_connection_encrypted") // AES-256-GCM ciphertext (hex)
+  dbConnectionIv        String?     @map("db_connection_iv")        // 16-byte IV (hex)
+  dbConnectionTag       String?     @map("db_connection_tag")       // 16-byte auth tag (hex)
+  dbRegion              String?     @default("ap-south-1") @map("db_region")
+
+  // ─── PLAN & SUBSCRIPTION ─────────────────────────────────────────────────
+  planId             String?            @map("plan_id")
+  planCode           String?            @map("plan_code")
+  subscriptionStatus SubscriptionStatus @default(TRIALING) @map("subscription_status")
+
+  // ─── BRAND / VERTICAL IDENTITY ───────────────────────────────────────────
+  partnerCode  String?   @map("partner_code")  // WL partner who owns this tenant
+  brandCode    String?   @map("brand_code")
+  editionCode  String?   @map("edition_code")
+  verticalCode String?   @map("vertical_code")
+
+  // ─── BRAND CONFIG CACHE ───────────────────────────────────────────────────
+  brandConfigHash        String?   @map("brand_config_hash")
+  brandConfigGeneratedAt DateTime? @map("brand_config_generated_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // [cross-db removed] businessType         BusinessTypeRegistry?     @relation(fields: [businessTypeId], references: [id])
   subscriptions        Subscription[]
@@ -573,6 +600,10 @@ model Tenant {
   // [cross-db removed] deliveryChallanItems DeliveryChallanItem[]
   // [cross-db removed] bomFormulaItems      BOMFormulaItem[]
 
+  @@index([subdomain])
+  @@index([brandCode, verticalCode])
+  @@index([partnerCode])
+  @@index([subscriptionStatus])
   @@map("gv_usr_tenants")
 }
 
@@ -597,9 +628,13 @@ model TenantProfile {
   industry            String?
   website             String?
   supportEmail        String?    @map("support_email")
-  dbStrategy          DbStrategy @default(SHARED) @map("db_strategy")
-  dbConnectionString  String?    @map("db_connection_string")
-  primaryContactName  String?    @map("primary_contact_name")
+  dbStrategy            DbStrategy @default(SHARED)  @map("db_strategy")
+  dbConnectionString    String?    @map("db_connection_string") // plaintext — deprecated; use encrypted fields on Tenant
+  dbConnectionEncrypted String?    @map("db_connection_encrypted")
+  dbConnectionIv        String?    @map("db_connection_iv")
+  dbConnectionTag       String?    @map("db_connection_tag")
+  dbRegion              String?    @default("ap-south-1") @map("db_region")
+  primaryContactName    String?    @map("primary_contact_name")
   primaryContactEmail String?    @map("primary_contact_email")
   primaryContactPhone String?    @map("primary_contact_phone")
   billingAddress      Json?      @map("billing_address")
