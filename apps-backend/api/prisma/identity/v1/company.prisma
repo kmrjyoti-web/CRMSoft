@@ -112,3 +112,54 @@ model UserCompanyMappingLog {
   @@index([createdAt])
   @@map("gv_cmp_mapping_logs")
 }
+
+model CompanyInvite {
+  id               String   @id @default(uuid())
+
+  companyId        String   @map("company_id")
+  invitedByUserId  String   @map("invited_by_user_id")
+  inviteeEmail     String?  @map("invitee_email")
+  role             String   @default("MEMBER")
+
+  token            String   @unique
+
+  status           String   @default("PENDING")    // PENDING | ACCEPTED | EXPIRED | REVOKED
+  expiresAt        DateTime @map("expires_at")
+  acceptedAt       DateTime? @map("accepted_at")
+  acceptedByUserId String?  @map("accepted_by_user_id")
+
+  personalMessage  String?  @map("personal_message")
+  sentVia          String   @default("EMAIL") @map("sent_via")   // EMAIL | WHATSAPP | LINK
+
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@index([companyId])
+  @@index([inviteeEmail])
+  @@index([token])
+  @@index([status])
+  @@map("gv_cmp_company_invites")
+}
+
+model CompanySubscriptionRequest {
+  id                String   @id @default(uuid())
+
+  requesterCompanyId  String   @map("requester_company_id")   // Company requesting to subscribe
+  targetCompanyId     String   @map("target_company_id")      // Company being subscribed to
+  requesterUserId     String   @map("requester_user_id")      // User who triggered the request
+
+  status            String   @default("PENDING")  // PENDING | APPROVED | REJECTED | CANCELLED
+  reason            String?                        // Why they want to subscribe
+  rejectionReason   String?  @map("rejection_reason")
+
+  reviewedByUserId  String?  @map("reviewed_by_user_id")
+  reviewedAt        DateTime? @map("reviewed_at")
+
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@unique([requesterCompanyId, targetCompanyId])
+  @@index([targetCompanyId, status])
+  @@index([requesterCompanyId])
+  @@map("gv_cmp_subscription_requests")
+}

@@ -19,6 +19,7 @@ export class MappingService {
     verticalCode: string;
     registrationFields?: Record<string, any>;
     requiresApproval: boolean;
+    selectedBusinessModes?: string[];
   }): Promise<{ company: any; mapping: any } | null> {
     if (!COMPANY_CATEGORY_CODES.includes(params.categoryCode)) return null;
 
@@ -44,6 +45,11 @@ export class MappingService {
       },
     });
 
+    const modes = params.selectedBusinessModes ?? [];
+    const selectedBusinessModes = modes.length > 0
+      ? { modes, primaryMode: modes[0], setAt: new Date().toISOString(), setByUser: true }
+      : [];
+
     const mapping = await (this.prisma.identity as any).userCompanyMapping.create({
       data: {
         userId: params.userId,
@@ -52,6 +58,7 @@ export class MappingService {
         joinMode: 'SELF_REGISTERED',
         status: params.requiresApproval ? 'PENDING' : 'ACTIVE',
         isDefault: true,
+        selectedBusinessModes,
       },
     });
 

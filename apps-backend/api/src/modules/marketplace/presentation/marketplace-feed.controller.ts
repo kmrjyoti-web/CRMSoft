@@ -15,6 +15,7 @@ import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { RequirePermissions } from '../../../core/permissions/decorators/require-permissions.decorator';
 import { RequireVerification } from '../../softwarevendor/verification/decorators/require-verification.decorator';
 import { VerificationGuard } from '../../softwarevendor/verification/guards/verification.guard';
+import { RequireBusinessMode, BusinessModeGuard } from '../../../common/guards/business-mode.guard';
 import { ListingService } from '../services/listing.service';
 import { PostService } from '../services/post.service';
 import { EnquiryService } from '../services/enquiry.service';
@@ -64,6 +65,8 @@ export class ListingController {
 
   @Post()
   @RequirePermissions('marketplace:create')
+  @UseGuards(BusinessModeGuard)
+  @RequireBusinessMode('B2B', 'B2C', 'SERVICE_B2B', 'SERVICE_B2C')
   async create(
     @CurrentUser('tenantId') tenantId: string,
     @CurrentUser('id') userId: string,
@@ -116,6 +119,8 @@ export class PostController {
   }
 
   @Post()
+  @UseGuards(BusinessModeGuard)
+  @RequireBusinessMode('B2B', 'B2C', 'SERVICE_B2B', 'SERVICE_B2C')
   async create(
     @CurrentUser('tenantId') tenantId: string,
     @CurrentUser('id') userId: string,

@@ -1,11 +1,12 @@
 import {
   Controller, Get, Post, Put, Param, Body, Query,
-  HttpCode, HttpStatus,
+  HttpCode, HttpStatus, UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { ApiResponse } from '../../../../common/utils/api-response';
+import { RequireBusinessMode, BusinessModeGuard } from '../../../../common/guards/business-mode.guard';
 import { CreateListingCommand } from '../application/commands/create-listing/create-listing.command';
 import { UpdateListingCommand } from '../application/commands/update-listing/update-listing.command';
 import { PublishListingCommand } from '../application/commands/publish-listing/publish-listing.command';
@@ -25,6 +26,8 @@ export class ListingsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new marketplace listing' })
+  @UseGuards(BusinessModeGuard)
+  @RequireBusinessMode('B2B', 'B2C', 'SERVICE_B2B', 'SERVICE_B2C')
   async create(
     @Body() dto: CreateListingDto,
     @CurrentUser('id') userId: string,

@@ -10,6 +10,10 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { PlatformBootstrapService } from './platform-bootstrap.service';
 import { TalentIdService } from './talent-id.service';
 import { MappingService } from './mapping.service';
+import { CompanyInviteService } from './company-invite.service';
+import { CompanyInviteController, PublicInviteController } from './company-invite.controller';
+import { CompanyApprovalService } from './company-approval.service';
+import { CompanyApprovalController } from './company-approval.controller';
 import { TenantModule } from '../../modules/core/identity/tenant/tenant.module';
 
 @Module({
@@ -24,9 +28,9 @@ import { TenantModule } from '../../modules/core/identity/tenant/tenant.module';
     }),
     forwardRef(() => TenantModule),
   ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, PlatformBootstrapService, TalentIdService, MappingService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
-  exports: [AuthService, MappingService],
+  controllers: [AuthController, CompanyInviteController, PublicInviteController, CompanyApprovalController],
+  providers: [AuthService, JwtStrategy, PlatformBootstrapService, TalentIdService, MappingService, CompanyInviteService, CompanyApprovalService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
+  exports: [AuthService, MappingService, CompanyInviteService, CompanyApprovalService],
 })
 export class AuthModule {}
 

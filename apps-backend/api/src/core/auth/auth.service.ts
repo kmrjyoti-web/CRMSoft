@@ -257,6 +257,7 @@ export class AuthService {
     email: string;
     password: string;
     registrationFields?: Record<string, any>;
+    selectedBusinessModes?: string[];
   }) {
     const existing = await this.prisma.identity.user.findFirst({ where: { email: data.email } });
     if (existing) throw new ConflictException('Email already registered');
@@ -301,6 +302,7 @@ export class AuthService {
       verticalCode: data.verticalCode,
       registrationFields: data.registrationFields,
       requiresApproval,
+      selectedBusinessModes: data.selectedBusinessModes,
     });
 
     if (!requiresApproval) {
@@ -345,6 +347,12 @@ export class AuthService {
     };
     const categoryCode = USER_TYPE_CATEGORY_MAP[dto.userType] ?? 'COMPANY_B2B';
 
+    // Extract businessModes from wizard fields and remove from registrationFields
+    const rawModes = dto.fields?.businessModes;
+    const selectedBusinessModes: string[] =
+      Array.isArray(rawModes) ? rawModes : (rawModes ? [String(rawModes)] : []);
+    const { businessModes: _omit, ...restFields } = dto.fields ?? {};
+
     return this.registerVertical({
       verticalCode: dto.verticalCode,
       categoryCode,
@@ -352,8 +360,9 @@ export class AuthService {
       brandCode: dto.brandCode,
       email: dto.email,
       password: dto.password,
+      selectedBusinessModes,
       registrationFields: {
-        ...dto.fields,
+        ...restFields,
         ...(dto.mobile ? { mobile: dto.mobile } : {}),
         _combinedCode: dto.combinedCode,
       },

@@ -14,6 +14,6 @@
 | 8  | Sprint 8.2 — Auto-Provisioning + Migration      | ⏳     |      |        |
 | 9  | Sprint 8.3 — Partner Commission                 | ⏳     |      |        |
 | 10 | Sprint 9 — Partner Vertical Assignment          | ⏳     |      |        |
-| 11 | Sprint 5.5 — Invite + Approval + BusinessMode   | ⏳     |      |        |
+| 11 | Sprint 5.5 — Invite + Approval + BusinessMode   | ✅     | 2026-04-29 | (pending) |
 | 12 | Sprint 10.1 — Magic Link                        | ⏳     |      |        |
 | 13 | Sprint 10.2 — Cross-Brand SSO                   | ⏳     |      |        |
