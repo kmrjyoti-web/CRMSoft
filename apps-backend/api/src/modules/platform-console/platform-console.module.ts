@@ -46,6 +46,7 @@ import { MenuEditorService } from './brand-config/menu-editor.service';
 import { MenuEditorController } from './brand-config/menu-editor.controller';
 import { CreatorService } from './brand-config/creator.service';
 import { CreatorController } from './brand-config/creator.controller';
+import { TenantHealthController } from './error-center/tenant-health.controller';
 
 @Module({
   imports: [ScheduleModule.forRoot()],
@@ -68,6 +69,7 @@ import { CreatorController } from './brand-config/creator.controller';
     PublicBrandConfigController,
     MenuEditorController,
     CreatorController,
+    TenantHealthController,
   ],
   providers: [
     PlatformConsolePrismaService,

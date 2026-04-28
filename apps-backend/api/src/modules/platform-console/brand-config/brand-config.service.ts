@@ -136,6 +136,65 @@ export class BrandConfigService {
     return this.getRawBrandConfig(domain);
   }
 
+  /**
+   * Returns only visual branding metadata for a domain — no encryption, no sensitive config.
+   * Used by the login page hook to apply brand colors/logo without full config overhead.
+   */
+  async getVisualBranding(domain: string): Promise<{
+    found: boolean;
+    brandCode: string | null;
+    brandName: string | null;
+    displayName: string | null;
+    logoUrl: string | null;
+    primaryColor: string;
+    secondaryColor: string;
+    designTokens: Record<string, unknown> | null;
+    welcomeTitle: string | null;
+    welcomeSubtitle: string | null;
+  }> {
+    const cacheKey = `brand-visual:${domain.toLowerCase()}`;
+    const cached = await this.cache.get<any>(cacheKey);
+    if (cached) return cached;
+
+    const tenant = await this.prisma.identity.tenant.findFirst({
+      where: { OR: [{ domain: domain.toLowerCase() }, { subdomain: domain.toLowerCase() }] },
+      select: { brandCode: true, name: true },
+    });
+
+    if (!tenant?.brandCode) {
+      return {
+        found: false, brandCode: null, brandName: null, displayName: null,
+        logoUrl: null, primaryColor: '#1976d2', secondaryColor: '#dc004e',
+        designTokens: null, welcomeTitle: null, welcomeSubtitle: null,
+      };
+    }
+
+    const brand = await this.db.brandProfile.findUnique({
+      where: { brandCode: tenant.brandCode },
+      select: {
+        brandCode: true, brandName: true, displayName: true,
+        logoUrl: true, primaryColor: true, secondaryColor: true,
+        designTokens: true,
+      },
+    });
+
+    const result = {
+      found: true,
+      brandCode: tenant.brandCode,
+      brandName: brand?.brandName ?? tenant.name,
+      displayName: brand?.displayName ?? tenant.name,
+      logoUrl: brand?.logoUrl ?? null,
+      primaryColor: brand?.primaryColor ?? '#1976d2',
+      secondaryColor: brand?.secondaryColor ?? '#dc004e',
+      designTokens: (brand?.designTokens as Record<string, unknown>) ?? null,
+      welcomeTitle: brand?.displayName ? `Welcome to ${brand.displayName}` : null,
+      welcomeSubtitle: `Sign in to manage your business`,
+    };
+
+    await this.cache.set(cacheKey, result, PUBLIC_CONFIG_TTL);
+    return result;
+  }
+
   // ─── Brand Profiles ──────────────────────────────────────────────────────
 
   async listBrands() {

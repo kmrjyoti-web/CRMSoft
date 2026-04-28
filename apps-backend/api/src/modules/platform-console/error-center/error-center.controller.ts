@@ -25,6 +25,8 @@ export class ErrorCenterController {
     @Query('brandId') brandId?: string,
     @Query('verticalType') verticalType?: string,
     @Query('resolved') resolved?: string,
+    @Query('tenantId') tenantId?: string,
+    @Query('partnerCode') partnerCode?: string,
   ) {
     return this.errorCenterService.listErrors({
       page: page ? parseInt(page) : undefined,
@@ -33,6 +35,8 @@ export class ErrorCenterController {
       brandId,
       verticalType,
       resolved: resolved !== undefined ? resolved === 'true' : undefined,
+      tenantId,
+      partnerCode,
     });
   }
 

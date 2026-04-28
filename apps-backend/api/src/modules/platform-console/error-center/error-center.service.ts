@@ -14,6 +14,8 @@ export class ErrorCenterService {
     brandId?: string;
     verticalType?: string;
     resolved?: boolean;
+    tenantId?: string;
+    partnerCode?: string;
   }) {
     try {
       const page = params.page ?? 1;
@@ -24,6 +26,8 @@ export class ErrorCenterService {
       if (params.severity) where.severity = params.severity;
       if (params.brandId) where.brandId = params.brandId;
       if (params.verticalType) where.verticalType = params.verticalType;
+      if (params.tenantId) where.tenantId = params.tenantId;
+      if (params.partnerCode) where.brandId = params.partnerCode;
       if (params.resolved !== undefined) {
         where.resolvedAt = params.resolved ? { not: null } : null;
       }
@@ -123,6 +127,84 @@ export class ErrorCenterService {
       );
       throw error;
     }
+  }
+
+  async getTenantErrors(tenantId: string, limit = 50): Promise<{
+    tenantId: string;
+    errorCount: number;
+    last50: object[];
+    trend7d: { date: string; count: number }[];
+  }> {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const [last50, allRecent] = await Promise.all([
+      this.db.globalErrorLog.findMany({
+        where: { tenantId },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        select: {
+          id: true, severity: true, errorCode: true, message: true,
+          module: true, httpStatus: true, resolvedAt: true, createdAt: true,
+        },
+      }),
+      this.db.globalErrorLog.findMany({
+        where: { tenantId, createdAt: { gte: sevenDaysAgo } },
+        select: { createdAt: true },
+      }),
+    ]);
+
+    // Build 7-day trend buckets
+    const buckets: Record<string, number> = {};
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+      buckets[d.toISOString().slice(0, 10)] = 0;
+    }
+    for (const row of allRecent) {
+      const day = row.createdAt.toISOString().slice(0, 10);
+      if (day in buckets) buckets[day]++;
+    }
+
+    return {
+      tenantId,
+      errorCount: allRecent.length,
+      last50,
+      trend7d: Object.entries(buckets).map(([date, count]) => ({ date, count })),
+    };
+  }
+
+  async getTenantHealthSummary(tenantId: string): Promise<{
+    status: 'HEALTHY' | 'DEGRADED' | 'DOWN';
+    errorCount24h: number;
+    lastErrorAt: Date | null;
+    criticalCount24h: number;
+  }> {
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const [errors, lastError] = await Promise.all([
+      this.db.globalErrorLog.findMany({
+        where: { tenantId, createdAt: { gte: since } },
+        select: { severity: true, createdAt: true },
+      }),
+      this.db.globalErrorLog.findFirst({
+        where: { tenantId },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true },
+      }),
+    ]);
+
+    const criticalCount = errors.filter((e) => e.severity === 'CRITICAL').length;
+    const totalCount = errors.length;
+    const status =
+      criticalCount >= 3 ? 'DOWN' :
+      criticalCount >= 1 || totalCount >= 10 ? 'DEGRADED' :
+      'HEALTHY';
+
+    return {
+      status,
+      errorCount24h: totalCount,
+      lastErrorAt: lastError?.createdAt ?? null,
+      criticalCount24h: criticalCount,
+    };
   }
 
   async getTrends(period: 'DAILY' | 'WEEKLY' | 'MONTHLY' = 'DAILY') {

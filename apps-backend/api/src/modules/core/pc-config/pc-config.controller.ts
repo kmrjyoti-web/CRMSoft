@@ -9,6 +9,7 @@ import { Type } from 'class-transformer';
 import { PcConfigService } from './pc-config.service';
 import { WlDomainService } from './wl-domain.service';
 import { WlDbProvisioningService } from '../identity/tenant/services/wl-db-provisioning.service';
+import { ErrorCenterService } from '../../platform-console/error-center/error-center.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles, Public } from '../../../common/decorators/roles.decorator';
@@ -194,6 +195,7 @@ export class PcConfigController {
     private readonly svc: PcConfigService,
     private readonly wlDomain: WlDomainService,
     private readonly wlDbProv: WlDbProvisioningService,
+    private readonly errorCenter: ErrorCenterService,
   ) {}
 
   // ── READ endpoints (public — unauthenticated users need these for registration) ──
@@ -696,5 +698,23 @@ export class PcConfigController {
   @ApiOperation({ summary: 'Revert to shared DB (clears encrypted connection, sets status → SHARED)' })
   rollbackProvisioning(@Param('tenantId') tenantId: string) {
     return this.wlDbProv.rollback(tenantId);
+  }
+
+  // ── Tenant Error Center (PLATFORM_ADMIN only) ─────────────────────────────────
+
+  @Get('tenants/:tenantId/errors')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Last 50 errors + 7-day trend for a specific tenant' })
+  getTenantErrors(@Param('tenantId') tenantId: string) {
+    return this.errorCenter.getTenantErrors(tenantId);
+  }
+
+  @Get('tenants/:tenantId/health')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Simplified health summary for a tenant (PLATFORM_ADMIN view)' })
+  getTenantHealth(@Param('tenantId') tenantId: string) {
+    return this.errorCenter.getTenantHealthSummary(tenantId);
   }
 }

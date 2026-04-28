@@ -70,4 +70,17 @@ export class PublicBrandConfigController {
   getPublicKey() {
     return { publicKey: this.security.getPublicKey(), algorithm: 'RSA-SHA256', keyType: 'RSA-2048' };
   }
+
+  @Get('visual')
+  @ApiOperation({
+    summary: 'Visual-only brand metadata for a domain (no auth, no encryption)',
+    description: 'Returns logo, colors, display name — safe for login page branding. No sensitive config.',
+  })
+  @ApiQuery({ name: 'domain', required: true, example: 'xtreme.crmsoft.com' })
+  async getVisualBranding(@Query('domain') domain: string) {
+    if (!domain) {
+      throw new HttpException('domain query param is required', HttpStatus.BAD_REQUEST);
+    }
+    return this.service.getVisualBranding(domain.toLowerCase().trim());
+  }
 }

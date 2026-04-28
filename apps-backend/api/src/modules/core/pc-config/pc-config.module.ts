@@ -4,12 +4,20 @@ import { PcConfigService } from './pc-config.service';
 import { WlDomainService } from './wl-domain.service';
 import { WlDbProvisioningService } from '../identity/tenant/services/wl-db-provisioning.service';
 import { PrismaClientFactory } from '../../../common/database/prisma-client-factory.service';
+import { FeatureGateService } from '../../../common/guards/feature-gate.service';
+import { ErrorCenterService } from '../../platform-console/error-center/error-center.service';
 import { PlatformConsoleModule } from '../../platform-console/platform-console.module';
 
 @Module({
   imports: [PlatformConsoleModule],
   controllers: [PcConfigController],
-  providers: [PcConfigService, WlDomainService, WlDbProvisioningService, PrismaClientFactory],
-  exports: [PcConfigService, WlDomainService, WlDbProvisioningService, PrismaClientFactory],
+  providers: [
+    PcConfigService, WlDomainService, WlDbProvisioningService,
+    PrismaClientFactory, FeatureGateService, ErrorCenterService,
+  ],
+  exports: [
+    PcConfigService, WlDomainService, WlDbProvisioningService,
+    PrismaClientFactory, FeatureGateService,
+  ],
 })
 export class PcConfigModule {}
