@@ -82,3 +82,10 @@ apps-frontend/**/.env.*
 .vscode/
 .idea/
 *.swp
+
+# ────────────────────────────────────────────────────────────
+# Build artifacts & local backups
+# ────────────────────────────────────────────────────────────
+.next/
+backups/
+brand-assets/*/extracted/
