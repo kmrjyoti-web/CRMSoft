@@ -4,7 +4,7 @@
 
 | #  | Sprint                                          | Status | Date | Commit |
 |----|-------------------------------------------------|--------|------|--------|
-| 1  | Sprint 5.1 — Master Code DB + Backend           | ⏳     |      |        |
+| 1  | Sprint 5.1 — Master Code DB + Backend           | ✅     | 2026-04-29 | 911c0bee |
 | 2  | Sprint 5.2 — Code Builder UI Redesign           | ⏳     |      |        |
 | 3  | Sprint 5.3 — Brand Config API + parent_tenant_id| ⏳     |      |        |
 | 4  | Sprint 6 — Brand Wiring Fixes (6 items)         | ⏳     |      |        |
