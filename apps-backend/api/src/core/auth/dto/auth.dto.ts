@@ -161,4 +161,7 @@ export class TenantRegisterDto {
 
   @ApiPropertyOptional({ description: 'Business type code (e.g., IT_SERVICES, RESTAURANT_FOOD)' })
   @IsOptional() @IsString() businessTypeCode?: string;
+
+  @ApiPropertyOptional({ description: 'Domain the user registered from (used to link WL parent tenant)' })
+  @IsOptional() @IsString() registeredOnDomain?: string;
 }

@@ -26,6 +26,7 @@ export class BrandConfigService {
   async getRawBrandConfig(domain: string): Promise<{
     _domain: { tenantId: string; domain: string | null; subdomain: string | null };
     tenant: object; brand: object | null;
+    tenantHierarchy: object | null;
     masterCodes: object[];
     combinedCodes: object[]; registrationFields: object[];
     onboardingStages: object[]; plan: object;
@@ -43,6 +44,8 @@ export class BrandConfigService {
         brandCode: true, editionCode: true, verticalCode: true,
         partnerCode: true, planCode: true,
         subscriptionStatus: true,
+        parentTenantId: true,
+        parentTenant: { select: { id: true, name: true, slug: true, brandCode: true, partnerCode: true } },
       },
     });
 
@@ -83,7 +86,7 @@ export class BrandConfigService {
       });
     });
 
-    // Fall back to old combined codes if no master codes found yet
+    // DEPRECATED fallback: use pcCombinedCode only when no master codes exist yet
     let combinedCodes: { id: string; code: string; displayName: string; userType: string }[];
     let regFields: any[];
 
@@ -164,7 +167,17 @@ export class BrandConfigService {
         verticalCode: tenant.verticalCode,
         partnerCode: tenant.partnerCode,
         subscriptionStatus: tenant.subscriptionStatus,
+        parentTenantId: tenant.parentTenantId ?? null,
       },
+      tenantHierarchy: tenant.parentTenant
+        ? {
+            parentId: tenant.parentTenant.id,
+            parentName: tenant.parentTenant.name,
+            parentSlug: tenant.parentTenant.slug,
+            parentBrandCode: tenant.parentTenant.brandCode,
+            parentPartnerCode: tenant.parentTenant.partnerCode,
+          }
+        : null,
       brand: brandProfile
         ? {
             brandCode: brandProfile.brandCode,

@@ -15,15 +15,16 @@ export class VendorTenantsController {
   constructor(private readonly vendorTenantsService: VendorTenantsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List tenants with pagination' })
+  @ApiOperation({ summary: 'List tenants with pagination. Filter by parentTenantId to get WL child tenants.' })
   async list(
     @Query('status') status?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('parentTenantId') parentTenantId?: string,
   ) {
     const p = Math.max(Number(page) || 1, 1);
     const l = Math.min(Math.max(Number(limit) || 20, 1), 100);
-    const { data, total } = await this.vendorTenantsService.list({ status, page: p, limit: l });
+    const { data, total } = await this.vendorTenantsService.list({ status, page: p, limit: l, parentTenantId });
     return ApiResponse.paginated(data, total, p, l);
   }
 

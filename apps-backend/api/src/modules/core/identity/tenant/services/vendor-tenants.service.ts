@@ -5,20 +5,23 @@ import { PrismaService } from '../../../../../core/prisma/prisma.service';
 export class VendorTenantsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async list(filters: { status?: string; page: number; limit: number }) {
+  async list(filters: { status?: string; page: number; limit: number; parentTenantId?: string }) {
     const where: any = {};
-    if (filters.status) where.status = filters.status;
+    if (filters.status)       where.status         = filters.status;
+    if (filters.parentTenantId) where.parentTenantId = filters.parentTenantId;
 
-    const [data, total] = await Promise.all([
+    const [tenants, total] = await Promise.all([
       this.prisma.identity.tenant.findMany({
         where,
         skip: (filters.page - 1) * filters.limit,
         take: filters.limit,
         orderBy: { createdAt: 'desc' },
+        include: { _count: { select: { childTenants: true } } },
       }),
       this.prisma.identity.tenant.count({ where }),
     ]);
 
+    const data = tenants.map(({ _count, ...t }) => ({ ...t, childTenantCount: _count.childTenants }));
     return { data, total };
   }
 

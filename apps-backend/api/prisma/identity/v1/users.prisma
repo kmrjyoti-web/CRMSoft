@@ -575,6 +575,11 @@ model Tenant {
   brandConfigHash        String?   @map("brand_config_hash")
   brandConfigGeneratedAt DateTime? @map("brand_config_generated_at")
 
+  // ─── TENANT HIERARCHY (WL parent-child) ──────────────────────────────────
+  parentTenantId String?   @map("parent_tenant_id")
+  parentTenant   Tenant?   @relation("TenantHierarchy", fields: [parentTenantId], references: [id])
+  childTenants   Tenant[]  @relation("TenantHierarchy")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -604,6 +609,7 @@ model Tenant {
   @@index([brandCode, verticalCode])
   @@index([partnerCode])
   @@index([subscriptionStatus])
+  @@index([parentTenantId])
   @@map("gv_usr_tenants")
 }
 

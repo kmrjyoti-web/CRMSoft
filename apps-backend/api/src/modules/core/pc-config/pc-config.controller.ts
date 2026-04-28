@@ -323,6 +323,7 @@ export class PcConfigController {
     return this.svc.listPageRegistry(portal);
   }
 
+  // DEPRECATED: use GET /pc-config/master-codes instead
   @Public() @Get('combined-codes')
   listCombinedCodes(@Query('brandCode') brandCode?: string) {
     return this.svc.listCombinedCodes(brandCode);
@@ -537,11 +538,12 @@ export class PcConfigController {
     return { success: true };
   }
 
+  // DEPRECATED: use POST /pc-config/master-codes + POST /pc-config/master-codes/:id/configs instead
   @Post('combined-code')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
-  @ApiOperation({ summary: 'M3 — Create a new combined code (builder save action)' })
+  @ApiOperation({ summary: 'M3 — Create a new combined code (builder save action) [DEPRECATED]' })
   async createCombinedCode(@Body() dto: CreateCombinedCodeDto) {
     try {
       return await this.svc.createCombinedCode(dto);

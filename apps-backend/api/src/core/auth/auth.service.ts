@@ -464,6 +464,7 @@ export class AuthService {
     companyName: string; slug: string; email: string;
     password: string; firstName: string; lastName: string;
     phone?: string; planId?: string; businessTypeCode?: string;
+    registeredOnDomain?: string;
   }) {
     // Check email uniqueness
     const existingUser = await this.prisma.identity.user.findFirst({ where: { email: data.email } });
@@ -475,6 +476,28 @@ export class AuthService {
     const existingTenant = await this.prisma.identity.tenant.findFirst({ where: { slug: data.slug } });
     if (existingTenant) {
       throw new ConflictException('Company slug already taken');
+    }
+
+    // Resolve WL parent tenant if registering from a branded domain
+    let parentTenantId: string | undefined;
+    let brandCode: string | undefined;
+    let partnerCode: string | undefined;
+    let editionCode: string | undefined;
+    let verticalCode: string | undefined;
+
+    if (data.registeredOnDomain) {
+      const d = data.registeredOnDomain.toLowerCase().trim();
+      const parentTenant = await this.prisma.identity.tenant.findFirst({
+        where: { OR: [{ domain: d }, { subdomain: d }] },
+        select: { id: true, brandCode: true, partnerCode: true, editionCode: true, verticalCode: true },
+      });
+      if (parentTenant) {
+        parentTenantId = parentTenant.id;
+        brandCode = parentTenant.brandCode ?? undefined;
+        partnerCode = parentTenant.partnerCode ?? undefined;
+        editionCode = parentTenant.editionCode ?? undefined;
+        verticalCode = parentTenant.verticalCode ?? undefined;
+      }
     }
 
     // Find plan (use provided or first active plan)
@@ -494,7 +517,7 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(data.password, this.getSaltRounds());
 
     // Provision tenant (creates Tenant + roles + admin User + permissions + lookups + Subscription + TenantUsage)
-    const { tenant, adminUser, subscription } = await this.tenantProvisioning.provision({
+    const { tenant, adminUser } = await this.tenantProvisioning.provision({
       name: data.companyName,
       slug: data.slug,
       adminEmail: data.email,
@@ -504,17 +527,26 @@ export class AuthService {
       planId,
     });
 
-    // Assign business type if provided
+    // Apply WL context + business type in a single update
+    const updateData: Record<string, unknown> = {};
+    if (parentTenantId) {
+      updateData.parentTenantId = parentTenantId;
+      if (brandCode)    updateData.brandCode    = brandCode;
+      if (partnerCode)  updateData.partnerCode  = partnerCode;
+      if (editionCode)  updateData.editionCode  = editionCode;
+      if (verticalCode) updateData.verticalCode = verticalCode;
+    }
     if (data.businessTypeCode) {
       const bt = await this.prisma.platform.businessTypeRegistry.findUnique({
         where: { typeCode: data.businessTypeCode },
       });
       if (bt) {
-        await this.prisma.identity.tenant.update({
-          where: { id: tenant.id },
-          data: { businessTypeId: bt.id, industryCode: data.businessTypeCode },
-        });
+        updateData.businessTypeId = bt.id;
+        updateData.industryCode   = data.businessTypeCode;
       }
+    }
+    if (Object.keys(updateData).length > 0) {
+      await this.prisma.identity.tenant.update({ where: { id: tenant.id }, data: updateData });
     }
 
     // Generate JWT tokens (auto-login)
@@ -538,6 +570,7 @@ export class AuthService {
         status: tenant.status,
         onboardingStep: tenant.onboardingStep,
         industryCode: data.businessTypeCode ?? null,
+        parentTenantId: parentTenantId ?? null,
       },
       ...tokens,
     };

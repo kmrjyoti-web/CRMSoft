@@ -378,12 +378,14 @@ export class PcConfigService {
   // COMBINED CODES
   // ═══════════════════════════════════════════
 
+  // DEPRECATED: use getByResolvedCode() → PcMasterCodeConfig instead
   async getCombinedCode(code: string) {
     return this.cache.wrap(`config:pc_combined_code:${code}`, () =>
       this.pcDb.pcCombinedCode.findUnique({ where: { code } }),
     );
   }
 
+  // DEPRECATED: use listMasterCodes({ brandCode }) → PcMasterCode instead
   async listCombinedCodesForBrand(brandCode: string) {
     return this.cache.wrap(`config:pc_combined_code:brand:${brandCode}`, async () => {
       const brand = await this.prisma.identity.gvCfgBrand.findUnique({ where: { code: brandCode } });
@@ -648,6 +650,7 @@ export class PcConfigService {
   // COMBINED CODES LIST
   // ═══════════════════════════════════════════
 
+  // DEPRECATED: use listMasterCodes() → PcMasterCode instead
   async listCombinedCodes(brandCode?: string) {
     const cacheKey = `config:pc_combined_code:list:${brandCode ?? 'all'}`;
     return this.cache.wrap(cacheKey, async () => {
@@ -661,7 +664,7 @@ export class PcConfigService {
     });
   }
 
-  // ── M3: Create combined code ──────────────────────────────────────────────
+  // ── M3: Create combined code ── DEPRECATED: use createMasterCode()+createConfig() instead ──
 
   async createCombinedCode(dto: {
     code: string;
