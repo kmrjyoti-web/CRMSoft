@@ -243,6 +243,106 @@ export class PcConfigService {
     });
   }
 
+  // ═══════════════════════════════════════════
+  // SUBSCRIPTION PLANS (WL platform plans)
+  // ═══════════════════════════════════════════
+
+  async listSubscriptionPlans(activeOnly = true) {
+    return this.cache.wrap(`config:sub_plan:all:${activeOnly}`, () =>
+      this.prisma.platform.subscriptionPackage.findMany({
+        where: activeOnly ? { isActive: true } : undefined,
+        orderBy: { sortOrder: 'asc' },
+      }),
+    );
+  }
+
+  async getSubscriptionPlan(packageCode: string) {
+    return this.cache.wrap(`config:sub_plan:${packageCode}`, () =>
+      this.prisma.platform.subscriptionPackage.findUnique({ where: { packageCode } }),
+    );
+  }
+
+  async createSubscriptionPlan(dto: {
+    packageCode: string;
+    packageName: string;
+    tagline?: string;
+    description?: string;
+    tier?: number;
+    priceMonthlyInr: number;
+    priceYearlyInr: number;
+    trialDays?: number;
+    entityLimits?: Record<string, unknown>;
+    featureFlags?: Record<string, unknown>;
+    hasDedicatedDb?: boolean;
+    isPublic?: boolean;
+    sortOrder?: number;
+  }) {
+    const existing = await this.prisma.platform.subscriptionPackage.findUnique({
+      where: { packageCode: dto.packageCode },
+    });
+    if (existing) throw new Error(`Plan code '${dto.packageCode}' already exists`);
+    const created = await this.prisma.platform.subscriptionPackage.create({
+      data: {
+        packageCode: dto.packageCode,
+        packageName: dto.packageName,
+        tagline: dto.tagline,
+        description: dto.description,
+        tier: dto.tier ?? 0,
+        priceMonthlyInr: dto.priceMonthlyInr,
+        priceYearlyInr: dto.priceYearlyInr,
+        yearlyDiscountPct: 20,
+        trialDays: dto.trialDays ?? 14,
+        entityLimits: (dto.entityLimits ?? {}) as any,
+        featureFlags: (dto.featureFlags ?? {}) as any,
+        hasDedicatedDb: dto.hasDedicatedDb ?? false,
+        isPublic: dto.isPublic ?? true,
+        isActive: true,
+        sortOrder: dto.sortOrder ?? 0,
+        applicableTypes: ['ALL'] as any,
+        includedModules: [] as any,
+        limits: {} as any,
+        planLevel: dto.tier ?? 0,
+      },
+    });
+    await this.cache.invalidate('config:sub_plan:*');
+    return created;
+  }
+
+  async updateSubscriptionPlan(packageCode: string, dto: {
+    packageName?: string;
+    tagline?: string;
+    description?: string;
+    priceMonthlyInr?: number;
+    priceYearlyInr?: number;
+    trialDays?: number;
+    entityLimits?: Record<string, unknown>;
+    featureFlags?: Record<string, unknown>;
+    hasDedicatedDb?: boolean;
+    isActive?: boolean;
+    isPublic?: boolean;
+    sortOrder?: number;
+  }) {
+    const patch: Record<string, unknown> = {};
+    if (dto.packageName !== undefined) patch.packageName = dto.packageName;
+    if (dto.tagline !== undefined) patch.tagline = dto.tagline;
+    if (dto.description !== undefined) patch.description = dto.description;
+    if (dto.priceMonthlyInr !== undefined) patch.priceMonthlyInr = dto.priceMonthlyInr;
+    if (dto.priceYearlyInr !== undefined) patch.priceYearlyInr = dto.priceYearlyInr;
+    if (dto.trialDays !== undefined) patch.trialDays = dto.trialDays;
+    if (dto.entityLimits !== undefined) patch.entityLimits = dto.entityLimits;
+    if (dto.featureFlags !== undefined) patch.featureFlags = dto.featureFlags;
+    if (dto.hasDedicatedDb !== undefined) patch.hasDedicatedDb = dto.hasDedicatedDb;
+    if (dto.isActive !== undefined) patch.isActive = dto.isActive;
+    if (dto.isPublic !== undefined) patch.isPublic = dto.isPublic;
+    if (dto.sortOrder !== undefined) patch.sortOrder = dto.sortOrder;
+    const updated = await this.prisma.platform.subscriptionPackage.update({
+      where: { packageCode },
+      data: patch as any,
+    });
+    await this.cache.invalidate('config:sub_plan:*');
+    return updated;
+  }
+
   // ── v2.3: Code suggestion ─────────────────────────────────────────────────
 
   async suggestCode(name: string, type: 'partner' | 'brand' | 'edition' | 'vertical' | 'subtype') {

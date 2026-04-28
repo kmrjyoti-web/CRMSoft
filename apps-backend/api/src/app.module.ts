@@ -118,6 +118,7 @@ import { PcConfigModule } from './modules/core/pc-config/pc-config.module';
 // import { AiAppsModule } from './modules/softwarevendor/ai-apps/ai-apps.module';
 import { BullModule } from '@nestjs/bull';
 import { TenantAuditMiddleware } from './modules/core/identity/tenant/infrastructure/tenant-audit.middleware';
+import { TenantResolverMiddleware } from './modules/core/identity/tenant/infrastructure/tenant-resolver.middleware';
 
 @Module({
   imports: [
@@ -255,5 +256,11 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(RequestLoggerMiddleware).forRoutes('*');
     consumer.apply(TenantAuditMiddleware).forRoutes('*');
+    // Resolves req['tenant'] from domain/subdomain/header/JWT before guards run.
+    // Excluded paths: /health and /api/v1/public/* (no tenant context needed).
+    consumer
+      .apply(TenantResolverMiddleware)
+      .exclude('/health', '/api/v1/public/(.*)')
+      .forRoutes('*');
   }
 }

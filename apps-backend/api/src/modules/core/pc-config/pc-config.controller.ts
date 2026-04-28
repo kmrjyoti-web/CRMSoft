@@ -135,6 +135,37 @@ class AddStageFieldDto {
   @ApiPropertyOptional() @IsOptional() @IsBoolean() required?: boolean;
 }
 
+class CreateSubscriptionPlanDto {
+  @ApiProperty({ example: 'STARTER' }) @IsString() packageCode: string;
+  @ApiProperty({ example: 'Starter Plan' }) @IsString() packageName: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() tagline?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
+  @ApiPropertyOptional() @IsOptional() @IsInt() @Type(() => Number) tier?: number;
+  @ApiProperty({ example: 999 }) @Type(() => Number) priceMonthlyInr: number;
+  @ApiProperty({ example: 9990 }) @Type(() => Number) priceYearlyInr: number;
+  @ApiPropertyOptional() @IsOptional() @IsInt() @Type(() => Number) trialDays?: number;
+  @ApiPropertyOptional() @IsOptional() entityLimits?: Record<string, unknown>;
+  @ApiPropertyOptional() @IsOptional() featureFlags?: Record<string, unknown>;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() hasDedicatedDb?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() isPublic?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsInt() @Type(() => Number) sortOrder?: number;
+}
+
+class UpdateSubscriptionPlanDto {
+  @ApiPropertyOptional() @IsOptional() @IsString() packageName?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() tagline?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
+  @ApiPropertyOptional() @IsOptional() @Type(() => Number) priceMonthlyInr?: number;
+  @ApiPropertyOptional() @IsOptional() @Type(() => Number) priceYearlyInr?: number;
+  @ApiPropertyOptional() @IsOptional() @IsInt() @Type(() => Number) trialDays?: number;
+  @ApiPropertyOptional() @IsOptional() entityLimits?: Record<string, unknown>;
+  @ApiPropertyOptional() @IsOptional() featureFlags?: Record<string, unknown>;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() hasDedicatedDb?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() isActive?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() isPublic?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsInt() @Type(() => Number) sortOrder?: number;
+}
+
 class CreateCombinedCodeDto {
   @ApiProperty({ example: 'B2B_TRAV_TRAVL_DMC' }) @IsString() code: string;
   @ApiProperty() @IsUUID() partnerId: string;
@@ -515,5 +546,41 @@ export class PcConfigController {
   @ApiOperation({ summary: 'Admin: move a field to a different stage (or back to registration form)' })
   moveFieldToStage(@Param('id') id: string, @Body() dto: { newStageId: string | null }) {
     return this.svc.moveFieldToStage(id, dto.newStageId);
+  }
+
+  // ── Subscription Plans ────────────────────────────────────────────────────────
+
+  @Public() @Get('subscription-plans')
+  @ApiOperation({ summary: 'List WL subscription plans (public)' })
+  listPlans(@Query('all') all?: string) {
+    return this.svc.listSubscriptionPlans(all !== 'true');
+  }
+
+  @Public() @Get('subscription-plans/:code')
+  @ApiOperation({ summary: 'Get a subscription plan by packageCode (public)' })
+  getPlan(@Param('code') code: string) {
+    return this.svc.getSubscriptionPlan(code);
+  }
+
+  @Post('subscription-plans')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: create a subscription plan' })
+  async createPlan(@Body() dto: CreateSubscriptionPlanDto) {
+    try {
+      return await this.svc.createSubscriptionPlan(dto);
+    } catch (err: any) {
+      if (err.message?.includes('already exists')) throw new ConflictException(err.message);
+      throw err;
+    }
+  }
+
+  @Patch('subscription-plans/:code')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: update a subscription plan' })
+  updatePlan(@Param('code') code: string, @Body() dto: UpdateSubscriptionPlanDto) {
+    return this.svc.updateSubscriptionPlan(code, dto);
   }
 }

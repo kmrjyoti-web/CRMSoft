@@ -40,6 +40,7 @@ import { CICDService } from './cicd/cicd.service';
 import { CICDController } from './cicd/cicd.controller';
 import { BrandConfigService } from './brand-config/brand-config.service';
 import { BrandConfigController } from './brand-config/brand-config.controller';
+import { PublicBrandConfigController } from './brand-config/public-brand-config.controller';
 import { MenuEditorService } from './brand-config/menu-editor.service';
 import { MenuEditorController } from './brand-config/menu-editor.controller';
 import { CreatorService } from './brand-config/creator.service';
@@ -63,6 +64,7 @@ import { CreatorController } from './brand-config/creator.controller';
     SecurityController,
     CICDController,
     BrandConfigController,
+    PublicBrandConfigController,
     MenuEditorController,
     CreatorController,
   ],

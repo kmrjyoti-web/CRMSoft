@@ -1,12 +1,123 @@
 import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { PlatformConsolePrismaService } from '../prisma/platform-console-prisma.service';
+import { PrismaService } from '../../../core/prisma/prisma.service';
+import { RedisCacheService } from '../../core/cache/cache.service';
 import { randomUUID } from 'crypto';
+
+const PUBLIC_CONFIG_TTL = 300; // 5 minutes
 
 @Injectable()
 export class BrandConfigService {
   private readonly logger = new Logger(BrandConfigService.name);
 
-  constructor(private readonly db: PlatformConsolePrismaService) {}
+  constructor(
+    private readonly db: PlatformConsolePrismaService,
+    private readonly prisma: PrismaService,
+    private readonly cache: RedisCacheService,
+  ) {}
+
+  // ─── Public brand config endpoint ────────────────────────────────────────
+
+  async getPublicBrandConfig(domain: string) {
+    const cacheKey = `brand-config:${domain.toLowerCase()}`;
+    const cached = await this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    // 1. Resolve tenant from domain or subdomain
+    const tenant = await this.prisma.identity.tenant.findFirst({
+      where: { OR: [{ domain: domain.toLowerCase() }, { subdomain: domain.toLowerCase() }] },
+      select: {
+        id: true, slug: true, name: true,
+        brandCode: true, editionCode: true, verticalCode: true,
+        partnerCode: true, planCode: true,
+        subscriptionStatus: true,
+      },
+    });
+
+    if (!tenant || !tenant.brandCode) {
+      throw new HttpException('No tenant configured for this domain', HttpStatus.NOT_FOUND);
+    }
+
+    // 2. Load brand profile from PlatformConsoleDB
+    const brandProfile = await this.db.brandProfile.findUnique({
+      where: { brandCode: tenant.brandCode },
+    });
+
+    // 3. Load registration fields for the combined codes that match this brand
+    // brandId in PcCombinedCode stores the brand code string (not a UUID)
+    const combinedCodes = await this.db.pcCombinedCode.findMany({
+      where: { brandId: tenant.brandCode, isActive: true },
+      orderBy: { code: 'asc' },
+    });
+
+    const regFields = combinedCodes.length > 0
+      ? await this.db.pcRegistrationField.findMany({
+          where: {
+            combinedCodeId: { in: combinedCodes.map((c) => c.id) },
+            isActive: true,
+          },
+          orderBy: { sortOrder: 'asc' },
+        })
+      : [];
+
+    // 4. Load onboarding stages
+    const stages = await this.db.pcOnboardingStage.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: 'asc' },
+    });
+
+    // 5. Load plan feature flags (if planCode is set)
+    let planFeatures: Record<string, unknown> = {};
+    if (tenant.planCode) {
+      const plan = await this.prisma.platform.subscriptionPackage.findUnique({
+        where: { packageCode: tenant.planCode },
+        select: { packageCode: true, packageName: true, featureFlags: true, entityLimits: true },
+      });
+      if (plan) {
+        planFeatures = {
+          planCode: plan.packageCode,
+          planName: plan.packageName,
+          featureFlags: plan.featureFlags,
+          entityLimits: plan.entityLimits,
+        };
+      }
+    }
+
+    const result = {
+      tenant: {
+        id: tenant.id,
+        slug: tenant.slug,
+        name: tenant.name,
+        editionCode: tenant.editionCode,
+        verticalCode: tenant.verticalCode,
+        partnerCode: tenant.partnerCode,
+        subscriptionStatus: tenant.subscriptionStatus,
+      },
+      brand: brandProfile
+        ? {
+            brandCode: brandProfile.brandCode,
+            brandName: brandProfile.brandName,
+            displayName: brandProfile.displayName,
+            logoUrl: brandProfile.logoUrl,
+            primaryColor: brandProfile.primaryColor,
+            secondaryColor: brandProfile.secondaryColor,
+            contactEmail: brandProfile.contactEmail,
+          }
+        : null,
+      combinedCodes: combinedCodes.map((c) => ({
+        id: c.id,
+        code: c.code,
+        displayName: c.displayName,
+        userType: c.userType,
+      })),
+      registrationFields: regFields,
+      onboardingStages: stages,
+      plan: planFeatures,
+    };
+
+    await this.cache.set(cacheKey, result, PUBLIC_CONFIG_TTL);
+    return result;
+  }
 
   // ─── Brand Profiles ──────────────────────────────────────────────────────
 
