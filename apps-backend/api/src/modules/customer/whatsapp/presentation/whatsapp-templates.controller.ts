@@ -4,6 +4,7 @@ import {
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
+import { PlanGuard, RequirePlan } from '../../../../common/guards/plan.guard';
 import { RequirePermissions } from '../../../../core/permissions/decorators/require-permissions.decorator';
 import { ApiResponse } from '../../../../common/utils/api-response';
 import { CreateTemplateCommand } from '../application/commands/create-template/create-template.command';
@@ -16,7 +17,8 @@ import { CreateTemplateDto, UpdateTemplateDto, TemplateQueryDto } from './dto/te
 
 @ApiTags('WhatsApp Templates')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@RequirePlan('WL_PROFESSIONAL')
+@UseGuards(JwtAuthGuard, PlanGuard)
 @Controller('whatsapp/templates')
 export class WhatsAppTemplatesController {
   constructor(

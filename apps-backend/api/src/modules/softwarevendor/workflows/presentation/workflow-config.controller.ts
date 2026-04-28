@@ -1,8 +1,10 @@
 import {
-  Controller, Post, Put, Delete, Param, Body,
+  Controller, Post, Put, Delete, Param, Body, UseGuards,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
+import { PlanGuard, RequirePlan } from '../../../../common/guards/plan.guard';
 import { RequirePermissions } from '../../../../core/permissions/decorators/require-permissions.decorator';
 import { ApiResponse } from '../../../../common/utils/api-response';
 import { CreateStateDto } from './dto/create-state.dto';
@@ -18,6 +20,8 @@ import { RemoveTransitionCommand } from '../application/commands/remove-transiti
 
 @ApiTags('Workflows - Config')
 @ApiBearerAuth()
+@RequirePlan('WL_STARTER')
+@UseGuards(JwtAuthGuard, PlanGuard)
 @Controller('workflows')
 export class WorkflowConfigController {
   constructor(private readonly commandBus: CommandBus) {}

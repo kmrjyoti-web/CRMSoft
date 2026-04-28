@@ -1,6 +1,7 @@
 import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
+import { PlanGuard, RequirePlan } from '../../../../common/guards/plan.guard';
 import { ApiResponse } from '../../../../common/utils/api-response';
 import { AiReportDesignerService } from '../services/ai-report-designer.service';
 import { IsString, IsOptional } from 'class-validator';
@@ -26,7 +27,8 @@ class RefineDesignDto {
 
 @ApiTags('Report AI')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@RequirePlan('WL_PROFESSIONAL')
+@UseGuards(JwtAuthGuard, PlanGuard)
 @Controller('report-ai')
 export class ReportAiController {
   constructor(private readonly aiService: AiReportDesignerService) {}

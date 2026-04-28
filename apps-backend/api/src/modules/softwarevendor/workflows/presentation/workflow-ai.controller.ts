@@ -3,6 +3,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
+import { PlanGuard, RequirePlan } from '../../../../common/guards/plan.guard';
 import { ApiResponse } from '../../../../common/utils/api-response';
 import { WorkflowAiService } from '../services/workflow-ai.service';
 
@@ -16,7 +17,8 @@ class GenerateFromPromptDto {
 
 @ApiTags('Workflows - AI')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@RequirePlan('WL_PROFESSIONAL')
+@UseGuards(JwtAuthGuard, PlanGuard)
 @Controller('workflow-admin/ai')
 export class WorkflowAiController {
   constructor(private readonly workflowAiService: WorkflowAiService) {}

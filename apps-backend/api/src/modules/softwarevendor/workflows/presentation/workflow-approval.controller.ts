@@ -1,8 +1,10 @@
 import {
-  Controller, Get, Post, Param, Body, HttpCode, HttpStatus,
+  Controller, Get, Post, Param, Body, HttpCode, HttpStatus, UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
+import { PlanGuard, RequirePlan } from '../../../../common/guards/plan.guard';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { RequirePermissions } from '../../../../core/permissions/decorators/require-permissions.decorator';
 import { ApiResponse } from '../../../../common/utils/api-response';
@@ -15,6 +17,8 @@ import { GetApprovalHistoryQuery } from '../application/queries/get-approval-his
 
 @ApiTags('Workflow Approvals')
 @ApiBearerAuth()
+@RequirePlan('WL_STARTER')
+@UseGuards(JwtAuthGuard, PlanGuard)
 @Controller('workflow-approvals')
 export class WorkflowApprovalController {
   constructor(

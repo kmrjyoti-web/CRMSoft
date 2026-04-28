@@ -4,6 +4,7 @@ import {
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
+import { PlanGuard, RequirePlan } from '../../../../common/guards/plan.guard';
 import { RequirePermissions } from '../../../../core/permissions/decorators/require-permissions.decorator';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { ApiResponse } from '../../../../common/utils/api-response';
@@ -19,7 +20,8 @@ import { CreateBroadcastDto, AddBroadcastRecipientsDto, BroadcastQueryDto, Broad
 
 @ApiTags('WhatsApp Broadcasts')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@RequirePlan('WL_PROFESSIONAL')
+@UseGuards(JwtAuthGuard, PlanGuard)
 @Controller('whatsapp/broadcasts')
 export class WhatsAppBroadcastsController {
   constructor(

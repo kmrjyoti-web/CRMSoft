@@ -1,8 +1,10 @@
 import {
-  Controller, Get, Post, Param, Body, Query, HttpCode, HttpStatus,
+  Controller, Get, Post, Param, Body, Query, HttpCode, HttpStatus, UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
+import { PlanGuard, RequirePlan } from '../../../../common/guards/plan.guard';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { RequirePermissions } from '../../../../core/permissions/decorators/require-permissions.decorator';
 import { ApiResponse } from '../../../../common/utils/api-response';
@@ -19,6 +21,8 @@ import { GetWorkflowStatsQuery } from '../application/queries/get-workflow-stats
 
 @ApiTags('Workflow Execution')
 @ApiBearerAuth()
+@RequirePlan('WL_STARTER')
+@UseGuards(JwtAuthGuard, PlanGuard)
 @Controller('workflow-execution')
 export class WorkflowExecutionController {
   constructor(
