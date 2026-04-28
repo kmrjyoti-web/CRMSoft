@@ -7,6 +7,7 @@ import { IsString, IsUUID, IsOptional, MinLength, IsArray, IsBoolean, IsInt, IsE
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { PcConfigService } from './pc-config.service';
+import { WlDomainService } from './wl-domain.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles, Public } from '../../../common/decorators/roles.decorator';
@@ -183,7 +184,10 @@ class CreateCombinedCodeDto {
 
 @Controller('pc-config')
 export class PcConfigController {
-  constructor(private readonly svc: PcConfigService) {}
+  constructor(
+    private readonly svc: PcConfigService,
+    private readonly wlDomain: WlDomainService,
+  ) {}
 
   // ── READ endpoints (public — unauthenticated users need these for registration) ──
 
@@ -582,5 +586,50 @@ export class PcConfigController {
   @ApiOperation({ summary: 'Admin: update a subscription plan' })
   updatePlan(@Param('code') code: string, @Body() dto: UpdateSubscriptionPlanDto) {
     return this.svc.updateSubscriptionPlan(code, dto);
+  }
+
+  // ── WL Domain Management ─────────────────────────────────────────────────────
+
+  @Get('tenants/:tenantId/domain/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Get custom domain + subdomain status for a WL tenant' })
+  getDomainStatus(@Param('tenantId') tenantId: string) {
+    return this.wlDomain.getDomainStatus(tenantId);
+  }
+
+  @Post('tenants/:tenantId/domain')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Set custom domain for a WL tenant (starts PENDING_VERIFICATION)' })
+  setDomain(@Param('tenantId') tenantId: string, @Body() body: { domain: string }) {
+    return this.wlDomain.setDomain(tenantId, body.domain);
+  }
+
+  @Post('tenants/:tenantId/domain/verify')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Verify CNAME points to {slug}.wl.crmsoft.com — sets domainVerified=true' })
+  verifyDomain(@Param('tenantId') tenantId: string) {
+    return this.wlDomain.verifyDomain(tenantId);
+  }
+
+  @Delete('tenants/:tenantId/domain')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Remove custom domain from a WL tenant' })
+  removeDomain(@Param('tenantId') tenantId: string) {
+    return this.wlDomain.removeDomain(tenantId);
+  }
+
+  @Post('tenants/:tenantId/setup-subdomain')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Auto-assign subdomain from partnerCode (e.g. XTREME → xtreme.crmsoft.com)' })
+  setupSubdomain(@Param('tenantId') tenantId: string) {
+    return this.wlDomain.setupSubdomain(tenantId);
   }
 }

@@ -18,9 +18,19 @@ export class BrandConfigService {
 
   // ─── Public brand config endpoint ────────────────────────────────────────
 
-  async getPublicBrandConfig(domain: string) {
-    const cacheKey = `brand-config:${domain.toLowerCase()}`;
-    const cached = await this.cache.get(cacheKey);
+  /**
+   * Resolves and merges brand config for a domain.
+   * Returns raw config + routing hints (_domain) for the controller to use.
+   * The controller is responsible for signing, encrypting, and caching.
+   */
+  async getRawBrandConfig(domain: string): Promise<{
+    _domain: { tenantId: string; domain: string | null; subdomain: string | null };
+    tenant: object; brand: object | null;
+    combinedCodes: object[]; registrationFields: object[];
+    onboardingStages: object[]; plan: object;
+  }> {
+    const cacheKey = `brand-config:raw:${domain.toLowerCase()}`;
+    const cached = await this.cache.get<any>(cacheKey);
     if (cached) return cached;
 
     // 1. Resolve tenant from domain or subdomain
@@ -28,6 +38,7 @@ export class BrandConfigService {
       where: { OR: [{ domain: domain.toLowerCase() }, { subdomain: domain.toLowerCase() }] },
       select: {
         id: true, slug: true, name: true,
+        domain: true, subdomain: true,
         brandCode: true, editionCode: true, verticalCode: true,
         partnerCode: true, planCode: true,
         subscriptionStatus: true,
@@ -84,6 +95,7 @@ export class BrandConfigService {
     }
 
     const result = {
+      _domain: { tenantId: tenant.id, domain: tenant.domain, subdomain: tenant.subdomain },
       tenant: {
         id: tenant.id,
         slug: tenant.slug,
@@ -117,6 +129,11 @@ export class BrandConfigService {
 
     await this.cache.set(cacheKey, result, PUBLIC_CONFIG_TTL);
     return result;
+  }
+
+  /** @deprecated use getRawBrandConfig — kept for backward compat */
+  async getPublicBrandConfig(domain: string) {
+    return this.getRawBrandConfig(domain);
   }
 
   // ─── Brand Profiles ──────────────────────────────────────────────────────

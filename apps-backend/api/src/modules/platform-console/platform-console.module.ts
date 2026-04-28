@@ -39,6 +39,7 @@ import { seedDRPlans } from './security/seed-dr-plans';
 import { CICDService } from './cicd/cicd.service';
 import { CICDController } from './cicd/cicd.controller';
 import { BrandConfigService } from './brand-config/brand-config.service';
+import { BrandConfigSecurityService } from './brand-config/brand-config-security.service';
 import { BrandConfigController } from './brand-config/brand-config.controller';
 import { PublicBrandConfigController } from './brand-config/public-brand-config.controller';
 import { MenuEditorService } from './brand-config/menu-editor.service';
@@ -89,6 +90,7 @@ import { CreatorController } from './brand-config/creator.controller';
     HealthSnapshotCron,
     CICDService,
     BrandConfigService,
+    BrandConfigSecurityService,
     MenuEditorService,
     CreatorService,
   ],
