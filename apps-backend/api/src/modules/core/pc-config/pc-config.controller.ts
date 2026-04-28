@@ -62,6 +62,18 @@ class CreateSubTypeDto {
   @ApiPropertyOptional() @IsOptional() @IsInt() @Type(() => Number) sortOrder?: number;
 }
 
+class UpdateSubTypeDto {
+  @ApiPropertyOptional() @IsOptional() @IsString() name?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() shortCode?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() userType?: string;
+  @ApiPropertyOptional() @IsOptional() @IsArray() @IsString({ each: true }) allowedBusinessModes?: string[];
+  @ApiPropertyOptional() @IsOptional() @IsString() defaultBusinessMode?: string;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() businessModeRequired?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsInt() @Type(() => Number) sortOrder?: number;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() isActive?: boolean;
+}
+
 class CreateOnboardingStageDto {
   @ApiProperty({ example: 'newsletter_consent' }) @IsString() stageKey: string;
   @ApiProperty({ example: 'Subscribe to Newsletter' }) @IsString() stageLabel: string;
@@ -303,6 +315,14 @@ export class PcConfigController {
     }
   }
 
+  @Get('sub-types-admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Admin: list all sub-types including inactive' })
+  listSubTypesAdmin() {
+    return this.svc.listAllSubTypesAdmin();
+  }
+
   @Post('sub-types')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -315,6 +335,23 @@ export class PcConfigController {
       if (err.message?.includes('already exists')) throw new ConflictException(err.message);
       throw err;
     }
+  }
+
+  @Patch('sub-types/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Update a sub-type' })
+  updateSubType(@Param('id') id: string, @Body() dto: UpdateSubTypeDto) {
+    return this.svc.updateSubType(id, dto);
+  }
+
+  @Delete('sub-types/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Soft-delete (deactivate) a sub-type' })
+  async deleteSubType(@Param('id') id: string) {
+    await this.svc.deleteSubType(id);
+    return { success: true };
   }
 
   @Post('combined-code')

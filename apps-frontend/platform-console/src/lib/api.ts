@@ -451,6 +451,14 @@ export const api = {
       allowedBusinessModes: string[]; defaultBusinessMode?: string;
       businessModeRequired?: boolean; sortOrder?: number;
     }) => apiFetch('/pc-config/sub-types', { method: 'POST', body: JSON.stringify(payload) }),
+    updateSubType: (id: string, payload: {
+      name?: string; shortCode?: string; description?: string;
+      userType?: string; allowedBusinessModes?: string[];
+      defaultBusinessMode?: string | null;
+      businessModeRequired?: boolean; sortOrder?: number; isActive?: boolean;
+    }) => apiFetch(`/pc-config/sub-types/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+    deleteSubType: (id: string) => apiFetch(`/pc-config/sub-types/${id}`, { method: 'DELETE' }),
+    listSubTypesAdmin: () => apiFetch('/pc-config/sub-types-admin'),
     checkCode: (code: string, type: string) =>
       apiFetch(`/pc-config/check-code?code=${encodeURIComponent(code)}&type=${encodeURIComponent(type)}`),
     createPartner: (payload: {

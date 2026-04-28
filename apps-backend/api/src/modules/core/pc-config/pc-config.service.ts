@@ -205,6 +205,44 @@ export class PcConfigService {
     return created;
   }
 
+  async updateSubType(id: string, dto: {
+    name?: string; shortCode?: string; description?: string;
+    userType?: string;
+    allowedBusinessModes?: string[];
+    defaultBusinessMode?: string | null;
+    businessModeRequired?: boolean;
+    sortOrder?: number;
+    isActive?: boolean;
+  }) {
+    const updated = await this.pcDb.pcSubType.update({
+      where: { id },
+      data: {
+        ...(dto.name !== undefined && { name: dto.name }),
+        ...(dto.shortCode !== undefined && { shortCode: dto.shortCode }),
+        ...(dto.description !== undefined && { description: dto.description ?? null }),
+        ...(dto.userType !== undefined && { userType: dto.userType }),
+        ...(dto.allowedBusinessModes !== undefined && { allowedBusinessModes: dto.allowedBusinessModes }),
+        ...(dto.defaultBusinessMode !== undefined && { defaultBusinessMode: dto.defaultBusinessMode }),
+        ...(dto.businessModeRequired !== undefined && { businessModeRequired: dto.businessModeRequired }),
+        ...(dto.sortOrder !== undefined && { sortOrder: dto.sortOrder }),
+        ...(dto.isActive !== undefined && { isActive: dto.isActive }),
+      },
+    });
+    await this.cache.invalidate('config:pc_subtype:*');
+    return updated;
+  }
+
+  async deleteSubType(id: string) {
+    await this.pcDb.pcSubType.update({ where: { id }, data: { isActive: false } });
+    await this.cache.invalidate('config:pc_subtype:*');
+  }
+
+  async listAllSubTypesAdmin() {
+    return this.pcDb.pcSubType.findMany({
+      orderBy: [{ sortOrder: 'asc' }, { code: 'asc' }],
+    });
+  }
+
   // ── v2.3: Code suggestion ─────────────────────────────────────────────────
 
   async suggestCode(name: string, type: 'partner' | 'brand' | 'edition' | 'vertical' | 'subtype') {
