@@ -8,6 +8,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { PcConfigService } from './pc-config.service';
 import { WlDomainService } from './wl-domain.service';
+import { WlDbProvisioningService } from '../identity/tenant/services/wl-db-provisioning.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles, Public } from '../../../common/decorators/roles.decorator';
@@ -167,6 +168,11 @@ class UpdateSubscriptionPlanDto {
   @ApiPropertyOptional() @IsOptional() @IsInt() @Type(() => Number) sortOrder?: number;
 }
 
+class ConfirmDbConnectionDto {
+  @ApiProperty({ example: 'postgresql://user:pass@host:5432/crmsoft_xtreme_prod' })
+  @IsString() connectionString: string;
+}
+
 class CreateCombinedCodeDto {
   @ApiProperty({ example: 'B2B_TRAV_TRAVL_DMC' }) @IsString() code: string;
   @ApiProperty() @IsUUID() partnerId: string;
@@ -187,6 +193,7 @@ export class PcConfigController {
   constructor(
     private readonly svc: PcConfigService,
     private readonly wlDomain: WlDomainService,
+    private readonly wlDbProv: WlDbProvisioningService,
   ) {}
 
   // ── READ endpoints (public — unauthenticated users need these for registration) ──
@@ -631,5 +638,63 @@ export class PcConfigController {
   @ApiOperation({ summary: 'Auto-assign subdomain from partnerCode (e.g. XTREME → xtreme.crmsoft.com)' })
   setupSubdomain(@Param('tenantId') tenantId: string) {
     return this.wlDomain.setupSubdomain(tenantId);
+  }
+
+  // ── WL Database Provisioning (PLATFORM_ADMIN only) ────────────────────────────
+
+  @Get('tenants/:tenantId/provision/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Get dedicated DB provisioning status for a WL tenant' })
+  getProvisionStatus(@Param('tenantId') tenantId: string) {
+    return this.wlDbProv.getStatus(tenantId);
+  }
+
+  @Post('tenants/:tenantId/provision/start')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Generate DB provisioning script (sets status → PROVISIONING)' })
+  startProvisioning(@Param('tenantId') tenantId: string) {
+    return this.wlDbProv.startProvisioning(tenantId);
+  }
+
+  @Post('tenants/:tenantId/provision/confirm')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Store encrypted connection string and test connectivity (sets status → DEDICATED)' })
+  confirmConnection(
+    @Param('tenantId') tenantId: string,
+    @Body() dto: ConfirmDbConnectionDto,
+  ) {
+    return this.wlDbProv.confirmConnection(tenantId, dto.connectionString);
+  }
+
+  @Post('tenants/:tenantId/provision/migrate')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Return migration instructions for the dedicated DB (sets status → MIGRATING)' })
+  getMigrationSql(@Param('tenantId') tenantId: string) {
+    return this.wlDbProv.getMigrationSql(tenantId);
+  }
+
+  @Post('tenants/:tenantId/provision/seed')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Seed default data into the dedicated DB (roles, profile, sequences)' })
+  seedTenantDb(@Param('tenantId') tenantId: string) {
+    return this.wlDbProv.seedTenantDb(tenantId);
+  }
+
+  @Post('tenants/:tenantId/provision/rollback')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Revert to shared DB (clears encrypted connection, sets status → SHARED)' })
+  rollbackProvisioning(@Param('tenantId') tenantId: string) {
+    return this.wlDbProv.rollback(tenantId);
   }
 }

@@ -166,23 +166,19 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
    *   Paid dedicated tenants ? their own DB (lazy-connected + cached)
    */
   async getWorkingClient(tenantId: string): Promise<WorkingClient> {
-    // Lookup tenant's dedicated DB URL from IdentityDB
+    // PrismaClientFactory is the recommended path for dedicated-DB tenants (use DbRouterMiddleware / req['tenantPrisma']).
+    // This legacy method falls back to shared DB; dedicated routing requires PrismaClientFactory.
     const tenant = await (this._identity.tenant.findUnique({
       where: { id: tenantId },
-      select: { databaseUrl: true, hasDedicatedDb: true } as any,
+      select: { dbStrategy: true } as any,
     }) as any).catch(() => null);
 
-    if (tenant?.hasDedicatedDb && tenant?.databaseUrl) {
-      if (!this._tenantClients.has(tenantId)) {
-        const client = new WorkingClient({
-          datasources: { db: { url: (tenant as any).databaseUrl } },
-        });
-        (client as any).$use(createSoftDeleteMiddleware());
-        await client.$connect();
-        this._tenantClients.set(tenantId, client);
-        this.logger.log(`Connected dedicated DB for tenant ${tenantId}`);
-      }
-      return this._tenantClients.get(tenantId)!;
+    if ((tenant as any)?.dbStrategy === 'DEDICATED') {
+      this.logger.warn(
+        `getWorkingClient(${tenantId}): tenant has DEDICATED strategy. ` +
+        `Inject PrismaClientFactory and call factory.getClient() for the per-tenant client. ` +
+        `Falling back to shared DB.`,
+      );
     }
 
     return this._globalWorking;

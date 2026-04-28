@@ -119,6 +119,7 @@ import { PcConfigModule } from './modules/core/pc-config/pc-config.module';
 import { BullModule } from '@nestjs/bull';
 import { TenantAuditMiddleware } from './modules/core/identity/tenant/infrastructure/tenant-audit.middleware';
 import { TenantResolverMiddleware } from './modules/core/identity/tenant/infrastructure/tenant-resolver.middleware';
+import { DbRouterMiddleware } from './common/database/db-router.middleware';
 
 @Module({
   imports: [
@@ -261,6 +262,12 @@ export class AppModule implements NestModule {
     consumer
       .apply(TenantResolverMiddleware)
       .exclude('/health', '/api/v1/public/(.*)')
+      .forRoutes('*');
+    // Runs after TenantResolverMiddleware — attaches req['tenantPrisma'] (shared or dedicated WorkingDB client).
+    // Platform Console routes use PlatformDB directly and don't need tenant routing.
+    consumer
+      .apply(DbRouterMiddleware)
+      .exclude('/health', '/api/v1/public/(.*)', '/api/v1/pc-config/(.*)')
       .forRoutes('*');
   }
 }
