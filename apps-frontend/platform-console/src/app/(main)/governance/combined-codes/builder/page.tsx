@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   Zap, ChevronRight, CheckCircle2, XCircle, Loader2, Save, RotateCcw,
   ListChecks, Layers, Plus, Pencil, Trash2, Eye, EyeOff, GripVertical,
@@ -63,6 +63,11 @@ export default function CombinedCodeBuilderPage() {
   // ── Tab state ─────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<'fields' | 'stages'>('fields');
   const [tabLoading, setTabLoading] = useState(false);
+
+  // Ref to read selectedStageId inside loadTabData without it being a dep,
+  // which would cause loadTabData → lookup → main effect to re-fire every time
+  // selectedStageId is set (infinite loop).
+  const selectedStageIdRef = useRef<string | null>(null);
 
   // ── Registration fields admin state ──────────────────────────────────────
   const [adminFields, setAdminFields] = useState<AdminField[]>([]);
@@ -139,6 +144,12 @@ export default function CombinedCodeBuilderPage() {
     return `${userType}_${editionObj.shortCode ?? editionObj.code}_${brandObj.shortCode ?? brandObj.code}_${subTypeObj.shortCode}`;
   }, [complete, userType, editionObj, brandObj, subTypeObj]);
 
+  // Keep the ref current on every render so loadTabData can read it without
+  // having selectedStageId as a useCallback dep (which would cause the callback
+  // to be recreated on every stage selection, re-triggering lookup, re-triggering
+  // the main effect → infinite API loop).
+  selectedStageIdRef.current = selectedStageId;
+
   const loadTabData = useCallback(async (code: string) => {
     setTabLoading(true);
     try {
@@ -149,11 +160,12 @@ export default function CombinedCodeBuilderPage() {
       setAdminFields(Array.isArray(fields) ? fields : []);
       const sorted = Array.isArray(stages) ? stages.sort((a, b) => a.sortOrder - b.sortOrder) : [];
       setAdminStages(sorted);
-      if (sorted.length > 0 && !selectedStageId) setSelectedStageId(sorted[0].id);
+      if (sorted.length > 0 && !selectedStageIdRef.current) setSelectedStageId(sorted[0].id);
     } finally {
       setTabLoading(false);
     }
-  }, [selectedStageId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // stable — selectedStageId read via ref above
 
   const lookup = useCallback(async (code: string) => {
     if (!code) return;
@@ -186,10 +198,19 @@ export default function CombinedCodeBuilderPage() {
     else { setResult(null); setAdminFields([]); setAdminStages([]); }
   }, [complete, generatedCode, lookup]);
 
-  // Sync editing state + load stage fields when selected stage changes
+  // Keep a stable ref to adminStages so the effect below can read the current
+  // stage without adminStages appearing in its deps. Including adminStages would
+  // fire the effect (and re-fetch stage fields) every time loadTabData refreshes
+  // the list — even when the selected stage hasn't changed.
+  const adminStagesRef = useRef<AdminStage[]>([]);
+  adminStagesRef.current = adminStages;
+
+  // Sync editing state + load stage fields when selected stage changes.
+  // adminStages is intentionally NOT in deps: we only want to re-fetch stage
+  // fields when the user picks a different stage, not on every stages-list refresh.
   useEffect(() => {
     if (!selectedStageId) return;
-    const s = adminStages.find((x) => x.id === selectedStageId);
+    const s = adminStagesRef.current.find((x) => x.id === selectedStageId);
     if (s) setEditingStage({ stageLabel: s.stageLabel, componentName: s.componentName, required: s.required, skipIfFieldSet: s.skipIfFieldSet ?? '' });
     setStageFields([]); setShowAddStageField(false);
     setStageFieldsLoading(true);
@@ -197,7 +218,8 @@ export default function CombinedCodeBuilderPage() {
       .then((res) => setStageFields(Array.isArray(res) ? res : (res as any).data ?? []))
       .catch(() => {})
       .finally(() => setStageFieldsLoading(false));
-  }, [selectedStageId, adminStages]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedStageId]); // adminStages read via ref — intentionally omitted
 
   const handleSave = async () => {
     if (!partnerObj || !brandObj || !editionObj || !verticalObj || !subTypeObj || !generatedCode) return;
