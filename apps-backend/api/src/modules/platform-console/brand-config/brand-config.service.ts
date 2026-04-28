@@ -233,6 +233,44 @@ export class BrandConfigService {
     });
 
     if (!tenant?.brandCode) {
+      // FIX 2: try TenantBranding custom domain fallback
+      const tenantBranding = await this.prisma.identity.tenantBranding.findFirst({
+        where: { customDomain: domain.toLowerCase(), domainVerified: true },
+        select: {
+          tenantId: true, primaryColor: true, secondaryColor: true,
+          faviconUrl: true, logoUrl: true,
+          loginPageTitle: true, loginPageSubtitle: true,
+        },
+      });
+
+      if (tenantBranding) {
+        const tenantByBranding = await this.prisma.identity.tenant.findUnique({
+          where: { id: tenantBranding.tenantId },
+          select: { name: true, brandCode: true },
+        });
+        const brand = tenantByBranding?.brandCode
+          ? await this.db.brandProfile.findUnique({
+              where: { brandCode: tenantByBranding.brandCode },
+              select: { brandName: true, displayName: true, logoUrl: true, designTokens: true },
+            })
+          : null;
+        const displayName = brand?.displayName ?? tenantByBranding?.name ?? null;
+        const result = {
+          found: true,
+          brandCode: tenantByBranding?.brandCode ?? null,
+          brandName: brand?.brandName ?? tenantByBranding?.name ?? null,
+          displayName,
+          logoUrl: brand?.logoUrl ?? tenantBranding.logoUrl ?? null,
+          primaryColor: tenantBranding.primaryColor ?? '#1976d2',
+          secondaryColor: tenantBranding.secondaryColor ?? '#dc004e',
+          designTokens: (brand?.designTokens as Record<string, unknown>) ?? null,
+          welcomeTitle: tenantBranding.loginPageTitle ?? (displayName ? `Welcome to ${displayName}` : null),
+          welcomeSubtitle: tenantBranding.loginPageSubtitle ?? 'Sign in to manage your business',
+        };
+        await this.cache.set(cacheKey, result, PUBLIC_CONFIG_TTL);
+        return result;
+      }
+
       return {
         found: false, brandCode: null, brandName: null, displayName: null,
         logoUrl: null, primaryColor: '#1976d2', secondaryColor: '#dc004e',

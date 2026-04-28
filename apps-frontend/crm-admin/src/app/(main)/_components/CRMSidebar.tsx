@@ -250,7 +250,7 @@ export function CRMSidebar({
           style={{
             fontWeight: 700,
             fontSize: showFull ? 18 : 16,
-            color: "#ff9d2b",
+            color: "var(--brand-primary, #ff9d2b)",
             letterSpacing: 0.5,
           }}
         >
@@ -261,7 +261,7 @@ export function CRMSidebar({
             style={{
               fontWeight: 500,
               fontSize: 12,
-              color: "#ffffff",
+              color: "var(--sidebar-text, #ffffff)",
               marginLeft: 3,
             }}
           >
