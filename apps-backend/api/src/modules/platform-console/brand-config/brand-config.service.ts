@@ -26,6 +26,7 @@ export class BrandConfigService {
   async getRawBrandConfig(domain: string): Promise<{
     _domain: { tenantId: string; domain: string | null; subdomain: string | null };
     tenant: object; brand: object | null;
+    masterCodes: object[];
     combinedCodes: object[]; registrationFields: object[];
     onboardingStages: object[]; plan: object;
   }> {
@@ -54,22 +55,56 @@ export class BrandConfigService {
       where: { brandCode: tenant.brandCode },
     });
 
-    // 3. Load registration fields for the combined codes that match this brand
-    // brandId in PcCombinedCode stores the brand code string (not a UUID)
-    const combinedCodes = await this.db.pcCombinedCode.findMany({
-      where: { brandId: tenant.brandCode, isActive: true },
-      orderBy: { code: 'asc' },
+    // 3. Load master codes for this brand + their configs (new Sprint 5.1 structure)
+    const masterCodes = await this.db.pcMasterCode.findMany({
+      where: { brandCode: tenant.brandCode, isActive: true },
+      include: {
+        configs: { where: { isActive: true }, orderBy: { userTypeCode: 'asc' } },
+      },
+      orderBy: { masterCode: 'asc' },
     });
 
-    const regFields = combinedCodes.length > 0
-      ? await this.db.pcRegistrationField.findMany({
-          where: {
-            combinedCodeId: { in: combinedCodes.map((c) => c.id) },
-            isActive: true,
-          },
-          orderBy: { sortOrder: 'asc' },
-        })
-      : [];
+    // Build combined codes shape from new structure for backward compat
+    const combinedCodesFromMaster = masterCodes.flatMap((m) =>
+      m.configs.map((cfg) => ({
+        id: cfg.id,
+        code: cfg.resolvedCode,
+        displayName: cfg.displayName,
+        userType: cfg.userTypeCode,
+      })),
+    );
+
+    // Merge common + extra reg fields per config
+    const regFieldsFromMaster = masterCodes.flatMap((m) => {
+      const common = (m.commonRegFields as any[]) ?? [];
+      return m.configs.flatMap((cfg) => {
+        const extra = (cfg.extraRegFields as any[]) ?? [];
+        return [...common, ...extra];
+      });
+    });
+
+    // Fall back to old combined codes if no master codes found yet
+    let combinedCodes: { id: string; code: string; displayName: string; userType: string }[];
+    let regFields: any[];
+
+    if (masterCodes.length > 0) {
+      combinedCodes = combinedCodesFromMaster;
+      regFields = regFieldsFromMaster;
+    } else {
+      const oldCodes = await this.db.pcCombinedCode.findMany({
+        where: { brandId: tenant.brandCode, isActive: true },
+        orderBy: { code: 'asc' },
+      });
+      combinedCodes = oldCodes.map((c) => ({
+        id: c.id, code: c.code, displayName: c.displayName, userType: c.userType,
+      }));
+      regFields = oldCodes.length > 0
+        ? await this.db.pcRegistrationField.findMany({
+            where: { combinedCodeId: { in: oldCodes.map((c) => c.id) }, isActive: true },
+            orderBy: { sortOrder: 'asc' },
+          })
+        : [];
+    }
 
     // 4. Load onboarding stages
     const stages = await this.db.pcOnboardingStage.findMany({
@@ -94,6 +129,31 @@ export class BrandConfigService {
       }
     }
 
+    // Build new master code structure for the response
+    const masterCodesResponse = masterCodes.map((m) => ({
+      masterCode: m.masterCode,
+      commonRegFields: (m.commonRegFields as any[]) ?? [],
+      commonOnboardingStages: (m.commonOnboardingStages as any[]) ?? [],
+      userTypes: Object.values(
+        m.configs.reduce(
+          (acc, cfg) => {
+            const ut = cfg.userTypeCode;
+            if (!acc[ut]) acc[ut] = { code: ut, subTypes: [] };
+            if (cfg.subTypeCode) {
+              acc[ut].subTypes.push({
+                code: cfg.subTypeCode,
+                resolvedCode: cfg.resolvedCode,
+                displayName: cfg.displayName,
+                extraRegFields: (cfg.extraRegFields as any[]) ?? [],
+              });
+            }
+            return acc;
+          },
+          {} as Record<string, { code: string; subTypes: any[] }>,
+        ),
+      ),
+    }));
+
     const result = {
       _domain: { tenantId: tenant.id, domain: tenant.domain, subdomain: tenant.subdomain },
       tenant: {
@@ -116,12 +176,10 @@ export class BrandConfigService {
             contactEmail: brandProfile.contactEmail,
           }
         : null,
-      combinedCodes: combinedCodes.map((c) => ({
-        id: c.id,
-        code: c.code,
-        displayName: c.displayName,
-        userType: c.userType,
-      })),
+      // Sprint 5.1: new master code structure
+      masterCodes: masterCodesResponse,
+      // Backward compat (flattened view, same shape as before)
+      combinedCodes,
       registrationFields: regFields,
       onboardingStages: stages,
       plan: planFeatures,

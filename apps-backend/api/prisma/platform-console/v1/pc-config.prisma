@@ -142,6 +142,67 @@ model PcRegistrationField {
   @@map("pc_registration_field")
 }
 
+model PcMasterCode {
+  id              String    @id @default(uuid())
+  masterCode      String    @unique @map("master_code")
+  // Format: {PARTNER}_{EDITION}_{BRAND}_{VERTICAL}
+
+  partnerCode     String    @map("partner_code")
+  editionCode     String    @map("edition_code")
+  brandCode       String    @map("brand_code")
+  verticalCode    String    @map("vertical_code")
+
+  displayName     String    @map("display_name")
+  description     String?
+
+  // Common registration fields (shared by ALL user types)
+  commonRegFields Json?     @map("common_reg_fields") @default("[]")
+
+  // Common onboarding stages (shared by ALL user types)
+  commonOnboardingStages Json? @map("common_onboarding_stages") @default("[]")
+
+  isActive        Boolean   @default(true) @map("is_active")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  createdById     String?   @map("created_by_id")
+
+  configs         PcMasterCodeConfig[]
+
+  @@unique([partnerCode, editionCode, brandCode, verticalCode])
+  @@index([partnerCode])
+  @@index([brandCode, verticalCode])
+  @@map("pc_master_codes")
+}
+
+model PcMasterCodeConfig {
+  id              String    @id @default(uuid())
+  masterCodeId    String    @map("master_code_id")
+  masterCode      PcMasterCode @relation(fields: [masterCodeId], references: [id], onDelete: Cascade)
+
+  userTypeCode    String    @map("user_type_code")
+  subTypeCode     String?   @map("sub_type_code")
+
+  // Backward compatible resolved code
+  resolvedCode    String    @unique @map("resolved_code")
+  // Format: {USERTYPE}_{EDITION}_{BRAND}_{SUBTYPE}
+
+  // Extra registration fields (ADDITIONAL to master's commonRegFields)
+  extraRegFields  Json?     @map("extra_reg_fields") @default("[]")
+
+  // Override onboarding stages (null = use master's stages)
+  overrideOnboardingStages Json? @map("override_onboarding_stages")
+
+  displayName     String    @map("display_name")
+  isActive        Boolean   @default(true) @map("is_active")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@unique([masterCodeId, userTypeCode, subTypeCode])
+  @@index([resolvedCode])
+  @@index([userTypeCode])
+  @@map("pc_master_code_configs")
+}
+
 model PcBrandEdition {
   id           String   @id @default(uuid()) @db.Uuid
   brandId      String   @map("brand_id")

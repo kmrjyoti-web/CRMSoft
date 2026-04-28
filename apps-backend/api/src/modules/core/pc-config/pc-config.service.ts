@@ -824,6 +824,185 @@ export class PcConfigService {
   }
 
   // ═══════════════════════════════════════════
+  // MASTER CODES
+  // ═══════════════════════════════════════════
+
+  async listMasterCodes(filters?: { partnerCode?: string; brandCode?: string; verticalCode?: string }) {
+    const cacheKey = `config:pc_master_code:list:${JSON.stringify(filters ?? {})}`;
+    return this.cache.wrap(cacheKey, async () => {
+      const where: any = { isActive: true };
+      if (filters?.partnerCode) where.partnerCode = filters.partnerCode;
+      if (filters?.brandCode) where.brandCode = filters.brandCode;
+      if (filters?.verticalCode) where.verticalCode = filters.verticalCode;
+      const masters = await this.pcDb.pcMasterCode.findMany({
+        where,
+        orderBy: { masterCode: 'asc' },
+        include: { _count: { select: { configs: true } } },
+      });
+      return masters.map((m) => ({ ...m, configCount: (m as any)._count.configs }));
+    });
+  }
+
+  async getMasterCode(id: string) {
+    return this.cache.wrap(`config:pc_master_code:${id}`, () =>
+      this.pcDb.pcMasterCode.findUnique({
+        where: { id },
+        include: { configs: { where: { isActive: true }, orderBy: { userTypeCode: 'asc' } } },
+      }),
+    );
+  }
+
+  async createMasterCode(dto: {
+    partnerCode: string; editionCode: string; brandCode: string; verticalCode: string;
+    displayName: string; description?: string;
+    commonRegFields?: any[]; commonOnboardingStages?: any[];
+    createdById?: string;
+  }) {
+    const masterCode = `${dto.partnerCode}_${dto.editionCode}_${dto.brandCode}_${dto.verticalCode}`;
+    const existing = await this.pcDb.pcMasterCode.findUnique({ where: { masterCode } });
+    if (existing) throw new Error(`Master code '${masterCode}' already exists`);
+    const created = await this.pcDb.pcMasterCode.create({
+      data: {
+        masterCode,
+        partnerCode: dto.partnerCode, editionCode: dto.editionCode,
+        brandCode: dto.brandCode, verticalCode: dto.verticalCode,
+        displayName: dto.displayName, description: dto.description ?? null,
+        commonRegFields: (dto.commonRegFields ?? []) as any,
+        commonOnboardingStages: (dto.commonOnboardingStages ?? []) as any,
+        createdById: dto.createdById ?? null,
+        isActive: true,
+      },
+    });
+    await this.cache.invalidate('config:pc_master_code:*');
+    return created;
+  }
+
+  async updateMasterCode(id: string, dto: {
+    displayName?: string; description?: string;
+    commonRegFields?: any[]; commonOnboardingStages?: any[];
+  }) {
+    const updated = await this.pcDb.pcMasterCode.update({
+      where: { id },
+      data: {
+        ...(dto.displayName !== undefined && { displayName: dto.displayName }),
+        ...(dto.description !== undefined && { description: dto.description }),
+        ...(dto.commonRegFields !== undefined && { commonRegFields: dto.commonRegFields as any }),
+        ...(dto.commonOnboardingStages !== undefined && { commonOnboardingStages: dto.commonOnboardingStages as any }),
+      },
+    });
+    await this.cache.invalidate('config:pc_master_code:*');
+    return updated;
+  }
+
+  async deleteMasterCode(id: string) {
+    await this.pcDb.pcMasterCode.update({ where: { id }, data: { isActive: false } });
+    await this.cache.invalidate('config:pc_master_code:*');
+  }
+
+  // ═══════════════════════════════════════════
+  // MASTER CODE CONFIGS
+  // ═══════════════════════════════════════════
+
+  async listConfigs(masterCodeId: string) {
+    return this.cache.wrap(`config:pc_master_code_config:${masterCodeId}`, () =>
+      this.pcDb.pcMasterCodeConfig.findMany({
+        where: { masterCodeId, isActive: true },
+        orderBy: [{ userTypeCode: 'asc' }, { subTypeCode: 'asc' }],
+      }),
+    );
+  }
+
+  async createConfig(masterCodeId: string, dto: {
+    userTypeCode: string; subTypeCode?: string;
+    displayName: string; extraRegFields?: any[]; overrideOnboardingStages?: any[];
+  }) {
+    const master = await this.pcDb.pcMasterCode.findUnique({ where: { id: masterCodeId } });
+    if (!master) throw new NotFoundException(`Master code ${masterCodeId} not found`);
+
+    const resolvedCode = dto.subTypeCode
+      ? `${dto.userTypeCode}_${master.editionCode}_${master.brandCode}_${dto.subTypeCode}`
+      : `${dto.userTypeCode}_${master.editionCode}_${master.brandCode}`;
+
+    const existing = await this.pcDb.pcMasterCodeConfig.findUnique({ where: { resolvedCode } });
+    if (existing) throw new Error(`Config with resolvedCode '${resolvedCode}' already exists`);
+
+    const created = await this.pcDb.pcMasterCodeConfig.create({
+      data: {
+        masterCodeId,
+        userTypeCode: dto.userTypeCode,
+        subTypeCode: dto.subTypeCode ?? null,
+        resolvedCode,
+        displayName: dto.displayName,
+        extraRegFields: (dto.extraRegFields ?? []) as any,
+        overrideOnboardingStages: dto.overrideOnboardingStages
+          ? (dto.overrideOnboardingStages as any)
+          : undefined,
+        isActive: true,
+      },
+    });
+    await this.cache.invalidate('config:pc_master_code_config:*');
+    return created;
+  }
+
+  async updateConfig(masterCodeId: string, configId: string, dto: {
+    displayName?: string; extraRegFields?: any[]; overrideOnboardingStages?: any[];
+  }) {
+    const updated = await this.pcDb.pcMasterCodeConfig.update({
+      where: { id: configId },
+      data: {
+        ...(dto.displayName !== undefined && { displayName: dto.displayName }),
+        ...(dto.extraRegFields !== undefined && { extraRegFields: dto.extraRegFields as any }),
+        ...(dto.overrideOnboardingStages !== undefined && { overrideOnboardingStages: dto.overrideOnboardingStages as any }),
+      },
+    });
+    await this.cache.invalidate('config:pc_master_code_config:*');
+    return updated;
+  }
+
+  async deleteConfig(masterCodeId: string, configId: string) {
+    await this.pcDb.pcMasterCodeConfig.update({ where: { id: configId }, data: { isActive: false } });
+    await this.cache.invalidate('config:pc_master_code_config:*');
+  }
+
+  // ═══════════════════════════════════════════
+  // REGISTRATION FIELDS RESOLVER (new master-code path)
+  // ═══════════════════════════════════════════
+
+  async getResolvedFields(resolvedCode: string) {
+    return this.cache.wrap(`config:resolved_fields:${resolvedCode}`, async () => {
+      const config = await this.pcDb.pcMasterCodeConfig.findUnique({
+        where: { resolvedCode },
+        include: { masterCode: true },
+      });
+      if (!config) return [];
+      const common = (config.masterCode.commonRegFields as any[]) ?? [];
+      const extra = (config.extraRegFields as any[]) ?? [];
+      return [...common, ...extra];
+    });
+  }
+
+  async getByResolvedCode(code: string) {
+    return this.cache.wrap(`config:by_resolved_code:${code}`, async () => {
+      const config = await this.pcDb.pcMasterCodeConfig.findUnique({
+        where: { resolvedCode: code },
+        include: { masterCode: true },
+      });
+      if (!config) return null;
+      return {
+        id: config.id,
+        code: config.resolvedCode,
+        displayName: config.displayName,
+        userType: config.userTypeCode,
+        partnerCode: config.masterCode.partnerCode,
+        brandCode: config.masterCode.brandCode,
+        verticalCode: config.masterCode.verticalCode,
+        editionCode: config.masterCode.editionCode,
+        isActive: config.isActive,
+      };
+    });
+  }
+
+  // ═══════════════════════════════════════════
   // CACHE MANAGEMENT
   // ═══════════════════════════════════════════
 

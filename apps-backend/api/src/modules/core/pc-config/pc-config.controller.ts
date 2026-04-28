@@ -174,6 +174,38 @@ class ConfirmDbConnectionDto {
   @IsString() connectionString: string;
 }
 
+class CreateMasterCodeDto {
+  @ApiProperty({ example: 'TRAVVELLIS' }) @IsString() partnerCode: string;
+  @ApiProperty({ example: 'TRAVEL' }) @IsString() editionCode: string;
+  @ApiProperty({ example: 'TRAVELSIS' }) @IsString() brandCode: string;
+  @ApiProperty({ example: 'TRAVEL_TOURISM' }) @IsString() verticalCode: string;
+  @ApiProperty({ example: 'Travelsis Travel & Tourism' }) @IsString() @MinLength(2) displayName: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
+  @ApiPropertyOptional() @IsOptional() commonRegFields?: any[];
+  @ApiPropertyOptional() @IsOptional() commonOnboardingStages?: any[];
+}
+
+class UpdateMasterCodeDto {
+  @ApiPropertyOptional() @IsOptional() @IsString() displayName?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
+  @ApiPropertyOptional() @IsOptional() commonRegFields?: any[];
+  @ApiPropertyOptional() @IsOptional() commonOnboardingStages?: any[];
+}
+
+class CreateMasterCodeConfigDto {
+  @ApiProperty({ example: 'B2B' }) @IsString() userTypeCode: string;
+  @ApiPropertyOptional({ example: 'DMCP' }) @IsOptional() @IsString() subTypeCode?: string;
+  @ApiProperty({ example: 'B2B DMC Provider' }) @IsString() @MinLength(2) displayName: string;
+  @ApiPropertyOptional() @IsOptional() extraRegFields?: any[];
+  @ApiPropertyOptional() @IsOptional() overrideOnboardingStages?: any[];
+}
+
+class UpdateMasterCodeConfigDto {
+  @ApiPropertyOptional() @IsOptional() @IsString() displayName?: string;
+  @ApiPropertyOptional() @IsOptional() extraRegFields?: any[];
+  @ApiPropertyOptional() @IsOptional() overrideOnboardingStages?: any[];
+}
+
 class CreateCombinedCodeDto {
   @ApiProperty({ example: 'B2B_TRAV_TRAVL_DMC' }) @IsString() code: string;
   @ApiProperty() @IsUUID() partnerId: string;
@@ -269,7 +301,12 @@ export class PcConfigController {
   }
 
   @Public() @Get('combined-code/:code')
-  getCombinedCode(@Param('code') code: string) { return this.svc.getCombinedCode(code); }
+  @ApiOperation({ summary: 'Backward compat — reads from new master code table by resolvedCode, falls back to old combined code' })
+  async getCombinedCode(@Param('code') code: string) {
+    const fromNew = await this.svc.getByResolvedCode(code);
+    if (fromNew) return fromNew;
+    return this.svc.getCombinedCode(code);
+  }
 
   @Public() @Get('registration-form')
   getRegistrationForm(@Query('combinedCode') combinedCode: string) {
@@ -299,6 +336,108 @@ export class PcConfigController {
   async getMyAccess(@Request() req: any) {
     const combinedCode: string | null = req.user?.combinedCode ?? null;
     return this.svc.getMyAccess(combinedCode);
+  }
+
+  // ── Master Codes (new Sprint 5.1 endpoints) ───────────────────────────────
+
+  @Get('master-codes')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Sprint 5.1 — List all master codes with child config count' })
+  listMasterCodes(
+    @Query('partnerCode') partnerCode?: string,
+    @Query('brandCode') brandCode?: string,
+    @Query('verticalCode') verticalCode?: string,
+  ) {
+    return this.svc.listMasterCodes({ partnerCode, brandCode, verticalCode });
+  }
+
+  @Get('master-codes/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Sprint 5.1 — Get master code detail + all child configs' })
+  getMasterCode(@Param('id') id: string) {
+    return this.svc.getMasterCode(id);
+  }
+
+  @Post('master-codes')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Sprint 5.1 — Create master code (auto-generates masterCode from parts)' })
+  async createMasterCode(@Body() dto: CreateMasterCodeDto, @Request() req: any) {
+    try {
+      return await this.svc.createMasterCode({ ...dto, createdById: req.user?.id });
+    } catch (err: any) {
+      if (err.message?.includes('already exists')) throw new ConflictException(err.message);
+      throw err;
+    }
+  }
+
+  @Patch('master-codes/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Sprint 5.1 — Update master code' })
+  updateMasterCode(@Param('id') id: string, @Body() dto: UpdateMasterCodeDto) {
+    return this.svc.updateMasterCode(id, dto);
+  }
+
+  @Delete('master-codes/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Sprint 5.1 — Soft-delete (deactivate) master code' })
+  async deleteMasterCode(@Param('id') id: string) {
+    await this.svc.deleteMasterCode(id);
+    return { success: true };
+  }
+
+  @Get('master-codes/:id/configs')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Sprint 5.1 — List configs under a master code' })
+  listConfigs(@Param('id') id: string) {
+    return this.svc.listConfigs(id);
+  }
+
+  @Post('master-codes/:id/configs')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Sprint 5.1 — Add user type config under a master code' })
+  async createConfig(@Param('id') id: string, @Body() dto: CreateMasterCodeConfigDto) {
+    try {
+      return await this.svc.createConfig(id, dto);
+    } catch (err: any) {
+      if (err.message?.includes('already exists')) throw new ConflictException(err.message);
+      throw err;
+    }
+  }
+
+  @Patch('master-codes/:id/configs/:configId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Sprint 5.1 — Update a config under a master code' })
+  updateConfig(
+    @Param('id') id: string,
+    @Param('configId') configId: string,
+    @Body() dto: UpdateMasterCodeConfigDto,
+  ) {
+    return this.svc.updateConfig(id, configId, dto);
+  }
+
+  @Delete('master-codes/:id/configs/:configId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Sprint 5.1 — Soft-delete a config' })
+  async deleteConfig(@Param('id') id: string, @Param('configId') configId: string) {
+    await this.svc.deleteConfig(id, configId);
+    return { success: true };
+  }
+
+  @Public() @Get('resolved-fields/:resolvedCode')
+  @ApiOperation({ summary: 'Sprint 5.1 — Get merged common + extra reg fields by resolvedCode' })
+  getResolvedFields(@Param('resolvedCode') resolvedCode: string) {
+    return this.svc.getResolvedFields(resolvedCode);
   }
 
   // ── WRITE endpoints (admin-only) ──────────────────────────────────────────
