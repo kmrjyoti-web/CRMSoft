@@ -476,6 +476,40 @@ export const api = {
       typeCode: string; typeName: string; industryCategory: string;
       crmEditionId?: string; description?: string; shortCode?: string; sortOrder?: number;
     }) => apiFetch('/pc-config/verticals', { method: 'POST', body: JSON.stringify(payload) }),
+    // ── Sprint 5.1 Master Code endpoints ──────────────────────────────────
+    masterCodes: (filters?: { partnerCode?: string; brandCode?: string; verticalCode?: string }) => {
+      const params = new URLSearchParams();
+      if (filters?.partnerCode) params.set('partnerCode', filters.partnerCode);
+      if (filters?.brandCode) params.set('brandCode', filters.brandCode);
+      if (filters?.verticalCode) params.set('verticalCode', filters.verticalCode);
+      const qs = params.toString();
+      return apiFetch(`/pc-config/master-codes${qs ? `?${qs}` : ''}`);
+    },
+    masterCode: (id: string) => apiFetch(`/pc-config/master-codes/${encodeURIComponent(id)}`),
+    createMasterCode: (payload: {
+      partnerCode: string; editionCode: string; brandCode: string; verticalCode: string;
+      displayName: string; description?: string;
+      commonRegFields?: unknown[]; commonOnboardingStages?: unknown[];
+    }) => apiFetch('/pc-config/master-codes', { method: 'POST', body: JSON.stringify(payload) }),
+    updateMasterCode: (id: string, payload: {
+      displayName?: string; description?: string;
+      commonRegFields?: unknown[]; commonOnboardingStages?: unknown[];
+    }) => apiFetch(`/pc-config/master-codes/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+    deleteMasterCode: (id: string) =>
+      apiFetch(`/pc-config/master-codes/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    masterCodeConfigs: (masterCodeId: string) =>
+      apiFetch(`/pc-config/master-codes/${encodeURIComponent(masterCodeId)}/configs`),
+    createMasterCodeConfig: (masterCodeId: string, payload: {
+      userTypeCode: string; subTypeCode?: string; displayName: string;
+      extraRegFields?: unknown[]; overrideOnboardingStages?: unknown[];
+    }) => apiFetch(`/pc-config/master-codes/${encodeURIComponent(masterCodeId)}/configs`, { method: 'POST', body: JSON.stringify(payload) }),
+    updateMasterCodeConfig: (masterCodeId: string, configId: string, payload: {
+      displayName?: string; extraRegFields?: unknown[]; overrideOnboardingStages?: unknown[];
+    }) => apiFetch(`/pc-config/master-codes/${encodeURIComponent(masterCodeId)}/configs/${encodeURIComponent(configId)}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+    deleteMasterCodeConfig: (masterCodeId: string, configId: string) =>
+      apiFetch(`/pc-config/master-codes/${encodeURIComponent(masterCodeId)}/configs/${encodeURIComponent(configId)}`, { method: 'DELETE' }),
+    resolvedFields: (resolvedCode: string) =>
+      apiFetch(`/pc-config/resolved-fields/${encodeURIComponent(resolvedCode)}`),
   },
   menuEditor: {
     list: (verticalCode: string) => apiFetch(`/platform-console/menu-editor/${verticalCode}`),
