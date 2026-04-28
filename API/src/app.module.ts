@@ -92,6 +92,7 @@ import { SelfHostedAiModule } from './modules/self-hosted-ai/self-hosted-ai.modu
 import { CalendarHighlightsModule } from './modules/calendar-highlights/calendar-highlights.module';
 import { ControlRoomModule } from './modules/control-room/control-room.module';
 import { TenantAuditMiddleware } from './modules/tenant/infrastructure/tenant-audit.middleware';
+import { PcConfigModule } from './modules/pc-config/pc-config.module';
 
 @Module({
   imports: [
@@ -180,6 +181,7 @@ import { TenantAuditMiddleware } from './modules/tenant/infrastructure/tenant-au
     SelfHostedAiModule,
     CalendarHighlightsModule,
     ControlRoomModule,
+    PcConfigModule,
     ErrorsModule,
   ],
   controllers: [],
