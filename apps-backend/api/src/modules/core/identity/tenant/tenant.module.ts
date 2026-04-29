@@ -37,6 +37,7 @@ import { VendorTenantsService } from './services/vendor-tenants.service';
 import { VendorAuditLogsService } from './services/vendor-audit-logs.service';
 import { VendorPackagesService } from './services/vendor-packages.service';
 import { SystemHealthService } from './services/system-health.service';
+import { PartnerCommissionService } from '../../../core/pc-config/partner-commission.service';
 
 // Infrastructure
 import { TenantContextService } from './infrastructure/tenant-context.service';
@@ -209,6 +210,7 @@ const QueryHandlers = [
     SystemHealthService,
     TenantUpgradeService,
     WlDbProvisioningService,
+    PartnerCommissionService,
     TenantDataMigrationService,
     PrismaClientFactory,
     // Infrastructure
