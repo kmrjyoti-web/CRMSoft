@@ -510,6 +510,28 @@ export const api = {
       apiFetch(`/pc-config/master-codes/${encodeURIComponent(masterCodeId)}/configs/${encodeURIComponent(configId)}`, { method: 'DELETE' }),
     resolvedFields: (resolvedCode: string) =>
       apiFetch(`/pc-config/resolved-fields/${encodeURIComponent(resolvedCode)}`),
+    // ── Sprint 8.3 Commission endpoints ──────────────────────────────────────
+    commissionRules: (partnerCode?: string) => {
+      const qs = partnerCode ? `?partnerCode=${encodeURIComponent(partnerCode)}` : '';
+      return apiFetch(`/pc-config/commission/rules${qs}`);
+    },
+    createCommissionRule: (data: { partnerCode: string; planCode?: string; commissionType?: string; commissionPct: number; minTenants?: number; maxTenants?: number }) =>
+      apiFetch('/pc-config/commission/rules', { method: 'POST', body: JSON.stringify(data) }),
+    updateCommissionRule: (id: string, data: { commissionPct?: number; commissionType?: string; minTenants?: number; maxTenants?: number; isActive?: boolean }) =>
+      apiFetch(`/pc-config/commission/rules/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    deleteCommissionRule: (id: string) =>
+      apiFetch(`/pc-config/commission/rules/${id}`, { method: 'DELETE' }),
+    commissionLogs: (params?: { partnerCode?: string; status?: string; from?: string; to?: string }) => {
+      const p = new URLSearchParams();
+      if (params?.partnerCode) p.set('partnerCode', params.partnerCode);
+      if (params?.status) p.set('status', params.status);
+      if (params?.from) p.set('from', params.from);
+      if (params?.to) p.set('to', params.to);
+      const qs = p.toString();
+      return apiFetch(`/pc-config/commission/logs${qs ? `?${qs}` : ''}`);
+    },
+    commissionSummary: (partnerCode: string) =>
+      apiFetch(`/pc-config/commission/summary/${encodeURIComponent(partnerCode)}`),
   },
   menuEditor: {
     list: (verticalCode: string) => apiFetch(`/platform-console/menu-editor/${verticalCode}`),

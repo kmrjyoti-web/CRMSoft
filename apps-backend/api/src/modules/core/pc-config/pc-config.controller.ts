@@ -11,6 +11,7 @@ import { WlDomainService } from './wl-domain.service';
 import { WlDbProvisioningService } from '../identity/tenant/services/wl-db-provisioning.service';
 import { TenantDataMigrationService } from '../identity/tenant/services/tenant-data-migration.service';
 import { ErrorCenterService } from '../../platform-console/error-center/error-center.service';
+import { PartnerCommissionService, CreateCommissionRuleDto, UpdateCommissionRuleDto } from './partner-commission.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles, Public } from '../../../common/decorators/roles.decorator';
@@ -230,6 +231,7 @@ export class PcConfigController {
     private readonly wlDbProv: WlDbProvisioningService,
     private readonly errorCenter: ErrorCenterService,
     private readonly migrationSvc: TenantDataMigrationService,
+    private readonly commissionSvc: PartnerCommissionService,
   ) {}
 
   // ── READ endpoints (public — unauthenticated users need these for registration) ──
@@ -877,5 +879,68 @@ export class PcConfigController {
   @ApiOperation({ summary: 'Simplified health summary for a tenant (PLATFORM_ADMIN view)' })
   getTenantHealth(@Param('tenantId') tenantId: string) {
     return this.errorCenter.getTenantHealthSummary(tenantId);
+  }
+
+  // ── Partner Commission (PLATFORM_ADMIN only) ──────────────────────────────────
+
+  @Get('commission/rules')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'List all commission rules' })
+  listCommissionRules(@Query('partnerCode') partnerCode?: string) {
+    return this.commissionSvc.listRules(partnerCode);
+  }
+
+  @Post('commission/rules')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Create commission rule' })
+  createCommissionRule(@Body() dto: CreateCommissionRuleDto) {
+    return this.commissionSvc.createRule(dto);
+  }
+
+  @Patch('commission/rules/:id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Update commission rule' })
+  updateCommissionRule(@Param('id') id: string, @Body() dto: UpdateCommissionRuleDto) {
+    return this.commissionSvc.updateRule(id, dto);
+  }
+
+  @Delete('commission/rules/:id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Delete commission rule' })
+  deleteCommissionRule(@Param('id') id: string) {
+    return this.commissionSvc.deleteRule(id);
+  }
+
+  @Get('commission/logs')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Commission logs (filterable by partnerCode, status, date)' })
+  getCommissionLogs(
+    @Query('partnerCode') partnerCode?: string,
+    @Query('status') status?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    return this.commissionSvc.getLogs(
+      partnerCode,
+      status,
+      from ? new Date(from) : undefined,
+      to ? new Date(to) : undefined,
+    );
+  }
+
+  @Get('commission/summary/:partnerCode')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Revenue + commission summary for a partner' })
+  getCommissionSummary(@Param('partnerCode') partnerCode: string) {
+    return this.commissionSvc.getRevenueSummary(partnerCode);
   }
 }

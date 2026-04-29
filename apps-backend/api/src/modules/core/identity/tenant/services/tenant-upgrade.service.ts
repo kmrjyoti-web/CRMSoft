@@ -8,6 +8,7 @@ import * as crypto from 'crypto';
 import axios from 'axios';
 import { PrismaService } from '../../../../../core/prisma/prisma.service';
 import { WlDbProvisioningService } from './wl-db-provisioning.service';
+import { PartnerCommissionService } from '../../../../core/pc-config/partner-commission.service';
 
 const DEDICATED_DB_PLANS = new Set(['WL_PROFESSIONAL', 'WL_ENTERPRISE']);
 
@@ -37,6 +38,7 @@ export class TenantUpgradeService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly wlProvisioning: WlDbProvisioningService,
+    private readonly commissionSvc: PartnerCommissionService,
   ) {}
 
   // ─── 1. List available plans ──────────────────────────────────────────────
@@ -172,6 +174,12 @@ export class TenantUpgradeService {
         this.logger.warn(`DB provisioning skipped for ${tenantId}: ${(err as Error).message}`);
       }
     }
+
+    // Calculate partner commission (non-fatal — payment already confirmed)
+    const amountInr = billingCycle === 'YEARLY' ? Number(pkg.priceYearlyInr) : Number(pkg.priceMonthlyInr);
+    this.commissionSvc.calculateCommission(tenantId, paymentId, amountInr, packageCode).catch((err) => {
+      this.logger.warn(`Commission calculation failed for ${tenantId}: ${(err as Error).message}`);
+    });
 
     return { planCode: packageCode, dedicatedDbStarted };
   }

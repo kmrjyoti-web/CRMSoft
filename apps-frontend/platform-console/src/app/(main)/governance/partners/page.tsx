@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Users, Mail, Shield, Plus, X, Loader2, Check } from 'lucide-react';
+import { Users, Mail, Shield, Plus, X, Loader2, Check, TrendingUp } from 'lucide-react';
+import Link from 'next/link';
 import { api } from '@/lib/api';
 
 type Partner = {
@@ -252,6 +253,7 @@ export default function GovernancePartnersPage() {
                 <th className="text-left px-4 py-2.5 text-xs font-medium text-console-muted">Owner Email</th>
                 <th className="text-left px-4 py-2.5 text-xs font-medium text-console-muted">License</th>
                 <th className="text-left px-4 py-2.5 text-xs font-medium text-console-muted">Status</th>
+                <th className="text-left px-4 py-2.5 text-xs font-medium text-console-muted">Revenue</th>
               </tr>
             </thead>
             <tbody>
@@ -282,6 +284,14 @@ export default function GovernancePartnersPage() {
                     ) : (
                       <span className="bg-[#30363d] text-console-muted text-xs px-1.5 py-0.5 rounded">Inactive</span>
                     )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <Link
+                      href={`/governance/partners/${encodeURIComponent(p.code)}/revenue`}
+                      className="flex items-center gap-1 text-xs text-[#d2a8ff] hover:text-white transition-colors"
+                    >
+                      <TrendingUp className="w-3 h-3" /> View
+                    </Link>
                   </td>
                 </tr>
               ))}

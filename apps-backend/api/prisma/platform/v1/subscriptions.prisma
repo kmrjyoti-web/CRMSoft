@@ -457,3 +457,42 @@ model PackageModule {
   @@unique([packageId, moduleId])
   @@map("gv_lic_package_modules")
 }
+
+// ─── Partner Commission ────────────────────────────────────────────────────
+
+model PartnerCommissionRule {
+  id             String   @id @default(uuid())
+  partnerCode    String   @map("partner_code")
+  planCode       String?  @map("plan_code")
+  commissionType String   @default("RECURRING") @map("commission_type")
+  commissionPct  Decimal  @map("commission_pct") @db.Decimal(5, 2)
+  minTenants     Int?     @map("min_tenants")
+  maxTenants     Int?     @map("max_tenants")
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@unique([partnerCode, planCode])
+  @@index([partnerCode])
+  @@map("pc_partner_commission_rules")
+}
+
+model PartnerCommissionLog {
+  id               String   @id @default(uuid())
+  partnerCode      String   @map("partner_code")
+  childTenantId    String   @map("child_tenant_id")
+  paymentId        String   @map("payment_id")
+  paymentAmountInr Decimal  @map("payment_amount_inr") @db.Decimal(12, 2)
+  commissionPct    Decimal  @map("commission_pct") @db.Decimal(5, 2)
+  commissionInr    Decimal  @map("commission_inr") @db.Decimal(12, 2)
+  planCode         String?  @map("plan_code")
+  status           String   @default("PENDING") @map("status")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@index([partnerCode])
+  @@index([childTenantId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("pc_partner_commission_logs")
+}

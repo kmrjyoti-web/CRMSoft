@@ -7,6 +7,7 @@ import { TenantDataMigrationService } from '../identity/tenant/services/tenant-d
 import { PrismaClientFactory } from '../../../common/database/prisma-client-factory.service';
 import { FeatureGateService } from '../../../common/guards/feature-gate.service';
 import { ErrorCenterService } from '../../platform-console/error-center/error-center.service';
+import { PartnerCommissionService } from './partner-commission.service';
 import { PlatformConsoleModule } from '../../platform-console/platform-console.module';
 
 @Module({
@@ -14,11 +15,12 @@ import { PlatformConsoleModule } from '../../platform-console/platform-console.m
   controllers: [PcConfigController],
   providers: [
     PcConfigService, WlDomainService, WlDbProvisioningService,
-    TenantDataMigrationService, PrismaClientFactory, FeatureGateService, ErrorCenterService,
+    TenantDataMigrationService, PrismaClientFactory, FeatureGateService,
+    ErrorCenterService, PartnerCommissionService,
   ],
   exports: [
     PcConfigService, WlDomainService, WlDbProvisioningService,
-    PrismaClientFactory, FeatureGateService,
+    PrismaClientFactory, FeatureGateService, PartnerCommissionService,
   ],
 })
 export class PcConfigModule {}
