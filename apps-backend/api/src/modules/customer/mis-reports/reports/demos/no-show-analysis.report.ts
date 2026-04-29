@@ -64,7 +64,7 @@ export class NoShowAnalysisReport implements IReport {
       dayMap.set(day, (dayMap.get(day) || 0) + 1);
     });
 
-    const topNoShowDay = [...dayMap.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
+    const topNoShowDay = totalNoShows === 0 ? 'NO_DEMOS_IN_PERIOD' : [...dayMap.entries()].sort((a, b) => b[1] - a[1])[0][0];
 
     // Time of day distribution
     const timeSlots = { Morning: 0, Afternoon: 0, Evening: 0 };
@@ -75,8 +75,7 @@ export class NoShowAnalysisReport implements IReport {
       else timeSlots.Evening++;
     });
 
-    const topNoShowTime = Object.entries(timeSlots)
-      .sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
+    const topNoShowTime = totalNoShows === 0 ? 'NO_DEMOS_IN_PERIOD' : Object.entries(timeSlots).sort((a, b) => b[1] - a[1])[0][0];
 
     // Mode distribution
     const modeMap = new Map<string, number>();
@@ -128,7 +127,7 @@ export class NoShowAnalysisReport implements IReport {
 
     // Generate suggestions based on patterns
     const suggestions: string[] = [];
-    if (topNoShowDay !== 'N/A') {
+    if (topNoShowDay !== 'NO_DEMOS_IN_PERIOD') {
       suggestions.push(`Consider sending reminder calls for ${topNoShowDay} demos as they have the highest no-show rate.`);
     }
     if (topNoShowTime === 'Morning') {

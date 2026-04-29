@@ -52,8 +52,8 @@ export class GeographicDistributionReport implements IReport {
     // Build org-to-location map
     const orgLocationMap = new Map<string, { state: string; city: string }>();
     orgs.forEach(o => orgLocationMap.set(o.id, {
-      state: o.state || 'Unknown',
-      city: o.city || 'Unknown',
+      state: o.state || 'STATE_NOT_PROVIDED',
+      city: o.city || 'CITY_NOT_PROVIDED',
     }));
 
     // Aggregate by state and city
@@ -62,8 +62,8 @@ export class GeographicDistributionReport implements IReport {
 
     // Count orgs per location
     orgs.forEach(o => {
-      const state = o.state || 'Unknown';
-      const city = o.city || 'Unknown';
+      const state = o.state || 'STATE_NOT_PROVIDED';
+      const city = o.city || 'CITY_NOT_PROVIDED';
       if (!stateMap.has(state)) stateMap.set(state, { orgCount: 0, leadCount: 0, revenue: 0 });
       stateMap.get(state)!.orgCount++;
       const cityKey = `${state}|${city}`;
@@ -97,10 +97,10 @@ export class GeographicDistributionReport implements IReport {
       .map(([key, data]) => ({ city: key.split('|')[1], ...data }))
       .sort((a, b) => b.orgCount - a.orgCount);
 
-    const totalStates = states.filter(s => s.state !== 'Unknown').length;
-    const totalCities = cities.filter(c => c.city !== 'Unknown').length;
-    const topCity = cities.length > 0 ? cities[0].city : 'N/A';
-    const topState = states.length > 0 ? states[0].state : 'N/A';
+    const totalStates = states.filter(s => s.state !== 'STATE_NOT_PROVIDED').length;
+    const totalCities = cities.filter(c => c.city !== 'CITY_NOT_PROVIDED').length;
+    const topCity = cities.length > 0 ? cities[0].city : 'NO_CITIES_RECORDED';
+    const topState = states.length > 0 ? states[0].state : 'NO_STATES_RECORDED';
 
     const summary: ReportMetric[] = [
       { key: 'totalStates', label: 'Total States', value: totalStates, format: 'number' },

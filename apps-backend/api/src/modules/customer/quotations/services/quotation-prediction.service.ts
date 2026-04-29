@@ -43,7 +43,7 @@ export class QuotationPredictionService {
     const enrichedFilters = await this.resolver.resolveLookupValues(rawLead.filters || [], 'lookupValueId', true);
     const lead = { ...rawLead, filters: enrichedFilters };
 
-    const industry = lead.organization?.industry || 'Unknown';
+    const industry = lead.organization?.industry || 'INDUSTRY_NOT_CLASSIFIED';
     const expectedValue = lead.expectedValue ? Number(lead.expectedValue) : 0;
 
     // Find similar historical leads: same industry, similar value �30%
@@ -54,7 +54,7 @@ export class QuotationPredictionService {
       where: {
         id: { not: leadId },
         status: { in: ['WON', 'LOST'] },
-        organization: industry !== 'Unknown' ? { industry } : undefined,
+        organization: industry !== 'INDUSTRY_NOT_CLASSIFIED' ? { industry } : undefined,
         expectedValue: expectedValue > 0 ? { gte: valueLow, lte: valueHigh } : undefined,
       },
       include: {

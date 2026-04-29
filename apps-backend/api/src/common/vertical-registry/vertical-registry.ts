@@ -67,7 +67,7 @@ export const VERTICAL_SCHEMAS: Record<EntityKey, Record<string, VerticalSchema>>
         { key: 'preferredPayment', label: 'Preferred Payment', labelHi: 'भुगतान पसंद', type: 'select', options: ['Cash', 'UPI', 'Card', 'Credit'] },
       ],
     },
-    GENERAL: { fields: [] },
+    BASELINE_VERTICAL: { fields: [] },
   },
 
   // ─── LEAD ──────────────────────────────────────────────────────────────────
@@ -107,7 +107,7 @@ export const VERTICAL_SCHEMAS: Record<EntityKey, Record<string, VerticalSchema>>
         { key: 'estimatedValue', label: 'Estimated Value', labelHi: 'अनुमानित मूल्य', type: 'number' },
       ],
     },
-    GENERAL: { fields: [] },
+    BASELINE_VERTICAL: { fields: [] },
   },
 
   // ─── PRODUCT ───────────────────────────────────────────────────────────────
@@ -152,16 +152,16 @@ export const VERTICAL_SCHEMAS: Record<EntityKey, Record<string, VerticalSchema>>
         { key: 'shelfLocation', label: 'Shelf Location', labelHi: 'शेल्फ स्थान', type: 'text' },
       ],
     },
-    GENERAL: { fields: [] },
+    BASELINE_VERTICAL: { fields: [] },
   },
 };
 
 /**
  * Get the vertical schema for a given entity and business type.
- * Falls back to GENERAL if the business type has no specific schema.
+ * Falls back to BASELINE_VERTICAL if the business type has no specific schema.
  */
 export function getVerticalSchema(entity: EntityKey, businessType: string): VerticalSchema {
-  return VERTICAL_SCHEMAS[entity]?.[businessType] ?? VERTICAL_SCHEMAS[entity]?.['GENERAL'] ?? { fields: [] };
+  return VERTICAL_SCHEMAS[entity]?.[businessType] ?? VERTICAL_SCHEMAS[entity]?.['BASELINE_VERTICAL'] ?? { fields: [] };
 }
 
 /**

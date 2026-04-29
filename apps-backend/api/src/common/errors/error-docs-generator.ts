@@ -73,7 +73,7 @@ export function generateErrorReference(): string {
     } else if (prefix.startsWith('REPORT')) {
       category = 'Reports';
     } else {
-      category = 'Other';
+      category = 'UNCATEGORIZED_ERROR';
     }
 
     if (!categories[category]) categories[category] = [];

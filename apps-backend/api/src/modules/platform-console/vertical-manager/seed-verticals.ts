@@ -1,7 +1,7 @@
 import { PlatformConsolePrismaService } from '../prisma/platform-console-prisma.service';
 
 const INITIAL_VERTICALS = [
-  { code: 'GENERAL', name: 'General CRM', nameHi: 'सामान्य CRM', status: 'ACTIVE' },
+  { code: 'BASELINE_VERTICAL', name: 'Baseline CRM', nameHi: 'आधार CRM', status: 'ACTIVE' },
   { code: 'SOFTWARE_VENDOR', name: 'Software Vendor', nameHi: 'सॉफ्टवेयर विक्रेता', status: 'ACTIVE' },
   { code: 'PHARMA', name: 'Pharmaceutical', nameHi: 'फार्मा', status: 'BETA' },
   { code: 'TOURISM', name: 'Tourism & Travel', nameHi: 'पर्यटन', status: 'BETA' },

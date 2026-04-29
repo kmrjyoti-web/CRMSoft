@@ -2323,7 +2323,8 @@ enum TestErrorCategory {
   SECURITY
   PERFORMANCE
   CONFIGURATION
-  OTHER
+  OTHER        // @deprecated — use UNCATEGORIZED
+  UNCATEGORIZED
 }
 
 enum TestSeverity {

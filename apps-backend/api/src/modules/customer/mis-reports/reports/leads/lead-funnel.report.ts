@@ -74,7 +74,7 @@ export class LeadFunnelReport implements IReport {
     const wonCount = stageMap.get('WON')!.count;
     const overallConversion = totalLeads > 0 ? Math.round((wonCount / totalLeads) * 10000) / 100 : 0;
 
-    let biggestLeakStage = 'N/A';
+    let biggestLeakStage = totalLeads === 0 ? 'NO_LEADS_IN_PERIOD' : 'ALL_STAGES_PERFORMING';
     let maxDrop = 0;
     const tableRows: any[] = [];
     for (let i = 0; i < stages.length; i++) {

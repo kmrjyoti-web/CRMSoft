@@ -48,7 +48,7 @@ export class IndustryWiseAnalysisReport implements IReport {
     }>();
 
     for (const lead of leads) {
-      const industry = lead.organization?.industry || 'Unknown';
+      const industry = lead.organization?.industry || 'INDUSTRY_NOT_CLASSIFIED';
       if (!industryMap.has(industry)) {
         industryMap.set(industry, { leads: 0, won: 0, lost: 0, revenue: 0 });
       }
@@ -76,8 +76,8 @@ export class IndustryWiseAnalysisReport implements IReport {
     const avgConversion = allConversions.length > 0
       ? Math.round(allConversions.reduce((a, b) => a + b, 0) / allConversions.length * 100) / 100
       : 0;
-    const bestIndustry = industries.length > 0 ? industries[0].industry : 'N/A';
-    const worstIndustry = industries.length > 0 ? industries[industries.length - 1].industry : 'N/A';
+    const bestIndustry = industries.length > 0 ? industries[0].industry : 'NO_LEAD_DATA';
+    const worstIndustry = industries.length > 0 ? industries[industries.length - 1].industry : 'NO_LEAD_DATA';
 
     const summary: ReportMetric[] = [
       { key: 'totalIndustries', label: 'Total Industries', value: totalIndustries, format: 'number' },
@@ -126,7 +126,7 @@ export class IndustryWiseAnalysisReport implements IReport {
       createdAt: { gte: params.dateFrom, lte: params.dateTo },
     };
     if (params.dimension === 'industry') {
-      where.organization = { industry: params.value === 'Unknown' ? null : params.value };
+      where.organization = { industry: params.value === 'INDUSTRY_NOT_CLASSIFIED' ? null : params.value };
     }
     const result = await this.drillDownSvc.getLeads(where, params.page, params.limit);
     return { ...result, dimension: params.dimension, value: params.value };

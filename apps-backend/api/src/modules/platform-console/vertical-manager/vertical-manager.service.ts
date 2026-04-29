@@ -8,7 +8,7 @@ const VERTICAL_AUDIT_SCORES = {
   PARTIAL: 85,
 } as const;
 
-const GENERAL_VERTICAL_METRICS = { modules: 12, handlers: 45, specFiles: 18 } as const;
+const BASELINE_VERTICAL_METRICS = { modules: 12, handlers: 45, specFiles: 18 } as const;
 const STANDARD_VERTICAL_METRICS = { modules: 8, handlers: 30, specFiles: 12 } as const;
 
 @Injectable()
@@ -163,7 +163,7 @@ export class VerticalManagerService {
 
       // Generate metrics based on vertical code
       // Since we cannot scan the filesystem in a service, return placeholder metrics
-      const isEstablished = ['GENERAL', 'SOFTWARE_VENDOR'].includes(code);
+      const isEstablished = ['BASELINE_VERTICAL', 'SOFTWARE_VENDOR'].includes(code);
       const isBeta = existing.status === 'BETA';
 
       let metrics: Record<string, unknown>;
@@ -186,7 +186,7 @@ export class VerticalManagerService {
         score = 0;
         issues.push('Not yet implemented — vertical is in BETA status');
       } else if (isEstablished) {
-        const metrics_ = code === 'GENERAL' ? GENERAL_VERTICAL_METRICS : STANDARD_VERTICAL_METRICS;
+        const metrics_ = code === 'BASELINE_VERTICAL' ? BASELINE_VERTICAL_METRICS : STANDARD_VERTICAL_METRICS;
         const modulesCount = metrics_.modules;
         const handlersTotal = metrics_.handlers;
         const handlersWithTryCatch = handlersTotal - 2;

@@ -36,7 +36,7 @@ export class TestErrorAnalyzerService {
     const suite = (context?.suiteName ?? '').toLowerCase();
     const file = (context?.filePath ?? '').toLowerCase();
 
-    let category: TestErrorCategory = 'OTHER';
+    let category: TestErrorCategory = 'UNCATEGORIZED';
     let severity: TestSeverity = 'MEDIUM';
 
     // DATABASE errors

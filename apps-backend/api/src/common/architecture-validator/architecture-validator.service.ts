@@ -26,7 +26,7 @@ export class ArchitectureValidatorService implements OnModuleInit {
       const { VERTICAL_SCHEMAS } = require('../vertical-registry/vertical-registry');
 
       const requiredEntities = ['CONTACT', 'LEAD', 'PRODUCT'];
-      const requiredBusinessTypes = ['SOFTWARE_VENDOR', 'PHARMA', 'TOURISM', 'RESTAURANT', 'RETAIL', 'GENERAL'];
+      const requiredBusinessTypes = ['SOFTWARE_VENDOR', 'PHARMA', 'TOURISM', 'RESTAURANT', 'RETAIL', 'BASELINE_VERTICAL'];
       const missing: string[] = [];
 
       for (const entity of requiredEntities) {
