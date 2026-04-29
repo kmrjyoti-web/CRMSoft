@@ -138,13 +138,19 @@ export class CentralAuthService {
     // One-time use — delete immediately
     await this.tokenDel(`sso:${ssoToken}`);
 
-    // Reuse switchCompany which validates membership and issues JWT
-    const tokens = await this.authService.switchCompany(data.userId, data.companyId);
+    // Parallel: issue JWT + fetch mapping for company details
+    const [tokens, mapping, user] = await Promise.all([
+      this.authService.switchCompany(data.userId, data.companyId),
+      (this.prisma.identity as any).userCompanyMapping.findFirst({
+        where: { userId: data.userId, companyId: data.companyId, status: 'ACTIVE', isDeleted: false },
+        include: { company: true },
+      }),
+      this.prisma.identity.user.findFirst({
+        where: { id: data.userId },
+        include: { role: true },
+      }),
+    ]);
 
-    const user = await this.prisma.identity.user.findFirst({
-      where: { id: data.userId },
-      include: { role: true },
-    });
     if (!user) throw new UnauthorizedException('User not found');
 
     return {
@@ -160,7 +166,11 @@ export class CentralAuthService {
       },
       company: {
         id: data.companyId,
-        brandCode: data.brandCode,
+        name: mapping?.company?.name ?? '',
+        brandCode: mapping?.company?.brandCode ?? data.brandCode,
+        verticalCode: mapping?.company?.verticalCode ?? null,
+        role: mapping?.role ?? 'MEMBER',
+        isDefault: mapping?.isDefault ?? false,
       },
     };
   }
