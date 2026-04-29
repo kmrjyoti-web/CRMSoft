@@ -2,11 +2,13 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from '../../../../core/prisma/prisma.module';
+import { PrismaClientFactory } from '../../../../common/database/prisma-client-factory.service';
 
 // Services
 import { TenantProvisioningService } from './services/tenant-provisioning.service';
 import { TenantUpgradeService } from './services/tenant-upgrade.service';
 import { WlDbProvisioningService } from './services/wl-db-provisioning.service';
+import { TenantDataMigrationService } from './services/tenant-data-migration.service';
 import { UsageTrackerService } from './services/usage-tracker.service';
 import { LimitCheckerService } from './services/limit-checker.service';
 import { PaymentGatewayService } from './services/payment-gateway.service';
@@ -207,6 +209,8 @@ const QueryHandlers = [
     SystemHealthService,
     TenantUpgradeService,
     WlDbProvisioningService,
+    TenantDataMigrationService,
+    PrismaClientFactory,
     // Infrastructure
     TenantContextService,
     TenantContextInterceptor,

@@ -13,7 +13,55 @@ import { CurrentUser } from '../../../../../common/decorators/current-user.decor
 import { Public } from '../../../../../common/decorators/roles.decorator';
 import { InvoiceGeneratorService } from '../services/invoice-generator.service';
 import { TenantUpgradeService } from '../services/tenant-upgrade.service';
+import { TenantDataMigrationService } from '../services/tenant-data-migration.service';
+import { WlDbProvisioningService } from '../services/wl-db-provisioning.service';
 import { ApiResponse } from '../../../../../common/utils/api-response';
+
+const DB_STRATEGY_ORDER = ['PROVISIONING', 'DEDICATED', 'MIGRATING', 'SEEDING', 'DEDICATED', 'DEDICATED'];
+
+function buildProvisioningSteps(
+  dbStrategy: string,
+  migration: ReturnType<TenantDataMigrationService['getMigrationProgress']>,
+  startedAt: Date | null,
+) {
+  type StepStatus = 'COMPLETE' | 'IN_PROGRESS' | 'PENDING';
+
+  const strats = ['SHARED', 'PROVISIONING', 'DEDICATED', 'MIGRATING', 'SEEDING', 'DEDICATED'];
+  const stratIdx = strats.indexOf(dbStrategy);
+
+  function stepStatus(threshold: number): StepStatus {
+    if (stratIdx > threshold) return 'COMPLETE';
+    if (stratIdx === threshold) return 'IN_PROGRESS';
+    return 'PENDING';
+  }
+
+  const migStatus = migration?.status ?? 'idle';
+
+  return [
+    { step: 'PAYMENT_RECEIVED',    status: 'COMPLETE' as StepStatus, label: 'Payment received' },
+    { step: 'DB_CREATED',          status: stepStatus(1), label: 'Database created' },
+    { step: 'SCHEMA_INITIALIZED',  status: stepStatus(2), label: 'Schema initialized' },
+    {
+      step: 'DATA_MIGRATION',
+      status: (migStatus === 'complete' ? 'COMPLETE' : migStatus === 'running' ? 'IN_PROGRESS' : stepStatus(3)) as StepStatus,
+      label: 'Migrating your data',
+      progress: migration
+        ? {
+            totalTables: migration.tables.length,
+            completedTables: migration.tables.filter((t) => t.status === 'complete').length,
+            currentTable: migration.currentTable,
+            totalRows: migration.totalRows,
+            migratedRows: migration.migratedRows,
+          }
+        : undefined,
+    },
+    {
+      step: 'ACTIVE',
+      status: (dbStrategy === 'DEDICATED' && migStatus === 'complete' ? 'COMPLETE' : 'PENDING') as StepStatus,
+      label: 'Account ready',
+    },
+  ];
+}
 
 @ApiTags('Billing')
 @ApiBearerAuth()
@@ -24,6 +72,8 @@ export class BillingController {
     private readonly queryBus: QueryBus,
     private readonly invoiceGenerator: InvoiceGeneratorService,
     private readonly upgradeService: TenantUpgradeService,
+    private readonly migrationService: TenantDataMigrationService,
+    private readonly wlProvisioning: WlDbProvisioningService,
   ) {}
 
   // ─── Plan listing ──────────────────────────────────────────────────────────
@@ -71,6 +121,35 @@ export class BillingController {
   async getUpgradeStatus(@CurrentUser('tenantId') tenantId: string) {
     const status = await this.upgradeService.getStatus(tenantId);
     return ApiResponse.success(status, 'Status retrieved');
+  }
+
+  // ─── Provisioning progress ────────────────────────────────────────────────
+
+  @Get('provisioning/status')
+  @ApiOperation({ summary: 'Get dedicated DB provisioning + data migration progress' })
+  async getProvisioningStatus(@CurrentUser('tenantId') tenantId: string) {
+    const [provision, migration] = await Promise.all([
+      this.wlProvisioning.getStatus(tenantId),
+      Promise.resolve(this.migrationService.getMigrationProgress(tenantId)),
+    ]);
+
+    const steps = buildProvisioningSteps(provision.status, migration, provision.createdAt);
+    const inProgress = steps.find((s) => s.status === 'IN_PROGRESS');
+    const migProg = migration;
+    const estimatedTimeRemaining = migProg?.status === 'running' && migProg.totalRows > 0
+      ? Math.round(((migProg.totalRows - migProg.migratedRows) / Math.max(migProg.migratedRows, 1)) *
+          ((Date.now() - (migProg.startedAt?.getTime() ?? Date.now())) / 1000))
+      : null;
+
+    return ApiResponse.success({
+      tenantId,
+      dbStrategy: provision.status,
+      steps,
+      currentStep: inProgress?.step ?? null,
+      estimatedTimeRemaining,
+      startedAt: provision.createdAt,
+      canRollback: ['PROVISIONING', 'MIGRATING', 'SEEDING'].includes(provision.status),
+    }, 'Provisioning status retrieved');
   }
 
   // ─── Razorpay webhook ─────────────────────────────────────────────────────

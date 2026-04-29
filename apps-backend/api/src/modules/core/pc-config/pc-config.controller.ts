@@ -9,6 +9,7 @@ import { Type } from 'class-transformer';
 import { PcConfigService } from './pc-config.service';
 import { WlDomainService } from './wl-domain.service';
 import { WlDbProvisioningService } from '../identity/tenant/services/wl-db-provisioning.service';
+import { TenantDataMigrationService } from '../identity/tenant/services/tenant-data-migration.service';
 import { ErrorCenterService } from '../../platform-console/error-center/error-center.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
@@ -228,6 +229,7 @@ export class PcConfigController {
     private readonly wlDomain: WlDomainService,
     private readonly wlDbProv: WlDbProvisioningService,
     private readonly errorCenter: ErrorCenterService,
+    private readonly migrationSvc: TenantDataMigrationService,
   ) {}
 
   // ── READ endpoints (public — unauthenticated users need these for registration) ──
@@ -839,6 +841,24 @@ export class PcConfigController {
   @ApiOperation({ summary: 'Revert to shared DB (clears encrypted connection, sets status → SHARED)' })
   rollbackProvisioning(@Param('tenantId') tenantId: string) {
     return this.wlDbProv.rollback(tenantId);
+  }
+
+  @Post('tenants/:tenantId/provision/migrate-data')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Migrate tenant data from shared DB → dedicated DB (runs 15 table groups)' })
+  migrateData(@Param('tenantId') tenantId: string) {
+    return this.migrationSvc.migrateToDeicatedDb(tenantId);
+  }
+
+  @Post('tenants/:tenantId/provision/cleanup')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Delete tenant data from shared DB (admin-confirmed, 30 days post-migration)' })
+  cleanupSharedData(@Param('tenantId') tenantId: string) {
+    return this.migrationSvc.cleanupSharedDbData(tenantId);
   }
 
   // ── Tenant Error Center (PLATFORM_ADMIN only) ─────────────────────────────────
