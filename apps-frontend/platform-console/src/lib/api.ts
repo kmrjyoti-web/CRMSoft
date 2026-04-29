@@ -288,6 +288,12 @@ export const api = {
     addBuildLog: (pipelineId: string, data: { jobName: string; output: string; exitCode?: number; duration?: number }) =>
       apiFetch(`/platform-console/cicd/pipelines/${pipelineId}/logs`, { method: 'POST', body: JSON.stringify({ ...data, pipelineRunId: pipelineId }) }),
   },
+  publicBrandConfig: {
+    verticals: (domain: string) =>
+      apiFetch(`/public/brand-config/verticals?domain=${encodeURIComponent(domain)}`),
+    visual: (domain: string) =>
+      apiFetch(`/public/brand-config/visual?domain=${encodeURIComponent(domain)}`),
+  },
   brandConfig: {
     list: () => apiFetch('/platform-console/brand-config'),
     get: (id: string) => apiFetch(`/platform-console/brand-config/${id}`),
@@ -532,6 +538,27 @@ export const api = {
     },
     commissionSummary: (partnerCode: string) =>
       apiFetch(`/pc-config/commission/summary/${encodeURIComponent(partnerCode)}`),
+    // ── Sprint 9 Partner Vertical Assignment ──────────────────────────────────
+    partnerVerticals: (partnerCode: string) =>
+      apiFetch(`/pc-config/partners/${encodeURIComponent(partnerCode)}/verticals`),
+    partnerVerticalDetail: (partnerCode: string, verticalCode: string) =>
+      apiFetch(`/pc-config/partners/${encodeURIComponent(partnerCode)}/verticals/${encodeURIComponent(verticalCode)}`),
+    enablePartnerVertical: (partnerCode: string, verticalCode: string, data: Record<string, unknown>) =>
+      apiFetch(`/pc-config/partners/${encodeURIComponent(partnerCode)}/verticals/${encodeURIComponent(verticalCode)}/enable`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    disablePartnerVertical: (partnerCode: string, verticalCode: string) =>
+      apiFetch(`/pc-config/partners/${encodeURIComponent(partnerCode)}/verticals/${encodeURIComponent(verticalCode)}/disable`, {
+        method: 'POST',
+      }),
+    updatePartnerVerticalConfig: (partnerCode: string, verticalCode: string, data: Record<string, unknown>) =>
+      apiFetch(`/pc-config/partners/${encodeURIComponent(partnerCode)}/verticals/${encodeURIComponent(verticalCode)}/config`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    publicPartnerVerticals: (partnerCode: string) =>
+      apiFetch(`/pc-config/public/partner/${encodeURIComponent(partnerCode)}/verticals`),
   },
   menuEditor: {
     list: (verticalCode: string) => apiFetch(`/platform-console/menu-editor/${verticalCode}`),

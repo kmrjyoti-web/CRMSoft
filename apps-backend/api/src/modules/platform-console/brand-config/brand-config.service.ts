@@ -304,6 +304,44 @@ export class BrandConfigService {
     return result;
   }
 
+  // ─── Sprint 9: enabled verticals for a domain (registration industry picker) ─
+
+  async getEnabledVerticalsByDomain(domain: string): Promise<{
+    partnerCode: string | null;
+    enabledVerticals: { code: string; name: string; minPlanCode: string | null }[];
+  }> {
+    const tenant = await this.prisma.identity.tenant.findFirst({
+      where: { OR: [{ domain: domain.toLowerCase() }, { subdomain: domain.toLowerCase() }] },
+      select: { partnerCode: true } as any,
+    }).catch(() => null);
+
+    const partnerCode = (tenant as any)?.partnerCode ?? null;
+    if (!partnerCode) return { partnerCode: null, enabledVerticals: [] };
+
+    const configs = await (this.db as any).pcPartnerVerticalConfig.findMany({
+      where: { partnerCode, isEnabled: true },
+      select: { verticalCode: true, minPlanCode: true },
+    }).catch(() => []) as { verticalCode: string; minPlanCode: string | null }[];
+
+    if (!configs.length) return { partnerCode, enabledVerticals: [] };
+
+    const verticals = await this.prisma.platform.gvCfgVertical.findMany({
+      where: { code: { in: configs.map((c) => c.verticalCode) }, isActive: true },
+      select: { code: true, name: true },
+      orderBy: { sortOrder: 'asc' },
+    });
+
+    const cfgMap = new Map(configs.map((c) => [c.verticalCode, c]));
+    return {
+      partnerCode,
+      enabledVerticals: verticals.map((v) => ({
+        code: v.code,
+        name: v.name,
+        minPlanCode: cfgMap.get(v.code)?.minPlanCode ?? null,
+      })),
+    };
+  }
+
   // ─── Brand Profiles ──────────────────────────────────────────────────────
 
   async listBrands() {

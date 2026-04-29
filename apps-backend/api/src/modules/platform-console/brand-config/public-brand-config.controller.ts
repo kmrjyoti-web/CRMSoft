@@ -83,4 +83,17 @@ export class PublicBrandConfigController {
     }
     return this.service.getVisualBranding(domain.toLowerCase().trim());
   }
+
+  @Get('verticals')
+  @ApiOperation({
+    summary: 'Enabled verticals for a domain — used by registration industry picker',
+    description: 'Returns enabled verticals for the partner that owns this domain. No auth required.',
+  })
+  @ApiQuery({ name: 'domain', required: true, example: 'xtreme.crmsoft.com' })
+  async getEnabledVerticals(@Query('domain') domain: string) {
+    if (!domain) {
+      throw new HttpException('domain query param is required', HttpStatus.BAD_REQUEST);
+    }
+    return this.service.getEnabledVerticalsByDomain(domain.toLowerCase().trim());
+  }
 }

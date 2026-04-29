@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Users, Mail, Shield, Plus, X, Loader2, Check, TrendingUp } from 'lucide-react';
+import { Users, Mail, Shield, Plus, X, Loader2, Check, TrendingUp, Layers } from 'lucide-react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 
@@ -286,12 +286,20 @@ export default function GovernancePartnersPage() {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <Link
-                      href={`/governance/partners/${encodeURIComponent(p.code)}/revenue`}
-                      className="flex items-center gap-1 text-xs text-[#d2a8ff] hover:text-white transition-colors"
-                    >
-                      <TrendingUp className="w-3 h-3" /> View
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      <Link
+                        href={`/governance/partners/${encodeURIComponent(p.code)}/verticals`}
+                        className="flex items-center gap-1 text-xs text-[#58a6ff] hover:text-white transition-colors"
+                      >
+                        <Layers className="w-3 h-3" /> Verticals
+                      </Link>
+                      <Link
+                        href={`/governance/partners/${encodeURIComponent(p.code)}/revenue`}
+                        className="flex items-center gap-1 text-xs text-[#d2a8ff] hover:text-white transition-colors"
+                      >
+                        <TrendingUp className="w-3 h-3" /> Revenue
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

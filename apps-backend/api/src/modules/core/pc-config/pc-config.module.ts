@@ -8,6 +8,7 @@ import { PrismaClientFactory } from '../../../common/database/prisma-client-fact
 import { FeatureGateService } from '../../../common/guards/feature-gate.service';
 import { ErrorCenterService } from '../../platform-console/error-center/error-center.service';
 import { PartnerCommissionService } from './partner-commission.service';
+import { PartnerVerticalService } from './partner-vertical.service';
 import { PlatformConsoleModule } from '../../platform-console/platform-console.module';
 
 @Module({
@@ -16,11 +17,11 @@ import { PlatformConsoleModule } from '../../platform-console/platform-console.m
   providers: [
     PcConfigService, WlDomainService, WlDbProvisioningService,
     TenantDataMigrationService, PrismaClientFactory, FeatureGateService,
-    ErrorCenterService, PartnerCommissionService,
+    ErrorCenterService, PartnerCommissionService, PartnerVerticalService,
   ],
   exports: [
     PcConfigService, WlDomainService, WlDbProvisioningService,
-    PrismaClientFactory, FeatureGateService, PartnerCommissionService,
+    PrismaClientFactory, FeatureGateService, PartnerCommissionService, PartnerVerticalService,
   ],
 })
 export class PcConfigModule {}

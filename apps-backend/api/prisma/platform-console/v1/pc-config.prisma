@@ -230,3 +230,21 @@ model PcBrandVertical {
   @@index([verticalId])
   @@map("pc_brand_vertical")
 }
+
+model PcPartnerVerticalConfig {
+  id             String   @id @default(uuid())
+  partnerCode    String   @map("partner_code")
+  verticalCode   String   @map("vertical_code")
+  isEnabled      Boolean  @default(false) @map("is_enabled")
+  terminology    Json?
+  extraFields    Json?    @map("extra_fields")
+  defaultModules Json?    @map("default_modules")
+  leadStages     Json?    @map("lead_stages")
+  minPlanCode    String?  @map("min_plan_code")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@unique([partnerCode, verticalCode])
+  @@index([partnerCode])
+  @@map("pc_partner_vertical_configs")
+}

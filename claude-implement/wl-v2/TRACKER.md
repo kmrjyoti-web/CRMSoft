@@ -12,7 +12,7 @@
 | 6  | Sprint 7.2 — Central Portal Frontend            | ✅     | 2026-04-29 | 73913ac8 |
 | 7  | Sprint 8.1 — Self-Service Upgrade (Razorpay)    | ✅     | 2026-04-29 | 9f80eccc |
 | 8  | Sprint 8.2 — Auto-Provisioning + Migration      | ✅     | 2026-04-29 | 63657944 |
-| 9  | Sprint 8.3 — Partner Commission                 | ⏳     |      |        |
+| 9  | Sprint 8.3 — Partner Commission                 | ✅     | 2026-04-29 | 84e36502 |
 | 10 | Sprint 9 — Partner Vertical Assignment          | ⏳     |      |        |
 | 11 | Sprint 5.5 — Invite + Approval + BusinessMode   | ✅     | 2026-04-29 | 3c17e36f |
 | 12 | Sprint 10.1 — Magic Link                        | ⏳     |      |        |

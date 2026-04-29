@@ -12,6 +12,7 @@ import { WlDbProvisioningService } from '../identity/tenant/services/wl-db-provi
 import { TenantDataMigrationService } from '../identity/tenant/services/tenant-data-migration.service';
 import { ErrorCenterService } from '../../platform-console/error-center/error-center.service';
 import { PartnerCommissionService, CreateCommissionRuleDto, UpdateCommissionRuleDto } from './partner-commission.service';
+import { PartnerVerticalService, UpdateVerticalConfigDto } from './partner-vertical.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles, Public } from '../../../common/decorators/roles.decorator';
@@ -232,6 +233,7 @@ export class PcConfigController {
     private readonly errorCenter: ErrorCenterService,
     private readonly migrationSvc: TenantDataMigrationService,
     private readonly commissionSvc: PartnerCommissionService,
+    private readonly partnerVerticalSvc: PartnerVerticalService,
   ) {}
 
   // ── READ endpoints (public — unauthenticated users need these for registration) ──
@@ -942,5 +944,70 @@ export class PcConfigController {
   @ApiOperation({ summary: 'Revenue + commission summary for a partner' })
   getCommissionSummary(@Param('partnerCode') partnerCode: string) {
     return this.commissionSvc.getRevenueSummary(partnerCode);
+  }
+
+  // ── Partner Vertical Assignment (Sprint 9) ────────────────────────────────────
+
+  @Get('partners/:partnerCode/verticals')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'All platform verticals with per-partner enable status' })
+  listPartnerVerticals(@Param('partnerCode') partnerCode: string) {
+    return this.partnerVerticalSvc.listPartnerVerticals(partnerCode);
+  }
+
+  @Get('partners/:partnerCode/verticals/:verticalCode')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Get partner+vertical config detail' })
+  getPartnerVerticalConfig(
+    @Param('partnerCode') partnerCode: string,
+    @Param('verticalCode') verticalCode: string,
+  ) {
+    return this.partnerVerticalSvc.getVerticalConfig(partnerCode, verticalCode);
+  }
+
+  @Post('partners/:partnerCode/verticals/:verticalCode/enable')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Enable a vertical for a partner' })
+  enablePartnerVertical(
+    @Param('partnerCode') partnerCode: string,
+    @Param('verticalCode') verticalCode: string,
+    @Body() dto: UpdateVerticalConfigDto,
+  ) {
+    return this.partnerVerticalSvc.enableVertical(partnerCode, verticalCode, dto);
+  }
+
+  @Post('partners/:partnerCode/verticals/:verticalCode/disable')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Disable a vertical for a partner' })
+  disablePartnerVertical(
+    @Param('partnerCode') partnerCode: string,
+    @Param('verticalCode') verticalCode: string,
+  ) {
+    return this.partnerVerticalSvc.disableVertical(partnerCode, verticalCode);
+  }
+
+  @Patch('partners/:partnerCode/verticals/:verticalCode/config')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Update partner-vertical config (terminology, modules, lead stages)' })
+  updatePartnerVerticalConfig(
+    @Param('partnerCode') partnerCode: string,
+    @Param('verticalCode') verticalCode: string,
+    @Body() dto: UpdateVerticalConfigDto,
+  ) {
+    return this.partnerVerticalSvc.updateVerticalConfig(partnerCode, verticalCode, dto);
+  }
+
+  @Public()
+  @Get('public/partner/:partnerCode/verticals')
+  @ApiOperation({ summary: 'Public: enabled verticals for registration industry dropdown' })
+  getPublicPartnerVerticals(@Param('partnerCode') partnerCode: string) {
+    return this.partnerVerticalSvc.getEnabledVerticals(partnerCode);
   }
 }
