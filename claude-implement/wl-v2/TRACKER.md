@@ -7,8 +7,8 @@
 | 1  | Sprint 5.1 — Master Code DB + Backend           | ✅     | 2026-04-29 | 911c0bee |
 | 2  | Sprint 5.2 — Code Builder UI Redesign           | ✅     | 2026-04-29 | 35eaa093 |
 | 3  | Sprint 5.3 — Brand Config API + parent_tenant_id| ✅     | 2026-04-29 | d8f94e6c |
-| 4  | Sprint 6 — Brand Wiring Fixes (6 items)         | ⏳     |      |        |
-| 5  | Sprint 7.1 — Central Portal Backend             | ⏳     |      |        |
+| 4  | Sprint 6 — Brand Wiring Fixes (6 items)         | ✅     | 2026-04-29 | 9669c590 |
+| 5  | Sprint 7.1 — Central Portal Backend             | ✅     | 2026-04-29 | (pending) |
 | 6  | Sprint 7.2 — Central Portal Frontend            | ⏳     |      |        |
 | 7  | Sprint 8.1 — Self-Service Upgrade (Razorpay)    | ⏳     |      |        |
 | 8  | Sprint 8.2 — Auto-Provisioning + Migration      | ⏳     |      |        |

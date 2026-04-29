@@ -5,6 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { CentralAuthService } from './central-auth.service';
+import { CentralAuthController } from './central-auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { PlatformBootstrapService } from './platform-bootstrap.service';
@@ -15,6 +17,7 @@ import { CompanyInviteController, PublicInviteController } from './company-invit
 import { CompanyApprovalService } from './company-approval.service';
 import { CompanyApprovalController } from './company-approval.controller';
 import { TenantModule } from '../../modules/core/identity/tenant/tenant.module';
+import { PlatformConsolePrismaService } from '../../modules/platform-console/prisma/platform-console-prisma.service';
 
 @Module({
   imports: [
@@ -28,8 +31,8 @@ import { TenantModule } from '../../modules/core/identity/tenant/tenant.module';
     }),
     forwardRef(() => TenantModule),
   ],
-  controllers: [AuthController, CompanyInviteController, PublicInviteController, CompanyApprovalController],
-  providers: [AuthService, JwtStrategy, PlatformBootstrapService, TalentIdService, MappingService, CompanyInviteService, CompanyApprovalService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
+  controllers: [AuthController, CentralAuthController, CompanyInviteController, PublicInviteController, CompanyApprovalController],
+  providers: [AuthService, CentralAuthService, JwtStrategy, PlatformBootstrapService, TalentIdService, MappingService, CompanyInviteService, CompanyApprovalService, PlatformConsolePrismaService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
   exports: [AuthService, MappingService, CompanyInviteService, CompanyApprovalService],
 })
 export class AuthModule {}

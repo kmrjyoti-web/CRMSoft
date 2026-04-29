@@ -165,3 +165,23 @@ export class TenantRegisterDto {
   @ApiPropertyOptional({ description: 'Domain the user registered from (used to link WL parent tenant)' })
   @IsOptional() @IsString() registeredOnDomain?: string;
 }
+
+// ─── CENTRAL AUTH (Sprint 7.1) ───
+
+export class CentralLoginDto {
+  @ApiProperty({ example: 'user@company.com' }) @IsEmail() email: string;
+  @ApiProperty({ example: 'Pass@12345' }) @IsString() @MinLength(1) password: string;
+}
+
+export class SelectTenantDto {
+  @ApiProperty({ description: 'Session token from MULTI central-login response' })
+  @IsString() sessionToken: string;
+
+  @ApiProperty({ description: 'Company ID the user selected' })
+  @IsString() companyId: string;
+}
+
+export class SsoVerifyDto {
+  @ApiProperty({ description: 'SSO token from redirectUrl ?sso= param (60s TTL)' })
+  @IsString() ssoToken: string;
+}
