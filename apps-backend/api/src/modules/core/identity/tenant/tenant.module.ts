@@ -5,6 +5,8 @@ import { PrismaModule } from '../../../../core/prisma/prisma.module';
 
 // Services
 import { TenantProvisioningService } from './services/tenant-provisioning.service';
+import { TenantUpgradeService } from './services/tenant-upgrade.service';
+import { WlDbProvisioningService } from './services/wl-db-provisioning.service';
 import { UsageTrackerService } from './services/usage-tracker.service';
 import { LimitCheckerService } from './services/limit-checker.service';
 import { PaymentGatewayService } from './services/payment-gateway.service';
@@ -203,6 +205,8 @@ const QueryHandlers = [
     VendorAuditLogsService,
     VendorPackagesService,
     SystemHealthService,
+    TenantUpgradeService,
+    WlDbProvisioningService,
     // Infrastructure
     TenantContextService,
     TenantContextInterceptor,

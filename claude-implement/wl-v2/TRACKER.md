@@ -9,8 +9,8 @@
 | 3  | Sprint 5.3 — Brand Config API + parent_tenant_id| ✅     | 2026-04-29 | d8f94e6c |
 | 4  | Sprint 6 — Brand Wiring Fixes (6 items)         | ✅     | 2026-04-29 | 9669c590 |
 | 5  | Sprint 7.1 — Central Portal Backend             | ✅     | 2026-04-29 | 5451c38f |
-| 6  | Sprint 7.2 — Central Portal Frontend            | ✅     | 2026-04-29 | (pending) |
-| 7  | Sprint 8.1 — Self-Service Upgrade (Razorpay)    | ⏳     |      |        |
+| 6  | Sprint 7.2 — Central Portal Frontend            | ✅     | 2026-04-29 | 73913ac8 |
+| 7  | Sprint 8.1 — Self-Service Upgrade (Razorpay)    | ✅     | 2026-04-29 |        |
 | 8  | Sprint 8.2 — Auto-Provisioning + Migration      | ⏳     |      |        |
 | 9  | Sprint 8.3 — Partner Commission                 | ⏳     |      |        |
 | 10 | Sprint 9 — Partner Vertical Assignment          | ⏳     |      |        |

@@ -17,6 +17,8 @@ const ENV_CHECKS: EnvCheck[] = [
   { key: 'JWT_SECRET', required: true, description: 'JWT signing secret (access tokens)' },
   { key: 'JWT_REFRESH_SECRET', required: true, description: 'JWT refresh token signing secret' },
   { key: 'REDIS_URL', required: false, description: 'Redis connection URL (BullMQ, caching)' },
+  { key: 'RAZORPAY_KEY_ID', required: false, description: 'Razorpay Key ID (plan upgrade payments)' },
+  { key: 'RAZORPAY_KEY_SECRET', required: false, description: 'Razorpay Key Secret (HMAC webhook verification)' },
   { key: 'R2_ACCOUNT_ID', required: false, description: 'Cloudflare R2 account ID (file storage)' },
   { key: 'R2_ACCESS_KEY', required: false, description: 'Cloudflare R2 access key' },
   { key: 'R2_SECRET_KEY', required: false, description: 'Cloudflare R2 secret key' },
