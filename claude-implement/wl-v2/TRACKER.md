@@ -15,5 +15,5 @@
 | 9  | Sprint 8.3 — Partner Commission                 | ✅     | 2026-04-29 | 84e36502 |
 | 10 | Sprint 9 — Partner Vertical Assignment          | ✅     | 2026-04-29 | 3f3d7698 |
 | 11 | Sprint 5.5 — Invite + Approval + BusinessMode   | ✅     | 2026-04-29 | 3c17e36f |
-| 12 | Sprint 10.1 — Magic Link                        | ✅     | 2026-04-29 | pending |
+| 12 | Sprint 10.1 — Magic Link                        | ✅     | 2026-04-29 | 7b6dc892 |
 | 13 | Sprint 10.2 — Cross-Brand SSO                   | ⏳     |      |        |
