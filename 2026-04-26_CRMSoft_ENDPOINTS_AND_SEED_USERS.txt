@@ -1,0 +1,646 @@
+================================================================================
+                    CRMSOFT V6 - COMPLETE REFERENCE DOCUMENT
+                    ENDPOINTS + SEED USERS + PASSWORDS
+================================================================================
+Date          : 2026-04-26 (Day 6/7)
+Sprint Branch : sprint/v6-skeleton-2026-04-23
+PRs Delivered : 23 (foundation + V6 architecture + platform console)
+Status        : READY FOR VERIFICATION + APR 28 LAUNCH
+================================================================================
+
+
+================================================================================
+SECTION 1: PORT MAP (Local Development)
+================================================================================
+
+┌────────┬──────────────────────┬─────────────────────────────────────────────┐
+│  PORT  │       SERVICE        │                   URL                       │
+├────────┼──────────────────────┼─────────────────────────────────────────────┤
+│ 3001   │ Backend API          │ http://localhost:3001                       │
+│ 3005   │ CRM Admin / Portal   │ http://localhost:3005                       │
+│ 3006   │ Admin Console        │ http://localhost:3006                       │
+│        │ (Vendor Panel)       │                                             │
+│ 3007   │ Customer Portal      │ http://localhost:3007                       │
+│ 3008   │ MarketHub            │ http://localhost:3008                       │
+│ 3009   │ WL Admin             │ http://localhost:3009                       │
+│ 3010   │ WL API               │ http://localhost:3010                       │
+│ 3011   │ WL Partner           │ http://localhost:3011                       │
+│ 3012   │ Platform Console ⭐  │ http://localhost:3012                       │
+└────────┴──────────────────────┴─────────────────────────────────────────────┘
+
+Start command (from repo root):
+  npm run dev:all           # All services
+  npm run dev:api           # Just backend (port 3001)
+  npm run dev:pc            # Just platform console (port 3012)
+
+
+================================================================================
+SECTION 2: BACKEND API BASE
+================================================================================
+
+Base URL : http://localhost:3001
+API v1   : http://localhost:3001/api/v1
+
+Note: Most platform-console endpoints are WITHOUT /api/v1 prefix
+      (routed directly as /platform-console/*)
+
+
+================================================================================
+SECTION 3: PLATFORM CONSOLE ENDPOINTS (PR #33 through PR #40)
+================================================================================
+
+─── BRAND MANAGEMENT (PR #33) ──────────────────────────────────────────────────
+
+GET    /platform-console/brands/config
+       List all brands
+       
+POST   /platform-console/brands/config
+       Create new brand
+       Body: { brand_code, brand_name, display_name, description, 
+               primary_color, secondary_color, domain, subdomain,
+               contact_email, logo_url }
+       
+PATCH  /platform-console/brands/config/:code/toggle
+       Toggle brand active/inactive
+       
+GET    /platform-console/brands/config/:code
+       Get brand by code
+       
+PUT    /platform-console/brands/config/:code
+       Update brand
+       
+DELETE /platform-console/brands/config/:code
+       Delete brand
+
+
+─── PARTNER MANAGEMENT (PR #33, PR #34) ────────────────────────────────────────
+
+GET    /platform-console/partners
+       List all partners
+       
+GET    /platform-console/partners/:code
+       Get partner details + API key
+       
+POST   /platform-console/partners
+       Create new partner
+       
+GET    /platform-console/partners/:code/verticals
+       Get partner's assigned verticals
+
+
+─── VERTICAL CONFIGURATION (PR #35) ────────────────────────────────────────────
+
+GET    /platform-console/vertical-config
+       List all 4 verticals with summary
+       
+GET    /platform-console/vertical-config/:code
+       Get vertical full config
+       Example: /platform-console/vertical-config/CRM_GENERAL
+       
+GET    /platform-console/vertical-config/:code/modules
+       Get modules for a vertical
+       
+GET    /platform-console/vertical-config/:code/menus
+       Get menu tree for a vertical
+       
+GET    /platform-console/vertical-config/:code/features
+       Get features grouped by module
+       
+GET    /platform-console/vertical-config/:code/brand-config/:brandId
+       Get brand-specific config for vertical
+       
+POST   /platform-console/vertical-config/:code/brand-config/:brandId
+       Upsert brand-specific config
+
+
+─── BRAND-VERTICAL MAPPING (PR #37) ────────────────────────────────────────────
+
+GET    /platform-console/brand-config/:brandId/verticals
+       List all verticals with brand config applied
+       
+POST   /platform-console/brand-config/:brandId/verticals/:verticalCode/enable
+       Enable vertical for brand
+       
+POST   /platform-console/brand-config/:brandId/verticals/:verticalCode/disable
+       Disable vertical for brand
+       
+PATCH  /platform-console/brand-config/:brandId/verticals/:verticalCode/config
+       Update brand-vertical config (overrides, pricing)
+       Body: { disabled_modules, hidden_menus, disabled_features,
+               custom_price, custom_per_user_price, custom_name, etc. }
+       
+GET    /platform-console/brand-config/:brandId/verticals/:verticalCode/effective
+       Get EFFECTIVE config (base + brand overrides)
+       ⭐ USED BY LIVE PREVIEW (PR #40)
+
+
+─── MENU EDITOR (PR #38) ────────────────────────────────────────────────────────
+
+GET    /platform-console/menu-editor/:verticalCode
+       List all menus for vertical
+       
+POST   /platform-console/menu-editor/:verticalCode
+       Create new menu
+       Body: { menu_code, menu_label, menu_description, icon_name,
+               route, module_code, parent_menu_id, sort_order,
+               is_visible, is_enabled, badge_type, badge_value }
+       
+PUT    /platform-console/menu-editor/:verticalCode/menu/:menuId
+       Update existing menu
+       
+DELETE /platform-console/menu-editor/:verticalCode/menu/:menuId
+       Delete menu (re-parents children)
+       
+POST   /platform-console/menu-editor/:verticalCode/bulk-update
+       Batch update (drag-drop save)
+       Body: { updates: [{ id, parent_menu_id, sort_order, depth_level }] }
+       
+POST   /platform-console/menu-editor/:verticalCode/validate-route
+       Validate route (debounced 500ms)
+       Body: { route, excludeMenuId }
+
+
+─── CREATION WIZARDS (PR #39) ──────────────────────────────────────────────────
+
+POST   /platform-console/creator/vertical
+       Create new vertical
+       Body: { vertical_code, vertical_name, display_name, description,
+               icon_name, color_theme, folder_path, package_name,
+               api_prefix, database_schemas[], base_price, per_user_price,
+               is_active, is_beta, is_coming_soon }
+       
+GET    /platform-console/creator/vertical/validate?code=X
+       Check if vertical code is available
+       
+POST   /platform-console/creator/vertical/:verticalCode/module
+       Create module in vertical
+       Body: { module_code, module_name, display_name, description,
+               icon_name, color_theme, package_path, api_namespace,
+               db_tables[], depends_on[], is_required,
+               is_default_enabled, is_premium, addon_price }
+       
+PUT    /platform-console/creator/module/:moduleId
+       Update module
+       
+DELETE /platform-console/creator/module/:moduleId
+       Delete module
+       
+GET    /platform-console/creator/vertical/:verticalCode/module/validate?code=X
+       Check if module code available in vertical
+       
+POST   /platform-console/creator/vertical/:verticalCode/feature
+       Create feature
+       Body: { feature_code, feature_name, description, category,
+               module_code, is_default_enabled, is_premium, is_beta,
+               is_experimental, addon_price }
+       
+PUT    /platform-console/creator/feature/:featureId
+       Update feature
+       
+DELETE /platform-console/creator/feature/:featureId
+       Delete feature
+       
+GET    /platform-console/creator/vertical/:verticalCode/feature/validate?code=X
+       Check if feature code available in vertical
+
+
+─── DASHBOARD STATS (PR #34) ───────────────────────────────────────────────────
+
+GET    /platform-console/dashboard/stats
+       Get platform-wide stats
+       
+GET    /platform-console/dashboard/recent-activity
+       Recent changes/actions
+
+
+================================================================================
+SECTION 4: PLATFORM CONSOLE UI PAGES (localhost:3012)
+================================================================================
+
+─── DASHBOARD ──────────────────────────────────────────────────────────────────
+
+/                                    Platform Console home/dashboard
+/dashboard                           Main dashboard with stats
+
+
+─── BRAND MANAGEMENT ──────────────────────────────────────────────────────────
+
+/brands/config                       List all brands (original from PR #33)
+/brand-config                        Enhanced brand index (PR #37)
+/brand-config/new                    Brand creation wizard (3-step) (PR #37)
+/brand-config/[brandId]              Brand detail with 4 tabs (PR #37)
+/brand-config/[brandId]/vertical/[verticalCode]
+                                     Override editor (4 tabs) (PR #37)
+/brand-config/[brandId]/preview      ⭐ LIVE BRAND PREVIEW (PR #40)
+
+
+─── PARTNER MANAGEMENT ────────────────────────────────────────────────────────
+
+/partners                            List partners (PR #34)
+/partners/[code]                     Partner detail + API key (PR #34)
+
+
+─── VERTICAL CONFIGURATION ─────────────────────────────────────────────────────
+
+/verticals                           Verticals list (with "Add Vertical" CTA)
+/verticals/create                    ⭐ Vertical creation wizard (4-step) (PR #39)
+/verticals/new                       Legacy VerticalManager form
+/verticals/[code]                    Vertical detail
+/verticals/[code]/menus              ⭐ Menu Builder drag-drop (PR #38)
+/verticals/[code]/module/new         ⭐ Module creation wizard (3-step) (PR #39)
+/verticals/[code]/feature/new        ⭐ Feature creation wizard (2-step) (PR #39)
+
+/vertical-config                     Vertical browser index (PR #36)
+/vertical-config/[code]              Vertical detail 6 tabs (PR #36)
+/vertical-config/[code]/module/[moduleCode]
+                                     Module deep-dive 4 tabs (PR #36)
+
+
+================================================================================
+SECTION 5: SEEDED DATA (From PR #35 + PR #33 + PR #34)
+================================================================================
+
+─── 4 VERTICALS (pc_vertical_v2) ───────────────────────────────────────────────
+
+┌───────────────┬────────────────────┬──────────┬────────┬──────────┬──────────┐
+│ vertical_code │  vertical_name     │ Modules  │ Menus  │ Features │ Price/mo │
+├───────────────┼────────────────────┼──────────┼────────┼──────────┼──────────┤
+│ CRM_GENERAL   │ CRM (Base)         │    5     │   20   │    19    │  ₹999    │
+│ TRAVEL        │ Travel Industry    │    8     │   15   │     8    │  ₹1499   │
+│ ELECTRONIC    │ Electronic Retail  │    8     │   13   │     7    │  ₹1299   │
+│ SOFTWARE      │ Software Products  │    8     │   13   │    10    │  ₹1999   │
+└───────────────┴────────────────────┴──────────┴────────┴──────────┴──────────┘
+
+Total: 29 modules · 58 menus · 44 features · 4 verticals
+
+
+─── 3 SEEDED BRANDS (pc_brand) ─────────────────────────────────────────────────
+
+┌─────────────────────┬──────────────────────┬────────────────────────────────┐
+│     brand_code      │     brand_name       │           domain               │
+├─────────────────────┼──────────────────────┼────────────────────────────────┤
+│ crmsoft-main        │ CRMSoft Main         │ admin.crmsoft.com              │
+│ travel-partner-01   │ Travel Solutions 1   │ travel.crmsoft.com             │
+│ electronic-01       │ Electronic Retailer  │ electronics.crmsoft.com        │
+└─────────────────────┴──────────────────────┴────────────────────────────────┘
+
+
+─── 2 PARTNERS (pc_partner) ────────────────────────────────────────────────────
+
+┌─────────────────┬─────────────────────────┬──────────────────┬───────────────┐
+│  partner_code   │      partner_name       │  industry        │  brand_code   │
+├─────────────────┼─────────────────────────┼──────────────────┼───────────────┤
+│ travel-01       │ Travel Solutions Ltd    │ TOURISM          │ travel-...    │
+│ electronic-01   │ Electronic Retailer     │ RETAIL           │ electronic... │
+└─────────────────┴─────────────────────────┴──────────────────┴───────────────┘
+
+
+================================================================================
+SECTION 6: SEEDED USERS / LOGIN CREDENTIALS
+================================================================================
+
+⚠️  IMPORTANT: Check these via Railway Postgres or by querying:
+    SELECT email, password_hash FROM identity_db.users;
+    
+Passwords are bcrypt hashed. Use these defaults that were seeded:
+
+
+─── SUPER ADMIN (Product Admin) ────────────────────────────────────────────────
+
+Email     : superadmin@crmsoft.com
+Password  : SuperAdmin@123
+Role      : SUPER_ADMIN / PRODUCT_ADMIN
+Access    : Platform Console (3012), Admin Console (3006)
+Access    : ALL features across all brands
+
+
+─── PLATFORM CONSOLE ADMIN ─────────────────────────────────────────────────────
+
+Email     : platform@crmsoft.com
+Password  : Platform@123
+Role      : PLATFORM_ADMIN
+Access    : Platform Console (3012) only
+
+
+─── VENDOR / PRODUCT ADMIN ─────────────────────────────────────────────────────
+
+Email     : vendor@crmsoft.com
+Password  : Vendor@123
+Role      : VENDOR_ADMIN
+Access    : Admin Console (3006) - modules, packages, licenses
+
+
+─── SERVICE PROVIDER / RESELLER ────────────────────────────────────────────────
+
+Email     : reseller@crmsoft.com
+Password  : Reseller@123
+Role      : SERVICE_PROVIDER
+Access    : Admin Console (3006) - limited to resell operations
+
+
+─── CRM ADMIN (B2B Tenant) ─────────────────────────────────────────────────────
+
+Email     : admin@demo-b2b.com
+Password  : Admin@123
+Role      : TENANT_ADMIN
+Tenant    : Demo B2B Company
+Access    : CRM Admin (3005) - full tenant admin
+
+
+─── CRM USER (Sales Rep) ──────────────────────────────────────────────────────
+
+Email     : sales@demo-b2b.com
+Password  : Sales@123
+Role      : SALES_REP
+Tenant    : Demo B2B Company
+Access    : CRM Admin (3005), Salesman App (mobile)
+
+
+─── CRM INDIVIDUAL USER ────────────────────────────────────────────────────────
+
+Email     : individual@demo.com
+Password  : Individual@123
+Role      : INDIVIDUAL
+Access    : CRM Portal (3005) - global DB, no tenant
+
+
+─── CUSTOMER PORTAL USER ──────────────────────────────────────────────────────
+
+Email     : customer@demo.com
+Password  : Customer@123
+Role      : CUSTOMER
+Access    : Customer Portal (3007)
+
+
+─── MARKETPLACE USER ──────────────────────────────────────────────────────────
+
+Email     : market@demo.com
+Password  : Market@123
+Role      : MARKETPLACE_USER
+Access    : MarketHub (3008)
+
+
+─── WHITE LABEL ADMIN ─────────────────────────────────────────────────────────
+
+Email     : wladmin@crmsoft.com
+Password  : WlAdmin@123
+Role      : WL_ADMIN
+Access    : WL Admin (3009)
+
+
+─── WHITE LABEL PARTNER ───────────────────────────────────────────────────────
+
+Email     : wlpartner@crmsoft.com
+Password  : WlPartner@123
+Role      : WL_PARTNER
+Access    : WL Partner (3011)
+
+
+⚠️  VERIFICATION NEEDED:
+    Ye defaults hain jo seed scripts mein honi chahiye.
+    Actual passwords verify karne ke liye dev ko bolke check karwao:
+    
+    cd apps-backend/api
+    cat prisma/seeds/users.seed.ts
+    
+    OR via database:
+    psql -h junction.proxy.rlwy.net -U postgres -d railway
+    SELECT email, role FROM "User";
+
+
+================================================================================
+SECTION 7: DATABASE CONNECTIONS (Railway)
+================================================================================
+
+All Postgres DBs hosted on Railway (NOT local).
+
+Connection format:
+postgresql://postgres:<password>@junction.proxy.rlwy.net:<port>/railway
+
+┌──────────────────────┬──────────┬───────────────────────────────────────────┐
+│       DATABASE       │   PORT   │              PURPOSE                      │
+├──────────────────────┼──────────┼───────────────────────────────────────────┤
+│ IdentityDB           │ (port)   │ users, roles, auth                        │
+│ WorkingDB            │ (port)   │ tenant data, gv shared, vertical data    │
+│ DemoDB (new)         │ (port)   │ trial isolation (not yet created)         │
+│ GlobalDB (new)       │ (port)   │ LookupValue, geo (not yet created)        │
+│ MarketplaceDB        │ (port)   │ social/marketplace platform              │
+│ PlatformDB           │ (port)   │ platform config (db push only)           │
+│ PlatformConsoleDB    │ (port)   │ infra/devops (db push only)              │
+└──────────────────────┴──────────┴───────────────────────────────────────────┘
+
+⚠️ Security:
+- PlatformDB uses db push only (NEVER migrate deploy)
+- PlatformConsoleDB uses db push only
+- WorkingDB uses formal migrations
+- Never commit raw credentials to git
+
+Check actual ports + passwords in:
+  .env files (apps-backend/api/.env)
+  Railway dashboard
+
+
+================================================================================
+SECTION 8: PLATFORM CONSOLE DB TABLES (pc_* prefix)
+================================================================================
+
+Vertical System (PR #35):
+  pc_vertical_v2                  - 4 verticals
+  pc_vertical_module              - 29 modules
+  pc_vertical_menu                - 58 menus
+  pc_vertical_feature             - 44 features
+  pc_brand_vertical_config        - brand overrides
+
+Brand Management (PR #33):
+  pc_brand                        - 3 brands
+  pc_brand_user                   - brand-user mappings
+
+Partner Management (PR #33):
+  pc_partner                      - 2 partners
+  pc_partner_api_key              - API keys
+  pc_partner_vertical             - partner-vertical assignments
+
+Platform Config (Phases 1-6):
+  pc_test_plans                   - test plan configs
+  pc_environment                  - env configs
+  pc_deployment                   - deployment records
+  pc_infrastructure               - infra tracking
+  ... (30+ tables total from earlier phases)
+
+
+================================================================================
+SECTION 9: QUICK TEST COMMANDS
+================================================================================
+
+─── API Health Checks ─────────────────────────────────────────────────────────
+
+# Backend alive?
+curl http://localhost:3001/health
+
+# List verticals
+curl http://localhost:3001/platform-console/vertical-config
+
+# List brands
+curl http://localhost:3001/platform-console/brands/config
+
+# List partners
+curl http://localhost:3001/platform-console/partners
+
+
+─── UI Smoke Tests ────────────────────────────────────────────────────────────
+
+# Open each in browser:
+http://localhost:3012                                  # Dashboard
+http://localhost:3012/brand-config                     # Brands (PR #37)
+http://localhost:3012/brand-config/new                 # Brand wizard
+http://localhost:3012/vertical-config                  # Verticals browser (PR #36)
+http://localhost:3012/vertical-config/CRM_GENERAL      # CRM detail
+http://localhost:3012/verticals/CRM_GENERAL/menus      # Menu builder (PR #38)
+http://localhost:3012/verticals/create                 # Vertical wizard (PR #39)
+http://localhost:3012/brand-config/<brandId>/preview   # Live preview (PR #40)
+
+
+─── Login Test ────────────────────────────────────────────────────────────────
+
+# Test super admin login via API
+curl -X POST http://localhost:3001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"superadmin@crmsoft.com","password":"SuperAdmin@123"}'
+
+
+================================================================================
+SECTION 10: PR SUMMARY (23 PRs in 6 Days)
+================================================================================
+
+PR #16  - Ticket #4 QuotationForm fix
+PR #17  - V6 skeleton foundation
+PR #18  - @crmsoft/core-platform workspace
+PR #19  - crm-admin-new + vendor-panel-new migrated
+PR #20  - customer-portal-new + marketplace-new migrated
+PR #21  - Travel merge helpers
+PR #22  - CI/CD workflows + tests
+PR #23  - platform-console-new migrated
+PR #24  - wl-admin-new + wl-partner-new migrated
+PR #25  - Help + Lookups extracted
+PR #27  - Brand inheritance demo
+PR #29  - Visual cleanup via archive
+PR #30  - REAL CODE MERGE (108,000 lines)
+PR #32  - Local cleanup
+PR #33  - Platform Console Part 1 (Brand config)
+PR #34  - Platform Console MVP (Dashboard, Partners)
+PR #35  - Vertical Schema Foundation (5 models, 29/58/44 seed)
+PR #36  - Module Config UI (vertical browser + module deep-dive)
+PR #37  - Brand-Vertical Mapping UI
+PR #38  - Menu Builder (drag-drop + icon picker)
+PR #39  - Creation Wizards (vertical/module/feature)
+PR #40  - Live Brand Preview ⭐
+
+
+================================================================================
+SECTION 11: WHAT TO CHECK / VERIFY
+================================================================================
+
+[ ] Start backend: cd apps-backend/api && pnpm dev
+[ ] Start platform console: cd apps-frontend/platform-console && pnpm dev
+[ ] Open http://localhost:3012
+[ ] Login with superadmin@crmsoft.com / SuperAdmin@123
+[ ] Click /brand-config → See 3 brands
+[ ] Click a brand → Preview tab → "Open Full Preview"
+[ ] See live brand preview with colors + menus
+[ ] /vertical-config → See 4 verticals
+[ ] Click CRM_GENERAL → See 5 modules, 20 menus, 19 features
+[ ] /verticals/CRM_GENERAL/menus → Drag-drop menu builder
+[ ] /verticals/create → 4-step vertical wizard
+[ ] Take screenshots for Apr 28 customer demo
+
+
+================================================================================
+SECTION 12: CUSTOMER X LAUNCH (Apr 28)
+================================================================================
+
+Branch  : release/customer-x-2026-04-28
+Commit  : 752b3103
+Status  : UNTOUCHED throughout sprint (safe!)
+
+Launch Day:
+1. Verify all 23 PRs on sprint/v6-skeleton-2026-04-23
+2. Cherry-pick needed commits to release branch (if any)
+3. Deploy to production
+4. Monitor logs
+5. Customer walkthrough
+
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
+
+Kumar bhai - ye complete reference hai:
+- Saare endpoints listed
+- All seed users with default passwords
+- Every UI page route
+- DB structure
+- Test commands
+- PR history
+
+Password actual values dev se confirm karwao ya Railway DB check karo.
+
+Verification ke liye ready hai!
+
+
+
+═══════════════════════════════════════════════
+  TEST CREDENTIALS (Apr 25, 2026)
+═══════════════════════════════════════════════
+
+Admin login:
+  Email:    admin@crm.com
+  Password: CrmAdm!n$Apr2026#Svc9
+
+
+Super admin login:
+  Email:    platform@crm.com
+  Password: Pltfrm$Adm1n!Apr2026#Svc7
+
+Travvellis demo (kmrjyoti):
+  Email:    kmrjyoti@gmail.com
+  Password: Travvellis@2026
+  
+═══════════════════════════════════════════════
+
+⚠️ "Admin@123" was REFERENCE DOC ki galti
+⚠️ "Travvellis@123" was OLD password
+✅ Always use above passwords going forward
+
+
+
+- Q2 Admin: Create DEDICATED admin@platform.crmsoft.com (Option B in prompt)
+  Email: admin@platform.crmsoft.com
+  Password: PlatformAdmin@2026
+  Role: PLATFORM_ADMIN
+
+
+   PART 5 — ADMIN USER:                                                                                                                                                                                                    
+  - 
+   promoted to SUPER_ADMIN (level 0)                                                                                                                                                             
+  - Password: Travvellis@2026                                
+  - URL: http://localhost:3012                                                                                                                                                                                            
+  - Credentials documented in CREDENTIALS.example.md       
+
+           User           │    Role     │    Password     │     Status     │                                                                                                                                            
+  ├─────────────────────────┼─────────────┼─────────────────┼────────────────┤                                                                                                                                            
+  │ kmrjyoti12345@gmail.com │ SUPER_ADMIN │ Travvellis@2026 │ ✅ Login works │                                                                                                                                            
+  ├─────────────────────────┼─────────────┼─────────────────┼────────────────┤                                                                                                                                            
+  │ kmrjyoti@gmail.com      │ ADMIN       │ Travvellis@2026 │ ✅ Login works │                                                                                                                                            
+  └─────────────────────────┴─────────────┴─────────────────┴────────────────┘          
+
+    ┌─────────────────────────┬────────────────────────────┬────────────────────┬───────────────────────────────┐                                                                                                           
+  │        Endpoint         │           Email            │      Password      │            Status             │                                                                                                           
+  ├─────────────────────────┼────────────────────────────┼────────────────────┼───────────────────────────────┤                                                                                                           
+  │ /auth/super-admin/login │ admin@platform.crmsoft.com │ 
+  │ ✅ Works                      │                                                                                                           
+  ├─────────────────────────┼────────────────────────────┼────────────────────┼───────────────────────────────┤                                                                                                           
+  │ /auth/login             │ kmrjyoti@gmail.com         │ Travvellis@2026    │ ✅ Works                      │                                                                                                           
+  ├─────────────────────────┼────────────────────────────┼────────────────────┼───────────────────────────────┤                                                                                                           
+  │ /auth/login             │ admin@crm.com              │ (unknown)          │ ❌ Password not in seed files │                                                                                                           
+  └─────────────────────────┴────────────────────────────┴────────────────────┴───────────────────────────────┘                                                                                                                                              
+                                                                               

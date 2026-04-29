@@ -59,6 +59,7 @@ export class AccountDashboardService {
       });
 
       monthlyData.push({
+        
         month: label,
         revenue: Math.round(sales.reduce((s, i) => s + Number(i.totalAmount), 0)),
         expenses: Math.round(purchases.reduce((s, i) => s + Number(i.grandTotal), 0)),
