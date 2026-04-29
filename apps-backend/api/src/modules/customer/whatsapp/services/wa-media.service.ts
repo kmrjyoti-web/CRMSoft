@@ -27,7 +27,7 @@ export class WaMediaService {
   }
 
   getMediaUrl(savedPath: string): string {
-    const baseUrl = process.env.API_URL || 'http://localhost:3000';
+    const baseUrl = process.env.API_URL || '';
     const relativePath = savedPath.replace('./uploads/', '');
     return `${baseUrl}/uploads/${relativePath}`;
   }

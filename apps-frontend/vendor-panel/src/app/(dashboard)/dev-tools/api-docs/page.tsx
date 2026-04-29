@@ -18,6 +18,8 @@ const ENDPOINT_GROUPS = [
   { group: 'DB Admin', path: '/admin/db' },
 ];
 
+const API_DOCS_URL = `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || ''}/api/docs`;
+
 export default function ApiDocsPage() {
   return (
     <div className="space-y-6 max-w-5xl">
@@ -28,7 +30,7 @@ export default function ApiDocsPage() {
             Interactive API reference powered by Swagger
           </p>
         </div>
-        <a href="http://localhost:3000/api/docs" target="_blank" rel="noopener noreferrer">
+        <a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer">
           <Button>
             Open Swagger UI
             <ExternalLink className="h-4 w-4 ml-1" />
@@ -40,7 +42,7 @@ export default function ApiDocsPage() {
       <Card>
         <CardContent className="p-0">
           <iframe
-            src="http://localhost:3000/api/docs"
+            src={API_DOCS_URL}
             title="Swagger UI"
             className="w-full border-0 rounded-lg"
             style={{ height: '600px' }}
@@ -54,7 +56,7 @@ export default function ApiDocsPage() {
           <div
             className="hidden items-center justify-center h-[200px] text-sm text-muted-foreground"
           >
-            Unable to load Swagger UI. Make sure the API server is running at localhost:3000.
+            Unable to load Swagger UI. Make sure the API server is running and NEXT_PUBLIC_API_URL is set.
           </div>
         </CardContent>
       </Card>

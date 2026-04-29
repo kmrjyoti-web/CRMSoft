@@ -16,7 +16,7 @@ export default function PartnerLoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await axios.post('http://localhost:3010/api/v1/wl/auth/partner/login', { email, password });
+      const { data } = await axios.post(`${process.env.NEXT_PUBLIC_WL_API_URL || '/api/v1/wl'}/auth/partner/login`, { email, password });
       setAuth(data.accessToken, data.partnerId, data.partnerCode, email);
       router.push('/dashboard');
     } catch {

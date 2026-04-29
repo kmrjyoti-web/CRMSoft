@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, AlertCircle } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '/api/v1';
 
 const BRAND_DISPLAY: Record<string, { name: string; accentColor: string }> = {
   travvellis: { name: 'Travvellis', accentColor: '#d4b878' },

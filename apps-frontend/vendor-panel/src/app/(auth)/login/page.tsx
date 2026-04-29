@@ -66,7 +66,7 @@ export default function LoginPage() {
               <p className="text-sm text-red-800">{errorMessage}</p>
               {showAdminLink && (
                 <a
-                  href="http://localhost:3005/login"
+                  href="/login"
                   className="text-sm text-red-600 underline mt-1 inline-block"
                 >
                   Go to CRM Admin Portal &rarr;
@@ -109,7 +109,7 @@ export default function LoginPage() {
         {/* Admin redirect */}
         <p className="text-center text-xs text-gray-400 mt-4">
           Are you an admin?{' '}
-          <a href="http://localhost:3005/login" className="text-primary hover:underline">
+          <a href="/login" className="text-primary hover:underline">
             Login to CRM Admin Portal
           </a>
         </p>

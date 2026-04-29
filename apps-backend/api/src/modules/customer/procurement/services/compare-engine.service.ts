@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 
+const QUALITY_SCORE_DEFAULT = 75;
+
 export interface CompareWeights {
   priceWeight: number;
   deliveryWeight: number;
@@ -61,7 +63,7 @@ export class CompareEngineService {
         : 100 - ((m.deliveryDays - minDelivery) / (maxDelivery - minDelivery)) * 100;
       const creditScore = maxCredit === minCredit ? 100
         : ((m.creditDays - minCredit) / (maxCredit - minCredit)) * 100;
-      const qualityScore = 75;
+      const qualityScore = QUALITY_SCORE_DEFAULT;
 
       const totalScore = (
         priceScore * (w.priceWeight / 100) +

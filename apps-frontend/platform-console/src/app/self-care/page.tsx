@@ -6,7 +6,7 @@ import { LogOut, User, Building2, ChevronRight, Settings } from 'lucide-react';
 import { BrandLogo } from '@/components/brand/BrandLogo';
 import { useBrand } from '@/contexts/BrandContext';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '/api/v1';
 
 interface UserProfile {
   id: string;

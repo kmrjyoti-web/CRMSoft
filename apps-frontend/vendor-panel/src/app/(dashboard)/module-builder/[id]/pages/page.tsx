@@ -131,7 +131,7 @@ export default function ModuleMenuBuilderPage({ params }: { params: { id: string
   };
 
   const previewUrl = selectedPage
-    ? (selectedPage.portal === 'crm' ? 'http://localhost:3005' : 'http://localhost:3006') +
+    ? (selectedPage.portal === 'crm' ? (process.env.NEXT_PUBLIC_CRM_URL || '') : (process.env.NEXT_PUBLIC_VENDOR_URL || '')) +
       routeDisplay(selectedPage).replace(/:(\w+)/g, 'demo')
     : '';
 
@@ -291,7 +291,7 @@ export default function ModuleMenuBuilderPage({ params }: { params: { id: string
                         className="h-7 w-7"
                         onClick={(e) => {
                           e.stopPropagation();
-                          const url = (pg.portal === 'crm' ? 'http://localhost:3005' : 'http://localhost:3006') +
+                          const url = (pg.portal === 'crm' ? (process.env.NEXT_PUBLIC_CRM_URL || '') : (process.env.NEXT_PUBLIC_VENDOR_URL || '')) +
                             routeDisplay(pg);
                           window.open(url, '_blank');
                         }}

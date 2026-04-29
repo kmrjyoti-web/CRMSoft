@@ -4,6 +4,8 @@ import { NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
 import { CrossDbResolverService } from '../../../../core/prisma/cross-db-resolver.service';
 
+const PREDICTION_BASE_SCORE = 50;
+
 export interface PredictionResult {
   score: number;
   confidence: string;
@@ -97,7 +99,7 @@ export class QuotationPredictionService {
     const avgTimeToClose = closeTimes.length > 0 ? Math.round(this.avg(closeTimes)) : 14;
 
     // Calculate score
-    let score = 50;
+    let score = PREDICTION_BASE_SCORE;
     if (lead.priority === 'URGENT') score += 15;
     else if (lead.priority === 'HIGH') score += 12;
     else if (lead.priority === 'MEDIUM') score += 8;

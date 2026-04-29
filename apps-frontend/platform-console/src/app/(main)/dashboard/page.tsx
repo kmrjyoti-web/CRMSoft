@@ -11,7 +11,7 @@ import { StatCard } from '@/components/ui/StatCard';
 // Server component — data fetched at request time
 async function getDashboardData() {
   try {
-    const base = process.env.INTERNAL_API_URL ?? 'http://localhost:3001';
+    const base = process.env.INTERNAL_API_URL ?? '';
     const [overview, health, errors] = await Promise.all([
       fetch(`${base}/platform-console/dashboard`, { cache: 'no-store' })
         .then((r) => r.json())

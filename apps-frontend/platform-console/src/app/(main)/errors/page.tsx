@@ -4,7 +4,7 @@ import { AlertTriangle } from 'lucide-react';
 
 async function getErrors(searchParams: Record<string, string>) {
   try {
-    const base = process.env.INTERNAL_API_URL ?? 'http://localhost:3001';
+    const base = process.env.INTERNAL_API_URL ?? '';
     const qs = new URLSearchParams(
       Object.fromEntries(Object.entries(searchParams).filter(([, v]) => v)),
     ).toString();
@@ -20,7 +20,7 @@ async function getErrors(searchParams: Record<string, string>) {
 
 async function getTenantList(): Promise<{ id: string; name: string; slug: string }[]> {
   try {
-    const base = process.env.INTERNAL_API_URL ?? 'http://localhost:3001';
+    const base = process.env.INTERNAL_API_URL ?? '';
     const res = await fetch(`${base}/identity/tenants?limit=100`, { cache: 'no-store' });
     if (!res.ok) return [];
     const json = await res.json();

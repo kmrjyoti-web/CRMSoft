@@ -35,7 +35,7 @@ export interface FieldDef {
   options?: string[];
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '/api/v1';
 
 export function useCategories() {
   const [categories, setCategories] = useState<UserCategory[]>([]);

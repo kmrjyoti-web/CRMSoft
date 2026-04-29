@@ -89,21 +89,21 @@ const PUBLIC_BASE = "/api/v1/public/entity-verify";
 export const publicVerificationService = {
   getPage: async (token: string) => {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000"}${PUBLIC_BASE}/${token}`
+      `${process.env.NEXT_PUBLIC_API_URL ?? ""}${PUBLIC_BASE}/${token}`
     );
     const json = await res.json();
     return json?.data ?? json;
   },
   confirm: async (token: string) => {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000"}${PUBLIC_BASE}/${token}/confirm`,
+      `${process.env.NEXT_PUBLIC_API_URL ?? ""}${PUBLIC_BASE}/${token}/confirm`,
       { method: "POST", headers: { "Content-Type": "application/json" } }
     );
     return res.json();
   },
   reject: async (token: string, reason: string) => {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000"}${PUBLIC_BASE}/${token}/reject`,
+      `${process.env.NEXT_PUBLIC_API_URL ?? ""}${PUBLIC_BASE}/${token}/reject`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

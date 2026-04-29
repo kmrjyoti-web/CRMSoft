@@ -195,8 +195,8 @@ export default function PageDetailPage({ params }: { params: { id: string } }) {
     : pg.routePath;
 
   const previewUrl = pg.portal === 'crm'
-    ? `http://localhost:3005${routeDisplay.replace(/:(\w+)/g, 'demo')}`
-    : `http://localhost:3006${routeDisplay.replace(/:(\w+)/g, 'demo')}`;
+    ? `${process.env.NEXT_PUBLIC_CRM_URL || ''}${routeDisplay.replace(/:(\w+)/g, 'demo')}`
+    : `${process.env.NEXT_PUBLIC_VENDOR_URL || ''}${routeDisplay.replace(/:(\w+)/g, 'demo')}`;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">

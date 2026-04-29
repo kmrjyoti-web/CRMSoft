@@ -3,6 +3,14 @@ import { PlatformConsolePrismaService } from '../prisma/platform-console-prisma.
 import { RegisterVerticalDto } from './dto/register-vertical.dto';
 import { VERTICAL_MANAGER_ERRORS } from './vertical-manager.errors';
 
+const VERTICAL_AUDIT_SCORES = {
+  PERFECT: 100,
+  PARTIAL: 85,
+} as const;
+
+const GENERAL_VERTICAL_METRICS = { modules: 12, handlers: 45, specFiles: 18 } as const;
+const STANDARD_VERTICAL_METRICS = { modules: 8, handlers: 30, specFiles: 12 } as const;
+
 @Injectable()
 export class VerticalManagerService {
   private readonly logger = new Logger(VerticalManagerService.name);
@@ -178,10 +186,11 @@ export class VerticalManagerService {
         score = 0;
         issues.push('Not yet implemented — vertical is in BETA status');
       } else if (isEstablished) {
-        const modulesCount = code === 'GENERAL' ? 12 : 8;
-        const handlersTotal = code === 'GENERAL' ? 45 : 30;
+        const metrics_ = code === 'GENERAL' ? GENERAL_VERTICAL_METRICS : STANDARD_VERTICAL_METRICS;
+        const modulesCount = metrics_.modules;
+        const handlersTotal = metrics_.handlers;
         const handlersWithTryCatch = handlersTotal - 2;
-        const specFilesCount = code === 'GENERAL' ? 18 : 12;
+        const specFilesCount = metrics_.specFiles;
 
         metrics = {
           modulesCount,
@@ -196,7 +205,7 @@ export class VerticalManagerService {
           noCoreImports: true,
         };
 
-        score = 100;
+        score = VERTICAL_AUDIT_SCORES.PERFECT;
         // Deduct for handlers missing try-catch
         const missingTryCatch = handlersTotal - handlersWithTryCatch;
         if (missingTryCatch > 0) {
@@ -217,7 +226,7 @@ export class VerticalManagerService {
           noTradeSpecificTables: true,
           noCoreImports: true,
         };
-        score = 85;
+        score = VERTICAL_AUDIT_SCORES.PARTIAL;
         issues.push('2 handler(s) missing try-catch');
       }
 

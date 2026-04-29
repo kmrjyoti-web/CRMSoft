@@ -2,7 +2,7 @@ import { HeartPulse, RefreshCw } from 'lucide-react';
 
 async function getHealth() {
   try {
-    const base = process.env.INTERNAL_API_URL ?? 'http://localhost:3001';
+    const base = process.env.INTERNAL_API_URL ?? '';
     const res = await fetch(`${base}/platform-console/health`, { cache: 'no-store' });
     return res.ok ? res.json() : [];
   } catch {

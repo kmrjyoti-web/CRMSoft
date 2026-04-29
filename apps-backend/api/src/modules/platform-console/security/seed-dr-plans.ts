@@ -41,14 +41,14 @@ const DR_PLANS = [
     rto: 10,
     rpo: 0,
     runbook:
-      '1. Check: curl http://localhost:3005\n2. Rebuild: cd Customer/frontend && npm run build\n3. Restart: pm2 restart crm-portal\n4. Check .next/ cache',
+      '1. Check: curl ${CRM_PORTAL_URL}\n2. Rebuild: cd Customer/frontend && npm run build\n3. Restart: pm2 restart crm-portal\n4. Check .next/ cache',
   },
   {
     service: 'MARKETHUB',
     rto: 10,
     rpo: 0,
     runbook:
-      '1. Check: curl http://localhost:3007\n2. Rebuild: cd Application/frontend && npm run build\n3. Restart: pm2 restart markethub',
+      '1. Check: curl ${MARKETHUB_URL}\n2. Rebuild: cd Application/frontend && npm run build\n3. Restart: pm2 restart markethub',
   },
 ];
 

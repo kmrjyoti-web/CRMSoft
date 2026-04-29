@@ -7,7 +7,7 @@ const token =
   typeof window !== 'undefined' ? localStorage.getItem('wl_partner_token') || '' : '';
 const partnerId =
   typeof window !== 'undefined' ? localStorage.getItem('wl_partner_id') || '' : '';
-const BASE = 'http://localhost:3010/api/v1/wl';
+const BASE = process.env.NEXT_PUBLIC_WL_API_URL || '/api/v1/wl';
 
 const apiFetch = (url: string, opts?: RequestInit) =>
   fetch(url, {

@@ -52,7 +52,7 @@ type ErrorDetail = {
   notes?: Array<{ id: string; note: string; author?: string; createdAt: string }>;
 };
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 async function fetchError(id: string): Promise<ErrorDetail | null> {
   try {

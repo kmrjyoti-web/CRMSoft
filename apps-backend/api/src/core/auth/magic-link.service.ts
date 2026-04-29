@@ -11,7 +11,7 @@ const RATE_LIMIT_MAX = 3;
 const SSO_TTL = 60;            // 60 seconds — one-time redirect token
 const SESSION_TTL = 600;       // 10 minutes — tenant selection window
 const CENTRAL_APP_URL = process.env.CENTRAL_APP_URL ?? 'https://app.crmsoft.com';
-const MAGIC_LINK_BASE_URL = process.env.MAGIC_LINK_BASE_URL ?? 'http://localhost:3000';
+const MAGIC_LINK_BASE_URL = process.env.MAGIC_LINK_BASE_URL ?? process.env.APP_URL ?? '';
 
 interface MagicTokenPayload {
   userId: string;

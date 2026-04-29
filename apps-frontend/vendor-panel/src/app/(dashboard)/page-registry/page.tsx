@@ -297,7 +297,7 @@ export default function PageRegistryPage() {
                       const route = pg.routePath.includes(':')
                         ? pg.routePath.split(':').slice(1).join(':')
                         : pg.routePath;
-                      const baseUrl = pg.portal === 'crm' ? 'http://localhost:3005' : 'http://localhost:3006';
+                      const baseUrl = pg.portal === 'crm' ? (process.env.NEXT_PUBLIC_CRM_URL || '') : (process.env.NEXT_PUBLIC_VENDOR_URL || '');
                       window.open(`${baseUrl}${route}`, '_blank');
                     }}
                     title="Preview"

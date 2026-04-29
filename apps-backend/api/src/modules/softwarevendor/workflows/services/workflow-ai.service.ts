@@ -1,5 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
+const WORKFLOW_AI_LAYOUT = {
+  NODE_START_X: 100,
+  NODE_SPACING_X: 250,
+  NODE_BASE_Y: 200,
+  NODE_BRANCH_Y: 350,
+} as const;
+
 /* ── Node data shape ──────────────────────────────────── */
 
 interface BaseNodeData {
@@ -442,7 +449,7 @@ export class WorkflowAiService {
     const nodes: GeneratedNode[] = orderedTemplates.map((t, i) => ({
       id: `ai-node-${i + 1}`,
       type: t.nodeCategory === 'trigger' ? 'triggerNode' : t.nodeCategory === 'condition' ? 'conditionNode' : 'actionNode',
-      position: { x: 100 + i * 250, y: 200 },
+      position: { x: WORKFLOW_AI_LAYOUT.NODE_START_X + i * WORKFLOW_AI_LAYOUT.NODE_SPACING_X, y: WORKFLOW_AI_LAYOUT.NODE_BASE_Y },
       data: {
         label: t.label,
         description: this.generateNodeDescription(t),
@@ -460,7 +467,7 @@ export class WorkflowAiService {
       const condIdx = triggers.length + delays.length;
       // Shift actions after condition down on Y axis for visual clarity
       for (let i = condIdx + 1; i < nodes.length - 1; i++) {
-        nodes[i].position.y = 350;
+        nodes[i].position.y = WORKFLOW_AI_LAYOUT.NODE_BRANCH_Y;
       }
     }
 

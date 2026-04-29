@@ -34,7 +34,7 @@ const BrandContext = createContext<BrandContextValue>({
   error: null,
 });
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '/api/v1';
 
 async function fetchBrandProfile(code: string): Promise<BrandProfile> {
   const res = await fetch(`${API_BASE}/platform-console/creator/brand/${encodeURIComponent(code)}`);

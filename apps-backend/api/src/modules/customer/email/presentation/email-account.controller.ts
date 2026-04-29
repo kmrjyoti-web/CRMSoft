@@ -44,7 +44,7 @@ export class EmailAccountController {
     @CurrentUser('id') userId: string,
     @CurrentUser('tenantId') tenantId: string,
   ) {
-    const frontendOrigin = process.env.FRONTEND_URL || process.env.CORS_ORIGINS?.split(',')[0] || 'http://localhost:3005';
+    const frontendOrigin = process.env.FRONTEND_URL || process.env.CORS_ORIGINS?.split(',')[0] || '';
     const redirectUrl = `${frontendOrigin}/settings/email/oauth-callback`;
 
     let authUrl: string;
@@ -64,7 +64,7 @@ export class EmailAccountController {
     @CurrentUser('id') userId: string,
     @CurrentUser('tenantId') tenantId: string,
   ) {
-    const frontendOrigin = process.env.FRONTEND_URL || process.env.CORS_ORIGINS?.split(',')[0] || 'http://localhost:3005';
+    const frontendOrigin = process.env.FRONTEND_URL || process.env.CORS_ORIGINS?.split(',')[0] || '';
     const redirectUrl = `${frontendOrigin}/settings/email/oauth-callback`;
 
     let tokens: { accessToken: string; refreshToken: string; expiresIn: number };

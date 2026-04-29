@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Webhook, CheckCircle, XCircle, Clock, Activity } from 'lucide-react';
 
 const token = typeof window !== 'undefined' ? localStorage.getItem('wl_admin_token') || '' : '';
-const BASE = 'http://localhost:3010/api/v1/wl';
+const BASE = process.env.NEXT_PUBLIC_WL_API_URL || '/api/v1/wl';
 const apiFetch = (url: string) =>
   fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json());
 

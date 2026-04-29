@@ -158,7 +158,7 @@ export default function TravvellisLogin({ brandName = 'Travvellis', onSuccess }:
     setError('');
     setIsLoading(true);
     try {
-      const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
+      const API = process.env.NEXT_PUBLIC_API_URL ?? '/api/v1';
       const res = await fetch(`${API}/auth/customer/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

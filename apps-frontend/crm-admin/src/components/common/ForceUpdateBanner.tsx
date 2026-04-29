@@ -21,7 +21,7 @@ export function ForceUpdateBanner() {
     const checkForUpdates = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/v1/tenant/force-update-check`,
+          `${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/tenant/force-update-check`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
         if (res.ok) {
