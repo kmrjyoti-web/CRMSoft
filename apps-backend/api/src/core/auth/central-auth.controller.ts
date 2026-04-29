@@ -1,14 +1,27 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { IsEmail, IsString } from 'class-validator';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { CentralAuthService } from './central-auth.service';
+import { MagicLinkService } from './magic-link.service';
 import { CentralLoginDto, SelectTenantDto, SsoVerifyDto } from './dto/auth.dto';
 import { Public } from '../../common/decorators/roles.decorator';
 import { ApiResponse } from '../../common/utils/api-response';
 
+class SendMagicLinkDto {
+  @IsEmail() email: string;
+}
+
+class VerifyMagicLinkDto {
+  @IsString() token: string;
+}
+
 @ApiTags('Central Auth')
 @Controller('auth')
 export class CentralAuthController {
-  constructor(private readonly centralAuth: CentralAuthService) {}
+  constructor(
+    private readonly centralAuth: CentralAuthService,
+    private readonly magicLink: MagicLinkService,
+  ) {}
 
   /**
    * Central portal login (app.crmsoft.com).
@@ -53,6 +66,30 @@ export class CentralAuthController {
     return ApiResponse.success(
       await this.centralAuth.verifySso(dto.ssoToken),
       'SSO verified',
+    );
+  }
+
+  // ── Magic Link (passwordless login) ──────────────────────────────
+
+  @Public()
+  @Post('magic-link')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Send passwordless magic link to email (rate: 3/email/hour)' })
+  async sendMagicLink(@Body() dto: SendMagicLinkDto) {
+    return ApiResponse.success(
+      await this.magicLink.sendMagicLink(dto.email),
+      'Magic link request processed',
+    );
+  }
+
+  @Public()
+  @Post('magic-link/verify')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Consume magic link token — returns SSO token or tenant list' })
+  async verifyMagicLink(@Body() dto: VerifyMagicLinkDto) {
+    return ApiResponse.success(
+      await this.magicLink.verifyMagicLink(dto.token),
+      'Magic link verified',
     );
   }
 }

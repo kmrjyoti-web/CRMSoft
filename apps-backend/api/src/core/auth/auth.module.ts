@@ -16,6 +16,7 @@ import { CompanyInviteService } from './company-invite.service';
 import { CompanyInviteController, PublicInviteController } from './company-invite.controller';
 import { CompanyApprovalService } from './company-approval.service';
 import { CompanyApprovalController } from './company-approval.controller';
+import { MagicLinkService } from './magic-link.service';
 import { TenantModule } from '../../modules/core/identity/tenant/tenant.module';
 import { PlatformConsolePrismaService } from '../../modules/platform-console/prisma/platform-console-prisma.service';
 
@@ -32,7 +33,7 @@ import { PlatformConsolePrismaService } from '../../modules/platform-console/pri
     forwardRef(() => TenantModule),
   ],
   controllers: [AuthController, CentralAuthController, CompanyInviteController, PublicInviteController, CompanyApprovalController],
-  providers: [AuthService, CentralAuthService, JwtStrategy, PlatformBootstrapService, TalentIdService, MappingService, CompanyInviteService, CompanyApprovalService, PlatformConsolePrismaService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
+  providers: [AuthService, CentralAuthService, JwtStrategy, PlatformBootstrapService, TalentIdService, MappingService, CompanyInviteService, CompanyApprovalService, MagicLinkService, PlatformConsolePrismaService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
   exports: [AuthService, MappingService, CompanyInviteService, CompanyApprovalService],
 })
 export class AuthModule {}

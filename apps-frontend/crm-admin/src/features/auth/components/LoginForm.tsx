@@ -223,9 +223,21 @@ export function LoginForm() {
       </form>
 
       {/* Divider */}
-      <div style={{ borderTop: "1px solid rgba(255,255,255,0.10)", margin: "20px 0 16px" }} />
+      <div style={{
+        display: "flex", alignItems: "center", gap: 10,
+        margin: "20px 0 16px",
+        color: "rgba(148,163,184,0.5)", fontSize: 12,
+      }}>
+        <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.10)" }} />
+        <span>or</span>
+        <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.10)" }} />
+      </div>
+
+      {/* Magic link section */}
+      <MagicLinkSection />
 
       {/* Register link */}
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.10)", margin: "20px 0 16px" }} />
       <p className="text-center" style={{ fontSize: 13, color: "rgba(148, 163, 184, 0.85)" }}>
         Don&apos;t have an account?{" "}
         <Link
@@ -238,5 +250,122 @@ export function LoginForm() {
         </Link>
       </p>
     </>
+  );
+}
+
+// ── Magic Link Section ───────────────────────────────────
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
+
+function MagicLinkSection() {
+  const [expanded, setExpanded] = useState(false);
+  const [email, setEmail] = useState('');
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+
+  const send = async () => {
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setResult({ ok: false, message: 'Please enter a valid email address.' });
+      return;
+    }
+    setSending(true);
+    setResult(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/auth/magic-link`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const body = await res.json();
+      const data = body?.data ?? body;
+      if (!res.ok) {
+        setResult({ ok: false, message: data?.message ?? 'Request failed. Try again.' });
+      } else {
+        setResult({ ok: true, message: data?.message ?? 'Check your email!' });
+      }
+    } catch {
+      setResult({ ok: false, message: 'Network error. Please try again.' });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  if (!expanded) {
+    return (
+      <button
+        onClick={() => setExpanded(true)}
+        style={{
+          width: '100%', padding: '10px 16px',
+          background: 'rgba(201,162,95,0.08)',
+          border: '1px solid rgba(201,162,95,0.25)',
+          borderRadius: 8, color: '#c9a25f', fontSize: 13,
+          fontWeight: 600, cursor: 'pointer', letterSpacing: '0.01em',
+          transition: 'background 0.15s',
+        }}
+        onMouseOver={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(201,162,95,0.15)'; }}
+        onMouseOut={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(201,162,95,0.08)'; }}
+      >
+        ✉ Sign in with Magic Link
+      </button>
+    );
+  }
+
+  return (
+    <div style={{
+      background: 'rgba(201,162,95,0.06)',
+      border: '1px solid rgba(201,162,95,0.2)',
+      borderRadius: 10, padding: '14px 16px',
+    }}>
+      <p style={{ fontSize: 12, color: '#94a3b8', marginBottom: 10, margin: '0 0 10px' }}>
+        Enter your email — we&apos;ll send a one-time sign-in link valid for 10 minutes.
+      </p>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter') send(); }}
+        placeholder="you@company.com"
+        style={{
+          width: '100%', padding: '9px 12px',
+          background: 'rgba(15,23,42,0.7)',
+          border: '1px solid rgba(255,255,255,0.12)',
+          borderRadius: 7, color: '#f1f5f9', fontSize: 13,
+          outline: 'none', boxSizing: 'border-box', marginBottom: 8,
+        }}
+        autoFocus
+      />
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button
+          onClick={send}
+          disabled={sending}
+          style={{
+            flex: 1, padding: '9px 0',
+            background: sending ? 'rgba(201,162,95,0.3)' : 'rgba(201,162,95,0.85)',
+            border: 'none', borderRadius: 7, color: '#0f172a',
+            fontSize: 13, fontWeight: 700, cursor: sending ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {sending ? 'Sending…' : 'Send Magic Link'}
+        </button>
+        <button
+          onClick={() => { setExpanded(false); setResult(null); setEmail(''); }}
+          style={{
+            padding: '9px 12px', background: 'transparent',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: 7, color: '#94a3b8', fontSize: 12, cursor: 'pointer',
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+      {result && (
+        <p style={{
+          marginTop: 8, fontSize: 12, margin: '8px 0 0',
+          color: result.ok ? '#86efac' : '#fca5a5',
+        }}>
+          {result.ok ? '✓ ' : '✕ '}{result.message}
+        </p>
+      )}
+    </div>
   );
 }
