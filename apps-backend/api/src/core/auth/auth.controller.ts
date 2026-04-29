@@ -113,10 +113,10 @@ export class AuthController {
   @SkipTenantGuard()
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Switch active company context (re-issues JWT with new companyId)' })
-  async switchCompany(@Body() dto: SwitchCompanyDto, @CurrentUser('id') userId: string) {
+  @ApiOperation({ summary: 'Switch active company — same-brand re-issues JWT, cross-brand returns SSO redirect' })
+  async switchCompany(@Body() dto: SwitchCompanyDto, @CurrentUser() user: any) {
     return ApiResponse.success(
-      await this.auth.switchCompany(userId, dto.companyId),
+      await this.auth.switchCompany(user.id, dto.companyId, user.brandCode ?? null),
       'Company switched',
     );
   }
@@ -138,10 +138,10 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @SkipTenantGuard()
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'List all companies the authenticated user belongs to' })
-  async getMyCompanies(@CurrentUser('id') userId: string) {
+  @ApiOperation({ summary: 'List all companies the authenticated user belongs to (includes domain, brandName, isCrossBrand)' })
+  async getMyCompanies(@CurrentUser() user: any) {
     return ApiResponse.success(
-      await this.auth.getMyCompanies(userId),
+      await this.auth.getMyCompanies(user.id, user.brandCode ?? null),
       'Companies fetched',
     );
   }

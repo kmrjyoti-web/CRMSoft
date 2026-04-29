@@ -3,13 +3,26 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { ChevronDown, Home, LogOut, Loader2, Check } from "lucide-react";
+import { ChevronDown, Home, LogOut, Loader2, Check, ExternalLink } from "lucide-react";
 
 import { useActiveCompany } from "@/hooks/useActiveCompany";
 import { useAuthStore } from "@/stores/auth.store";
 import { authService } from "@/features/auth/services/auth.service";
 import { setAuthCookie } from "@/features/auth/utils/auth-cookies";
 import type { CompanyListItem } from "@/features/auth/types/auth.types";
+
+// Group companies by brandCode
+function groupByBrand(companies: CompanyListItem[]): { brandCode: string | null; brandName: string | null; logoUrl: string | null; items: CompanyListItem[] }[] {
+  const map = new Map<string, { brandCode: string | null; brandName: string | null; logoUrl: string | null; items: CompanyListItem[] }>();
+  for (const c of companies) {
+    const key = c.brandCode ?? '__none__';
+    if (!map.has(key)) {
+      map.set(key, { brandCode: c.brandCode, brandName: c.brandName, logoUrl: c.logoUrl, items: [] });
+    }
+    map.get(key)!.items.push(c);
+  }
+  return Array.from(map.values());
+}
 
 export function CompanyHeader() {
   const router = useRouter();
@@ -55,6 +68,14 @@ export function CompanyHeader() {
     setSwitchingId(target.id);
     try {
       const result = await authService.switchCompany(target.id);
+
+      if (result.crossBrand) {
+        // Hard redirect to the other brand's portal with SSO token
+        window.location.href = result.redirectUrl;
+        return;
+      }
+
+      // Same-brand switch: update JWT + reload
       setAuthCookie(result.accessToken);
       setAuth({ accessToken: result.accessToken, refreshToken: result.refreshToken });
       setActiveCompany({
@@ -66,7 +87,6 @@ export function CompanyHeader() {
         isDefault: target.isDefault,
       });
       setAvailableCompanies(companies);
-      // Full reload — applies new brand theme
       window.location.href = `/company/${target.id}/dashboard`;
     } catch {
       toast.error("Switch failed");
@@ -83,6 +103,7 @@ export function CompanyHeader() {
 
   const primary = theme.primary;
   const brandName = brandConfig?.name ?? "CRMSoft";
+  const groups = groupByBrand(companies);
 
   return (
     <header
@@ -124,7 +145,7 @@ export function CompanyHeader() {
 
           {open && (
             <div
-              className="absolute right-0 top-full mt-2 w-72 rounded-xl border shadow-2xl overflow-hidden"
+              className="absolute right-0 top-full mt-2 w-80 rounded-xl border shadow-2xl overflow-hidden"
               style={{
                 background: "rgba(15, 20, 32, 0.97)",
                 borderColor: `${primary}33`,
@@ -134,39 +155,78 @@ export function CompanyHeader() {
                 Your workspaces
               </div>
 
-              <div className="max-h-72 overflow-y-auto">
-                {companies.map((c) => {
-                  const isActive = c.id === company?.id;
-                  const isLoading = switchingId === c.id;
-                  return (
-                    <button
-                      key={c.id}
-                      onClick={() => handleSwitch(c)}
-                      disabled={!!isLoading}
-                      className={`w-full px-3 py-2.5 flex items-center justify-between text-left transition-colors hover:bg-white/5 ${
-                        isActive ? "bg-white/5" : ""
-                      }`}
+              <div className="max-h-80 overflow-y-auto">
+                {groups.length === 0 && (
+                  <div className="px-3 py-4 text-center text-xs text-slate-500">Loading…</div>
+                )}
+
+                {groups.map((group, gi) => (
+                  <div key={group.brandCode ?? `group-${gi}`}>
+                    {/* Brand group header */}
+                    <div
+                      className="px-3 py-1.5 flex items-center gap-2"
+                      style={{ borderTop: gi > 0 ? "1px solid rgba(255,255,255,0.06)" : undefined }}
                     >
-                      <div>
-                        <div className="text-sm font-medium text-white">
-                          {c.name}
+                      {group.logoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={group.logoUrl} alt="" className="h-4 w-4 rounded object-contain" />
+                      ) : (
+                        <div
+                          className="h-4 w-4 rounded text-center text-xs font-bold leading-4"
+                          style={{ background: `${primary}22`, color: primary }}
+                        >
+                          {(group.brandName ?? group.brandCode ?? "?")[0]?.toUpperCase()}
                         </div>
-                        <div className="text-xs text-slate-500">
-                          {c.brandCode ?? "default"} · {c.role}
-                        </div>
-                      </div>
-                      {isLoading && (
-                        <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
                       )}
-                      {isActive && !isLoading && (
-                        <Check
-                          className="h-4 w-4"
-                          style={{ color: primary }}
-                        />
+                      <span className="text-xs font-semibold text-slate-400 tracking-wide">
+                        {group.brandName ?? group.brandCode ?? "Default"}
+                      </span>
+                      {group.items[0]?.isCrossBrand && (
+                        <ExternalLink className="h-3 w-3 text-amber-400 ml-auto" />
                       )}
-                    </button>
-                  );
-                })}
+                    </div>
+
+                    {/* Companies in this brand */}
+                    {group.items.map((c) => {
+                      const isActive = c.id === company?.id;
+                      const isLoading = switchingId === c.id;
+                      const isCross = c.isCrossBrand;
+                      return (
+                        <button
+                          key={c.id}
+                          onClick={() => handleSwitch(c)}
+                          disabled={!!isLoading}
+                          className={`w-full px-3 py-2.5 pl-8 flex items-center justify-between text-left transition-colors hover:bg-white/5 ${
+                            isActive ? "bg-white/5" : ""
+                          }`}
+                        >
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-white truncate">
+                              {c.name}
+                            </div>
+                            <div className="text-xs text-slate-500">
+                              {c.role}
+                              {isCross && c.domain && (
+                                <span className="ml-1 text-amber-500/70">↗ {c.domain}</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {isCross && !isLoading && (
+                              <ExternalLink className="h-3.5 w-3.5 text-amber-400/70" />
+                            )}
+                            {isLoading && (
+                              <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                            )}
+                            {isActive && !isLoading && (
+                              <Check className="h-4 w-4" style={{ color: primary }} />
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
 
               <div className="border-t border-white/5">

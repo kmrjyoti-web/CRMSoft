@@ -139,8 +139,9 @@ export class CentralAuthService {
     await this.tokenDel(`sso:${ssoToken}`);
 
     // Parallel: issue JWT + fetch mapping for company details
+    // SSO verify always issues same-brand JWT — no cross-brand redirect here
     const [tokens, mapping, user] = await Promise.all([
-      this.authService.switchCompany(data.userId, data.companyId),
+      this.authService.switchCompany(data.userId, data.companyId) as any,
       (this.prisma.identity as any).userCompanyMapping.findFirst({
         where: { userId: data.userId, companyId: data.companyId, status: 'ACTIVE', isDeleted: false },
         include: { company: true },

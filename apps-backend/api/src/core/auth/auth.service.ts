@@ -9,7 +9,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantProvisioningService } from '../../modules/core/identity/tenant/services/tenant-provisioning.service';
 import { TalentIdService } from './talent-id.service';
 import { MappingService } from './mapping.service';
-import { randomBytes } from 'crypto';
+import { RedisCacheService } from '../../modules/core/cache/cache.service';
+import { PlatformConsolePrismaService } from '../../modules/platform-console/prisma/platform-console-prisma.service';
+import { randomBytes, randomUUID } from 'crypto';
+
+const SSO_TTL = 60;
+const CENTRAL_APP_URL = process.env.CENTRAL_APP_URL ?? 'https://app.crmsoft.com';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +25,8 @@ export class AuthService {
     private tenantProvisioning: TenantProvisioningService,
     private talentId: TalentIdService,
     private mapping: MappingService,
+    private cache: RedisCacheService,
+    private pcDb: PlatformConsolePrismaService,
   ) {}
 
   // ═══════════════════════════════════════
@@ -867,19 +874,47 @@ export class AuthService {
   // SWITCH COMPANY (exchange JWT companyId)
   // ═══════════════════════════════════════
 
-  async getMyCompanies(userId: string) {
+  async getMyCompanies(userId: string, currentBrandCode?: string | null) {
     const companies = await this.mapping.getUserCompanies(userId);
-    return companies.map((m: any) => ({
-      id: m.company.id,
-      talentId: m.company.talentId,
-      name: m.company.name,
-      brandCode: m.company.brandCode ?? null,
-      verticalCode: m.company.verticalCode ?? null,
-      categoryCode: m.company.categoryCode ?? null,
-      role: m.role,
-      isDefault: m.isDefault,
-      status: m.status,
-      lastAccessedAt: m.lastAccessedAt ?? null,
+
+    return Promise.all(companies.map(async (m: any) => {
+      const company = m.company;
+      const brandCode = company.brandCode ?? null;
+
+      const [tenant, brandProfile] = await Promise.all([
+        brandCode
+          ? this.prisma.identity.tenant.findFirst({
+              where: { brandCode },
+              select: { domain: true, subdomain: true },
+            }).catch(() => null)
+          : Promise.resolve(null),
+        brandCode
+          ? this.pcDb.brandProfile.findUnique({
+              where: { brandCode },
+              select: { brandName: true, logoUrl: true },
+            }).catch(() => null)
+          : Promise.resolve(null),
+      ]);
+
+      return {
+        id: company.id,
+        talentId: company.talentId,
+        name: company.name,
+        brandCode,
+        brandName: (brandProfile as any)?.brandName ?? null,
+        logoUrl: (brandProfile as any)?.logoUrl ?? null,
+        verticalCode: company.verticalCode ?? null,
+        categoryCode: company.categoryCode ?? null,
+        role: m.role,
+        isDefault: m.isDefault,
+        status: m.status,
+        lastAccessedAt: m.lastAccessedAt ?? null,
+        domain: (tenant as any)?.domain ?? null,
+        subdomain: (tenant as any)?.subdomain ?? null,
+        isCrossBrand: currentBrandCode !== undefined
+          ? (brandCode !== currentBrandCode)
+          : false,
+      };
     }));
   }
 
@@ -887,7 +922,7 @@ export class AuthService {
     return this.switchCompany(userId, companyId);
   }
 
-  async switchCompany(userId: string, companyId: string) {
+  async switchCompany(userId: string, companyId: string, currentBrandCode?: string | null) {
     const user = await this.prisma.identity.user.findFirst({
       where: { id: userId },
       include: { role: true },
@@ -897,7 +932,6 @@ export class AuthService {
     const isMember = await this.mapping.verifyMembership(userId, companyId);
     if (!isMember) throw new ForbiddenException('Not a member of this company');
 
-    // Resolve brand from mapping for JWT
     const mapping = await (this.prisma.identity as any).userCompanyMapping.findFirst({
       where: { userId, companyId, status: 'ACTIVE', isDeleted: false },
       include: { company: true },
@@ -906,11 +940,45 @@ export class AuthService {
     const mappingRole = mapping?.role ?? null;
     const talentId = (user as any).talentId ?? null;
 
+    // Cross-brand switch: issue SSO token + return redirect URL
+    if (currentBrandCode !== undefined && brandCode !== currentBrandCode) {
+      const { ssoToken, redirectUrl } = await this.issueSsoToken(userId, companyId, brandCode);
+      return {
+        crossBrand: true,
+        ssoToken,
+        redirectUrl,
+        activeCompanyId: companyId,
+        activeCompanyBrandCode: brandCode,
+      };
+    }
+
     const tokens = await this.generateTokens(
       user.id, user.email, user.role.name, user.userType, user.tenantId, companyId,
       { talentId, brandCode, companyRole: mappingRole },
     );
-    return { activeCompanyId: companyId, activeCompanyBrandCode: brandCode, ...tokens };
+    return { crossBrand: false, activeCompanyId: companyId, activeCompanyBrandCode: brandCode, ...tokens };
+  }
+
+  private async issueSsoToken(userId: string, companyId: string, brandCode: string | null) {
+    const tenant = brandCode
+      ? await this.prisma.identity.tenant.findFirst({
+          where: { brandCode },
+          select: { domain: true, subdomain: true },
+        })
+      : null;
+
+    const ssoToken = randomUUID();
+    await this.cache.set(`sso:${ssoToken}`, {
+      userId, companyId, brandCode,
+      createdAt: new Date().toISOString(),
+    }, SSO_TTL);
+
+    const portalDomain = (tenant as any)?.domain ?? (tenant as any)?.subdomain ?? null;
+    const redirectUrl = portalDomain
+      ? `https://${portalDomain}?sso=${ssoToken}`
+      : `${CENTRAL_APP_URL}/sso/callback?token=${ssoToken}`;
+
+    return { ssoToken, redirectUrl };
   }
 
   private async generateTokens(

@@ -45,20 +45,34 @@ export interface CompanyListItem {
   talentId: string;
   name: string;
   brandCode: string | null;
+  brandName: string | null;
+  logoUrl: string | null;
   verticalCode: string | null;
   categoryCode: string | null;
   role: string;
   isDefault: boolean;
   status: string;
   lastAccessedAt: string | null;
+  domain: string | null;
+  subdomain: string | null;
+  isCrossBrand: boolean;
 }
 
-export interface SwitchCompanyResult {
-  activeCompanyId: string;
-  activeCompanyBrandCode: string | null;
-  accessToken: string;
-  refreshToken: string;
-}
+export type SwitchCompanyResult =
+  | {
+      crossBrand: false;
+      activeCompanyId: string;
+      activeCompanyBrandCode: string | null;
+      accessToken: string;
+      refreshToken: string;
+    }
+  | {
+      crossBrand: true;
+      activeCompanyId: string;
+      activeCompanyBrandCode: string | null;
+      ssoToken: string;
+      redirectUrl: string;
+    };
 
 export interface LoginResponse {
   user: User;
