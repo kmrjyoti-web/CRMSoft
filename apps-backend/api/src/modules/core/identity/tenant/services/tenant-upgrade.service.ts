@@ -91,10 +91,11 @@ export class TenantUpgradeService {
       throw new BadRequestException('Payment gateway not configured. Contact support.');
     }
 
+    const normalizedCode = packageCode.toUpperCase();
     const pkg = await this.prisma.platform.subscriptionPackage.findFirst({
-      where: { packageCode, isActive: true },
+      where: { packageCode: normalizedCode, isActive: true },
     });
-    if (!pkg) throw new BadRequestException(`Plan "${packageCode}" not found or inactive.`);
+    if (!pkg) throw new BadRequestException(`Plan "${normalizedCode}" not found or inactive.`);
 
     const amountInr = billingCycle === 'YEARLY' ? Number(pkg.priceYearlyInr) : Number(pkg.priceMonthlyInr);
     if (amountInr <= 0) throw new BadRequestException('Invalid plan amount.');
@@ -108,7 +109,7 @@ export class TenantUpgradeService {
         amount: amountPaise,
         currency: 'INR',
         receipt,
-        notes: { tenantId, packageCode, billingCycle },
+        notes: { tenantId, packageCode: normalizedCode, billingCycle },
       },
       { auth: { username: this.rzpKeyId, password: this.rzpKeySecret } },
     );
@@ -120,7 +121,7 @@ export class TenantUpgradeService {
       amount: amountPaise,
       currency: 'INR',
       keyId: this.rzpKeyId,
-      packageCode,
+      packageCode: normalizedCode,
       packageName: pkg.packageName,
     };
   }
@@ -148,10 +149,11 @@ export class TenantUpgradeService {
       throw new UnauthorizedException('Payment signature verification failed.');
     }
 
+    const normalizedCode = packageCode.toUpperCase();
     const pkg = await this.prisma.platform.subscriptionPackage.findFirst({
-      where: { packageCode, isActive: true },
+      where: { packageCode: normalizedCode, isActive: true },
     });
-    if (!pkg) throw new BadRequestException(`Plan "${packageCode}" not found.`);
+    if (!pkg) throw new BadRequestException(`Plan "${normalizedCode}" not found.`);
 
     await this.prisma.identity.tenant.update({
       where: { id: tenantId },
@@ -162,10 +164,10 @@ export class TenantUpgradeService {
       } as any,
     });
 
-    this.logger.log(`Tenant ${tenantId} upgraded to plan ${packageCode} (${billingCycle})`);
+    this.logger.log(`Tenant ${tenantId} upgraded to plan ${normalizedCode} (${billingCycle})`);
 
     let dedicatedDbStarted = false;
-    if (pkg.hasDedicatedDb && DEDICATED_DB_PLANS.has(packageCode)) {
+    if (pkg.hasDedicatedDb && DEDICATED_DB_PLANS.has(normalizedCode)) {
       try {
         await this.wlProvisioning.startProvisioning(tenantId);
         dedicatedDbStarted = true;
@@ -177,11 +179,11 @@ export class TenantUpgradeService {
 
     // Calculate partner commission (non-fatal — payment already confirmed)
     const amountInr = billingCycle === 'YEARLY' ? Number(pkg.priceYearlyInr) : Number(pkg.priceMonthlyInr);
-    this.commissionSvc.calculateCommission(tenantId, paymentId, amountInr, packageCode).catch((err) => {
+    this.commissionSvc.calculateCommission(tenantId, paymentId, amountInr, normalizedCode).catch((err) => {
       this.logger.warn(`Commission calculation failed for ${tenantId}: ${(err as Error).message}`);
     });
 
-    return { planCode: packageCode, dedicatedDbStarted };
+    return { planCode: normalizedCode, dedicatedDbStarted };
   }
 
   // ─── 4. Current plan status ───────────────────────────────────────────────
@@ -233,8 +235,9 @@ export class TenantUpgradeService {
       const { tenantId, packageCode } = notes;
       if (!tenantId || !packageCode) return;
 
+      const normalizedCode = packageCode.toUpperCase();
       const pkg = await this.prisma.platform.subscriptionPackage.findFirst({
-        where: { packageCode, isActive: true },
+        where: { packageCode: normalizedCode, isActive: true },
       });
       if (!pkg) return;
 
@@ -242,7 +245,7 @@ export class TenantUpgradeService {
         where: { id: tenantId },
         data: { planCode: pkg.packageCode, planId: pkg.id, subscriptionStatus: 'ACTIVE' } as any,
       });
-      this.logger.log(`Webhook: Tenant ${tenantId} plan activated → ${packageCode}`);
+      this.logger.log(`Webhook: Tenant ${tenantId} plan activated → ${normalizedCode}`);
     }
   }
 }

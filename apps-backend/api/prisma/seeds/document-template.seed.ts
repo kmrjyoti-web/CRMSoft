@@ -1713,7 +1713,7 @@ const CUSTOMER_STATEMENT_HTML = `<!DOCTYPE html>
 
 export const DOCUMENT_TEMPLATES = [
   {
-    code: 'gst-invoice-standard',
+    code: 'GST_INVOICE_STANDARD',
     name: 'GST Invoice - Standard',
     description: 'Professional GST-compliant tax invoice with classic layout. Supports intra-state (CGST+SGST) and inter-state (IGST) billing.',
     documentType: DocumentType.GST_INVOICE,
@@ -1726,7 +1726,7 @@ export const DOCUMENT_TEMPLATES = [
     isDefault: true,
   },
   {
-    code: 'gst-invoice-modern',
+    code: 'GST_INVOICE_MODERN',
     name: 'GST Invoice - Modern',
     description: 'Modern, visually rich GST invoice with gradient accents and card-based layout. Ideal for brands seeking a contemporary look.',
     documentType: DocumentType.GST_INVOICE,
@@ -1739,7 +1739,7 @@ export const DOCUMENT_TEMPLATES = [
     isDefault: false,
   },
   {
-    code: 'restaurant-bill',
+    code: 'RESTAURANT_BILL',
     name: 'Restaurant Bill',
     description: 'Compact 80mm thermal-printer-friendly bill for restaurants and food outlets. Includes table number, server, and service charge.',
     documentType: DocumentType.GST_INVOICE,
@@ -1752,7 +1752,7 @@ export const DOCUMENT_TEMPLATES = [
     isDefault: false,
   },
   {
-    code: 'quotation-standard',
+    code: 'QUOTATION_STANDARD',
     name: 'Quotation - Standard',
     description: 'Professional quotation template with validity notice, subject line, and full GST tax breakdown.',
     documentType: DocumentType.QUOTATION,
@@ -1765,7 +1765,7 @@ export const DOCUMENT_TEMPLATES = [
     isDefault: true,
   },
   {
-    code: 'quotation-detailed',
+    code: 'QUOTATION_DETAILED',
     name: 'Quotation - Detailed',
     description: 'Detailed quotation with scope sections, notes area, and comprehensive item breakdown.',
     documentType: DocumentType.QUOTATION,
@@ -1778,7 +1778,7 @@ export const DOCUMENT_TEMPLATES = [
     isDefault: false,
   },
   {
-    code: 'tourism-itinerary-quote',
+    code: 'TOURISM_ITINERARY_QUOTE',
     name: 'Tour Itinerary & Quotation',
     description: 'Travel and tourism quotation with day-wise itinerary, inclusions/exclusions, and cancellation policy.',
     documentType: DocumentType.QUOTATION,
@@ -1791,7 +1791,7 @@ export const DOCUMENT_TEMPLATES = [
     isDefault: false,
   },
   {
-    code: 'payment-receipt',
+    code: 'PAYMENT_RECEIPT',
     name: 'Payment Receipt',
     description: 'Clean payment receipt showing amount received, payment mode, and reference details.',
     documentType: DocumentType.RECEIPT,
@@ -1804,7 +1804,7 @@ export const DOCUMENT_TEMPLATES = [
     isDefault: true,
   },
   {
-    code: 'purchase-order-standard',
+    code: 'PURCHASE_ORDER_STANDARD',
     name: 'Purchase Order - Standard',
     description: 'Standard purchase order template with vendor details, delivery date, and GST breakdown.',
     documentType: DocumentType.PURCHASE_ORDER,
@@ -1817,7 +1817,7 @@ export const DOCUMENT_TEMPLATES = [
     isDefault: true,
   },
   {
-    code: 'delivery-challan',
+    code: 'DELIVERY_CHALLAN',
     name: 'Delivery Challan',
     description: 'Delivery challan for goods dispatch with vehicle details, transporter info, and receiver acknowledgement.',
     documentType: DocumentType.DELIVERY_CHALLAN,
@@ -1830,7 +1830,7 @@ export const DOCUMENT_TEMPLATES = [
     isDefault: true,
   },
   {
-    code: 'sale-challan',
+    code: 'SALE_CHALLAN',
     name: 'Sale Challan',
     description: 'Sale challan for goods sold with transport details, quantities, and rates.',
     documentType: DocumentType.SALE_CHALLAN,
@@ -1843,7 +1843,7 @@ export const DOCUMENT_TEMPLATES = [
     isDefault: true,
   },
   {
-    code: 'credit-note',
+    code: 'CREDIT_NOTE',
     name: 'Credit Note',
     description: 'Credit note for returns, adjustments, or billing corrections with GST reversal details.',
     documentType: DocumentType.CREDIT_NOTE,
@@ -1856,7 +1856,7 @@ export const DOCUMENT_TEMPLATES = [
     isDefault: true,
   },
   {
-    code: 'sales-report',
+    code: 'SALES_REPORT',
     name: 'Sales Report',
     description: 'Tabular sales report with summary cards, date-wise invoice listing, and tax breakdowns.',
     documentType: DocumentType.SALES_REPORT,
@@ -1869,7 +1869,7 @@ export const DOCUMENT_TEMPLATES = [
     isDefault: true,
   },
   {
-    code: 'customer-statement',
+    code: 'CUSTOMER_STATEMENT',
     name: 'Customer Statement',
     description: 'Statement of account showing all transactions with running balance for a customer over a period.',
     documentType: DocumentType.CUSTOMER_STATEMENT,
