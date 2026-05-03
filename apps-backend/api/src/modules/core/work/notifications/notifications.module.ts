@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
+import { ConfigModule } from '@nestjs/config';
 
 // Services
 import { NotificationCoreService } from './services/notification-core.service';
@@ -76,7 +77,7 @@ const QueryHandlers = [
 ];
 
 @Module({
-  imports: [CqrsModule],
+  imports: [CqrsModule, ConfigModule],
   controllers: [NotificationController, NotificationSettingsController, NotificationAdminController, SseController],
   providers: [
     NotificationCoreService,

@@ -12,8 +12,10 @@ model GlCfgPincode {
   cityName       String?     @map("city_name")     // "Mumbai"
   officeName     String?     @map("office_name")   // "Mumbai GPO"
   officeType     String?     @map("office_type")   // "H.O.", "S.O.", "B.O."
-  deliveryStatus String?     @map("delivery_status") // "Delivery", "Non-Delivery"
-  isActive       Boolean     @default(true) @map("is_active")
+  deliveryStatus    String? @map("delivery_status") // "Delivery", "Non-Delivery"
+  multilanguageJson Json?   @map("multilanguage_json")
+  sortOrder         Int     @default(0) @map("sort_order")
+  isActive          Boolean @default(true) @map("is_active")
   createdAt      DateTime    @default(now()) @map("created_at")
   updatedAt      DateTime    @updatedAt @map("updated_at")
 
@@ -33,8 +35,10 @@ model GlCfgGstRate {
   rate        Decimal       @db.Decimal(5, 2)  // 18.00, 0.00, 28.00
   cessRate    Decimal?      @map("cess_rate") @db.Decimal(5, 2) // 12.00 for luxury goods
   type        GstRateType   @default(STANDARD)
-  description String?
-  isActive    Boolean       @default(true) @map("is_active")
+  description       String?
+  code              String? @unique @map("code") @db.VarChar(50)
+  multilanguageJson Json?   @map("multilanguage_json")
+  isActive          Boolean @default(true) @map("is_active")
   sortOrder   Int           @default(0) @map("sort_order")
   createdAt   DateTime      @default(now()) @map("created_at")
   updatedAt   DateTime      @updatedAt @map("updated_at")
@@ -55,8 +59,10 @@ model GlCfgHsnCode {
   descriptionHi    String?      @map("description_hi") // Hindi description
   chapter          String?                        // "01" — HSN chapter number
   section          String?                        // "I" — HSN section
-  defaultGstRateId String?      @map("default_gst_rate_id")
-  isActive         Boolean      @default(true) @map("is_active")
+  defaultGstRateId  String? @map("default_gst_rate_id")
+  multilanguageJson Json?   @map("multilanguage_json")
+  sortOrder         Int     @default(0) @map("sort_order")
+  isActive          Boolean @default(true) @map("is_active")
   createdAt        DateTime     @default(now()) @map("created_at")
   updatedAt        DateTime     @updatedAt @map("updated_at")
 

@@ -9,8 +9,9 @@ model GlCfgCountry {
   name         String
   nameLocal    String?      @map("name_local")     // Local script name: "भारत"
   phoneCode    String?      @map("phone_code")     // "+91"
-  currencyCode String?      @map("currency_code")  // "INR"
-  isActive     Boolean      @default(true) @map("is_active")
+  currencyCode      String? @map("currency_code")  // "INR"
+  multilanguageJson Json?   @map("multilanguage_json")
+  isActive          Boolean @default(true) @map("is_active")
   sortOrder    Int          @default(0) @map("sort_order")
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @updatedAt @map("updated_at")
@@ -27,8 +28,9 @@ model GlCfgState {
   code         String                               // "MH" for Maharashtra
   name         String
   nameLocal    String?      @map("name_local")      // "महाराष्ट्र"
-  gstStateCode String?      @map("gst_state_code")  // "27" — Indian GST state code
-  isActive     Boolean      @default(true) @map("is_active")
+  gstStateCode      String? @map("gst_state_code")  // "27" — Indian GST state code
+  multilanguageJson Json?   @map("multilanguage_json")
+  isActive          Boolean @default(true) @map("is_active")
   sortOrder    Int          @default(0) @map("sort_order")
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @updatedAt @map("updated_at")
@@ -47,8 +49,10 @@ model GlCfgCity {
   stateId      String       @map("state_id")
   name         String
   nameLocal    String?      @map("name_local")      // "मुंबई"
-  tier         String?                               // "TIER_1", "TIER_2", "TIER_3"
-  isActive     Boolean      @default(true) @map("is_active")
+  tier              String? // "TIER_1", "TIER_2", "TIER_3"
+  code              String? @unique @map("code") @db.VarChar(100)
+  multilanguageJson Json?   @map("multilanguage_json")
+  isActive          Boolean @default(true) @map("is_active")
   sortOrder    Int          @default(0) @map("sort_order")
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @updatedAt @map("updated_at")
@@ -65,8 +69,10 @@ model GlCfgLookupType {
   code         String              @unique           // "GENDER", "MARITAL_STATUS", "BLOOD_GROUP"
   displayName  String              @map("display_name")
   description  String?
-  isSystem     Boolean             @default(true) @map("is_system")
-  isActive     Boolean             @default(true) @map("is_active")
+  isSystem          Boolean @default(true) @map("is_system")
+  multilanguageJson Json?   @map("multilanguage_json")
+  sortOrder         Int     @default(0) @map("sort_order")
+  isActive          Boolean @default(true) @map("is_active")
   createdAt    DateTime            @default(now()) @map("created_at")
   updatedAt    DateTime            @updatedAt @map("updated_at")
 
@@ -83,9 +89,10 @@ model GlCfgLookupValue {
   label        String                                // "Male"
   labelHi      String?          @map("label_hi")     // "पुरुष"
   icon         String?
-  color        String?
-  sortOrder    Int              @default(0) @map("sort_order")
-  isActive     Boolean          @default(true) @map("is_active")
+  color             String?
+  sortOrder         Int     @default(0) @map("sort_order")
+  multilanguageJson Json?   @map("multilanguage_json")
+  isActive          Boolean @default(true) @map("is_active")
   metadata     Json?
   createdAt    DateTime         @default(now()) @map("created_at")
   updatedAt    DateTime         @updatedAt @map("updated_at")

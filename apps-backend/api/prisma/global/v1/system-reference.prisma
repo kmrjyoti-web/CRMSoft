@@ -14,8 +14,9 @@ model GlCfgCurrency {
   decimalPlaces  Int      @default(2) @map("decimal_places")
   thousandSep    String   @default(",") @map("thousand_sep") // "," or "."
   decimalSep     String   @default(".") @map("decimal_sep")  // "." or ","
-  isDefault      Boolean  @default(false) @map("is_default") // true for INR
-  isActive       Boolean  @default(true) @map("is_active")
+  isDefault         Boolean @default(false) @map("is_default") // true for INR
+  multilanguageJson Json?   @map("multilanguage_json")
+  isActive          Boolean @default(true) @map("is_active")
   sortOrder      Int      @default(0) @map("sort_order")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
@@ -34,8 +35,10 @@ model GlCfgTimezone {
   offsetHours    Int      @map("offset_hours")          // 5
   offsetMinutes  Int      @default(0) @map("offset_minutes") // 30
   isDst          Boolean  @default(false) @map("is_dst") // true if observes daylight saving
-  isDefault      Boolean  @default(false) @map("is_default") // true for Asia/Kolkata
-  isActive       Boolean  @default(true) @map("is_active")
+  isDefault         Boolean @default(false) @map("is_default") // true for Asia/Kolkata
+  code              String? @unique @map("code") @db.VarChar(50)
+  multilanguageJson Json?   @map("multilanguage_json")
+  isActive          Boolean @default(true) @map("is_active")
   sortOrder      Int      @default(0) @map("sort_order")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
@@ -53,8 +56,9 @@ model GlCfgIndustryType {
   name        String                       // "Software & IT"
   nameHi      String?  @map("name_hi")    // "सॉफ्टवेयर और आईटी"
   description String?
-  icon        String?                      // icon identifier for UI
-  isActive    Boolean  @default(true) @map("is_active")
+  icon              String? // icon identifier for UI
+  multilanguageJson Json?   @map("multilanguage_json")
+  isActive          Boolean @default(true) @map("is_active")
   sortOrder   Int      @default(0) @map("sort_order")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -72,9 +76,10 @@ model GlCfgLanguage {
   name        String                       // "Hindi"
   nameLocal   String?  @map("name_local")  // "हिन्दी"
   script      String?                      // "Devanagari", "Latin"
-  isIndian    Boolean  @default(false) @map("is_indian") // true for Indian languages
-  isDefault   Boolean  @default(false) @map("is_default") // true for "en"
-  isActive    Boolean  @default(true) @map("is_active")
+  isIndian          Boolean @default(false) @map("is_indian") // true for Indian languages
+  isDefault         Boolean @default(false) @map("is_default") // true for "en"
+  multilanguageJson Json?   @map("multilanguage_json")
+  isActive          Boolean @default(true) @map("is_active")
   sortOrder   Int      @default(0) @map("sort_order")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")

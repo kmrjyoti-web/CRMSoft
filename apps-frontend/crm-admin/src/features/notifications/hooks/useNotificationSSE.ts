@@ -7,7 +7,7 @@ import { useNotificationStore } from "@/stores/notification.store";
 import { API_BASE_URL } from "@/config/constants";
 import type { Notification } from "../types/notifications.types";
 
-const SSE_URL = `${API_BASE_URL}/notifications/sse/stream`;
+const SSE_URL = `${API_BASE_URL}/api/v1/notifications/sse/stream`;
 
 export function useNotificationSSE() {
   const eventSourceRef = useRef<EventSource | null>(null);
@@ -19,7 +19,7 @@ export function useNotificationSSE() {
   useEffect(() => {
     if (!user?.id || !token) return;
 
-    const url = `${SSE_URL}?userId=${user.id}`;
+    const url = `${SSE_URL}?token=${encodeURIComponent(token)}`;
 
     const es = new EventSource(url);
     eventSourceRef.current = es;

@@ -9,6 +9,14 @@ model MasterLookup {
   displayName String        @map("display_name")
   description String?
   isSystem    Boolean       @default(false) @map("is_system")
+
+  code              String? @map("code") @db.VarChar(100)
+  partnerCode       String? @map("partner_code") @db.VarChar(50)
+  brandCode         String? @map("brand_code") @db.VarChar(50)
+  verticalCode      String? @map("vertical_code") @db.VarChar(50)
+  multilanguageJson Json?   @map("multilanguage_json")
+  sortOrder         Int     @default(0) @map("sort_order")
+
   isActive    Boolean       @default(true) @map("is_active")
   createdAt   DateTime      @default(now()) @map("created_at")
   updatedAt   DateTime      @updatedAt @map("updated_at")
@@ -39,6 +47,14 @@ model LookupValue {
   isActive   Boolean       @default(true) @map("is_active")
   parentId   String?       @map("parent_id")
   configJson Json?         @map("config_json")
+
+  code              String? @map("code") @db.VarChar(100)
+  partnerCode       String? @map("partner_code") @db.VarChar(50)
+  brandCode         String? @map("brand_code") @db.VarChar(50)
+  verticalCode      String? @map("vertical_code") @db.VarChar(50)
+  multilanguageJson Json?   @map("multilanguage_json")
+  sortOrder         Int     @default(0) @map("sort_order")
+
   createdAt  DateTime      @default(now()) @map("created_at")
   updatedAt  DateTime      @updatedAt @map("updated_at")
   lookup     MasterLookup  @relation(fields: [lookupId], references: [id], onDelete: Cascade)
@@ -640,6 +656,12 @@ model SystemFieldMaster {
   isCustomerOverridable Boolean @default(false) @map("is_customer_overridable")
   version               Int     @default(1)
   isLatestVersion       Boolean @default(true) @map("is_latest_version")
+
+  // DNA columns
+  partnerCode       String? @map("partner_code") @db.VarChar(50)
+  brandCode         String? @map("brand_code") @db.VarChar(50)
+  verticalCode      String? @map("vertical_code") @db.VarChar(50)
+  multilanguageJson Json?   @map("multilanguage_json")
 
   @@unique([fieldCode, tenantId])
   @@index([fieldGroup])
