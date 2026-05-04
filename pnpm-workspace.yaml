@@ -12,12 +12,11 @@ packages:
   # Pre-V5 Shared/* packages (non-backend still in use)
   - 'Shared/common'
   - 'Shared/frontend'
-  - 'Shared/prisma-schemas'
 
-  # Shared/backend/* removed from workspace 2026-05-04 (Phase 3A cleanup)
-  # All 11 packages confirmed zero imports across entire codebase.
-  # Files preserved on disk at Shared/backend/ for reference.
-  # See: docs/PHASE_2_SHARED_BACKEND_AUDIT.md
+  # Shared/* removed from workspace:
+  #   Shared/prisma-schemas  — archived 2026-05-04 to archive/prisma-schemas-stale/
+  #                            (conflicting generator outputs with canonical; see docs/PHASE_3B_PRISMA_AUDIT.md)
+  #   Shared/backend/*       — removed 2026-05-04 (11 packages, 0 imports; see docs/PHASE_2_SHARED_BACKEND_AUDIT.md)
 
   # White Label API (separate Next.js service, stays per V5 plan)
   - 'WhiteLabel/wl-api'

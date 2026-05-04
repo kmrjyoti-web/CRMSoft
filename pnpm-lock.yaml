@@ -65,15 +65,6 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
-  Shared/prisma-schemas:
-    dependencies:
-      '@prisma/client':
-        specifier: ^5.0.0
-        version: 5.22.0(prisma@5.22.0)
-      prisma:
-        specifier: ^5.0.0
-        version: 5.22.0
-
   WhiteLabel/wl-api:
     dependencies:
       '@nestjs/common':
