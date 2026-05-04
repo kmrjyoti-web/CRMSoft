@@ -4,12 +4,12 @@ on:
   pull_request:
     branches: [develop, main]
     paths:
-      - 'apps-frontend/vendor-panel/**'
+      - 'apps/vendor-panel/**'
       - '.github/workflows/ci-vendor-panel.yml'
   push:
     branches: [develop]
     paths:
-      - 'apps-frontend/vendor-panel/**'
+      - 'apps/vendor-panel/**'
 
 concurrency:
   group: ci-vendor-panel-${{ github.ref }}
@@ -18,7 +18,7 @@ concurrency:
 env:
   NODE_VERSION: '24'
   NODE_OPTIONS: '--max-old-space-size=4096'
-  APP_DIR: 'apps-frontend/vendor-panel'
+  APP_DIR: 'apps/vendor-panel'
 
 jobs:
   # ─────────────────────────────────────────────

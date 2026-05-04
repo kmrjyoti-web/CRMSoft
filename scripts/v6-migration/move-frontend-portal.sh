@@ -18,7 +18,7 @@ if [ -z "${SOURCE_NAME:-}" ] || [ -z "${TARGET_NAME:-}" ]; then
   exit 1
 fi
 
-SOURCE="apps-frontend/$SOURCE_NAME"
+SOURCE="apps/$SOURCE_NAME"
 TARGET="apps/frontend/$TARGET_NAME"
 
 if [ ! -d "$SOURCE" ]; then
@@ -41,7 +41,7 @@ git mv "$SOURCE" "$TARGET"
 
 echo ""
 echo "Next steps:"
-echo "1. Update pnpm-workspace.yaml: change 'apps-frontend/$SOURCE_NAME' → 'apps/frontend/$TARGET_NAME'"
+echo "1. Update pnpm-workspace.yaml: change 'apps/$SOURCE_NAME' → 'apps/frontend/$TARGET_NAME'"
 echo "2. Update any tsconfig.json paths referencing the old location"
 echo "3. Run: pnpm install"
 echo "4. Run: ./scripts/v6-migration/verify-migration-health.sh"

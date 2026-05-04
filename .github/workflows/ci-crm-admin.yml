@@ -4,12 +4,12 @@ on:
   pull_request:
     branches: [develop, main]
     paths:
-      - 'apps-frontend/crm-admin/**'
+      - 'apps/crm-admin/**'
       - '.github/workflows/ci-crm-admin.yml'
   push:
     branches: [develop]
     paths:
-      - 'apps-frontend/crm-admin/**'
+      - 'apps/crm-admin/**'
 
 concurrency:
   group: ci-crm-admin-${{ github.ref }}
@@ -18,8 +18,8 @@ concurrency:
 env:
   NODE_VERSION: '24'
   NODE_OPTIONS: '--max-old-space-size=4096'
-  APP_DIR: 'apps-frontend/crm-admin'
-  COREUI_DIR: 'apps-frontend/crm-admin/lib/coreui'
+  APP_DIR: 'apps/crm-admin'
+  COREUI_DIR: 'apps/crm-admin/lib/coreui'
 
 jobs:
   # ─────────────────────────────────────────────

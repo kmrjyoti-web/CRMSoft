@@ -5,9 +5,8 @@
 # ignores. This file is what pnpm actually reads for workspace discovery.
 
 packages:
-  # Apps (executables)
+  # Apps (executables) — api + 7 frontend apps
   - 'apps/*'
-  - 'apps-frontend/*'
 
   # Pre-V5 Shared/* packages (non-backend still in use)
   - 'Shared/common'

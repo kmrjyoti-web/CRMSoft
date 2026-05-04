@@ -32,7 +32,7 @@ echo "=== TypeScript checks ==="
 backend_errors=$(cd apps/api && pnpm exec tsc --noEmit 2>&1 | grep -c "error TS" || true)
 check "Backend tsc errors" "$backend_errors" 0
 
-crm_errors=$(cd apps-frontend/crm-admin && rm -rf .next && pnpm exec tsc --noEmit 2>&1 | grep -c "error TS" || true)
+crm_errors=$(cd apps/crm-admin && rm -rf .next && pnpm exec tsc --noEmit 2>&1 | grep -c "error TS" || true)
 check "crm-admin tsc errors" "$crm_errors" 329
 
 echo ""

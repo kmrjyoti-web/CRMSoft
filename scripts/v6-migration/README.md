@@ -23,7 +23,7 @@ Uses `git mv` to preserve history.
 
 ### move-frontend-portal.sh
 
-Move a frontend portal from `apps-frontend/` to `apps/frontend/`.
+Move a frontend portal from `apps/` to `apps/frontend/`.
 
 ```bash
 ./scripts/v6-migration/move-frontend-portal.sh crm-admin crm-admin-new

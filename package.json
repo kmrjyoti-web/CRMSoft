@@ -29,7 +29,7 @@
     "build:wl-api": "pnpm --filter wl-api build",
     "build:wl-admin": "pnpm --filter wl-admin build",
     "build:wl-partner": "pnpm --filter wl-partner build",
-    "build:all-frontend": "pnpm --filter './apps-frontend/*' build",
+    "build:all-frontend": "pnpm --filter './apps/*' --filter '!api' build",
     "test:api": "pnpm --filter crm-backend test",
     "test:wl": "pnpm --filter wl-api test",
     "tsc:api": "pnpm --filter crm-backend exec tsc --noEmit",
