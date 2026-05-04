@@ -29,7 +29,7 @@ echo "=========================================="
 echo ""
 echo "=== TypeScript checks ==="
 
-backend_errors=$(cd apps-backend/api && pnpm exec tsc --noEmit 2>&1 | grep -c "error TS" || true)
+backend_errors=$(cd apps/api && pnpm exec tsc --noEmit 2>&1 | grep -c "error TS" || true)
 check "Backend tsc errors" "$backend_errors" 0
 
 crm_errors=$(cd apps-frontend/crm-admin && rm -rf .next && pnpm exec tsc --noEmit 2>&1 | grep -c "error TS" || true)
@@ -38,8 +38,8 @@ check "crm-admin tsc errors" "$crm_errors" 329
 echo ""
 echo "=== Prisma checks ==="
 
-prisma_at=$(ls apps-backend/api/node_modules/@prisma/ 2>/dev/null | grep -c "client" || true)
-prisma_dot=$(ls apps-backend/api/node_modules/.prisma/ 2>/dev/null | grep -c "client" || true)
+prisma_at=$(ls apps/api/node_modules/@prisma/ 2>/dev/null | grep -c "client" || true)
+prisma_dot=$(ls apps/api/node_modules/.prisma/ 2>/dev/null | grep -c "client" || true)
 echo "  @prisma/ clients: $prisma_at (expected ≥ 4)"
 echo "  .prisma/ clients: $prisma_dot (expected ≥ 3)"
 

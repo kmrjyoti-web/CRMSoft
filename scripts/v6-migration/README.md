@@ -17,7 +17,7 @@ Uses `git mv` to preserve history.
 
 ```bash
 ./scripts/v6-migration/move-backend-module.sh \
-  apps-backend/api/src/modules/core/identity \
+  apps/api/src/modules/core/identity \
   core/platform/auth
 ```
 

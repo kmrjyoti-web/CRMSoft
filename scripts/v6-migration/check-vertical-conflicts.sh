@@ -9,7 +9,7 @@ set -euo pipefail
 
 VERTICAL=${1:-travel}
 TARGET="verticals/$VERTICAL"
-CORE_PRISMA="apps-backend/api/prisma"
+CORE_PRISMA="apps/api/prisma"
 
 cd "$(git rev-parse --show-toplevel)"
 

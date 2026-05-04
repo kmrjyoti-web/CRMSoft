@@ -4,7 +4,7 @@
 # Usage: ./move-backend-module.sh <source-dir> <target-dir>
 # Example:
 #   ./move-backend-module.sh \
-#     apps-backend/api/src/modules/core/identity \
+#     apps/api/src/modules/core/identity \
 #     core/platform/auth
 #
 # Safety: always run verify-migration-health.sh after this script.
@@ -16,7 +16,7 @@ TARGET=$2
 
 if [ -z "${SOURCE:-}" ] || [ -z "${TARGET:-}" ]; then
   echo "Usage: $0 <source> <target>"
-  echo "Example: $0 apps-backend/api/src/modules/core/identity core/platform/auth"
+  echo "Example: $0 apps/api/src/modules/core/identity core/platform/auth"
   exit 1
 fi
 
@@ -38,7 +38,7 @@ git mv "$SOURCE" "$TARGET"
 
 echo ""
 echo "Import paths to update manually:"
-echo "  Old: $(echo "$SOURCE" | sed 's|apps-backend/api/src/||')"
+echo "  Old: $(echo "$SOURCE" | sed 's|apps/api/src/||')"
 echo "  New: $(echo "$TARGET")"
 echo ""
 echo "Run: ./scripts/v6-migration/update-imports-bulk.sh <old-pattern> <new-pattern>"

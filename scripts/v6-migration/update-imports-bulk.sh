@@ -4,7 +4,7 @@
 # Usage: ./update-imports-bulk.sh <old-pattern> <new-pattern> [directory]
 # Example:
 #   ./update-imports-bulk.sh '@shared-types' '@crmsoft/types'
-#   ./update-imports-bulk.sh 'modules/core/identity' 'core/platform/auth' apps-backend
+#   ./update-imports-bulk.sh 'modules/core/identity' 'core/platform/auth' apps
 
 set -euo pipefail
 

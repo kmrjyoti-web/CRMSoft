@@ -6,7 +6,7 @@
 
 packages:
   # Apps (executables)
-  - 'apps-backend/*'
+  - 'apps/*'
   - 'apps-frontend/*'
 
   # Pre-V5 Shared/* packages (non-backend still in use)
