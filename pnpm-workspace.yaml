@@ -9,14 +9,6 @@ packages:
   - 'apps-backend/*'
   - 'apps-frontend/*'
 
-  # V5 reusable packages — glob patterns for future growth.
-  # Currently only README placeholders; pnpm skips any folder without
-  # a package.json so these are safe no-ops today.
-  - 'packages-backend/*'
-  - 'packages-frontend/*'
-  - 'packages-shared/*'
-  - 'tools/*'
-
   # Pre-V5 Shared/* packages (still used by the backend; keep until migrated)
   - 'Shared/common'
   - 'Shared/frontend'

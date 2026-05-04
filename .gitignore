@@ -24,6 +24,8 @@ Application/backend/tmp/reports/
 Application/backend/uploads/exports/
 Application/backend/docs/health-reports/audit-runs/
 Application/backend/docs/health-reports/latest-audit.json
+apps-backend/api/tmp/
+apps-backend/api/uploads/exports/
 
 # ────────────────────────────────────────────────────────────
 # Credential / connection reference files — NEVER commit these
@@ -89,3 +91,4 @@ apps-frontend/**/.env.*
 .next/
 backups/
 brand-assets/*/extracted/
+.env-archive/
