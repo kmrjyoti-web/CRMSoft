@@ -1,0 +1,207 @@
+/*
+ * CoreUI – Control Tokens
+ * CSS custom properties for all form controls.
+ * Source: Angular aic-textbox.tokens.css + GLOBAL_UI_CONFIG Tailwind class equivalents.
+ *
+ * Token naming: --st-{component}-{property}
+ * Default values = light mode, matching Angular's Tailwind classes.
+ *
+ * DT (Design Token) override chain:
+ *   1. Component receives dt={{ inputtext: { background: '#f0f0f0' } }}
+ *   2. StyleHelper.generateCssVariables(dt) → { '--p-inputtext-background': '#f0f0f0' }
+ *   3. Applied as style attribute on the component wrapper
+ *   4. CSS references: background: var(--p-inputtext-background, var(--st-bg))
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════
+     TEXT / INPUT
+     ═══════════════════════════════════════════════════════ */
+  --st-bg: #f8fafc;
+  --st-bg-focus: #ffffff;
+  --st-bg-hover: #f1f5f9;
+  --st-border: #94a3b8;
+  --st-border-color: #94a3b8;
+  --st-border-radius: 0.5rem;
+  --st-border-focus: #4f46e5;
+  --st-text: #1e293b;
+  --st-placeholder: #64748b;
+  --st-focus-ring: rgba(79, 70, 229, 0.25);
+  --st-focus-border: #4f46e5;
+  --st-disabled-bg: #f1f5f9;
+  --st-disabled-text: #9ca3af;
+  --st-error-border: #ef4444;
+  --st-error-text: #ef4444;
+  --st-label-text: #475569;
+  --st-label-active-text: #4f46e5;
+  --st-label-color: #475569;
+  --st-icon-color: #64748b;
+  --st-glass-bg: transparent;
+  --st-glass-blur: 0px;
+
+  /* ═══════════════════════════════════════════════════════
+     CHECKBOX
+     ═══════════════════════════════════════════════════════ */
+  --st-checkbox-bg: #ffffff;
+  --st-checkbox-border: #d1d5db;
+  --st-checkbox-checked-bg: var(--color-primary, #3b82f6);
+  --st-checkbox-checked-border: var(--color-primary, #3b82f6);
+  --st-checkbox-check-color: #ffffff;
+  --st-checkbox-focus-ring: rgba(59, 130, 246, 0.25);
+  --st-checkbox-label-text: #374151;
+
+  /* ═══════════════════════════════════════════════════════
+     SWITCH
+     ═══════════════════════════════════════════════════════ */
+  --st-switch-track-bg: #e5e7eb;
+  --st-switch-track-active-bg: var(--color-primary, #3b82f6);
+  --st-switch-thumb-bg: #ffffff;
+  --st-switch-thumb-border: #d1d5db;
+  --st-switch-focus-ring: rgba(59, 130, 246, 0.25);
+
+  /* ═══════════════════════════════════════════════════════
+     SELECT
+     ═══════════════════════════════════════════════════════ */
+  --st-select-bg: #ffffff;
+  --st-select-border: #d1d5db;
+  --st-select-text: #1e293b;
+  --st-select-placeholder: #9ca3af;
+  --st-select-dropdown-bg: #ffffff;
+  --st-select-dropdown-border: #e5e7eb;
+  --st-select-dropdown-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --st-select-option-hover: #f3f4f6;
+  --st-select-option-selected: #eff6ff;
+  --st-select-option-text: #1e293b;
+  --st-select-icon-color: #9ca3af;
+
+  /* ═══════════════════════════════════════════════════════
+     SLIDER
+     ═══════════════════════════════════════════════════════ */
+  --st-slider-track-bg: #e5e7eb;
+  --st-slider-fill-bg: var(--color-primary, #3b82f6);
+  --st-slider-thumb-bg: #ffffff;
+  --st-slider-thumb-border: var(--color-primary, #3b82f6);
+  --st-slider-thumb-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+  /* ═══════════════════════════════════════════════════════
+     RATING
+     ═══════════════════════════════════════════════════════ */
+  --st-rating-active: #f59e0b;
+  --st-rating-inactive: #d1d5db;
+  --st-rating-hover: #fbbf24;
+
+  /* ═══════════════════════════════════════════════════════
+     FILE UPLOAD
+     ═══════════════════════════════════════════════════════ */
+  --st-upload-border: #d1d5db;
+  --st-upload-border-style: dashed;
+  --st-upload-bg: #ffffff;
+  --st-upload-hover-bg: #eff6ff;
+  --st-upload-hover-border: var(--color-primary, #3b82f6);
+  --st-upload-text: #6b7280;
+
+  /* ═══════════════════════════════════════════════════════
+     OTP
+     ═══════════════════════════════════════════════════════ */
+  --st-otp-border: #d1d5db;
+  --st-otp-focus-border: var(--color-primary, #3b82f6);
+  --st-otp-bg: #ffffff;
+  --st-otp-text: #1e293b;
+
+  /* ═══════════════════════════════════════════════════════
+     SIGNATURE
+     ═══════════════════════════════════════════════════════ */
+  --st-signature-border: #d1d5db;
+  --st-signature-bg: #ffffff;
+  --st-signature-stroke: #1e293b;
+  --st-signature-clear-bg: #e5e7eb;
+  --st-signature-clear-text: #374151;
+
+  /* ═══════════════════════════════════════════════════════
+     EDITOR / RICH TEXT
+     ═══════════════════════════════════════════════════════ */
+  --st-editor-border: #d1d5db;
+  --st-editor-border-radius: 0.5rem;
+  --st-editor-toolbar-bg: #f9fafb;
+  --st-editor-toolbar-border: #e5e7eb;
+  --st-editor-content-bg: #ffffff;
+  --st-editor-content-text: #1f2937;
+  --st-editor-btn-bg: transparent;
+  --st-editor-btn-hover-bg: #f3f4f6;
+  --st-editor-btn-active-bg: #e5e7eb;
+  --st-editor-focus-ring: var(--color-primary, #3b82f6);
+
+  /* ═══════════════════════════════════════════════════════
+     RADIO
+     ═══════════════════════════════════════════════════════ */
+  --st-radio-border: #d1d5db;
+  --st-radio-checked-bg: var(--color-primary, #3b82f6);
+  --st-radio-checked-border: var(--color-primary, #3b82f6);
+  --st-radio-dot-color: #ffffff;
+
+  /* ═══════════════════════════════════════════════════════
+     TAGS / CHIPS
+     ═══════════════════════════════════════════════════════ */
+  --st-tag-bg: #eff6ff;
+  --st-tag-text: #1d4ed8;
+  --st-tag-border: #bfdbfe;
+  --st-tag-remove-hover: #dbeafe;
+
+  /* ═══════════════════════════════════════════════════════
+     SEGMENTED CONTROL
+     ═══════════════════════════════════════════════════════ */
+  --st-segment-bg: #f3f4f6;
+  --st-segment-active-bg: #ffffff;
+  --st-segment-active-text: #111827;
+  --st-segment-idle-text: #6b7280;
+  --st-segment-active-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  /* ═══════════════════════════════════════════════════════
+     COLOR PICKER
+     ═══════════════════════════════════════════════════════ */
+  --st-color-preview-border: #d1d5db;
+  --st-color-preview-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  /* ═══════════════════════════════════════════════════════
+     OPTION CARDS (Radio/Checkbox groups)
+     ═══════════════════════════════════════════════════════ */
+  --st-option-card-bg: #ffffff;
+  --st-option-card-border: #e5e7eb;
+  --st-option-card-selected-border: var(--color-primary, #3b82f6);
+  --st-option-card-selected-bg: rgba(59, 130, 246, 0.03);
+  --st-option-card-hover-border: #9ca3af;
+  --st-option-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  /* ═══════════════════════════════════════════════════════
+     FIELDSET
+     ═══════════════════════════════════════════════════════ */
+  --st-fieldset-border: #e5e7eb;
+  --st-fieldset-bg: #ffffff;
+  --st-fieldset-header-bg: #f9fafb;
+  --st-fieldset-legend-text: #334155;
+
+  /* ═══════════════════════════════════════════════════════
+     BUTTON (Action Buttons)
+     ═══════════════════════════════════════════════════════ */
+  --st-button-radius: 0.5rem;
+  --st-button-font-weight: 500;
+  --st-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --st-button-primary-bg: var(--color-primary, #3b82f6);
+  --st-button-primary-text: #ffffff;
+  --st-button-primary-border: var(--color-primary, #3b82f6);
+  --st-button-primary-hover-bg: #2563eb;
+  --st-button-secondary-bg: #ffffff;
+  --st-button-secondary-text: #374151;
+  --st-button-secondary-border: #d1d5db;
+  --st-button-secondary-hover-bg: #f9fafb;
+  --st-button-danger-bg: #dc2626;
+  --st-button-danger-text: #ffffff;
+  --st-button-danger-border: #dc2626;
+  --st-button-danger-hover-bg: #b91c1c;
+  --st-button-ghost-text: #4b5563;
+  --st-button-ghost-hover-bg: #f3f4f6;
+  --st-button-outline-text: var(--color-primary, #3b82f6);
+  --st-button-outline-border: var(--color-primary, #3b82f6);
+  --st-button-outline-hover-bg: #eff6ff;
+  --st-button-disabled-opacity: 0.5;
+}

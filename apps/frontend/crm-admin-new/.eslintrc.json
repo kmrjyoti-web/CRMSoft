@@ -1,0 +1,86 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "next/typescript"
+  ],
+  "plugins": ["import"],
+  "ignorePatterns": ["lib/**"],
+  "rules": {
+    "no-restricted-imports": ["error", {
+      "patterns": [
+        {
+          "group": ["@coreui/ui-react", "@coreui/ui-react/*", "@coreui/ui", "@coreui/ui/*", "@coreui/layout", "@coreui/layout/*", "@coreui/theme", "@coreui/theme/*"],
+          "message": "Import from '@/components/ui' instead. Only src/components/ui/ can import @coreui."
+        },
+        {
+          "group": ["lucide-react"],
+          "message": "Import { Icon } from '@/components/ui' instead. Add icons to Icon.tsx ICON_MAP."
+        }
+      ]
+    }],
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["warn", {
+      "argsIgnorePattern": "^_",
+      "varsIgnorePattern": "^_"
+    }],
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/consistent-type-imports": ["warn", {
+      "prefer": "type-imports"
+    }],
+    "react/jsx-no-duplicate-props": "error",
+    "react/self-closing-comp": "warn",
+    "react/jsx-curly-brace-presence": ["warn", {
+      "props": "never",
+      "children": "never"
+    }],
+    "import/order": ["warn", {
+      "groups": ["builtin", "external", "internal", ["parent", "sibling"], "index", "type"],
+      "pathGroups": [
+        { "pattern": "react", "group": "builtin", "position": "before" },
+        { "pattern": "react/**", "group": "builtin", "position": "before" },
+        { "pattern": "next", "group": "builtin", "position": "before" },
+        { "pattern": "next/**", "group": "builtin", "position": "before" },
+        { "pattern": "@/components/ui", "group": "internal", "position": "before" },
+        { "pattern": "@/components/ui/**", "group": "internal", "position": "before" },
+        { "pattern": "@/components/common/**", "group": "internal" },
+        { "pattern": "@/features/**", "group": "internal" },
+        { "pattern": "@/hooks/**", "group": "internal" },
+        { "pattern": "@/stores/**", "group": "internal" },
+        { "pattern": "@/services/**", "group": "internal" },
+        { "pattern": "@/lib/**", "group": "internal" },
+        { "pattern": "@/config/**", "group": "internal" },
+        { "pattern": "@/types/**", "group": "internal" },
+        { "pattern": "@/providers/**", "group": "internal" }
+      ],
+      "pathGroupsExcludedImportTypes": ["react", "next"],
+      "newlines-between": "always",
+      "alphabetize": { "order": "asc", "caseInsensitive": true }
+    }],
+    "import/no-duplicates": "error"
+  },
+  "overrides": [
+    {
+      "files": ["src/components/ui/**/*.{ts,tsx}"],
+      "rules": {
+        "no-restricted-imports": ["error", {
+          "patterns": [{
+            "group": ["lucide-react"],
+            "message": "Only Icon.tsx can import lucide-react."
+          }]
+        }]
+      }
+    },
+    {
+      "files": ["src/components/ui/Icon.tsx"],
+      "rules": { "no-restricted-imports": "off" }
+    },
+    {
+      "files": ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}", "jest.setup.ts"],
+      "rules": {
+        "no-console": "off",
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    }
+  ]
+}

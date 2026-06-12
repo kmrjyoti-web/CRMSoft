@@ -1,0 +1,43 @@
+{
+  "name": "@coreui/ui",
+  "version": "1.0.2",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./styles/base.css": "./src/core/styles/base.css",
+    "./styles/control-tokens.css": "./src/core/tokens/control-tokens.css",
+    "./styles/component-tokens.css": "./src/core/tokens/component-tokens.css"
+  },
+  "files": [
+    "dist",
+    "src/core/styles",
+    "src/core/tokens",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@coreui/config": "workspace:*",
+    "@types/node": "^20.19.34",
+    "jsdom": "^28.1.0",
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.18"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  }
+}

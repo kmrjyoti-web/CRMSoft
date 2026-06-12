@@ -1,0 +1,376 @@
+{
+  "generatedAt": "2026-04-16T14:01:16.015Z",
+  "totalRoutes": 45,
+  "routes": [
+    {
+      "key": "dashboard",
+      "label": "Dashboard",
+      "path": "/",
+      "icon": "LayoutDashboard",
+      "section": "DEV_OPS",
+      "displayOrder": 1
+    },
+    {
+      "key": "ai-tokens",
+      "label": "Ai Tokens",
+      "path": "/ai-tokens",
+      "icon": "Brain",
+      "section": "SOFTWARE_VENDOR",
+      "displayOrder": 2
+    },
+    {
+      "key": "audit-logs",
+      "label": "Audit Logs",
+      "path": "/audit-logs",
+      "icon": "FileSearch",
+      "section": "DEV_OPS",
+      "displayOrder": 3
+    },
+    {
+      "key": "coupons",
+      "label": "Coupons",
+      "path": "/coupons",
+      "icon": "Ticket",
+      "section": "SOFTWARE_VENDOR",
+      "displayOrder": 4
+    },
+    {
+      "key": "db-admin",
+      "label": "Db Admin",
+      "path": "/db-admin",
+      "icon": "Database",
+      "section": "DEV_OPS",
+      "displayOrder": 5
+    },
+    {
+      "key": "dev-requests",
+      "label": "Dev Requests",
+      "path": "/dev-requests",
+      "icon": "ClipboardList",
+      "section": "DEV_OPS",
+      "displayOrder": 6
+    },
+    {
+      "key": "dev-tools",
+      "label": "Dev Tools",
+      "path": "/dev-tools",
+      "icon": "Code",
+      "section": "DEVELOPER_TOOLS",
+      "displayOrder": 7
+    },
+    {
+      "key": "error-logs",
+      "label": "Error Logs",
+      "path": "/error-logs",
+      "icon": "AlertTriangle",
+      "section": "DEV_OPS",
+      "displayOrder": 8
+    },
+    {
+      "key": "industries",
+      "label": "Industries",
+      "path": "/industries",
+      "icon": "Circle",
+      "section": "OTHER",
+      "displayOrder": 9
+    },
+    {
+      "key": "inventory-labels",
+      "label": "Inventory Labels",
+      "path": "/inventory-labels",
+      "icon": "Circle",
+      "section": "OTHER",
+      "displayOrder": 10
+    },
+    {
+      "key": "licenses",
+      "label": "Licenses",
+      "path": "/licenses",
+      "icon": "Key",
+      "section": "SOFTWARE_VENDOR",
+      "displayOrder": 11
+    },
+    {
+      "key": "module-builder",
+      "label": "Module Builder",
+      "path": "/module-builder",
+      "icon": "Hammer",
+      "section": "DEV_OPS",
+      "displayOrder": 12
+    },
+    {
+      "key": "modules",
+      "label": "Modules",
+      "path": "/modules",
+      "icon": "Layers",
+      "section": "SOFTWARE_VENDOR",
+      "displayOrder": 13
+    },
+    {
+      "key": "notion-test-log",
+      "label": "Notion Test Log",
+      "path": "/notion-test-log",
+      "icon": "Circle",
+      "section": "OTHER",
+      "displayOrder": 14
+    },
+    {
+      "key": "offers",
+      "label": "Offers",
+      "path": "/offers",
+      "icon": "Gift",
+      "section": "SOFTWARE_VENDOR",
+      "displayOrder": 15
+    },
+    {
+      "key": "packages",
+      "label": "Packages",
+      "path": "/packages",
+      "icon": "Package",
+      "section": "SOFTWARE_VENDOR",
+      "displayOrder": 16
+    },
+    {
+      "key": "page-registry",
+      "label": "Page Registry",
+      "path": "/page-registry",
+      "icon": "Circle",
+      "section": "OTHER",
+      "displayOrder": 17
+    },
+    {
+      "key": "partners",
+      "label": "Partners",
+      "path": "/partners",
+      "icon": "Users",
+      "section": "SOFTWARE_VENDOR",
+      "displayOrder": 18
+    },
+    {
+      "key": "plans",
+      "label": "Plans",
+      "path": "/plans",
+      "icon": "CreditCard",
+      "section": "SOFTWARE_VENDOR",
+      "displayOrder": 19
+    },
+    {
+      "key": "profile",
+      "label": "Profile",
+      "path": "/profile",
+      "icon": "User",
+      "section": "OTHER",
+      "displayOrder": 20
+    },
+    {
+      "key": "recharge-plans",
+      "label": "Recharge Plans",
+      "path": "/recharge-plans",
+      "icon": "Zap",
+      "section": "SOFTWARE_VENDOR",
+      "displayOrder": 21
+    },
+    {
+      "key": "service-rates",
+      "label": "Service Rates",
+      "path": "/service-rates",
+      "icon": "Receipt",
+      "section": "SOFTWARE_VENDOR",
+      "displayOrder": 22
+    },
+    {
+      "key": "settings",
+      "label": "Settings",
+      "path": "/settings",
+      "icon": "Settings",
+      "section": "OTHER",
+      "displayOrder": 23
+    },
+    {
+      "key": "subscription-analytics",
+      "label": "Subscription Analytics",
+      "path": "/subscription-analytics",
+      "icon": "TrendingUp",
+      "section": "SOFTWARE_VENDOR",
+      "displayOrder": 24
+    },
+    {
+      "key": "support",
+      "label": "Support",
+      "path": "/support",
+      "icon": "Circle",
+      "section": "OTHER",
+      "displayOrder": 25
+    },
+    {
+      "key": "system-health",
+      "label": "System Health",
+      "path": "/system-health",
+      "icon": "Activity",
+      "section": "DEV_OPS",
+      "displayOrder": 26
+    },
+    {
+      "key": "templates",
+      "label": "Templates",
+      "path": "/templates",
+      "icon": "Circle",
+      "section": "OTHER",
+      "displayOrder": 27
+    },
+    {
+      "key": "tenants",
+      "label": "Tenants",
+      "path": "/tenants",
+      "icon": "Building",
+      "section": "SOFTWARE_VENDOR",
+      "displayOrder": 28
+    },
+    {
+      "key": "test-center",
+      "label": "Test Center",
+      "path": "/test-center",
+      "icon": "Circle",
+      "section": "OTHER",
+      "displayOrder": 29
+    },
+    {
+      "key": "vendor-dashboard",
+      "label": "Vendor Dashboard",
+      "path": "/vendor-dashboard",
+      "icon": "BarChart3",
+      "section": "SOFTWARE_VENDOR",
+      "displayOrder": 30
+    },
+    {
+      "key": "versions",
+      "label": "Versions",
+      "path": "/versions",
+      "icon": "Circle",
+      "section": "OTHER",
+      "displayOrder": 31
+    },
+    {
+      "key": "verticals",
+      "label": "Verticals",
+      "path": "/verticals",
+      "icon": "Circle",
+      "section": "OTHER",
+      "displayOrder": 32
+    },
+    {
+      "key": "wallet",
+      "label": "Wallet",
+      "path": "/wallet",
+      "icon": "Wallet",
+      "section": "SOFTWARE_VENDOR",
+      "displayOrder": 33
+    },
+    {
+      "key": "wallet-analytics",
+      "label": "Wallet Analytics",
+      "path": "/wallet-analytics",
+      "icon": "PieChart",
+      "section": "SOFTWARE_VENDOR",
+      "displayOrder": 34
+    },
+    {
+      "key": "webhooks",
+      "label": "Webhooks",
+      "path": "/webhooks",
+      "icon": "Webhook",
+      "section": "DEV_OPS",
+      "displayOrder": 35
+    },
+    {
+      "key": "dev-tools.api-docs",
+      "label": "Api Docs",
+      "path": "/dev-tools/api-docs",
+      "icon": "BookOpen",
+      "parentKey": "dev-tools",
+      "section": "OTHER",
+      "displayOrder": 36
+    },
+    {
+      "key": "dev-tools.ui-kit",
+      "label": "Ui Kit",
+      "path": "/dev-tools/ui-kit",
+      "icon": "Palette",
+      "parentKey": "dev-tools",
+      "section": "OTHER",
+      "displayOrder": 37
+    },
+    {
+      "key": "test-center.automated",
+      "label": "Automated",
+      "path": "/test-center/automated",
+      "icon": "Circle",
+      "parentKey": "test-center",
+      "section": "OTHER",
+      "displayOrder": 38
+    },
+    {
+      "key": "test-center.database",
+      "label": "Database",
+      "path": "/test-center/database",
+      "icon": "Circle",
+      "parentKey": "test-center",
+      "section": "OTHER",
+      "displayOrder": 39
+    },
+    {
+      "key": "test-center.dev-qa",
+      "label": "Dev Qa",
+      "path": "/test-center/dev-qa",
+      "icon": "Circle",
+      "parentKey": "test-center",
+      "section": "OTHER",
+      "displayOrder": 40
+    },
+    {
+      "key": "test-center.errors",
+      "label": "Errors",
+      "path": "/test-center/errors",
+      "icon": "Circle",
+      "parentKey": "test-center",
+      "section": "OTHER",
+      "displayOrder": 41
+    },
+    {
+      "key": "test-center.manual",
+      "label": "Manual",
+      "path": "/test-center/manual",
+      "icon": "Circle",
+      "parentKey": "test-center",
+      "section": "OTHER",
+      "displayOrder": 42
+    },
+    {
+      "key": "test-center.reports",
+      "label": "Reports",
+      "path": "/test-center/reports",
+      "icon": "Circle",
+      "parentKey": "test-center",
+      "section": "OTHER",
+      "displayOrder": 43
+    },
+    {
+      "key": "test-center.scheduled",
+      "label": "Scheduled",
+      "path": "/test-center/scheduled",
+      "icon": "Circle",
+      "parentKey": "test-center",
+      "section": "OTHER",
+      "displayOrder": 44
+    },
+    {
+      "key": "test-center.test-plans",
+      "label": "Test Plans",
+      "path": "/test-center/test-plans",
+      "icon": "Circle",
+      "parentKey": "test-center",
+      "section": "OTHER",
+      "displayOrder": 45
+    }
+  ]
+}

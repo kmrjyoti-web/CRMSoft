@@ -1344,6 +1344,263 @@ importers:
         specifier: ^5
         version: 5.9.3
 
+  apps/frontend/crm-admin-new:
+    dependencies:
+      '@dnd-kit/core':
+        specifier: ^6.3.1
+        version: 6.3.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@dnd-kit/sortable':
+        specifier: ^10.0.0
+        version: 10.0.0(@dnd-kit/core@6.3.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+      '@hookform/resolvers':
+        specifier: ^5.2.2
+        version: 5.2.2(react-hook-form@7.73.1(react@18.3.1))
+      '@tanstack/react-query':
+        specifier: ^5.90.21
+        version: 5.99.2(react@18.3.1)
+      '@tanstack/react-query-devtools':
+        specifier: ^5.91.3
+        version: 5.99.2(@tanstack/react-query@5.99.2(react@18.3.1))(react@18.3.1)
+      '@types/dagre':
+        specifier: ^0.7.54
+        version: 0.7.54
+      '@types/qrcode':
+        specifier: ^1.5.6
+        version: 1.5.6
+      '@xyflow/react':
+        specifier: ^12.10.1
+        version: 12.10.2(@types/react@18.3.28)(immer@11.1.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      axios:
+        specifier: ^1.15.0
+        version: 1.15.2
+      country-state-city:
+        specifier: ^3.2.1
+        version: 3.2.1
+      dagre:
+        specifier: ^0.8.5
+        version: 0.8.5
+      date-fns:
+        specifier: ^4.1.0
+        version: 4.1.0
+      expr-eval:
+        specifier: ^2.0.2
+        version: 2.0.2
+      file-saver:
+        specifier: ^2.0.5
+        version: 2.0.5
+      jsbarcode:
+        specifier: ^3.12.3
+        version: 3.12.3
+      jspdf:
+        specifier: ^4.2.1
+        version: 4.2.1
+      jspdf-autotable:
+        specifier: ^3.8.4
+        version: 3.8.4(jspdf@4.2.1)
+      jwt-decode:
+        specifier: ^4.0.0
+        version: 4.0.0
+      leaflet:
+        specifier: ^1.9.4
+        version: 1.9.4
+      lucide-react:
+        specifier: ^0.575.0
+        version: 0.575.0(react@18.3.1)
+      motion:
+        specifier: ^12.34.3
+        version: 12.38.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      next:
+        specifier: 15.5.15
+        version: 15.5.15(@babel/core@7.29.0)(@playwright/test@1.59.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      qrcode:
+        specifier: ^1.5.4
+        version: 1.5.4
+      react:
+        specifier: ^18
+        version: 18.3.1
+      react-dom:
+        specifier: ^18
+        version: 18.3.1(react@18.3.1)
+      react-hook-form:
+        specifier: ^7.71.2
+        version: 7.73.1(react@18.3.1)
+      react-hot-toast:
+        specifier: ^2.6.0
+        version: 2.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-leaflet:
+        specifier: '4'
+        version: 4.2.1(leaflet@1.9.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      recharts:
+        specifier: ^3.7.0
+        version: 3.8.1(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react-is@18.3.1)(react@18.3.1)(redux@5.0.1)
+      xlsx:
+        specifier: ^0.18.5
+        version: 0.18.5
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
+      zustand:
+        specifier: ^5.0.11
+        version: 5.0.12(@types/react@18.3.28)(immer@11.1.4)(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
+    devDependencies:
+      '@playwright/test':
+        specifier: ^1.58.2
+        version: 1.59.1
+      '@testing-library/jest-dom':
+        specifier: ^6.9.1
+        version: 6.9.1
+      '@testing-library/react':
+        specifier: ^16.3.2
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@testing-library/user-event':
+        specifier: ^14.6.1
+        version: 14.6.1(@testing-library/dom@10.4.1)
+      '@types/file-saver':
+        specifier: ^2.0.7
+        version: 2.0.7
+      '@types/jest':
+        specifier: ^29
+        version: 29.5.14
+      '@types/leaflet':
+        specifier: ^1.9.21
+        version: 1.9.21
+      '@types/node':
+        specifier: ^20
+        version: 20.19.39
+      '@types/react':
+        specifier: ^18
+        version: 18.3.28
+      '@types/react-dom':
+        specifier: ^18
+        version: 18.3.7(@types/react@18.3.28)
+      eslint:
+        specifier: ^8
+        version: 8.57.1
+      eslint-config-next:
+        specifier: 15.5.15
+        version: 15.5.15(eslint@8.57.1)(typescript@5.9.3)
+      eslint-plugin-import:
+        specifier: ^2.31.0
+        version: 2.32.0(@typescript-eslint/parser@8.59.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
+      jest:
+        specifier: ^30.2.0
+        version: 30.3.0(@types/node@20.19.39)
+      jest-environment-jsdom:
+        specifier: ^30.2.0
+        version: 30.3.0
+      msw:
+        specifier: ^2.12.10
+        version: 2.13.4(@types/node@20.19.39)(typescript@5.9.3)
+      postcss:
+        specifier: ^8
+        version: 8.5.10
+      prettier:
+        specifier: ^3.5.3
+        version: 3.8.3
+      tailwindcss:
+        specifier: ^3.4.1
+        version: 3.4.19
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
+  apps/frontend/vendor-panel-new:
+    dependencies:
+      '@hookform/resolvers':
+        specifier: ^5.2.2
+        version: 5.2.2(react-hook-form@7.73.1(react@18.3.1))
+      '@tanstack/react-query':
+        specifier: ^5.90.21
+        version: 5.99.2(react@18.3.1)
+      axios:
+        specifier: ^1.15.0
+        version: 1.15.2
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      date-fns:
+        specifier: ^4.1.0
+        version: 4.1.0
+      lucide-react:
+        specifier: ^0.577.0
+        version: 0.577.0(react@18.3.1)
+      next:
+        specifier: 14.2.35
+        version: 14.2.35(@babel/core@7.29.0)(@playwright/test@1.59.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react:
+        specifier: ^18
+        version: 18.3.1
+      react-dom:
+        specifier: ^18
+        version: 18.3.1(react@18.3.1)
+      react-hook-form:
+        specifier: ^7.71.2
+        version: 7.73.1(react@18.3.1)
+      recharts:
+        specifier: ^3.8.0
+        version: 3.8.1(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react-is@18.3.1)(react@18.3.1)(redux@5.0.1)
+      sonner:
+        specifier: ^2.0.7
+        version: 2.0.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      tailwind-merge:
+        specifier: ^3.5.0
+        version: 3.5.0
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
+      zustand:
+        specifier: ^5.0.11
+        version: 5.0.12(@types/react@18.3.28)(immer@11.1.4)(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
+    devDependencies:
+      '@playwright/test':
+        specifier: ^1.59.1
+        version: 1.59.1
+      '@testing-library/jest-dom':
+        specifier: ^6.9.1
+        version: 6.9.1
+      '@testing-library/react':
+        specifier: ^16.3.2
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@testing-library/user-event':
+        specifier: ^14.6.1
+        version: 14.6.1(@testing-library/dom@10.4.1)
+      '@types/jest':
+        specifier: ^30.0.0
+        version: 30.0.0
+      '@types/node':
+        specifier: ^20
+        version: 20.19.39
+      '@types/react':
+        specifier: ^18
+        version: 18.3.28
+      '@types/react-dom':
+        specifier: ^18
+        version: 18.3.7(@types/react@18.3.28)
+      eslint:
+        specifier: ^8
+        version: 8.57.1
+      eslint-config-next:
+        specifier: 14.2.35
+        version: 14.2.35(eslint@8.57.1)(typescript@5.9.3)
+      jest:
+        specifier: ^30.3.0
+        version: 30.3.0(@types/node@20.19.39)
+      jest-environment-jsdom:
+        specifier: ^30.3.0
+        version: 30.3.0
+      postcss:
+        specifier: ^8
+        version: 8.5.10
+      tailwindcss:
+        specifier: ^3.4.1
+        version: 3.4.19
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
 packages:
 
   '@adobe/css-tools@4.4.4':
@@ -17138,7 +17395,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.59.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1))(eslint@8.57.1):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.59.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -17189,7 +17446,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.10
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.59.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1))(eslint@8.57.1)
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.59.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3

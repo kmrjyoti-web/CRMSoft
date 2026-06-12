@@ -1,0 +1,15 @@
+{
+  "name": "@coreui/config",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    "./tailwind": "./tailwind/tailwind.preset.ts",
+    "./tailwind/tailwind.preset": "./tailwind/tailwind.preset.ts",
+    "./tailwind/tailwind.preset.ts": "./tailwind/tailwind.preset.ts",
+    "./tsconfig/*": "./tsconfig/*.json",
+    "./eslint/*": "./eslint/*.js"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  }
+}

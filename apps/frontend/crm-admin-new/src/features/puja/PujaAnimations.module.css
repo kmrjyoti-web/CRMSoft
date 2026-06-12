@@ -1,0 +1,137 @@
+/* Puja item animation classes — triggered on item click */
+
+/* Bell / Ghanti — pendulum swing */
+@keyframes ring {
+  0%, 100% { transform: rotate(0deg); transform-origin: top center; }
+  15%  { transform: rotate(-22deg); transform-origin: top center; }
+  30%  { transform: rotate(18deg);  transform-origin: top center; }
+  45%  { transform: rotate(-12deg); transform-origin: top center; }
+  60%  { transform: rotate(8deg);   transform-origin: top center; }
+  75%  { transform: rotate(-4deg);  transform-origin: top center; }
+  90%  { transform: rotate(2deg);   transform-origin: top center; }
+}
+
+/* Diya / Candle — flame flicker with warm glow */
+@keyframes glowFlame {
+  0%, 100% {
+    filter: brightness(1) drop-shadow(0 0 6px rgba(255, 120, 0, 0.5));
+    transform: scale(1);
+  }
+  25%  {
+    filter: brightness(1.25) drop-shadow(0 0 14px rgba(255, 180, 0, 0.7));
+    transform: scale(1.06) scaleX(0.96);
+  }
+  50%  {
+    filter: brightness(1.35) drop-shadow(0 0 20px rgba(255, 200, 0, 0.85));
+    transform: scale(1.1) scaleX(0.92);
+  }
+  75%  {
+    filter: brightness(1.2) drop-shadow(0 0 12px rgba(255, 150, 0, 0.65));
+    transform: scale(1.04) scaleX(0.97);
+  }
+}
+
+/* Agarbatti — smoke particles rise upward */
+@keyframes smokeRise {
+  0%   { opacity: 0.75; transform: translateY(0)    scaleX(1)   rotate(0deg); }
+  33%  { opacity: 0.5;  transform: translateY(-14px) scaleX(1.2) rotate(-8deg); }
+  66%  { opacity: 0.25; transform: translateY(-28px) scaleX(1.5) rotate(6deg); }
+  100% { opacity: 0;    transform: translateY(-44px) scaleX(1.8) rotate(-4deg); }
+}
+
+/* Shankh / Conch — scale + rotate vibration */
+@keyframes shankhBlow {
+  0%, 100% { transform: scale(1)    rotate(0deg); }
+  20%       { transform: scale(1.18) rotate(-6deg); }
+  40%       { transform: scale(1.22) rotate(5deg); }
+  60%       { transform: scale(1.15) rotate(-3deg); }
+  80%       { transform: scale(1.08) rotate(2deg); }
+}
+
+/* Aarti thali — circular swirl with brightness */
+@keyframes aartiRotate {
+  0%   { transform: rotate(-25deg) scale(1);    filter: brightness(1); }
+  25%  { transform: rotate(25deg)  scale(1.12); filter: brightness(1.4); }
+  50%  { transform: rotate(-18deg) scale(1.06); filter: brightness(1.25); }
+  75%  { transform: rotate(18deg)  scale(1.12); filter: brightness(1.4); }
+  100% { transform: rotate(-25deg) scale(1);    filter: brightness(1); }
+}
+
+/* Phool / Petal — upward drift + spin */
+@keyframes petalFall {
+  0%   { opacity: 1;   transform: translateY(0)    rotate(0deg)   scale(1); }
+  50%  { opacity: 0.8; transform: translateY(-30px) rotate(120deg) scale(1.1); }
+  100% { opacity: 0;   transform: translateY(-65px) rotate(240deg) scale(0.8); }
+}
+
+/* Jal / Water — expanding ripple ring */
+@keyframes ripple {
+  0%   { box-shadow: 0 0 0 0px  rgba(59, 130, 246, 0.55), 0 0 0 0px  rgba(59, 130, 246, 0.3); }
+  50%  { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0.2),  0 0 0 20px rgba(59, 130, 246, 0.08); }
+  100% { box-shadow: 0 0 0 20px rgba(59, 130, 246, 0),    0 0 0 40px rgba(59, 130, 246, 0); }
+}
+
+/* Tulsi — subtle leaf sway */
+@keyframes leafWave {
+  0%, 100% { transform: rotate(-6deg) scale(1); }
+  50%       { transform: rotate(6deg)  scale(1.04); }
+}
+
+/* Chandan / Prasad / Rice / Prayer — gentle bounce */
+@keyframes gentleBounce {
+  0%, 100% { transform: translateY(0)    scale(1); }
+  35%       { transform: translateY(-10px) scale(1.08); }
+  65%       { transform: translateY(-6px)  scale(1.05); }
+}
+
+/* Meditation / Singing bowl — pulsating purple ring */
+@keyframes singingBowl {
+  0%, 100% {
+    box-shadow: 0 0 0 0  rgba(147, 51, 234, 0.4), 0 0 8px  rgba(147, 51, 234, 0.2);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 14px rgba(147, 51, 234, 0),  0 0 24px rgba(147, 51, 234, 0.5);
+    transform: scale(1.07);
+  }
+}
+
+/* Tasbih — swing like a rosary */
+@keyframes tasbihSwing {
+  0%, 100% { transform: rotate(0deg)   scale(1); }
+  30%       { transform: rotate(-20deg) scale(1.05); }
+  70%       { transform: rotate(20deg)  scale(1.05); }
+}
+
+/* ── Applied CSS classes ─────────────────────────────────── */
+
+.ring         { animation: ring         0.8s ease-in-out; }
+.glowFlame    { animation: glowFlame    1.6s ease-in-out infinite; }
+.smokeRise    { animation: smokeRise    1.2s ease-out; }
+.shankhBlow   { animation: shankhBlow   1.0s ease-in-out; }
+.aartiRotate  { animation: aartiRotate  1.4s ease-in-out; }
+.petalFall    { animation: petalFall    1.2s ease-out; }
+.ripple       { animation: ripple       1.0s ease-out; }
+.leafWave     { animation: leafWave     1.2s ease-in-out; }
+.gentleBounce { animation: gentleBounce 0.8s ease-in-out; }
+.singingBowl  { animation: singingBowl  1.8s ease-in-out infinite; }
+.tasbihSwing  { animation: tasbihSwing  1.0s ease-in-out; }
+
+/* Smoke particle — used by SmokeEffect */
+.smokeParticle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(180, 180, 180, 0.5);
+  animation: smokeRise 1.6s ease-out forwards;
+  pointer-events: none;
+}
+
+/* Petal particle — used by PetalShower */
+.petalParticle {
+  position: absolute;
+  font-size: 16px;
+  animation: petalFall 1.4s ease-out forwards;
+  pointer-events: none;
+}

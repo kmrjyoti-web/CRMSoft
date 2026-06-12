@@ -1,0 +1,82 @@
+import type {
+  User,
+  LoginRequest,
+  LoginResponse,
+  LoginPortal,
+} from "@/features/auth/types/auth.types";
+import { setAuthCookie, clearAuthCookie } from "@/features/auth/utils/auth-cookies";
+import api from "@/services/api-client";
+import { useAuthStore } from "@/stores/auth.store";
+import type { ApiResponse } from "@/types/api-response";
+
+// ── Auth Service ────────────────────────────────────────
+
+export const authService = {
+  /**
+   * POST /api/v1/auth/{portal}/login
+   * Portal determines the login endpoint: admin, employee, customer, partner, super-admin
+   */
+  async login(
+    payload: LoginRequest,
+    portal: LoginPortal = "admin",
+  ): Promise<LoginResponse> {
+    const { data } = await api.post<ApiResponse<LoginResponse>>(
+      `/api/v1/auth/${portal}/login`,
+      payload,
+    );
+
+    // Unwrap the NestJS ResponseMapperInterceptor wrapper.
+    // The auth controller returns { success, message, data: { user, accessToken, ... } }
+    // which gets wrapped again by the interceptor as { data: { ... } }.
+    const outerData = data.data as LoginResponse & { data?: LoginResponse };
+    const loginData: LoginResponse = outerData.data ?? outerData;
+
+    useAuthStore.getState().setAuth(loginData);
+    setAuthCookie(loginData.accessToken);
+    return loginData;
+  },
+
+  /** Clear store + redirect to /login */
+  logout(): void {
+    clearAuthCookie();
+    useAuthStore.getState().clearAuth();
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+  },
+
+  /** POST /api/v1/auth/refresh */
+  async refreshToken(): Promise<LoginResponse> {
+    const { refreshToken } = useAuthStore.getState();
+
+    const { data } = await api.post<ApiResponse<LoginResponse>>(
+      "/api/v1/auth/refresh",
+      { refreshToken },
+    );
+
+    // Unwrap the NestJS wrapper (handles double-wrapping)
+    const outerData = data.data as LoginResponse & { data?: LoginResponse };
+    const refreshData: LoginResponse = outerData.data ?? outerData;
+
+    useAuthStore.getState().setAuth({
+      accessToken: refreshData.accessToken,
+      refreshToken: refreshData.refreshToken ?? refreshToken ?? "",
+    });
+    setAuthCookie(refreshData.accessToken);
+
+    return refreshData;
+  },
+
+  /** GET /api/v1/auth/me */
+  async getProfile(): Promise<User> {
+    const { data } = await api.get<ApiResponse<User>>("/api/v1/auth/me");
+
+    // Unwrap the NestJS wrapper
+    const user = data.data;
+
+    useAuthStore.getState().setUser(user);
+    return user;
+  },
+};
+
+export default authService;

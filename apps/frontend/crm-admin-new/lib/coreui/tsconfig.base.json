@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "target": "ES2020",
+    "lib": ["ES2020"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@coreui/ui": ["packages/ui/src"],
+      "@coreui/ui-react": ["packages/ui-react/src"],
+      "@coreui/theme": ["packages/theme/src"],
+      "@coreui/layout": ["packages/layout/src"],
+      "@coreui/form-builder": ["packages/form-builder/src"],
+      "@coreui/ai-engine": ["packages/ai-engine/src"],
+      "@coreui/config/*": ["packages/config/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist"]
+}

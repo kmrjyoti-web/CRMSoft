@@ -1,0 +1,97 @@
+/*
+ * CoreUI – Component Tokens
+ * CSS custom properties for complex UI components.
+ * Source: Angular aic-table, aic-dialog, aic-drawer, aic-toast, aic-toolbar inline styles.
+ *
+ * Token naming: --st-{component}-{property}
+ * Default values = light mode, matching Angular component styles.
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════
+     TABLE
+     ═══════════════════════════════════════════════════════ */
+  --st-table-header-bg: #f8fafc;
+  --st-table-header-text: #475569;
+  --st-table-row-bg: #ffffff;
+  --st-table-row-hover: #f1f5f9;
+  --st-table-row-selected: #eff6ff;
+  --st-table-border: #e5e7eb;
+  --st-table-stripe-bg: #f9fafb;
+  --st-table-text: #1e293b;
+
+  /* ═══════════════════════════════════════════════════════
+     DIALOG
+     ═══════════════════════════════════════════════════════ */
+  --st-dialog-bg: #ffffff;
+  --st-dialog-overlay: rgba(0, 0, 0, 0.5);
+  --st-dialog-border: #e5e7eb;
+  --st-dialog-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --st-dialog-header-bg: #f8fafc;
+  --st-dialog-header-text: #1e293b;
+  --st-dialog-header-border: #e5e7eb;
+  --st-dialog-close-hover: #f3f4f6;
+  --st-dialog-radius: 0.75rem;
+
+  /* ═══════════════════════════════════════════════════════
+     DRAWER
+     ═══════════════════════════════════════════════════════ */
+  --st-drawer-bg: #ffffff;
+  --st-drawer-overlay: rgba(0, 0, 0, 0.5);
+  --st-drawer-shadow: -4px 0 25px rgba(0, 0, 0, 0.15);
+  --st-drawer-header-bg: #ffffff;
+  --st-drawer-footer-bg: #f8fafc;
+  --st-drawer-border: #cbd5e1;
+  --st-drawer-text: #0f172a;
+  --st-drawer-accent: #2563eb;
+  --st-drawer-icon-bg: transparent;
+
+  /* ═══════════════════════════════════════════════════════
+     TOAST
+     ═══════════════════════════════════════════════════════ */
+  --st-toast-success-bg: #f0fdf4;
+  --st-toast-success-border: #22c55e;
+  --st-toast-error-bg: #fef2f2;
+  --st-toast-error-border: #ef4444;
+  --st-toast-warning-bg: #fffbeb;
+  --st-toast-warning-border: #f59e0b;
+  --st-toast-info-bg: #eff6ff;
+  --st-toast-info-border: #3b82f6;
+  --st-toast-text: #1e293b;
+  --st-toast-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+  /* ═══════════════════════════════════════════════════════
+     TOOLBAR
+     ═══════════════════════════════════════════════════════ */
+  --st-toolbar-bg: #ffffff;
+  --st-toolbar-border: #e5e7eb;
+  --st-toolbar-text: #1f2937;
+  --st-toolbar-btn-hover: #f3f4f6;
+  --st-toolbar-btn-active: #e5e7eb;
+  --st-toolbar-separator: #e5e7eb;
+
+  /* ═══════════════════════════════════════════════════════
+     CARD
+     ═══════════════════════════════════════════════════════ */
+  --st-card-bg: var(--ui-surface, #ffffff);
+  --st-card-border: var(--ui-border, #e5e7eb);
+  --st-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --st-card-header-bg: #f9fafb;
+  --st-card-radius: 0.75rem;
+
+  /* ═══════════════════════════════════════════════════════
+     TOOLTIP / POPOVER
+     ═══════════════════════════════════════════════════════ */
+  --st-tooltip-bg: #1e293b;
+  --st-tooltip-text: #ffffff;
+  --st-tooltip-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --st-tooltip-radius: 0.375rem;
+
+  /* ═══════════════════════════════════════════════════════
+     SCROLLBAR
+     ═══════════════════════════════════════════════════════ */
+  --st-scrollbar-thumb: #cbd5e1;
+  --st-scrollbar-track: transparent;
+  --st-scrollbar-thumb-hover: #94a3b8;
+  --st-scrollbar-width: 6px;
+}
