@@ -35,3 +35,7 @@ packages:
 
   # White Label API (separate Next.js service, stays per V5 plan)
   - 'WhiteLabel/wl-api'
+
+  # V6 restructured apps (new paths under apps/)
+  - 'apps/frontend/wl-admin-new'
+  - 'apps/frontend/wl-partner-new'
