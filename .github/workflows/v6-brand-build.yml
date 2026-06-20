@@ -1,0 +1,190 @@
+name: V6 Brand-Specific Build
+
+# Manual trigger: build a specific brand variant of crm-admin or any portal.
+# Also triggers automatically on push to brands/ to catch theme regressions.
+#
+# Brand resolution order (in the actual app):
+#   1. BRAND env var selects brands/{brand}/ folder
+#   2. brands/{brand}/theme/ → CSS tokens injected at build time
+#   3. brands/{brand}/config/ → feature flags and copy overrides
+#   4. brands/{brand}/overrides/ → component-level UI overrides
+
+on:
+  workflow_dispatch:
+    inputs:
+      brand:
+        description: 'Brand to build'
+        required: true
+        type: choice
+        options:
+          - crmsoft
+      portal:
+        description: 'Portal to build for this brand'
+        required: true
+        type: choice
+        options:
+          - crm-admin
+          - vendor-panel
+          - customer-portal
+          - marketplace
+
+  push:
+    branches: [develop, 'sprint/**']
+    paths:
+      - 'brands/**'
+
+concurrency:
+  group: v6-brand-build-${{ github.ref }}-${{ inputs.brand || 'auto' }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '24'
+  NODE_OPTIONS: '--max-old-space-size=4096'
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Validate brand folder exists and has required structure
+  # ─────────────────────────────────────────────────────────────────────────────
+  validate-brand:
+    name: Validate brand structure
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      brand: ${{ steps.resolve.outputs.brand }}
+      portal: ${{ steps.resolve.outputs.portal }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve brand + portal
+        id: resolve
+        run: |
+          # Manual dispatch uses inputs; push trigger defaults to crmsoft/crm-admin
+          BRAND="${{ inputs.brand || 'crmsoft' }}"
+          PORTAL="${{ inputs.portal || 'crm-admin' }}"
+          echo "brand=$BRAND" >> "$GITHUB_OUTPUT"
+          echo "portal=$PORTAL" >> "$GITHUB_OUTPUT"
+          echo "Building brand=$BRAND portal=$PORTAL"
+
+      - name: Check brand folder exists
+        run: |
+          BRAND="${{ steps.resolve.outputs.brand }}"
+          BRAND_DIR="brands/$BRAND"
+          if [ ! -d "$BRAND_DIR" ]; then
+            echo "::error::Brand folder not found: $BRAND_DIR"
+            echo "Available brands:"
+            ls brands/ | grep -v "_template\|README"
+            exit 1
+          fi
+          echo "✅ Brand folder: $BRAND_DIR"
+          echo "Theme dir: $(ls $BRAND_DIR/theme/ 2>/dev/null | head -5 || echo '(empty)')"
+          echo "Config dir: $(ls $BRAND_DIR/config/ 2>/dev/null | head -5 || echo '(empty)')"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Build the selected portal with the brand environment
+  # ─────────────────────────────────────────────────────────────────────────────
+  brand-build:
+    name: Build ${{ needs.validate-brand.outputs.portal }} (brand=${{ needs.validate-brand.outputs.brand }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: validate-brand
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: Install workspace
+        run: pnpm install --frozen-lockfile
+
+      - name: Resolve portal directory
+        id: portal-dir
+        run: |
+          PORTAL="${{ needs.validate-brand.outputs.portal }}"
+          # Check V6 new location first, fall back to V5 original
+          if [ -d "apps/frontend/${PORTAL}-new" ]; then
+            echo "dir=apps/frontend/${PORTAL}-new" >> "$GITHUB_OUTPUT"
+            echo "Using V6 location: apps/frontend/${PORTAL}-new"
+          elif [ -d "apps-frontend/$PORTAL" ]; then
+            echo "dir=apps-frontend/$PORTAL" >> "$GITHUB_OUTPUT"
+            echo "Using V5 location: apps-frontend/$PORTAL"
+          else
+            echo "::error::Portal directory not found for: $PORTAL"
+            exit 1
+          fi
+
+      - name: Next.js build with brand env
+        working-directory: ${{ steps.portal-dir.outputs.dir }}
+        env:
+          BRAND: ${{ needs.validate-brand.outputs.brand }}
+          BRAND_DIR: ${{ github.workspace }}/brands/${{ needs.validate-brand.outputs.brand }}
+          NEXT_PUBLIC_BRAND: ${{ needs.validate-brand.outputs.brand }}
+          NEXT_PUBLIC_API_URL: 'http://localhost:3001'
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: |
+          echo "Building portal=${{ needs.validate-brand.outputs.portal }} brand=$BRAND"
+          echo "Brand assets: $BRAND_DIR"
+          pnpm build
+        continue-on-error: true
+
+      - name: Brand build summary
+        if: always()
+        run: |
+          echo "Brand: ${{ needs.validate-brand.outputs.brand }}"
+          echo "Portal: ${{ needs.validate-brand.outputs.portal }}"
+          echo "Dir: ${{ steps.portal-dir.outputs.dir }}"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Brand theme validation: check required token files exist
+  # Runs on every brands/ push — fast sanity before full build
+  # ─────────────────────────────────────────────────────────────────────────────
+  validate-brand-tokens:
+    name: Validate brand theme tokens
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check changed brands
+        run: |
+          CHANGED_BRANDS=$(git diff --name-only HEAD~1 HEAD | grep "^brands/" | awk -F/ '{print $2}' | grep -v "_template\|README" | sort -u || true)
+          if [ -z "$CHANGED_BRANDS" ]; then
+            echo "No brand folders changed — skipping token validation"
+            exit 0
+          fi
+
+          echo "Changed brands: $CHANGED_BRANDS"
+          FAIL=0
+
+          while IFS= read -r brand; do
+            [ -z "$brand" ] && continue
+            echo "Validating brand: $brand"
+            BRAND_DIR="brands/$brand"
+
+            # Required directories
+            for dir in theme config overrides; do
+              if [ ! -d "$BRAND_DIR/$dir" ]; then
+                echo "::error::$BRAND_DIR/$dir directory missing"
+                FAIL=$((FAIL + 1))
+              fi
+            done
+
+            # If theme has CSS files, validate they define at least some variables
+            if ls "$BRAND_DIR/theme/"*.css 2>/dev/null | head -1 | grep -q .; then
+              var_count=$(grep -h "^  --" "$BRAND_DIR/theme/"*.css 2>/dev/null | wc -l | tr -d ' ')
+              echo "  Theme CSS variables: $var_count"
+              if [ "$var_count" -eq 0 ]; then
+                echo "::warning::$BRAND_DIR/theme/ has .css files but no CSS custom properties"
+              fi
+            fi
+
+          done <<< "$CHANGED_BRANDS"
+
+          if [ "$FAIL" -gt 0 ]; then
+            echo "::error::Brand validation failed: $FAIL error(s)"
+            exit 1
+          fi
+          echo "✅ All changed brands valid"

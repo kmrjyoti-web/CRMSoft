@@ -1,0 +1,55 @@
+# CODEOWNERS — V6 CRMSoft Access Control
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Format: <pattern>   <owner(s)>
+# Rules are ordered last-match-wins.
+#
+# Teams to create in GitHub (Settings > Teams):
+#   @kmrjyoti-web/core-team     — Kumar + trusted senior devs
+#   @kmrjyoti-web/internal-devs — all 5 internal devs
+#   (future) @kmrjyoti-web/partner-travel-1
+#   (future) @kmrjyoti-web/partner-electronic-1
+
+# ── Default: all internal devs review ─────────────────────────────────────────
+*                               @kmrjyoti-web/internal-devs
+
+# ── Core — Kumar-gated ────────────────────────────────────────────────────────
+# Any change to core/ requires Kumar's explicit approval.
+core/                           @kmrjyoti-web
+
+# ── CI/CD and GitHub config — Kumar-gated ─────────────────────────────────────
+.github/                        @kmrjyoti-web
+
+# ── Verticals — internal devs only ───────────────────────────────────────────
+verticals/                      @kmrjyoti-web/internal-devs
+
+# ── Apps — internal devs by app ──────────────────────────────────────────────
+apps-backend/                   @kmrjyoti-web/internal-devs
+apps-frontend/                  @kmrjyoti-web/internal-devs
+apps/                           @kmrjyoti-web/internal-devs
+
+# ── Shared packages — senior review ──────────────────────────────────────────
+Shared/                         @kmrjyoti-web/internal-devs
+packages-backend/               @kmrjyoti-web/internal-devs
+packages-frontend/              @kmrjyoti-web/internal-devs
+
+# ── Partner customizations — isolated per partner ─────────────────────────────
+# Uncomment + add GitHub team when partner onboards:
+#
+# partner-customizations/partner-travel-1/    @kmrjyoti-web/partner-travel-1
+# partner-customizations/partner-electronic-1/ @kmrjyoti-web/partner-electronic-1
+#
+# Until partner GitHub accounts exist, internal-devs own these:
+partner-customizations/         @kmrjyoti-web/internal-devs
+
+# ── Brands — partner brand devs + Kumar ──────────────────────────────────────
+brands/crmsoft/                 @kmrjyoti-web
+brands/_template/               @kmrjyoti-web
+#
+# Uncomment when partner brand devs onboard:
+# brands/partner-travel-1-brand/    @kmrjyoti-web/partner-travel-1
+# brands/partner-electronic-1-brand/ @kmrjyoti-web/partner-electronic-1
+
+# ── Scripts and docs — internal ───────────────────────────────────────────────
+scripts/                        @kmrjyoti-web/internal-devs
+docs/                           @kmrjyoti-web/internal-devs

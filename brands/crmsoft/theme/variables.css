@@ -1,0 +1,52 @@
+/* CRMSoft default brand — design tokens
+ * Source: current crm-admin globals.css palette (snapshot 2026-04-24)
+ * All portals inherit these when BRAND=crmsoft (the default).
+ */
+
+:root {
+  /* ── Primary palette ──────────────────────────────── */
+  --brand-primary:         #2563eb;  /* blue-600 */
+  --brand-primary-hover:   #1d4ed8;  /* blue-700 */
+  --brand-primary-light:   #dbeafe;  /* blue-100 */
+  --brand-primary-text:    #ffffff;
+
+  /* ── Secondary palette ────────────────────────────── */
+  --brand-secondary:       #64748b;  /* slate-500 */
+  --brand-secondary-hover: #475569;  /* slate-600 */
+
+  /* ── Accent ───────────────────────────────────────── */
+  --brand-accent:          #7c3aed;  /* violet-600 */
+  --brand-accent-light:    #ede9fe;  /* violet-100 */
+
+  /* ── Status ───────────────────────────────────────── */
+  --brand-success:         #16a34a;  /* green-600 */
+  --brand-warning:         #d97706;  /* amber-600 */
+  --brand-error:           #dc2626;  /* red-600 */
+  --brand-info:            #0284c7;  /* sky-600 */
+
+  /* ── Surface ──────────────────────────────────────── */
+  --brand-bg:              #f8fafc;  /* slate-50 */
+  --brand-surface:         #ffffff;
+  --brand-surface-raised:  #f1f5f9;  /* slate-100 */
+  --brand-border:          #e2e8f0;  /* slate-200 */
+
+  /* ── Typography ───────────────────────────────────── */
+  --brand-text-primary:    #0f172a;  /* slate-900 */
+  --brand-text-secondary:  #475569;  /* slate-600 */
+  --brand-text-muted:      #94a3b8;  /* slate-400 */
+
+  /* ── Brand identity ────────────────────────────────── */
+  --brand-name:            'CRMSoft';
+  --brand-logo:            '/assets/crmsoft-logo.svg';
+  --brand-favicon:         '/assets/crmsoft-favicon.ico';
+
+  /* ── Sidebar ───────────────────────────────────────── */
+  --brand-sidebar-bg:      #1e293b;  /* slate-800 */
+  --brand-sidebar-text:    #e2e8f0;  /* slate-200 */
+  --brand-sidebar-active:  #2563eb;  /* blue-600 */
+
+  /* ── Radius + spacing ─────────────────────────────── */
+  --brand-radius-sm:       4px;
+  --brand-radius-md:       8px;
+  --brand-radius-lg:       12px;
+}

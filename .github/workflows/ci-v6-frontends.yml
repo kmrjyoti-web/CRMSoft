@@ -1,0 +1,165 @@
+name: CI — V6 frontend portals
+
+# Covers the new V6 portal locations: apps/frontend/*-new/
+# Mirrors the pattern of ci-crm-admin.yml + ci-vendor-panel.yml.
+# Runs tsc + next lint for each portal when its path changes.
+# Build is non-blocking (v1) — portals are copies, not yet primary.
+
+on:
+  pull_request:
+    branches: [develop, main, 'sprint/**']
+    paths:
+      - 'apps/frontend/**'
+      - '.github/workflows/ci-v6-frontends.yml'
+  push:
+    branches: [develop, 'sprint/**']
+    paths:
+      - 'apps/frontend/**'
+
+concurrency:
+  group: ci-v6-frontends-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '24'
+  NODE_OPTIONS: '--max-old-space-size=4096'
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  detect-changed-portals:
+    name: Detect changed portals
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      portals: ${{ steps.detect.outputs.portals }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect which portals changed
+        id: detect
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE="HEAD~1"
+          fi
+
+          CHANGED_PORTALS=$(git diff --name-only "$BASE" HEAD \
+            | grep "^apps/frontend/" \
+            | awk -F/ '{print $3}' \
+            | sort -u \
+            | grep -v "^$\|^_shared")
+
+          echo "Changed portals:"
+          echo "$CHANGED_PORTALS"
+
+          # Build JSON array for matrix
+          PORTAL_JSON="["
+          FIRST=true
+          while IFS= read -r portal; do
+            [ -z "$portal" ] && continue
+            [ "$FIRST" = "true" ] || PORTAL_JSON="$PORTAL_JSON,"
+            PORTAL_JSON="$PORTAL_JSON\"$portal\""
+            FIRST=false
+          done <<< "$CHANGED_PORTALS"
+          PORTAL_JSON="$PORTAL_JSON]"
+
+          # Default to all portals if none detected (e.g., workflow file change)
+          if [ "$PORTAL_JSON" = "[]" ]; then
+            PORTAL_JSON='["crm-admin-new","vendor-panel-new","customer-portal-new","marketplace-new"]'
+          fi
+
+          echo "portals=$PORTAL_JSON" >> "$GITHUB_OUTPUT"
+          echo "Portal matrix: $PORTAL_JSON"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  typecheck:
+    name: tsc — ${{ matrix.portal }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    needs: detect-changed-portals
+    if: needs.detect-changed-portals.outputs.portals != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        portal: ${{ fromJson(needs.detect-changed-portals.outputs.portals) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: Install workspace
+        run: pnpm install --frozen-lockfile
+
+      - name: tsc --noEmit
+        working-directory: apps/frontend/${{ matrix.portal }}
+        run: pnpm exec tsc --noEmit
+        # Non-blocking in v1: portals are copies, tsc errors may exist
+        continue-on-error: true
+
+      - name: Report tsc result
+        if: always()
+        working-directory: apps/frontend/${{ matrix.portal }}
+        run: |
+          ERROR_COUNT=$(pnpm exec tsc --noEmit 2>&1 | grep -c "error TS" || echo 0)
+          echo "::notice::${{ matrix.portal }} tsc errors: $ERROR_COUNT"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  lint:
+    name: lint — ${{ matrix.portal }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    needs: detect-changed-portals
+    if: needs.detect-changed-portals.outputs.portals != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        portal: ${{ fromJson(needs.detect-changed-portals.outputs.portals) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: Install workspace
+        run: pnpm install --frozen-lockfile
+
+      - name: next lint
+        working-directory: apps/frontend/${{ matrix.portal }}
+        run: pnpm lint
+        continue-on-error: true
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Extend backend CI to cover core/platform package changes
+  # ─────────────────────────────────────────────────────────────────────────────
+  core-platform-typecheck:
+    name: tsc — core/platform
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: |
+      contains(github.event.pull_request.title, 'core') ||
+      contains(toJson(github.event.pull_request.labels.*.name), 'core')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'apps-backend/api/package-lock.json'
+
+      - name: Install backend (core/platform is included via tsconfig paths)
+        working-directory: apps-backend/api
+        run: npm ci
+
+      - name: tsc with core/platform included
+        working-directory: apps-backend/api
+        run: npm run typecheck

@@ -35,3 +35,6 @@ packages:
 
   # White Label API (separate Next.js service, stays per V5 plan)
   - 'WhiteLabel/wl-api'
+
+  # V6 integration tests
+  - 'tests/integration/v6'
