@@ -1,13 +1,22 @@
-# CRMSoft V5 — pnpm workspace configuration
+# CRMSoft V6 — pnpm workspace configuration
 # Created: 2026-04-22 (Phase 4 of V5 restructure)
+# Updated: 2026-04-23 (V6 skeleton — added core/* packages)
 #
 # Replaces the npm-style "workspaces" field in root package.json, which pnpm
 # ignores. This file is what pnpm actually reads for workspace discovery.
 
 packages:
+  # V6 Core packages (Kumar's domain — platform + base modules)
+  - 'core/platform'
+  - 'core/base-modules/*'
+  - 'core/shared-libraries/*'
+
   # Apps (executables)
   - 'apps-backend/*'
   - 'apps-frontend/*'
+  # V6 new app locations (populated incrementally during migration)
+  - 'apps/backend/*'
+  - 'apps/frontend/*'
 
   # V5 reusable packages — glob patterns for future growth.
   # Currently only README placeholders; pnpm skips any folder without

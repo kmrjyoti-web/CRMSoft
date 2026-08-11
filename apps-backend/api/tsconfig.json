@@ -28,11 +28,18 @@
       "@modules/customer/*": ["src/modules/customer/*"],
       "@modules/softwarevendor/*": ["src/modules/softwarevendor/*"],
       "@modules/marketplace/*": ["src/modules/marketplace/*"],
-      "@modules/plugins/*": ["src/modules/plugins/*"]
+      "@modules/plugins/*": ["src/modules/plugins/*"],
+      "@crmsoft/core-platform": ["../../core/platform/src/index.ts"],
+      "@crmsoft/core-platform/*": ["../../core/platform/src/*"],
+      "@nestjs/common": ["node_modules/@nestjs/common"],
+      "@nestjs/common/*": ["node_modules/@nestjs/common/*"],
+      "@nestjs/swagger": ["node_modules/@nestjs/swagger"],
+      "@nestjs/swagger/*": ["node_modules/@nestjs/swagger/*"]
     }
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "../../core/platform/src/**/*"
   ],
   "exclude": [
     "node_modules",

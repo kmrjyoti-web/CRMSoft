@@ -1,14 +1,21 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Inject, Optional } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { PrismaService } from '../../../core/prisma/prisma.service';
 import * as os from 'os';
+
+export const HEALTH_DB_CHECKER = Symbol('HEALTH_DB_CHECKER');
+
+export interface HealthDbChecker {
+  checkDatabases(): Promise<Record<string, { status: 'up' | 'down'; responseTimeMs: number }>>;
+}
 
 const START_TIME = Date.now();
 
 @ApiTags('Health')
 @Controller('health')
 export class HealthController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Optional() @Inject(HEALTH_DB_CHECKER) private readonly dbChecker?: HealthDbChecker,
+  ) {}
 
   /** Quick health check — no auth required, used by load balancers */
   @Get()
@@ -23,38 +30,21 @@ export class HealthController {
     };
   }
 
-  /** Deep health check — checks all DBs, Redis, memory, disk */
+  /** Deep health check — checks all DBs, memory, disk */
   @Get('deep')
   @ApiOperation({ summary: 'Deep health check (all subsystems)' })
   async deepHealth() {
     const checks: Record<string, any> = {};
     let overallStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
 
-    // ── Database checks ────────────────────────────────────────────────────
-    const dbChecks = [
-      { key: 'workingDb', fn: () => this.prisma.working.$queryRaw`SELECT 1` },
-      { key: 'platformDb', fn: () => this.prisma.platform.$queryRaw`SELECT 1` },
-    ];
-
-    for (const { key, fn } of dbChecks) {
-      const t0 = Date.now();
-      try {
-        await fn();
-        checks[key] = { status: 'up', responseTimeMs: Date.now() - t0 };
-      } catch {
-        checks[key] = { status: 'down', responseTimeMs: Date.now() - t0 };
-        overallStatus = 'unhealthy';
-      }
-    }
-
-    // ── Identity DB (separate Prisma client if available) ──────────────────
-    const t0id = Date.now();
-    try {
-      await this.prisma.$queryRaw`SELECT 1`;
-      checks['identityDb'] = { status: 'up', responseTimeMs: Date.now() - t0id };
-    } catch {
-      checks['identityDb'] = { status: 'down', responseTimeMs: Date.now() - t0id };
-      overallStatus = 'unhealthy';
+    // ── Database checks (delegated to provider if registered) ─────────────
+    if (this.dbChecker) {
+      const dbChecks = await this.dbChecker.checkDatabases();
+      Object.assign(checks, dbChecks);
+      const hasDown = Object.values(dbChecks).some((c) => c.status === 'down');
+      if (hasDown) overallStatus = 'unhealthy';
+    } else {
+      checks['databases'] = { status: 'not-configured', note: 'Register HEALTH_DB_CHECKER provider to enable DB checks' };
     }
 
     // ── Memory ────────────────────────────────────────────────────────────
@@ -75,7 +65,7 @@ export class HealthController {
     checks['process'] = {
       heapUsedMb: Math.round(proc.heapUsed / 1024 / 1024),
       heapTotalMb: Math.round(proc.heapTotal / 1024 / 1024),
-      rssM: Math.round(proc.rss / 1024 / 1024),
+      rssMb: Math.round(proc.rss / 1024 / 1024),
     };
 
     // ── Uptime ────────────────────────────────────────────────────────────

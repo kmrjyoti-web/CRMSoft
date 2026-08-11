@@ -1,0 +1,22 @@
+{
+  "name": "@crmsoft/core-platform",
+  "version": "0.0.1",
+  "description": "CRMSoft V6 — core platform modules (auth, tenant, RBAC, health)",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/swagger": "^7.0.0"
+  },
+  "peerDependencies": {
+    "@crmsoft/prisma-clients": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
