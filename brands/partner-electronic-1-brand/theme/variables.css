@@ -1,0 +1,85 @@
+/* Partner Electronic 1 — brand design tokens
+ * Electronics/gadgets vertical partner: crimson tech + dark + electric accent
+ * Inherits CRMSoft platform; only visual tokens differ.
+ */
+
+:root {
+  /* ── Brand identity ──────────────────────────────────────── */
+  --brand-id:              'partner-electronic-1';
+  --brand-name:            'ElectroHub CRM';
+  --brand-tagline:         'Devices Tracked. Deals Closed.';
+
+  /* ── Primary (crimson — electronics/power) ───────────────── */
+  --brand-primary:         #e11d48;
+  --brand-primary-hover:   #be123c;
+  --brand-primary-active:  #9f1239;
+  --brand-primary-light:   #ffe4e6;
+  --brand-primary-text:    #ffffff;
+
+  /* ── Secondary (slate — precision/tech) ─────────────────── */
+  --brand-secondary:       #334155;
+  --brand-secondary-hover: #1e293b;
+  --brand-secondary-light: #f1f5f9;
+  --brand-secondary-text:  #ffffff;
+
+  /* ── Accent (electric green — power on) ─────────────────── */
+  --brand-accent:          #22c55e;
+  --brand-accent-hover:    #16a34a;
+  --brand-accent-light:    #dcfce7;
+  --brand-accent-text:     #ffffff;
+
+  /* ── Status (standard — keep accessible) ─────────────────── */
+  --brand-success:         #16a34a;
+  --brand-success-light:   #dcfce7;
+  --brand-warning:         #d97706;
+  --brand-warning-light:   #fef3c7;
+  --brand-error:           #dc2626;
+  --brand-error-light:     #fee2e2;
+  --brand-info:            #3b82f6;
+  --brand-info-light:      #dbeafe;
+
+  /* ── Surface (clean white — gadget showroom) ─────────────── */
+  --brand-bg:              #f8fafc;
+  --brand-surface:         #ffffff;
+  --brand-surface-raised:  #f1f5f9;
+  --brand-surface-overlay: rgba(15, 23, 42, 0.6);
+  --brand-border:          #e2e8f0;
+  --brand-border-strong:   #cbd5e1;
+  --brand-divider:         #f1f5f9;
+
+  /* ── Typography ──────────────────────────────────────────── */
+  --brand-font-sans:       'Roboto', 'Inter', system-ui, sans-serif;
+  --brand-font-mono:       'JetBrains Mono', monospace;
+  --brand-text-primary:    #0f172a;
+  --brand-text-secondary:  #475569;
+  --brand-text-muted:      #94a3b8;
+  --brand-text-disabled:   #cbd5e1;
+  --brand-text-inverse:    #ffffff;
+
+  /* ── Sidebar (near-black — tech/premium) ─────────────────── */
+  --brand-sidebar-bg:      #0f172a;
+  --brand-sidebar-bg-hover:#1e293b;
+  --brand-sidebar-text:    #94a3b8;
+  --brand-sidebar-text-active: #ffffff;
+  --brand-sidebar-active:  #e11d48;
+  --brand-sidebar-active-bg: rgba(225, 29, 72, 0.15);
+  --brand-sidebar-width:   260px;
+
+  /* ── Header ──────────────────────────────────────────────── */
+  --brand-header-bg:       #ffffff;
+  --brand-header-border:   #e2e8f0;
+  --brand-header-height:   60px;
+
+  /* ── Radius (tight — tech/precision feel) ────────────────── */
+  --brand-radius-xs:       2px;
+  --brand-radius-sm:       4px;
+  --brand-radius-md:       6px;
+  --brand-radius-lg:       8px;
+  --brand-radius-xl:       12px;
+  --brand-radius-full:     9999px;
+
+  /* ── Shadows ─────────────────────────────────────────────── */
+  --brand-shadow-sm:       0 1px 3px 0 rgba(15, 23, 42, 0.08);
+  --brand-shadow-md:       0 4px 12px -1px rgba(15, 23, 42, 0.12), 0 2px 6px -2px rgba(15, 23, 42, 0.08);
+  --brand-shadow-lg:       0 10px 25px -3px rgba(15, 23, 42, 0.15), 0 4px 10px -4px rgba(15, 23, 42, 0.1);
+}

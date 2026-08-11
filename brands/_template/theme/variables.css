@@ -1,0 +1,88 @@
+/* Partner brand theme template
+ * Copy this file to brands/{partner-name}-brand/theme/variables.css
+ * Replace all #REPLACE_ME values with partner's actual design tokens.
+ *
+ * Required: every variable below must be defined.
+ * For reference values, see brands/crmsoft/theme/variables.css.
+ */
+
+:root {
+  /* ── Brand identity ──────────────────────────────────────── */
+  --brand-id:              'REPLACE_ME';
+  --brand-name:            'REPLACE_ME';
+  --brand-tagline:         'REPLACE_ME';
+
+  /* ── Primary (main action color) ─────────────────────────── */
+  --brand-primary:         #REPLACE_ME;
+  --brand-primary-hover:   #REPLACE_ME;
+  --brand-primary-active:  #REPLACE_ME;
+  --brand-primary-light:   #REPLACE_ME;
+  --brand-primary-text:    #ffffff;
+
+  /* ── Secondary (supporting actions) ──────────────────────── */
+  --brand-secondary:       #REPLACE_ME;
+  --brand-secondary-hover: #REPLACE_ME;
+  --brand-secondary-light: #REPLACE_ME;
+  --brand-secondary-text:  #REPLACE_ME;
+
+  /* ── Accent (highlights, badges) ─────────────────────────── */
+  --brand-accent:          #REPLACE_ME;
+  --brand-accent-hover:    #REPLACE_ME;
+  --brand-accent-light:    #REPLACE_ME;
+  --brand-accent-text:     #ffffff;
+
+  /* ── Status (keep WCAG AA contrast) ──────────────────────── */
+  --brand-success:         #16a34a;
+  --brand-success-light:   #dcfce7;
+  --brand-warning:         #d97706;
+  --brand-warning-light:   #fef3c7;
+  --brand-error:           #dc2626;
+  --brand-error-light:     #fee2e2;
+  --brand-info:            #0284c7;
+  --brand-info-light:      #e0f2fe;
+
+  /* ── Surface ─────────────────────────────────────────────── */
+  --brand-bg:              #REPLACE_ME;
+  --brand-surface:         #ffffff;
+  --brand-surface-raised:  #REPLACE_ME;
+  --brand-surface-overlay: rgba(0,0,0,0.5);
+  --brand-border:          #REPLACE_ME;
+  --brand-border-strong:   #REPLACE_ME;
+  --brand-divider:         #REPLACE_ME;
+
+  /* ── Typography ──────────────────────────────────────────── */
+  --brand-font-sans:       'REPLACE_ME', 'Inter', system-ui, sans-serif;
+  --brand-font-mono:       'JetBrains Mono', monospace;
+  --brand-text-primary:    #REPLACE_ME;
+  --brand-text-secondary:  #REPLACE_ME;
+  --brand-text-muted:      #REPLACE_ME;
+  --brand-text-disabled:   #REPLACE_ME;
+  --brand-text-inverse:    #ffffff;
+
+  /* ── Sidebar ─────────────────────────────────────────────── */
+  --brand-sidebar-bg:      #REPLACE_ME;
+  --brand-sidebar-bg-hover:#REPLACE_ME;
+  --brand-sidebar-text:    #REPLACE_ME;
+  --brand-sidebar-text-active: #ffffff;
+  --brand-sidebar-active:  #REPLACE_ME;
+  --brand-sidebar-active-bg: rgba(0,0,0,0.15);
+  --brand-sidebar-width:   260px;
+
+  /* ── Header ──────────────────────────────────────────────── */
+  --brand-header-bg:       #ffffff;
+  --brand-header-border:   #REPLACE_ME;
+  --brand-header-height:   60px;
+
+  /* ── Radius ──────────────────────────────────────────────── */
+  --brand-radius-xs:       2px;
+  --brand-radius-sm:       4px;
+  --brand-radius-md:       8px;
+  --brand-radius-lg:       12px;
+  --brand-radius-xl:       16px;
+  --brand-radius-full:     9999px;
+
+  /* ── Shadows ─────────────────────────────────────────────── */
+  --brand-shadow-sm:       0 1px 2px 0 rgba(0,0,0,0.05);
+  --brand-shadow-md:       0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+  --brand-shadow-lg:       0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+}
