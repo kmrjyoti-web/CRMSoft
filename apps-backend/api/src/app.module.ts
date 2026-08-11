@@ -4,6 +4,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { PrismaModule } from './core/prisma/prisma.module';
+import { PrismaService } from './core/prisma/prisma.service';
 import { ErrorsModule } from './common/errors/errors.module';
 import { ArchitectureValidatorService } from './common/architecture-validator/architecture-validator.service';
 import { RequestContextService } from './common/request/request-context.service';
@@ -18,7 +19,7 @@ import { OrganizationsModule } from './modules/customer/organizations/organizati
 import { LeadsModule } from './modules/customer/leads/leads.module';
 import { CommunicationsModule } from './modules/customer/communications/communications.module';
 import { ContactOrganizationsModule } from './modules/customer/contact-organizations/contact-organizations.module';
-import { LookupsModule } from './modules/core/platform/lookups/lookups.module';
+import { LookupsModule, HelpModule as HelpModulePlatform, PLATFORM_PRISMA } from '@crmsoft/core-platform';
 import { EntityFiltersModule } from './modules/core/identity/entity-filters/entity-filters.module';
 import { UserOverridesModule } from './modules/softwarevendor/user-overrides/user-overrides.module';
 import { ApprovalRequestsModule } from './modules/customer/approval-requests/approval-requests.module';
@@ -78,7 +79,7 @@ import { DbAuditorModule } from './modules/softwarevendor/db-auditor/db-auditor.
 import { ModuleManagerModule } from './modules/softwarevendor/module-manager/module-manager.module';
 import { MarketplaceModule } from './modules/marketplace/marketplace.module';
 import { SubscriptionPackageModule } from './modules/softwarevendor/subscription-package/subscription-package.module';
-import { HelpModule } from './modules/core/platform/help/help.module';
+// HelpModule is now imported from @crmsoft/core-platform (see LookupsModule import above)
 import { PluginsModule } from './modules/plugins/plugins.module';
 import { VerificationModule } from './modules/softwarevendor/verification/verification.module';
 import { DocumentTemplatesModule } from './modules/customer/document-templates/document-templates.module';
@@ -195,7 +196,7 @@ import { TenantAuditMiddleware } from './modules/core/identity/tenant/infrastruc
     ModuleManagerModule,
     MarketplaceModule,
     SubscriptionPackageModule,
-    HelpModule,
+    HelpModulePlatform,
     PluginsModule,
     VerificationModule,
     DocumentTemplatesModule,
@@ -240,6 +241,8 @@ import { TenantAuditMiddleware } from './modules/core/identity/tenant/infrastruc
     // TenantGuard moved to TenantModule to ensure it runs after JwtAuthGuard
     RequestContextService,
     ArchitectureValidatorService,
+    // Wire PrismaService into @crmsoft/core-platform modules (help, lookups)
+    { provide: PLATFORM_PRISMA, useExisting: PrismaService },
   ],
   exports: [RequestContextService],
 })
